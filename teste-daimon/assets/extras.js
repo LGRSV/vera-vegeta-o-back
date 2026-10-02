@@ -58,9 +58,10 @@
     ['T1', 'T2', 'T3'].map(k => `<tr><td>${k}</td><td>${(r[k] || {}).n ?? 0}</td><td>${km((r[k] || {}).m || 0)}</td></tr>`).join('') +
     `<tr><th>Total</th><th>${r.trechos ?? ''}</th><th>${km(r.extensao_m || 0)}</th></tr></table>` +
     `<p class="origem">Municípios: ${muns.map(x => `${esc(x.nome)} ${km(x.m)}`).join(' · ') || '—'}<br>` +
-    `Continuidades estimadas: ${(M.continuidades_estimadas || []).length || 'nenhuma (o processamento não cria ligações)'}</p>` +
+    `Continuidades estimadas: ${(M.continuidades_estimadas || []).length || ((M.origem || {}).observacao ? 'não contabilizadas (ver procedência)' : 'nenhuma (o processamento não cria ligações)')}</p>` +
     (v.avisos.length ? `<div class="aviso-dados"><b>Dados a conferir:</b><br>${v.avisos.map(esc).join('<br>')}</div>` : '') +
     `<p class="origem">Origem: ${esc((M.origem || {}).kml)} (${esc((M.origem || {}).data)})` +
+    ((M.origem || {}).observacao ? `<br><b>Procedência:</b> ${esc(M.origem.observacao)}` : '') +
     `${(M.origem || {}).postes ? ' · postes ' + esc(M.origem.postes) : ''}${(M.origem || {}).critica ? ' · Crítica ' + esc(M.origem.critica.join(', ')) + (M.origem.nae_filtro === 'arvore' ? ' (só Meio Ambiente · Árvore/Eucalipto na rede)' : '') : ''}` +
     `${(M.origem || {}).malha ? ' · municípios: ' + esc(M.origem.malha) : ''}<br><a href="${esc(M.al)}-trechos.kmz">Baixar o KMZ (Google Earth)</a></p>`;
   document.querySelector('.panel').append(box);
