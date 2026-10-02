@@ -1,0 +1,118 @@
+# Relatório de validação · trechos por município
+
+Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = ocorrências da Crítica (coletivas e individuais) associadas a um trecho ou não.
+
+## Ananás
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Ananás | NORTE | SE-2AN2 | AL01005098 | 31 | 1 | 1 | 29 | 24,5 | 24,5 | 1 | 29 | 1 | 19 | 0 | 0 | 1 | aviso |
+| **Total Ananás** | | | 1 alimentadores | 31 | | | | 24,5 | 24,5 | | | | | | | | |
+
+## Araguaína
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Araguaína | NORTE | SE-2AR4 | AL01040004 | 29 | 1 | 1 | 27 | 25,4 | 20,9 | 1 | 27 | 0 | 0 | 0 | 0 | 2 | aviso |
+| Araguaína | NORTE | SE-2AR4 | AL02040004 | 34 | 1 | 2 | 31 | 18,4 | 18,4 | 2 | 31 | 2 | 0 | 0 | 0 | 1 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL04010004 | 54 | 1 | 3 | 50 | 14,9 | 14,9 | 3 | 50 | 0 | 0 | 0 | 0 | 0 | ok |
+| Araguaína | NORTE | SE-2AR3 | AL02103004 | 22 | 1 | 1 | 20 | 9,7 | 9,7 | 1 | 20 | 0 | 0 | 0 | 0 | 1 | aviso |
+| **Total Araguaína** | | | 4 alimentadores | 139 | | | | 68,4 | 63,9 | | | | | | | | |
+
+## Araguatins
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Araguatins | NORTE | SE-2BRT | AL01019068 | 71 | 1 | 0 | 70 | 79,6 | 61,8 | 0 | 70 | 12 | 1 | 0 | 0 | 1 | aviso |
+| **Total Araguatins** | | | 1 alimentadores | 71 | | | | 79,6 | 61,8 | | | | | | | | |
+
+## Augustinópolis
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Augustinópolis | NORTE | SE-2AGT | AL01014045 | 15 | 1 | 1 | 13 | 12,3 | 12,3 | 1 | 13 | 1 | 0 | 0 | 0 | 1 | aviso |
+| **Total Augustinópolis** | | | 1 alimentadores | 15 | | | | 12,3 | 12,3 | | | | | | | | |
+
+## Axixá do Tocantins
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Axixá do Tocantins | NORTE | SE-2STN | AL01077088 | 147 | 1 | 6 | 140 | 135,5 | 1,3 | 6 | 140 | 11 | 1 | 0 | 0 | 1 | aviso |
+| **Total Axixá do Tocantins** | | | 1 alimentadores | 147 | | | | 135,5 | 1,3 | | | | | | | | |
+
+## Babaçulândia
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Babaçulândia | NORTE | SE-2WND | AL01086016 | 91 | 1 | 1 | 89 | 149,1 | 26,7 | 1 | 89 | 2 | 2 | 0 | 0 | 1 | aviso |
+| **Total Babaçulândia** | | | 1 alimentadores | 91 | | | | 149,1 | 26,7 | | | | | | | | |
+
+## Buriti do Tocantins
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Buriti do Tocantins | NORTE | SE-2BRT | AL01019068 | 71 | 1 | 0 | 70 | 79,6 | 17,8 | 0 | 70 | 12 | 1 | 0 | 0 | 1 | aviso |
+| **Total Buriti do Tocantins** | | | 1 alimentadores | 71 | | | | 79,6 | 17,8 | | | | | | | | |
+
+## Colméia
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Colméia | NORTE | SE-2CLM | AL01022033 | 37 | 1 | 1 | 35 | 22,1 | 22,1 | 1 | 35 | 5 | 0 | 0 | 0 | 0 | ok |
+| **Total Colméia** | | | 1 alimentadores | 37 | | | | 22,1 | 22,1 | | | | | | | | |
+
+## Itaguatins
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Itaguatins | NORTE | SE-2STN | AL01077088 | 147 | 1 | 6 | 140 | 135,5 | 37,3 | 6 | 140 | 11 | 1 | 0 | 0 | 1 | aviso |
+| **Total Itaguatins** | | | 1 alimentadores | 147 | | | | 135,5 | 37,3 | | | | | | | | |
+
+## São Miguel do Tocantins
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| São Miguel do Tocantins | NORTE | SE-2STN | AL01077088 | 147 | 1 | 6 | 140 | 135,5 | 5,6 | 6 | 140 | 11 | 1 | 0 | 0 | 1 | aviso |
+| **Total São Miguel do Tocantins** | | | 1 alimentadores | 147 | | | | 135,5 | 5,6 | | | | | | | | |
+
+## Sítio Novo do Tocantins
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Sítio Novo do Tocantins | NORTE | SE-2STN | AL01077088 | 147 | 1 | 6 | 140 | 135,5 | 91,3 | 6 | 140 | 11 | 1 | 0 | 0 | 1 | aviso |
+| **Total Sítio Novo do Tocantins** | | | 1 alimentadores | 147 | | | | 135,5 | 91,3 | | | | | | | | |
+
+## Wanderlândia
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Wanderlândia | NORTE | SE-2WND | AL01086016 | 91 | 1 | 1 | 89 | 149,1 | 122,4 | 1 | 89 | 2 | 2 | 0 | 0 | 1 | aviso |
+| Wanderlândia | NORTE | SE-2AR4 | AL01040004 | 29 | 1 | 1 | 27 | 25,4 | 4,5 | 1 | 27 | 0 | 0 | 0 | 0 | 2 | aviso |
+| **Total Wanderlândia** | | | 2 alimentadores | 120 | | | | 174,5 | 126,9 | | | | | | | | |
+
+## Xambioá
+
+| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Xambioá | NORTE | SE-2XMB | AL01087030 | 38 | 1 | 0 | 37 | 18,7 | 18,7 | 0 | 37 | 1 | 0 | 0 | 0 | 0 | ok |
+| **Total Xambioá** | | | 1 alimentadores | 38 | | | | 18,7 | 18,7 | | | | | | | | |
+
+## Total geral
+
+- Municípios: 13
+- Alimentadores processados sem falha: 11 (510,3 km, 569 trechos)
+
+## Avisos por alimentador
+
+- **AL01005098** (aviso): trechos a revisar: T2
+- **AL01014045** (aviso): trechos a revisar: T2
+- **AL01019068** (aviso): 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m)
+- **AL01040004** (aviso): 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2
+- **AL01077088** (aviso): 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m)
+- **AL01086016** (aviso): 7 vão(s) na divisa entre municípios (medidos por amostragem de 20 m)
+- **AL02040004** (aviso): trechos a revisar: T2
+- **AL02103004** (aviso): trechos a revisar: T2
+
+## Não processados
+
+- nenhum
