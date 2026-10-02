@@ -89,3 +89,6 @@ p{margin:0}
 .ie em{font-style:normal;font-size:10.5px;letter-spacing:.05em;padding:2px 4px;border-radius:2px;color:#fff;background:#15803d}
 .ie.fim em{background:#b91c1c}
 .leaflet-container{font-family:var(--f-body)}
+/* mapa fica à vista enquanto o painel rola (computador); no celular, mapa quase da altura da tela */
+@media (min-width:981px){.mapbox{position:sticky;top:8px;z-index:5}}
+@media (max-width:640px){#map{height:calc(100svh - 110px);min-height:360px}.leaflet-control-attribution{font-size:9.5px;max-width:62%}}

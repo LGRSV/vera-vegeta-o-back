@@ -134,6 +134,7 @@ function selecionar(nome, enquadrar, vao) {
     ...t.fim.map((f, i) => pino(t.fim_pts[i], 'fim', 'FIM', f.replace('fim de linha · poste ', 'poste ') + (f.startsWith('fim de linha') ? ' (fim de linha)' : '')))]).addTo(map);
   if (enquadrar) map.fitBounds(L.latLngBounds(meus.flat()).pad(0.25), {maxZoom: 17});
   rotulosT3();
+  if (window.__onSel) window.__onSel(nome);
 }
 function limpar() {
   sel = null;
@@ -145,6 +146,7 @@ function limpar() {
   if (marcas) { marcas.remove(); marcas = null; }
   Object.values(rotulos).forEach(m => m.getElement() && m.getElement().firstChild.classList.remove('sel'));
   rotulosT3();
+  if (window.__onSel) window.__onSel(null);
 }
 // vão do trecho mais perto do ponto tocado (o trecho é desenhado como uma linha só)
 function vaoPerto(vs, ll) {
@@ -174,6 +176,7 @@ function mostraClasses() {
     if (v && !rotulos[t.nome]) rotulo(t, contagem()); else if (!v && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; } });
   if (visivel.T3 && !map.hasLayer(fusMarcas)) fusMarcas.addTo(map); else if (!visivel.T3) fusMarcas.remove();
   rotulosT3();
+  if (window.__onClasses) window.__onClasses();   // camadas extras (limpeza.js) voltam para cima
 }
 function rotulosT3() {
   if (!map) return;
@@ -209,6 +212,7 @@ if (typeof L === 'undefined') {
     linhas[t.nome] = [l, vs];
   });
   fusMarcas = L.layerGroup().addTo(map);
+  window.__fusMarcas = fusMarcas;
   D.fusiveis.forEach(a => {
     L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' || a.t === 'FTR' ? '#9ca3af' : '#fff', fillOpacity: 1})
       .bindTooltip(`${a.nome} · ${TIPO[a.t] || a.t}${papel(a.nome) ? ' · ' + papel(a.nome) : ''}`, {direction: 'top'})
@@ -250,5 +254,6 @@ $('busca').addEventListener('input', e => {
 });
 window.__sel = selecionar;
 window.__limpar = limpar;
+window.__visivel = visivel;
 limpar();
 if (NAE) atualizaNae();
