@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>AL01044024 · trechos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../../assets/leaflet/leaflet.css">
+<link rel="stylesheet" href="../../assets/alimentador.css">
+</head><body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">SE-2ITP SE ITAPORÃ · Alimentador AL01044024</span>
+    <h1>Trechos por ativo</h1>
+    <p class="lede"><b>T1</b> vai do DJ ao 1º religador. <b>T2</b> vai do 1º ao 2º religador; cada religador seguinte abre um novo T2: <b>T2-A, T2-B…</b>, em ordem a partir do DJ. <b>T3-A, T3-B…</b> é cada fusível, em ordem a partir do DJ; fusível dentro de fusível também é T3 (não existe T4). Cada trecho vai de chave até chave: toque num trecho no mapa ou na lista para ver a chave de início e de fim.</p>
+  </header>
+
+  <div class="stage">
+    <div class="mapbox">
+      <div id="map" role="region" aria-label="Mapa dos trechos"></div>
+      <div class="classes" id="classes" role="group" aria-label="Mostrar no mapa"></div>
+      <div class="banner" id="nosat" hidden><b>A imagem de satélite não carregou.</b> Confira a internet. Os trechos aparecem igual.</div>
+      <div class="banner" id="nolib" hidden><b>O mapa não carregou.</b> A biblioteca de mapa (Leaflet) não foi encontrada.</div>
+    </div>
+    <aside class="panel">
+      <div class="legend" id="legenda"></div>
+      <input class="busca" id="busca" type="search" placeholder="Buscar trecho, ativo ou poste" aria-label="Buscar trecho, ativo ou poste">
+      <div class="ctrl" id="ctrl" hidden>
+        <label for="mes">NAE em <select id="mes"></select></label>
+        <label for="ind"><input type="checkbox" id="ind" checked> Contar individuais</label>
+      </div>
+      <section class="det" id="det" aria-live="polite"></section>
+      <div class="lista" id="lista" role="list"></div>
+    </aside>
+  </div>
+  <p class="foot">Fim do trecho: o religador onde começa o T2 seguinte; senão, seguindo a linha principal (rumo ao ponto mais distante do DJ), a 1ª chave onde começa outro trecho ou, se não houver, o poste de fim de linha. Chaves 88 não aparecem. Imagem de satélite: Esri World Imagery, carregada ao vivo.</p>
+</div>
+
+<script src="../../assets/leaflet/leaflet.js"></script>
+<script src="dados.js"></script>
+<script src="../../assets/alimentador.js"></script>
+<script src="../../assets/extras.js"></script>
+</body></html>
