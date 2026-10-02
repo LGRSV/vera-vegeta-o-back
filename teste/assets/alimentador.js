@@ -23,13 +23,15 @@ $('legenda').innerHTML = leg.map(([n, c, k]) => `<span><i class="${k}" style="--
 // interrupções (NAE): coletiva = atuou DJ, religador, fusível ou trafo; individual = um consumidor
 const NAE = D.nae || null;
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-const rotMes = m => `${MESES[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`;
+const rotMes1 = m => `${MESES[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`;
+const rotMes = m => m === 'todos' ? `${rotMes1(NAE.meses[0])} a ${rotMes1(NAE.meses[NAE.meses.length - 1])}` : rotMes1(m);
 const ABR = {DJ: 'DJ', RL: 'religador', 'CH FUS': 'fusível', CH: 'chave', TR: 'trafo', UC: 'consumidor'};
 if (NAE && NAE.meses.length) {
   $('ctrl').hidden = false;
-  $('mes').innerHTML = NAE.meses.map(m => `<option value="${m}">${rotMes(m)}</option>`).join('');
+  $('mes').innerHTML = (NAE.meses.length > 1 ? `<option value="todos" selected>Todos os meses (${rotMes('todos')})</option>` : '') +
+    NAE.meses.map(m => `<option value="${m}">${rotMes(m)}</option>`).join('');
 }
-const doMes = () => NAE ? NAE.oc.filter(o => o.mes === $('mes').value && (o.col || $('ind').checked)) : [];
+const doMes = () => NAE ? NAE.oc.filter(o => ($('mes').value === 'todos' || o.mes === $('mes').value) && (o.col || $('ind').checked)) : [];
 function contagem() { const c = {}; doMes().forEach(o => { if (o.trecho) c[o.trecho] = (c[o.trecho] || 0) + 1; }); return c; }
 function listaOc(os) {
   return `<ul class="oc">${os.map(o => `<li class="${o.col ? 'col' : ''}"><span class="q">${esc(o.dia)} · ${!o.col ? '1 consumidor · trafo ' + esc(o.ativo) : esc(ABR[o.abr] || o.abr) + ' ' + esc(o.prob || o.ativo) + (o.prob && o.prob !== o.ativo ? ' · trafo ' + esc(o.ativo) : '')}</span><br>` +
@@ -44,7 +46,8 @@ function atualizaNae() {
   desenhaLista($('busca').value);
   sel ? detalhe(TR[sel]) : resumo();
   const c = contagem();
-  Object.entries(rotulos).forEach(([n, m]) => { const el = m.getElement(); if (el) el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : ''); });
+  Object.entries(rotulos).forEach(([n, m]) => { const el = m.getElement(); if (el) { el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : ''); el.firstChild.classList.toggle('oc', !!c[n]); } });
+  rotulosT3();
 }
 $('mes').addEventListener('change', atualizaNae);
 $('ind').addEventListener('change', atualizaNae);
@@ -61,7 +64,7 @@ function desenhaLista(filtro) {
     if (!ts.length) return '';
     return `<div class="grp">${titulo} · ${ts.length}</div>` + ts.map(t =>
       `<button class="row" role="listitem" data-t="${esc(t.nome)}" aria-current="${t.nome === sel}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
-      `<span title="${esc(t.inicio + ' → ' + fimTxt(t))}">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</span>${cnt ? `<strong class="nae ${cnt[t.nome] ? 'tem' : ''}" title="NAE no mês">${cnt[t.nome] || 0}</strong>` : ''}<em>${km(t.ext)}</em></button>`).join('');
+      `<span title="${esc(t.inicio + ' → ' + fimTxt(t))}">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</span>${cnt ? `<strong class="nae ${cnt[t.nome] ? 'tem' : ''}" title="NAE no período">${cnt[t.nome] || 0}</strong>` : ''}<em>${km(t.ext)}</em></button>`).join('');
   }).join('') || '<p class="lede">Nada encontrado.</p>';
 }
 $('lista').addEventListener('click', e => { const b = e.target.closest('.row'); if (b) selecionar(b.dataset.t, true); });
@@ -158,7 +161,7 @@ function vaoPerto(vs, ll) {
 }
 // rótulos: T1/T2 sempre; T3 só de perto e só os que estão na tela (mais leve em alimentador grande)
 function rotulo(t, c) {
-  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${t.nome === sel ? ' sel' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}</div>`}), zIndexOffset: t.tipo === 'fusivel' ? 0 : 400})
+  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${t.nome === sel ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}</div>`}), zIndexOffset: t.tipo === 'fusivel' ? 0 : 400})
     .bindTooltip(`${t.inicio} → ${fimTxt(t)}`, {direction: 'top'})
     .on('click', e => { L.DomEvent.stopPropagation(e); selecionar(t.nome, false); }).addTo(map);
   rotulos[t.nome] = m;
@@ -177,7 +180,7 @@ function rotulosT3() {
   const perto = map.getZoom() >= 15.5, b = map.getBounds().pad(0.2), c = contagem();
   D.trechos.forEach(t => {
     if (t.tipo !== 'fusivel') return;
-    const ver = visivel.T3 && (t.nome === sel || (perto && b.contains(t.rotulo)));
+    const ver = visivel.T3 && (t.nome === sel || c[t.nome] || (perto && b.contains(t.rotulo)));
     if (ver && !rotulos[t.nome]) rotulo(t, c);
     else if (!ver && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; }
   });
