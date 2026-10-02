@@ -6,751 +6,545 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Abreulândia | CENTRO | SE-2PR0 | LD05062013 | 6 | 1 | 0 | 5 | 749,1 | 349,7 | 0 | 5 | 1 | 47 | 1154 | 0 | 6 | aviso |
-| Abreulândia | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 14,8 | 0 | 7 | 0 | 5 | 7 | 0 | 4 | aviso |
-| Abreulândia | CENTRO | SE-2PR0 | LD04062013 | 21 | 1 | 0 | 20 | 1.188,5 | 11,3 | 0 | 20 | 3 | 54 | 20 | 0 | 5 | aviso |
-| Abreulândia | CENTRO | SE-2MRN | LD01050008 | 9 | 1 | 0 | 8 | 590,3 | 7,2 | 0 | 8 | 0 | 13 | 14 | 0 | 5 | aviso |
-| **Total Abreulândia** | | | 4 alimentadores | 44 | | | | 2.711,0 | 382,9 | | | | | | | | |
+| Abreulândia | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 14,8 | 0 | 7 | 0 | 5 | 7 | 0 | 5 | aviso |
+| **Total Abreulândia** | | | 1 alimentadores | 8 | | | | 183,1 | 14,8 | | | | | | | | |
 
 ## Aguiarnópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Aguiarnópolis | NORTE | SE-2TOC | LD01084002 | 9 | 1 | 0 | 8 | 487,0 | 148,5 | 0 | 8 | 1 | 54 | 1284 | 0 | 5 | aviso |
-| Aguiarnópolis | NORTE | SE-2AGP | AL01055123 | 20 | 1 | 0 | 19 | 22,5 | 22,5 | 0 | 19 | 2 | 0 | 0 | 0 | 2 | aviso |
-| Aguiarnópolis | NORTE | SE-2AGP | AL02055123 | 7 | 1 | 0 | 6 | 15,7 | 15,1 | 0 | 7 | 0 | 0 | 0 | 0 | 4 | aviso |
-| **Total Aguiarnópolis** | | | 3 alimentadores | 36 | | | | 525,1 | 186,0 | | | | | | | | |
+| Aguiarnópolis | NORTE | SE-2AGP | AL01055123 | 20 | 1 | 0 | 19 | 22,5 | 22,5 | 0 | 19 | 2 | 0 | 0 | 0 | 3 | aviso |
+| Aguiarnópolis | NORTE | SE-2AGP | AL02055123 | 7 | 1 | 0 | 6 | 15,7 | 15,1 | 0 | 7 | 0 | 0 | 0 | 0 | 5 | aviso |
+| **Total Aguiarnópolis** | | | 2 alimentadores | 27 | | | | 38,1 | 37,6 | | | | | | | | |
 
 ## Aliança do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Aliança do Tocantins | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 237,5 | 6 | 342 | 23 | 14 | 0 | 0 | 5 | aviso |
-| Aliança do Tocantins | SUL | SE-2DRE | AL01031076 | 7 | 1 | 0 | 6 | 275,6 | 75,0 | 0 | 6 | 0 | 16 | 186 | 0 | 6 | aviso |
-| Aliança do Tocantins | SUL | SE-2ALN | AL01001037 | 16 | 1 | 1 | 14 | 13,2 | 13,2 | 1 | 14 | 1 | 1 | 0 | 0 | 6 | aviso |
-| Aliança do Tocantins | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 8,2 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Aliança do Tocantins | SUL | SE-2GUR | LD03040003 | 5 | 1 | 0 | 4 | 156,6 | 3,9 | 0 | 4 | 0 | 89 | 6808 | 0 | 5 | aviso |
-| **Total Aliança do Tocantins** | | | 5 alimentadores | 397 | | | | 2.130,1 | 337,7 | | | | | | | | |
+| Aliança do Tocantins | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 237,5 | 6 | 342 | 23 | 14 | 0 | 0 | 6 | aviso |
+| Aliança do Tocantins | SUL | SE-2DRE | AL01031076 | 7 | 1 | 0 | 6 | 275,6 | 75,0 | 0 | 6 | 0 | 16 | 186 | 0 | 7 | aviso |
+| Aliança do Tocantins | SUL | SE-2ALN | AL01001037 | 16 | 1 | 1 | 14 | 13,2 | 13,2 | 1 | 14 | 1 | 1 | 0 | 0 | 7 | aviso |
+| **Total Aliança do Tocantins** | | | 3 alimentadores | 370 | | | | 869,4 | 325,6 | | | | | | | | |
 
 ## Almas
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Almas | SUL | SE-2AL2 | LD06002091 | 277 | 1 | 4 | 272 | 498,9 | 380,5 | 4 | 272 | 8 | 3 | 0 | 0 | 6 | aviso |
+| Almas | SUL | SE-2AL2 | LD06002091 | 277 | 1 | 4 | 272 | 498,9 | 380,5 | 4 | 272 | 8 | 3 | 0 | 0 | 7 | aviso |
 | Almas | SUL | SE-2AL2 | LD05002091 | 154 | 1 | 1 | 152 | 284,3 | 238,5 | 1 | 153 | 4 | 0 | 0 | 0 | 5 | aviso |
-| Almas | SUL | SE-2AL2 | LD03002091 | 78 | 1 | 1 | 76 | 177,0 | 143,1 | 1 | 76 | 3 | 0 | 0 | 0 | 6 | aviso |
-| Almas | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 88,9 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| Almas | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 75,0 | 11 | 888 | 35 | 22 | 0 | 0 | 7 | aviso |
-| Almas | SUL | SE-2AL2 | LD07002091 | 289 | 1 | 5 | 283 | 356,0 | 47,0 | 5 | 283 | 13 | 4 | 0 | 0 | 6 | aviso |
-| Almas | SUL | SE-2AL2 | AL01002091 | 20 | 1 | 1 | 18 | 16,7 | 16,7 | 1 | 20 | 0 | 1 | 0 | 0 | 5 | aviso |
-| Almas | SUL | SE-2DIA | LD01028074 | 3 | 1 | 0 | 2 | 200,8 | 4,0 | 0 | 2 | 0 | 6 | 26 | 0 | 4 | aviso |
-| **Total Almas** | | | 8 alimentadores | 1745 | | | | 5.828,4 | 993,7 | | | | | | | | |
+| Almas | SUL | SE-2AL2 | LD03002091 | 78 | 1 | 1 | 76 | 177,0 | 143,1 | 1 | 76 | 3 | 0 | 0 | 0 | 7 | aviso |
+| Almas | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 75,0 | 11 | 888 | 35 | 22 | 0 | 0 | 8 | aviso |
+| Almas | SUL | SE-2AL2 | LD07002091 | 289 | 1 | 5 | 283 | 356,0 | 47,0 | 5 | 283 | 13 | 4 | 0 | 0 | 7 | aviso |
+| Almas | SUL | SE-2AL2 | AL01002091 | 20 | 1 | 1 | 18 | 16,7 | 16,7 | 1 | 20 | 0 | 1 | 0 | 0 | 6 | aviso |
+| **Total Almas** | | | 6 alimentadores | 1712 | | | | 2.750,1 | 900,8 | | | | | | | | |
 
 ## Alvorada
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Alvorada | SUL | SE-2ALV | AL01003036 | 418 | 1 | 8 | 409 | 545,9 | 272,2 | 8 | 411 | 11 | 9 | 0 | 0 | 7 | aviso |
-| Alvorada | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 133,7 | 5 | 500 | 10 | 4 | 0 | 0 | 9 | aviso |
-| Alvorada | SUL | SE-2FGR | AL01033047 | 5 | 1 | 0 | 4 | 275,4 | 66,0 | 0 | 4 | 0 | 13 | 384 | 0 | 5 | aviso |
-| Alvorada | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 45,6 | 13 | 1126 | 30 | 9 | 0 | 0 | 7 | aviso |
-| Alvorada | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 16,4 | 10 | 960 | 24 | 3 | 0 | 0 | 8 | aviso |
-| Alvorada | SUL | SE-2FGR | AL02033047 | 3 | 1 | 0 | 2 | 242,3 | 2,1 | 0 | 2 | 0 | 7 | 0 | 0 | 3 | aviso |
-| **Total Alvorada** | | | 6 alimentadores | 3035 | | | | 4.764,0 | 536,0 | | | | | | | | |
+| Alvorada | SUL | SE-2ALV | AL01003036 | 418 | 1 | 8 | 409 | 545,9 | 272,2 | 8 | 411 | 11 | 9 | 0 | 0 | 8 | aviso |
+| Alvorada | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 133,7 | 5 | 500 | 10 | 4 | 0 | 0 | 10 | aviso |
+| Alvorada | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 45,6 | 13 | 1126 | 30 | 9 | 0 | 0 | 8 | aviso |
+| Alvorada | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 16,4 | 10 | 960 | 24 | 3 | 0 | 0 | 9 | aviso |
+| **Total Alvorada** | | | 4 alimentadores | 3027 | | | | 4.246,4 | 467,9 | | | | | | | | |
 
 ## Ananás
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Ananás | NORTE | SE-2AN2 | LD01005098 | 270 | 1 | 2 | 267 | 411,3 | 409,6 | 2 | 267 | 17 | 21 | 0 | 0 | 7 | aviso |
-| Ananás | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 65,1 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
-| Ananás | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 45,1 | 4 | 253 | 15 | 13 | 0 | 0 | 6 | aviso |
-| Ananás | NORTE | SE-2RCH | AL01030124 | 3 | 1 | 0 | 2 | 160,4 | 1,2 | 0 | 2 | 1 | 23 | 12 | 0 | 5 | aviso |
-| **Total Ananás** | | | 4 alimentadores | 1525 | | | | 2.001,9 | 521,0 | | | | | | | | |
+| Ananás | NORTE | SE-2AN2 | LD01005098 | 270 | 1 | 2 | 267 | 411,3 | 409,6 | 2 | 267 | 17 | 21 | 0 | 0 | 8 | aviso |
+| Ananás | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 65,1 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
+| Ananás | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 45,1 | 4 | 253 | 15 | 13 | 0 | 0 | 7 | aviso |
+| Ananás | NORTE | SE-2AN2 | LD02005098 | 2 | 1 | 0 | 1 | 12,1 | 9,7 | 0 | 1 | 1 | 0 | 0 | 0 | 2 | aviso |
+| **Total Ananás** | | | 4 alimentadores | 1524 | | | | 1.853,6 | 529,6 | | | | | | | | |
 
 ## Angico
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Angico | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 202,8 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
-| Angico | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 16,4 | 4 | 253 | 15 | 13 | 0 | 0 | 6 | aviso |
-| Angico | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 10,0 | 0 | 5 | 0 | 26 | 32 | 0 | 5 | aviso |
+| Angico | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 202,8 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
+| Angico | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 16,4 | 4 | 253 | 15 | 13 | 0 | 0 | 7 | aviso |
+| Angico | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 10,0 | 0 | 5 | 0 | 26 | 32 | 0 | 6 | aviso |
 | **Total Angico** | | | 3 alimentadores | 1258 | | | | 1.615,5 | 229,2 | | | | | | | | |
 
 ## Aragominas
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Aragominas | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 534,9 | 19 | 1962 | 183 | 269 | 0 | 0 | 8 | aviso |
+| Aragominas | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 534,9 | 19 | 1962 | 183 | 269 | 0 | 0 | 9 | aviso |
 | Aragominas | NORTE | SE-2ARM | AL01006040 | 107 | 1 | 1 | 105 | 108,0 | 96,8 | 1 | 106 | 11 | 6 | 0 | 0 | 4 | aviso |
-| Aragominas | NORTE | SE-2AR0 | LD04010004 | 117 | 1 | 6 | 110 | 146,0 | 32,0 | 6 | 111 | 15 | 10 | 0 | 0 | 8 | aviso |
+| Aragominas | NORTE | SE-2AR0 | LD04010004 | 117 | 1 | 6 | 110 | 146,0 | 32,0 | 6 | 111 | 15 | 10 | 0 | 0 | 9 | aviso |
 | **Total Aragominas** | | | 3 alimentadores | 2204 | | | | 2.553,0 | 663,7 | | | | | | | | |
 
 ## Araguacema
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Araguacema | CENTRO | SE-2CSR | LD01434149 | 6 | 1 | 1 | 4 | 359,7 | 207,0 | 1 | 4 | 3 | 19 | 7240 | 0 | 7 | aviso |
-| Araguacema | CENTRO | SE-2AGC | AL01007055 | 36 | 1 | 1 | 34 | 28,8 | 28,7 | 1 | 36 | 2 | 2 | 0 | 0 | 7 | aviso |
-| **Total Araguacema** | | | 2 alimentadores | 42 | | | | 388,5 | 235,8 | | | | | | | | |
+| Araguacema | CENTRO | SE-2AGC | AL01007055 | 36 | 1 | 1 | 34 | 28,8 | 28,7 | 1 | 36 | 2 | 2 | 0 | 0 | 8 | aviso |
+| **Total Araguacema** | | | 1 alimentadores | 36 | | | | 28,8 | 28,7 | | | | | | | | |
 
 ## Araguaçu
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Araguaçu | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 1.104,2 | 13 | 1126 | 30 | 9 | 0 | 0 | 7 | aviso |
-| Araguaçu | SUL | SE-2ARG | AL01008032 | 249 | 1 | 4 | 244 | 309,2 | 309,2 | 4 | 246 | 5 | 3 | 0 | 0 | 5 | aviso |
-| Araguaçu | SUL | SE-2ARG | LD01008032 | 128 | 1 | 1 | 126 | 163,9 | 147,3 | 1 | 126 | 4 | 3 | 0 | 0 | 6 | aviso |
+| Araguaçu | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 1.104,2 | 13 | 1126 | 30 | 9 | 0 | 0 | 8 | aviso |
+| Araguaçu | SUL | SE-2ARG | AL01008032 | 249 | 1 | 4 | 244 | 309,2 | 309,2 | 4 | 246 | 5 | 3 | 0 | 0 | 6 | aviso |
+| Araguaçu | SUL | SE-2ARG | LD01008032 | 128 | 1 | 1 | 126 | 163,9 | 147,3 | 1 | 126 | 4 | 3 | 0 | 0 | 7 | aviso |
 | Araguaçu | SUL | SE-2MAR | AL01098118 | 3 | 1 | 0 | 2 | 141,7 | 134,1 | 0 | 2 | 0 | 3 | 0 | 0 | 3 | aviso |
-| Araguaçu | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 2,6 | 5 | 500 | 10 | 4 | 0 | 0 | 9 | aviso |
+| Araguaçu | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 2,6 | 5 | 500 | 10 | 4 | 0 | 0 | 10 | aviso |
 | **Total Araguaçu** | | | 5 alimentadores | 2020 | | | | 2.887,8 | 1.697,3 | | | | | | | | |
 
 ## Araguaína
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Araguaína | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 451,0 | 19 | 1962 | 183 | 269 | 0 | 0 | 8 | aviso |
-| Araguaína | NORTE | SE-2BNS | LD02010153 | 12 | 1 | 1 | 10 | 1.242,1 | 343,9 | 1 | 10 | 0 | 37 | 152 | 0 | 7 | aviso |
-| Araguaína | NORTE | SE-2AR0 | LD05010004 | 965 | 1 | 8 | 956 | 860,9 | 246,5 | 8 | 962 | 67 | 55 | 0 | 0 | 5 | aviso |
-| Araguaína | NORTE | SE-2AR2 | AL02096004 | 282 | 1 | 3 | 278 | 264,3 | 213,2 | 3 | 280 | 35 | 51 | 0 | 0 | 5 | aviso |
-| Araguaína | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 162,4 | 16 | 1152 | 76 | 26 | 0 | 0 | 7 | aviso |
-| Araguaína | NORTE | SE-2AR2 | AL04096004 | 116 | 1 | 0 | 115 | 134,2 | 134,2 | 0 | 116 | 13 | 5 | 0 | 0 | 3 | aviso |
-| Araguaína | NORTE | SE-2AR2 | AL03096004 | 113 | 1 | 2 | 110 | 74,5 | 74,5 | 2 | 110 | 3 | 1 | 0 | 0 | 5 | aviso |
-| Araguaína | NORTE | SE-2AR0 | LD04010004 | 117 | 1 | 6 | 110 | 146,0 | 67,5 | 6 | 111 | 15 | 10 | 0 | 0 | 8 | aviso |
-| Araguaína | NORTE | SE-2AR0 | AL01010004 | 73 | 1 | 2 | 70 | 46,8 | 46,8 | 2 | 72 | 2 | 11 | 0 | 0 | 4 | aviso |
-| Araguaína | NORTE | SE-2NVO | AL01054060 | 17 | 1 | 0 | 16 | 780,8 | 41,4 | 0 | 16 | 0 | 53 | 143 | 0 | 5 | aviso |
-| Araguaína | NORTE | SE-2AR0 | AL03010004 | 57 | 1 | 2 | 54 | 19,9 | 19,9 | 2 | 55 | 0 | 0 | 0 | 0 | 4 | aviso |
-| Araguaína | NORTE | SE-2AR0 | AL05010004 | 63 | 1 | 2 | 60 | 19,6 | 19,6 | 2 | 60 | 0 | 1 | 0 | 0 | 4 | aviso |
-| Araguaína | NORTE | SE-2AR3 | AL01103004 | 33 | 1 | 2 | 30 | 15,8 | 15,8 | 2 | 30 | 0 | 2 | 0 | 0 | 3 | aviso |
-| Araguaína | NORTE | SE-2AR0 | AL04010004 | 51 | 1 | 2 | 48 | 15,0 | 15,0 | 3 | 49 | 0 | 0 | 0 | 0 | 5 | aviso |
-| Araguaína | NORTE | SE-2AR0 | AL02010004 | 50 | 1 | 1 | 48 | 13,7 | 13,7 | 1 | 48 | 0 | 0 | 0 | 0 | 6 | aviso |
-| Araguaína | NORTE | SE-2AR0 | AL07010004 | 11 | 1 | 0 | 10 | 12,9 | 12,9 | 0 | 10 | 0 | 1 | 0 | 0 | 2 | aviso |
+| Araguaína | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 451,0 | 19 | 1962 | 183 | 269 | 0 | 0 | 9 | aviso |
+| Araguaína | NORTE | SE-2AR0 | LD05010004 | 965 | 1 | 8 | 956 | 860,9 | 246,5 | 8 | 962 | 67 | 55 | 0 | 0 | 6 | aviso |
+| Araguaína | NORTE | SE-2AR2 | AL02096004 | 282 | 1 | 3 | 278 | 264,3 | 213,2 | 3 | 280 | 35 | 51 | 0 | 0 | 6 | aviso |
+| Araguaína | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 162,4 | 16 | 1152 | 76 | 26 | 0 | 0 | 8 | aviso |
+| Araguaína | NORTE | SE-2AR2 | AL04096004 | 116 | 1 | 0 | 115 | 134,2 | 134,2 | 0 | 116 | 13 | 5 | 0 | 0 | 4 | aviso |
+| Araguaína | NORTE | SE-2AR2 | AL03096004 | 113 | 1 | 2 | 110 | 74,5 | 74,5 | 2 | 110 | 3 | 1 | 0 | 0 | 6 | aviso |
+| Araguaína | NORTE | SE-2AR0 | LD04010004 | 117 | 1 | 6 | 110 | 146,0 | 67,5 | 6 | 111 | 15 | 10 | 0 | 0 | 9 | aviso |
+| Araguaína | NORTE | SE-2AR3 | AL07103004 | 2 | 1 | 0 | 1 | 50,4 | 50,4 | 0 | 1 | 0 | 2 | 5 | 0 | 6 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL01010004 | 73 | 1 | 2 | 70 | 46,8 | 46,8 | 2 | 72 | 2 | 11 | 0 | 0 | 5 | aviso |
+| Araguaína | NORTE | SE-2NVO | AL01054060 | 17 | 1 | 0 | 16 | 780,8 | 41,4 | 0 | 16 | 0 | 53 | 143 | 0 | 6 | aviso |
+| Araguaína |  | SE-GIS-SE_ARAGUAINA | AL05040004 | 1 | 1 | 0 | 0 | 25,1 | 25,1 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | aviso |
+| Araguaína | NORTE | SE-2AR4 | AL01040004 | 1 | 1 | 0 | 0 | 26,8 | 23,9 | 0 | 0 | 0 | 1 | 0 | 0 | 4 | aviso |
+| Araguaína | NORTE | SE-2AR4 | AL04040004 | 2 | 1 | 0 | 1 | 23,8 | 23,8 | 0 | 1 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Araguaína | NORTE | SE-2AR4 | AL03040004 | 2 | 1 | 0 | 1 | 21,2 | 21,2 | 0 | 1 | 0 | 1 | 0 | 0 | 4 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL03010004 | 57 | 1 | 2 | 54 | 19,9 | 19,9 | 2 | 55 | 0 | 0 | 0 | 0 | 5 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL05010004 | 63 | 1 | 2 | 60 | 19,6 | 19,6 | 2 | 60 | 0 | 1 | 0 | 0 | 5 | aviso |
+| Araguaína | NORTE | SE-2AR4 | AL02040004 | 2 | 1 | 0 | 1 | 19,0 | 19,0 | 0 | 1 | 0 | 2 | 22 | 0 | 5 | aviso |
+| Araguaína | NORTE | SE-2AR3 | AL06103004 | 1 | 1 | 0 | 0 | 16,0 | 16,0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Araguaína | NORTE | SE-2AR3 | AL01103004 | 33 | 1 | 2 | 30 | 15,8 | 15,8 | 2 | 30 | 0 | 2 | 0 | 0 | 4 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL04010004 | 51 | 1 | 2 | 48 | 15,0 | 15,0 | 3 | 49 | 0 | 0 | 0 | 0 | 6 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL02010004 | 50 | 1 | 1 | 48 | 13,7 | 13,7 | 1 | 48 | 0 | 0 | 0 | 0 | 7 | aviso |
+| Araguaína | NORTE | SE-2AR3 | AL03103004 | 2 | 1 | 0 | 1 | 13,1 | 13,1 | 0 | 1 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL07010004 | 11 | 1 | 0 | 10 | 12,9 | 12,9 | 0 | 10 | 0 | 1 | 0 | 0 | 3 | aviso |
 | Araguaína | NORTE | SE-2AR0 | LD06010004 | 4 | 1 | 0 | 3 | 11,1 | 11,1 | 0 | 3 | 0 | 0 | 0 | 0 | 1 | aviso |
-| Araguaína | NORTE | SE-2AR3 | AL02103004 | 21 | 1 | 1 | 19 | 10,1 | 10,1 | 1 | 20 | 0 | 0 | 0 | 0 | 5 | aviso |
+| Araguaína | NORTE | SE-2AR3 | AL02103004 | 21 | 1 | 1 | 19 | 10,1 | 10,1 | 1 | 20 | 0 | 0 | 0 | 0 | 6 | aviso |
+| Araguaína | NORTE | SE-2AR3 | AL04103004 | 1 | 1 | 0 | 0 | 9,5 | 9,5 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL08010004 | 1 | 1 | 0 | 0 | 7,4 | 7,4 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Araguaína | NORTE | SE-2AR0 | AL06010004 | 23 | 1 | 0 | 22 | 7,2 | 7,2 | 0 | 22 | 1 | 1 | 0 | 0 | 1 | aviso |
-| Araguaína | NORTE | SE-2BIE | LD04105019 | 5 | 1 | 0 | 4 | 379,8 | 5,3 | 0 | 4 | 0 | 21 | 0 | 0 | 3 | aviso |
 | Araguaína | NORTE | SE-2ARM | AL01006040 | 107 | 1 | 1 | 105 | 108,0 | 5,3 | 1 | 106 | 11 | 6 | 0 | 0 | 4 | aviso |
 | Araguaína | NORTE | SE-2AR2 | AL01096004 | 1 | 1 | 0 | 0 | 1,2 | 1,2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
-| Araguaína | NORTE | SE-2AR3 | AL05103004 | 1 | 1 | 0 | 0 | 0,9 | 0,9 | 0 | 0 | 0 | 1 | 583 | 0 | 3 | aviso |
-| **Total Araguaína** | | | 23 alimentadores | 5270 | | | | 7.741,2 | 1.919,2 | | | | | | | | |
+| **Total Araguaína** | | | 30 alimentadores | 5267 | | | | 6.330,6 | 1.778,4 | | | | | | | | |
 
 ## Araguanã
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Araguanã | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 226,6 | 19 | 1962 | 183 | 269 | 0 | 0 | 8 | aviso |
-| Araguanã | NORTE | SE-2XB2 | LD01095030 | 7 | 1 | 0 | 6 | 550,3 | 24,1 | 0 | 6 | 2 | 42 | 3296 | 0 | 6 | aviso |
-| **Total Araguanã** | | | 2 alimentadores | 1987 | | | | 2.849,3 | 250,7 | | | | | | | | |
+| Araguanã | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 226,6 | 19 | 1962 | 183 | 269 | 0 | 0 | 9 | aviso |
+| **Total Araguanã** | | | 1 alimentadores | 1980 | | | | 2.299,1 | 226,6 | | | | | | | | |
 
 ## Araguatins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Araguatins | NORTE | SE-2ATN | LD03109039 | 8 | 1 | 0 | 7 | 523,2 | 459,5 | 0 | 7 | 2 | 95 | 0 | 0 | 3 | aviso |
-| Araguatins | NORTE | SE-2ATN | LD02109039 | 6 | 1 | 0 | 5 | 482,6 | 440,8 | 0 | 6 | 0 | 115 | 96 | 0 | 7 | aviso |
-| Araguatins | NORTE | SE-2ATN | AL03109039 | 3 | 1 | 1 | 1 | 287,9 | 287,9 | 1 | 1 | 0 | 45 | 150 | 0 | 7 | aviso |
-| Araguatins | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 142,3 | 0 | 19 | 0 | 174 | 81 | 0 | 5 | aviso |
-| Araguatins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 64,7 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
-| Araguatins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 40,7 | 0 | 5 | 0 | 91 | 6 | 0 | 5 | aviso |
-| Araguatins | NORTE | SE-2ATN | AL02109039 | 1 | 1 | 0 | 0 | 1,5 | 1,5 | 0 | 0 | 0 | 0 | 762 | 0 | 3 | aviso |
-| **Total Araguatins** | | | 7 alimentadores | 1038 | | | | 3.640,3 | 1.437,5 | | | | | | | | |
+| Araguatins | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 142,3 | 0 | 19 | 0 | 174 | 81 | 0 | 6 | aviso |
+| Araguatins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 64,7 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
+| Araguatins | NORTE | SE-2BRT | AL01019068 | 2 | 1 | 0 | 1 | 79,9 | 56,8 | 0 | 1 | 0 | 14 | 0 | 0 | 2 | aviso |
+| Araguatins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 40,7 | 0 | 5 | 0 | 91 | 6 | 0 | 6 | aviso |
+| Araguatins | NORTE | SE-2ATN | AL01109039 | 1 | 1 | 0 | 0 | 34,6 | 34,6 | 0 | 0 | 0 | 4 | 0 | 0 | 1 | aviso |
+| **Total Araguatins** | | | 5 alimentadores | 1023 | | | | 2.459,6 | 339,1 | | | | | | | | |
 
 ## Arapoema
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Arapoema | NORTE | SE-2BNS | LD02010153 | 12 | 1 | 1 | 10 | 1.242,1 | 428,5 | 1 | 10 | 0 | 37 | 152 | 0 | 7 | aviso |
-| Arapoema | NORTE | SE-2NVO | LD01054060 | 10 | 1 | 0 | 9 | 557,2 | 23,9 | 0 | 9 | 0 | 27 | 41 | 0 | 5 | aviso |
-| **Total Arapoema** | | | 2 alimentadores | 22 | | | | 1.799,4 | 452,4 | | | | | | | | |
+| Arapoema | NORTE | SE-2ARP | AL01012025 | 1 | 1 | 0 | 0 | 27,4 | 27,3 | 0 | 0 | 0 | 1 | 0 | 0 | 4 | aviso |
+| **Total Arapoema** | | | 1 alimentadores | 1 | | | | 27,4 | 27,3 | | | | | | | | |
 
 ## Arraias
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Arraias | SUL | SE-2ARS | LD02110005 | 5 | 1 | 0 | 4 | 745,4 | 672,7 | 0 | 5 | 0 | 14 | 7555 | 0 | 6 | aviso |
-| Arraias | SUL | SE-2ARS | LD01110005 | 4 | 1 | 0 | 3 | 501,5 | 355,0 | 0 | 3 | 0 | 5 | 12 | 0 | 4 | aviso |
-| Arraias | SUL | SE-2NVL | AL02058020 | 8 | 1 | 0 | 7 | 241,0 | 226,0 | 0 | 7 | 1 | 5 | 0 | 0 | 3 | aviso |
-| Arraias | SUL | SE-2DIA | LD05028074 | 12 | 1 | 0 | 11 | 1.199,0 | 12,7 | 0 | 11 | 0 | 53 | 107 | 0 | 5 | aviso |
-| Arraias | SUL | SE-2PRN | LD03010021 | 11 | 1 | 0 | 10 | 792,8 | 2,3 | 0 | 10 | 0 | 15 | 147 | 0 | 5 | aviso |
-| **Total Arraias** | | | 5 alimentadores | 40 | | | | 3.479,7 | 1.268,6 | | | | | | | | |
+| Arraias | SUL | SE-2NVL | AL02058020 | 8 | 1 | 0 | 7 | 241,0 | 226,0 | 0 | 7 | 1 | 5 | 0 | 0 | 4 | aviso |
+| **Total Arraias** | | | 1 alimentadores | 8 | | | | 241,0 | 226,0 | | | | | | | | |
 
 ## Augustinópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Augustinópolis | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 210,1 | 0 | 19 | 0 | 174 | 81 | 0 | 5 | aviso |
-| Augustinópolis | NORTE | SE-2AGT | LD02014045 | 5 | 1 | 0 | 4 | 204,7 | 52,4 | 0 | 4 | 1 | 78 | 19 | 0 | 5 | aviso |
-| Augustinópolis | NORTE | SE-2ATN | LD03109039 | 8 | 1 | 0 | 7 | 523,2 | 14,3 | 0 | 7 | 2 | 95 | 0 | 0 | 3 | aviso |
-| Augustinópolis | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 3,5 | 1 | 10 | 4 | 85 | 311 | 0 | 5 | aviso |
-| **Total Augustinópolis** | | | 4 alimentadores | 45 | | | | 1.956,2 | 280,3 | | | | | | | | |
+| Augustinópolis | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 210,1 | 0 | 19 | 0 | 174 | 81 | 0 | 6 | aviso |
+| Augustinópolis | NORTE | SE-2AGT | LD02014045 | 5 | 1 | 0 | 4 | 204,7 | 52,4 | 0 | 4 | 1 | 78 | 19 | 0 | 6 | aviso |
+| Augustinópolis | NORTE | SE-2AGT | AL02014045 | 2 | 1 | 0 | 1 | 14,9 | 14,9 | 0 | 1 | 0 | 1 | 0 | 0 | 3 | aviso |
+| Augustinópolis | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 3,5 | 1 | 10 | 4 | 85 | 311 | 0 | 7 | aviso |
+| **Total Augustinópolis** | | | 4 alimentadores | 39 | | | | 1.447,9 | 280,9 | | | | | | | | |
 
 ## Aurora do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Aurora do Tocantins |  | SE-GIS-SE_SERRAS_GE | LD02414027 | 5 | 1 | 0 | 4 | 370,4 | 2,1 | 0 | 4 | 0 | 0 | 3 | 0 | 7 | aviso |
-| **Total Aurora do Tocantins** | | | 1 alimentadores | 5 | | | | 370,4 | 2,1 | | | | | | | | |
+| Aurora do Tocantins | SUL | SE-2AUR | AL01015049 | 1 | 1 | 0 | 0 | 5,4 | 5,4 | 0 | 0 | 0 | 3 | 0 | 0 | 3 | aviso |
+| **Total Aurora do Tocantins** | | | 1 alimentadores | 1 | | | | 5,4 | 5,4 | | | | | | | | |
 
 ## Axixá do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Axixá do Tocantins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 78,1 | 0 | 5 | 0 | 91 | 6 | 0 | 5 | aviso |
-| Axixá do Tocantins | NORTE | SE-2ATN | LD03109039 | 8 | 1 | 0 | 7 | 523,2 | 24,3 | 0 | 7 | 2 | 95 | 0 | 0 | 3 | aviso |
-| Axixá do Tocantins | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 21,3 | 1 | 10 | 4 | 85 | 311 | 0 | 5 | aviso |
-| **Total Axixá do Tocantins** | | | 3 alimentadores | 26 | | | | 1.118,1 | 123,7 | | | | | | | | |
+| Axixá do Tocantins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 78,1 | 0 | 5 | 0 | 91 | 6 | 0 | 6 | aviso |
+| Axixá do Tocantins | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 21,3 | 1 | 10 | 4 | 85 | 311 | 0 | 7 | aviso |
+| **Total Axixá do Tocantins** | | | 2 alimentadores | 18 | | | | 594,9 | 99,4 | | | | | | | | |
 
 ## Babaçulândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Babaçulândia | NORTE | SE-2AR0 | LD05010004 | 965 | 1 | 8 | 956 | 860,9 | 614,4 | 8 | 962 | 67 | 55 | 0 | 0 | 5 | aviso |
-| Babaçulândia | NORTE | SE-2BIE | LD04105019 | 5 | 1 | 0 | 4 | 379,8 | 132,6 | 0 | 4 | 0 | 21 | 0 | 0 | 3 | aviso |
-| Babaçulândia | NORTE | SE-2BIE | LD01105019 | 4 | 1 | 0 | 3 | 455,2 | 102,0 | 0 | 3 | 0 | 15 | 0 | 0 | 2 | aviso |
-| Babaçulândia | NORTE | SE-2WND | AL01086016 | 5 | 1 | 0 | 4 | 152,8 | 27,9 | 0 | 4 | 0 | 6 | 2 | 0 | 5 | aviso |
-| Babaçulândia | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 25,9 | 16 | 1152 | 76 | 26 | 0 | 0 | 7 | aviso |
-| **Total Babaçulândia** | | | 5 alimentadores | 2147 | | | | 3.126,2 | 902,8 | | | | | | | | |
+| Babaçulândia | NORTE | SE-2AR0 | LD05010004 | 965 | 1 | 8 | 956 | 860,9 | 614,4 | 8 | 962 | 67 | 55 | 0 | 0 | 6 | aviso |
+| Babaçulândia | NORTE | SE-2WND | AL01086016 | 5 | 1 | 0 | 4 | 152,8 | 27,9 | 0 | 4 | 0 | 6 | 2 | 0 | 6 | aviso |
+| Babaçulândia | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 25,9 | 16 | 1152 | 76 | 26 | 0 | 0 | 8 | aviso |
+| **Total Babaçulândia** | | | 3 alimentadores | 2138 | | | | 2.291,1 | 668,2 | | | | | | | | |
 
 ## Bandeirantes do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Bandeirantes do Tocantins | NORTE | SE-2NVO | LD01054060 | 10 | 1 | 0 | 9 | 557,2 | 219,7 | 0 | 9 | 0 | 27 | 41 | 0 | 5 | aviso |
-| Bandeirantes do Tocantins | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 167,0 | 0 | 10 | 0 | 7 | 0 | 0 | 3 | aviso |
-| Bandeirantes do Tocantins | NORTE | SE-2BNS | LD03020023 | 3 | 1 | 0 | 2 | 137,5 | 23,6 | 0 | 2 | 1 | 18 | 2332 | 0 | 5 | aviso |
-| Bandeirantes do Tocantins | NORTE | SE-2BNS | LD02010153 | 12 | 1 | 1 | 10 | 1.242,1 | 14,1 | 1 | 10 | 0 | 37 | 152 | 0 | 7 | aviso |
-| Bandeirantes do Tocantins | NORTE | SE-2CLN | AL01020023 | 3 | 1 | 0 | 2 | 116,1 | 13,0 | 0 | 3 | 0 | 2 | 2 | 0 | 7 | aviso |
-| Bandeirantes do Tocantins | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 11,8 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| **Total Bandeirantes do Tocantins** | | | 6 alimentadores | 67 | | | | 4.152,6 | 449,1 | | | | | | | | |
-
-## Barra do Ouro
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Barra do Ouro | NORTE | SE-2BIE | LD03105019 | 16 | 1 | 0 | 15 | 1.589,7 | 372,4 | 0 | 16 | 2 | 62 | 62 | 0 | 6 | aviso |
-| Barra do Ouro | NORTE | SE-2ITC | AL01042078 | 8 | 1 | 0 | 7 | 610,9 | 62,5 | 0 | 7 | 1 | 16 | 7 | 0 | 5 | aviso |
-| **Total Barra do Ouro** | | | 2 alimentadores | 24 | | | | 2.200,6 | 434,9 | | | | | | | | |
+| Bandeirantes do Tocantins | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 167,0 | 0 | 10 | 0 | 7 | 0 | 0 | 4 | aviso |
+| Bandeirantes do Tocantins | NORTE | SE-2CLN | AL01020023 | 3 | 1 | 0 | 2 | 116,1 | 13,0 | 0 | 3 | 0 | 2 | 2 | 0 | 8 | aviso |
+| **Total Bandeirantes do Tocantins** | | | 2 alimentadores | 14 | | | | 644,4 | 179,9 | | | | | | | | |
 
 ## Barrolândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Barrolândia | CENTRO | SE-2PR0 | LD02062013 | 9 | 1 | 1 | 7 | 368,5 | 156,7 | 1 | 7 | 0 | 9 | 0 | 0 | 5 | aviso |
-| Barrolândia | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 140,0 | 0 | 7 | 0 | 5 | 7 | 0 | 4 | aviso |
-| Barrolândia | CENTRO | SE-2MRN | LD01050008 | 9 | 1 | 0 | 8 | 590,3 | 50,0 | 0 | 8 | 0 | 13 | 14 | 0 | 5 | aviso |
-| Barrolândia | CENTRO | SE-2BRR | AL02017017 | 9 | 1 | 0 | 8 | 271,7 | 39,3 | 0 | 8 | 0 | 5 | 14 | 0 | 5 | aviso |
-| Barrolândia | CENTRO | SE-2PR0 | LD04062013 | 21 | 1 | 0 | 20 | 1.188,5 | 24,1 | 0 | 20 | 3 | 54 | 20 | 0 | 5 | aviso |
-| **Total Barrolândia** | | | 5 alimentadores | 56 | | | | 2.602,1 | 410,2 | | | | | | | | |
+| Barrolândia | CENTRO | SE-2PR0 | LD02062013 | 9 | 1 | 1 | 7 | 368,5 | 156,7 | 1 | 7 | 0 | 9 | 0 | 0 | 6 | aviso |
+| Barrolândia | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 140,0 | 0 | 7 | 0 | 5 | 7 | 0 | 5 | aviso |
+| Barrolândia | CENTRO | SE-2BRR | AL02017017 | 9 | 1 | 0 | 8 | 271,7 | 39,3 | 0 | 8 | 0 | 5 | 14 | 0 | 6 | aviso |
+| **Total Barrolândia** | | | 3 alimentadores | 26 | | | | 823,3 | 336,1 | | | | | | | | |
 
 ## Bernardo Sayão
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Bernardo Sayão | NORTE | SE-2BNS | LD03020023 | 3 | 1 | 0 | 2 | 137,5 | 93,1 | 0 | 2 | 1 | 18 | 2332 | 0 | 5 | aviso |
-| Bernardo Sayão | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 61,3 | 0 | 10 | 0 | 7 | 0 | 0 | 3 | aviso |
-| Bernardo Sayão | NORTE | SE-2BNS | LD02010153 | 12 | 1 | 1 | 10 | 1.242,1 | 25,1 | 1 | 10 | 0 | 37 | 152 | 0 | 7 | aviso |
-| Bernardo Sayão | NORTE | SE-2BNS | AL01010153 | 1 | 1 | 0 | 0 | 1,3 | 1,3 | 0 | 0 | 0 | 0 | 136 | 0 | 3 | aviso |
-| Bernardo Sayão | NORTE | SE-2BNS | LD04444153 | 1 | 1 | 0 | 0 | 1,0 | 1,0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Bernardo Sayão** | | | 5 alimentadores | 28 | | | | 1.910,3 | 181,8 | | | | | | | | |
+| Bernardo Sayão | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 61,3 | 0 | 10 | 0 | 7 | 0 | 0 | 4 | aviso |
+| Bernardo Sayão | NORTE | SE-2BNS | LD04444153 | 1 | 1 | 0 | 0 | 1,0 | 1,0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| **Total Bernardo Sayão** | | | 2 alimentadores | 12 | | | | 529,3 | 62,4 | | | | | | | | |
 
 ## Bom Jesus do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Bom Jesus do Tocantins | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 285,2 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| Bom Jesus do Tocantins |  | SE-GIS-SE_PEDRO_AFO | LD01414015 | 6 | 1 | 0 | 5 | 563,2 | 202,3 | 0 | 5 | 0 | 2 | 0 | 0 | 4 | aviso |
-| **Total Bom Jesus do Tocantins** | | | 2 alimentadores | 36 | | | | 3.096,9 | 487,6 | | | | | | | | |
-
-## Brasilândia do Tocantins
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Brasilândia do Tocantins | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 205,1 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Brasilândia do Tocantins | NORTE | SE-2GU2 | LD03038009 | 19 | 1 | 1 | 17 | 1.464,3 | 10,7 | 1 | 18 | 2 | 79 | 134 | 0 | 6 | aviso |
-| **Total Brasilândia do Tocantins** | | | 2 alimentadores | 47 | | | | 3.035,7 | 215,8 | | | | | | | | |
+| Bom Jesus do Tocantins | NORTE | SE-2PDA | AL02065015 | 2 | 1 | 0 | 1 | 40,3 | 34,3 | 0 | 1 | 0 | 2 | 0 | 0 | 2 | aviso |
+| **Total Bom Jesus do Tocantins** | | | 1 alimentadores | 2 | | | | 40,3 | 34,3 | | | | | | | | |
 
 ## Brejinho de Nazaré
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Brejinho de Nazaré | CENTRO | SE-2BRN | AL01018071 | 6 | 1 | 0 | 5 | 204,7 | 204,7 | 0 | 5 | 1 | 14 | 11 | 0 | 4 | aviso |
-| Brejinho de Nazaré | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 131,3 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Brejinho de Nazaré | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 101,8 | 6 | 342 | 23 | 14 | 0 | 0 | 5 | aviso |
-| Brejinho de Nazaré | CENTRO | SE-2NPN | AL01057189 | 8 | 1 | 0 | 7 | 340,0 | 59,7 | 0 | 7 | 1 | 31 | 0 | 0 | 3 | aviso |
-| Brejinho de Nazaré | CENTRO | SE-2NPN | AL02057189 | 9 | 1 | 0 | 8 | 412,8 | 0,8 | 0 | 8 | 1 | 42 | 46 | 0 | 5 | aviso |
-| **Total Brejinho de Nazaré** | | | 5 alimentadores | 392 | | | | 2.642,2 | 498,3 | | | | | | | | |
+| Brejinho de Nazaré | CENTRO | SE-2BRN | AL01018071 | 6 | 1 | 0 | 5 | 204,7 | 204,7 | 0 | 5 | 1 | 14 | 11 | 0 | 5 | aviso |
+| Brejinho de Nazaré | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 101,8 | 6 | 342 | 23 | 14 | 0 | 0 | 6 | aviso |
+| Brejinho de Nazaré | CENTRO | SE-2NPN | AL01057189 | 8 | 1 | 0 | 7 | 340,0 | 59,7 | 0 | 7 | 1 | 31 | 0 | 0 | 4 | aviso |
+| Brejinho de Nazaré | CENTRO | SE-2NPN | AL02057189 | 9 | 1 | 0 | 8 | 412,8 | 0,8 | 0 | 8 | 1 | 42 | 46 | 0 | 6 | aviso |
+| **Total Brejinho de Nazaré** | | | 4 alimentadores | 370 | | | | 1.538,1 | 366,9 | | | | | | | | |
 
 ## Buriti do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Buriti do Tocantins | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 87,6 | 0 | 19 | 0 | 174 | 81 | 0 | 5 | aviso |
-| Buriti do Tocantins | NORTE | SE-2ATN | LD02109039 | 6 | 1 | 0 | 5 | 482,6 | 14,9 | 0 | 6 | 0 | 115 | 96 | 0 | 7 | aviso |
-| **Total Buriti do Tocantins** | | | 2 alimentadores | 26 | | | | 1.391,4 | 102,5 | | | | | | | | |
+| Buriti do Tocantins | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 87,6 | 0 | 19 | 0 | 174 | 81 | 0 | 6 | aviso |
+| Buriti do Tocantins | NORTE | SE-2BRT | AL01019068 | 2 | 1 | 0 | 1 | 79,9 | 23,1 | 0 | 1 | 0 | 14 | 0 | 0 | 2 | aviso |
+| Buriti do Tocantins | NORTE | SE-2BRT | AL02019068 | 1 | 1 | 0 | 0 | 31,2 | 4,9 | 0 | 0 | 0 | 16 | 0 | 0 | 4 | aviso |
+| **Total Buriti do Tocantins** | | | 3 alimentadores | 23 | | | | 1.019,9 | 115,6 | | | | | | | | |
 
 ## Cachoeirinha
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Cachoeirinha | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 94,6 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
+| Cachoeirinha | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 94,6 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
 | **Total Cachoeirinha** | | | 1 alimentadores | 994 | | | | 1.160,9 | 94,6 | | | | | | | | |
-
-## Campos Lindos
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Campos Lindos | NORTE | SE-2BIE | LD03105019 | 16 | 1 | 0 | 15 | 1.589,7 | 177,4 | 0 | 16 | 2 | 62 | 62 | 0 | 6 | aviso |
-| **Total Campos Lindos** | | | 1 alimentadores | 16 | | | | 1.589,7 | 177,4 | | | | | | | | |
 
 ## Cariri do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Cariri do Tocantins | SUL | SE-2GUR | AL06040003 | 4 | 1 | 0 | 3 | 113,5 | 89,2 | 0 | 3 | 1 | 7 | 5 | 0 | 5 | aviso |
-| Cariri do Tocantins | SUL | SE-2FGR | AL02033047 | 3 | 1 | 0 | 2 | 242,3 | 84,5 | 0 | 2 | 0 | 7 | 0 | 0 | 3 | aviso |
-| Cariri do Tocantins | SUL | SE-2GUR | LD04040003 | 14 | 1 | 1 | 12 | 923,2 | 29,1 | 1 | 12 | 1 | 96 | 2039 | 0 | 6 | aviso |
-| Cariri do Tocantins | SUL | SE-2FGR | AL01033047 | 5 | 1 | 0 | 4 | 275,4 | 21,1 | 0 | 4 | 0 | 13 | 384 | 0 | 5 | aviso |
-| Cariri do Tocantins | SUL | SE-2CAR | AL02085042 | 1 | 1 | 0 | 0 | 3,1 | 3,1 | 0 | 0 | 1 | 18 | 2700 | 0 | 3 | aviso |
-| Cariri do Tocantins | SUL | SE-2GUR | LD02040003 | 7 | 1 | 0 | 6 | 609,8 | 1,7 | 0 | 6 | 0 | 61 | 1931 | 0 | 5 | aviso |
-| Cariri do Tocantins | SUL | SE-2GP3 | AL05020003 | 4 | 1 | 0 | 3 | 44,4 | 1,5 | 0 | 4 | 1 | 0 | 6 | 0 | 6 | aviso |
-| **Total Cariri do Tocantins** | | | 7 alimentadores | 38 | | | | 2.211,7 | 230,2 | | | | | | | | |
+| Cariri do Tocantins | SUL | SE-2GUR | AL06040003 | 4 | 1 | 0 | 3 | 113,5 | 89,2 | 0 | 3 | 1 | 7 | 5 | 0 | 6 | aviso |
+| Cariri do Tocantins | SUL | SE-2GUR | LD01040003 | 1 | 1 | 0 | 0 | 22,9 | 19,4 | 0 | 0 | 0 | 0 | 71 | 0 | 6 | aviso |
+| Cariri do Tocantins | SUL | SE-2CAR | AL01085042 | 1 | 1 | 0 | 0 | 16,2 | 16,2 | 0 | 0 | 0 | 1 | 0 | 0 | 3 | aviso |
+| Cariri do Tocantins | SUL | SE-2GP3 | AL05020003 | 4 | 1 | 0 | 3 | 44,4 | 1,5 | 0 | 4 | 1 | 0 | 6 | 0 | 7 | aviso |
+| **Total Cariri do Tocantins** | | | 4 alimentadores | 10 | | | | 197,0 | 126,3 | | | | | | | | |
 
 ## Carmolândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Carmolândia | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 186,5 | 19 | 1962 | 183 | 269 | 0 | 0 | 8 | aviso |
+| Carmolândia | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 186,5 | 19 | 1962 | 183 | 269 | 0 | 0 | 9 | aviso |
 | **Total Carmolândia** | | | 1 alimentadores | 1980 | | | | 2.299,1 | 186,5 | | | | | | | | |
 
 ## Carrasco Bonito
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Carrasco Bonito | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 82,6 | 0 | 19 | 0 | 174 | 81 | 0 | 5 | aviso |
-| Carrasco Bonito | NORTE | SE-2AGT | LD02014045 | 5 | 1 | 0 | 4 | 204,7 | 13,1 | 0 | 4 | 1 | 78 | 19 | 0 | 5 | aviso |
+| Carrasco Bonito | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 82,6 | 0 | 19 | 0 | 174 | 81 | 0 | 6 | aviso |
+| Carrasco Bonito | NORTE | SE-2AGT | LD02014045 | 5 | 1 | 0 | 4 | 204,7 | 13,1 | 0 | 4 | 1 | 78 | 19 | 0 | 6 | aviso |
 | **Total Carrasco Bonito** | | | 2 alimentadores | 25 | | | | 1.113,5 | 95,8 | | | | | | | | |
 
 ## Caseara
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Caseara | CENTRO | SE-2CSR | LD01434149 | 6 | 1 | 1 | 4 | 359,7 | 129,6 | 1 | 4 | 3 | 19 | 7240 | 0 | 7 | aviso |
-| Caseara | CENTRO | SE-2CSR | LD03414149 | 3 | 1 | 0 | 2 | 109,7 | 109,7 | 0 | 2 | 0 | 36 | 9278 | 0 | 3 | aviso |
-| **Total Caseara** | | | 2 alimentadores | 9 | | | | 469,4 | 239,3 | | | | | | | | |
-
-## Centenário
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Centenário | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 393,8 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| Centenário |  | SE-GIS-SE_PEDRO_AFO | LD02424015 | 17 | 1 | 0 | 16 | 1.550,1 | 41,5 | 0 | 16 | 0 | 3 | 1068 | 0 | 7 | aviso |
-| Centenário |  | SE-GIS-SE_PEDRO_AFO | LD01414015 | 6 | 1 | 0 | 5 | 563,2 | 33,8 | 0 | 5 | 0 | 2 | 0 | 0 | 4 | aviso |
-| **Total Centenário** | | | 3 alimentadores | 53 | | | | 4.646,9 | 469,1 | | | | | | | | |
+| Caseara | CENTRO | SE-2CSR | LD02424149 | 1 | 1 | 0 | 0 | 10,4 | 10,4 | 0 | 0 | 0 | 2 | 0 | 0 | 3 | aviso |
+| **Total Caseara** | | | 1 alimentadores | 1 | | | | 10,4 | 10,4 | | | | | | | | |
 
 ## Chapada da Natividade
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Chapada da Natividade | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 571,4 | 11 | 888 | 35 | 22 | 0 | 0 | 7 | aviso |
-| Chapada da Natividade | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 106,6 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| Chapada da Natividade | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 37,5 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
+| Chapada da Natividade | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 571,4 | 11 | 888 | 35 | 22 | 0 | 0 | 8 | aviso |
 | Chapada da Natividade | SUL | SE-2CNT | AL01075116 | 1 | 1 | 0 | 0 | 3,5 | 3,5 | 0 | 0 | 1 | 1 | 0 | 0 | 1 | aviso |
-| **Total Chapada da Natividade** | | | 4 alimentadores | 950 | | | | 6.165,7 | 719,1 | | | | | | | | |
-
-## Chapada de Areia
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Chapada de Areia | CENTRO | SE-2PR0 | LD03062013 | 18 | 1 | 0 | 17 | 975,1 | 282,3 | 0 | 17 | 1 | 31 | 816 | 0 | 5 | aviso |
-| **Total Chapada de Areia** | | | 1 alimentadores | 18 | | | | 975,1 | 282,3 | | | | | | | | |
+| **Total Chapada da Natividade** | | | 2 alimentadores | 895 | | | | 1.420,8 | 574,9 | | | | | | | | |
 
 ## Colinas do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Colinas do Tocantins | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 202,2 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Colinas do Tocantins | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 131,2 | 0 | 10 | 0 | 7 | 0 | 0 | 3 | aviso |
-| Colinas do Tocantins | NORTE | SE-2CLN | AL01020023 | 3 | 1 | 0 | 2 | 116,1 | 101,9 | 0 | 3 | 0 | 2 | 2 | 0 | 7 | aviso |
-| Colinas do Tocantins | NORTE | SE-2NVO | LD01054060 | 10 | 1 | 0 | 9 | 557,2 | 36,5 | 0 | 9 | 0 | 27 | 41 | 0 | 5 | aviso |
-| Colinas do Tocantins | NORTE | SE-2BNS | LD03020023 | 3 | 1 | 0 | 2 | 137,5 | 20,8 | 0 | 2 | 1 | 18 | 2332 | 0 | 5 | aviso |
-| Colinas do Tocantins | NORTE | SE-2CLN | LD01020023 | 12 | 1 | 0 | 11 | 598,7 | 14,1 | 0 | 11 | 0 | 19 | 2 | 0 | 5 | aviso |
-| Colinas do Tocantins | NORTE | SE-2CLN | AL04020023 | 1 | 1 | 0 | 0 | 1,7 | 1,7 | 0 | 0 | 0 | 0 | 95 | 0 | 3 | aviso |
-| **Total Colinas do Tocantins** | | | 7 alimentadores | 68 | | | | 3.510,8 | 508,4 | | | | | | | | |
+| Colinas do Tocantins | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 131,2 | 0 | 10 | 0 | 7 | 0 | 0 | 4 | aviso |
+| Colinas do Tocantins | NORTE | SE-2CLN | AL01020023 | 3 | 1 | 0 | 2 | 116,1 | 101,9 | 0 | 3 | 0 | 2 | 2 | 0 | 8 | aviso |
+| Colinas do Tocantins | NORTE | SE-2CLN | AL06020023 | 1 | 1 | 0 | 0 | 42,4 | 39,9 | 0 | 0 | 1 | 4 | 0 | 0 | 4 | aviso |
+| Colinas do Tocantins | NORTE | SE-2CLN | AL02020023 | 2 | 1 | 0 | 1 | 33,3 | 29,2 | 0 | 1 | 0 | 0 | 0 | 0 | 4 | aviso |
+| Colinas do Tocantins | NORTE | SE-2CLN | LD01020023 | 12 | 1 | 0 | 11 | 598,7 | 14,1 | 0 | 11 | 0 | 19 | 2 | 0 | 6 | aviso |
+| Colinas do Tocantins | NORTE | SE-2CLN | AL03020023 | 1 | 1 | 0 | 0 | 11,3 | 11,3 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
+| **Total Colinas do Tocantins** | | | 6 alimentadores | 30 | | | | 1.330,1 | 327,6 | | | | | | | | |
 
 ## Colméia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Colméia | NORTE | SE-2CLM | LD02022033 | 21 | 1 | 0 | 20 | 810,7 | 280,6 | 0 | 20 | 1 | 68 | 4638 | 0 | 5 | aviso |
-| Colméia | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 57,1 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Colméia | NORTE | SE-2GU1 | AL01037009 | 6 | 1 | 0 | 5 | 182,0 | 51,9 | 0 | 5 | 0 | 13 | 0 | 0 | 3 | aviso |
-| Colméia | NORTE | SE-2GU2 | LD02038009 | 8 | 1 | 0 | 7 | 457,7 | 29,0 | 0 | 7 | 0 | 48 | 237 | 0 | 5 | aviso |
-| Colméia | CENTRO | SE-2MRN | LD02050008 | 17 | 1 | 0 | 16 | 881,4 | 0,9 | 0 | 16 | 3 | 100 | 9340 | 0 | 5 | aviso |
-| **Total Colméia** | | | 5 alimentadores | 80 | | | | 3.903,2 | 419,5 | | | | | | | | |
-
-## Combinado
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Combinado | SUL | SE-2CMB | AL01023050 | 3 | 1 | 0 | 2 | 48,3 | 32,0 | 0 | 2 | 0 | 4 | 908 | 0 | 5 | aviso |
-| **Total Combinado** | | | 1 alimentadores | 3 | | | | 48,3 | 32,0 | | | | | | | | |
+| Colméia | NORTE | SE-2GU1 | AL01037009 | 6 | 1 | 0 | 5 | 182,0 | 51,9 | 0 | 5 | 0 | 13 | 0 | 0 | 4 | aviso |
+| Colméia | NORTE | SE-2CLM | AL01022033 | 1 | 1 | 0 | 0 | 22,3 | 22,3 | 0 | 0 | 0 | 6 | 0 | 0 | 3 | aviso |
+| Colméia | NORTE | SE-2ITP | AL01044024 | 2 | 1 | 0 | 1 | 57,4 | 1,3 | 0 | 1 | 1 | 14 | 0 | 0 | 4 | aviso |
+| **Total Colméia** | | | 3 alimentadores | 9 | | | | 261,8 | 75,5 | | | | | | | | |
 
 ## Conceição do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Conceição do Tocantins | SUL | SE-2PRN | LD01010021 | 10 | 1 | 0 | 9 | 1.055,1 | 519,8 | 0 | 9 | 1 | 22 | 363 | 0 | 6 | aviso |
-| Conceição do Tocantins | SUL | SE-2DIA | LD05028074 | 12 | 1 | 0 | 11 | 1.199,0 | 107,6 | 0 | 11 | 0 | 53 | 107 | 0 | 5 | aviso |
-| Conceição do Tocantins | SUL | SE-2ARS | LD01110005 | 4 | 1 | 0 | 3 | 501,5 | 27,6 | 0 | 3 | 0 | 5 | 12 | 0 | 4 | aviso |
 | Conceição do Tocantins | SUL | SE-2AL2 | LD05002091 | 154 | 1 | 1 | 152 | 284,3 | 8,1 | 1 | 153 | 4 | 0 | 0 | 0 | 5 | aviso |
-| **Total Conceição do Tocantins** | | | 4 alimentadores | 180 | | | | 3.039,9 | 663,1 | | | | | | | | |
-
-## Couto Magalhães
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Couto Magalhães | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 409,7 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Couto Magalhães | NORTE | SE-2CTM | AL01024113 | 3 | 1 | 0 | 2 | 164,2 | 164,2 | 0 | 2 | 1 | 4 | 0 | 0 | 2 | aviso |
-| **Total Couto Magalhães** | | | 2 alimentadores | 31 | | | | 1.735,5 | 573,8 | | | | | | | | |
+| **Total Conceição do Tocantins** | | | 1 alimentadores | 154 | | | | 284,3 | 8,1 | | | | | | | | |
 
 ## Cristalândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Cristalândia | CENTRO | SE-2CRI | LD01025012 | 9 | 1 | 0 | 8 | 875,8 | 244,8 | 0 | 8 | 1 | 17 | 2798 | 0 | 5 | aviso |
-| Cristalândia | CENTRO | SE-SLC | LD02047073 | 6 | 1 | 0 | 5 | 859,4 | 105,4 | 0 | 5 | 0 | 54 | 12 | 0 | 5 | aviso |
 | Cristalândia | CENTRO | SE-2CRI | AL02025012 | 3 | 1 | 0 | 2 | 85,4 | 85,4 | 0 | 2 | 0 | 7 | 0 | 0 | 1 | aviso |
-| Cristalândia | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 37,5 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Cristalândia | CENTRO | SE-2NRS | AL01056046 | 3 | 1 | 0 | 2 | 100,8 | 1,4 | 0 | 2 | 0 | 3 | 0 | 0 | 3 | aviso |
-| **Total Cristalândia** | | | 5 alimentadores | 43 | | | | 3.025,5 | 474,4 | | | | | | | | |
+| Cristalândia | CENTRO | SE-2CRI | AL01025012 | 1 | 1 | 0 | 0 | 9,0 | 9,0 | 0 | 0 | 0 | 1 | 0 | 0 | 3 | aviso |
+| Cristalândia | CENTRO | SE-2NRS | AL01056046 | 3 | 1 | 0 | 2 | 100,8 | 1,4 | 0 | 2 | 0 | 3 | 0 | 0 | 4 | aviso |
+| **Total Cristalândia** | | | 3 alimentadores | 7 | | | | 195,2 | 95,8 | | | | | | | | |
 
 ## Crixás do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Crixás do Tocantins | SUL | SE-2DRE | AL01031076 | 7 | 1 | 0 | 6 | 275,6 | 71,2 | 0 | 6 | 0 | 16 | 186 | 0 | 6 | aviso |
-| Crixás do Tocantins | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 50,6 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Crixás do Tocantins | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 33,9 | 6 | 342 | 23 | 14 | 0 | 0 | 5 | aviso |
-| **Total Crixás do Tocantins** | | | 3 alimentadores | 376 | | | | 1.960,4 | 155,6 | | | | | | | | |
+| Crixás do Tocantins | SUL | SE-2DRE | AL01031076 | 7 | 1 | 0 | 6 | 275,6 | 71,2 | 0 | 6 | 0 | 16 | 186 | 0 | 7 | aviso |
+| Crixás do Tocantins | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 33,9 | 6 | 342 | 23 | 14 | 0 | 0 | 6 | aviso |
+| **Total Crixás do Tocantins** | | | 2 alimentadores | 354 | | | | 856,3 | 105,0 | | | | | | | | |
 
 ## Darcinópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Darcinópolis | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 449,7 | 16 | 1152 | 76 | 26 | 0 | 0 | 7 | aviso |
-| Darcinópolis | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 29,7 | 4 | 253 | 15 | 13 | 0 | 0 | 6 | aviso |
-| Darcinópolis | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 4,2 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
-| Darcinópolis | NORTE | SE-2TOC | LD01084002 | 9 | 1 | 0 | 8 | 487,0 | 3,7 | 0 | 8 | 1 | 54 | 1284 | 0 | 5 | aviso |
-| **Total Darcinópolis** | | | 4 alimentadores | 2429 | | | | 3.194,7 | 487,2 | | | | | | | | |
+| Darcinópolis | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 449,7 | 16 | 1152 | 76 | 26 | 0 | 0 | 8 | aviso |
+| Darcinópolis | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 29,7 | 4 | 253 | 15 | 13 | 0 | 0 | 7 | aviso |
+| Darcinópolis | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 4,2 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
+| **Total Darcinópolis** | | | 3 alimentadores | 2420 | | | | 2.707,8 | 483,5 | | | | | | | | |
 
 ## Dianópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Dianópolis | SUL | SE-2DIA | LD05028074 | 12 | 1 | 0 | 11 | 1.199,0 | 511,0 | 0 | 11 | 0 | 53 | 107 | 0 | 5 | aviso |
-| Dianópolis | SUL | SE-2DIA | LD01028074 | 3 | 1 | 0 | 2 | 200,8 | 81,4 | 0 | 2 | 0 | 6 | 26 | 0 | 4 | aviso |
-| Dianópolis | SUL | SE-2DIA | AL01028074 | 3 | 1 | 1 | 1 | 69,1 | 69,1 | 1 | 1 | 0 | 8 | 70 | 0 | 7 | aviso |
-| Dianópolis | SUL | SE-2AL2 | LD07002091 | 289 | 1 | 5 | 283 | 356,0 | 53,5 | 5 | 283 | 13 | 4 | 0 | 0 | 6 | aviso |
+| Dianópolis | SUL | SE-2DIA | AL02028074 | 2 | 1 | 0 | 1 | 73,5 | 73,5 | 0 | 1 | 0 | 12 | 13 | 0 | 5 | aviso |
+| Dianópolis | SUL | SE-2MAL | LD02107074 | 2 | 1 | 0 | 1 | 73,4 | 73,4 | 0 | 2 | 0 | 1 | 0 | 0 | 4 | aviso |
+| Dianópolis | SUL | SE-2DIA | AL01028074 | 3 | 1 | 1 | 1 | 69,1 | 69,1 | 1 | 1 | 0 | 8 | 70 | 0 | 8 | aviso |
+| Dianópolis | SUL | SE-2AL2 | LD07002091 | 289 | 1 | 5 | 283 | 356,0 | 53,5 | 5 | 283 | 13 | 4 | 0 | 0 | 7 | aviso |
+| Dianópolis |  | SE-GIS-SE_DIANOPOLI | LD07028074 | 1 | 1 | 0 | 0 | 29,3 | 18,4 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
+| Dianópolis | SUL | SE-2MAL | LD01107074 | 1 | 1 | 0 | 0 | 7,0 | 7,0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Dianópolis |  | SE-GIS-SE_UHE_AGROT | AL01089074 | 1 | 1 | 0 | 0 | 0,5 | 0,5 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Dianópolis** | | | 5 alimentadores | 308 | | | | 1.825,5 | 715,4 | | | | | | | | |
+| **Total Dianópolis** | | | 7 alimentadores | 299 | | | | 608,8 | 295,5 | | | | | | | | |
 
 ## Divinópolis do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Divinópolis do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 21 | 1 | 0 | 20 | 1.188,5 | 744,2 | 0 | 20 | 3 | 54 | 20 | 0 | 5 | aviso |
-| Divinópolis do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 6 | 1 | 0 | 5 | 749,1 | 157,5 | 0 | 5 | 1 | 47 | 1154 | 0 | 6 | aviso |
-| Divinópolis do Tocantins | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 0,5 | 0 | 7 | 0 | 5 | 7 | 0 | 4 | aviso |
-| **Total Divinópolis do Tocantins** | | | 3 alimentadores | 35 | | | | 2.120,7 | 902,2 | | | | | | | | |
+| Divinópolis do Tocantins | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 0,5 | 0 | 7 | 0 | 5 | 7 | 0 | 5 | aviso |
+| **Total Divinópolis do Tocantins** | | | 1 alimentadores | 8 | | | | 183,1 | 0,5 | | | | | | | | |
 
 ## Dois Irmãos do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Dois Irmãos do Tocantins | CENTRO | SE-2MRN | LD02050008 | 17 | 1 | 0 | 16 | 881,4 | 582,8 | 0 | 16 | 3 | 100 | 9340 | 0 | 5 | aviso |
-| Dois Irmãos do Tocantins | CENTRO | SE-2MRN | LD01050008 | 9 | 1 | 0 | 8 | 590,3 | 88,1 | 0 | 8 | 0 | 13 | 14 | 0 | 5 | aviso |
-| Dois Irmãos do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 6 | 1 | 0 | 5 | 749,1 | 53,5 | 0 | 5 | 1 | 47 | 1154 | 0 | 6 | aviso |
-| Dois Irmãos do Tocantins | CENTRO | SE-2CSR | LD01434149 | 6 | 1 | 1 | 4 | 359,7 | 23,1 | 1 | 4 | 3 | 19 | 7240 | 0 | 7 | aviso |
-| Dois Irmãos do Tocantins | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 1,7 | 0 | 7 | 0 | 5 | 7 | 0 | 4 | aviso |
-| **Total Dois Irmãos do Tocantins** | | | 5 alimentadores | 46 | | | | 2.763,5 | 749,1 | | | | | | | | |
+| Dois Irmãos do Tocantins | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 1,7 | 0 | 7 | 0 | 5 | 7 | 0 | 5 | aviso |
+| **Total Dois Irmãos do Tocantins** | | | 1 alimentadores | 8 | | | | 183,1 | 1,7 | | | | | | | | |
 
 ## Dueré
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Dueré | SUL | SE-2GUR | LD02040003 | 7 | 1 | 0 | 6 | 609,8 | 583,2 | 0 | 6 | 0 | 61 | 1931 | 0 | 5 | aviso |
-| Dueré | SUL | SE-2DRE | AL01031076 | 7 | 1 | 0 | 6 | 275,6 | 110,5 | 0 | 6 | 0 | 16 | 186 | 0 | 6 | aviso |
-| Dueré | CENTRO | SE-SLC | LD06047073 | 3 | 1 | 0 | 2 | 599,1 | 76,3 | 0 | 2 | 0 | 27 | 9 | 0 | 5 | aviso |
-| Dueré | SUL | SE-2FRM | AL02036052 | 3 | 1 | 0 | 2 | 153,6 | 18,7 | 0 | 2 | 0 | 6 | 0 | 0 | 3 | aviso |
-| Dueré | CENTRO | SE-SLC | LD02047073 | 6 | 1 | 0 | 5 | 859,4 | 5,5 | 0 | 5 | 0 | 54 | 12 | 0 | 5 | aviso |
-| Dueré | SUL | SE-2GP3 | AL05020003 | 4 | 1 | 0 | 3 | 44,4 | 1,9 | 0 | 4 | 1 | 0 | 6 | 0 | 6 | aviso |
-| Dueré | SUL | SE-2GUR | LD03040003 | 5 | 1 | 0 | 4 | 156,6 | 1,9 | 0 | 4 | 0 | 89 | 6808 | 0 | 5 | aviso |
-| **Total Dueré** | | | 7 alimentadores | 35 | | | | 2.698,5 | 798,1 | | | | | | | | |
+| Dueré | SUL | SE-2DRE | AL01031076 | 7 | 1 | 0 | 6 | 275,6 | 110,5 | 0 | 6 | 0 | 16 | 186 | 0 | 7 | aviso |
+| Dueré | SUL | SE-2DGU | AL01041003 | 2 | 1 | 0 | 1 | 60,8 | 9,0 | 0 | 1 | 0 | 6 | 149 | 0 | 6 | aviso |
+| Dueré | SUL | SE-2GP3 | AL05020003 | 4 | 1 | 0 | 3 | 44,4 | 1,9 | 0 | 4 | 1 | 0 | 6 | 0 | 7 | aviso |
+| **Total Dueré** | | | 3 alimentadores | 13 | | | | 380,8 | 121,5 | | | | | | | | |
 
 ## Esperantina
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Esperantina | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 235,1 | 0 | 19 | 0 | 174 | 81 | 0 | 5 | aviso |
-| Esperantina | NORTE | SE-2ATN | LD02109039 | 6 | 1 | 0 | 5 | 482,6 | 14,6 | 0 | 6 | 0 | 115 | 96 | 0 | 7 | aviso |
-| **Total Esperantina** | | | 2 alimentadores | 26 | | | | 1.391,4 | 249,7 | | | | | | | | |
+| Esperantina | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 235,1 | 0 | 19 | 0 | 174 | 81 | 0 | 6 | aviso |
+| **Total Esperantina** | | | 1 alimentadores | 20 | | | | 908,8 | 235,1 | | | | | | | | |
 
 ## Fátima
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Fátima | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 191,4 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Fátima | CENTRO | SE-2NPN | AL02057189 | 9 | 1 | 0 | 8 | 412,8 | 0,2 | 0 | 8 | 1 | 42 | 46 | 0 | 5 | aviso |
-| **Total Fátima** | | | 2 alimentadores | 31 | | | | 1.516,8 | 191,6 | | | | | | | | |
+| Fátima | CENTRO | SE-2FTM | AL01032044 | 2 | 1 | 0 | 1 | 83,9 | 71,8 | 0 | 1 | 0 | 4 | 210 | 0 | 6 | aviso |
+| Fátima | CENTRO | SE-2NPN | AL02057189 | 9 | 1 | 0 | 8 | 412,8 | 0,2 | 0 | 8 | 1 | 42 | 46 | 0 | 6 | aviso |
+| **Total Fátima** | | | 2 alimentadores | 11 | | | | 496,6 | 72,0 | | | | | | | | |
 
 ## Figueirópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Figueirópolis | SUL | SE-2ALV | AL01003036 | 418 | 1 | 8 | 409 | 545,9 | 269,2 | 8 | 411 | 11 | 9 | 0 | 0 | 7 | aviso |
-| Figueirópolis | SUL | SE-2FGR | AL02033047 | 3 | 1 | 0 | 2 | 242,3 | 155,7 | 0 | 2 | 0 | 7 | 0 | 0 | 3 | aviso |
-| Figueirópolis | SUL | SE-2FGR | AL01033047 | 5 | 1 | 0 | 4 | 275,4 | 139,3 | 0 | 4 | 0 | 13 | 384 | 0 | 5 | aviso |
-| Figueirópolis | SUL | SE-2GUR | LD04040003 | 14 | 1 | 1 | 12 | 923,2 | 23,9 | 1 | 12 | 1 | 96 | 2039 | 0 | 6 | aviso |
-| Figueirópolis | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 15,2 | 13 | 1126 | 30 | 9 | 0 | 0 | 7 | aviso |
-| Figueirópolis | SUL | SE-2FGR | AL03033047 | 1 | 1 | 0 | 0 | 0,3 | 0,3 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Figueirópolis** | | | 6 alimentadores | 1577 | | | | 3.484,1 | 603,5 | | | | | | | | |
+| Figueirópolis | SUL | SE-2ALV | AL01003036 | 418 | 1 | 8 | 409 | 545,9 | 269,2 | 8 | 411 | 11 | 9 | 0 | 0 | 8 | aviso |
+| Figueirópolis | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 15,2 | 13 | 1126 | 30 | 9 | 0 | 0 | 8 | aviso |
+| Figueirópolis | SUL | SE-2FGR | AL03033047 | 1 | 1 | 0 | 0 | 0,3 | 0,3 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| **Total Figueirópolis** | | | 3 alimentadores | 1555 | | | | 2.043,2 | 284,7 | | | | | | | | |
 
 ## Filadélfia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Filadélfia | NORTE | SE-2BIE | LD01105019 | 4 | 1 | 0 | 3 | 455,2 | 353,2 | 0 | 3 | 0 | 15 | 0 | 0 | 2 | aviso |
-| Filadélfia | NORTE | SE-2BIE | LD02105019 | 11 | 1 | 0 | 10 | 547,5 | 261,3 | 0 | 10 | 0 | 26 | 22 | 0 | 5 | aviso |
-| Filadélfia | NORTE | SE-2BIE | LD04105019 | 5 | 1 | 0 | 4 | 379,8 | 241,9 | 0 | 4 | 0 | 21 | 0 | 0 | 3 | aviso |
-| Filadélfia | NORTE | SE-2BIE | LD03105019 | 16 | 1 | 0 | 15 | 1.589,7 | 145,5 | 0 | 16 | 2 | 62 | 62 | 0 | 6 | aviso |
-| **Total Filadélfia** | | | 4 alimentadores | 36 | | | | 2.972,2 | 1.001,9 | | | | | | | | |
-
-## Formoso do Araguaia
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Formoso do Araguaia | SUL | SE-2COB | LD01035052 | 8 | 1 | 0 | 7 | 412,5 | 400,4 | 0 | 7 | 2 | 23 | 25 | 0 | 5 | aviso |
-| Formoso do Araguaia | SUL | SE-2FRM | LD02036052 | 6 | 1 | 0 | 5 | 257,4 | 237,1 | 0 | 5 | 0 | 43 | 9102 | 0 | 5 | aviso |
-| Formoso do Araguaia | SUL | SE-2FRM | LD01036052 | 4 | 1 | 0 | 3 | 230,1 | 204,0 | 0 | 3 | 0 | 14 | 522 | 0 | 5 | aviso |
-| Formoso do Araguaia | SUL | SE-2FRM | AL02036052 | 3 | 1 | 0 | 2 | 153,6 | 134,8 | 0 | 2 | 0 | 6 | 0 | 0 | 3 | aviso |
-| **Total Formoso do Araguaia** | | | 4 alimentadores | 21 | | | | 1.053,5 | 976,3 | | | | | | | | |
-
-## Goianorte
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Goianorte | NORTE | SE-2CLM | LD02022033 | 21 | 1 | 0 | 20 | 810,7 | 201,8 | 0 | 20 | 1 | 68 | 4638 | 0 | 5 | aviso |
-| Goianorte | CENTRO | SE-2MRN | LD02050008 | 17 | 1 | 0 | 16 | 881,4 | 35,3 | 0 | 16 | 3 | 100 | 9340 | 0 | 5 | aviso |
-| **Total Goianorte** | | | 2 alimentadores | 38 | | | | 1.692,1 | 237,2 | | | | | | | | |
-
-## Goiatins
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Goiatins | NORTE | SE-2BIE | LD03105019 | 16 | 1 | 0 | 15 | 1.589,7 | 878,6 | 0 | 16 | 2 | 62 | 62 | 0 | 6 | aviso |
-| Goiatins | NORTE | SE-2ITC | AL01042078 | 8 | 1 | 0 | 7 | 610,9 | 539,2 | 0 | 7 | 1 | 16 | 7 | 0 | 5 | aviso |
-| Goiatins | NORTE | SE-2GU2 | LD03038009 | 19 | 1 | 1 | 17 | 1.464,3 | 87,5 | 1 | 18 | 2 | 79 | 134 | 0 | 6 | aviso |
-| Goiatins | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 13,5 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| **Total Goiatins** | | | 4 alimentadores | 73 | | | | 6.198,5 | 1.518,9 | | | | | | | | |
+| Filadélfia | NORTE | SE-2BIE | LD02105019 | 11 | 1 | 0 | 10 | 547,5 | 261,3 | 0 | 10 | 0 | 26 | 22 | 0 | 6 | aviso |
+| Filadélfia |  | SE-GIS-SE_BIELANDIA | LD05105019 | 1 | 1 | 0 | 0 | 36,8 | 36,8 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
+| Filadélfia | NORTE | SE-2FLD | AL01034019 | 2 | 1 | 0 | 1 | 22,1 | 22,1 | 0 | 1 | 1 | 2 | 0 | 0 | 3 | aviso |
+| **Total Filadélfia** | | | 3 alimentadores | 14 | | | | 606,4 | 320,2 | | | | | | | | |
 
 ## Guaraí
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Guaraí | NORTE | SE-2GU2 | LD04038009 | 5 | 1 | 0 | 4 | 261,3 | 261,3 | 0 | 4 | 0 | 114 | 3833 | 0 | 5 | aviso |
-| Guaraí | NORTE | SE-2GU2 | LD03038009 | 19 | 1 | 1 | 17 | 1.464,3 | 200,7 | 1 | 18 | 2 | 79 | 134 | 0 | 6 | aviso |
 | Guaraí | NORTE | SE-2GU1 | AL03037009 | 5 | 1 | 0 | 4 | 211,5 | 148,3 | 0 | 4 | 2 | 46 | 0 | 0 | 2 | aviso |
-| Guaraí | NORTE | SE-2GU1 | AL01037009 | 6 | 1 | 0 | 5 | 182,0 | 123,7 | 0 | 5 | 0 | 13 | 0 | 0 | 3 | aviso |
-| Guaraí | NORTE | SE-2GU2 | LD02038009 | 8 | 1 | 0 | 7 | 457,7 | 63,9 | 0 | 7 | 0 | 48 | 237 | 0 | 5 | aviso |
-| Guaraí | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 41,9 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Guaraí | NORTE | SE-2GU2 | LD01038009 | 1 | 1 | 0 | 0 | 4,4 | 4,4 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Guaraí** | | | 7 alimentadores | 72 | | | | 4.152,6 | 844,2 | | | | | | | | |
+| Guaraí | NORTE | SE-2GU1 | AL01037009 | 6 | 1 | 0 | 5 | 182,0 | 123,7 | 0 | 5 | 0 | 13 | 0 | 0 | 4 | aviso |
+| Guaraí | NORTE | SE-2GU1 | AL02037009 | 1 | 1 | 0 | 0 | 13,3 | 13,3 | 0 | 0 | 0 | 6 | 0 | 0 | 3 | aviso |
+| Guaraí | NORTE | SE-2GU2 | LD01038009 | 1 | 1 | 0 | 0 | 4,4 | 4,4 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Guaraí | NORTE | SE-2PKN | AL01073034 | 2 | 1 | 0 | 1 | 18,4 | 3,9 | 0 | 1 | 1 | 3 | 0 | 0 | 2 | aviso |
+| **Total Guaraí** | | | 5 alimentadores | 15 | | | | 429,7 | 293,6 | | | | | | | | |
 
 ## Gurupi
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Gurupi | SUL | SE-2GUR | LD04040003 | 14 | 1 | 1 | 12 | 923,2 | 275,9 | 1 | 12 | 1 | 96 | 2039 | 0 | 6 | aviso |
-| Gurupi | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 200,6 | 6 | 342 | 23 | 14 | 0 | 0 | 5 | aviso |
-| Gurupi | SUL | SE-2GUR | LD03040003 | 5 | 1 | 0 | 4 | 156,6 | 150,9 | 0 | 4 | 0 | 89 | 6808 | 0 | 5 | aviso |
-| Gurupi | SUL | SE-2GP3 | AL05020003 | 4 | 1 | 0 | 3 | 44,4 | 40,9 | 0 | 4 | 1 | 0 | 6 | 0 | 6 | aviso |
-| Gurupi | SUL | SE-2GUR | LD02040003 | 7 | 1 | 0 | 6 | 609,8 | 25,0 | 0 | 6 | 0 | 61 | 1931 | 0 | 5 | aviso |
-| Gurupi | SUL | SE-2GUR | AL06040003 | 4 | 1 | 0 | 3 | 113,5 | 24,3 | 0 | 3 | 1 | 7 | 5 | 0 | 5 | aviso |
-| Gurupi | SUL | SE-2GUR | AL01040003 | 1 | 1 | 0 | 0 | 2,6 | 2,6 | 0 | 0 | 0 | 0 | 476 | 0 | 3 | aviso |
-| Gurupi | SUL | SE-2GP3 | AL03020003 | 1 | 1 | 0 | 0 | 0,6 | 0,6 | 0 | 0 | 1 | 1 | 920 | 0 | 3 | aviso |
-| **Total Gurupi** | | | 8 alimentadores | 383 | | | | 2.431,5 | 720,7 | | | | | | | | |
-
-## Ipueiras
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Ipueiras | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 279,3 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| Ipueiras | CENTRO | SE-2MTC | LD01051035 | 4 | 1 | 0 | 3 | 888,8 | 19,8 | 0 | 3 | 0 | 63 | 14 | 0 | 5 | aviso |
-| **Total Ipueiras** | | | 2 alimentadores | 29 | | | | 2.756,3 | 299,1 | | | | | | | | |
-
-## Itacajá
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Itacajá | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 600,4 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| Itacajá | NORTE | SE-2GU2 | LD03038009 | 19 | 1 | 1 | 17 | 1.464,3 | 279,2 | 1 | 18 | 2 | 79 | 134 | 0 | 6 | aviso |
-| Itacajá | NORTE | SE-2ITC | AL01042078 | 8 | 1 | 0 | 7 | 610,9 | 9,2 | 0 | 7 | 1 | 16 | 7 | 0 | 5 | aviso |
-| **Total Itacajá** | | | 3 alimentadores | 57 | | | | 4.608,8 | 888,7 | | | | | | | | |
+| Gurupi | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 200,6 | 6 | 342 | 23 | 14 | 0 | 0 | 6 | aviso |
+| Gurupi | SUL | SE-2GP2 | AL01113003 | 2 | 1 | 0 | 1 | 81,6 | 81,6 | 0 | 1 | 0 | 12 | 54 | 0 | 5 | aviso |
+| Gurupi | SUL | SE-2DGU | AL01041003 | 2 | 1 | 0 | 1 | 60,8 | 51,8 | 0 | 1 | 0 | 6 | 149 | 0 | 6 | aviso |
+| Gurupi | SUL | SE-2GP2 | AL04113003 | 1 | 1 | 0 | 0 | 43,6 | 43,6 | 0 | 0 | 0 | 7 | 0 | 0 | 3 | aviso |
+| Gurupi | SUL | SE-2GP3 | AL05020003 | 4 | 1 | 0 | 3 | 44,4 | 40,9 | 0 | 4 | 1 | 0 | 6 | 0 | 7 | aviso |
+| Gurupi | SUL | SE-2GP2 | AL03113003 | 1 | 1 | 0 | 0 | 28,7 | 28,7 | 0 | 0 | 0 | 6 | 141 | 0 | 5 | aviso |
+| Gurupi | SUL | SE-2GUR | AL06040003 | 4 | 1 | 0 | 3 | 113,5 | 24,3 | 0 | 3 | 1 | 7 | 5 | 0 | 6 | aviso |
+| Gurupi | SUL | SE-2GP2 | AL02113003 | 1 | 1 | 0 | 0 | 22,1 | 22,1 | 0 | 0 | 0 | 3 | 9 | 0 | 5 | aviso |
+| Gurupi | SUL | SE-2GUR | AL04040003 | 1 | 1 | 0 | 0 | 21,4 | 21,4 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Gurupi | SUL | SE-2GP3 | AL04244003 | 2 | 1 | 1 | 0 | 19,6 | 19,6 | 1 | 0 | 0 | 1 | 0 | 0 | 4 | aviso |
+| Gurupi | SUL | SE-2GUR | AL05040003 | 1 | 1 | 0 | 0 | 16,1 | 16,1 | 0 | 0 | 1 | 2 | 0 | 0 | 3 | aviso |
+| Gurupi | SUL | SE-2GUR | AL03040003 | 1 | 1 | 0 | 0 | 8,0 | 8,0 | 0 | 0 | 1 | 7 | 0 | 0 | 1 | aviso |
+| Gurupi | SUL | SE-2GUR | AL02040003 | 1 | 1 | 0 | 0 | 6,0 | 6,0 | 0 | 0 | 1 | 1 | 0 | 0 | 1 | aviso |
+| Gurupi | SUL | SE-2GUR | LD01040003 | 1 | 1 | 0 | 0 | 22,9 | 3,5 | 0 | 0 | 0 | 0 | 71 | 0 | 6 | aviso |
+| **Total Gurupi** | | | 14 alimentadores | 369 | | | | 1.069,5 | 568,3 | | | | | | | | |
 
 ## Itaguatins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Itaguatins | NORTE | SE-2ITG | AL01043081 | 4 | 1 | 0 | 3 | 127,5 | 127,5 | 0 | 3 | 0 | 31 | 0 | 0 | 2 | aviso |
-| Itaguatins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 58,3 | 0 | 5 | 0 | 91 | 6 | 0 | 5 | aviso |
-| Itaguatins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 48,8 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
+| Itaguatins | NORTE | SE-2ITG | AL01043081 | 4 | 1 | 0 | 3 | 127,5 | 127,5 | 0 | 3 | 0 | 31 | 0 | 0 | 3 | aviso |
+| Itaguatins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 58,3 | 0 | 5 | 0 | 91 | 6 | 0 | 6 | aviso |
+| Itaguatins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 48,8 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
 | **Total Itaguatins** | | | 3 alimentadores | 1004 | | | | 1.563,7 | 234,6 | | | | | | | | |
-
-## Itapiratins
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Itapiratins | NORTE | SE-2GU2 | LD03038009 | 19 | 1 | 1 | 17 | 1.464,3 | 468,3 | 1 | 18 | 2 | 79 | 134 | 0 | 6 | aviso |
-| Itapiratins | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 68,6 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| Itapiratins | NORTE | SE-2BIE | LD03105019 | 16 | 1 | 0 | 15 | 1.589,7 | 15,8 | 0 | 16 | 2 | 62 | 62 | 0 | 6 | aviso |
-| **Total Itapiratins** | | | 3 alimentadores | 65 | | | | 5.587,7 | 552,8 | | | | | | | | |
 
 ## Itaporã do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Itaporã do Tocantins | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 217,5 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Itaporã do Tocantins | NORTE | SE-2CLM | LD02022033 | 21 | 1 | 0 | 20 | 810,7 | 74,5 | 0 | 20 | 1 | 68 | 4638 | 0 | 5 | aviso |
-| Itaporã do Tocantins | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 61,1 | 0 | 10 | 0 | 7 | 0 | 0 | 3 | aviso |
-| **Total Itaporã do Tocantins** | | | 3 alimentadores | 60 | | | | 2.910,4 | 353,1 | | | | | | | | |
+| Itaporã do Tocantins | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 61,1 | 0 | 10 | 0 | 7 | 0 | 0 | 4 | aviso |
+| Itaporã do Tocantins | NORTE | SE-2ITP | AL01044024 | 2 | 1 | 0 | 1 | 57,4 | 56,2 | 0 | 1 | 1 | 14 | 0 | 0 | 4 | aviso |
+| **Total Itaporã do Tocantins** | | | 2 alimentadores | 13 | | | | 585,7 | 117,2 | | | | | | | | |
 
 ## Jaú do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Jaú do Tocantins | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 823,6 | 10 | 960 | 24 | 3 | 0 | 0 | 8 | aviso |
-| Jaú do Tocantins | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 3,0 | 5 | 500 | 10 | 4 | 0 | 0 | 9 | aviso |
-| Jaú do Tocantins | SUL | SE-2UPX | LD02066094 | 7 | 1 | 0 | 6 | 452,3 | 0,1 | 0 | 6 | 0 | 19 | 179 | 0 | 5 | aviso |
-| **Total Jaú do Tocantins** | | | 3 alimentadores | 1480 | | | | 2.655,7 | 826,8 | | | | | | | | |
+| Jaú do Tocantins | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 823,6 | 10 | 960 | 24 | 3 | 0 | 0 | 9 | aviso |
+| Jaú do Tocantins | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 3,0 | 5 | 500 | 10 | 4 | 0 | 0 | 10 | aviso |
+| **Total Jaú do Tocantins** | | | 2 alimentadores | 1473 | | | | 2.203,4 | 826,6 | | | | | | | | |
 
 ## Lagoa da Confusão
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Lagoa da Confusão | CENTRO | SE-SLC | LD06047073 | 3 | 1 | 0 | 2 | 599,1 | 499,7 | 0 | 2 | 0 | 27 | 9 | 0 | 5 | aviso |
-| Lagoa da Confusão | CENTRO | SE-SLC | LD02047073 | 6 | 1 | 0 | 5 | 859,4 | 176,1 | 0 | 5 | 0 | 54 | 12 | 0 | 5 | aviso |
-| Lagoa da Confusão | CENTRO | SE-SLC | LD01047073 | 3 | 1 | 0 | 2 | 158,8 | 137,3 | 0 | 2 | 0 | 13 | 0 | 0 | 3 | aviso |
-| Lagoa da Confusão | SUL | SE-2COB | LD01035052 | 8 | 1 | 0 | 7 | 412,5 | 12,1 | 0 | 7 | 2 | 23 | 25 | 0 | 5 | aviso |
-| **Total Lagoa da Confusão** | | | 4 alimentadores | 20 | | | | 2.029,8 | 825,1 | | | | | | | | |
-
-## Lagoa do Tocantins
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Lagoa do Tocantins | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 7,1 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| **Total Lagoa do Tocantins** | | | 1 alimentadores | 30 | | | | 2.877,5 | 7,1 | | | | | | | | |
+| Lagoa da Confusão |  | SE-GIS-SE_LAGOA_DA_ | AL01047073 | 1 | 1 | 0 | 0 | 26,2 | 26,2 | 0 | 0 | 0 | 1 | 0 | 0 | 4 | aviso |
+| Lagoa da Confusão | CENTRO | SE-SLC | LD05047073 | 1 | 1 | 0 | 0 | 21,1 | 21,1 | 0 | 0 | 0 | 2 | 0 | 0 | 3 | aviso |
+| Lagoa da Confusão |  | SE-GIS-SE_LAGOA_DA_ | AL02047073 | 1 | 1 | 0 | 0 | 13,2 | 13,2 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | aviso |
+| **Total Lagoa da Confusão** | | | 3 alimentadores | 3 | | | | 60,6 | 60,6 | | | | | | | | |
 
 ## Lajeado
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Lajeado | CENTRO | SE-2PA2 | LD03059122 | 18 | 1 | 0 | 17 | 267,1 | 26,3 | 0 | 17 | 0 | 65 | 7195 | 0 | 5 | aviso |
-| **Total Lajeado** | | | 1 alimentadores | 18 | | | | 267,1 | 26,3 | | | | | | | | |
-
-## Lavandeira
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Lavandeira | SUL | SE-2CMB | AL01023050 | 3 | 1 | 0 | 2 | 48,3 | 16,3 | 0 | 2 | 0 | 4 | 908 | 0 | 5 | aviso |
-| **Total Lavandeira** | | | 1 alimentadores | 3 | | | | 48,3 | 16,3 | | | | | | | | |
-
-## Lizarda
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Lizarda |  | SE-GIS-SE_PEDRO_AFO | LD02424015 | 17 | 1 | 0 | 16 | 1.550,1 | 374,1 | 0 | 16 | 0 | 3 | 1068 | 0 | 7 | aviso |
-| Lizarda | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 76,2 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| **Total Lizarda** | | | 2 alimentadores | 47 | | | | 4.083,7 | 450,2 | | | | | | | | |
+| Lajeado | CENTRO | SE-2BLD | AL02049010 | 1 | 1 | 0 | 0 | 7,4 | 7,4 | 0 | 0 | 0 | 1 | 0 | 0 | 3 | aviso |
+| **Total Lajeado** | | | 1 alimentadores | 1 | | | | 7,4 | 7,4 | | | | | | | | |
 
 ## Luzinópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Luzinópolis | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 115,8 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
+| Luzinópolis | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 115,8 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
 | **Total Luzinópolis** | | | 1 alimentadores | 994 | | | | 1.160,9 | 115,8 | | | | | | | | |
-
-## Marianópolis do Tocantins
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Marianópolis do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 6 | 1 | 0 | 5 | 749,1 | 143,3 | 0 | 5 | 1 | 47 | 1154 | 0 | 6 | aviso |
-| Marianópolis do Tocantins | CENTRO | SE-2CRI | LD01025012 | 9 | 1 | 0 | 8 | 875,8 | 53,1 | 0 | 8 | 1 | 17 | 2798 | 0 | 5 | aviso |
-| Marianópolis do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 21 | 1 | 0 | 20 | 1.188,5 | 42,4 | 0 | 20 | 3 | 54 | 20 | 0 | 5 | aviso |
-| **Total Marianópolis do Tocantins** | | | 3 alimentadores | 36 | | | | 2.813,4 | 238,8 | | | | | | | | |
-
-## Mateiros
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Mateiros | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 658,6 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| **Total Mateiros** | | | 1 alimentadores | 30 | | | | 2.877,5 | 658,6 | | | | | | | | |
 
 ## Maurilândia do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Maurilândia do Tocantins | NORTE | SE-2TOC | AL01084002 | 3 | 1 | 0 | 2 | 139,7 | 8,6 | 0 | 2 | 0 | 35 | 17 | 0 | 6 | aviso |
-| Maurilândia do Tocantins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 5,6 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
+| Maurilândia do Tocantins | NORTE | SE-2TOC | AL01084002 | 3 | 1 | 0 | 2 | 139,7 | 8,6 | 0 | 2 | 0 | 35 | 17 | 0 | 7 | aviso |
+| Maurilândia do Tocantins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 5,6 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
 | **Total Maurilândia do Tocantins** | | | 2 alimentadores | 997 | | | | 1.300,6 | 14,2 | | | | | | | | |
 
 ## Miracema do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Miracema do Tocantins | CENTRO | SE-2MRN | LD01050008 | 9 | 1 | 0 | 8 | 590,3 | 361,9 | 0 | 8 | 0 | 13 | 14 | 0 | 5 | aviso |
-| Miracema do Tocantins | CENTRO | SE-2BRR | AL02017017 | 9 | 1 | 0 | 8 | 271,7 | 227,1 | 0 | 8 | 0 | 5 | 14 | 0 | 5 | aviso |
-| Miracema do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 9 | 1 | 1 | 7 | 368,5 | 62,0 | 1 | 7 | 0 | 9 | 0 | 0 | 5 | aviso |
-| Miracema do Tocantins | CENTRO | SE-2LUZ | AL02101271 | 9 | 1 | 0 | 8 | 271,4 | 57,0 | 0 | 8 | 0 | 7 | 6 | 0 | 5 | aviso |
-| Miracema do Tocantins | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 26,1 | 0 | 7 | 0 | 5 | 7 | 0 | 4 | aviso |
-| Miracema do Tocantins | CENTRO | SE-2MRN | LD03050008 | 8 | 1 | 0 | 7 | 426,6 | 19,0 | 0 | 7 | 1 | 25 | 850 | 0 | 4 | aviso |
-| **Total Miracema do Tocantins** | | | 6 alimentadores | 52 | | | | 2.111,6 | 753,1 | | | | | | | | |
+| Miracema do Tocantins | CENTRO | SE-2BRR | AL02017017 | 9 | 1 | 0 | 8 | 271,7 | 227,1 | 0 | 8 | 0 | 5 | 14 | 0 | 6 | aviso |
+| Miracema do Tocantins | CENTRO | SE-2MIR | AL02048007 | 2 | 1 | 0 | 1 | 82,5 | 82,5 | 0 | 1 | 0 | 13 | 2 | 0 | 5 | aviso |
+| Miracema do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 9 | 1 | 1 | 7 | 368,5 | 62,0 | 1 | 7 | 0 | 9 | 0 | 0 | 6 | aviso |
+| Miracema do Tocantins | CENTRO | SE-2LUZ | AL02101271 | 9 | 1 | 0 | 8 | 271,4 | 57,0 | 0 | 8 | 0 | 7 | 6 | 0 | 6 | aviso |
+| Miracema do Tocantins | CENTRO | SE-2BRR | AL01017017 | 8 | 1 | 0 | 7 | 183,1 | 26,1 | 0 | 7 | 0 | 5 | 7 | 0 | 5 | aviso |
+| Miracema do Tocantins | CENTRO | SE-2MIR | AL01048007 | 1 | 1 | 0 | 0 | 16,4 | 16,4 | 0 | 0 | 0 | 3 | 0 | 0 | 3 | aviso |
+| Miracema do Tocantins | CENTRO | SE-2MRN | LD04050008 | 1 | 1 | 0 | 0 | 18,5 | 13,8 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | aviso |
+| **Total Miracema do Tocantins** | | | 7 alimentadores | 39 | | | | 1.212,1 | 484,9 | | | | | | | | |
 
 ## Miranorte
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Miranorte | CENTRO | SE-2MRN | LD02050008 | 17 | 1 | 0 | 16 | 881,4 | 262,4 | 0 | 16 | 3 | 100 | 9340 | 0 | 5 | aviso |
-| Miranorte | CENTRO | SE-2MRN | LD03050008 | 8 | 1 | 0 | 7 | 426,6 | 137,1 | 0 | 7 | 1 | 25 | 850 | 0 | 4 | aviso |
-| Miranorte | CENTRO | SE-2MRN | LD01050008 | 9 | 1 | 0 | 8 | 590,3 | 83,1 | 0 | 8 | 0 | 13 | 14 | 0 | 5 | aviso |
-| **Total Miranorte** | | | 3 alimentadores | 34 | | | | 1.898,2 | 482,6 | | | | | | | | |
+| Miranorte | CENTRO | SE-2MRN | AL02050008 | 1 | 1 | 0 | 0 | 31,1 | 31,1 | 0 | 0 | 0 | 3 | 2 | 0 | 5 | aviso |
+| Miranorte | CENTRO | SE-2MRN | LD04050008 | 1 | 1 | 0 | 0 | 18,5 | 4,7 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | aviso |
+| **Total Miranorte** | | | 2 alimentadores | 2 | | | | 49,6 | 35,9 | | | | | | | | |
 
 ## Monte do Carmo
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Monte do Carmo | CENTRO | SE-2MTC | LD01051035 | 4 | 1 | 0 | 3 | 888,8 | 669,5 | 0 | 3 | 0 | 63 | 14 | 0 | 5 | aviso |
-| Monte do Carmo | CENTRO | SE-2PNA | AL03072001 | 6 | 1 | 0 | 5 | 502,4 | 350,3 | 0 | 5 | 0 | 46 | 73 | 0 | 6 | aviso |
-| Monte do Carmo | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 83,3 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| Monte do Carmo | CENTRO | SE-2SJO | LD01100001 | 6 | 1 | 0 | 5 | 241,6 | 24,1 | 0 | 5 | 2 | 60 | 30 | 0 | 4 | aviso |
-| Monte do Carmo | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 13,5 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| **Total Monte do Carmo** | | | 5 alimentadores | 71 | | | | 6.377,8 | 1.140,7 | | | | | | | | |
+| Monte do Carmo | CENTRO | SE-2SJO | LD01100001 | 6 | 1 | 0 | 5 | 241,6 | 24,1 | 0 | 5 | 2 | 60 | 30 | 0 | 5 | aviso |
+| **Total Monte do Carmo** | | | 1 alimentadores | 6 | | | | 241,6 | 24,1 | | | | | | | | |
 
 ## Monte Santo do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 21 | 1 | 0 | 20 | 1.188,5 | 345,9 | 0 | 20 | 3 | 54 | 20 | 0 | 5 | aviso |
-| Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD03062013 | 18 | 1 | 0 | 17 | 975,1 | 154,5 | 0 | 17 | 1 | 31 | 816 | 0 | 5 | aviso |
-| Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 9 | 1 | 1 | 7 | 368,5 | 35,3 | 1 | 7 | 0 | 9 | 0 | 0 | 5 | aviso |
-| Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 6 | 1 | 0 | 5 | 749,1 | 33,1 | 0 | 5 | 1 | 47 | 1154 | 0 | 6 | aviso |
-| **Total Monte Santo do Tocantins** | | | 4 alimentadores | 54 | | | | 3.281,2 | 568,8 | | | | | | | | |
+| Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 9 | 1 | 1 | 7 | 368,5 | 35,3 | 1 | 7 | 0 | 9 | 0 | 0 | 6 | aviso |
+| **Total Monte Santo do Tocantins** | | | 1 alimentadores | 9 | | | | 368,5 | 35,3 | | | | | | | | |
 
 ## Muricilândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Muricilândia | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 363,5 | 19 | 1962 | 183 | 269 | 0 | 0 | 8 | aviso |
-| Muricilândia | NORTE | SE-2AR0 | LD04010004 | 117 | 1 | 6 | 110 | 146,0 | 34,0 | 6 | 111 | 15 | 10 | 0 | 0 | 8 | aviso |
+| Muricilândia | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 363,5 | 19 | 1962 | 183 | 269 | 0 | 0 | 9 | aviso |
+| Muricilândia | NORTE | SE-2AR0 | LD04010004 | 117 | 1 | 6 | 110 | 146,0 | 34,0 | 6 | 111 | 15 | 10 | 0 | 0 | 9 | aviso |
 | Muricilândia | NORTE | SE-2ARM | AL01006040 | 107 | 1 | 1 | 105 | 108,0 | 5,8 | 1 | 106 | 11 | 6 | 0 | 0 | 4 | aviso |
 | **Total Muricilândia** | | | 3 alimentadores | 2204 | | | | 2.553,0 | 403,4 | | | | | | | | |
 
@@ -758,1028 +552,916 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Natividade | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 737,0 | 11 | 888 | 35 | 22 | 0 | 0 | 7 | aviso |
-| Natividade | SUL | SE-2PRN | LD01010021 | 10 | 1 | 0 | 9 | 1.055,1 | 75,7 | 0 | 9 | 1 | 22 | 363 | 0 | 6 | aviso |
-| Natividade | SUL | SE-2AL2 | LD03002091 | 78 | 1 | 1 | 76 | 177,0 | 33,9 | 1 | 76 | 3 | 0 | 0 | 0 | 6 | aviso |
+| Natividade | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 737,0 | 11 | 888 | 35 | 22 | 0 | 0 | 8 | aviso |
+| Natividade | SUL | SE-2AL2 | LD03002091 | 78 | 1 | 1 | 76 | 177,0 | 33,9 | 1 | 76 | 3 | 0 | 0 | 0 | 7 | aviso |
+| Natividade | SUL | SE-2NAT | AL01052028 | 1 | 1 | 0 | 0 | 20,3 | 20,3 | 0 | 0 | 1 | 2 | 0 | 0 | 3 | aviso |
 | Natividade | SUL | SE-2AL2 | LD05002091 | 154 | 1 | 1 | 152 | 284,3 | 18,9 | 1 | 153 | 4 | 0 | 0 | 0 | 5 | aviso |
-| Natividade | SUL | SE-2UPX | LD01066094 | 27 | 1 | 0 | 26 | 2.036,3 | 17,2 | 0 | 26 | 1 | 47 | 1218 | 0 | 6 | aviso |
-| Natividade | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 13,8 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| **Total Natividade** | | | 6 alimentadores | 1193 | | | | 7.847,5 | 896,6 | | | | | | | | |
+| **Total Natividade** | | | 4 alimentadores | 1127 | | | | 1.898,9 | 810,2 | | | | | | | | |
 
 ## Nazaré
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Nazaré | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 200,0 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
-| Nazaré | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 26,8 | 0 | 5 | 0 | 26 | 32 | 0 | 5 | aviso |
-| Nazaré | NORTE | SE-2TOC | LD01084002 | 9 | 1 | 0 | 8 | 487,0 | 6,2 | 0 | 8 | 1 | 54 | 1284 | 0 | 5 | aviso |
-| **Total Nazaré** | | | 3 alimentadores | 1009 | | | | 1.833,0 | 233,0 | | | | | | | | |
+| Nazaré | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 200,0 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
+| Nazaré | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 26,8 | 0 | 5 | 0 | 26 | 32 | 0 | 6 | aviso |
+| **Total Nazaré** | | | 2 alimentadores | 1000 | | | | 1.346,1 | 226,8 | | | | | | | | |
 
 ## Nova Olinda
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Nova Olinda | NORTE | SE-2NVO | AL01054060 | 17 | 1 | 0 | 16 | 780,8 | 564,1 | 0 | 16 | 0 | 53 | 143 | 0 | 5 | aviso |
-| Nova Olinda | NORTE | SE-2NVO | LD01054060 | 10 | 1 | 0 | 9 | 557,2 | 168,6 | 0 | 9 | 0 | 27 | 41 | 0 | 5 | aviso |
-| Nova Olinda | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 53,9 | 19 | 1962 | 183 | 269 | 0 | 0 | 8 | aviso |
-| Nova Olinda | NORTE | SE-2AR2 | AL02096004 | 282 | 1 | 3 | 278 | 264,3 | 51,2 | 3 | 280 | 35 | 51 | 0 | 0 | 5 | aviso |
+| Nova Olinda | NORTE | SE-2NVO | AL01054060 | 17 | 1 | 0 | 16 | 780,8 | 564,1 | 0 | 16 | 0 | 53 | 143 | 0 | 6 | aviso |
+| Nova Olinda | NORTE | SE-2NVO | AL02054060 | 2 | 1 | 0 | 1 | 69,5 | 69,5 | 0 | 1 | 0 | 0 | 10 | 0 | 5 | aviso |
+| Nova Olinda | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 53,9 | 19 | 1962 | 183 | 269 | 0 | 0 | 9 | aviso |
+| Nova Olinda | NORTE | SE-2AR2 | AL02096004 | 282 | 1 | 3 | 278 | 264,3 | 51,2 | 3 | 280 | 35 | 51 | 0 | 0 | 6 | aviso |
 | Nova Olinda |  | SE-GIS-SE_NOVA_OLIN | AL03054060 | 1 | 1 | 0 | 0 | 1,9 | 1,9 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
-| Nova Olinda | NORTE | SE-2CLN | LD01020023 | 12 | 1 | 0 | 11 | 598,7 | 0,3 | 0 | 11 | 0 | 19 | 2 | 0 | 5 | aviso |
-| **Total Nova Olinda** | | | 6 alimentadores | 2302 | | | | 4.502,0 | 840,1 | | | | | | | | |
+| Nova Olinda | NORTE | SE-2CLN | LD01020023 | 12 | 1 | 0 | 11 | 598,7 | 0,3 | 0 | 11 | 0 | 19 | 2 | 0 | 6 | aviso |
+| **Total Nova Olinda** | | | 6 alimentadores | 2294 | | | | 4.014,3 | 741,0 | | | | | | | | |
 
 ## Nova Rosalândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Nova Rosalândia | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 210,3 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Nova Rosalândia | CENTRO | SE-2NRS | AL01056046 | 3 | 1 | 0 | 2 | 100,8 | 97,7 | 0 | 2 | 0 | 3 | 0 | 0 | 3 | aviso |
-| **Total Nova Rosalândia** | | | 2 alimentadores | 25 | | | | 1.204,9 | 308,0 | | | | | | | | |
-
-## Novo Acordo
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Novo Acordo | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 131,1 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| **Total Novo Acordo** | | | 1 alimentadores | 30 | | | | 2.877,5 | 131,1 | | | | | | | | |
+| Nova Rosalândia | CENTRO | SE-2NRS | AL01056046 | 3 | 1 | 0 | 2 | 100,8 | 97,7 | 0 | 2 | 0 | 3 | 0 | 0 | 4 | aviso |
+| **Total Nova Rosalândia** | | | 1 alimentadores | 3 | | | | 100,8 | 97,7 | | | | | | | | |
 
 ## Novo Alegre
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Novo Alegre | SUL | SE-2NVL | AL02058020 | 8 | 1 | 0 | 7 | 241,0 | 15,0 | 0 | 7 | 1 | 5 | 0 | 0 | 3 | aviso |
-| Novo Alegre | SUL | SE-2ARS | LD02110005 | 5 | 1 | 0 | 4 | 745,4 | 10,9 | 0 | 5 | 0 | 14 | 7555 | 0 | 6 | aviso |
-| **Total Novo Alegre** | | | 2 alimentadores | 13 | | | | 986,4 | 26,0 | | | | | | | | |
-
-## Novo Jardim
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Novo Jardim | SUL | SE-2DIA | LD05028074 | 12 | 1 | 0 | 11 | 1.199,0 | 1,6 | 0 | 11 | 0 | 53 | 107 | 0 | 5 | aviso |
-| **Total Novo Jardim** | | | 1 alimentadores | 12 | | | | 1.199,0 | 1,6 | | | | | | | | |
+| Novo Alegre | SUL | SE-2NVL | AL02058020 | 8 | 1 | 0 | 7 | 241,0 | 15,0 | 0 | 7 | 1 | 5 | 0 | 0 | 4 | aviso |
+| Novo Alegre | SUL | SE-2NVL | AL01058020 | 1 | 1 | 0 | 0 | 9,6 | 9,6 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| **Total Novo Alegre** | | | 2 alimentadores | 9 | | | | 250,7 | 24,7 | | | | | | | | |
 
 ## Oliveira de Fátima
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Oliveira de Fátima | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 82,7 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Oliveira de Fátima | CENTRO | SE-2NPN | AL02057189 | 9 | 1 | 0 | 8 | 412,8 | 24,4 | 0 | 8 | 1 | 42 | 46 | 0 | 5 | aviso |
-| **Total Oliveira de Fátima** | | | 2 alimentadores | 31 | | | | 1.516,8 | 107,2 | | | | | | | | |
+| Oliveira de Fátima | CENTRO | SE-2NPN | AL02057189 | 9 | 1 | 0 | 8 | 412,8 | 24,4 | 0 | 8 | 1 | 42 | 46 | 0 | 6 | aviso |
+| Oliveira de Fátima | CENTRO | SE-2FTM | AL01032044 | 2 | 1 | 0 | 1 | 83,9 | 4,7 | 0 | 1 | 0 | 4 | 210 | 0 | 6 | aviso |
+| **Total Oliveira de Fátima** | | | 2 alimentadores | 11 | | | | 496,6 | 29,1 | | | | | | | | |
 
 ## Palmas
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Palmas | CENTRO | SE-2PA2 | LD03059122 | 18 | 1 | 0 | 17 | 267,1 | 240,8 | 0 | 17 | 0 | 65 | 7195 | 0 | 5 | aviso |
-| Palmas | CENTRO | SE-2SJO | LD01100001 | 6 | 1 | 0 | 5 | 241,6 | 97,7 | 0 | 5 | 2 | 60 | 30 | 0 | 4 | aviso |
-| Palmas | CENTRO | SE-2TQ2 | AL01099059 | 4 | 1 | 0 | 3 | 81,8 | 81,8 | 0 | 3 | 0 | 5 | 3 | 0 | 4 | aviso |
-| Palmas | CENTRO | SE-2PA2 | AL10059122 | 3 | 1 | 0 | 2 | 48,8 | 48,8 | 0 | 2 | 0 | 4 | 212 | 0 | 4 | aviso |
-| Palmas | CENTRO | SE-2PA3 | AL08097122 | 3 | 1 | 0 | 2 | 35,6 | 35,6 | 0 | 2 | 1 | 4 | 20 | 0 | 4 | aviso |
-| Palmas | CENTRO | SE-2PA3 | AL02097122 | 4 | 1 | 0 | 3 | 34,4 | 34,4 | 0 | 3 | 1 | 10 | 0 | 0 | 2 | aviso |
-| Palmas | CENTRO | SE-2PA2 | AL08059122 | 3 | 1 | 0 | 2 | 19,0 | 19,0 | 0 | 2 | 0 | 5 | 0 | 0 | 2 | aviso |
-| Palmas | CENTRO | SE-2PNA | AL03072001 | 6 | 1 | 0 | 5 | 502,4 | 9,9 | 0 | 5 | 0 | 46 | 73 | 0 | 6 | aviso |
-| Palmas | CENTRO | SE-2TQ2 | AL03099059 | 1 | 1 | 0 | 0 | 3,5 | 3,5 | 0 | 0 | 0 | 4 | 1134 | 0 | 3 | aviso |
-| Palmas | CENTRO | SE-2PA4 | AL01060122 | 1 | 1 | 0 | 0 | 1,9 | 1,9 | 0 | 0 | 0 | 0 | 3 | 0 | 3 | aviso |
-| Palmas | CENTRO | SE-2PA2 | AL05059122 | 1 | 1 | 0 | 0 | 1,2 | 1,2 | 0 | 0 | 0 | 0 | 399 | 0 | 3 | aviso |
-| Palmas | CENTRO | SE-2PA2 | LD01059122 | 1 | 1 | 0 | 0 | 0,3 | 0,3 | 0 | 0 | 0 | 38 | 15283 | 0 | 3 | aviso |
-| Palmas | CENTRO | SE-2PA2 | LD02059122 | 1 | 1 | 0 | 0 | 0,3 | 0,3 | 0 | 0 | 0 | 192 | 19400 | 0 | 3 | aviso |
-| **Total Palmas** | | | 13 alimentadores | 52 | | | | 1.237,9 | 575,2 | | | | | | | | |
+| Palmas | CENTRO | SE-2SJO | LD01100001 | 6 | 1 | 0 | 5 | 241,6 | 97,7 | 0 | 5 | 2 | 60 | 30 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2TQ2 | AL01099059 | 4 | 1 | 0 | 3 | 81,8 | 81,8 | 0 | 3 | 0 | 5 | 3 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2TQ2 | AL04099059 | 2 | 1 | 0 | 1 | 58,4 | 58,4 | 0 | 1 | 0 | 6 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL10059122 | 3 | 1 | 0 | 2 | 48,8 | 48,8 | 0 | 2 | 0 | 4 | 212 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA3 | AL06097122 | 2 | 1 | 0 | 1 | 44,8 | 44,8 | 0 | 1 | 0 | 1 | 0 | 0 | 4 | aviso |
+| Palmas | CENTRO | SE-2PA3 | AL07097122 | 2 | 1 | 0 | 1 | 36,8 | 36,8 | 0 | 1 | 0 | 9 | 12 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL06060122 | 1 | 1 | 0 | 0 | 36,3 | 36,3 | 0 | 0 | 0 | 8 | 313 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA3 | AL08097122 | 3 | 1 | 0 | 2 | 35,6 | 35,6 | 0 | 2 | 1 | 4 | 20 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL11060122 | 2 | 1 | 0 | 1 | 34,5 | 34,5 | 0 | 2 | 0 | 2 | 35 | 0 | 7 | aviso |
+| Palmas | CENTRO | SE-2PA3 | AL02097122 | 4 | 1 | 0 | 3 | 34,4 | 34,4 | 0 | 3 | 1 | 10 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA3 | AL04097122 | 1 | 1 | 0 | 0 | 33,5 | 33,5 | 0 | 0 | 0 | 0 | 45 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL08060122 | 1 | 1 | 0 | 0 | 33,1 | 33,1 | 0 | 0 | 0 | 7 | 0 | 0 | 4 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL07059122 | 1 | 1 | 0 | 0 | 31,6 | 31,6 | 0 | 0 | 0 | 18 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL09059122 | 2 | 1 | 0 | 1 | 31,6 | 31,6 | 0 | 1 | 0 | 1 | 5 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2TQ2 | AL08099059 | 2 | 1 | 0 | 1 | 30,8 | 30,8 | 0 | 1 | 0 | 0 | 24 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2TQS | AL01081100 | 1 | 1 | 0 | 0 | 28,3 | 28,3 | 0 | 0 | 0 | 14 | 5 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL04060122 | 1 | 1 | 0 | 0 | 24,9 | 24,9 | 0 | 0 | 2 | 3 | 7 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL04059122 | 2 | 1 | 0 | 1 | 22,7 | 22,7 | 0 | 1 | 0 | 5 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL07060122 | 1 | 1 | 0 | 0 | 20,7 | 20,7 | 0 | 1 | 0 | 1 | 2 | 0 | 6 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL02059122 | 1 | 1 | 0 | 0 | 19,7 | 19,7 | 0 | 0 | 0 | 2 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL03060122 | 2 | 1 | 0 | 1 | 19,0 | 19,0 | 0 | 1 | 0 | 1 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL08059122 | 3 | 1 | 0 | 2 | 19,0 | 19,0 | 0 | 2 | 0 | 5 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2TQ2 | AL02099059 | 2 | 1 | 0 | 1 | 18,6 | 18,6 | 0 | 1 | 0 | 2 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL06059122 | 1 | 1 | 0 | 0 | 18,6 | 18,6 | 0 | 1 | 0 | 0 | 5 | 0 | 7 | aviso |
+| Palmas | CENTRO | SE-2TQ2 | AL05099059 | 1 | 1 | 0 | 0 | 17,8 | 17,8 | 0 | 0 | 0 | 2 | 7 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA3 | AL05097122 | 1 | 1 | 0 | 0 | 17,3 | 17,3 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA3 | AL03097122 | 1 | 1 | 0 | 0 | 15,9 | 15,9 | 0 | 0 | 0 | 5 | 17 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL01059122 | 1 | 1 | 0 | 0 | 15,6 | 15,6 | 0 | 0 | 0 | 4 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL03059122 | 1 | 1 | 0 | 0 | 15,3 | 15,3 | 0 | 0 | 0 | 1 | 4 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA2 | AL11059122 | 1 | 1 | 0 | 0 | 14,7 | 14,7 | 0 | 0 | 0 | 1 | 47 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL05060122 | 2 | 1 | 0 | 1 | 14,5 | 14,5 | 0 | 1 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL10060122 | 1 | 1 | 0 | 0 | 14,4 | 14,4 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Palmas |  | SE-GIS-SE_PALMAS_II | AL09097122 | 1 | 1 | 0 | 0 | 12,8 | 12,8 | 0 | 0 | 0 | 1 | 0 | 0 | 4 | aviso |
+| Palmas | CENTRO | SE-2PA3 | AL01097122 | 1 | 1 | 0 | 0 | 12,4 | 12,4 | 0 | 0 | 0 | 2 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL09060122 | 1 | 1 | 0 | 0 | 11,0 | 11,0 | 0 | 0 | 0 | 0 | 24 | 0 | 5 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL01060122 | 1 | 1 | 0 | 0 | 1,9 | 1,9 | 0 | 0 | 0 | 0 | 3 | 0 | 4 | aviso |
+| **Total Palmas** | | | 36 alimentadores | 63 | | | | 1.168,6 | 1.024,7 | | | | | | | | |
 
 ## Palmeirante
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Palmeirante | NORTE | SE-2CLN | LD01020023 | 12 | 1 | 0 | 11 | 598,7 | 575,4 | 0 | 11 | 0 | 19 | 2 | 0 | 5 | aviso |
-| Palmeirante | NORTE | SE-2BIE | LD02105019 | 11 | 1 | 0 | 10 | 547,5 | 286,1 | 0 | 10 | 0 | 26 | 22 | 0 | 5 | aviso |
-| Palmeirante | NORTE | SE-2NVO | AL01054060 | 17 | 1 | 0 | 16 | 780,8 | 125,8 | 0 | 16 | 0 | 53 | 143 | 0 | 5 | aviso |
-| Palmeirante | NORTE | SE-2NVO | LD01054060 | 10 | 1 | 0 | 9 | 557,2 | 94,4 | 0 | 9 | 0 | 27 | 41 | 0 | 5 | aviso |
-| Palmeirante | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 67,6 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Palmeirante | NORTE | SE-2CLN | AL01020023 | 3 | 1 | 0 | 2 | 116,1 | 1,2 | 0 | 3 | 0 | 2 | 2 | 0 | 7 | aviso |
-| **Total Palmeirante** | | | 6 alimentadores | 81 | | | | 4.171,7 | 1.150,6 | | | | | | | | |
+| Palmeirante | NORTE | SE-2CLN | LD01020023 | 12 | 1 | 0 | 11 | 598,7 | 575,4 | 0 | 11 | 0 | 19 | 2 | 0 | 6 | aviso |
+| Palmeirante | NORTE | SE-2BIE | LD02105019 | 11 | 1 | 0 | 10 | 547,5 | 286,1 | 0 | 10 | 0 | 26 | 22 | 0 | 6 | aviso |
+| Palmeirante | NORTE | SE-2NVO | AL01054060 | 17 | 1 | 0 | 16 | 780,8 | 125,8 | 0 | 16 | 0 | 53 | 143 | 0 | 6 | aviso |
+| Palmeirante | NORTE | SE-2CLN | AL02020023 | 2 | 1 | 0 | 1 | 33,3 | 4,2 | 0 | 1 | 0 | 0 | 0 | 0 | 4 | aviso |
+| Palmeirante | NORTE | SE-2CLN | AL06020023 | 1 | 1 | 0 | 0 | 42,4 | 2,5 | 0 | 0 | 1 | 4 | 0 | 0 | 4 | aviso |
+| Palmeirante | NORTE | SE-2CLN | AL01020023 | 3 | 1 | 0 | 2 | 116,1 | 1,2 | 0 | 3 | 0 | 2 | 2 | 0 | 8 | aviso |
+| **Total Palmeirante** | | | 6 alimentadores | 46 | | | | 2.118,9 | 995,2 | | | | | | | | |
 
 ## Palmeiras do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Palmeiras do Tocantins | NORTE | SE-2TOC | LD01084002 | 9 | 1 | 0 | 8 | 487,0 | 238,8 | 0 | 8 | 1 | 54 | 1284 | 0 | 5 | aviso |
-| Palmeiras do Tocantins | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 103,0 | 16 | 1152 | 76 | 26 | 0 | 0 | 7 | aviso |
-| Palmeiras do Tocantins | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 15,8 | 0 | 5 | 0 | 26 | 32 | 0 | 5 | aviso |
-| Palmeiras do Tocantins | NORTE | SE-2AGP | AL02055123 | 7 | 1 | 0 | 6 | 15,7 | 0,6 | 0 | 7 | 0 | 0 | 0 | 0 | 4 | aviso |
-| **Total Palmeiras do Tocantins** | | | 4 alimentadores | 1190 | | | | 1.965,3 | 358,1 | | | | | | | | |
+| Palmeiras do Tocantins | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 103,0 | 16 | 1152 | 76 | 26 | 0 | 0 | 8 | aviso |
+| Palmeiras do Tocantins | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 15,8 | 0 | 5 | 0 | 26 | 32 | 0 | 6 | aviso |
+| Palmeiras do Tocantins | NORTE | SE-2AGP | AL02055123 | 7 | 1 | 0 | 6 | 15,7 | 0,6 | 0 | 7 | 0 | 0 | 0 | 0 | 5 | aviso |
+| **Total Palmeiras do Tocantins** | | | 3 alimentadores | 1181 | | | | 1.478,3 | 119,4 | | | | | | | | |
 
 ## Palmeirópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Palmeirópolis | SUL | SE-2PLM | AL01061029 | 9 | 1 | 0 | 8 | 477,0 | 412,4 | 0 | 8 | 0 | 13 | 21 | 0 | 5 | aviso |
-| Palmeirópolis | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 149,9 | 10 | 960 | 24 | 3 | 0 | 0 | 8 | aviso |
-| **Total Palmeirópolis** | | | 2 alimentadores | 978 | | | | 1.904,4 | 562,4 | | | | | | | | |
+| Palmeirópolis | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 149,9 | 10 | 960 | 24 | 3 | 0 | 0 | 9 | aviso |
+| **Total Palmeirópolis** | | | 1 alimentadores | 969 | | | | 1.427,4 | 149,9 | | | | | | | | |
 
 ## Paraíso do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Paraíso do Tocantins | CENTRO | SE-2PR0 | AL03062013 | 11 | 1 | 0 | 10 | 519,1 | 229,1 | 0 | 10 | 0 | 17 | 12 | 0 | 5 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD03062013 | 18 | 1 | 0 | 17 | 975,1 | 143,3 | 0 | 17 | 1 | 31 | 816 | 0 | 5 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 9 | 1 | 1 | 7 | 368,5 | 114,5 | 1 | 7 | 0 | 9 | 0 | 0 | 5 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD01062013 | 6 | 1 | 0 | 5 | 186,1 | 102,6 | 0 | 5 | 1 | 12 | 4 | 0 | 5 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2PR0 | AL04062013 | 3 | 1 | 0 | 2 | 21,8 | 21,8 | 0 | 2 | 0 | 1 | 27 | 0 | 5 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 21 | 1 | 0 | 20 | 1.188,5 | 20,7 | 0 | 20 | 3 | 54 | 20 | 0 | 5 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 6 | 1 | 0 | 5 | 749,1 | 12,0 | 0 | 5 | 1 | 47 | 1154 | 0 | 6 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 3,0 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| **Total Paraíso do Tocantins** | | | 8 alimentadores | 96 | | | | 5.112,3 | 647,1 | | | | | | | | |
+| Paraíso do Tocantins | CENTRO | SE-2PR0 | AL03062013 | 11 | 1 | 0 | 10 | 519,1 | 229,1 | 0 | 10 | 0 | 17 | 12 | 0 | 6 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 9 | 1 | 1 | 7 | 368,5 | 114,5 | 1 | 7 | 0 | 9 | 0 | 0 | 6 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD01062013 | 6 | 1 | 0 | 5 | 186,1 | 102,6 | 0 | 5 | 1 | 12 | 4 | 0 | 6 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2PR0 | AL01062013 | 2 | 1 | 0 | 1 | 61,2 | 61,2 | 0 | 1 | 0 | 6 | 190 | 0 | 5 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2PR0 | AL04062013 | 3 | 1 | 0 | 2 | 21,8 | 21,8 | 0 | 2 | 0 | 1 | 27 | 0 | 6 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2PR2 | LD02004013 | 1 | 1 | 0 | 0 | 11,4 | 11,4 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2PR2 | LD01004013 | 1 | 1 | 0 | 0 | 5,2 | 5,2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
+| **Total Paraíso do Tocantins** | | | 7 alimentadores | 33 | | | | 1.173,3 | 545,9 | | | | | | | | |
 
 ## Paranã
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Paranã | SUL | SE-2PRN | LD03010021 | 11 | 1 | 0 | 10 | 792,8 | 790,5 | 0 | 10 | 0 | 15 | 147 | 0 | 5 | aviso |
-| Paranã | SUL | SE-2PRN | LD01010021 | 10 | 1 | 0 | 9 | 1.055,1 | 456,9 | 0 | 9 | 1 | 22 | 363 | 0 | 6 | aviso |
-| Paranã | SUL | SE-2PRN | LD02010021 | 7 | 1 | 0 | 6 | 429,9 | 356,3 | 0 | 6 | 0 | 36 | 2875 | 0 | 5 | aviso |
-| Paranã | SUL | SE-2UPX | LD01066094 | 27 | 1 | 0 | 26 | 2.036,3 | 169,7 | 0 | 26 | 1 | 47 | 1218 | 0 | 6 | aviso |
-| Paranã | SUL | SE-2ARS | LD01110005 | 4 | 1 | 0 | 3 | 501,5 | 85,5 | 0 | 3 | 0 | 5 | 12 | 0 | 4 | aviso |
-| Paranã | SUL | SE-2PLM | AL01061029 | 9 | 1 | 0 | 8 | 477,0 | 64,5 | 0 | 8 | 0 | 13 | 21 | 0 | 5 | aviso |
-| Paranã | SUL | SE-2ARS | LD02110005 | 5 | 1 | 0 | 4 | 745,4 | 61,8 | 0 | 5 | 0 | 14 | 7555 | 0 | 6 | aviso |
-| **Total Paranã** | | | 7 alimentadores | 73 | | | | 6.037,8 | 1.985,2 | | | | | | | | |
+| Paranã | SUL | SE-2PRN | AL01010021 | 1 | 1 | 0 | 0 | 13,6 | 13,6 | 0 | 0 | 0 | 2 | 0 | 0 | 3 | aviso |
+| **Total Paranã** | | | 1 alimentadores | 1 | | | | 13,6 | 13,6 | | | | | | | | |
 
 ## Pau D'Arco
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Pau D'Arco | NORTE | SE-2BNS | LD02010153 | 12 | 1 | 1 | 10 | 1.242,1 | 422,0 | 1 | 10 | 0 | 37 | 152 | 0 | 7 | aviso |
-| Pau D'Arco | NORTE | SE-2NVO | AL01054060 | 17 | 1 | 0 | 16 | 780,8 | 49,4 | 0 | 16 | 0 | 53 | 143 | 0 | 5 | aviso |
-| Pau D'Arco | NORTE | SE-2NVO | LD01054060 | 10 | 1 | 0 | 9 | 557,2 | 14,2 | 0 | 9 | 0 | 27 | 41 | 0 | 5 | aviso |
-| **Total Pau D'Arco** | | | 3 alimentadores | 39 | | | | 2.580,2 | 485,6 | | | | | | | | |
+| Pau D'Arco | NORTE | SE-2NVO | AL01054060 | 17 | 1 | 0 | 16 | 780,8 | 49,4 | 0 | 16 | 0 | 53 | 143 | 0 | 6 | aviso |
+| **Total Pau D'Arco** | | | 1 alimentadores | 17 | | | | 780,8 | 49,4 | | | | | | | | |
 
 ## Pedro Afonso
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Pedro Afonso |  | SE-GIS-SE_PEDRO_AFO | LD02424015 | 17 | 1 | 0 | 16 | 1.550,1 | 363,4 | 0 | 16 | 0 | 3 | 1068 | 0 | 7 | aviso |
-| Pedro Afonso |  | SE-GIS-SE_PEDRO_AFO | LD01414015 | 6 | 1 | 0 | 5 | 563,2 | 327,0 | 0 | 5 | 0 | 2 | 0 | 0 | 4 | aviso |
 | Pedro Afonso | NORTE | SE-2PDA | LD02065015 | 3 | 1 | 0 | 2 | 36,8 | 36,8 | 0 | 2 | 0 | 33 | 0 | 0 | 1 | aviso |
-| Pedro Afonso | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 27,2 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| Pedro Afonso | NORTE | SE-2PDA | AL01065015 | 4 | 1 | 1 | 2 | 213,0 | 25,2 | 1 | 2 | 2 | 8 | 0 | 0 | 4 | aviso |
-| **Total Pedro Afonso** | | | 5 alimentadores | 60 | | | | 4.896,7 | 779,7 | | | | | | | | |
+| Pedro Afonso | NORTE | SE-2PDA | AL02065015 | 2 | 1 | 0 | 1 | 40,3 | 6,0 | 0 | 1 | 0 | 2 | 0 | 0 | 2 | aviso |
+| **Total Pedro Afonso** | | | 2 alimentadores | 5 | | | | 77,1 | 42,8 | | | | | | | | |
 
 ## Peixe
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Peixe | SUL | SE-2UPX | LD01066094 | 27 | 1 | 0 | 26 | 2.036,3 | 1.138,2 | 0 | 26 | 1 | 47 | 1218 | 0 | 6 | aviso |
-| Peixe | SUL | SE-2GUR | LD04040003 | 14 | 1 | 1 | 12 | 923,2 | 476,4 | 1 | 12 | 1 | 96 | 2039 | 0 | 6 | aviso |
-| Peixe | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 277,7 | 10 | 960 | 24 | 3 | 0 | 0 | 8 | aviso |
-| Peixe | SUL | SE-2UPX | LD02066094 | 7 | 1 | 0 | 6 | 452,3 | 141,8 | 0 | 6 | 0 | 19 | 179 | 0 | 5 | aviso |
-| Peixe | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 42,5 | 5 | 500 | 10 | 4 | 0 | 0 | 9 | aviso |
-| Peixe | SUL | SE-2PXE | AL01067094 | 3 | 1 | 0 | 2 | 39,3 | 39,3 | 0 | 2 | 0 | 6 | 5 | 0 | 5 | aviso |
-| Peixe | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 27,7 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| Peixe | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 7,0 | 6 | 342 | 23 | 14 | 0 | 0 | 5 | aviso |
-| **Total Peixe** | | | 8 alimentadores | 1896 | | | | 8.102,8 | 2.150,7 | | | | | | | | |
+| Peixe | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 277,7 | 10 | 960 | 24 | 3 | 0 | 0 | 9 | aviso |
+| Peixe | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 42,5 | 5 | 500 | 10 | 4 | 0 | 0 | 10 | aviso |
+| Peixe | SUL | SE-2PXE | AL01067094 | 3 | 1 | 0 | 2 | 39,3 | 39,3 | 0 | 2 | 0 | 6 | 5 | 0 | 6 | aviso |
+| Peixe | SUL | SE-2PXE | AL02067094 | 1 | 1 | 0 | 0 | 16,4 | 16,4 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
+| Peixe | SUL | SE-2ALN | LD02001037 | 347 | 1 | 6 | 340 | 580,7 | 7,0 | 6 | 342 | 23 | 14 | 0 | 0 | 6 | aviso |
+| **Total Peixe** | | | 5 alimentadores | 1824 | | | | 2.839,8 | 382,9 | | | | | | | | |
 
 ## Pequizeiro
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Pequizeiro | NORTE | SE-2CLM | LD02022033 | 21 | 1 | 0 | 20 | 810,7 | 253,8 | 0 | 20 | 1 | 68 | 4638 | 0 | 5 | aviso |
-| Pequizeiro | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 148,4 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Pequizeiro | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 107,7 | 0 | 10 | 0 | 7 | 0 | 0 | 3 | aviso |
-| **Total Pequizeiro** | | | 3 alimentadores | 60 | | | | 2.910,4 | 509,8 | | | | | | | | |
+| Pequizeiro | NORTE | SE-2CLN | AL05020023 | 11 | 1 | 0 | 10 | 528,3 | 107,7 | 0 | 10 | 0 | 7 | 0 | 0 | 4 | aviso |
+| **Total Pequizeiro** | | | 1 alimentadores | 11 | | | | 528,3 | 107,7 | | | | | | | | |
 
 ## Pindorama do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Pindorama do Tocantins | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 590,9 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| Pindorama do Tocantins | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 54,7 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| Pindorama do Tocantins | SUL | SE-2AL2 | LD06002091 | 277 | 1 | 4 | 272 | 498,9 | 10,4 | 4 | 272 | 8 | 3 | 0 | 0 | 6 | aviso |
-| Pindorama do Tocantins | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 0,1 | 11 | 888 | 35 | 22 | 0 | 0 | 7 | aviso |
-| **Total Pindorama do Tocantins** | | | 4 alimentadores | 1226 | | | | 6.661,1 | 656,1 | | | | | | | | |
+| Pindorama do Tocantins | SUL | SE-2AL2 | LD06002091 | 277 | 1 | 4 | 272 | 498,9 | 10,4 | 4 | 272 | 8 | 3 | 0 | 0 | 7 | aviso |
+| Pindorama do Tocantins | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 0,1 | 11 | 888 | 35 | 22 | 0 | 0 | 8 | aviso |
+| **Total Pindorama do Tocantins** | | | 2 alimentadores | 1171 | | | | 1.916,1 | 10,5 | | | | | | | | |
 
 ## Piraquê
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Piraquê | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 214,5 | 16 | 1152 | 76 | 26 | 0 | 0 | 7 | aviso |
-| Piraquê | NORTE | SE-2XB2 | LD01095030 | 7 | 1 | 0 | 6 | 550,3 | 133,7 | 0 | 6 | 2 | 42 | 3296 | 0 | 6 | aviso |
-| Piraquê | NORTE | SE-2RCH | AL01030124 | 3 | 1 | 0 | 2 | 160,4 | 38,2 | 0 | 2 | 1 | 23 | 12 | 0 | 5 | aviso |
-| Piraquê | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 13,2 | 4 | 253 | 15 | 13 | 0 | 0 | 6 | aviso |
-| Piraquê | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 2,3 | 19 | 1962 | 183 | 269 | 0 | 0 | 8 | aviso |
-| **Total Piraquê** | | | 5 alimentadores | 3416 | | | | 4.556,6 | 402,0 | | | | | | | | |
+| Piraquê | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 214,5 | 16 | 1152 | 76 | 26 | 0 | 0 | 8 | aviso |
+| Piraquê | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 13,2 | 4 | 253 | 15 | 13 | 0 | 0 | 7 | aviso |
+| Piraquê | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 2,3 | 19 | 1962 | 183 | 269 | 0 | 0 | 9 | aviso |
+| **Total Piraquê** | | | 3 alimentadores | 3406 | | | | 3.845,9 | 230,1 | | | | | | | | |
 
 ## Pium
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Pium | CENTRO | SE-2CRI | LD01025012 | 9 | 1 | 0 | 8 | 875,8 | 577,9 | 0 | 8 | 1 | 17 | 2798 | 0 | 5 | aviso |
-| Pium | CENTRO | SE-2PR0 | LD03062013 | 18 | 1 | 0 | 17 | 975,1 | 394,9 | 0 | 17 | 1 | 31 | 816 | 0 | 5 | aviso |
-| Pium | CENTRO | SE-SLC | LD02047073 | 6 | 1 | 0 | 5 | 859,4 | 187,1 | 0 | 5 | 0 | 54 | 12 | 0 | 5 | aviso |
-| Pium | CENTRO | SE-SLC | LD01047073 | 3 | 1 | 0 | 2 | 158,8 | 21,5 | 0 | 2 | 0 | 13 | 0 | 0 | 3 | aviso |
-| Pium | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 18,2 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Pium | CENTRO | SE-2NRS | AL01056046 | 3 | 1 | 0 | 2 | 100,8 | 1,7 | 0 | 2 | 0 | 3 | 0 | 0 | 3 | aviso |
-| **Total Pium** | | | 6 alimentadores | 61 | | | | 4.074,0 | 1.201,3 | | | | | | | | |
+| Pium |  | SE-GIS-SE_PIUM_76 | AL01068014 | 2 | 1 | 0 | 1 | 48,0 | 48,0 | 0 | 1 | 0 | 3 | 0 | 0 | 4 | aviso |
+| Pium | CENTRO | SE-2NRS | AL01056046 | 3 | 1 | 0 | 2 | 100,8 | 1,7 | 0 | 2 | 0 | 3 | 0 | 0 | 4 | aviso |
+| **Total Pium** | | | 2 alimentadores | 5 | | | | 148,8 | 49,7 | | | | | | | | |
 
 ## Ponte Alta do Bom Jesus
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Ponte Alta do Bom Jesus | SUL | SE-SGE | LD01414027 | 11 | 1 | 0 | 10 | 741,8 | 346,3 | 0 | 10 | 0 | 5 | 12 | 0 | 6 | aviso |
-| Ponte Alta do Bom Jesus | SUL | SE-2DIA | LD05028074 | 12 | 1 | 0 | 11 | 1.199,0 | 105,7 | 0 | 11 | 0 | 53 | 107 | 0 | 5 | aviso |
-| Ponte Alta do Bom Jesus |  | SE-GIS-SE_SERRAS_GE | LD02414027 | 5 | 1 | 0 | 4 | 370,4 | 17,5 | 0 | 4 | 0 | 0 | 3 | 0 | 7 | aviso |
-| Ponte Alta do Bom Jesus |  | SE-GIS-SE_SERRAS_GE | LD03414027 | 1 | 1 | 0 | 0 | 1,4 | 1,4 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
-| **Total Ponte Alta do Bom Jesus** | | | 4 alimentadores | 29 | | | | 2.312,7 | 470,8 | | | | | | | | |
+| Ponte Alta do Bom Jesus | SUL | SE-1UBJ | AL01070027 | 2 | 1 | 0 | 1 | 39,6 | 14,3 | 0 | 1 | 0 | 1 | 0 | 0 | 2 | aviso |
+| Ponte Alta do Bom Jesus |  | SE-GIS-SE_SERRAS_GE | LD03414027 | 1 | 1 | 0 | 0 | 1,4 | 1,4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | aviso |
+| **Total Ponte Alta do Bom Jesus** | | | 2 alimentadores | 3 | | | | 40,9 | 15,6 | | | | | | | | |
 
 ## Ponte Alta do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Ponte Alta do Tocantins | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 1.000,8 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| Ponte Alta do Tocantins | SUL | SE-2AL2 | LD06002091 | 277 | 1 | 4 | 272 | 498,9 | 102,8 | 4 | 272 | 8 | 3 | 0 | 0 | 6 | aviso |
-| Ponte Alta do Tocantins | CENTRO | SE-2MTC | LD01051035 | 4 | 1 | 0 | 3 | 888,8 | 5,4 | 0 | 3 | 0 | 63 | 14 | 0 | 5 | aviso |
-| **Total Ponte Alta do Tocantins** | | | 3 alimentadores | 311 | | | | 4.265,2 | 1.109,0 | | | | | | | | |
+| Ponte Alta do Tocantins | SUL | SE-2AL2 | LD06002091 | 277 | 1 | 4 | 272 | 498,9 | 102,8 | 4 | 272 | 8 | 3 | 0 | 0 | 7 | aviso |
+| Ponte Alta do Tocantins | CENTRO | SE-2PTA | AL01069026 | 2 | 1 | 0 | 1 | 37,9 | 37,9 | 0 | 1 | 3 | 0 | 25 | 0 | 5 | aviso |
+| **Total Ponte Alta do Tocantins** | | | 2 alimentadores | 279 | | | | 536,8 | 140,8 | | | | | | | | |
 
 ## Porto Alegre do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Porto Alegre do Tocantins | SUL | SE-2AL2 | LD07002091 | 289 | 1 | 5 | 283 | 356,0 | 255,5 | 5 | 283 | 13 | 4 | 0 | 0 | 6 | aviso |
+| Porto Alegre do Tocantins | SUL | SE-2AL2 | LD07002091 | 289 | 1 | 5 | 283 | 356,0 | 255,5 | 5 | 283 | 13 | 4 | 0 | 0 | 7 | aviso |
 | Porto Alegre do Tocantins | SUL | SE-2AL2 | LD05002091 | 154 | 1 | 1 | 152 | 284,3 | 18,7 | 1 | 153 | 4 | 0 | 0 | 0 | 5 | aviso |
-| Porto Alegre do Tocantins | SUL | SE-2DIA | LD01028074 | 3 | 1 | 0 | 2 | 200,8 | 12,8 | 0 | 2 | 0 | 6 | 26 | 0 | 4 | aviso |
-| Porto Alegre do Tocantins | SUL | SE-2AL2 | LD06002091 | 277 | 1 | 4 | 272 | 498,9 | 5,1 | 4 | 272 | 8 | 3 | 0 | 0 | 6 | aviso |
-| **Total Porto Alegre do Tocantins** | | | 4 alimentadores | 723 | | | | 1.340,0 | 292,2 | | | | | | | | |
+| Porto Alegre do Tocantins | SUL | SE-2AL2 | LD06002091 | 277 | 1 | 4 | 272 | 498,9 | 5,1 | 4 | 272 | 8 | 3 | 0 | 0 | 7 | aviso |
+| **Total Porto Alegre do Tocantins** | | | 3 alimentadores | 720 | | | | 1.139,1 | 279,4 | | | | | | | | |
 
 ## Porto Nacional
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Porto Nacional | CENTRO | SE-2NPN | AL02057189 | 9 | 1 | 0 | 8 | 412,8 | 387,3 | 0 | 8 | 1 | 42 | 46 | 0 | 5 | aviso |
-| Porto Nacional | CENTRO | SE-2NPN | AL01057189 | 8 | 1 | 0 | 7 | 340,0 | 280,2 | 0 | 7 | 1 | 31 | 0 | 0 | 3 | aviso |
-| Porto Nacional | CENTRO | SE-2PR0 | AL03062013 | 11 | 1 | 0 | 10 | 519,1 | 259,6 | 0 | 10 | 0 | 17 | 12 | 0 | 5 | aviso |
-| Porto Nacional | CENTRO | SE-2LUZ | AL02101271 | 9 | 1 | 0 | 8 | 271,4 | 214,4 | 0 | 8 | 0 | 7 | 6 | 0 | 5 | aviso |
-| Porto Nacional | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 162,4 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| Porto Nacional | CENTRO | SE-2PNA | AL03072001 | 6 | 1 | 0 | 5 | 502,4 | 142,2 | 0 | 5 | 0 | 46 | 73 | 0 | 6 | aviso |
-| Porto Nacional | CENTRO | SE-2SJO | LD01100001 | 6 | 1 | 0 | 5 | 241,6 | 119,7 | 0 | 5 | 2 | 60 | 30 | 0 | 4 | aviso |
-| Porto Nacional | CENTRO | SE-2SJO | LD02100001 | 4 | 1 | 0 | 3 | 72,5 | 72,5 | 0 | 4 | 3 | 24 | 0 | 0 | 3 | aviso |
-| Porto Nacional | CENTRO | SE-2BRR | AL02017017 | 9 | 1 | 0 | 8 | 271,7 | 5,3 | 0 | 8 | 0 | 5 | 14 | 0 | 5 | aviso |
-| Porto Nacional | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 3,9 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Porto Nacional |  | SE-GIS-SE_SAO_JOAO_ | LD03434001 | 1 | 1 | 0 | 0 | 0,6 | 0,6 | 0 | 0 | 0 | 1 | 502 | 0 | 4 | aviso |
-| **Total Porto Nacional** | | | 11 alimentadores | 110 | | | | 5.603,5 | 1.648,1 | | | | | | | | |
+| Porto Nacional | CENTRO | SE-2NPN | AL02057189 | 9 | 1 | 0 | 8 | 412,8 | 387,3 | 0 | 8 | 1 | 42 | 46 | 0 | 6 | aviso |
+| Porto Nacional | CENTRO | SE-2NPN | AL01057189 | 8 | 1 | 0 | 7 | 340,0 | 280,2 | 0 | 7 | 1 | 31 | 0 | 0 | 4 | aviso |
+| Porto Nacional | CENTRO | SE-2PR0 | AL03062013 | 11 | 1 | 0 | 10 | 519,1 | 259,6 | 0 | 10 | 0 | 17 | 12 | 0 | 6 | aviso |
+| Porto Nacional | CENTRO | SE-2LUZ | AL02101271 | 9 | 1 | 0 | 8 | 271,4 | 214,4 | 0 | 8 | 0 | 7 | 6 | 0 | 6 | aviso |
+| Porto Nacional | CENTRO | SE-2SJO | LD01100001 | 6 | 1 | 0 | 5 | 241,6 | 119,7 | 0 | 5 | 2 | 60 | 30 | 0 | 5 | aviso |
+| Porto Nacional | CENTRO | SE-2SJO | LD02100001 | 4 | 1 | 0 | 3 | 72,5 | 72,5 | 0 | 4 | 3 | 24 | 0 | 0 | 4 | aviso |
+| Porto Nacional | CENTRO | SE-2LUZ | AL01101271 | 1 | 1 | 0 | 0 | 40,1 | 40,1 | 0 | 0 | 0 | 12 | 0 | 0 | 1 | aviso |
+| Porto Nacional | CENTRO | SE-2PNA | AL05072001 | 1 | 1 | 0 | 0 | 29,1 | 29,1 | 0 | 0 | 0 | 4 | 27 | 0 | 5 | aviso |
+| Porto Nacional | CENTRO | SE-2PNA | AL01072001 | 1 | 1 | 0 | 0 | 26,8 | 26,8 | 0 | 0 | 0 | 2 | 19 | 0 | 6 | aviso |
+| Porto Nacional | CENTRO | SE-2PNA | AL02072001 | 1 | 1 | 0 | 0 | 15,8 | 15,8 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| Porto Nacional | CENTRO | SE-2DPN | AL01071001 | 2 | 1 | 0 | 1 | 12,7 | 12,7 | 0 | 1 | 0 | 4 | 0 | 0 | 1 | aviso |
+| Porto Nacional | CENTRO | SE-2LUI | AL02102271 | 1 | 1 | 0 | 0 | 10,7 | 10,7 | 0 | 0 | 1 | 20 | 0 | 0 | 3 | aviso |
+| Porto Nacional | CENTRO | SE-2FTM | AL01032044 | 2 | 1 | 0 | 1 | 83,9 | 7,4 | 0 | 1 | 0 | 4 | 210 | 0 | 6 | aviso |
+| Porto Nacional | CENTRO | SE-2BRR | AL02017017 | 9 | 1 | 0 | 8 | 271,7 | 5,3 | 0 | 8 | 0 | 5 | 14 | 0 | 6 | aviso |
+| **Total Porto Nacional** | | | 14 alimentadores | 65 | | | | 2.348,0 | 1.481,6 | | | | | | | | |
 
 ## Praia Norte
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Praia Norte | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 124,6 | 1 | 10 | 4 | 85 | 311 | 0 | 5 | aviso |
-| Praia Norte | NORTE | SE-2AGT | LD02014045 | 5 | 1 | 0 | 4 | 204,7 | 39,4 | 0 | 4 | 1 | 78 | 19 | 0 | 5 | aviso |
-| Praia Norte | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 16,2 | 0 | 19 | 0 | 174 | 81 | 0 | 5 | aviso |
-| Praia Norte | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 14,6 | 0 | 5 | 0 | 91 | 6 | 0 | 5 | aviso |
+| Praia Norte | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 124,6 | 1 | 10 | 4 | 85 | 311 | 0 | 7 | aviso |
+| Praia Norte | NORTE | SE-2AGT | LD02014045 | 5 | 1 | 0 | 4 | 204,7 | 39,4 | 0 | 4 | 1 | 78 | 19 | 0 | 6 | aviso |
+| Praia Norte | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 16,2 | 0 | 19 | 0 | 174 | 81 | 0 | 6 | aviso |
+| Praia Norte | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 14,6 | 0 | 5 | 0 | 91 | 6 | 0 | 6 | aviso |
 | **Total Praia Norte** | | | 4 alimentadores | 43 | | | | 1.708,4 | 194,7 | | | | | | | | |
 
 ## Presidente Kennedy
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Presidente Kennedy | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 180,4 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Presidente Kennedy | NORTE | SE-2GU2 | LD03038009 | 19 | 1 | 1 | 17 | 1.464,3 | 95,7 | 1 | 18 | 2 | 79 | 134 | 0 | 6 | aviso |
-| **Total Presidente Kennedy** | | | 2 alimentadores | 47 | | | | 3.035,7 | 276,1 | | | | | | | | |
+| Presidente Kennedy | NORTE | SE-2PKN | AL01073034 | 2 | 1 | 0 | 1 | 18,4 | 14,5 | 0 | 1 | 1 | 3 | 0 | 0 | 2 | aviso |
+| **Total Presidente Kennedy** | | | 1 alimentadores | 2 | | | | 18,4 | 14,5 | | | | | | | | |
 
 ## Pugmil
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Pugmil | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 112,1 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Pugmil | CENTRO | SE-2PR0 | LD01062013 | 6 | 1 | 0 | 5 | 186,1 | 83,5 | 0 | 5 | 1 | 12 | 4 | 0 | 5 | aviso |
-| Pugmil | CENTRO | SE-2PR0 | AL03062013 | 11 | 1 | 0 | 10 | 519,1 | 30,3 | 0 | 10 | 0 | 17 | 12 | 0 | 5 | aviso |
-| **Total Pugmil** | | | 3 alimentadores | 39 | | | | 1.809,2 | 225,9 | | | | | | | | |
-
-## Recursolândia
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Recursolândia | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 504,0 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| **Total Recursolândia** | | | 1 alimentadores | 30 | | | | 2.533,6 | 504,0 | | | | | | | | |
+| Pugmil | CENTRO | SE-2PR0 | LD01062013 | 6 | 1 | 0 | 5 | 186,1 | 83,5 | 0 | 5 | 1 | 12 | 4 | 0 | 6 | aviso |
+| Pugmil | CENTRO | SE-2PR0 | AL03062013 | 11 | 1 | 0 | 10 | 519,1 | 30,3 | 0 | 10 | 0 | 17 | 12 | 0 | 6 | aviso |
+| **Total Pugmil** | | | 2 alimentadores | 17 | | | | 705,2 | 113,8 | | | | | | | | |
 
 ## Riachinho
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Riachinho | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 165,0 | 4 | 253 | 15 | 13 | 0 | 0 | 6 | aviso |
-| Riachinho | NORTE | SE-2RCH | AL01030124 | 3 | 1 | 0 | 2 | 160,4 | 120,9 | 0 | 2 | 1 | 23 | 12 | 0 | 5 | aviso |
-| **Total Riachinho** | | | 2 alimentadores | 261 | | | | 429,8 | 285,9 | | | | | | | | |
+| Riachinho | NORTE | SE-2AN2 | AL01005098 | 258 | 1 | 4 | 253 | 269,4 | 165,0 | 4 | 253 | 15 | 13 | 0 | 0 | 7 | aviso |
+| Riachinho | NORTE | SE-2AN2 | LD02005098 | 2 | 1 | 0 | 1 | 12,1 | 2,3 | 0 | 1 | 1 | 0 | 0 | 0 | 2 | aviso |
+| **Total Riachinho** | | | 2 alimentadores | 260 | | | | 281,5 | 167,3 | | | | | | | | |
 
 ## Rio da Conceição
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Rio da Conceição | SUL | SE-2DIA | LD01028074 | 3 | 1 | 0 | 2 | 200,8 | 102,7 | 0 | 2 | 0 | 6 | 26 | 0 | 4 | aviso |
-| **Total Rio da Conceição** | | | 1 alimentadores | 3 | | | | 200,8 | 102,7 | | | | | | | | |
-
-## Rio dos Bois
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Rio dos Bois | CENTRO | SE-2MRN | LD03050008 | 8 | 1 | 0 | 7 | 426,6 | 222,3 | 0 | 7 | 1 | 25 | 850 | 0 | 4 | aviso |
-| Rio dos Bois | NORTE | SE-2GU2 | LD02038009 | 8 | 1 | 0 | 7 | 457,7 | 119,1 | 0 | 7 | 0 | 48 | 237 | 0 | 5 | aviso |
-| **Total Rio dos Bois** | | | 2 alimentadores | 16 | | | | 884,3 | 341,4 | | | | | | | | |
+| Rio da Conceição |  | SE-GIS-SE_DIANOPOLI | LD07028074 | 1 | 1 | 0 | 0 | 29,3 | 10,8 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
+| **Total Rio da Conceição** | | | 1 alimentadores | 1 | | | | 29,3 | 10,8 | | | | | | | | |
 
 ## Rio Sono
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Rio Sono |  | SE-GIS-SE_PEDRO_AFO | LD02424015 | 17 | 1 | 0 | 16 | 1.550,1 | 676,8 | 0 | 16 | 0 | 3 | 1068 | 0 | 7 | aviso |
-| **Total Rio Sono** | | | 1 alimentadores | 17 | | | | 1.550,1 | 676,8 | | | | | | | | |
+| Rio Sono | CENTRO | SE-2RSN | AL01074070 | 2 | 1 | 0 | 1 | 55,1 | 53,9 | 0 | 1 | 0 | 0 | 0 | 0 | 4 | aviso |
+| **Total Rio Sono** | | | 1 alimentadores | 2 | | | | 55,1 | 53,9 | | | | | | | | |
 
 ## Sampaio
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Sampaio | NORTE | SE-2AGT | LD02014045 | 5 | 1 | 0 | 4 | 204,7 | 99,8 | 0 | 4 | 1 | 78 | 19 | 0 | 5 | aviso |
-| Sampaio | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 25,0 | 0 | 19 | 0 | 174 | 81 | 0 | 5 | aviso |
+| Sampaio | NORTE | SE-2AGT | LD02014045 | 5 | 1 | 0 | 4 | 204,7 | 99,8 | 0 | 4 | 1 | 78 | 19 | 0 | 6 | aviso |
+| Sampaio | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 25,0 | 0 | 19 | 0 | 174 | 81 | 0 | 6 | aviso |
 | **Total Sampaio** | | | 2 alimentadores | 25 | | | | 1.113,5 | 124,9 | | | | | | | | |
 
 ## Sandolândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Sandolândia | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 165,0 | 13 | 1126 | 30 | 9 | 0 | 0 | 7 | aviso |
-| Sandolândia | SUL | SE-2FRM | LD01036052 | 4 | 1 | 0 | 3 | 230,1 | 26,1 | 0 | 3 | 0 | 14 | 522 | 0 | 5 | aviso |
-| Sandolândia | SUL | SE-2FRM | LD02036052 | 6 | 1 | 0 | 5 | 257,4 | 20,3 | 0 | 5 | 0 | 43 | 9102 | 0 | 5 | aviso |
-| **Total Sandolândia** | | | 3 alimentadores | 1146 | | | | 1.984,5 | 211,4 | | | | | | | | |
+| Sandolândia | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 165,0 | 13 | 1126 | 30 | 9 | 0 | 0 | 8 | aviso |
+| Sandolândia | SUL | SE-2SDL | AL01063107 | 1 | 1 | 0 | 0 | 5,2 | 5,2 | 0 | 0 | 0 | 2 | 0 | 0 | 3 | aviso |
+| **Total Sandolândia** | | | 2 alimentadores | 1137 | | | | 1.502,2 | 170,2 | | | | | | | | |
 
 ## Santa Fé do Araguaia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Santa Fé do Araguaia | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 480,3 | 19 | 1962 | 183 | 269 | 0 | 0 | 8 | aviso |
-| Santa Fé do Araguaia | NORTE | SE-2AR0 | LD04010004 | 117 | 1 | 6 | 110 | 146,0 | 12,5 | 6 | 111 | 15 | 10 | 0 | 0 | 8 | aviso |
-| Santa Fé do Araguaia | NORTE | SE-2BNS | LD02010153 | 12 | 1 | 1 | 10 | 1.242,1 | 8,5 | 1 | 10 | 0 | 37 | 152 | 0 | 7 | aviso |
-| **Total Santa Fé do Araguaia** | | | 3 alimentadores | 2109 | | | | 3.687,2 | 501,4 | | | | | | | | |
-
-## Santa Maria do Tocantins
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Santa Maria do Tocantins | NORTE | SE-2PDA | LD01065015 | 30 | 1 | 0 | 29 | 2.533,6 | 564,6 | 0 | 29 | 0 | 23 | 1946 | 0 | 5 | aviso |
-| **Total Santa Maria do Tocantins** | | | 1 alimentadores | 30 | | | | 2.533,6 | 564,6 | | | | | | | | |
+| Santa Fé do Araguaia | NORTE | SE-2AR0 | LD03010004 | 1980 | 1 | 19 | 1960 | 2.299,1 | 480,3 | 19 | 1962 | 183 | 269 | 0 | 0 | 9 | aviso |
+| Santa Fé do Araguaia | NORTE | SE-2AR0 | LD04010004 | 117 | 1 | 6 | 110 | 146,0 | 12,5 | 6 | 111 | 15 | 10 | 0 | 0 | 9 | aviso |
+| **Total Santa Fé do Araguaia** | | | 2 alimentadores | 2097 | | | | 2.445,0 | 492,8 | | | | | | | | |
 
 ## Santa Rita do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Santa Rita do Tocantins | CENTRO | SE-SLC | LD02047073 | 6 | 1 | 0 | 5 | 859,4 | 385,3 | 0 | 5 | 0 | 54 | 12 | 0 | 5 | aviso |
-| Santa Rita do Tocantins | CENTRO | SE-2NRS | LD01056046 | 22 | 1 | 0 | 21 | 1.104,1 | 254,9 | 0 | 21 | 0 | 38 | 58 | 0 | 5 | aviso |
-| Santa Rita do Tocantins | CENTRO | SE-SLC | LD06047073 | 3 | 1 | 0 | 2 | 599,1 | 23,2 | 0 | 2 | 0 | 27 | 9 | 0 | 5 | aviso |
-| Santa Rita do Tocantins | SUL | SE-2DRE | AL01031076 | 7 | 1 | 0 | 6 | 275,6 | 18,9 | 0 | 6 | 0 | 16 | 186 | 0 | 6 | aviso |
-| **Total Santa Rita do Tocantins** | | | 4 alimentadores | 38 | | | | 2.838,2 | 682,2 | | | | | | | | |
+| Santa Rita do Tocantins | SUL | SE-2DRE | AL01031076 | 7 | 1 | 0 | 6 | 275,6 | 18,9 | 0 | 6 | 0 | 16 | 186 | 0 | 7 | aviso |
+| **Total Santa Rita do Tocantins** | | | 1 alimentadores | 7 | | | | 275,6 | 18,9 | | | | | | | | |
 
 ## Santa Rosa do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Santa Rosa do Tocantins | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 825,7 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| Santa Rosa do Tocantins | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 0,3 | 11 | 888 | 35 | 22 | 0 | 0 | 7 | aviso |
-| **Total Santa Rosa do Tocantins** | | | 2 alimentadores | 919 | | | | 3.284,7 | 826,1 | | | | | | | | |
+| Santa Rosa do Tocantins | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 0,3 | 11 | 888 | 35 | 22 | 0 | 0 | 8 | aviso |
+| **Total Santa Rosa do Tocantins** | | | 1 alimentadores | 894 | | | | 1.417,3 | 0,3 | | | | | | | | |
 
 ## Santa Terezinha do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Santa Terezinha do Tocantins | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 128,6 | 0 | 5 | 0 | 26 | 32 | 0 | 5 | aviso |
-| Santa Terezinha do Tocantins | NORTE | SE-2TOC | LD01084002 | 9 | 1 | 0 | 8 | 487,0 | 5,5 | 0 | 8 | 1 | 54 | 1284 | 0 | 5 | aviso |
-| Santa Terezinha do Tocantins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 4,4 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
-| Santa Terezinha do Tocantins | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 0,1 | 16 | 1152 | 76 | 26 | 0 | 0 | 7 | aviso |
-| **Total Santa Terezinha do Tocantins** | | | 4 alimentadores | 2177 | | | | 3.110,5 | 138,7 | | | | | | | | |
+| Santa Terezinha do Tocantins | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 128,6 | 0 | 5 | 0 | 26 | 32 | 0 | 6 | aviso |
+| Santa Terezinha do Tocantins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 4,4 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
+| Santa Terezinha do Tocantins | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 0,1 | 16 | 1152 | 76 | 26 | 0 | 0 | 8 | aviso |
+| **Total Santa Terezinha do Tocantins** | | | 3 alimentadores | 2168 | | | | 2.623,5 | 133,1 | | | | | | | | |
 
 ## São Bento do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| São Bento do Tocantins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 353,6 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
-| São Bento do Tocantins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 31,4 | 0 | 5 | 0 | 91 | 6 | 0 | 5 | aviso |
-| São Bento do Tocantins | NORTE | SE-2ATN | LD03109039 | 8 | 1 | 0 | 7 | 523,2 | 21,4 | 0 | 7 | 2 | 95 | 0 | 0 | 3 | aviso |
-| São Bento do Tocantins | NORTE | SE-2AN2 | LD01005098 | 270 | 1 | 2 | 267 | 411,3 | 1,6 | 2 | 267 | 17 | 21 | 0 | 0 | 7 | aviso |
-| **Total São Bento do Tocantins** | | | 4 alimentadores | 1278 | | | | 2.370,7 | 408,0 | | | | | | | | |
-
-## São Félix do Tocantins
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| São Félix do Tocantins | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 251,1 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| **Total São Félix do Tocantins** | | | 1 alimentadores | 30 | | | | 2.877,5 | 251,1 | | | | | | | | |
+| São Bento do Tocantins | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 353,6 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
+| São Bento do Tocantins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 31,4 | 0 | 5 | 0 | 91 | 6 | 0 | 6 | aviso |
+| São Bento do Tocantins | NORTE | SE-2AN2 | LD01005098 | 270 | 1 | 2 | 267 | 411,3 | 1,6 | 2 | 267 | 17 | 21 | 0 | 0 | 8 | aviso |
+| **Total São Bento do Tocantins** | | | 3 alimentadores | 1270 | | | | 1.847,5 | 386,6 | | | | | | | | |
 
 ## São Miguel do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| São Miguel do Tocantins | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 107,9 | 1 | 10 | 4 | 85 | 311 | 0 | 5 | aviso |
-| São Miguel do Tocantins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 13,4 | 0 | 5 | 0 | 91 | 6 | 0 | 5 | aviso |
-| **Total São Miguel do Tocantins** | | | 2 alimentadores | 18 | | | | 594,9 | 121,3 | | | | | | | | |
+| São Miguel do Tocantins | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 107,9 | 1 | 10 | 4 | 85 | 311 | 0 | 7 | aviso |
+| São Miguel do Tocantins | NORTE | SE-2SMG | LD02076103 | 2 | 1 | 0 | 1 | 48,4 | 48,4 | 0 | 1 | 0 | 31 | 0 | 0 | 3 | aviso |
+| São Miguel do Tocantins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 13,4 | 0 | 5 | 0 | 91 | 6 | 0 | 6 | aviso |
+| **Total São Miguel do Tocantins** | | | 3 alimentadores | 20 | | | | 643,3 | 169,7 | | | | | | | | |
 
 ## São Salvador do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| São Salvador do Tocantins | SUL | SE-2UPX | LD02066094 | 7 | 1 | 0 | 6 | 452,3 | 310,4 | 0 | 6 | 0 | 19 | 179 | 0 | 5 | aviso |
-| São Salvador do Tocantins | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 95,7 | 10 | 960 | 24 | 3 | 0 | 0 | 8 | aviso |
-| São Salvador do Tocantins | SUL | SE-2PRN | LD02010021 | 7 | 1 | 0 | 6 | 429,9 | 73,6 | 0 | 6 | 0 | 36 | 2875 | 0 | 5 | aviso |
-| **Total São Salvador do Tocantins** | | | 3 alimentadores | 983 | | | | 2.309,7 | 479,7 | | | | | | | | |
+| São Salvador do Tocantins | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 95,7 | 10 | 960 | 24 | 3 | 0 | 0 | 9 | aviso |
+| **Total São Salvador do Tocantins** | | | 1 alimentadores | 969 | | | | 1.427,4 | 95,7 | | | | | | | | |
 
 ## São Sebastião do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| São Sebastião do Tocantins | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 109,8 | 0 | 19 | 0 | 174 | 81 | 0 | 5 | aviso |
-| **Total São Sebastião do Tocantins** | | | 1 alimentadores | 20 | | | | 908,8 | 109,8 | | | | | | | | |
+| São Sebastião do Tocantins | NORTE | SE-2AGT | LD03014045 | 20 | 1 | 0 | 19 | 908,8 | 109,8 | 0 | 19 | 0 | 174 | 81 | 0 | 6 | aviso |
+| São Sebastião do Tocantins | NORTE | SE-2BRT | AL02019068 | 1 | 1 | 0 | 0 | 31,2 | 26,4 | 0 | 0 | 0 | 16 | 0 | 0 | 4 | aviso |
+| **Total São Sebastião do Tocantins** | | | 2 alimentadores | 21 | | | | 940,0 | 136,2 | | | | | | | | |
 
 ## São Valério
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| São Valério | SUL | SE-2UPX | LD01066094 | 27 | 1 | 0 | 26 | 2.036,3 | 711,3 | 0 | 26 | 1 | 47 | 1218 | 0 | 6 | aviso |
-| São Valério | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 53,4 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| São Valério | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 33,3 | 11 | 888 | 35 | 22 | 0 | 0 | 7 | aviso |
-| São Valério | SUL | SE-2PRN | LD01010021 | 10 | 1 | 0 | 9 | 1.055,1 | 2,7 | 0 | 9 | 1 | 22 | 363 | 0 | 6 | aviso |
-| **Total São Valério** | | | 4 alimentadores | 956 | | | | 6.376,1 | 800,7 | | | | | | | | |
+| São Valério | SUL | SE-2AL2 | LD04002091 | 894 | 1 | 10 | 883 | 1.417,3 | 33,3 | 11 | 888 | 35 | 22 | 0 | 0 | 8 | aviso |
+| **Total São Valério** | | | 1 alimentadores | 894 | | | | 1.417,3 | 33,3 | | | | | | | | |
 
 ## Silvanópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Silvanópolis | CENTRO | SE-2PNA | LD02072001 | 25 | 1 | 0 | 24 | 1.867,4 | 274,2 | 0 | 24 | 1 | 68 | 109 | 0 | 6 | aviso |
-| Silvanópolis | CENTRO | SE-2MTC | LD01051035 | 4 | 1 | 0 | 3 | 888,8 | 194,2 | 0 | 3 | 0 | 63 | 14 | 0 | 5 | aviso |
-| Silvanópolis | CENTRO | SE-1UI1 | LD03046026 | 30 | 1 | 1 | 28 | 2.877,5 | 71,1 | 1 | 29 | 6 | 68 | 2001 | 0 | 10 | aviso |
-| **Total Silvanópolis** | | | 3 alimentadores | 59 | | | | 5.633,8 | 539,5 | | | | | | | | |
+| Silvanópolis | CENTRO | SE-2SIL | AL01093043 | 1 | 1 | 0 | 0 | 19,6 | 19,6 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | aviso |
+| **Total Silvanópolis** | | | 1 alimentadores | 1 | | | | 19,6 | 19,6 | | | | | | | | |
 
 ## Sítio Novo do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Sítio Novo do Tocantins | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 62,3 | 1 | 10 | 4 | 85 | 311 | 0 | 5 | aviso |
-| Sítio Novo do Tocantins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 38,9 | 0 | 5 | 0 | 91 | 6 | 0 | 5 | aviso |
-| Sítio Novo do Tocantins | NORTE | SE-2ATN | LD03109039 | 8 | 1 | 0 | 7 | 523,2 | 3,6 | 0 | 7 | 2 | 95 | 0 | 0 | 3 | aviso |
-| **Total Sítio Novo do Tocantins** | | | 3 alimentadores | 26 | | | | 1.118,1 | 104,8 | | | | | | | | |
+| Sítio Novo do Tocantins | NORTE | SE-2AGT | LD01014045 | 12 | 1 | 1 | 10 | 319,5 | 62,3 | 1 | 10 | 4 | 85 | 311 | 0 | 7 | aviso |
+| Sítio Novo do Tocantins | NORTE | SE-2AXX | AL01016065 | 6 | 1 | 0 | 5 | 275,4 | 38,9 | 0 | 5 | 0 | 91 | 6 | 0 | 6 | aviso |
+| **Total Sítio Novo do Tocantins** | | | 2 alimentadores | 18 | | | | 594,9 | 101,2 | | | | | | | | |
 
 ## Sucupira
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Sucupira | SUL | SE-2GUR | LD04040003 | 14 | 1 | 1 | 12 | 923,2 | 117,9 | 1 | 12 | 1 | 96 | 2039 | 0 | 6 | aviso |
-| Sucupira | SUL | SE-2FGR | AL01033047 | 5 | 1 | 0 | 4 | 275,4 | 49,0 | 0 | 4 | 0 | 13 | 384 | 0 | 5 | aviso |
-| Sucupira | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 7,9 | 10 | 960 | 24 | 3 | 0 | 0 | 8 | aviso |
-| **Total Sucupira** | | | 3 alimentadores | 988 | | | | 2.626,1 | 174,8 | | | | | | | | |
+| Sucupira | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 7,9 | 10 | 960 | 24 | 3 | 0 | 0 | 9 | aviso |
+| **Total Sucupira** | | | 1 alimentadores | 969 | | | | 1.427,4 | 7,9 | | | | | | | | |
 
 ## Tabocão
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Tabocão | NORTE | SE-2GU2 | LD02038009 | 8 | 1 | 0 | 7 | 457,7 | 216,9 | 0 | 7 | 0 | 48 | 237 | 0 | 5 | aviso |
-| Tabocão | CENTRO | SE-2MRN | LD03050008 | 8 | 1 | 0 | 7 | 426,6 | 48,2 | 0 | 7 | 1 | 25 | 850 | 0 | 4 | aviso |
-| Tabocão | NORTE | SE-2GU1 | AL01037009 | 6 | 1 | 0 | 5 | 182,0 | 6,5 | 0 | 5 | 0 | 13 | 0 | 0 | 3 | aviso |
-| **Total Tabocão** | | | 3 alimentadores | 22 | | | | 1.066,3 | 271,6 | | | | | | | | |
+| Tabocão | NORTE | SE-2GU1 | AL01037009 | 6 | 1 | 0 | 5 | 182,0 | 6,5 | 0 | 5 | 0 | 13 | 0 | 0 | 4 | aviso |
+| **Total Tabocão** | | | 1 alimentadores | 6 | | | | 182,0 | 6,5 | | | | | | | | |
 
 ## Taguatinga
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Taguatinga | SUL | SE-SGE | LD01414027 | 11 | 1 | 0 | 10 | 741,8 | 390,0 | 0 | 10 | 0 | 5 | 12 | 0 | 6 | aviso |
-| Taguatinga |  | SE-GIS-SE_SERRAS_GE | LD02414027 | 5 | 1 | 0 | 4 | 370,4 | 350,9 | 0 | 4 | 0 | 0 | 3 | 0 | 7 | aviso |
-| Taguatinga | SUL | SE-2DIA | LD05028074 | 12 | 1 | 0 | 11 | 1.199,0 | 157,8 | 0 | 11 | 0 | 53 | 107 | 0 | 5 | aviso |
-| **Total Taguatinga** | | | 3 alimentadores | 28 | | | | 2.311,3 | 898,7 | | | | | | | | |
-
-## Taipas do Tocantins
-
-| Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Taipas do Tocantins | SUL | SE-2DIA | LD05028074 | 12 | 1 | 0 | 11 | 1.199,0 | 302,7 | 0 | 11 | 0 | 53 | 107 | 0 | 5 | aviso |
-| Taipas do Tocantins | SUL | SE-2ARS | LD01110005 | 4 | 1 | 0 | 3 | 501,5 | 33,3 | 0 | 3 | 0 | 5 | 12 | 0 | 4 | aviso |
-| **Total Taipas do Tocantins** | | | 2 alimentadores | 16 | | | | 1.700,5 | 336,0 | | | | | | | | |
+| Taguatinga | SUL | SE-2TGT | AL01078038 | 2 | 1 | 0 | 1 | 39,8 | 39,8 | 0 | 1 | 0 | 1 | 5 | 0 | 5 | aviso |
+| Taguatinga | SUL | SE-1UBJ | AL01070027 | 2 | 1 | 0 | 1 | 39,6 | 25,3 | 0 | 1 | 0 | 1 | 0 | 0 | 2 | aviso |
+| Taguatinga | SUL | SE-2TGT | AL02078038 | 1 | 1 | 0 | 0 | 15,6 | 15,6 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | aviso |
+| **Total Taguatinga** | | | 3 alimentadores | 5 | | | | 94,9 | 80,6 | | | | | | | | |
 
 ## Talismã
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Talismã | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 593,5 | 5 | 500 | 10 | 4 | 0 | 0 | 9 | aviso |
-| Talismã | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 167,1 | 13 | 1126 | 30 | 9 | 0 | 0 | 7 | aviso |
-| Talismã | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 55,5 | 10 | 960 | 24 | 3 | 0 | 0 | 8 | aviso |
-| Talismã | SUL | SE-2ALV | AL01003036 | 418 | 1 | 8 | 409 | 545,9 | 4,5 | 8 | 411 | 11 | 9 | 0 | 0 | 7 | aviso |
+| Talismã | SUL | SE-2ALV | AL02003036 | 504 | 1 | 5 | 498 | 776,0 | 593,5 | 5 | 500 | 10 | 4 | 0 | 0 | 10 | aviso |
+| Talismã | SUL | SE-2ALV | LD01003036 | 1136 | 1 | 13 | 1122 | 1.497,1 | 167,1 | 13 | 1126 | 30 | 9 | 0 | 0 | 8 | aviso |
+| Talismã | SUL | SE-2ALV | LD02003036 | 969 | 1 | 10 | 958 | 1.427,4 | 55,5 | 10 | 960 | 24 | 3 | 0 | 0 | 9 | aviso |
+| Talismã | SUL | SE-2ALV | AL01003036 | 418 | 1 | 8 | 409 | 545,9 | 4,5 | 8 | 411 | 11 | 9 | 0 | 0 | 8 | aviso |
 | **Total Talismã** | | | 4 alimentadores | 3027 | | | | 4.246,4 | 820,7 | | | | | | | | |
 
 ## Tocantínia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Tocantínia | CENTRO | SE-2TCN | AL01082006 | 4 | 1 | 0 | 3 | 205,7 | 205,7 | 0 | 3 | 0 | 4 | 19 | 0 | 4 | aviso |
-| Tocantínia |  | SE-GIS-SE_PEDRO_AFO | LD02424015 | 17 | 1 | 0 | 16 | 1.550,1 | 93,3 | 0 | 16 | 0 | 3 | 1068 | 0 | 7 | aviso |
-| **Total Tocantínia** | | | 2 alimentadores | 21 | | | | 1.755,8 | 299,0 | | | | | | | | |
+| Tocantínia | CENTRO | SE-2RSN | AL01074070 | 2 | 1 | 0 | 1 | 55,1 | 1,2 | 0 | 1 | 0 | 0 | 0 | 0 | 4 | aviso |
+| **Total Tocantínia** | | | 1 alimentadores | 2 | | | | 55,1 | 1,2 | | | | | | | | |
 
 ## Tocantinópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Tocantinópolis | NORTE | SE-2TOC | AL01084002 | 3 | 1 | 0 | 2 | 139,7 | 131,1 | 0 | 2 | 0 | 35 | 17 | 0 | 6 | aviso |
-| Tocantinópolis | NORTE | SE-2TOC | LD01084002 | 9 | 1 | 0 | 8 | 487,0 | 84,3 | 0 | 8 | 1 | 54 | 1284 | 0 | 5 | aviso |
-| Tocantinópolis | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 4,0 | 0 | 5 | 0 | 26 | 32 | 0 | 5 | aviso |
-| Tocantinópolis | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 1,3 | 15 | 983 | 95 | 75 | 0 | 0 | 8 | aviso |
-| **Total Tocantinópolis** | | | 4 alimentadores | 1012 | | | | 1.972,8 | 220,6 | | | | | | | | |
+| Tocantinópolis | NORTE | SE-2TOC | AL01084002 | 3 | 1 | 0 | 2 | 139,7 | 131,1 | 0 | 2 | 0 | 35 | 17 | 0 | 7 | aviso |
+| Tocantinópolis | NORTE | SE-2TOC | AL02084002 | 2 | 1 | 0 | 1 | 82,7 | 82,7 | 0 | 1 | 0 | 16 | 23 | 0 | 6 | aviso |
+| Tocantinópolis | NORTE | SE-2NZR | AL01053090 | 6 | 1 | 0 | 5 | 185,2 | 4,0 | 0 | 5 | 0 | 26 | 32 | 0 | 6 | aviso |
+| Tocantinópolis | NORTE | SE-2AN2 | LD03005098 | 994 | 1 | 15 | 978 | 1.160,9 | 1,3 | 15 | 983 | 95 | 75 | 0 | 0 | 9 | aviso |
+| **Total Tocantinópolis** | | | 4 alimentadores | 1005 | | | | 1.568,5 | 219,0 | | | | | | | | |
 
 ## Tupirama
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Tupirama | NORTE | SE-2PDA | AL01065015 | 4 | 1 | 1 | 2 | 213,0 | 187,8 | 1 | 2 | 2 | 8 | 0 | 0 | 4 | aviso |
 | Tupirama | NORTE | SE-2GU1 | AL03037009 | 5 | 1 | 0 | 4 | 211,5 | 63,2 | 0 | 4 | 2 | 46 | 0 | 0 | 2 | aviso |
-| Tupirama | NORTE | SE-2GU2 | LD02038009 | 8 | 1 | 0 | 7 | 457,7 | 28,7 | 0 | 7 | 0 | 48 | 237 | 0 | 5 | aviso |
-| **Total Tupirama** | | | 3 alimentadores | 17 | | | | 882,2 | 279,7 | | | | | | | | |
+| **Total Tupirama** | | | 1 alimentadores | 5 | | | | 211,5 | 63,2 | | | | | | | | |
 
 ## Tupiratins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Tupiratins | NORTE | SE-2GU2 | LD03038009 | 19 | 1 | 1 | 17 | 1.464,3 | 322,1 | 1 | 18 | 2 | 79 | 134 | 0 | 6 | aviso |
-| Tupiratins | NORTE | SE-2CLN | LD02020023 | 28 | 1 | 0 | 27 | 1.571,4 | 29,7 | 0 | 27 | 1 | 28 | 486 | 0 | 5 | aviso |
-| Tupiratins | NORTE | SE-2CLN | LD01020023 | 12 | 1 | 0 | 11 | 598,7 | 8,9 | 0 | 11 | 0 | 19 | 2 | 0 | 5 | aviso |
-| **Total Tupiratins** | | | 3 alimentadores | 59 | | | | 3.634,4 | 360,7 | | | | | | | | |
+| Tupiratins | NORTE | SE-2CLN | LD01020023 | 12 | 1 | 0 | 11 | 598,7 | 8,9 | 0 | 11 | 0 | 19 | 2 | 0 | 6 | aviso |
+| **Total Tupiratins** | | | 1 alimentadores | 12 | | | | 598,7 | 8,9 | | | | | | | | |
 
 ## Wanderlândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Wanderlândia | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 321,9 | 16 | 1152 | 76 | 26 | 0 | 0 | 7 | aviso |
-| Wanderlândia | NORTE | SE-2WND | AL01086016 | 5 | 1 | 0 | 4 | 152,8 | 124,8 | 0 | 4 | 0 | 6 | 2 | 0 | 5 | aviso |
-| **Total Wanderlândia** | | | 2 alimentadores | 1173 | | | | 1.430,3 | 446,7 | | | | | | | | |
+| Wanderlândia | NORTE | SE-2AR0 | LD02010004 | 1168 | 1 | 16 | 1151 | 1.277,5 | 321,9 | 16 | 1152 | 76 | 26 | 0 | 0 | 8 | aviso |
+| Wanderlândia | NORTE | SE-2WND | AL01086016 | 5 | 1 | 0 | 4 | 152,8 | 124,8 | 0 | 4 | 0 | 6 | 2 | 0 | 6 | aviso |
+| Wanderlândia | NORTE | SE-2AR4 | AL01040004 | 1 | 1 | 0 | 0 | 26,8 | 2,9 | 0 | 0 | 0 | 1 | 0 | 0 | 4 | aviso |
+| **Total Wanderlândia** | | | 3 alimentadores | 1174 | | | | 1.457,0 | 449,6 | | | | | | | | |
 
 ## Xambioá
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Xambioá | NORTE | SE-2XB2 | LD01095030 | 7 | 1 | 0 | 6 | 550,3 | 392,4 | 0 | 6 | 2 | 42 | 3296 | 0 | 6 | aviso |
-| **Total Xambioá** | | | 1 alimentadores | 7 | | | | 550,3 | 392,4 | | | | | | | | |
+| Xambioá | NORTE | SE-2XB2 | LD02095030 | 2 | 1 | 0 | 1 | 51,4 | 51,4 | 0 | 1 | 0 | 4 | 0 | 0 | 3 | aviso |
+| Xambioá | NORTE | SE-2XMB | AL01087030 | 1 | 1 | 0 | 0 | 18,9 | 18,9 | 0 | 0 | 0 | 1 | 0 | 0 | 3 | aviso |
+| **Total Xambioá** | | | 2 alimentadores | 3 | | | | 70,3 | 70,3 | | | | | | | | |
 
 ## Total geral
 
-- Municípios: 136
-- Alimentadores processados sem falha: 187 (69.932,8 km, 13235 trechos)
+- Municípios: 111
+- Alimentadores processados sem falha: 215 (28.139,2 km, 12746 trechos)
 
 ## Avisos por alimentador
 
-- **AL01001037** (aviso): trechos a revisar: T2; 6 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100021037, T_AL01001037, T_AL01001037, T_AL01001037, T_AL01001037, T_AL01001037; Chave(s) fora do caminho da energia (em paralelo): 3100021037; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300032037; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0200036037; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01002091** (aviso): 2 chave(s) de proteção sem trecho (não seccionam a rede): 0347602091, 0333563091; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9033828091, Suporte Chave 3100015091, Suporte Chave 3100728091, T_AL01002091; Chave(s) fora do caminho da energia (em paralelo): 9033828091, 3100015091, 3100728091; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0319304091, 0300006091, 0300038091; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01003036** (aviso): 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0310260036, 0300058036; trechos a revisar: T2-C, T2-E, T2-F, T2-G; 12 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036; 9 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300091036, 0300090036, 0300827036, 3300862036, 0300081036, 0300097036, 0300101036, 0300855036, 0300005036; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 4000645047; Mais de um religador pode ser o 2º do tronco; escolhido 7937112036 (mais rede depois dele). Outros candidatos: 7951919036, 7960788036, 7900774036.
+- **AL01001037** (aviso): 1% da rede fora da árvore do DJ (6 de 417 vãos); trechos a revisar: T2; 6 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100021037, T_AL01001037, T_AL01001037, T_AL01001037, T_AL01001037, T_AL01001037; Chave(s) fora do caminho da energia (em paralelo): 3100021037; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300032037; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0200036037; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01002091** (aviso): 2 chave(s) de proteção sem trecho (não seccionam a rede): 0347602091, 0333563091; 1% da rede fora da árvore do DJ (4 de 457 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9033828091, Suporte Chave 3100015091, Suporte Chave 3100728091, T_AL01002091; Chave(s) fora do caminho da energia (em paralelo): 9033828091, 3100015091, 3100728091; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0319304091, 0300006091, 0300038091; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01003036** (aviso): 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0310260036, 0300058036; 0% da rede fora da árvore do DJ (12 de 5588 vãos); trechos a revisar: T2-C, T2-E, T2-F, T2-G; 12 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036, T_AL01003036; 9 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300091036, 0300090036, 0300827036, 3300862036, 0300081036, 0300097036, 0300101036, 0300855036, 0300005036; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 4000645047; Mais de um religador pode ser o 2º do tronco; escolhido 7937112036 (mais rede depois dele). Outros candidatos: 7951919036, 7960788036, 7900774036.
 - **AL01003097** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01005098** (aviso): 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01005098, T_AL01005098; 11 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300161080, 4000294124, 0300293124, 3300325124, 0300291124, 0322963124, 3310001247, 0300324124, 0310053124, 0300003246, 0300303098; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300005247; Mais de um religador pode ser o 2º do tronco; escolhido 7930909247 (mais rede depois dele). Outros candidatos: 7900052124.
+- **AL01005098** (aviso): 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 2964 vãos); trechos a revisar: T2-A, T2-B; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01005098, T_AL01005098; 11 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300161080, 4000294124, 0300293124, 3300325124, 0300291124, 0322963124, 3310001247, 0300324124, 0310053124, 0300003246, 0300303098; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300005247; Mais de um religador pode ser o 2º do tronco; escolhido 7930909247 (mais rede depois dele). Outros candidatos: 7900052124.
 - **AL01006040** (aviso): 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0301233040; 6 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300117004, 0301237040, 0310120040, 0300890040, 0320084040, 0300006040; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01007055** (aviso): 40 m fora da malha municipal do Tocantins; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0300579055, 0300658055; trechos a revisar: T2; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01007055, T_AL01007055, T_AL01007055, T_AL01007055; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3311787055, 0301378055, 0300581055, 0300667055, 0300639055, 0300004055, 0362100055; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01008032** (aviso): 2 chave(s) de proteção sem trecho (não seccionam a rede): 0363646032, 0310510032; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3162194032, T_AL01008032, T_AL01008032, T_AL01008032; Chave(s) fora do caminho da energia (em paralelo): 3162194032; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300042032, 3300025032; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300001106
-- **AL01010004** (aviso): 2 chave(s) de proteção sem trecho (não seccionam a rede): 0301090004, 0300049004; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01010004, T_AL01010004, T_AL01010004, T_AL01010004, T_AL01010004, T_AL01010004; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0303865004, 0320309004, 3300065004, 0302387004, 0302383004, 0303718004, 0349277004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0334747004
-- **AL01010021** (falha): classificação colapsada: 1 trecho(s) para 13.6 km; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01010021, T_AL01010021, T_AL01010021; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01010153** (aviso): 136 ponto(s) sem ligação com o DJ (fora da classificação); 136 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01012025** (falha): classificação colapsada: 1 trecho(s) para 27.4 km; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01012025, T_AL01012025; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01013005** (falha): classificação colapsada: 2 trecho(s) para 31.0 km; 2731 ponto(s) sem ligação com o DJ (fora da classificação); 2731 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01014045** (aviso): 535 ponto(s) sem ligação com o DJ (fora da classificação); 535 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01015049** (falha): classificação colapsada: 1 trecho(s) para 5.4 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01015049; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01016065** (aviso): 6 ponto(s) sem ligação com o DJ (fora da classificação); 28 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01016065, T_AL01016065, T_AL01016065, T_AL01016065; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01017017** (aviso): 7 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01018071** (aviso): 11 ponto(s) sem ligação com o DJ (fora da classificação); 11 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01018071, T_AL01018071; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01019068** (falha): classificação colapsada: 2 trecho(s) para 79.9 km; 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01020023** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0300141023; 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 14 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3125729023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023; Chave(s) fora do caminho da energia (em paralelo): 3125729023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01022033** (falha): classificação colapsada: 1 trecho(s) para 22.3 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01022033; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01023050** (aviso): 908 ponto(s) sem ligação com o DJ (fora da classificação); 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 908 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01023050, T_AL01023050, T_AL01023050; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01024113** (aviso): 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01024113, T_AL01024113, T_AL01024113; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01025012** (falha): classificação colapsada: 1 trecho(s) para 9.0 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01025012; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01026041** (falha): classificação colapsada: 2 trecho(s) para 171.5 km; 8 ponto(s) sem ligação com o DJ (fora da classificação); 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 8 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01026041; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01028074** (aviso): 70 ponto(s) sem ligação com o DJ (fora da classificação); trechos a revisar: T2; 70 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3131863074, T_AL01028074; Chave(s) fora do caminho da energia (em paralelo): 3131863074; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0310075074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01007055** (aviso): 40 m fora da malha municipal do Tocantins; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0300579055, 0300658055; 1% da rede fora da árvore do DJ (4 de 554 vãos); trechos a revisar: T2; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01007055, T_AL01007055, T_AL01007055, T_AL01007055; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3311787055, 0301378055, 0300581055, 0300667055, 0300639055, 0300004055, 0362100055; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01008032** (aviso): 2 chave(s) de proteção sem trecho (não seccionam a rede): 0363646032, 0310510032; 0% da rede fora da árvore do DJ (4 de 3157 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3162194032, T_AL01008032, T_AL01008032, T_AL01008032; Chave(s) fora do caminho da energia (em paralelo): 3162194032; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300042032, 3300025032; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300001106
+- **AL01010004** (aviso): 2 chave(s) de proteção sem trecho (não seccionam a rede): 0301090004, 0300049004; 0% da rede fora da árvore do DJ (6 de 1314 vãos); 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01010004, T_AL01010004, T_AL01010004, T_AL01010004, T_AL01010004, T_AL01010004; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0303865004, 0320309004, 3300065004, 0302387004, 0302383004, 0303718004, 0349277004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0334747004
+- **AL01010021** (aviso): 1% da rede fora da árvore do DJ (3 de 381 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01010021, T_AL01010021, T_AL01010021; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01010153** (falha): 78% da rede fora da árvore do DJ (135 de 174 vãos); 136 ponto(s) sem ligação com o DJ (fora da classificação); 136 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01012025** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 448 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01012025, T_AL01012025; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01013005** (falha): 91% da rede fora da árvore do DJ (2731 de 3017 vãos); 2731 ponto(s) sem ligação com o DJ (fora da classificação); 2731 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01014045** (falha): 100% da rede fora da árvore do DJ (543 de 544 vãos); 535 ponto(s) sem ligação com o DJ (fora da classificação); 535 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01015049** (aviso): 1% da rede fora da árvore do DJ (1 de 177 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01015049; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01016065** (aviso): 6 ponto(s) sem ligação com o DJ (fora da classificação); 28 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (8 de 3015 vãos); 6 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01016065, T_AL01016065, T_AL01016065, T_AL01016065; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01017017** (aviso): 7 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (5 de 1481 vãos); 7 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01018071** (aviso): 11 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (11 de 1999 vãos); 11 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01018071, T_AL01018071; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01019068** (aviso): 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01020023** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0300141023; 1% da rede fora da árvore do DJ (15 de 1778 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 14 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3125729023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023, T_AL01020023; Chave(s) fora do caminho da energia (em paralelo): 3125729023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01022033** (aviso): 0% da rede fora da árvore do DJ (1 de 508 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01022033; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01023050** (falha): 58% da rede fora da árvore do DJ (909 de 1561 vãos); 908 ponto(s) sem ligação com o DJ (fora da classificação); 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 908 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01023050, T_AL01023050, T_AL01023050; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01024113** (falha): classificação colapsada: 55 km por trecho (3 trecho(s) para 164.2 km); 0% da rede fora da árvore do DJ (3 de 1756 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01024113, T_AL01024113, T_AL01024113; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01025012** (aviso): 0% da rede fora da árvore do DJ (1 de 296 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01025012; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01026041** (falha): classificação colapsada: 86 km por trecho (2 trecho(s) para 171.5 km); 8 ponto(s) sem ligação com o DJ (fora da classificação); 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (8 de 1450 vãos); 8 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01026041; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01028074** (aviso): 70 ponto(s) sem ligação com o DJ (fora da classificação); 7% da rede fora da árvore do DJ (71 de 980 vãos); trechos a revisar: T2; 70 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3131863074, T_AL01028074; Chave(s) fora do caminho da energia (em paralelo): 3131863074; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0310075074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01029052** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01030124** (aviso): 12 ponto(s) sem ligação com o DJ (fora da classificação); 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01030124; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01031076** (aviso): 186 ponto(s) sem ligação com o DJ (fora da classificação); 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 186 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3113662076, Suporte Chave 6800087076, T_AL01031076, T_AL01031076, T_AL01031076; Chave(s) fora do caminho da energia (em paralelo): 3113662076, 6800087076; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01032044** (falha): classificação colapsada: 2 trecho(s) para 83.9 km; 210 ponto(s) sem ligação com o DJ (fora da classificação); 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 210 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01032044; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01033047** (aviso): 384 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 384 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01033047, T_AL01033047, T_AL01033047; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01034019** (falha): classificação colapsada: 2 trecho(s) para 22.1 km; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01034019, T_AL01034019; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01035052** (falha): classificação colapsada: 2 trecho(s) para 78.4 km; 276 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 276 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01036052** (falha): classificação colapsada: 2 trecho(s) para 50.6 km; 561 ponto(s) sem ligação com o DJ (fora da classificação); 561 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01036052, T_AL01036052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01037009** (aviso): 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01037009, T_AL01037009, T_AL01037009, T_AL01037009, T_AL01037009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01038009** (falha): classificação colapsada: 1 trecho(s) para 58.8 km; 98 ponto(s) sem ligação com o DJ (fora da classificação); 98 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01038009, T_AL01038009, T_AL01038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01040003** (aviso): 476 ponto(s) sem ligação com o DJ (fora da classificação); 476 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01040004** (falha): classificação colapsada: 1 trecho(s) para 26.8 km; 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01040004, T_AL01040004, T_AL01040004, T_AL01040004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01041003** (falha): classificação colapsada: 2 trecho(s) para 60.8 km; 149 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 149 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01041003, T_AL01041003, T_AL01041003, T_AL01041003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01042078** (aviso): 7 ponto(s) sem ligação com o DJ (fora da classificação); 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01042078, T_AL01042078; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01043081** (aviso): 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01043081; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01044024** (falha): classificação colapsada: 2 trecho(s) para 57.4 km; 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01044024; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01047073** (falha): classificação colapsada: 1 trecho(s) para 26.2 km; sem arquivo de postes: nós sem número de poste; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01047073, T_AL01047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01048007** (falha): classificação colapsada: 1 trecho(s) para 16.4 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01048007; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01030124** (falha): classificação colapsada: 53 km por trecho (3 trecho(s) para 160.4 km); 12 ponto(s) sem ligação com o DJ (fora da classificação); 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (12 de 1531 vãos); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01030124; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01031076** (aviso): 186 ponto(s) sem ligação com o DJ (fora da classificação); 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7% da rede fora da árvore do DJ (189 de 2661 vãos); 186 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3113662076, Suporte Chave 6800087076, T_AL01031076, T_AL01031076, T_AL01031076; Chave(s) fora do caminho da energia (em paralelo): 3113662076, 6800087076; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01032044** (aviso): 210 ponto(s) sem ligação com o DJ (fora da classificação); 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 23% da rede fora da árvore do DJ (210 de 914 vãos); 210 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01032044; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01033047** (falha): classificação colapsada: 55 km por trecho (5 trecho(s) para 275.4 km); 384 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 13% da rede fora da árvore do DJ (382 de 2897 vãos); 384 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01033047, T_AL01033047, T_AL01033047; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01034019** (aviso): 0% da rede fora da árvore do DJ (2 de 446 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01034019, T_AL01034019; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01035052** (falha): 28% da rede fora da árvore do DJ (273 de 976 vãos); 276 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 276 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01036052** (falha): 41% da rede fora da árvore do DJ (560 de 1382 vãos); 561 ponto(s) sem ligação com o DJ (fora da classificação); 561 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01036052, T_AL01036052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01037009** (aviso): 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (5 de 1961 vãos); 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01037009, T_AL01037009, T_AL01037009, T_AL01037009, T_AL01037009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01038009** (falha): classificação colapsada: 59 km por trecho (1 trecho(s) para 58.8 km); 98 ponto(s) sem ligação com o DJ (fora da classificação); 11% da rede fora da árvore do DJ (100 de 881 vãos); 98 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01038009, T_AL01038009, T_AL01038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01040003** (falha): 87% da rede fora da árvore do DJ (477 de 548 vãos); 476 ponto(s) sem ligação com o DJ (fora da classificação); 476 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01040004** (aviso): 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (4 de 823 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01040004, T_AL01040004, T_AL01040004, T_AL01040004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01041003** (aviso): 149 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 17% da rede fora da árvore do DJ (151 de 907 vãos); 149 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01041003, T_AL01041003, T_AL01041003, T_AL01041003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01042078** (falha): classificação colapsada: 76 km por trecho (8 trecho(s) para 610.9 km); 7 ponto(s) sem ligação com o DJ (fora da classificação); 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (8 de 5195 vãos); 7 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01042078, T_AL01042078; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01043081** (aviso): 0% da rede fora da árvore do DJ (1 de 1345 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01043081; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01044024** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 473 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01044024; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01047073** (aviso): sem arquivo de postes: nós sem número de poste; 0% da rede fora da árvore do DJ (2 de 805 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01047073, T_AL01047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01048007** (aviso): 0% da rede fora da árvore do DJ (1 de 473 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01048007; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01049010** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01050008** (falha): classificação colapsada: 1 trecho(s) para 13.3 km; 512 ponto(s) sem ligação com o DJ (fora da classificação); 512 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01050008, T_AL01050008, T_AL01050008, T_AL01050008, T_AL01050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01051035** (falha): classificação colapsada: 1 trecho(s) para 192.3 km; 56 ponto(s) sem ligação com o DJ (fora da classificação); 56 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01052028** (falha): classificação colapsada: 1 trecho(s) para 20.3 km; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01052028, T_AL01052028; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01053090** (aviso): 32 ponto(s) sem ligação com o DJ (fora da classificação); 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 32 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01053090, T_AL01053090; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01054060** (aviso): 143 ponto(s) sem ligação com o DJ (fora da classificação); 17 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 143 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01055123** (aviso): 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01055123, T_AL01055123; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01056046** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01056046; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01057189** (aviso): 9 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01057189; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01058020** (falha): classificação colapsada: 1 trecho(s) para 9.6 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01058020; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01059122** (falha): classificação colapsada: 1 trecho(s) para 15.6 km; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01059122, T_AL01059122, T_AL01059122, T_AL01059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01060122** (aviso): 3 ponto(s) sem ligação com o DJ (fora da classificação); 3 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01061029** (aviso): 21 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 21 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01061029, T_AL01061029, T_AL01061029, T_AL01061029, T_AL01061029, T_AL01061029; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01062013** (falha): classificação colapsada: 2 trecho(s) para 61.2 km; 190 ponto(s) sem ligação com o DJ (fora da classificação); 190 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01063107** (falha): classificação colapsada: 1 trecho(s) para 5.2 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01063107; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01050008** (falha): 58% da rede fora da árvore do DJ (515 de 893 vãos); 512 ponto(s) sem ligação com o DJ (fora da classificação); 512 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01050008, T_AL01050008, T_AL01050008, T_AL01050008, T_AL01050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01051035** (falha): classificação colapsada: 192 km por trecho (1 trecho(s) para 192.3 km); 56 ponto(s) sem ligação com o DJ (fora da classificação); 2% da rede fora da árvore do DJ (45 de 1859 vãos); 56 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01052028** (aviso): 0% da rede fora da árvore do DJ (2 de 490 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01052028, T_AL01052028; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01053090** (aviso): 32 ponto(s) sem ligação com o DJ (fora da classificação); 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2% da rede fora da árvore do DJ (30 de 1996 vãos); 32 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01053090, T_AL01053090; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01054060** (aviso): 143 ponto(s) sem ligação com o DJ (fora da classificação); 17 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2% da rede fora da árvore do DJ (147 de 6756 vãos); 143 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060, T_AL01054060; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01055123** (aviso): 0% da rede fora da árvore do DJ (2 de 500 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01055123, T_AL01055123; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01056046** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 979 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01056046; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01057189** (aviso): 9 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 3186 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01057189; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01058020** (aviso): 1% da rede fora da árvore do DJ (1 de 182 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01058020; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01059122** (aviso): 1% da rede fora da árvore do DJ (4 de 561 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01059122, T_AL01059122, T_AL01059122, T_AL01059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01060122** (aviso): 3 ponto(s) sem ligação com o DJ (fora da classificação); 3% da rede fora da árvore do DJ (2 de 62 vãos); 3 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01061029** (falha): classificação colapsada: 53 km por trecho (9 trecho(s) para 477.0 km); 21 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (19 de 4530 vãos); 21 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01061029, T_AL01061029, T_AL01061029, T_AL01061029, T_AL01061029, T_AL01061029; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01062013** (aviso): 190 ponto(s) sem ligação com o DJ (fora da classificação); 13% da rede fora da árvore do DJ (199 de 1586 vãos); 190 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013, T_AL01062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01063107** (aviso): 1% da rede fora da árvore do DJ (1 de 160 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01063107; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01064261** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01065015** (aviso): trechos a revisar: T2; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01065015, T_AL01065015, T_AL01065015, T_AL01065015, T_AL01065015, T_AL01065015; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300060011; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01065015** (falha): classificação colapsada: 53 km por trecho (4 trecho(s) para 213.0 km); 0% da rede fora da árvore do DJ (6 de 2428 vãos); trechos a revisar: T2; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01065015, T_AL01065015, T_AL01065015, T_AL01065015, T_AL01065015, T_AL01065015; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300060011; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01066094** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01067094** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3157559094, T_AL01067094, T_AL01067094, T_AL01067094; Chave(s) fora do caminho da energia (em paralelo): 3157559094; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01068014** (falha): classificação colapsada: 2 trecho(s) para 48.0 km; sem arquivo de postes: nós sem número de poste; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01068014; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01069026** (falha): classificação colapsada: 2 trecho(s) para 37.9 km; 25 ponto(s) sem ligação com o DJ (fora da classificação); 25 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01069026, T_AL01069026; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01070027** (falha): classificação colapsada: 2 trecho(s) para 39.6 km; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01071001** (falha): classificação colapsada: 2 trecho(s) para 12.7 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01072001** (falha): classificação colapsada: 1 trecho(s) para 26.8 km; 19 ponto(s) sem ligação com o DJ (fora da classificação); 19 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3104411001, T_AL01072001, T_AL01072001, T_AL01072001; Chave(s) fora do caminho da energia (em paralelo): 3104411001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01073034** (falha): classificação colapsada: 2 trecho(s) para 18.4 km; 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01074070** (falha): classificação colapsada: 2 trecho(s) para 55.1 km; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01074070; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01067094** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (8 de 707 vãos); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3157559094, T_AL01067094, T_AL01067094, T_AL01067094; Chave(s) fora do caminho da energia (em paralelo): 3157559094; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01068014** (aviso): sem arquivo de postes: nós sem número de poste; 0% da rede fora da árvore do DJ (1 de 618 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01068014; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01069026** (aviso): 25 ponto(s) sem ligação com o DJ (fora da classificação); 5% da rede fora da árvore do DJ (26 de 567 vãos); 25 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01069026, T_AL01069026; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01070027** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01071001** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01072001** (aviso): 19 ponto(s) sem ligação com o DJ (fora da classificação); 3% da rede fora da árvore do DJ (22 de 858 vãos); 19 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3104411001, T_AL01072001, T_AL01072001, T_AL01072001; Chave(s) fora do caminho da energia (em paralelo): 3104411001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01073034** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01074070** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 570 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01074070; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01075116** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01077088** (falha): classificação colapsada: 2 trecho(s) para 118.2 km; 9 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01077088, T_AL01077088, T_AL01077088, T_AL01077088, T_AL01077088; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01078038** (falha): classificação colapsada: 2 trecho(s) para 39.8 km; 5 ponto(s) sem ligação com o DJ (fora da classificação); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01078038, T_AL01078038, T_AL01078038, T_AL01078038; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01081100** (falha): classificação colapsada: 1 trecho(s) para 28.3 km; 5 ponto(s) sem ligação com o DJ (fora da classificação); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01081100, T_AL01081100, T_AL01081100, T_AL01081100, T_AL01081100, T_AL01081100; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01082006** (aviso): 19 ponto(s) sem ligação com o DJ (fora da classificação); 19 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01082006; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01077088** (falha): classificação colapsada: 59 km por trecho (2 trecho(s) para 118.2 km); 9 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (5 de 1430 vãos); 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01077088, T_AL01077088, T_AL01077088, T_AL01077088, T_AL01077088; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01078038** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (8 de 668 vãos); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01078038, T_AL01078038, T_AL01078038, T_AL01078038; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01081100** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 2% da rede fora da árvore do DJ (10 de 547 vãos); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01081100, T_AL01081100, T_AL01081100, T_AL01081100, T_AL01081100, T_AL01081100; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01082006** (falha): classificação colapsada: 51 km por trecho (4 trecho(s) para 205.7 km); 19 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (18 de 1847 vãos); 19 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01082006; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01083007** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01084002** (aviso): 17 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 17 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3125726002, T_AL01084002, T_AL01084002, T_AL01084002, T_AL01084002, T_AL01084002, T_AL01084002; Chave(s) fora do caminho da energia (em paralelo): 3125726002; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01085042** (falha): classificação colapsada: 1 trecho(s) para 16.2 km; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01085042, T_AL01085042; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01086016** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01087030** (falha): classificação colapsada: 1 trecho(s) para 18.9 km; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01087030, T_AL01087030, T_AL01087030; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01084002** (aviso): 17 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (20 de 2004 vãos); 17 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3125726002, T_AL01084002, T_AL01084002, T_AL01084002, T_AL01084002, T_AL01084002, T_AL01084002; Chave(s) fora do caminho da energia (em paralelo): 3125726002; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01085042** (aviso): 1% da rede fora da árvore do DJ (2 de 300 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01085042, T_AL01085042; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01086016** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (9 de 1517 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016, T_AL01086016; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01087030** (aviso): 1% da rede fora da árvore do DJ (3 de 504 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01087030, T_AL01087030, T_AL01087030; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01089074** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01093043** (falha): classificação colapsada: 1 trecho(s) para 19.6 km; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01093043, T_AL01093043; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01093043** (aviso): 0% da rede fora da árvore do DJ (2 de 470 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01093043, T_AL01093043; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01096004** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01097122** (falha): classificação colapsada: 1 trecho(s) para 12.4 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01097122** (aviso): 0% da rede fora da árvore do DJ (1 de 388 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01098118** (aviso): 7595 m fora da malha municipal do Tocantins; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01099059** (aviso): 3 ponto(s) sem ligação com o DJ (fora da classificação); 3 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01101271** (falha): classificação colapsada: 1 trecho(s) para 40.1 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01102271** (falha): classificação colapsada: 2 trecho(s) para 41.5 km; 3070 ponto(s) sem ligação com o DJ (fora da classificação); 3070 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01102271; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01103004** (aviso): 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01103004, T_AL01103004; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0302875004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0313315004
-- **AL01109039** (falha): classificação colapsada: 1 trecho(s) para 34.6 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01113003** (falha): classificação colapsada: 2 trecho(s) para 81.6 km; 54 ponto(s) sem ligação com o DJ (fora da classificação); 54 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01113003, T_AL01113003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01099059** (aviso): 3 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (13 de 2118 vãos); 3 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059, T_AL01099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01101271** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01102271** (falha): 87% da rede fora da árvore do DJ (3068 de 3546 vãos); 3070 ponto(s) sem ligação com o DJ (fora da classificação); 3070 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01102271; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01103004** (aviso): 0% da rede fora da árvore do DJ (2 de 612 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01103004, T_AL01103004; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0302875004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0313315004
+- **AL01109039** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01113003** (aviso): 54 ponto(s) sem ligação com o DJ (fora da classificação); 5% da rede fora da árvore do DJ (55 de 1145 vãos); 54 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL01113003, T_AL01113003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01114007** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02003036** (aviso): 637 m fora da malha municipal do Tocantins; 20 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0320251094, 0320007036; trechos a revisar: T2-B, T2-C, T2-D; 14 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100018097, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036; Chave(s) fora do caminho da energia (em paralelo): 3100018097; 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0310100097, 0345678036, 0353440097, 3320014097; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300014097; Mais de um religador pode ser o 2º do tronco; escolhido 7958217097 (mais rede depois dele). Outros candidatos: 7955666036, 7936753097.
+- **AL02003036** (aviso): 637 m fora da malha municipal do Tocantins; 20 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0320251094, 0320007036; 0% da rede fora da árvore do DJ (14 de 7338 vãos); trechos a revisar: T2-B, T2-C, T2-D; 14 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100018097, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036, T_AL02003036; Chave(s) fora do caminho da energia (em paralelo): 3100018097; 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0310100097, 0345678036, 0353440097, 3320014097; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300014097; Mais de um religador pode ser o 2º do tronco; escolhido 7958217097 (mais rede depois dele). Outros candidatos: 7955666036, 7936753097.
 - **AL02003097** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02010004** (aviso): 1 chave(s) do KML sem vão correspondente na rede; trechos a revisar: T2; 15 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 0234807004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004; Chave(s) fora do caminho da energia (em paralelo): 0234807004; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0200424004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02014045** (falha): classificação colapsada: 2 trecho(s) para 14.9 km; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02014045, T_AL02014045, T_AL02014045, T_AL02014045, T_AL02014045, T_AL02014045; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02017017** (aviso): 14 ponto(s) sem ligação com o DJ (fora da classificação); 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 14 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02017017, T_AL02017017, T_AL02017017, T_AL02017017, T_AL02017017, T_AL02017017; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02019068** (falha): classificação colapsada: 1 trecho(s) para 31.2 km; 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02019068; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02020023** (falha): classificação colapsada: 2 trecho(s) para 33.3 km; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02020023, T_AL02020023, T_AL02020023, T_AL02020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02010004** (aviso): 1 chave(s) do KML sem vão correspondente na rede; 2% da rede fora da árvore do DJ (15 de 616 vãos); trechos a revisar: T2; 15 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 0234807004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004, T_AL02010004; Chave(s) fora do caminho da energia (em paralelo): 0234807004; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0200424004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02014045** (aviso): 1% da rede fora da árvore do DJ (6 de 527 vãos); 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02014045, T_AL02014045, T_AL02014045, T_AL02014045, T_AL02014045, T_AL02014045; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02017017** (aviso): 14 ponto(s) sem ligação com o DJ (fora da classificação); 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (17 de 2681 vãos); 14 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02017017, T_AL02017017, T_AL02017017, T_AL02017017, T_AL02017017, T_AL02017017; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02019068** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 449 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02019068; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02020023** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (4 de 844 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02020023, T_AL02020023, T_AL02020023, T_AL02020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL02025012** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02028074** (falha): classificação colapsada: 2 trecho(s) para 73.5 km; 13 ponto(s) sem ligação com o DJ (fora da classificação); 13 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02028074, T_AL02028074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02028074** (aviso): 13 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (13 de 1237 vãos); 13 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02028074, T_AL02028074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL02033044** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02033047** (aviso): 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02033047; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02036052** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02036052, T_AL02036052, T_AL02036052, T_AL02036052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02037009** (falha): classificação colapsada: 1 trecho(s) para 13.3 km; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02037009, T_AL02037009, T_AL02037009, T_AL02037009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02040003** (falha): classificação colapsada: 1 trecho(s) para 6.0 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02040004** (falha): classificação colapsada: 2 trecho(s) para 19.0 km; 22 ponto(s) sem ligação com o DJ (fora da classificação); 22 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 13 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02043081** (aviso): 3853 ponto(s) sem ligação com o DJ (fora da classificação); 3853 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02047073** (falha): classificação colapsada: 1 trecho(s) para 13.2 km; sem arquivo de postes: nós sem número de poste; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02048007** (falha): classificação colapsada: 2 trecho(s) para 82.5 km; 2 ponto(s) sem ligação com o DJ (fora da classificação); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02048007, T_AL02048007, T_AL02048007; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02049010** (falha): classificação colapsada: 1 trecho(s) para 7.4 km; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02049010, T_AL02049010, T_AL02049010; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02050008** (falha): classificação colapsada: 1 trecho(s) para 31.1 km; 2 ponto(s) sem ligação com o DJ (fora da classificação); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02050008, T_AL02050008, T_AL02050008, T_AL02050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02054060** (falha): classificação colapsada: 2 trecho(s) para 69.5 km; 10 ponto(s) sem ligação com o DJ (fora da classificação); 10 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 9 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02055123** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0300571127; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02055123; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02057189** (aviso): 46 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 46 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02057189; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02058020** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02058020; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02059122** (falha): classificação colapsada: 1 trecho(s) para 19.7 km; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02059122, T_AL02059122, T_AL02059122, T_AL02059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02060122** (falha): classificação colapsada: 1 trecho(s) para 5.0 km; 497 ponto(s) sem ligação com o DJ (fora da classificação); 497 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02062013** (aviso): 918 ponto(s) sem ligação com o DJ (fora da classificação); 918 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02033047** (falha): classificação colapsada: 81 km por trecho (3 trecho(s) para 242.3 km); 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 2193 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02033047; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02036052** (falha): classificação colapsada: 51 km por trecho (3 trecho(s) para 153.6 km); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (4 de 1700 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02036052, T_AL02036052, T_AL02036052, T_AL02036052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02037009** (aviso): 1% da rede fora da árvore do DJ (4 de 441 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02037009, T_AL02037009, T_AL02037009, T_AL02037009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02040003** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02040004** (aviso): 22 ponto(s) sem ligação com o DJ (fora da classificação); 5% da rede fora da árvore do DJ (34 de 704 vãos); 22 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 13 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004, T_AL02040004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02043081** (falha): 100% da rede fora da árvore do DJ (3859 de 3860 vãos); 3853 ponto(s) sem ligação com o DJ (fora da classificação); 3853 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02047073** (aviso): sem arquivo de postes: nós sem número de poste; 0% da rede fora da árvore do DJ (1 de 399 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02048007** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 0% da rede fora da árvore do DJ (4 de 1318 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02048007, T_AL02048007, T_AL02048007; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02049010** (aviso): 1% da rede fora da árvore do DJ (3 de 204 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02049010, T_AL02049010, T_AL02049010; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02050008** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (5 de 633 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02050008, T_AL02050008, T_AL02050008, T_AL02050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02054060** (aviso): 10 ponto(s) sem ligação com o DJ (fora da classificação); 2% da rede fora da árvore do DJ (18 de 1079 vãos); 10 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 9 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060, T_AL02054060; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02055123** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0300571127; 0% da rede fora da árvore do DJ (1 de 287 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02055123; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02057189** (aviso): 46 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (39 de 3590 vãos); 46 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02057189; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02058020** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 2115 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02058020; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02059122** (aviso): 1% da rede fora da árvore do DJ (4 de 701 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02059122, T_AL02059122, T_AL02059122, T_AL02059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02060122** (falha): 77% da rede fora da árvore do DJ (504 de 655 vãos); 497 ponto(s) sem ligação com o DJ (fora da classificação); 497 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02062013** (falha): 100% da rede fora da árvore do DJ (926 de 928 vãos); 918 ponto(s) sem ligação com o DJ (fora da classificação); 918 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL02064261** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02065015** (falha): classificação colapsada: 2 trecho(s) para 40.3 km; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02067094** (falha): classificação colapsada: 1 trecho(s) para 16.4 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02072001** (falha): classificação colapsada: 1 trecho(s) para 15.8 km; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02072001, T_AL02072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02078038** (falha): classificação colapsada: 1 trecho(s) para 15.6 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02084002** (falha): classificação colapsada: 2 trecho(s) para 82.7 km; 23 ponto(s) sem ligação com o DJ (fora da classificação); 23 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100090002, T_AL02084002, T_AL02084002, T_AL02084002; Chave(s) fora do caminho da energia (em paralelo): 3100090002; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02085042** (aviso): 2700 ponto(s) sem ligação com o DJ (fora da classificação); 2700 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02096004** (aviso): 7 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0301567004, 0303801004; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02096004, T_AL02096004, T_AL02096004, T_AL02096004; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0303780004, 3302028004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3303803004
-- **AL02097122** (aviso): 14 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02099059** (falha): classificação colapsada: 2 trecho(s) para 18.6 km; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02099059, T_AL02099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02101271** (aviso): 6 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02102271** (falha): classificação colapsada: 1 trecho(s) para 10.7 km; 20 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02103004** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0312677004; trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02103004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0303058004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02109039** (aviso): 762 ponto(s) sem ligação com o DJ (fora da classificação); 762 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02113003** (falha): classificação colapsada: 1 trecho(s) para 22.1 km; 9 ponto(s) sem ligação com o DJ (fora da classificação); 9 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02113003, T_AL02113003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03010004** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0300291004; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03010004, T_AL03010004, T_AL03010004, T_AL03010004, T_AL03010004; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0366876004, 0366868004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0366877004
-- **AL03020003** (aviso): 920 ponto(s) sem ligação com o DJ (fora da classificação); 920 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03020023** (falha): classificação colapsada: 1 trecho(s) para 11.3 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03033047** (aviso): 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03033047, T_AL03033047; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02065015** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02067094** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02072001** (aviso): 0% da rede fora da árvore do DJ (2 de 537 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02072001, T_AL02072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02078038** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02084002** (aviso): 23 ponto(s) sem ligação com o DJ (fora da classificação); 2% da rede fora da árvore do DJ (26 de 1422 vãos); 23 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100090002, T_AL02084002, T_AL02084002, T_AL02084002; Chave(s) fora do caminho da energia (em paralelo): 3100090002; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02085042** (falha): 99% da rede fora da árvore do DJ (2703 de 2736 vãos); 2700 ponto(s) sem ligação com o DJ (fora da classificação); 2700 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02096004** (aviso): 7 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0301567004, 0303801004; 0% da rede fora da árvore do DJ (4 de 2793 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02096004, T_AL02096004, T_AL02096004, T_AL02096004; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0303780004, 3302028004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3303803004
+- **AL02097122** (aviso): 1% da rede fora da árvore do DJ (14 de 1112 vãos); 14 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122, T_AL02097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02099059** (aviso): 0% da rede fora da árvore do DJ (2 de 627 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02099059, T_AL02099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02101271** (aviso): 6 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (11 de 3961 vãos); 6 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271, T_AL02101271; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02102271** (aviso): 9% da rede fora da árvore do DJ (20 de 235 vãos); 20 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271, T_AL02102271; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02103004** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0312677004; 0% da rede fora da árvore do DJ (1 de 384 vãos); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02103004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0303058004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02109039** (falha): 96% da rede fora da árvore do DJ (778 de 809 vãos); 762 ponto(s) sem ligação com o DJ (fora da classificação); 762 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02113003** (aviso): 9 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (10 de 709 vãos); 9 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL02113003, T_AL02113003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03010004** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0300291004; 1% da rede fora da árvore do DJ (5 de 811 vãos); 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03010004, T_AL03010004, T_AL03010004, T_AL03010004, T_AL03010004; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0366876004, 0366868004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0366877004
+- **AL03020003** (falha): 98% da rede fora da árvore do DJ (917 de 935 vãos); 920 ponto(s) sem ligação com o DJ (fora da classificação); 920 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03020023** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03033047** (aviso): 17% da rede fora da árvore do DJ (2 de 12 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03033047, T_AL03033047; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL03037009** (aviso): 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03040003** (falha): classificação colapsada: 1 trecho(s) para 8.0 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03040004** (falha): classificação colapsada: 2 trecho(s) para 21.2 km; 3 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3130272004, T_AL03040004, T_AL03040004; Chave(s) fora do caminho da energia (em paralelo): 3130272004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03040003** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03040004** (aviso): 0% da rede fora da árvore do DJ (3 de 652 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3130272004, T_AL03040004, T_AL03040004; Chave(s) fora do caminho da energia (em paralelo): 3130272004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL03054060** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03059122** (falha): classificação colapsada: 1 trecho(s) para 15.3 km; 4 ponto(s) sem ligação com o DJ (fora da classificação); 4 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03059122, T_AL03059122, T_AL03059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03060122** (falha): classificação colapsada: 2 trecho(s) para 19.0 km; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03062013** (aviso): 12 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03062013, T_AL03062013, T_AL03062013, T_AL03062013, T_AL03062013, T_AL03062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03072001** (aviso): 73 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 73 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9002723001, T_AL03072001, T_AL03072001; Chave(s) fora do caminho da energia (em paralelo): 9002723001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03096004** (aviso): trechos a revisar: T2; 13 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300704004, 0301586004, 3310102004, 0302166004, 0344125004, 0344124004, 0359838004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300059004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03097122** (falha): classificação colapsada: 1 trecho(s) para 15.9 km; 17 ponto(s) sem ligação com o DJ (fora da classificação); 17 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03097122, T_AL03097122, T_AL03097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03099059** (aviso): 1134 ponto(s) sem ligação com o DJ (fora da classificação); 1134 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03101271** (falha): classificação colapsada: 1 trecho(s) para 29.5 km; 3038 ponto(s) sem ligação com o DJ (fora da classificação); 3038 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03101271, T_AL03101271, T_AL03101271; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03059122** (aviso): 4 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (6 de 575 vãos); 4 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03059122, T_AL03059122, T_AL03059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03060122** (aviso): 2% da rede fora da árvore do DJ (10 de 625 vãos); 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122, T_AL03060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03062013** (aviso): 12 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (15 de 4741 vãos); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03062013, T_AL03062013, T_AL03062013, T_AL03062013, T_AL03062013, T_AL03062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03072001** (falha): classificação colapsada: 84 km por trecho (6 trecho(s) para 502.4 km); 73 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2% da rede fora da árvore do DJ (74 de 4514 vãos); 73 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9002723001, T_AL03072001, T_AL03072001; Chave(s) fora do caminho da energia (em paralelo): 9002723001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03096004** (aviso): 1% da rede fora da árvore do DJ (13 de 1497 vãos); trechos a revisar: T2; 13 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004, T_AL03096004; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300704004, 0301586004, 3310102004, 0302166004, 0344125004, 0344124004, 0359838004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300059004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03097122** (aviso): 17 ponto(s) sem ligação com o DJ (fora da classificação); 3% da rede fora da árvore do DJ (19 de 546 vãos); 17 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03097122, T_AL03097122, T_AL03097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03099059** (falha): 92% da rede fora da árvore do DJ (1137 de 1238 vãos); 1134 ponto(s) sem ligação com o DJ (fora da classificação); 1134 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03101271** (falha): 77% da rede fora da árvore do DJ (3041 de 3963 vãos); 3038 ponto(s) sem ligação com o DJ (fora da classificação); 3038 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03101271, T_AL03101271, T_AL03101271; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL03102271** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03103004** (falha): classificação colapsada: 2 trecho(s) para 13.1 km; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03103004, T_AL03103004, T_AL03103004, T_AL03103004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03109039** (aviso): 150 ponto(s) sem ligação com o DJ (fora da classificação); trechos a revisar: T2; 150 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03109039; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300875039; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0310239039; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL03113003** (falha): classificação colapsada: 1 trecho(s) para 28.7 km; 141 ponto(s) sem ligação com o DJ (fora da classificação); 141 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03113003, T_AL03113003, T_AL03113003, T_AL03113003, T_AL03113003, T_AL03113003, T_AL03113003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04010004** (aviso): 1 chave(s) do KML sem vão correspondente na rede; 2 chave(s) de proteção sem trecho (não seccionam a rede): 0300600004, 7902218004 — 1 religador(es); 9 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9004479004, Suporte Chave 0202671004, T_AL04010004, T_AL04010004, T_AL04010004, T_AL04010004, T_AL04010004, T_AL04010004, T_AL04010004; Chave(s) fora do caminho da energia (em paralelo): 9004479004, 0202671004; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0200547004
-- **AL04020023** (aviso): 95 ponto(s) sem ligação com o DJ (fora da classificação); 95 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04040003** (falha): classificação colapsada: 1 trecho(s) para 21.4 km; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04040003, T_AL04040003, T_AL04040003, T_AL04040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04040004** (falha): classificação colapsada: 2 trecho(s) para 23.8 km; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04040004, T_AL04040004, T_AL04040004, T_AL04040004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04059122** (falha): classificação colapsada: 2 trecho(s) para 22.7 km; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04059122, T_AL04059122, T_AL04059122, T_AL04059122, T_AL04059122, T_AL04059122, T_AL04059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04060122** (falha): classificação colapsada: 1 trecho(s) para 24.9 km; 7 ponto(s) sem ligação com o DJ (fora da classificação); 7 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04062013** (aviso): 27 ponto(s) sem ligação com o DJ (fora da classificação); 27 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 17 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100178013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013; Chave(s) fora do caminho da energia (em paralelo): 3100178013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04072001** (falha): classificação colapsada: 1 trecho(s) para 95.3 km; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04072001, T_AL04072001, T_AL04072001, T_AL04072001, T_AL04072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04096004** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0310033004; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04096004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04097122** (falha): classificação colapsada: 1 trecho(s) para 33.5 km; 45 ponto(s) sem ligação com o DJ (fora da classificação); 45 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04099059** (falha): classificação colapsada: 2 trecho(s) para 58.4 km; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04099059, T_AL04099059, T_AL04099059, T_AL04099059, T_AL04099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04103004** (falha): classificação colapsada: 1 trecho(s) para 9.5 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04103004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04113003** (falha): classificação colapsada: 1 trecho(s) para 43.6 km; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04113003, T_AL04113003, T_AL04113003, T_AL04113003, T_AL04113003, T_AL04113003, T_AL04113003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04244003** (falha): classificação colapsada: 2 trecho(s) para 19.6 km; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04244003, T_AL04244003, T_AL04244003, T_AL04244003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05010004** (aviso): 1 chave(s) do KML sem vão correspondente na rede; 3 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 0202522004, T_AL05010004, T_AL05010004; Chave(s) fora do caminho da energia (em paralelo): 0202522004; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0202547004, 0345822004
-- **AL05020003** (aviso): 6 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0345138003; 6 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05020023** (aviso): 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05020023, T_AL05020023, T_AL05020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05040003** (falha): classificação colapsada: 1 trecho(s) para 16.1 km; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05040003, T_AL05040003, T_AL05040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05040004** (falha): classificação colapsada: 1 trecho(s) para 25.1 km; sem arquivo de postes: nós sem número de poste; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05059122** (aviso): 399 ponto(s) sem ligação com o DJ (fora da classificação); 399 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05060122** (falha): classificação colapsada: 2 trecho(s) para 14.5 km; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05060122, T_AL05060122, T_AL05060122, T_AL05060122, T_AL05060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05062013** (falha): classificação colapsada: 1 trecho(s) para 94.2 km; 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05062013, T_AL05062013, T_AL05062013, T_AL05062013, T_AL05062013, T_AL05062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05072001** (falha): classificação colapsada: 1 trecho(s) para 29.1 km; 27 ponto(s) sem ligação com o DJ (fora da classificação); 27 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05097122** (falha): classificação colapsada: 1 trecho(s) para 17.3 km; 9 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05099059** (falha): classificação colapsada: 1 trecho(s) para 17.8 km; 7 ponto(s) sem ligação com o DJ (fora da classificação); 7 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL05103004** (aviso): 583 ponto(s) sem ligação com o DJ (fora da classificação); 583 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03103004** (aviso): 1% da rede fora da árvore do DJ (4 de 435 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03103004, T_AL03103004, T_AL03103004, T_AL03103004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03109039** (falha): classificação colapsada: 96 km por trecho (3 trecho(s) para 287.9 km); 150 ponto(s) sem ligação com o DJ (fora da classificação); 5% da rede fora da árvore do DJ (142 de 2970 vãos); trechos a revisar: T2; 150 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03109039; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300875039; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0310239039; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL03113003** (aviso): 141 ponto(s) sem ligação com o DJ (fora da classificação); 16% da rede fora da árvore do DJ (147 de 928 vãos); 141 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_AL03113003, T_AL03113003, T_AL03113003, T_AL03113003, T_AL03113003, T_AL03113003, T_AL03113003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04010004** (aviso): 1 chave(s) do KML sem vão correspondente na rede; 2 chave(s) de proteção sem trecho (não seccionam a rede): 0300600004, 7902218004 — 1 religador(es); 1% da rede fora da árvore do DJ (9 de 666 vãos); 9 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9004479004, Suporte Chave 0202671004, T_AL04010004, T_AL04010004, T_AL04010004, T_AL04010004, T_AL04010004, T_AL04010004, T_AL04010004; Chave(s) fora do caminho da energia (em paralelo): 9004479004, 0202671004; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0200547004
+- **AL04020023** (falha): 80% da rede fora da árvore do DJ (95 de 119 vãos); 95 ponto(s) sem ligação com o DJ (fora da classificação); 95 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04040003** (aviso): 1% da rede fora da árvore do DJ (4 de 701 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04040003, T_AL04040003, T_AL04040003, T_AL04040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04040004** (aviso): 1% da rede fora da árvore do DJ (4 de 776 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04040004, T_AL04040004, T_AL04040004, T_AL04040004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04059122** (aviso): 1% da rede fora da árvore do DJ (7 de 777 vãos); 7 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04059122, T_AL04059122, T_AL04059122, T_AL04059122, T_AL04059122, T_AL04059122, T_AL04059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04060122** (aviso): 7 ponto(s) sem ligação com o DJ (fora da classificação); 2% da rede fora da árvore do DJ (17 de 861 vãos); 7 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122, T_AL04060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04062013** (aviso): 27 ponto(s) sem ligação com o DJ (fora da classificação); 5% da rede fora da árvore do DJ (41 de 878 vãos); 27 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 17 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100178013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013, T_AL04062013; Chave(s) fora do caminho da energia (em paralelo): 3100178013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04072001** (falha): classificação colapsada: 95 km por trecho (1 trecho(s) para 95.3 km); 0% da rede fora da árvore do DJ (5 de 1932 vãos); 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04072001, T_AL04072001, T_AL04072001, T_AL04072001, T_AL04072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04096004** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0310033004; 0% da rede fora da árvore do DJ (1 de 1301 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04096004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04097122** (aviso): 45 ponto(s) sem ligação com o DJ (fora da classificação); 5% da rede fora da árvore do DJ (54 de 1145 vãos); 45 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122, T_AL04097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04099059** (aviso): 0% da rede fora da árvore do DJ (5 de 1289 vãos); 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04099059, T_AL04099059, T_AL04099059, T_AL04099059, T_AL04099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04103004** (aviso): 0% da rede fora da árvore do DJ (1 de 310 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04103004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04113003** (aviso): 1% da rede fora da árvore do DJ (7 de 1281 vãos); 7 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04113003, T_AL04113003, T_AL04113003, T_AL04113003, T_AL04113003, T_AL04113003, T_AL04113003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL04244003** (aviso): 1% da rede fora da árvore do DJ (4 de 602 vãos); trechos a revisar: T2; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL04244003, T_AL04244003, T_AL04244003, T_AL04244003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05010004** (aviso): 1 chave(s) do KML sem vão correspondente na rede; 0% da rede fora da árvore do DJ (3 de 768 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 0202522004, T_AL05010004, T_AL05010004; Chave(s) fora do caminho da energia (em paralelo): 0202522004; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0202547004, 0345822004
+- **AL05020003** (aviso): 6 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0345138003; 1% da rede fora da árvore do DJ (17 de 1160 vãos); 6 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003, T_AL05020003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05020023** (aviso): 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (3 de 4096 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05020023, T_AL05020023, T_AL05020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05040003** (aviso): 1% da rede fora da árvore do DJ (3 de 521 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05040003, T_AL05040003, T_AL05040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05040004** (aviso): sem arquivo de postes: nós sem número de poste; 1% da rede fora da árvore do DJ (8 de 828 vãos); 8 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004, T_AL05040004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05059122** (falha): 91% da rede fora da árvore do DJ (401 de 439 vãos); 399 ponto(s) sem ligação com o DJ (fora da classificação); 399 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05060122** (aviso): 1% da rede fora da árvore do DJ (5 de 543 vãos); 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05060122, T_AL05060122, T_AL05060122, T_AL05060122, T_AL05060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05062013** (falha): classificação colapsada: 94 km por trecho (1 trecho(s) para 94.2 km); 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (6 de 1690 vãos); 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05062013, T_AL05062013, T_AL05062013, T_AL05062013, T_AL05062013, T_AL05062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05072001** (aviso): 27 ponto(s) sem ligação com o DJ (fora da classificação); 4% da rede fora da árvore do DJ (35 de 944 vãos); 27 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001, T_AL05072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05097122** (aviso): 1% da rede fora da árvore do DJ (9 de 616 vãos); 9 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122, T_AL05097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05099059** (aviso): 7 ponto(s) sem ligação com o DJ (fora da classificação); 3% da rede fora da árvore do DJ (18 de 688 vãos); 7 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059, T_AL05099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL05103004** (falha): 95% da rede fora da árvore do DJ (584 de 614 vãos); 583 ponto(s) sem ligação com o DJ (fora da classificação); 583 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL06010004** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06020023** (falha): classificação colapsada: 1 trecho(s) para 42.4 km; 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06020023, T_AL06020023, T_AL06020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06040003** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06040003, T_AL06040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06059122** (falha): classificação colapsada: 1 trecho(s) para 18.6 km; 5 ponto(s) sem ligação com o DJ (fora da classificação); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0308063122; 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3108715122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122; Chave(s) fora do caminho da energia (em paralelo): 3108715122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06060122** (falha): classificação colapsada: 1 trecho(s) para 36.3 km; 313 ponto(s) sem ligação com o DJ (fora da classificação); 313 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06060122, T_AL06060122, T_AL06060122, T_AL06060122, T_AL06060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06072001** (falha): classificação colapsada: 2 trecho(s) para 198.8 km; 164 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 164 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06072001, T_AL06072001, T_AL06072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06097122** (falha): classificação colapsada: 2 trecho(s) para 44.8 km; 3 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3109593122, T_AL06097122, T_AL06097122; Chave(s) fora do caminho da energia (em paralelo): 3109593122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06099059** (falha): classificação colapsada: 2 trecho(s) para 43.7 km; 1 religador(es) no cadastro e nenhum T2: nenhum deles secciona a rede; 14 ponto(s) sem ligação com o DJ (fora da classificação); 1 chave(s) de proteção sem trecho (não seccionam a rede): 7924268059 — 1 religador(es); 14 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3124268059, T_AL06099059, T_AL06099059, T_AL06099059, T_AL06099059, T_AL06099059, T_AL06099059; Chave(s) fora do caminho da energia (em paralelo): 3124268059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06103004** (falha): classificação colapsada: 1 trecho(s) para 16.0 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06103004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL07010004** (aviso): 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07010004, T_AL07010004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL07059122** (falha): classificação colapsada: 1 trecho(s) para 31.6 km; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07059122, T_AL07059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL07060122** (falha): classificação colapsada: 1 trecho(s) para 20.7 km; 2 ponto(s) sem ligação com o DJ (fora da classificação); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0331681122; 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07060122, T_AL07060122, T_AL07060122, T_AL07060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL07097122** (falha): classificação colapsada: 2 trecho(s) para 36.8 km; 12 ponto(s) sem ligação com o DJ (fora da classificação); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07097122, T_AL07097122, T_AL07097122, T_AL07097122, T_AL07097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL07099059** (falha): classificação colapsada: 1 trecho(s) para 7.0 km; 364 ponto(s) sem ligação com o DJ (fora da classificação); 364 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL07103004** (falha): classificação colapsada: 2 trecho(s) para 50.4 km; 5 ponto(s) sem ligação com o DJ (fora da classificação); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3128466004, T_AL07103004, T_AL07103004, T_AL07103004, T_AL07103004, T_AL07103004; Chave(s) fora do caminho da energia (em paralelo): 3128466004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL08010004** (falha): classificação colapsada: 1 trecho(s) para 7.4 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL08059122** (aviso): 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL08060122** (falha): classificação colapsada: 1 trecho(s) para 33.1 km; 13 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3131610122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122; Chave(s) fora do caminho da energia (em paralelo): 3131610122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL08097122** (aviso): 20 ponto(s) sem ligação com o DJ (fora da classificação); 20 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 45 trecho(s) fechavam laço e ficaram fora da árvore: T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL08099059** (falha): classificação colapsada: 2 trecho(s) para 30.8 km; 24 ponto(s) sem ligação com o DJ (fora da classificação); 24 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL08099059, T_AL08099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL09059122** (falha): classificação colapsada: 2 trecho(s) para 31.6 km; 5 ponto(s) sem ligação com o DJ (fora da classificação); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL09059122, T_AL09059122, T_AL09059122, T_AL09059122, T_AL09059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL09060122** (falha): classificação colapsada: 1 trecho(s) para 11.0 km; 24 ponto(s) sem ligação com o DJ (fora da classificação); 24 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL09060122, T_AL09060122, T_AL09060122, T_AL09060122, T_AL09060122, T_AL09060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL09097122** (falha): classificação colapsada: 1 trecho(s) para 12.8 km; sem arquivo de postes: nós sem número de poste; 15 trecho(s) fechavam laço e ficaram fora da árvore: T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL10059122** (aviso): 212 ponto(s) sem ligação com o DJ (fora da classificação); 212 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 59 trecho(s) fechavam laço e ficaram fora da árvore: T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL10060122** (falha): classificação colapsada: 1 trecho(s) para 14.4 km; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL11059122** (falha): classificação colapsada: 1 trecho(s) para 14.7 km; 47 ponto(s) sem ligação com o DJ (fora da classificação); 47 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL11059122, T_AL11059122, T_AL11059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL11060122** (falha): classificação colapsada: 2 trecho(s) para 34.5 km; 35 ponto(s) sem ligação com o DJ (fora da classificação); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0364323122; 35 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 15 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9001179122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122; Chave(s) fora do caminho da energia (em paralelo): 9001179122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06020023** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (3 de 882 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06020023, T_AL06020023, T_AL06020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06040003** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (6 de 1302 vãos); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06040003, T_AL06040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06059122** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0308063122; 2% da rede fora da árvore do DJ (15 de 701 vãos); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3108715122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122, T_AL06059122; Chave(s) fora do caminho da energia (em paralelo): 3108715122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06060122** (aviso): 313 ponto(s) sem ligação com o DJ (fora da classificação); 24% da rede fora da árvore do DJ (317 de 1334 vãos); 313 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06060122, T_AL06060122, T_AL06060122, T_AL06060122, T_AL06060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06072001** (falha): classificação colapsada: 99 km por trecho (2 trecho(s) para 198.8 km); 164 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6% da rede fora da árvore do DJ (164 de 2561 vãos); 164 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06072001, T_AL06072001, T_AL06072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06097122** (aviso): 0% da rede fora da árvore do DJ (3 de 1312 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3109593122, T_AL06097122, T_AL06097122; Chave(s) fora do caminho da energia (em paralelo): 3109593122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06099059** (falha): 1 religador(es) no cadastro e nenhum T2: nenhum deles secciona a rede; 14 ponto(s) sem ligação com o DJ (fora da classificação); 1 chave(s) de proteção sem trecho (não seccionam a rede): 7924268059 — 1 religador(es); 1% da rede fora da árvore do DJ (19 de 1268 vãos); 14 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3124268059, T_AL06099059, T_AL06099059, T_AL06099059, T_AL06099059, T_AL06099059, T_AL06099059; Chave(s) fora do caminho da energia (em paralelo): 3124268059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06103004** (aviso): 0% da rede fora da árvore do DJ (1 de 559 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL06103004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL07010004** (aviso): 0% da rede fora da árvore do DJ (2 de 406 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07010004, T_AL07010004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL07059122** (aviso): 0% da rede fora da árvore do DJ (2 de 673 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07059122, T_AL07059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL07060122** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0331681122; 1% da rede fora da árvore do DJ (5 de 733 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07060122, T_AL07060122, T_AL07060122, T_AL07060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL07097122** (aviso): 12 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (14 de 1219 vãos); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07097122, T_AL07097122, T_AL07097122, T_AL07097122, T_AL07097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL07099059** (falha): 61% da rede fora da árvore do DJ (364 de 598 vãos); 364 ponto(s) sem ligação com o DJ (fora da classificação); 364 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_AL07099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL07103004** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (10 de 1264 vãos); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3128466004, T_AL07103004, T_AL07103004, T_AL07103004, T_AL07103004, T_AL07103004; Chave(s) fora do caminho da energia (em paralelo): 3128466004; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL08010004** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL08059122** (aviso): 1% da rede fora da árvore do DJ (10 de 703 vãos); 10 trecho(s) fechavam laço e ficaram fora da árvore: T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122, T_AL08059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL08060122** (aviso): 1% da rede fora da árvore do DJ (13 de 1150 vãos); 13 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3131610122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122, T_AL08060122; Chave(s) fora do caminho da energia (em paralelo): 3131610122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL08097122** (aviso): 20 ponto(s) sem ligação com o DJ (fora da classificação); 5% da rede fora da árvore do DJ (63 de 1172 vãos); 20 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 45 trecho(s) fechavam laço e ficaram fora da árvore: T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122, T_AL08097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL08099059** (aviso): 24 ponto(s) sem ligação com o DJ (fora da classificação); 3% da rede fora da árvore do DJ (24 de 778 vãos); 24 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_AL08099059, T_AL08099059; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL09059122** (aviso): 5 ponto(s) sem ligação com o DJ (fora da classificação); 1% da rede fora da árvore do DJ (9 de 1070 vãos); 5 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_AL09059122, T_AL09059122, T_AL09059122, T_AL09059122, T_AL09059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL09060122** (aviso): 24 ponto(s) sem ligação com o DJ (fora da classificação); 7% da rede fora da árvore do DJ (29 de 441 vãos); 24 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_AL09060122, T_AL09060122, T_AL09060122, T_AL09060122, T_AL09060122, T_AL09060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL09097122** (aviso): sem arquivo de postes: nós sem número de poste; 3% da rede fora da árvore do DJ (15 de 495 vãos); 15 trecho(s) fechavam laço e ficaram fora da árvore: T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122, T_AL09097122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL10059122** (aviso): 212 ponto(s) sem ligação com o DJ (fora da classificação); 22% da rede fora da árvore do DJ (269 de 1206 vãos); 212 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 59 trecho(s) fechavam laço e ficaram fora da árvore: T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122, T_AL10059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL10060122** (aviso): 2% da rede fora da árvore do DJ (11 de 503 vãos); 11 trecho(s) fechavam laço e ficaram fora da árvore: T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122, T_AL10060122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL11059122** (aviso): 47 ponto(s) sem ligação com o DJ (fora da classificação); 9% da rede fora da árvore do DJ (49 de 570 vãos); 47 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_AL11059122, T_AL11059122, T_AL11059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL11060122** (aviso): 35 ponto(s) sem ligação com o DJ (fora da classificação); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0364323122; 4% da rede fora da árvore do DJ (48 de 1204 vãos); 35 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 15 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9001179122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122, T_AL11060122; Chave(s) fora do caminho da energia (em paralelo): 9001179122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD00000023** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01003036** (aviso): 25 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 chave(s) de proteção sem trecho (não seccionam a rede): 0310514097, 0310541097, 0364989032, 0301089032; trechos a revisar: T2-A, T2-B, T2-C; 13 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036; 8 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310273097, 3300662032, 3320157032, 3310152032, 0301069032, 0355826032, 0328201036, 3320232032; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300485107; Mais de um religador pode ser o 2º do tronco; escolhido 7926250032 (mais rede depois dele). Outros candidatos: 7928242097, 7926246032.
-- **LD01004013** (falha): classificação colapsada: 1 trecho(s) para 5.2 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01005098** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100423098; Chave(s) fora do caminho da energia (em paralelo): 3100423098; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300440098; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3310094098; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01008032** (aviso): 16655 m fora da malha municipal do Tocantins; 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01008032; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3301197032; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01010021** (aviso): 363 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 363 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100666072, T_LD01010021; Chave(s) fora do caminho da energia (em paralelo): 3100666072; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01010153** (aviso): 6207 ponto(s) sem ligação com o DJ (fora da classificação); 6207 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01014045** (aviso): 311 ponto(s) sem ligação com o DJ (fora da classificação); 19 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 311 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01014045, T_LD01014045, T_LD01014045; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01020023** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01020023, T_LD01020023, T_LD01020023, T_LD01020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01025012** (aviso): 2798 ponto(s) sem ligação com o DJ (fora da classificação); 7 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2798 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01025012, T_LD01025012, T_LD01025012, T_LD01025012; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01003036** (aviso): 25 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 chave(s) de proteção sem trecho (não seccionam a rede): 0310514097, 0310541097, 0364989032, 0301089032; 0% da rede fora da árvore do DJ (13 de 13886 vãos); trechos a revisar: T2-A, T2-B, T2-C; 13 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036, T_LD01003036; 8 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310273097, 3300662032, 3320157032, 3310152032, 0301069032, 0355826032, 0328201036, 3320232032; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300485107; Mais de um religador pode ser o 2º do tronco; escolhido 7926250032 (mais rede depois dele). Outros candidatos: 7928242097, 7926246032.
+- **LD01004013** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01005098** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 3763 vãos); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100423098; Chave(s) fora do caminho da energia (em paralelo): 3100423098; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300440098; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3310094098; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01008032** (aviso): 16655 m fora da malha municipal do Tocantins; 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 1538 vãos); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01008032; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3301197032; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01010021** (falha): classificação colapsada: 106 km por trecho (10 trecho(s) para 1055.1 km); 363 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4% da rede fora da árvore do DJ (347 de 9474 vãos); 363 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100666072, T_LD01010021; Chave(s) fora do caminho da energia (em paralelo): 3100666072; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01010153** (falha): 100% da rede fora da árvore do DJ (6207 de 6209 vãos); 6207 ponto(s) sem ligação com o DJ (fora da classificação); 6207 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01014045** (aviso): 311 ponto(s) sem ligação com o DJ (fora da classificação); 19 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 8% da rede fora da árvore do DJ (311 de 3776 vãos); trechos a revisar: T2; 311 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01014045, T_LD01014045, T_LD01014045; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01020023** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (5 de 5871 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01020023, T_LD01020023, T_LD01020023, T_LD01020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01025012** (falha): 28% da rede fora da árvore do DJ (2800 de 10164 vãos); classificação colapsada: 97 km por trecho (9 trecho(s) para 875.8 km); 2798 ponto(s) sem ligação com o DJ (fora da classificação); 7 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2798 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01025012, T_LD01025012, T_LD01025012, T_LD01025012; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD01027074** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01028074** (aviso): 26 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 26 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01035052** (aviso): 25 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 25 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01035052, T_LD01035052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01036052** (aviso): 522 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 522 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01036052, T_LD01036052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01038009** (aviso): 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01038009, T_LD01038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01040003** (falha): classificação colapsada: 1 trecho(s) para 22.9 km; 71 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 71 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01040003, T_LD01040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01047073** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01047073, T_LD01047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01050008** (aviso): 14 ponto(s) sem ligação com o DJ (fora da classificação); 30 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 14 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01050008, T_LD01050008, T_LD01050008, T_LD01050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01051035** (aviso): 14 ponto(s) sem ligação com o DJ (fora da classificação); 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 14 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01051035, T_LD01051035, T_LD01051035, T_LD01051035; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01054060** (aviso): 41 ponto(s) sem ligação com o DJ (fora da classificação); 28 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 41 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01054060, T_LD01054060, T_LD01054060; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01056046** (aviso): 58 ponto(s) sem ligação com o DJ (fora da classificação); 64 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 58 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01028074** (falha): classificação colapsada: 67 km por trecho (3 trecho(s) para 200.8 km); 26 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (25 de 2067 vãos); 26 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01035052** (falha): classificação colapsada: 52 km por trecho (8 trecho(s) para 412.5 km); 25 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (25 de 3706 vãos); 25 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01035052, T_LD01035052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01036052** (falha): classificação colapsada: 58 km por trecho (4 trecho(s) para 230.1 km); 522 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 20% da rede fora da árvore do DJ (519 de 2579 vãos); 522 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01036052, T_LD01036052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01038009** (aviso): 2% da rede fora da árvore do DJ (2 de 112 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01038009, T_LD01038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01040003** (aviso): 71 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 19% da rede fora da árvore do DJ (70 de 369 vãos); 71 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01040003, T_LD01040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01047073** (falha): classificação colapsada: 53 km por trecho (3 trecho(s) para 158.8 km); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 1758 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01047073, T_LD01047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01050008** (falha): classificação colapsada: 66 km por trecho (9 trecho(s) para 590.3 km); 14 ponto(s) sem ligação com o DJ (fora da classificação); 30 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (13 de 5013 vãos); 14 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01050008, T_LD01050008, T_LD01050008, T_LD01050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01051035** (falha): classificação colapsada: 222 km por trecho (4 trecho(s) para 888.8 km); 14 ponto(s) sem ligação com o DJ (fora da classificação); 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (16 de 7593 vãos); 14 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01051035, T_LD01051035, T_LD01051035, T_LD01051035; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01054060** (falha): classificação colapsada: 56 km por trecho (10 trecho(s) para 557.2 km); 41 ponto(s) sem ligação com o DJ (fora da classificação); 28 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (41 de 4740 vãos); 41 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01054060, T_LD01054060, T_LD01054060; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01056046** (falha): classificação colapsada: 50 km por trecho (22 trecho(s) para 1104.1 km); 58 ponto(s) sem ligação com o DJ (fora da classificação); 64 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (64 de 9665 vãos); 58 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046, T_LD01056046; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD01057189** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01059122** (aviso): 15283 ponto(s) sem ligação com o DJ (fora da classificação); 15283 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01062013** (aviso): 4 ponto(s) sem ligação com o DJ (fora da classificação); 9 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01062013, T_LD01062013, T_LD01062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01065015** (aviso): 1946 ponto(s) sem ligação com o DJ (fora da classificação); 53 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1946 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01066094** (aviso): 1218 ponto(s) sem ligação com o DJ (fora da classificação); 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1218 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 13 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3114474148, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094; Chave(s) fora do caminho da energia (em paralelo): 3114474148; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01072001** (falha): classificação colapsada: 1 trecho(s) para 153.7 km; 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01076103** (falha): classificação colapsada: 2 trecho(s) para 136.7 km; 11 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 11 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01076103, T_LD01076103, T_LD01076103, T_LD01076103, T_LD01076103, T_LD01076103, T_LD01076103; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01084002** (aviso): 1284 ponto(s) sem ligação com o DJ (fora da classificação); 25 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1284 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 15 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01059122** (falha): 100% da rede fora da árvore do DJ (15275 de 15283 vãos); 15283 ponto(s) sem ligação com o DJ (fora da classificação); 15283 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01062013** (aviso): 4 ponto(s) sem ligação com o DJ (fora da classificação); 9 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (6 de 1774 vãos); 4 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01062013, T_LD01062013, T_LD01062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01065015** (falha): classificação colapsada: 84 km por trecho (30 trecho(s) para 2533.6 km); 1946 ponto(s) sem ligação com o DJ (fora da classificação); 53 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 8% da rede fora da árvore do DJ (1940 de 24180 vãos); 1946 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015, T_LD01065015; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01066094** (falha): classificação colapsada: 75 km por trecho (27 trecho(s) para 2036.3 km); 1218 ponto(s) sem ligação com o DJ (fora da classificação); 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6% da rede fora da árvore do DJ (1205 de 18611 vãos); 1218 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 13 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3114474148, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094, T_LD01066094; Chave(s) fora do caminho da energia (em paralelo): 3114474148; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01072001** (falha): classificação colapsada: 154 km por trecho (1 trecho(s) para 153.7 km); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 1908 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01072001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01076103** (falha): classificação colapsada: 68 km por trecho (2 trecho(s) para 136.7 km); 11 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (17 de 1919 vãos); 11 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01076103, T_LD01076103, T_LD01076103, T_LD01076103, T_LD01076103, T_LD01076103, T_LD01076103; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01084002** (falha): classificação colapsada: 54 km por trecho (9 trecho(s) para 487.0 km); 1284 ponto(s) sem ligação com o DJ (fora da classificação); 25 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 21% da rede fora da árvore do DJ (1294 de 6032 vãos); 1284 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 15 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002, T_LD01084002; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD01090074** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01095030** (aviso): 3296 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3296 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3121277157, T_LD01095030, T_LD01095030, T_LD01095030; Chave(s) fora do caminho da energia (em paralelo): 3121277157; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01100001** (aviso): 30 ponto(s) sem ligação com o DJ (fora da classificação); 17 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 30 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01105019** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01107074** (falha): classificação colapsada: 1 trecho(s) para 7.0 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01110005** (aviso): 12 ponto(s) sem ligação com o DJ (fora da classificação); 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01414015** (aviso): sem arquivo de postes: nós sem número de poste; 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01414015, T_LD01414015, T_LD01414015, T_LD01414015; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01414027** (aviso): 5522 m fora da malha municipal do Tocantins; 12 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01434149** (aviso): 7240 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7240 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3126839055, T_LD01434149, T_LD01434149, T_LD01434149, T_LD01434149; Chave(s) fora do caminho da energia (em paralelo): 3126839055; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0301056055, 0308267055; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02001037** (aviso): 18 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0310256037, 0301080003; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02001037, T_LD02001037, T_LD02001037, T_LD02001037; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300001243, 3310001243; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300929003
-- **LD02003036** (aviso): 687 m fora da malha municipal do Tocantins; 43 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0300085186, 0300006186; trechos a revisar: T2-A, T2-B; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02003036, T_LD02003036, T_LD02003036, T_LD02003036, T_LD02003036, T_LD02003036, T_LD02003036; 26 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0337141097, 0337128097, 0337145097, 0337143097, 0337119097, 0337136097, 0337129097, 0337139097, 0337146094, 0337142094, 0320007094, 0337138094, 0337137094, 0337131094, 0337116186, 3310079186, 0337133186, 0337118186, 0337134186, 3310050186, 0330525186, 0337127186, 0337130186, 0337126186, 0337125186, 0337132186; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0337120186; Mais de um religador pode ser o 2º do tronco; escolhido 7936003094 (mais rede depois dele). Outros candidatos: 7933960094.
-- **LD02004013** (falha): classificação colapsada: 1 trecho(s) para 11.4 km; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02005098** (falha): classificação colapsada: 2 trecho(s) para 12.1 km; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02010004** (aviso): 37 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 3300016080; trechos a revisar: T2-A, T2-B, T2-D; 14 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004; 12 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0302363004, 0352535004, 4000621004, 3301808004, 3304041004, 0300049177, 3300003016, 3300554053, 3300525053, 0330935080, 0330936080, 0300664080; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300670080; Mais de um religador pode ser o 2º do tronco; escolhido 7925739016 (mais rede depois dele). Outros candidatos: 7909569004, 7925732016.
-- **LD02010021** (aviso): 2875 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2875 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02010021, T_LD02010021, T_LD02010021; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02010153** (aviso): 152 ponto(s) sem ligação com o DJ (fora da classificação); 29 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 152 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100491025, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153; Chave(s) fora do caminho da energia (em paralelo): 3100491025; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300001025; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02014045** (aviso): 19 ponto(s) sem ligação com o DJ (fora da classificação); 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 19 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02014045, T_LD02014045; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02020023** (aviso): 486 ponto(s) sem ligação com o DJ (fora da classificação); 54 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 486 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02022033** (aviso): 4638 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4638 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02022033, T_LD02022033, T_LD02022033; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02025012** (falha): classificação colapsada: 2 trecho(s) para 115.3 km; 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01095030** (falha): 41% da rede fora da árvore do DJ (3297 de 8063 vãos); classificação colapsada: 79 km por trecho (7 trecho(s) para 550.3 km); 3296 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3296 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3121277157, T_LD01095030, T_LD01095030, T_LD01095030; Chave(s) fora do caminho da energia (em paralelo): 3121277157; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01100001** (aviso): 30 ponto(s) sem ligação com o DJ (fora da classificação); 17 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (28 de 2684 vãos); 30 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01105019** (falha): classificação colapsada: 114 km por trecho (4 trecho(s) para 455.2 km); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01107074** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01110005** (falha): classificação colapsada: 125 km por trecho (4 trecho(s) para 501.5 km); 12 ponto(s) sem ligação com o DJ (fora da classificação); 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (10 de 4606 vãos); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01414015** (falha): classificação colapsada: 94 km por trecho (6 trecho(s) para 563.2 km); sem arquivo de postes: nós sem número de poste; 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (4 de 4937 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01414015, T_LD01414015, T_LD01414015, T_LD01414015; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01414027** (falha): classificação colapsada: 67 km por trecho (11 trecho(s) para 741.8 km); 5522 m fora da malha municipal do Tocantins; 12 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (18 de 7000 vãos); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027, T_LD01414027; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD01434149** (falha): 67% da rede fora da árvore do DJ (7232 de 10749 vãos); classificação colapsada: 60 km por trecho (6 trecho(s) para 359.7 km); 7240 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; 7240 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3126839055, T_LD01434149, T_LD01434149, T_LD01434149, T_LD01434149; Chave(s) fora do caminho da energia (em paralelo): 3126839055; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0301056055, 0308267055; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02001037** (aviso): 18 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0310256037, 0301080003; 0% da rede fora da árvore do DJ (4 de 5304 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02001037, T_LD02001037, T_LD02001037, T_LD02001037; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300001243, 3310001243; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300929003
+- **LD02003036** (aviso): 687 m fora da malha municipal do Tocantins; 43 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0300085186, 0300006186; 0% da rede fora da árvore do DJ (7 de 13813 vãos); trechos a revisar: T2-A, T2-B; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02003036, T_LD02003036, T_LD02003036, T_LD02003036, T_LD02003036, T_LD02003036, T_LD02003036; 26 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0337141097, 0337128097, 0337145097, 0337143097, 0337119097, 0337136097, 0337129097, 0337139097, 0337146094, 0337142094, 0320007094, 0337138094, 0337137094, 0337131094, 0337116186, 3310079186, 0337133186, 0337118186, 0337134186, 3310050186, 0330525186, 0337127186, 0337130186, 0337126186, 0337125186, 0337132186; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0337120186; Mais de um religador pode ser o 2º do tronco; escolhido 7936003094 (mais rede depois dele). Outros candidatos: 7933960094.
+- **LD02004013** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02005098** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02010004** (aviso): 37 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 3300016080; 0% da rede fora da árvore do DJ (14 de 13353 vãos); trechos a revisar: T2-A, T2-B, T2-D; 14 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004, T_LD02010004; 12 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0302363004, 0352535004, 4000621004, 3301808004, 3304041004, 0300049177, 3300003016, 3300554053, 3300525053, 0330935080, 0330936080, 0300664080; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300670080; Mais de um religador pode ser o 2º do tronco; escolhido 7925739016 (mais rede depois dele). Outros candidatos: 7909569004, 7925732016.
+- **LD02010021** (falha): 42% da rede fora da árvore do DJ (2871 de 6894 vãos); classificação colapsada: 61 km por trecho (7 trecho(s) para 429.9 km); 2875 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2875 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02010021, T_LD02010021, T_LD02010021; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02010153** (falha): classificação colapsada: 104 km por trecho (12 trecho(s) para 1242.1 km); 152 ponto(s) sem ligação com o DJ (fora da classificação); 29 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (155 de 10667 vãos); trechos a revisar: T2; 152 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 10 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100491025, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153, T_LD02010153; Chave(s) fora do caminho da energia (em paralelo): 3100491025; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300001025; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02014045** (aviso): 19 ponto(s) sem ligação com o DJ (fora da classificação); 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (18 de 2443 vãos); 19 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02014045, T_LD02014045; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02020023** (falha): classificação colapsada: 56 km por trecho (28 trecho(s) para 1571.4 km); 486 ponto(s) sem ligação com o DJ (fora da classificação); 54 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4% da rede fora da árvore do DJ (489 de 13790 vãos); 486 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023, T_LD02020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02022033** (falha): 39% da rede fora da árvore do DJ (4640 de 12044 vãos); 4638 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4638 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02022033, T_LD02022033, T_LD02022033; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02025012** (falha): classificação colapsada: 58 km por trecho (2 trecho(s) para 115.3 km); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD02027074** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD02028074** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02036052** (aviso): 9102 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 9102 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02036052, T_LD02036052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02038009** (aviso): 237 ponto(s) sem ligação com o DJ (fora da classificação); 20 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 237 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02038009, T_LD02038009, T_LD02038009, T_LD02038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02040003** (aviso): 1931 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1931 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02047073** (aviso): 12 ponto(s) sem ligação com o DJ (fora da classificação); 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02047073, T_LD02047073, T_LD02047073, T_LD02047073, T_LD02047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02050008** (aviso): 9340 ponto(s) sem ligação com o DJ (fora da classificação); 23 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 9340 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02050008, T_LD02050008, T_LD02050008, T_LD02050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02059122** (aviso): 19400 ponto(s) sem ligação com o DJ (fora da classificação); 19400 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02062013** (aviso): 35 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02062013; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0301443017; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02036052** (falha): 80% da rede fora da árvore do DJ (9099 de 11375 vãos); 9102 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 9102 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02036052, T_LD02036052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02038009** (falha): classificação colapsada: 57 km por trecho (8 trecho(s) para 457.7 km); 237 ponto(s) sem ligação com o DJ (fora da classificação); 20 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6% da rede fora da árvore do DJ (240 de 4294 vãos); 237 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02038009, T_LD02038009, T_LD02038009, T_LD02038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02040003** (falha): 27% da rede fora da árvore do DJ (1923 de 7227 vãos); classificação colapsada: 87 km por trecho (7 trecho(s) para 609.8 km); 1931 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1931 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003, T_LD02040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02047073** (falha): classificação colapsada: 143 km por trecho (6 trecho(s) para 859.4 km); 12 ponto(s) sem ligação com o DJ (fora da classificação); 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (15 de 7471 vãos); 12 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02047073, T_LD02047073, T_LD02047073, T_LD02047073, T_LD02047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02050008** (falha): 57% da rede fora da árvore do DJ (9308 de 16468 vãos); classificação colapsada: 52 km por trecho (17 trecho(s) para 881.4 km); 9340 ponto(s) sem ligação com o DJ (fora da classificação); 23 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 9340 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02050008, T_LD02050008, T_LD02050008, T_LD02050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02059122** (falha): 100% da rede fora da árvore do DJ (19396 de 19404 vãos); 19400 ponto(s) sem ligação com o DJ (fora da classificação); 19400 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02062013** (aviso): 35 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 3283 vãos); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02062013; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0301443017; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD02065015** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02066094** (aviso): 179 ponto(s) sem ligação com o DJ (fora da classificação); 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 179 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02066094, T_LD02066094; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02072001** (aviso): 109 ponto(s) sem ligação com o DJ (fora da classificação); 47 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 109 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100367152, Suporte Chave 3100377152, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001; Chave(s) fora do caminho da energia (em paralelo): 3100367152, 3100377152; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02076103** (falha): classificação colapsada: 2 trecho(s) para 48.4 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02076103; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02095030** (falha): classificação colapsada: 2 trecho(s) para 51.4 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02095030; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02100001** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0310820001; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02100001, T_LD02100001, T_LD02100001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02105019** (aviso): 22 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 22 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02105019, T_LD02105019, T_LD02105019; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02107074** (falha): classificação colapsada: 2 trecho(s) para 73.4 km; 1 chave(s) de proteção sem trecho (não seccionam a rede): 0347656074; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02107074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02109039** (aviso): 12278 m fora da malha municipal do Tocantins; 96 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0357760039; 96 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02109039, T_LD02109039; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02110005** (aviso): 7555 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 3332110005; 7555 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02110005, T_LD02110005, T_LD02110005; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02414027** (aviso): 3 ponto(s) sem ligação com o DJ (fora da classificação); sem arquivo de postes: nós sem número de poste; 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3120790038, T_LD02414027, T_LD02414027, T_LD02414027, T_LD02414027, T_LD02414027, T_LD02414027; Chave(s) fora do caminho da energia (em paralelo): 3120790038; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02424015** (aviso): 1016 m fora da malha municipal do Tocantins; 1068 ponto(s) sem ligação com o DJ (fora da classificação); sem arquivo de postes: nós sem número de poste; 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1068 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02424015, T_LD02424015, T_LD02424015, T_LD02424015, T_LD02424015, T_LD02424015, T_LD02424015; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD02424149** (falha): classificação colapsada: 1 trecho(s) para 10.4 km; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02424149, T_LD02424149; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03002091** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9001184091; Chave(s) fora do caminho da energia (em paralelo): 9001184091; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0341209028; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03005098** (aviso): 53 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 5 chave(s) de proteção sem trecho (não seccionam a rede): 0365280109, 0322965090, 0310003119, 3300142119, 0330929171; trechos a revisar: T2-A, T2-B; 11 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100004109, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098; Chave(s) fora do caminho da energia (em paralelo): 3100004109; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0310026080, 3317709109, 3300116171, 0300174156, 3300021119; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300421119; Mais de um religador pode ser o 2º do tronco; escolhido 7949650109 (mais rede depois dele). Outros candidatos: 7930919109.
-- **LD03010004** (aviso): 56 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0300193157, 0301121040; trechos a revisar: T2-C, T2-D, T2-E, T2-F; 13 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3103935004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004; Chave(s) fora do caminho da energia (em paralelo): 3103935004; 19 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0327753004, 0327787004, 0327754004, 0327788004, 0327755056, 0327756056, 0327789040, 0327757056, 0327759056, 3310062159, 0310069159, 3300705058, 0300458159, 3300663058, 0300681058, 0302818058, 0327780157, 0300517058, 3320077040; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300473058; Mais de um religador pode ser o 2º do tronco; escolhido 7925150058 (mais rede depois dele). Outros candidatos: 7930281056, 7925880056, 7900558159.
-- **LD03010021** (aviso): 147 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 147 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03010021, T_LD03010021; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03014045** (aviso): 81 ponto(s) sem ligação com o DJ (fora da classificação); 51 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 81 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03014045, T_LD03014045, T_LD03014045, T_LD03014045, T_LD03014045, T_LD03014045; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03020023** (aviso): 2332 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2332 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03022033** (falha): classificação colapsada: 1 trecho(s) para 172.7 km; 10 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 10 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03022033, T_LD03022033, T_LD03022033, T_LD03022033, T_LD03022033, T_LD03022033; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03028074** (falha): classificação colapsada: 1 trecho(s) para 185.6 km; 2 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03028074, T_LD03028074, T_LD03028074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03036052** (falha): classificação colapsada: 1 trecho(s) para 7.6 km; 1360 ponto(s) sem ligação com o DJ (fora da classificação); 1360 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03038009** (aviso): 134 ponto(s) sem ligação com o DJ (fora da classificação); 32 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 3310001079; 134 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03040003** (aviso): 6808 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6808 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03040003, T_LD03040003, T_LD03040003, T_LD03040003, T_LD03040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03046026** (aviso): 13229 m fora da malha municipal do Tocantins; 2001 ponto(s) sem ligação com o DJ (fora da classificação); 48 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 416069; 2001 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 82 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9008691026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026; Chave(s) fora do caminho da energia (em paralelo): 9008691026; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300612096, 0300447096; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300504026; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03050008** (aviso): 850 ponto(s) sem ligação com o DJ (fora da classificação); 23 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 850 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03059122** (aviso): 7195 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7195 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03059122, T_LD03059122, T_LD03059122, T_LD03059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03062013** (aviso): 816 ponto(s) sem ligação com o DJ (fora da classificação); 31 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 816 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03062013, T_LD03062013, T_LD03062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03072001** (aviso): 776 ponto(s) sem ligação com o DJ (fora da classificação); 776 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03105019** (aviso): 62 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 3301420077; 62 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03109039** (aviso): 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03109039, T_LD03109039; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03414027** (aviso): sem arquivo de postes: nós sem número de poste; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03414027; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03414149** (aviso): 9278 ponto(s) sem ligação com o DJ (fora da classificação); 9278 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD03434001** (aviso): 502 ponto(s) sem ligação com o DJ (fora da classificação); sem arquivo de postes: nós sem número de poste; 502 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD04002091** (aviso): 29 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6 chave(s) de proteção sem trecho (não seccionam a rede): 0344476528, 0300467028, 0300554028, 7948761028, 3333870028, 0200550028 — 1 religador(es); trechos a revisar: T2-B, T2-C, T2-D, T2-E; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0310001028, 0300003245, 0300475028, 3300991028, 0300583028; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300603028; Mais de um religador pode ser o 2º do tronco; escolhido 7955523028 (mais rede depois dele). Outros candidatos: 7942509028, 7955635116, 7913661028.
-- **LD04010004** (aviso): 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0348701170; trechos a revisar: T2-A, T2-C, T2-E; 6 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100006170, T_LD04010004, T_LD04010004, T_LD04010004, T_LD04010004, T_LD04010004; Chave(s) fora do caminho da energia (em paralelo): 3100006170; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0365045159, 0300525159, 0352686058; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0301374004; Mais de um religador pode ser o 2º do tronco; escolhido 7958324004 (mais rede depois dele). Outros candidatos: 7928461040, 7925140058.
-- **LD04028074** (falha): classificação colapsada: 1 trecho(s) para 59.0 km; 2499 ponto(s) sem ligação com o DJ (fora da classificação); 7 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2499 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD04038009** (aviso): 3833 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3833 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD04040003** (aviso): 2039 ponto(s) sem ligação com o DJ (fora da classificação); 16 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2039 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0310145089; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD04050008** (falha): classificação colapsada: 1 trecho(s) para 18.5 km; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04050008, T_LD04050008, T_LD04050008, T_LD04050008, T_LD04050008, T_LD04050008, T_LD04050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD04062013** (aviso): 20 ponto(s) sem ligação com o DJ (fora da classificação); 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 20 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 9 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD04105019** (aviso): 24 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04105019; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD04444153** (aviso): 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04444153, T_LD04444153; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02066094** (falha): classificação colapsada: 65 km por trecho (7 trecho(s) para 452.3 km); 179 ponto(s) sem ligação com o DJ (fora da classificação); 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4% da rede fora da árvore do DJ (173 de 4360 vãos); 179 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02066094, T_LD02066094; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02072001** (falha): classificação colapsada: 75 km por trecho (25 trecho(s) para 1867.4 km); 109 ponto(s) sem ligação com o DJ (fora da classificação); 47 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (112 de 16343 vãos); 109 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100367152, Suporte Chave 3100377152, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001, T_LD02072001; Chave(s) fora do caminho da energia (em paralelo): 3100367152, 3100377152; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02076103** (aviso): 0% da rede fora da árvore do DJ (1 de 857 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02076103; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02095030** (aviso): 0% da rede fora da árvore do DJ (1 de 525 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02095030; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02100001** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0310820001; 0% da rede fora da árvore do DJ (3 de 1324 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02100001, T_LD02100001, T_LD02100001; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02105019** (aviso): 22 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (23 de 4696 vãos); 22 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02105019, T_LD02105019, T_LD02105019; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02107074** (aviso): 1 chave(s) de proteção sem trecho (não seccionam a rede): 0347656074; 0% da rede fora da árvore do DJ (1 de 849 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02107074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02109039** (falha): classificação colapsada: 80 km por trecho (6 trecho(s) para 482.6 km); 12278 m fora da malha municipal do Tocantins; 96 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0357760039; 2% da rede fora da árvore do DJ (91 de 4886 vãos); 96 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02109039, T_LD02109039; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02110005** (falha): 51% da rede fora da árvore do DJ (7544 de 14760 vãos); classificação colapsada: 149 km por trecho (5 trecho(s) para 745.4 km); 7555 ponto(s) sem ligação com o DJ (fora da classificação); 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 3332110005; 7555 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02110005, T_LD02110005, T_LD02110005; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02414027** (falha): classificação colapsada: 74 km por trecho (5 trecho(s) para 370.4 km); 3 ponto(s) sem ligação com o DJ (fora da classificação); sem arquivo de postes: nós sem número de poste; 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (9 de 4089 vãos); 3 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3120790038, T_LD02414027, T_LD02414027, T_LD02414027, T_LD02414027, T_LD02414027, T_LD02414027; Chave(s) fora do caminho da energia (em paralelo): 3120790038; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02424015** (falha): classificação colapsada: 91 km por trecho (17 trecho(s) para 1550.1 km); 1016 m fora da malha municipal do Tocantins; 1068 ponto(s) sem ligação com o DJ (fora da classificação); sem arquivo de postes: nós sem número de poste; 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7% da rede fora da árvore do DJ (1053 de 15186 vãos); 1068 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 7 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02424015, T_LD02424015, T_LD02424015, T_LD02424015, T_LD02424015, T_LD02424015, T_LD02424015; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD02424149** (aviso): 1% da rede fora da árvore do DJ (2 de 290 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD02424149, T_LD02424149; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03002091** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 1681 vãos); trechos a revisar: T2; 1 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9001184091; Chave(s) fora do caminho da energia (em paralelo): 9001184091; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0341209028; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03005098** (aviso): 53 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 5 chave(s) de proteção sem trecho (não seccionam a rede): 0365280109, 0322965090, 0310003119, 3300142119, 0330929171; 0% da rede fora da árvore do DJ (11 de 12283 vãos); trechos a revisar: T2-A, T2-B; 11 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100004109, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098, T_LD03005098; Chave(s) fora do caminho da energia (em paralelo): 3100004109; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0310026080, 3317709109, 3300116171, 0300174156, 3300021119; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300421119; Mais de um religador pode ser o 2º do tronco; escolhido 7949650109 (mais rede depois dele). Outros candidatos: 7930919109.
+- **LD03010004** (aviso): 56 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) de proteção sem trecho (não seccionam a rede): 0300193157, 0301121040; 0% da rede fora da árvore do DJ (13 de 22002 vãos); trechos a revisar: T2-C, T2-D, T2-E, T2-F; 13 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3103935004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004, T_LD03010004; Chave(s) fora do caminho da energia (em paralelo): 3103935004; 19 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0327753004, 0327787004, 0327754004, 0327788004, 0327755056, 0327756056, 0327789040, 0327757056, 0327759056, 3310062159, 0310069159, 3300705058, 0300458159, 3300663058, 0300681058, 0302818058, 0327780157, 0300517058, 3320077040; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300473058; Mais de um religador pode ser o 2º do tronco; escolhido 7925150058 (mais rede depois dele). Outros candidatos: 7930281056, 7925880056, 7900558159.
+- **LD03010021** (falha): classificação colapsada: 72 km por trecho (11 trecho(s) para 792.8 km); 147 ponto(s) sem ligação com o DJ (fora da classificação); 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2% da rede fora da árvore do DJ (141 de 7119 vãos); 147 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03010021, T_LD03010021; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03014045** (aviso): 81 ponto(s) sem ligação com o DJ (fora da classificação); 51 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (73 de 9310 vãos); 81 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03014045, T_LD03014045, T_LD03014045, T_LD03014045, T_LD03014045, T_LD03014045; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03020023** (falha): 62% da rede fora da árvore do DJ (2332 de 3735 vãos); 2332 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2332 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03020023; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03022033** (falha): classificação colapsada: 173 km por trecho (1 trecho(s) para 172.7 km); 10 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (15 de 1818 vãos); 10 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03022033, T_LD03022033, T_LD03022033, T_LD03022033, T_LD03022033, T_LD03022033; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03028074** (falha): classificação colapsada: 186 km por trecho (1 trecho(s) para 185.6 km); 2 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (4 de 1781 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03028074, T_LD03028074, T_LD03028074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03036052** (falha): 96% da rede fora da árvore do DJ (1359 de 1423 vãos); 1360 ponto(s) sem ligação com o DJ (fora da classificação); 1360 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03038009** (falha): classificação colapsada: 77 km por trecho (19 trecho(s) para 1464.3 km); 134 ponto(s) sem ligação com o DJ (fora da classificação); 32 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 3310001079; 1% da rede fora da árvore do DJ (141 de 12631 vãos); trechos a revisar: T2; 134 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009, T_LD03038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03040003** (falha): 82% da rede fora da árvore do DJ (6797 de 8276 vãos); 6808 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6808 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03040003, T_LD03040003, T_LD03040003, T_LD03040003, T_LD03040003; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03046026** (falha): classificação colapsada: 96 km por trecho (30 trecho(s) para 2877.5 km); 13229 m fora da malha municipal do Tocantins; 2001 ponto(s) sem ligação com o DJ (fora da classificação); 48 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 416069; 8% da rede fora da árvore do DJ (2064 de 27470 vãos); trechos a revisar: T2; 2001 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 82 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 9008691026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026, T_LD03046026; Chave(s) fora do caminho da energia (em paralelo): 9008691026; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300612096, 0300447096; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300504026; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03050008** (falha): classificação colapsada: 53 km por trecho (8 trecho(s) para 426.6 km); 850 ponto(s) sem ligação com o DJ (fora da classificação); 23 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 18% da rede fora da árvore do DJ (830 de 4607 vãos); 850 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03059122** (falha): 68% da rede fora da árvore do DJ (7177 de 10495 vãos); 7195 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7195 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03059122, T_LD03059122, T_LD03059122, T_LD03059122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03062013** (falha): classificação colapsada: 54 km por trecho (18 trecho(s) para 975.1 km); 816 ponto(s) sem ligação com o DJ (fora da classificação); 31 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 9% da rede fora da árvore do DJ (812 de 9039 vãos); 816 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03062013, T_LD03062013, T_LD03062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03072001** (falha): 100% da rede fora da árvore do DJ (778 de 781 vãos); 776 ponto(s) sem ligação com o DJ (fora da classificação); 776 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03105019** (falha): classificação colapsada: 99 km por trecho (16 trecho(s) para 1589.7 km); 62 ponto(s) sem ligação com o DJ (fora da classificação); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 3301420077; 0% da rede fora da árvore do DJ (69 de 14052 vãos); 62 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019, T_LD03105019; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03109039** (falha): classificação colapsada: 65 km por trecho (8 trecho(s) para 523.2 km); 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 4677 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03109039, T_LD03109039; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03414027** (aviso): sem arquivo de postes: nós sem número de poste; 4% da rede fora da árvore do DJ (1 de 23 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD03414027; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03414149** (falha): 88% da rede fora da árvore do DJ (9279 de 10487 vãos); 9278 ponto(s) sem ligação com o DJ (fora da classificação); 9278 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD03434001** (falha): 98% da rede fora da árvore do DJ (505 de 516 vãos); 502 ponto(s) sem ligação com o DJ (fora da classificação); sem arquivo de postes: nós sem número de poste; 502 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD04002091** (aviso): 29 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6 chave(s) de proteção sem trecho (não seccionam a rede): 0344476528, 0300467028, 0300554028, 7948761028, 3333870028, 0200550028 — 1 religador(es); 0% da rede fora da árvore do DJ (8 de 13766 vãos); trechos a revisar: T2-B, T2-C, T2-D, T2-E; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091, T_LD04002091; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0310001028, 0300003245, 0300475028, 3300991028, 0300583028; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300603028; Mais de um religador pode ser o 2º do tronco; escolhido 7955523028 (mais rede depois dele). Outros candidatos: 7942509028, 7955635116, 7913661028.
+- **LD04010004** (aviso): 4 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0348701170; 0% da rede fora da árvore do DJ (6 de 1949 vãos); trechos a revisar: T2-A, T2-C, T2-E; 6 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3100006170, T_LD04010004, T_LD04010004, T_LD04010004, T_LD04010004, T_LD04010004; Chave(s) fora do caminho da energia (em paralelo): 3100006170; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0365045159, 0300525159, 0352686058; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0301374004; Mais de um religador pode ser o 2º do tronco; escolhido 7958324004 (mais rede depois dele). Outros candidatos: 7928461040, 7925140058.
+- **LD04028074** (falha): 82% da rede fora da árvore do DJ (2497 de 3061 vãos); classificação colapsada: 59 km por trecho (1 trecho(s) para 59.0 km); 2499 ponto(s) sem ligação com o DJ (fora da classificação); 7 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2499 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD04038009** (falha): 63% da rede fora da árvore do DJ (3825 de 6096 vãos); classificação colapsada: 52 km por trecho (5 trecho(s) para 261.3 km); 3833 ponto(s) sem ligação com o DJ (fora da classificação); 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3833 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04038009; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD04040003** (falha): classificação colapsada: 66 km por trecho (14 trecho(s) para 923.2 km); 2039 ponto(s) sem ligação com o DJ (fora da classificação); 16 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 20% da rede fora da árvore do DJ (2022 de 10057 vãos); trechos a revisar: T2; 2039 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 11 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003, T_LD04040003; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0310145089; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD04050008** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2% da rede fora da árvore do DJ (7 de 292 vãos); 7 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04050008, T_LD04050008, T_LD04050008, T_LD04050008, T_LD04050008, T_LD04050008, T_LD04050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD04062013** (falha): classificação colapsada: 57 km por trecho (21 trecho(s) para 1188.5 km); 20 ponto(s) sem ligação com o DJ (fora da classificação); 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (25 de 9835 vãos); 20 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 9 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013, T_LD04062013; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD04105019** (falha): classificação colapsada: 76 km por trecho (5 trecho(s) para 379.8 km); 24 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 3204 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04105019; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD04444153** (aviso): 7% da rede fora da árvore do DJ (2 de 29 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: T_LD04444153, T_LD04444153; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD05002091** (aviso): 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) de proteção sem trecho (não seccionam a rede): 0310004091; trechos a revisar: T2; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300138101; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD05010004** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6 chave(s) de proteção sem trecho (não seccionam a rede): 0303855004, 3301964004, 0303886004, 0300476022, 3310138022, 0301628022; 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05010004, T_LD05010004, T_LD05010004; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0203950004, 3302536004, 3303810004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0346514004
-- **LD05028074** (aviso): 107 ponto(s) sem ligação com o DJ (fora da classificação); 28 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 107 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05028074, T_LD05028074, T_LD05028074, T_LD05028074, T_LD05028074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD05047073** (falha): classificação colapsada: 1 trecho(s) para 21.1 km; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD05050008** (falha): classificação colapsada: 2 trecho(s) para 51.9 km; 5501 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 5501 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD05062013** (aviso): 1154 ponto(s) sem ligação com o DJ (fora da classificação); 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1154 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3112773086, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013; Chave(s) fora do caminho da energia (em paralelo): 3112773086; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD05105019** (falha): classificação colapsada: 1 trecho(s) para 36.8 km; sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD05454153** (falha): classificação colapsada: 1 trecho(s) para 46.2 km; 631 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 631 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05454153; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD06002091** (aviso): 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-B, T2-C; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD06002091, T_LD06002091, T_LD06002091, T_LD06002091; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300973091, 3300432091, 0300692091; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3328013026; Mais de um religador pode ser o 2º do tronco; escolhido 7942038091 (mais rede depois dele). Outros candidatos: 7964815091.
+- **LD05010004** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 6 chave(s) de proteção sem trecho (não seccionam a rede): 0303855004, 3301964004, 0303886004, 0300476022, 3310138022, 0301628022; 0% da rede fora da árvore do DJ (3 de 9452 vãos); 3 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05010004, T_LD05010004, T_LD05010004; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0203950004, 3302536004, 3303810004; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0346514004
+- **LD05028074** (falha): classificação colapsada: 100 km por trecho (12 trecho(s) para 1199.0 km); 107 ponto(s) sem ligação com o DJ (fora da classificação); 28 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1% da rede fora da árvore do DJ (95 de 10327 vãos); 107 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 5 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05028074, T_LD05028074, T_LD05028074, T_LD05028074, T_LD05028074; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD05047073** (aviso): 0% da rede fora da árvore do DJ (1 de 317 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD05050008** (falha): 90% da rede fora da árvore do DJ (5503 de 6086 vãos); 5501 ponto(s) sem ligação com o DJ (fora da classificação); 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 5501 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05050008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD05062013** (falha): classificação colapsada: 125 km por trecho (6 trecho(s) para 749.1 km); 1154 ponto(s) sem ligação com o DJ (fora da classificação); 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 14% da rede fora da árvore do DJ (1160 de 8237 vãos); 1154 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 12 trecho(s) fechavam laço e ficaram fora da árvore: Suporte Chave 3112773086, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013, T_LD05062013; Chave(s) fora do caminho da energia (em paralelo): 3112773086; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD05105019** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD05454153** (falha): 58% da rede fora da árvore do DJ (629 de 1090 vãos); 631 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 631 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 1 trecho(s) fechavam laço e ficaram fora da árvore: T_LD05454153; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD06002091** (aviso): 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (4 de 4741 vãos); trechos a revisar: T2-B, T2-C; 4 trecho(s) fechavam laço e ficaram fora da árvore: T_LD06002091, T_LD06002091, T_LD06002091, T_LD06002091; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300973091, 3300432091, 0300692091; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3328013026; Mais de um religador pode ser o 2º do tronco; escolhido 7942038091 (mais rede depois dele). Outros candidatos: 7964815091.
 - **LD06010004** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD06047073** (aviso): 9 ponto(s) sem ligação com o DJ (fora da classificação); 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 9 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD07002091** (aviso): 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_LD07002091, T_LD07002091, T_LD07002091, T_LD07002091, T_LD07002091, T_LD07002091; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300239101, 3300146101; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300129101; Mais de um religador pode ser o 2º do tronco; escolhido 7908712101 (mais rede depois dele). Outros candidatos: 7931866101.
-- **LD07028074** (falha): classificação colapsada: 1 trecho(s) para 29.3 km; sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD06047073** (falha): classificação colapsada: 200 km por trecho (3 trecho(s) para 599.1 km); 9 ponto(s) sem ligação com o DJ (fora da classificação); 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (15 de 5647 vãos); 9 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; 8 trecho(s) fechavam laço e ficaram fora da árvore: T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073, T_LD06047073; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **LD07002091** (aviso): 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (6 de 3514 vãos); trechos a revisar: T2-A, T2-B; 6 trecho(s) fechavam laço e ficaram fora da árvore: T_LD07002091, T_LD07002091, T_LD07002091, T_LD07002091, T_LD07002091, T_LD07002091; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300239101, 3300146101; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300129101; Mais de um religador pode ser o 2º do tronco; escolhido 7908712101 (mais rede depois dele). Outros candidatos: 7931866101.
+- **LD07028074** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 
 ## Não processados
 
-- AL01010021: classificação colapsada: 1 trecho(s) para 13.6 km
-- AL01012025: classificação colapsada: 1 trecho(s) para 27.4 km
-- AL01013005: classificação colapsada: 2 trecho(s) para 31.0 km
-- AL01015049: classificação colapsada: 1 trecho(s) para 5.4 km
-- AL01019068: classificação colapsada: 2 trecho(s) para 79.9 km
-- AL01022033: classificação colapsada: 1 trecho(s) para 22.3 km
-- AL01025012: classificação colapsada: 1 trecho(s) para 9.0 km
-- AL01026041: classificação colapsada: 2 trecho(s) para 171.5 km
-- AL01032044: classificação colapsada: 2 trecho(s) para 83.9 km
-- AL01034019: classificação colapsada: 2 trecho(s) para 22.1 km
-- AL01035052: classificação colapsada: 2 trecho(s) para 78.4 km
-- AL01036052: classificação colapsada: 2 trecho(s) para 50.6 km
-- AL01038009: classificação colapsada: 1 trecho(s) para 58.8 km
-- AL01040004: classificação colapsada: 1 trecho(s) para 26.8 km
-- AL01041003: classificação colapsada: 2 trecho(s) para 60.8 km
-- AL01044024: classificação colapsada: 2 trecho(s) para 57.4 km
-- AL01047073: classificação colapsada: 1 trecho(s) para 26.2 km
-- AL01048007: classificação colapsada: 1 trecho(s) para 16.4 km
-- AL01050008: classificação colapsada: 1 trecho(s) para 13.3 km
-- AL01051035: classificação colapsada: 1 trecho(s) para 192.3 km
-- AL01052028: classificação colapsada: 1 trecho(s) para 20.3 km
-- AL01058020: classificação colapsada: 1 trecho(s) para 9.6 km
-- AL01059122: classificação colapsada: 1 trecho(s) para 15.6 km
-- AL01062013: classificação colapsada: 2 trecho(s) para 61.2 km
-- AL01063107: classificação colapsada: 1 trecho(s) para 5.2 km
-- AL01068014: classificação colapsada: 2 trecho(s) para 48.0 km
-- AL01069026: classificação colapsada: 2 trecho(s) para 37.9 km
-- AL01070027: classificação colapsada: 2 trecho(s) para 39.6 km
-- AL01071001: classificação colapsada: 2 trecho(s) para 12.7 km
-- AL01072001: classificação colapsada: 1 trecho(s) para 26.8 km
-- AL01073034: classificação colapsada: 2 trecho(s) para 18.4 km
-- AL01074070: classificação colapsada: 2 trecho(s) para 55.1 km
-- AL01077088: classificação colapsada: 2 trecho(s) para 118.2 km
-- AL01078038: classificação colapsada: 2 trecho(s) para 39.8 km
-- AL01081100: classificação colapsada: 1 trecho(s) para 28.3 km
-- AL01085042: classificação colapsada: 1 trecho(s) para 16.2 km
-- AL01087030: classificação colapsada: 1 trecho(s) para 18.9 km
-- AL01093043: classificação colapsada: 1 trecho(s) para 19.6 km
-- AL01097122: classificação colapsada: 1 trecho(s) para 12.4 km
-- AL01101271: classificação colapsada: 1 trecho(s) para 40.1 km
-- AL01102271: classificação colapsada: 2 trecho(s) para 41.5 km
-- AL01109039: classificação colapsada: 1 trecho(s) para 34.6 km
-- AL01113003: classificação colapsada: 2 trecho(s) para 81.6 km
-- AL02014045: classificação colapsada: 2 trecho(s) para 14.9 km
-- AL02019068: classificação colapsada: 1 trecho(s) para 31.2 km
-- AL02020023: classificação colapsada: 2 trecho(s) para 33.3 km
-- AL02028074: classificação colapsada: 2 trecho(s) para 73.5 km
-- AL02037009: classificação colapsada: 1 trecho(s) para 13.3 km
-- AL02040003: classificação colapsada: 1 trecho(s) para 6.0 km
-- AL02040004: classificação colapsada: 2 trecho(s) para 19.0 km
-- AL02047073: classificação colapsada: 1 trecho(s) para 13.2 km
-- AL02048007: classificação colapsada: 2 trecho(s) para 82.5 km
-- AL02049010: classificação colapsada: 1 trecho(s) para 7.4 km
-- AL02050008: classificação colapsada: 1 trecho(s) para 31.1 km
-- AL02054060: classificação colapsada: 2 trecho(s) para 69.5 km
-- AL02059122: classificação colapsada: 1 trecho(s) para 19.7 km
-- AL02060122: classificação colapsada: 1 trecho(s) para 5.0 km
-- AL02065015: classificação colapsada: 2 trecho(s) para 40.3 km
-- AL02067094: classificação colapsada: 1 trecho(s) para 16.4 km
-- AL02072001: classificação colapsada: 1 trecho(s) para 15.8 km
-- AL02078038: classificação colapsada: 1 trecho(s) para 15.6 km
-- AL02084002: classificação colapsada: 2 trecho(s) para 82.7 km
-- AL02099059: classificação colapsada: 2 trecho(s) para 18.6 km
-- AL02102271: classificação colapsada: 1 trecho(s) para 10.7 km
-- AL02113003: classificação colapsada: 1 trecho(s) para 22.1 km
-- AL03020023: classificação colapsada: 1 trecho(s) para 11.3 km
-- AL03040003: classificação colapsada: 1 trecho(s) para 8.0 km
-- AL03040004: classificação colapsada: 2 trecho(s) para 21.2 km
-- AL03059122: classificação colapsada: 1 trecho(s) para 15.3 km
-- AL03060122: classificação colapsada: 2 trecho(s) para 19.0 km
-- AL03097122: classificação colapsada: 1 trecho(s) para 15.9 km
-- AL03101271: classificação colapsada: 1 trecho(s) para 29.5 km
-- AL03103004: classificação colapsada: 2 trecho(s) para 13.1 km
-- AL03113003: classificação colapsada: 1 trecho(s) para 28.7 km
-- AL04040003: classificação colapsada: 1 trecho(s) para 21.4 km
-- AL04040004: classificação colapsada: 2 trecho(s) para 23.8 km
-- AL04059122: classificação colapsada: 2 trecho(s) para 22.7 km
-- AL04060122: classificação colapsada: 1 trecho(s) para 24.9 km
-- AL04072001: classificação colapsada: 1 trecho(s) para 95.3 km
-- AL04097122: classificação colapsada: 1 trecho(s) para 33.5 km
-- AL04099059: classificação colapsada: 2 trecho(s) para 58.4 km
-- AL04103004: classificação colapsada: 1 trecho(s) para 9.5 km
-- AL04113003: classificação colapsada: 1 trecho(s) para 43.6 km
-- AL04244003: classificação colapsada: 2 trecho(s) para 19.6 km
-- AL05040003: classificação colapsada: 1 trecho(s) para 16.1 km
-- AL05040004: classificação colapsada: 1 trecho(s) para 25.1 km
-- AL05060122: classificação colapsada: 2 trecho(s) para 14.5 km
-- AL05062013: classificação colapsada: 1 trecho(s) para 94.2 km
-- AL05072001: classificação colapsada: 1 trecho(s) para 29.1 km
-- AL05097122: classificação colapsada: 1 trecho(s) para 17.3 km
-- AL05099059: classificação colapsada: 1 trecho(s) para 17.8 km
-- AL06020023: classificação colapsada: 1 trecho(s) para 42.4 km
-- AL06059122: classificação colapsada: 1 trecho(s) para 18.6 km
-- AL06060122: classificação colapsada: 1 trecho(s) para 36.3 km
-- AL06072001: classificação colapsada: 2 trecho(s) para 198.8 km
-- AL06097122: classificação colapsada: 2 trecho(s) para 44.8 km
-- AL06099059: classificação colapsada: 2 trecho(s) para 43.7 km; 1 religador(es) no cadastro e nenhum T2: nenhum deles secciona a rede
-- AL06103004: classificação colapsada: 1 trecho(s) para 16.0 km
-- AL07059122: classificação colapsada: 1 trecho(s) para 31.6 km
-- AL07060122: classificação colapsada: 1 trecho(s) para 20.7 km
-- AL07097122: classificação colapsada: 2 trecho(s) para 36.8 km
-- AL07099059: classificação colapsada: 1 trecho(s) para 7.0 km
-- AL07103004: classificação colapsada: 2 trecho(s) para 50.4 km
-- AL08010004: classificação colapsada: 1 trecho(s) para 7.4 km
-- AL08060122: classificação colapsada: 1 trecho(s) para 33.1 km
-- AL08099059: classificação colapsada: 2 trecho(s) para 30.8 km
-- AL09059122: classificação colapsada: 2 trecho(s) para 31.6 km
-- AL09060122: classificação colapsada: 1 trecho(s) para 11.0 km
-- AL09097122: classificação colapsada: 1 trecho(s) para 12.8 km
-- AL10060122: classificação colapsada: 1 trecho(s) para 14.4 km
-- AL11059122: classificação colapsada: 1 trecho(s) para 14.7 km
-- AL11060122: classificação colapsada: 2 trecho(s) para 34.5 km
-- LD01004013: classificação colapsada: 1 trecho(s) para 5.2 km
-- LD01040003: classificação colapsada: 1 trecho(s) para 22.9 km
-- LD01072001: classificação colapsada: 1 trecho(s) para 153.7 km
-- LD01076103: classificação colapsada: 2 trecho(s) para 136.7 km
-- LD01107074: classificação colapsada: 1 trecho(s) para 7.0 km
-- LD02004013: classificação colapsada: 1 trecho(s) para 11.4 km
-- LD02005098: classificação colapsada: 2 trecho(s) para 12.1 km
-- LD02025012: classificação colapsada: 2 trecho(s) para 115.3 km
-- LD02076103: classificação colapsada: 2 trecho(s) para 48.4 km
-- LD02095030: classificação colapsada: 2 trecho(s) para 51.4 km
-- LD02107074: classificação colapsada: 2 trecho(s) para 73.4 km
-- LD02424149: classificação colapsada: 1 trecho(s) para 10.4 km
-- LD03022033: classificação colapsada: 1 trecho(s) para 172.7 km
-- LD03028074: classificação colapsada: 1 trecho(s) para 185.6 km
-- LD03036052: classificação colapsada: 1 trecho(s) para 7.6 km
-- LD04028074: classificação colapsada: 1 trecho(s) para 59.0 km
-- LD04050008: classificação colapsada: 1 trecho(s) para 18.5 km
-- LD05047073: classificação colapsada: 1 trecho(s) para 21.1 km
-- LD05050008: classificação colapsada: 2 trecho(s) para 51.9 km
-- LD05105019: classificação colapsada: 1 trecho(s) para 36.8 km
-- LD05454153: classificação colapsada: 1 trecho(s) para 46.2 km
-- LD07028074: classificação colapsada: 1 trecho(s) para 29.3 km
+- AL01010153: 78% da rede fora da árvore do DJ (135 de 174 vãos)
+- AL01013005: 91% da rede fora da árvore do DJ (2731 de 3017 vãos)
+- AL01014045: 100% da rede fora da árvore do DJ (543 de 544 vãos)
+- AL01023050: 58% da rede fora da árvore do DJ (909 de 1561 vãos)
+- AL01024113: classificação colapsada: 55 km por trecho (3 trecho(s) para 164.2 km)
+- AL01026041: classificação colapsada: 86 km por trecho (2 trecho(s) para 171.5 km)
+- AL01030124: classificação colapsada: 53 km por trecho (3 trecho(s) para 160.4 km)
+- AL01033047: classificação colapsada: 55 km por trecho (5 trecho(s) para 275.4 km)
+- AL01035052: 28% da rede fora da árvore do DJ (273 de 976 vãos)
+- AL01036052: 41% da rede fora da árvore do DJ (560 de 1382 vãos)
+- AL01038009: classificação colapsada: 59 km por trecho (1 trecho(s) para 58.8 km)
+- AL01040003: 87% da rede fora da árvore do DJ (477 de 548 vãos)
+- AL01042078: classificação colapsada: 76 km por trecho (8 trecho(s) para 610.9 km)
+- AL01050008: 58% da rede fora da árvore do DJ (515 de 893 vãos)
+- AL01051035: classificação colapsada: 192 km por trecho (1 trecho(s) para 192.3 km)
+- AL01061029: classificação colapsada: 53 km por trecho (9 trecho(s) para 477.0 km)
+- AL01065015: classificação colapsada: 53 km por trecho (4 trecho(s) para 213.0 km)
+- AL01077088: classificação colapsada: 59 km por trecho (2 trecho(s) para 118.2 km)
+- AL01082006: classificação colapsada: 51 km por trecho (4 trecho(s) para 205.7 km)
+- AL01102271: 87% da rede fora da árvore do DJ (3068 de 3546 vãos)
+- AL02033047: classificação colapsada: 81 km por trecho (3 trecho(s) para 242.3 km)
+- AL02036052: classificação colapsada: 51 km por trecho (3 trecho(s) para 153.6 km)
+- AL02043081: 100% da rede fora da árvore do DJ (3859 de 3860 vãos)
+- AL02060122: 77% da rede fora da árvore do DJ (504 de 655 vãos)
+- AL02062013: 100% da rede fora da árvore do DJ (926 de 928 vãos)
+- AL02085042: 99% da rede fora da árvore do DJ (2703 de 2736 vãos)
+- AL02109039: 96% da rede fora da árvore do DJ (778 de 809 vãos)
+- AL03020003: 98% da rede fora da árvore do DJ (917 de 935 vãos)
+- AL03072001: classificação colapsada: 84 km por trecho (6 trecho(s) para 502.4 km)
+- AL03099059: 92% da rede fora da árvore do DJ (1137 de 1238 vãos)
+- AL03101271: 77% da rede fora da árvore do DJ (3041 de 3963 vãos)
+- AL03109039: classificação colapsada: 96 km por trecho (3 trecho(s) para 287.9 km)
+- AL04020023: 80% da rede fora da árvore do DJ (95 de 119 vãos)
+- AL04072001: classificação colapsada: 95 km por trecho (1 trecho(s) para 95.3 km)
+- AL05059122: 91% da rede fora da árvore do DJ (401 de 439 vãos)
+- AL05062013: classificação colapsada: 94 km por trecho (1 trecho(s) para 94.2 km)
+- AL05103004: 95% da rede fora da árvore do DJ (584 de 614 vãos)
+- AL06072001: classificação colapsada: 99 km por trecho (2 trecho(s) para 198.8 km)
+- AL06099059: 1 religador(es) no cadastro e nenhum T2: nenhum deles secciona a rede
+- AL07099059: 61% da rede fora da árvore do DJ (364 de 598 vãos)
+- LD01010021: classificação colapsada: 106 km por trecho (10 trecho(s) para 1055.1 km)
+- LD01010153: 100% da rede fora da árvore do DJ (6207 de 6209 vãos)
+- LD01025012: 28% da rede fora da árvore do DJ (2800 de 10164 vãos); classificação colapsada: 97 km por trecho (9 trecho(s) para 875.8 km)
+- LD01028074: classificação colapsada: 67 km por trecho (3 trecho(s) para 200.8 km)
+- LD01035052: classificação colapsada: 52 km por trecho (8 trecho(s) para 412.5 km)
+- LD01036052: classificação colapsada: 58 km por trecho (4 trecho(s) para 230.1 km)
+- LD01047073: classificação colapsada: 53 km por trecho (3 trecho(s) para 158.8 km)
+- LD01050008: classificação colapsada: 66 km por trecho (9 trecho(s) para 590.3 km)
+- LD01051035: classificação colapsada: 222 km por trecho (4 trecho(s) para 888.8 km)
+- LD01054060: classificação colapsada: 56 km por trecho (10 trecho(s) para 557.2 km)
+- LD01056046: classificação colapsada: 50 km por trecho (22 trecho(s) para 1104.1 km)
+- LD01059122: 100% da rede fora da árvore do DJ (15275 de 15283 vãos)
+- LD01065015: classificação colapsada: 84 km por trecho (30 trecho(s) para 2533.6 km)
+- LD01066094: classificação colapsada: 75 km por trecho (27 trecho(s) para 2036.3 km)
+- LD01072001: classificação colapsada: 154 km por trecho (1 trecho(s) para 153.7 km)
+- LD01076103: classificação colapsada: 68 km por trecho (2 trecho(s) para 136.7 km)
+- LD01084002: classificação colapsada: 54 km por trecho (9 trecho(s) para 487.0 km)
+- LD01095030: 41% da rede fora da árvore do DJ (3297 de 8063 vãos); classificação colapsada: 79 km por trecho (7 trecho(s) para 550.3 km)
+- LD01105019: classificação colapsada: 114 km por trecho (4 trecho(s) para 455.2 km)
+- LD01110005: classificação colapsada: 125 km por trecho (4 trecho(s) para 501.5 km)
+- LD01414015: classificação colapsada: 94 km por trecho (6 trecho(s) para 563.2 km)
+- LD01414027: classificação colapsada: 67 km por trecho (11 trecho(s) para 741.8 km)
+- LD01434149: 67% da rede fora da árvore do DJ (7232 de 10749 vãos); classificação colapsada: 60 km por trecho (6 trecho(s) para 359.7 km)
+- LD02010021: 42% da rede fora da árvore do DJ (2871 de 6894 vãos); classificação colapsada: 61 km por trecho (7 trecho(s) para 429.9 km)
+- LD02010153: classificação colapsada: 104 km por trecho (12 trecho(s) para 1242.1 km)
+- LD02020023: classificação colapsada: 56 km por trecho (28 trecho(s) para 1571.4 km)
+- LD02022033: 39% da rede fora da árvore do DJ (4640 de 12044 vãos)
+- LD02025012: classificação colapsada: 58 km por trecho (2 trecho(s) para 115.3 km)
+- LD02036052: 80% da rede fora da árvore do DJ (9099 de 11375 vãos)
+- LD02038009: classificação colapsada: 57 km por trecho (8 trecho(s) para 457.7 km)
+- LD02040003: 27% da rede fora da árvore do DJ (1923 de 7227 vãos); classificação colapsada: 87 km por trecho (7 trecho(s) para 609.8 km)
+- LD02047073: classificação colapsada: 143 km por trecho (6 trecho(s) para 859.4 km)
+- LD02050008: 57% da rede fora da árvore do DJ (9308 de 16468 vãos); classificação colapsada: 52 km por trecho (17 trecho(s) para 881.4 km)
+- LD02059122: 100% da rede fora da árvore do DJ (19396 de 19404 vãos)
+- LD02066094: classificação colapsada: 65 km por trecho (7 trecho(s) para 452.3 km)
+- LD02072001: classificação colapsada: 75 km por trecho (25 trecho(s) para 1867.4 km)
+- LD02109039: classificação colapsada: 80 km por trecho (6 trecho(s) para 482.6 km)
+- LD02110005: 51% da rede fora da árvore do DJ (7544 de 14760 vãos); classificação colapsada: 149 km por trecho (5 trecho(s) para 745.4 km)
+- LD02414027: classificação colapsada: 74 km por trecho (5 trecho(s) para 370.4 km)
+- LD02424015: classificação colapsada: 91 km por trecho (17 trecho(s) para 1550.1 km)
+- LD03010021: classificação colapsada: 72 km por trecho (11 trecho(s) para 792.8 km)
+- LD03020023: 62% da rede fora da árvore do DJ (2332 de 3735 vãos)
+- LD03022033: classificação colapsada: 173 km por trecho (1 trecho(s) para 172.7 km)
+- LD03028074: classificação colapsada: 186 km por trecho (1 trecho(s) para 185.6 km)
+- LD03036052: 96% da rede fora da árvore do DJ (1359 de 1423 vãos)
+- LD03038009: classificação colapsada: 77 km por trecho (19 trecho(s) para 1464.3 km)
+- LD03040003: 82% da rede fora da árvore do DJ (6797 de 8276 vãos)
+- LD03046026: classificação colapsada: 96 km por trecho (30 trecho(s) para 2877.5 km)
+- LD03050008: classificação colapsada: 53 km por trecho (8 trecho(s) para 426.6 km)
+- LD03059122: 68% da rede fora da árvore do DJ (7177 de 10495 vãos)
+- LD03062013: classificação colapsada: 54 km por trecho (18 trecho(s) para 975.1 km)
+- LD03072001: 100% da rede fora da árvore do DJ (778 de 781 vãos)
+- LD03105019: classificação colapsada: 99 km por trecho (16 trecho(s) para 1589.7 km)
+- LD03109039: classificação colapsada: 65 km por trecho (8 trecho(s) para 523.2 km)
+- LD03414149: 88% da rede fora da árvore do DJ (9279 de 10487 vãos)
+- LD03434001: 98% da rede fora da árvore do DJ (505 de 516 vãos)
+- LD04028074: 82% da rede fora da árvore do DJ (2497 de 3061 vãos); classificação colapsada: 59 km por trecho (1 trecho(s) para 59.0 km)
+- LD04038009: 63% da rede fora da árvore do DJ (3825 de 6096 vãos); classificação colapsada: 52 km por trecho (5 trecho(s) para 261.3 km)
+- LD04040003: classificação colapsada: 66 km por trecho (14 trecho(s) para 923.2 km)
+- LD04062013: classificação colapsada: 57 km por trecho (21 trecho(s) para 1188.5 km)
+- LD04105019: classificação colapsada: 76 km por trecho (5 trecho(s) para 379.8 km)
+- LD05028074: classificação colapsada: 100 km por trecho (12 trecho(s) para 1199.0 km)
+- LD05050008: 90% da rede fora da árvore do DJ (5503 de 6086 vãos)
+- LD05062013: classificação colapsada: 125 km por trecho (6 trecho(s) para 749.1 km)
+- LD05454153: 58% da rede fora da árvore do DJ (629 de 1090 vãos)
+- LD06047073: classificação colapsada: 200 km por trecho (3 trecho(s) para 599.1 km)
 - AL01003097: nenhum município com ≥ 100 m
-- AL01014045: nenhum município com ≥ 100 m
 - AL01029052: nenhum município com ≥ 100 m
 - AL01049010: nenhum município com ≥ 100 m
 - AL01064261: nenhum município com ≥ 100 m
@@ -1788,15 +1470,34 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 - AL01114007: nenhum município com ≥ 100 m
 - AL02003097: nenhum município com ≥ 100 m
 - AL02033044: nenhum município com ≥ 100 m
-- AL02043081: nenhum município com ≥ 100 m
-- AL02062013: nenhum município com ≥ 100 m
 - AL02064261: nenhum município com ≥ 100 m
 - AL03102271: nenhum município com ≥ 100 m
 - LD00000023: nenhum município com ≥ 100 m
-- LD01010153: nenhum município com ≥ 100 m
 - LD01027074: nenhum município com ≥ 100 m
 - LD01057189: nenhum município com ≥ 100 m
 - LD01090074: nenhum município com ≥ 100 m
 - LD02027074: nenhum município com ≥ 100 m
 - LD02028074: nenhum município com ≥ 100 m
-- LD03072001: nenhum município com ≥ 100 m
+- AL0102405: sem KML do Daimon na pasta informada
+- AL01024113CM: sem KML do Daimon na pasta informada
+- AL01042078IT: sem KML do Daimon na pasta informada
+- AL01044024IP: sem KML do Daimon na pasta informada
+- AL01073034PK: sem KML do Daimon na pasta informada
+- AL01087030XA: sem KML do Daimon na pasta informada
+- AL02014045AU: sem KML do Daimon na pasta informada
+- AL02048007MC: sem KML do Daimon na pasta informada
+- AL02050008MN: sem KML do Daimon na pasta informada
+- AL02065015BJ: sem KML do Daimon na pasta informada
+- AL02084002TO: sem KML do Daimon na pasta informada
+- AL02109039AG: sem KML do Daimon na pasta informada
+- GG01116257: sem KML do Daimon na pasta informada
+- LD01010153CM: sem KML do Daimon na pasta informada
+- LD01010256: sem KML do Daimon na pasta informada
+- LD01065015SM: sem KML do Daimon na pasta informada
+- LD02022033GN: sem KML do Daimon na pasta informada
+- LD02022033PQ: sem KML do Daimon na pasta informada
+- LD02050008DI: sem KML do Daimon na pasta informada
+- LD03022033GN: sem KML do Daimon na pasta informada
+- LD03050008RB: sem KML do Daimon na pasta informada
+- LD03105019GO: sem KML do Daimon na pasta informada
+- PS01112193: sem KML do Daimon na pasta informada
