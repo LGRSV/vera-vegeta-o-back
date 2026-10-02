@@ -72,6 +72,8 @@ p{margin:0}
 .lb.sel{outline:2px solid #fde047}
 /* interrupções (NAE) */
 .ctrl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13.5px}
+.ctrl label{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0;max-width:100%}
+#mes{max-width:100%;min-width:0}
 .ctrl label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
 .ctrl select{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font:14px var(--f-body)}
 .ctrl select:focus-visible,.ctrl input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}

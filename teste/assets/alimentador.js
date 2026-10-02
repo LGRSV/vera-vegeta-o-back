@@ -7,7 +7,7 @@ D.trechos.forEach(t => {
   t.peso = t.tipo === 'principal' ? 6 : t.tipo === 'ramal' ? 4.5 : 3;
 });
 const TR = Object.fromEntries(D.trechos.map(t => [t.nome, t]));
-const TIPO = {DJ:'disjuntor', '79':'religador', '03':'fusível 03', '33':'fusível 33', '02':'chave 02', SEC:'seccionamento'};
+const TIPO = {DJ:'disjuntor', '79':'religador', '03':'fusível 03', '33':'fusível 33', '02':'chave 02', SEC:'seccionamento', FTR:'fusível no tronco (não abre T3)'};
 const km = m => m < 1000 ? Math.round(m) + ' m' : (m / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
 const nv = q => q + (q === 1 ? ' vão' : ' vãos');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -28,7 +28,7 @@ const rotMes = m => m === 'todos' ? `${rotMes1(NAE.meses[0])} a ${rotMes1(NAE.me
 const ABR = {DJ: 'DJ', RL: 'religador', 'CH FUS': 'fusível', CH: 'chave', TR: 'trafo', UC: 'consumidor'};
 if (NAE && NAE.meses.length) {
   $('ctrl').hidden = false;
-  $('mes').innerHTML = (NAE.meses.length > 1 ? `<option value="todos" selected>Todos os meses (${rotMes('todos')})</option>` : '') +
+  $('mes').innerHTML = (NAE.meses.length > 1 ? `<option value="todos" selected>Todos (${rotMes('todos')})</option>` : '') +
     NAE.meses.map(m => `<option value="${m}">${rotMes(m)}</option>`).join('');
 }
 const doMes = () => NAE ? NAE.oc.filter(o => ($('mes').value === 'todos' || o.mes === $('mes').value) && (o.col || $('ind').checked)) : [];
@@ -206,7 +206,7 @@ if (typeof L === 'undefined') {
   });
   fusMarcas = L.layerGroup().addTo(map);
   D.fusiveis.forEach(a => {
-    L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' ? '#9ca3af' : '#fff', fillOpacity: 1})
+    L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' || a.t === 'FTR' ? '#9ca3af' : '#fff', fillOpacity: 1})
       .bindTooltip(`${a.nome} · ${TIPO[a.t] || a.t}${papel(a.nome) ? ' · ' + papel(a.nome) : ''}`, {direction: 'top'})
       .on('click', e => { L.DomEvent.stopPropagation(e); if (a.trecho) selecionar(a.trecho, false); }).addTo(fusMarcas);
   });
