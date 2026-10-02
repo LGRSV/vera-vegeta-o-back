@@ -46,6 +46,10 @@
   }).observe(lista, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-current'] });
   aplica();
 
+  // NAE só de vegetação: deixa isso escrito no seletor de mês
+  const labMes = document.querySelector('label[for="mes"]');
+  if (labMes && (M.origem || {}).nae_filtro === 'arvore') labMes.firstChild.textContent = 'NAE árvore/eucalipto em ';
+
   // resumo por classe, avisos de dados e origem
   const r = M.resumo || {};
   const v = M.validacao || { avisos: [] };
