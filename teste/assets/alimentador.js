@@ -189,7 +189,8 @@ function rotulosT3() {
 if (typeof L === 'undefined') {
   $('nolib').hidden = false;
 } else {
-  map = L.map('map', {preferCanvas: true, zoomSnap: 0.25, zoomDelta: 0.5});
+  // área de toque em volta das linhas: não precisa acertar em cima do trecho (mais larga no celular)
+  map = L.map('map', {preferCanvas: true, renderer: L.canvas({tolerance: L.Browser.mobile ? 16 : 10}), zoomSnap: 0.25, zoomDelta: 0.5});
   window.__map = map;
   let falhas = 0;
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -202,6 +203,9 @@ if (typeof L === 'undefined') {
     const t = D.trechos[i], vs = vaosDe[i];
     const l = L.polyline(vs.map(v => [[v[0], v[1]], [v[2], v[3]]]), {color: t.cor, weight: t.peso, opacity: 1, lineCap: 'round'}).addTo(map);
     l.on('click', e => { L.DomEvent.stopPropagation(e); selecionar(t.nome, false, vaoPerto(vs, e.latlng)); });
+    l.bindTooltip(t.nome, {sticky: true, direction: 'top', offset: [0, -8]});
+    l.on('mouseover', () => l.setStyle({weight: t.peso + 3}));
+    l.on('mouseout', () => l.setStyle({weight: t.peso}));
     linhas[t.nome] = [l, vs];
   });
   fusMarcas = L.layerGroup().addTo(map);
