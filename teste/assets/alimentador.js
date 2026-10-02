@@ -7,7 +7,9 @@ D.trechos.forEach(t => {
   t.peso = t.tipo === 'principal' ? 6 : t.tipo === 'ramal' ? 4.5 : 3;
 });
 const TR = Object.fromEntries(D.trechos.map(t => [t.nome, t]));
-const TIPO = {DJ:'disjuntor', '79':'religador', '03':'fusível 03', '33':'fusível 33', '02':'chave 02', SEC:'seccionamento', FTR:'fusível no tronco (não abre T3)'};
+const TIPO = {DJ:'disjuntor', '79':'religador', '03':'fusível 03', '33':'fusível 33', '02':'chave 02',
+              '40':'trip saver 40', '41':'trip saver 41', SEC:'seccionamento',
+              FTR:'fusível no tronco (não abre T3)'};
 const km = m => m < 1000 ? Math.round(m) + ' m' : (m / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
 const nv = q => q + (q === 1 ? ' vão' : ' vãos');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -78,6 +80,7 @@ function detalhe(t, vao) {
     ${t.passa.length ? `<dt>Passa por</dt><dd class="mono">${t.passa.map(esc).join(', ')}</dd>` : ''}
     <dt>Fim</dt><dd class="mono">${t.fim.map(esc).join('<br>')}</dd>
     <dt>Extensão</dt><dd>${km(t.ext)} · ${nv(t.qtd)}</dd>
+    ${t.fase ? `<dt>Fases</dt><dd>${esc(t.fase)}${t.fases && Object.keys(t.fases).length > 1 ? ' · ' + Object.entries(t.fases).map(([f, m]) => `${esc(f)} ${km(m)}`).join(' · ') : ''}</dd>` : ''}
     <dt>Vem de</dt><dd>${t.pai ? chips([t.pai]) : '—'}</dd>
     <dt>Derivações</dt><dd>${chips(t.derivacoes)}</dd>
     ${NAE ? blocoNae(t.nome) : ''}
@@ -134,7 +137,6 @@ function selecionar(nome, enquadrar, vao) {
     ...t.fim.map((f, i) => pino(t.fim_pts[i], 'fim', 'FIM', f.replace('fim de linha · poste ', 'poste ') + (f.startsWith('fim de linha') ? ' (fim de linha)' : '')))]).addTo(map);
   if (enquadrar) map.fitBounds(L.latLngBounds(meus.flat()).pad(0.25), {maxZoom: 17});
   rotulosT3();
-  if (window.__onSel) window.__onSel(nome);
 }
 function limpar() {
   sel = null;
@@ -146,7 +148,6 @@ function limpar() {
   if (marcas) { marcas.remove(); marcas = null; }
   Object.values(rotulos).forEach(m => m.getElement() && m.getElement().firstChild.classList.remove('sel'));
   rotulosT3();
-  if (window.__onSel) window.__onSel(null);
 }
 // vão do trecho mais perto do ponto tocado (o trecho é desenhado como uma linha só)
 function vaoPerto(vs, ll) {
@@ -176,7 +177,6 @@ function mostraClasses() {
     if (v && !rotulos[t.nome]) rotulo(t, contagem()); else if (!v && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; } });
   if (visivel.T3 && !map.hasLayer(fusMarcas)) fusMarcas.addTo(map); else if (!visivel.T3) fusMarcas.remove();
   rotulosT3();
-  if (window.__onClasses) window.__onClasses();   // camadas extras (limpeza.js) voltam para cima
 }
 function rotulosT3() {
   if (!map) return;
@@ -212,7 +212,6 @@ if (typeof L === 'undefined') {
     linhas[t.nome] = [l, vs];
   });
   fusMarcas = L.layerGroup().addTo(map);
-  window.__fusMarcas = fusMarcas;
   D.fusiveis.forEach(a => {
     L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' || a.t === 'FTR' ? '#9ca3af' : '#fff', fillOpacity: 1})
       .bindTooltip(`${a.nome} · ${TIPO[a.t] || a.t}${papel(a.nome) ? ' · ' + papel(a.nome) : ''}`, {direction: 'top'})
@@ -254,6 +253,5 @@ $('busca').addEventListener('input', e => {
 });
 window.__sel = selecionar;
 window.__limpar = limpar;
-window.__visivel = visivel;
 limpar();
 if (NAE) atualizaNae();
