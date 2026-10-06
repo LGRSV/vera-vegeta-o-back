@@ -25,6 +25,7 @@ p{margin:0}
 .stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
 @media (max-width:980px){.stage{grid-template-columns:1fr}}
 .mapbox{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--mapbg)}
+@media (min-width:981px){.mapbox{position:sticky;top:8px;z-index:5}}  /* computador: o mapa fica à vista enquanto o painel rola */
 #map{height:min(78vh,760px);min-height:400px;background:var(--mapbg)}
 .classes{position:absolute;right:10px;top:10px;z-index:810;display:flex;gap:6px}
 .classes button{font:700 13px/1 var(--f-body);padding:8px 10px;border-radius:6px;border:2px solid var(--c);background:rgba(15,20,23,.88);color:#f3f4f4;cursor:pointer;min-width:44px;min-height:36px}
@@ -52,7 +53,7 @@ p{margin:0}
 .chip:focus-visible,.row:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .lista{display:grid;gap:2px;max-height:min(46vh,430px);overflow-y:auto;padding-right:2px}
 .grp{font:600 11.5px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:10px 4px 5px;position:sticky;top:0;background:var(--paper)}
-.row{display:grid;grid-template-columns:10px 54px minmax(0,1fr) auto auto;gap:8px;align-items:center;width:100%;text-align:left;border:0;border-radius:5px;background:transparent;color:var(--fg);padding:6px 6px;cursor:pointer;font:13px/1.3 var(--f-body)}
+.row{display:grid;grid-template-columns:10px 54px minmax(0,1fr);grid-auto-flow:column;grid-auto-columns:auto;gap:8px;align-items:center;width:100%;text-align:left;border:0;border-radius:5px;background:transparent;color:var(--fg);padding:6px 6px;cursor:pointer;font:13px/1.3 var(--f-body)}
 .row{scroll-margin-top:30px}
 .row:hover{background:var(--bg)}
 .row[aria-current="true"]{background:var(--sel)}

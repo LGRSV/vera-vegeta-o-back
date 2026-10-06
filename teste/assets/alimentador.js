@@ -69,7 +69,22 @@ function desenhaLista(filtro) {
       `<span title="${esc(t.inicio + ' → ' + fimTxt(t))}">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</span>${cnt ? `<strong class="nae ${cnt[t.nome] ? 'tem' : ''}" title="NAE no período">${cnt[t.nome] || 0}</strong>` : ''}<em>${km(t.ext)}</em></button>`).join('');
   }).join('') || '<p class="lede">Nada encontrado.</p>';
 }
-$('lista').addEventListener('click', e => { const b = e.target.closest('.row'); if (b) selecionar(b.dataset.t, true); });
+$('lista').addEventListener('click', e => {
+  const b = e.target.closest('.row');
+  if (!b) return;
+  const y = b.getBoundingClientRect().top;               // a linha tocada fica no mesmo lugar da tela (o detalhe acima muda de altura)
+  selecionar(b.dataset.t, true);
+  requestAnimationFrame(() => {                          // depois dos acréscimos ao detalhe (limpeza, NAE), antes de pintar
+    const n = document.querySelector(`.row[data-t="${CSS.escape(b.dataset.t)}"]`);
+    if (n) window.scrollBy(0, n.getBoundingClientRect().top - y);
+  });
+});
+// rola só a lista até a linha, sem mexer na página (tocar no mapa não leva a tela até a lista)
+function naLista(b) {
+  const l = $('lista'), r = b.getBoundingClientRect(), c = l.getBoundingClientRect(), topo = 30;  // 30: título do grupo fixo no topo
+  if (r.top < c.top + topo) l.scrollTop -= c.top + topo - r.top;
+  else if (r.bottom > c.bottom) l.scrollTop += r.bottom - c.bottom;
+}
 
 // detalhe
 function detalhe(t, vao) {
@@ -123,7 +138,7 @@ function selecionar(nome, enquadrar, vao) {
   detalhe(t, vao);
   desenhaLista($('busca').value);
   const b = document.querySelector(`.row[data-t="${CSS.escape(nome)}"]`);
-  if (b) b.scrollIntoView({block: 'nearest'});
+  if (b) naLista(b);
   if (!map) return;
   Object.entries(linhas).forEach(([n, [l]]) => l.setStyle({opacity: n === nome ? 1 : 0.28}));
   if (halo) halo.remove();
