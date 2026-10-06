@@ -17,7 +17,9 @@
     '.ativo>div:first-of-type{display:flex;gap:8px;flex-wrap:wrap}.ativo .busca{flex:1 1 220px}' +
     '.ativo button{font:inherit;font-weight:600;padding:8px 16px;border:0;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer}' +
     '.ativo button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}#ativo-res{display:grid;gap:8px}#ativo-res:empty{display:none}' +
-    '#ativo-res p{font-size:14px}.ativo.no-mapa{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:4px 4px 12px;margin-bottom:8px}' +
+    '#ativo-res p{font-size:14px}.ativo.no-mapa{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:4px 4px 12px;margin-bottom:8px;' +
+    'text-align:center;justify-items:center}.ativo.no-mapa>div:first-of-type{justify-content:center;width:100%;max-width:560px}' +
+    '.ativo.no-mapa #ativo-res{justify-self:stretch;text-align:left}' +
     '.ativo.no-mapa .grade{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}';
   document.head.append(css);
 

@@ -27,7 +27,7 @@
     const tot = s.dia + s.vence + s.vencida + s.sem;
     return { s, tot, ult, prazo: tot ? (s.dia + s.vence) / tot : null };
   }
-  P.polos.forEach(p => p.als.forEach(a => {
+  P.polos.forEach(p => [...p.als, ...(p.trs || [])].forEach(a => {
     a.limp = limpeza(a.lp);
     a.n100 = a.km ? a.nae / a.km * 100000 : 0;
   }));
@@ -52,6 +52,10 @@
 .pl-reg button[aria-pressed=true]{background:var(--fg);color:var(--paper);border-color:var(--fg)}
 .pl-reg button[aria-pressed=true] small{color:inherit;opacity:.75}
 .pl-reg button:focus-visible,.pl-tab th button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pl-vis{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;justify-self:start}
+.pl-vis button{font:600 14px var(--f-body);min-height:40px;padding:6px 18px;border:0;background:var(--paper);color:var(--muted);cursor:pointer}
+.pl-vis button[aria-pressed=true]{background:var(--fg);color:var(--paper)}
+.pl-vis button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .pl-cab{display:grid;gap:4px}
 .pl-cab h2{margin:0;font-size:24px;line-height:1.15}
 .pl-cab p{font-size:14px}
@@ -90,30 +94,38 @@
   document.head.append(css);
 
   const porId = Object.fromEntries(P.polos.map(p => [p.id, p]));
-  let polo = porId[location.hash.slice(1)] || P.polos[0], ord = 'nae', desc = true;
+  const doHash = () => { const [id, v] = location.hash.slice(1).split('/'); return [porId[id], v === 'trechos' ? 'tr' : 'al']; };
+  let [polo, vista] = doHash(), ord = 'nae', desc = true;      // vista: 'al' alimentadores, 'tr' trechos
+  polo = polo || P.polos[0];
+  const poeHash = () => history.replaceState(null, '', '#' + polo.id + (vista === 'tr' ? '/trechos' : ''));
   const regs = [...new Set(P.polos.map(p => p.regional))];
   const totNae = p => p.als.reduce((s, a) => s + a.nae, 0);
 
   function desenha() {
     const col = COLS[ord];
-    const als = polo.als.slice().sort((a, b) => (desc ? -1 : 1) * (col.val(a) > col.val(b) ? 1 : col.val(a) < col.val(b) ? -1 : 0) || b.nae - a.nae || (a.al > b.al ? 1 : -1));
+    const tr = vista === 'tr', base = tr ? polo.trs || [] : polo.als;
+    const als = base.slice().sort((a, b) => (desc ? -1 : 1) * (col.val(a) > col.val(b) ? 1 : col.val(a) < col.val(b) ? -1 : 0) || b.nae - a.nae
+      || (a.al + (a.t || '') > b.al + (b.t || '') ? 1 : -1));
+    const rotKm = tr ? 'Km do trecho' : COLS.km.rot;
     const kmPolo = polo.als.reduce((s, a) => s + a.km, 0), nae = totNae(polo);
-    const th = (k, cls = '') => `<th scope="col" class="${cls}"${k === ord ? ` aria-sort="${desc ? 'descending' : 'ascending'}"` : ''}><button type="button" data-o="${k}">${COLS[k].rot}</button></th>`;
+    const th = (k, cls = '') => `<th scope="col" class="${cls}"${k === ord ? ` aria-sort="${desc ? 'descending' : 'ascending'}"` : ''}><button type="button" data-o="${k}">${k === 'km' ? rotKm : COLS[k].rot}</button></th>`;
     alvo.innerHTML = `<div class="pl-esc" role="group" aria-label="Escolher o polo">${regs.map(r => `<div class="pl-reg"><span>${esc(r)}</span>${
         P.polos.filter(p => p.regional === r).map(p => `<button type="button" data-p="${p.id}" aria-pressed="${p === polo}">${esc(p.nome)}<small>${nf(totNae(p))} NAE</small></button>`).join('')}</div>`).join('')}</div>
       <div class="pl-cab"><h2>Polo ${esc(polo.nome)}</h2>
-        <p>Regional ${esc(polo.regional)} · equipe ${esc(polo.equipe)} · ${polo.n_muns} municípios · ${polo.als.length} alimentadores · ${km(kmPolo)} km de rede no polo · <b>${nf(nae)} NAE</b> árvore/eucalipto${periodo ? ' de ' + periodo : ''}</p></div>
+        <p>Regional ${esc(polo.regional)} · equipe ${esc(polo.equipe)} · ${polo.n_muns} municípios · ${polo.als.length} alimentadores · ${(polo.trs || []).length} trechos com NAE · ${km(kmPolo)} km de rede no polo · <b>${nf(nae)} NAE</b> árvore/eucalipto${periodo ? ' de ' + periodo : ''}</p>
+        <div class="pl-vis" role="group" aria-label="Ver ranking de"><button type="button" data-v="al" aria-pressed="${!tr}">Alimentadores</button><button type="button" data-v="tr" aria-pressed="${tr}">Trechos</button></div></div>
       <table class="pl-tab">
-        <thead><tr><th scope="col" class="t">#</th><th scope="col" class="t">Alimentador</th>${th('nae')}${th('cons')}${th('chi')}${th('km')}${th('n100')}${th('prazo', 't')}${th('ult')}</tr></thead>
+        <thead><tr><th scope="col" class="t">#</th><th scope="col" class="t">${tr ? 'Trecho' : 'Alimentador'}</th>${th('nae')}${th('cons')}${th('chi')}${th('km')}${th('n100')}${th('prazo', 't')}${th('ult')}</tr></thead>
         <tbody>${als.map((a, i) => {
-          const L = a.limp, muns = a.muns.map(c => P.muns[c] || c);
-          const href = `../alimentadores/${encodeURIComponent(a.al)}/${a.m ? '?m=' + encodeURIComponent(a.m) : ''}`;
+          const L = a.limp, muns = tr ? [P.muns[a.mun] || a.mun].filter(Boolean) : a.muns.map(c => P.muns[c] || c);
+          const q = [tr ? 't=' + encodeURIComponent(a.t) : '', a.m ? 'm=' + encodeURIComponent(a.m) : ''].filter(Boolean).join('&');
+          const href = `../alimentadores/${encodeURIComponent(a.al)}/${q ? '?' + q : ''}`;
           return `<tr><td class="n">${i + 1}º</td>
-            <td class="al t"><a href="${href}" data-pos="${i + 1}">${esc(a.al)}</a><span>${esc(a.se)}${muns.length ? ' · ' + esc(muns.slice(0, 4).join(', ')) + (muns.length > 4 ? ` e mais ${muns.length - 4}` : '') : ''}</span></td>
+            <td class="al t"><a href="${href}" data-pos="${i + 1}">${esc(tr ? a.t : a.al)}</a><span>${tr ? esc(a.al) + ' · ' : ''}${esc(a.se)}${muns.length ? ' · ' + esc(muns.slice(0, 4).join(', ')) + (muns.length > 4 ? ` e mais ${muns.length - 4}` : '') : ''}</span></td>
             <td data-r="NAE"><b>${nf(a.nae)}</b>${a.sem ? `<small>${nf(a.sem)} sem trecho</small>` : ''}</td>
             <td data-r="Consumidores">${nf(a.cons)}</td>
             <td data-r="CHI (h)">${nf(a.chi)}</td>
-            <td data-r="Km no polo">${km(a.km)}${a.km_total > a.km + 50 ? `<small>de ${km(a.km_total)} km</small>` : ''}</td>
+            <td data-r="${rotKm}">${km(a.km)}${a.km_total > a.km + 50 ? `<small>de ${km(a.km_total)} km</small>` : ''}</td>
             <td data-r="NAE / 100 km">${nf(a.n100, 1)}</td>
             <td class="t lim" data-r="Limpeza no prazo">${L.tot ? `<span class="pl-bar" title="${Object.entries(SIT).map(([k, [n]]) => `${n}: ${km(L.s[k])} km`).join(' · ')}">${
               Object.entries(SIT).map(([k, [, c]]) => L.s[k] ? `<i style="width:${100 * L.s[k] / L.tot}%;background:${c}"></i>` : '').join('')}</span>${nf(100 * L.prazo)}% no prazo` : '<small>sem dados de limpeza</small>'}</td>
@@ -121,19 +133,22 @@
         }).join('')}</tbody></table>
       <div class="pl-leg" aria-label="Cores da limpeza">${Object.values(SIT).map(([n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join('')}</div>
       <div class="pl-nota"><p><b>Como conta:</b> alimentador que passa por mais de um polo aparece em cada um, com a rede e a NAE dos trechos que estão no polo (o trecho conta no município onde tem mais rede). NAE sem trecho localizado conta no polo onde o alimentador tem mais rede.</p>
+        ${tr ? '<p><b>Trechos:</b> só os que tiveram NAE no período; o trecho conta no polo do município onde tem mais rede. Tocar no trecho abre o mapa com ele selecionado.</p>' : ''}
         <p><b>Limpeza:</b> só OS executadas${P.equipes ? ' pelas equipes ' + esc(P.equipes.join(', ')) : ''}, pela data de execução; T1 a cada ${P.regra.T1} anos, T2 a cada ${P.regra.T2}, T3 a cada ${P.regra.T3}, contando da última limpeza de cada vão (situação de hoje).</p>
         <p>Polo de cada município: ${esc(P.fonte)}.${P.fora.length ? ' ' + esc(P.fora.join('; ')) + '.' : ''}</p></div>`;
   }
   alvo.addEventListener('click', e => {
-    const b = e.target.closest('[data-p],[data-o]');
-    if (!b) return;
-    if (b.dataset.p) { polo = porId[b.dataset.p]; history.replaceState(null, '', '#' + polo.id); }
+    const b = e.target.closest('[data-p],[data-o],[data-v]');
+    if (!b || b.tagName === 'A') return;
+    if (b.dataset.p) { polo = porId[b.dataset.p]; poeHash(); }
+    else if (b.dataset.v) { vista = b.dataset.v; poeHash(); }
     else if (b.dataset.o === ord) desc = !desc;
     else { ord = b.dataset.o; desc = true; }
     desenha();
     if (b.dataset.o) alvo.querySelector(`[data-o="${ord}"]`)?.focus();
     if (b.dataset.p) alvo.querySelector(`[data-p="${polo.id}"]`)?.focus();
+    if (b.dataset.v) alvo.querySelector(`[data-v="${vista}"]`)?.focus();
   });
-  addEventListener('hashchange', () => { if (porId[location.hash.slice(1)]) { polo = porId[location.hash.slice(1)]; desenha(); } });
+  addEventListener('hashchange', () => { const [p, v] = doHash(); if (p) { polo = p; vista = v; desenha(); } });
   desenha();
 })();
