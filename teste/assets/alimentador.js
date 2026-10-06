@@ -1,9 +1,7 @@
 const D = window.D;
 const COR_Z = {1:'#3b82f6', 2:'#22c55e', 3:'#facc15', 4:'#f97316', 5:'#ef4444'};
-const COR_R = ['#2dd4bf', '#a3e635', '#67e8f9', '#86efac', '#5eead4', '#bef264'];
-let nr = 0;
 D.trechos.forEach(t => {
-  t.cor = t.tipo === 'ramal' ? COR_R[nr++ % COR_R.length] : (COR_Z[t.zona] || '#d946ef');
+  t.cor = COR_Z[t.zona] || '#d946ef';                  // cor pela classe: T2, T2-A, T2-B… na mesma cor
   t.peso = t.tipo === 'principal' ? 6 : t.tipo === 'ramal' ? 4.5 : 3;
 });
 const TR = Object.fromEntries(D.trechos.map(t => [t.nome, t]));
@@ -16,8 +14,8 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 const $ = id => document.getElementById(id);
 
 // legenda
-const leg = [['T1', COR_Z[1], ''], ['T2', COR_Z[2], '']];
-D.trechos.filter(t => t.tipo === 'ramal').forEach(t => leg.push([t.nome, t.cor, '']));
+const nRamal = D.trechos.filter(t => t.tipo === 'ramal').length;
+const leg = [['T1', COR_Z[1], ''], [nRamal > 1 ? 'T2, T2-A, T2-B…' : nRamal ? 'T2, T2-A' : 'T2', COR_Z[2], '']];
 [3, 4, 5].forEach(z => { if (D.trechos.some(t => t.zona === z)) leg.push([`T${z}-…`, COR_Z[z], 'fino']); });
 if (D.trechos.some(t => t.zona > 5)) leg.push(['T6+', '#d946ef', 'fino']);
 $('legenda').innerHTML = leg.map(([n, c, k]) => `<span><i class="${k}" style="--c:${c}"></i>${esc(n)}</span>`).join('');

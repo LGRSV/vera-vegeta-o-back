@@ -12,6 +12,9 @@
   const km = m => (m / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
   const br = d => d ? d.split('-').reverse().join('/') : '—';
   const REGRA = LP.regra_anos;
+  // executadas só das equipes da regra (prefixo do número da OS); pendentes aparecem de qualquer equipe
+  const EQ = (LP.equipes || []).length ? ' pelas equipes ' + (LP.equipes.every(e => e.startsWith('ETO-RD-'))
+    ? 'ETO-RD-' + LP.equipes.map(e => e.slice(7)).join('/') : LP.equipes.join(', ')) : '';
   const HOJE = new Date(); HOJE.setHours(0, 0, 0, 0);
   const somaAnos = (d, n) => { const x = new Date(d + 'T00:00:00'); x.setFullYear(x.getFullYear() + n); return x; };
   const iso = x => x.toISOString().slice(0, 10);
@@ -424,12 +427,12 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
           <button type="button" class="so" data-so="${a}" data-foco="s${a}" title="Mostrar só ${a} e enquadrar no mapa">Ver só</button></div>`).join('')}
         ${PEND.length ? `<div class="limp-ano-l"><button type="button" class="liga" data-a="pend" data-foco="pend" aria-pressed="${st.pend}" title="Mostrar/esconder as OS ainda não executadas"><i class="trac" style="--c:#9ca3af"></i><span>Programadas / pendentes · ${PEND.length} OS</span><em>${km(KM_PEND)}</em></button></div>` : ''}</div>
         ${st.anos.size < ANOS.length ? '<button type="button" class="limp-todos" data-acao="todos" data-foco="todos">Mostrar todos os anos</button>' : ''}
-        <p class="limp-nota">Só limpezas executadas, pela data de execução. Cinza-claro: sem registro de limpeza.</p>`
-        : '<p class="limp-nota">Nenhuma OS executada caiu neste alimentador.</p>';
+        <p class="limp-nota">Só limpezas executadas${EQ}, pela data de execução. Cinza-claro: sem registro de limpeza.</p>`
+        : `<p class="limp-nota">Nenhuma OS executada${EQ} caiu neste alimentador.</p>`;
     } else if (st.ligado) {
       corpo = `<div class="limp-bar">${['dia', 'vence', 'vencida', 'sem'].map(k => TOT_SIT[k] ? `<span style="width:${100 * TOT_SIT[k] / KM_REDE}%;background:${SIT[k][1]}"></span>` : '').join('')}</div>
         <div class="limp-anos">${Object.entries(SIT).map(([k, [n, c]]) => `<div class="limp-ano-l fixo"><button type="button" class="liga" tabindex="-1" aria-disabled="true"><i style="--c:${c}"></i><span>${n}</span><em>${km(TOT_SIT[k])}</em></button></div>`).join('')}</div>
-        <p class="limp-nota">T1 a cada ${REGRA.T1} anos · T2 a cada ${REGRA.T2} · T3 a cada ${REGRA.T3}, contando da última limpeza de cada vão.</p>`;
+        <p class="limp-nota">T1 a cada ${REGRA.T1} anos · T2 a cada ${REGRA.T2} · T3 a cada ${REGRA.T3}, contando da última limpeza de cada vão${EQ ? ' (executadas' + EQ + ')' : ''}.</p>`;
     }
     const nOs = LP.os.length;
     const lista = nOs ? `<details class="limp-lista"${st.lista ? ' open' : ''}><summary data-foco="lista">Ver as ${nOs} OS por ano</summary><div>

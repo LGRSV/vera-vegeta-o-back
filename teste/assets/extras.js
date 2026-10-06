@@ -7,7 +7,7 @@
   const muns = M.municipios || [];
   const mun = muns.find(x => x.slug === new URLSearchParams(location.search).get('m'));
   const css = document.createElement('style');
-  css.textContent = '.migalhas{font-size:14px;margin-bottom:6px}.migalhas a{color:inherit}.filtros{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}' +
+  css.textContent = '.ie.ativo{transform:translate(-50%,9px)}.ie.ativo em{background:#1d4ed8}.migalhas{font-size:14px;margin-bottom:6px}.migalhas a{color:inherit}.filtros{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}' +
     '.filtros label{font-size:13px}.filtros select{font:inherit;max-width:100%}.aviso-dados{border-left:3px solid var(--alerta,#b91c1c);padding:6px 10px;margin:8px 0;font-size:13px}' +
     '.resumo-classe{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}.resumo-classe td,.resumo-classe th{padding:2px 6px;text-align:left;border-bottom:1px solid var(--line,#ddd)}' +
     '.origem{font-size:12px;opacity:.8}';
@@ -72,4 +72,16 @@
     D.vaos.forEach(x => { if ((tm[D.trechos[x[4]].nome] || []).includes(mun.cod)) pts.push([x[0], x[1]], [x[2], x[3]]); });
     if (pts.length) window.__map.fitBounds(L.latLngBounds(pts), { padding: [20, 20] });
   }
+
+  // vindo da busca de ativo da página inicial (?t=trecho&a=código&ll=lat,lon): seleciona o trecho e marca o ativo.
+  // Espera o load para a limpeza de faixa (scripts seguintes) também pintar a seleção.
+  const pq = new URLSearchParams(location.search), tq = pq.get('t');
+  if (tq && window.__sel && D.trechos.some(t => t.nome === tq)) addEventListener('load', () => {
+    window.__sel(tq, true);
+    const ll = (pq.get('ll') || '').split(',').map(Number), map = window.__map;
+    if (!map || !window.L || ll.length !== 2 || !ll.every(Number.isFinite)) return;
+    L.marker(ll, { interactive: false, zIndexOffset: 1000, icon: L.divIcon({ className: '', iconSize: null,
+      html: `<div class="ie ativo"><em>ATIVO</em>${esc(pq.get('a') || '')}</div>` }) }).addTo(map);
+    map.setView(ll, Math.max(map.getZoom(), 16), { animate: false });
+  });
 })();

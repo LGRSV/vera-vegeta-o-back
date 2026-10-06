@@ -13,10 +13,12 @@ Como a OS vira trecho no mapa (é aproximado: a OS não traz o traçado, só ati
      ("aproximadamente 15,30 km"); sem km, marca o resto do trecho dele.
      Com 0: tenta MONT_ABRANGENCIA como ponto único; senão fica "sem localização".
 Data da limpeza: FIM_EXEC; se o FIM vier mais de 60 dias depois do INICIO (fechamento em lote), usa INICIO_EXEC.
-Só OS EXECUTADA conta como limpeza; CRIADA / A REPROGRAMAR / REPROGRAMADA aparecem como pendentes.
+Só OS EXECUTADA conta como limpeza, e só das equipes de EQUIPES (prefixo do NUMERO_OS, ex.: "ETO-RD-GU 004972/2022");
+CRIADA / A REPROGRAMAR / REPROGRAMADA aparecem como pendentes, de qualquer equipe.
 
 Uso:
   python teste/ferramentas/limpeza_faixa.py "OS LIMPEZA DE FAIXA.xlsx" [saida.xlsx] [pasta_kmz ...]
+  python teste/ferramentas/limpeza_faixa.py --so-equipes [pasta do site]   (aplica EQUIPES nos limpeza.js já gerados)
   pasta_kmz: pasta(s) com o export KMZ_GOOGLE_EARTH (SE_*/AL*/Equipamentos/..., Apoios_e_pontos/Postes.kmz).
 """
 import glob
@@ -29,11 +31,22 @@ import sys
 import zipfile
 from collections import defaultdict, deque
 
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:  # --so-equipes não precisa do pandas
+    pd = None
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../teste
 REGRA = {"T1": 3, "T2": 4, "T3": 5}
 RAIO_M = 300  # distância máxima do ativo do KMZ até o poste do mapa
+# equipes de rede de distribuição dos 8 polos: só a limpeza executada por elas conta
+EQUIPES = ("ETO-RD-PA", "ETO-RD-PS", "ETO-RD-PO", "ETO-RD-GR", "ETO-RD-AR", "ETO-RD-AG", "ETO-RD-GU", "ETO-RD-DP")
+
+
+def conta(sit, numero_os):
+    """OS que entra no mapa: pendente de qualquer equipe; executada só das EQUIPES."""
+    eq = str(numero_os).split()[0] if str(numero_os).split() else ""
+    return sit != "EXECUTADA" or eq in EQUIPES
 
 
 def carrega_dados_js(al):
@@ -209,6 +222,8 @@ def main(xlsx, pastas_kmz=()):
 
     por_al = {a: [] for a in als}
     for _, r in df.iterrows():
+        if not conta(r.SITUACAO, r.NUMERO_OS):
+            continue
         desc = str(r.DESCRICAO_OS) if not pd.isna(r.DESCRICAO_OS) else ""
         cod_desc = list(dict.fromkeys(re.findall(r"(?<!\d)\d{10}(?!\d)", desc)))
         extra = [str(r[c]).strip() for c in ("ELEMENTO", "ABRANGENCIA") if not pd.isna(r[c])]
@@ -272,7 +287,7 @@ def main(xlsx, pastas_kmz=()):
     for a, lst in por_al.items():
         rede = redes[a]
         lst.sort(key=lambda ov: ov[0]["data"] or ov[0]["criada"] or "")
-        out = {"regra_anos": REGRA, "fonte": os.path.basename(xlsx), "gerado": hoje.date().isoformat(),
+        out = {"regra_anos": REGRA, "fonte": os.path.basename(xlsx), "gerado": hoje.date().isoformat(), "equipes": list(EQUIPES),
                "os": [o for o, _ in lst], "vaos": {}, "sem_local": []}
         ult = {}  # vão -> data da última limpeza executada
         for k, (o, vs) in enumerate(lst):
@@ -313,7 +328,32 @@ def main(xlsx, pastas_kmz=()):
     return linhas, por_al
 
 
+def so_equipes(raiz=RAIZ):
+    """Aplica EQUIPES nos limpeza.js já gerados, sem refazer a localização das OS (cada OS é localizada sozinha,
+    então tirar uma OS depois dá o mesmo que não ler a linha dela)."""
+    antes = depois = 0
+    for f in sorted(glob.glob(os.path.join(raiz, "alimentadores", "*", "limpeza.js"))):
+        s = open(f, encoding="utf8").read()
+        d = json.loads(s[s.index("=") + 1:].strip().rstrip(";"))
+        if not d:
+            continue
+        fica = [k for k, o in enumerate(d["os"]) if conta(o["sit"], o["os_completa"])]
+        novo = {k: i for i, k in enumerate(fica)}
+        antes, depois = antes + len(d["os"]), depois + len(fica)
+        d["os"] = [d["os"][k] for k in fica]
+        vaos = {v: [novo[k] for k in ks if k in novo] for v, ks in d["vaos"].items()}
+        d["vaos"] = {v: ks for v, ks in vaos.items() if ks}
+        d["sem_local"] = [novo[k] for k in d["sem_local"] if k in novo]
+        d["equipes"] = list(EQUIPES)
+        open(f, "w", encoding="utf8").write("window.LIMPEZA = " + json.dumps(d, ensure_ascii=False, separators=(",", ":")) + ";\n")
+    return antes, depois
+
+
 if __name__ == "__main__":
+    if sys.argv[1] == "--so-equipes":
+        antes, depois = so_equipes(*sys.argv[2:3])
+        print(f"{antes} OS antes, {depois} depois (executadas só de {', '.join(EQUIPES)})")
+        sys.exit(0)
     xlsx = sys.argv[1]
     saida = sys.argv[2] if len(sys.argv) > 2 else None
     linhas, por_al = main(xlsx, sys.argv[3:])

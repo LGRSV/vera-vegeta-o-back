@@ -1,1 +1,1 @@
-window.LIMPEZA = {"regra_anos":{"T1":3,"T2":4,"T3":5},"fonte":"OS LIMPEZA DE FAIXA.xlsx","gerado":"2026-10-03","os":[],"vaos":{},"sem_local":[]};
+window.LIMPEZA = {"regra_anos":{"T1":3,"T2":4,"T3":5},"fonte":"OS LIMPEZA DE FAIXA.xlsx","gerado":"2026-10-03","os":[],"vaos":{},"sem_local":[],"equipes":["ETO-RD-PA","ETO-RD-PS","ETO-RD-PO","ETO-RD-GR","ETO-RD-AR","ETO-RD-AG","ETO-RD-GU","ETO-RD-DP"]};
