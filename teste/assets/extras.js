@@ -41,8 +41,8 @@
   f.addEventListener('change', aplica);
   new MutationObserver(ms => {
     if (ms.some(m => m.type === 'childList')) aplica();
-    const s = lista.querySelector('.row[aria-current="true"]');
-    document.getElementById('mig-trecho').textContent = s ? ' → ' + s.dataset.t : '';
+    const s = [...lista.querySelectorAll('.row[aria-current="true"]')].map(b => b.dataset.t);
+    document.getElementById('mig-trecho').textContent = s.length ? ' → ' + s.join(' + ') : '';
   }).observe(lista, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-current'] });
   aplica();
 
@@ -75,11 +75,12 @@
 
   // vindo da busca de ativo da página inicial (?t=trecho&a=código&ll=lat,lon): seleciona o trecho e marca o ativo.
   // Espera o load para a limpeza de faixa (scripts seguintes) também pintar a seleção.
-  const pq = new URLSearchParams(location.search), tq = pq.get('t');
-  if (tq && window.__sel && D.trechos.some(t => t.nome === tq)) addEventListener('load', () => {
-    window.__sel(tq, true);
-    const ll = (pq.get('ll') || '').split(',').map(Number), map = window.__map;
-    if (!map || !window.L || ll.length !== 2 || !ll.every(Number.isFinite)) return;
+  const pq = new URLSearchParams(location.search), tq = pq.get('t'), ll = (pq.get('ll') || '').split(',').map(Number);
+  const temT = tq && window.__sel && D.trechos.some(t => t.nome === tq), temLL = ll.length === 2 && ll.every(Number.isFinite);
+  if (temT || temLL) addEventListener('load', () => {    // ativo longe da rede: só o marcador
+    if (temT) window.__sel(tq, true);
+    const map = window.__map;
+    if (!map || !window.L || !temLL) return;
     L.marker(ll, { interactive: false, zIndexOffset: 1000, icon: L.divIcon({ className: '', iconSize: null,
       html: `<div class="ie ativo"><em>ATIVO</em>${esc(pq.get('a') || '')}</div>` }) }).addTo(map);
     map.setView(ll, Math.max(map.getZoom(), 16), { animate: false });

@@ -31,20 +31,29 @@ if (NAE && NAE.meses.length) {
   $('mes').innerHTML = (NAE.meses.length > 1 ? `<option value="todos" selected>Todos (${rotMes('todos')})</option>` : '') +
     NAE.meses.map(m => `<option value="${m}">${rotMes(m)}</option>`).join('');
 }
-const doMes = () => NAE ? NAE.oc.filter(o => ($('mes').value === 'todos' || o.mes === $('mes').value) && (o.col || $('ind').checked)) : [];
-function contagem() { const c = {}; doMes().forEach(o => { if (o.trecho) c[o.trecho] = (c[o.trecho] || 0) + 1; }); return c; }
-function listaOc(os) {
-  return `<ul class="oc">${os.map(o => `<li class="${o.col ? 'col' : ''}"><span class="q">${esc(o.dia)} · ${!o.col ? '1 consumidor · trafo ' + esc(o.ativo) : esc(ABR[o.abr] || o.abr) + ' ' + esc(o.prob || o.ativo) + (o.prob && o.prob !== o.ativo ? ' · trafo ' + esc(o.ativo) : '')}</span><br>` +
-    `${esc(o.sub || o.causa)}${o.prog ? ' · <b>programada</b>' : ''} · ${o.cons} cons. · ${o.dur} min</li>`).join('')}</ul>`;
+const filtra = l => (l || []).filter(o => ($('mes').value === 'todos' || o.mes === $('mes').value) && (o.col || $('ind').checked));
+const doMes = () => NAE ? filtra(NAE.oc) : [];            // NAE deste alimentador (Crítica): o total do alimentador
+const doExt = () => NAE ? filtra(NAE.ext) : [];           // NAE de outro alimentador cujo ativo hoje está num trecho daqui
+const doTrecho = () => [...doMes(), ...doExt()];          // bloco do trecho: soma a NAE de todos os ativos do trecho
+function contagem() { const c = {}; doTrecho().forEach(o => { if (o.trecho) c[o.trecho] = (c[o.trecho] || 0) + 1; }); return c; }
+const raizAl = location.pathname.includes('/alimentadores/') ? '../' : null;   // no site: link para o outro alimentador
+function listaOc(os, comTrecho) {
+  return `<ul class="oc">${os.map(o => `<li class="${o.col ? 'col' : ''}"><span class="q">${comTrecho ? `<b>${esc(o.trecho)}</b> · ` : ''}${esc(o.dia)} · ${!o.col ? '1 consumidor · trafo ' + esc(o.ativo) : esc(ABR[o.abr] || o.abr) + ' ' + esc(o.prob || o.ativo) + (o.prob && o.prob !== o.ativo ? ' · trafo ' + esc(o.ativo) : '')}</span><br>` +
+    `${esc(o.sub || o.causa)}${o.prog ? ' · <b>programada</b>' : ''} · ${o.cons} cons. · ${o.dur} min` +
+    (o.lonlat && map ? ` · <button type="button" class="ir" data-ll="${o.lonlat[1]},${o.lonlat[0]}">ver no mapa</button>` : '') +
+    (o.de ? `<br><b>registrada no ${esc(o.de)}</b> (a Crítica conta lá; o ativo hoje fica aqui)` : '') +
+    (o.hoje ? `<br>ativo hoje no ${raizAl && o.hoje[1] ? `<a href="${raizAl}${encodeURIComponent(o.hoje[0])}/?t=${encodeURIComponent(o.hoje[1])}">${esc(o.hoje[0])} · ${esc(o.hoje[1])}</a>` : esc(o.hoje[0]) + (o.hoje[1] ? ' · ' + esc(o.hoje[1]) : '')}${o.hoje[1] ? ' (conta também lá)' : ''}` : '') +
+    `</li>`).join('')}</ul>`;
 }
-function blocoNae(nome) {
-  const os = doMes().filter(o => o.trecho === nome), col = os.filter(o => o.col).length;
+function blocoNae(nome, l) {
+  const os = doTrecho().filter(o => (l || [nome]).includes(o.trecho)), col = os.filter(o => o.col).length, ext = os.filter(o => o.de).length;
   const ind = $('ind').checked ? ` · ${os.length - col} individua${os.length - col === 1 ? 'l' : 'is'}` : '';
-  return `<dt>NAE ${rotMes($('mes').value)}</dt><dd><b>${os.length}</b> (${col} coletiva${col === 1 ? '' : 's'}${ind})${os.length ? listaOc(os) : ''}</dd>`;
+  return `<dt>NAE ${rotMes($('mes').value)}</dt><dd><b>${os.length}</b> (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})${os.length ? listaOc(os, !!l) : ''}</dd>`;
 }
 function atualizaNae() {
   desenhaLista($('busca').value);
-  sel ? detalhe(TR[sel]) : resumo();
+  multi.length ? detalheVarios(multi) : sel ? detalhe(TR[sel]) : resumo();
+  marcaNae(multi.length ? multi : sel ? [sel] : null);
   const c = contagem();
   Object.entries(rotulos).forEach(([n, m]) => { const el = m.getElement(); if (el) { el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : ''); el.firstChild.classList.toggle('oc', !!c[n]); } });
   rotulosT3();
@@ -63,7 +72,7 @@ function desenhaLista(filtro) {
     const ts = D.trechos.filter(t => t.tipo === g && casa(t));
     if (!ts.length) return '';
     return `<div class="grp">${titulo} · ${ts.length}</div>` + ts.map(t =>
-      `<button class="row" role="listitem" data-t="${esc(t.nome)}" aria-current="${t.nome === sel}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
+      `<button class="row" role="listitem" data-t="${esc(t.nome)}" aria-current="${escolhido(t.nome)}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
       `<span title="${esc(t.inicio + ' → ' + fimTxt(t))}">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</span>${cnt ? `<strong class="nae ${cnt[t.nome] ? 'tem' : ''}" title="NAE no período">${cnt[t.nome] || 0}</strong>` : ''}<em>${km(t.ext)}</em></button>`).join('');
   }).join('') || '<p class="lede">Nada encontrado.</p>';
 }
@@ -71,7 +80,7 @@ $('lista').addEventListener('click', e => {
   const b = e.target.closest('.row');
   if (!b) return;
   const y = b.getBoundingClientRect().top;               // a linha tocada fica no mesmo lugar da tela (o detalhe acima muda de altura)
-  selecionar(b.dataset.t, true);
+  clique(b.dataset.t, e, true);
   requestAnimationFrame(() => {                          // depois dos acréscimos ao detalhe (limpeza, NAE), antes de pintar
     const n = document.querySelector(`.row[data-t="${CSS.escape(b.dataset.t)}"]`);
     if (n) window.scrollBy(0, n.getBoundingClientRect().top - y);
@@ -100,11 +109,23 @@ function detalhe(t, vao) {
     ${vao ? `<dt>Vão</dt><dd class="mono">${esc(vao[5])} · poste ${esc(vao[6])} → ${esc(vao[7])} · ${Math.round(vao[8])} m</dd>` : ''}
   </dl><div><button class="chip" id="todos">Ver todos</button></div>`;
 }
+// vários trechos (Ctrl ou ⌘ + clique): soma de extensão e NAE, e cada trecho com o seu
+function detalheVarios(l) {
+  const ts = l.map(n => TR[n]), ext = ts.reduce((s, t) => s + t.ext, 0), c = NAE ? contagem() : {};
+  const nae = NAE ? blocoNae(null, l) : '';
+  $('det').innerHTML = `<h2>${l.length} trechos <small>${km(ext)} · ${nv(ts.reduce((s, t) => s + t.qtd, 0))}</small></h2>
+    <div class="varios">${ts.map(t => `<div><button class="chip" data-t="${esc(t.nome)}">${esc(t.nome)}</button><span>${km(t.ext)}</span>` +
+      `${NAE ? `<span><b>${c[t.nome] || 0}</b> NAE</span>` : ''}<small class="mono">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</small></div>`).join('')}</div><dl>
+    <dt>Extensão</dt><dd>${km(ext)} somados</dd>
+    ${nae}
+  </dl><p class="lede">Ctrl (⌘ no Mac) + clique põe ou tira um trecho. Clique sem Ctrl volta a um trecho só.</p><div><button class="chip" id="todos">Ver todos</button></div>`;
+}
 function resumoNae() {
-  const os = doMes(), col = os.filter(o => o.col).length, fora = os.filter(o => !o.trecho), mot = {};
-  fora.forEach(o => { mot[o.fora] = (mot[o.fora] || 0) + 1; });
+  const os = doMes(), col = os.filter(o => o.col).length, fora = os.filter(o => !o.trecho), mot = {}, ext = doExt();
+  fora.forEach(o => { const m = (o.fora || '').startsWith('hoje no ') ? 'com o ativo hoje em outro alimentador' : o.fora; mot[m] = (mot[m] || 0) + 1; });
   return `<dt>NAE ${rotMes($('mes').value)}</dt><dd><b>${os.length}</b> no alimentador (${col} coletivas${$('ind').checked ? ` · ${os.length - col} individuais` : ''})` +
-    `${fora.length ? `<br>Fora dos trechos atuais: ${Object.entries(mot).map(([m, n]) => `${n} ${esc(m)}`).join(' · ')}${listaOc(fora)}` : ''}</dd>`;
+    `${fora.length ? `<br>Sem trecho aqui: ${Object.entries(mot).map(([m, n]) => `${n} ${esc(m)}`).join(' · ')}${listaOc(fora)}` : ''}` +
+    `${ext.length ? `<br>Mais ${ext.length} de outros alimentadores com o ativo hoje num trecho daqui: contam no trecho, não no total acima.` : ''}</dd>`;
 }
 function resumo() {
   const total = D.trechos.reduce((s, t) => s + t.ext, 0);
@@ -116,12 +137,17 @@ function resumo() {
     ${D.trechos.filter(t => t.tipo !== 'fusivel').map(linha).join('')}
     <dt>Fusíveis</dt><dd>${fus.length} trechos (${Object.entries(porZ).map(([z, n]) => `T${z}: ${n}`).join(' · ')})</dd>
     ${NAE ? resumoNae() : ''}
-  </dl><p class="lede">Toque num trecho no mapa ou na lista para ver início, fim e derivações.</p>`;
+  </dl><p class="lede">Toque num trecho no mapa ou na lista para ver início, fim e derivações. Para somar vários, segure Ctrl (⌘ no Mac) e clique em cada um.</p>`;
 }
-$('det').addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; b.id === 'todos' ? limpar() : selecionar(b.dataset.t, true); });
+$('det').addEventListener('click', e => {
+  const v = e.target.closest('[data-ll]');               // ocorrência da lista: vai até o ativo no mapa
+  if (v) { if (map) { map.setView(v.dataset.ll.split(',').map(Number), 18); document.getElementById('map').scrollIntoView({block: 'nearest'}); } return; }
+  const b = e.target.closest('.chip'); if (!b) return; b.id === 'todos' ? limpar() : clique(b.dataset.t, e, true);
+});
 
 // mapa
-let map = null, sel = null;
+let map = null, sel = null, multi = [];                // multi: trechos escolhidos com Ctrl (ou ⌘) + clique
+const escolhido = n => n === sel || multi.includes(n);
 const linhas = {}, rotulos = {};
 const visivel = {T1: true, T2: true, T3: true};
 let fusMarcas = null;                                     // pontos dos fusíveis: somem junto com o T3          // botões T1 / T2 / T3 sobre o mapa
@@ -130,29 +156,66 @@ let halo = null, marcas = null;
 const fimDe = {};
 D.trechos.forEach(t => t.fim.forEach(f => (fimDe[f] = fimDe[f] || []).push(t.nome)));
 const papel = nome => [...D.trechos.filter(t => t.inicio === nome).map(t => 'início do ' + t.nome), ...(fimDe[nome] || []).map(n => 'fim do ' + n)].join(' · ');
+// clique com Ctrl (⌘ no Mac): põe ou tira o trecho da seleção; sem Ctrl: um trecho só
+const comCtrl = e => !!e && (e.ctrlKey || e.metaKey);
+function clique(nome, e, enquadrar, vao) {
+  if (!comCtrl(e)) return selecionar(nome, enquadrar, vao);
+  const l = multi.length ? multi.slice() : sel ? [sel] : [], i = l.indexOf(nome);
+  i < 0 ? l.push(nome) : l.splice(i, 1);
+  if (l.length > 1) selecionarVarios(l, nome);
+  else if (l.length) selecionar(l[0], false);
+  else limpar();
+}
 function selecionar(nome, enquadrar, vao) {
-  sel = nome;
-  const t = TR[nome];
-  detalhe(t, vao);
+  sel = nome; multi = [];
+  detalhe(TR[nome], vao);
   desenhaLista($('busca').value);
   const b = document.querySelector(`.row[data-t="${CSS.escape(nome)}"]`);
   if (b) naLista(b);
+  realca([nome], enquadrar);
+}
+function selecionarVarios(l, ultimo) {
+  sel = null; multi = l;
+  detalheVarios(l);
+  desenhaLista($('busca').value);
+  const b = document.querySelector(`.row[data-t="${CSS.escape(ultimo)}"]`);
+  if (b) naLista(b);
+  realca(l, false);
+}
+// destaca no mapa os trechos escolhidos: os outros ficam apagados; pinos de início e fim (com vários, só o início de cada um)
+function realca(nomes, enquadrar) {
   if (!map) return;
-  Object.entries(linhas).forEach(([n, [l]]) => l.setStyle({opacity: n === nome ? 1 : 0.28}));
+  Object.entries(linhas).forEach(([n, [l]]) => l.setStyle({opacity: nomes.includes(n) ? 1 : 0.28}));
   if (halo) halo.remove();
-  const meus = (linhas[nome] || [null, []])[1].map(v => [[v[0], v[1]], [v[2], v[3]]]);
-  halo = L.polyline(meus, {color: '#fff', weight: t.peso + 6, opacity: .9, interactive: false}).addTo(map);
-  halo.bringToBack();
-  Object.entries(rotulos).forEach(([n, m]) => m.getElement() && m.getElement().firstChild.classList.toggle('sel', n === nome));
+  const meus = n => (linhas[n] || [null, []])[1].map(v => [[v[0], v[1]], [v[2], v[3]]]);
+  halo = L.layerGroup(nomes.map(n => L.polyline(meus(n), {color: '#fff', weight: TR[n].peso + 6, opacity: .9, interactive: false}))).addTo(map);
+  halo.eachLayer(l => l.bringToBack());
+  Object.entries(rotulos).forEach(([n, m]) => m.getElement() && m.getElement().firstChild.classList.toggle('sel', nomes.includes(n)));
   if (marcas) marcas.remove();
   const pino = (pt, cls, tag, txt) => L.marker(pt, {interactive: false, zIndexOffset: 900, icon: L.divIcon({className: '', iconSize: null, html: `<div class="ie ${cls}"><em>${tag}</em>${esc(txt)}</div>`})});
-  marcas = L.layerGroup([pino([t.inicio_lat, t.inicio_lon], 'ini', 'INÍCIO', t.inicio),
-    ...t.fim.map((f, i) => pino(t.fim_pts[i], 'fim', 'FIM', f.replace('fim de linha · poste ', 'poste ') + (f.startsWith('fim de linha') ? ' (fim de linha)' : '')))]).addTo(map);
-  if (enquadrar) map.fitBounds(L.latLngBounds(meus.flat()).pad(0.25), {maxZoom: 17});
+  const t = TR[nomes[0]];
+  marcas = L.layerGroup(nomes.length > 1 ? nomes.map(n => pino([TR[n].inicio_lat, TR[n].inicio_lon], 'ini', esc(n), TR[n].inicio))
+    : [pino([t.inicio_lat, t.inicio_lon], 'ini', 'INÍCIO', t.inicio),
+      ...t.fim.map((f, i) => pino(t.fim_pts[i], 'fim', 'FIM', f.replace('fim de linha · poste ', 'poste ') + (f.startsWith('fim de linha') ? ' (fim de linha)' : '')))]).addTo(map);
+  if (enquadrar) map.fitBounds(L.latLngBounds(nomes.flatMap(n => meus(n).flat())).pad(0.25), {maxZoom: 17});
+  marcaNae(nomes);
   rotulosT3();
 }
+// ativos com NAE nos trechos escolhidos: um marcador vermelho por ativo, com quantas NAE teve (mês e filtro da tela)
+let naeMarcas = null;
+function marcaNae(nomes) {
+  if (naeMarcas) { naeMarcas.remove(); naeMarcas = null; }
+  if (!map || !NAE || !nomes) return;
+  const g = {};
+  doTrecho().forEach(o => { if (o.lonlat && nomes.includes(o.trecho)) { const k = o.ativo + '|' + o.trecho; (g[k] = g[k] || {o, n: 0, de: new Set()}).n++; if (o.de) g[k].de.add(o.de); } });
+  naeMarcas = L.layerGroup(Object.values(g).map(({o, n, de}) => L.marker([o.lonlat[1], o.lonlat[0]], {zIndexOffset: 950, keyboard: false,
+    icon: L.divIcon({className: '', iconSize: null, html: `<div class="nae-at">${n}</div>`})})
+    .bindTooltip(`${esc(ABR[o.abr] || o.abr)} ${esc(o.ativo)} · ${n} NAE · ${esc(o.trecho)}${de.size ? ' · registrada no ' + esc([...de].join(', ')) : ''}`, {direction: 'top'})
+    .on('click', e => { L.DomEvent.stopPropagation(e); map.setView(e.latlng, Math.max(map.getZoom(), 17)); }))).addTo(map);
+}
 function limpar() {
-  sel = null;
+  sel = null; multi = [];
+  marcaNae(null);
   resumo();
   desenhaLista($('busca').value);
   if (!map) return;
@@ -177,9 +240,9 @@ function vaoPerto(vs, ll) {
 }
 // rótulos: T1/T2 sempre; T3 só de perto e só os que estão na tela (mais leve em alimentador grande)
 function rotulo(t, c) {
-  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${t.nome === sel ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}</div>`}), zIndexOffset: t.tipo === 'fusivel' ? 0 : 400})
+  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${escolhido(t.nome) ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}</div>`}), zIndexOffset: t.tipo === 'fusivel' ? 0 : 400})
     .bindTooltip(`${t.inicio} → ${fimTxt(t)}`, {direction: 'top'})
-    .on('click', e => { L.DomEvent.stopPropagation(e); selecionar(t.nome, false); }).addTo(map);
+    .on('click', e => { L.DomEvent.stopPropagation(e); clique(t.nome, e.originalEvent, false); }).addTo(map);
   rotulos[t.nome] = m;
 }
 function mostraClasses() {
@@ -196,7 +259,7 @@ function rotulosT3() {
   const perto = map.getZoom() >= 15.5, b = map.getBounds().pad(0.2), c = contagem();
   D.trechos.forEach(t => {
     if (t.tipo !== 'fusivel') return;
-    const ver = visivel.T3 && (t.nome === sel || c[t.nome] || (perto && b.contains(t.rotulo)));
+    const ver = visivel.T3 && (escolhido(t.nome) || c[t.nome] || (perto && b.contains(t.rotulo)));
     if (ver && !rotulos[t.nome]) rotulo(t, c);
     else if (!ver && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; }
   });
@@ -218,7 +281,7 @@ if (typeof L === 'undefined') {
   Object.keys(vaosDe).forEach(i => {
     const t = D.trechos[i], vs = vaosDe[i];
     const l = L.polyline(vs.map(v => [[v[0], v[1]], [v[2], v[3]]]), {color: t.cor, weight: t.peso, opacity: 1, lineCap: 'round'}).addTo(map);
-    l.on('click', e => { L.DomEvent.stopPropagation(e); selecionar(t.nome, false, vaoPerto(vs, e.latlng)); });
+    l.on('click', e => { L.DomEvent.stopPropagation(e); clique(t.nome, e.originalEvent, false, vaoPerto(vs, e.latlng)); });
     l.bindTooltip(t.nome, {sticky: true, direction: 'top', offset: [0, -8]});
     l.on('mouseover', () => l.setStyle({weight: t.peso + 3}));
     l.on('mouseout', () => l.setStyle({weight: t.peso}));
@@ -228,7 +291,7 @@ if (typeof L === 'undefined') {
   D.fusiveis.forEach(a => {
     L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' || a.t === 'FTR' ? '#9ca3af' : '#fff', fillOpacity: 1})
       .bindTooltip(`${a.nome} · ${TIPO[a.t] || a.t}${papel(a.nome) ? ' · ' + papel(a.nome) : ''}`, {direction: 'top'})
-      .on('click', e => { L.DomEvent.stopPropagation(e); if (a.trecho) selecionar(a.trecho, false); }).addTo(fusMarcas);
+      .on('click', e => { L.DomEvent.stopPropagation(e); if (a.trecho) clique(a.trecho, e.originalEvent, false); }).addTo(fusMarcas);
   });
   D.principais.forEach(a => {
     L.marker([a.lat, a.lon], {icon: L.divIcon({className: '', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500})
@@ -250,7 +313,7 @@ if (typeof L === 'undefined') {
     mostraClasses();
   });
   L.DomEvent.disableClickPropagation($('classes'));
-  map.on('click', limpar);
+  map.on('click', e => { if (!comCtrl(e.originalEvent)) limpar(); });   // Ctrl + clique fora da rede não desfaz a seleção
 }
 
 $('busca').addEventListener('input', e => {
@@ -265,6 +328,7 @@ $('busca').addEventListener('input', e => {
   if (v) { selecionar(D.trechos[v[4]].nome, false, v); if (map) map.setView([v[2], v[3]], Math.max(map.getZoom(), 17)); }
 });
 window.__sel = selecionar;
+window.__clique = clique;
 window.__limpar = limpar;
 limpar();
 if (NAE) atualizaNae();

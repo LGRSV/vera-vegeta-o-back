@@ -225,6 +225,8 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
     const v = maisPerto(vs, e.latlng);
     if (!v) return;
     const nome = D.trechos[v[4]].nome, classe = classeDe(nome);
+    const oe = e.originalEvent || {};
+    if ((oe.ctrlKey || oe.metaKey) && window.__clique) return window.__clique(nome, oe, false);   // Ctrl + clique: soma trechos, sem balão
     if (window.__sel) window.__sel(nome, false);
     const ks = (porVao[v[5]] || { ks: [] }).ks.slice().sort((a, b) => (LP.os[b].data || '9' + LP.os[b].criada).localeCompare(LP.os[a].data || '9' + LP.os[a].criada));
     const exec = ks.filter(k => LP.os[k].data), pend = ks.filter(k => !LP.os[k].data);
