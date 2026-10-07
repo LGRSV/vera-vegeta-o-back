@@ -3,12 +3,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Alimentadores por polo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../assets/site.css"></head><body><div class="wrap">
-<nav class="migalhas"><a href="../">Municípios</a> → <b>Ranking por polo</b></nav>
-<header><h1>Ranking por polo</h1><p>Escolha a ETO inteira, uma regional (Norte, Centro, Sul) ou um polo e veja os alimentadores ou os trechos (todos ou só T1, T2 ou T3), do que tem mais NAE (árvore/eucalipto na rede) para o que tem menos; toque no título de uma coluna para ordenar por ela.</p></header>
+<nav class="migalhas" aria-label="Caminho"><a href="../">Municípios</a><span aria-hidden="true">›</span><span aria-current="page">Ranking por polo</span></nav>
+<header><h1>Ranking por polo</h1><p>Alimentadores e trechos com mais NAE (árvore/eucalipto na rede) na ETO, em cada regional e em cada polo.</p></header>
 <div id="polos"></div>
 <script src="../assets/ranking-polos-dados.js"></script>
 <script src="../assets/ranking-polos.js"></script>
+<footer class="rodape"><p><a href="../relatorio.html">Relatório de validação</a> · <a href="../manifesto.json">manifesto.json</a></p></footer>
 </div>
-<script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();document.querySelectorAll("[data-busca]").forEach(e=>{e.hidden=!e.dataset.busca.includes(q)});});</script>
+<script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();document.querySelectorAll("[data-busca]").forEach(e=>{e.hidden=!e.dataset.busca.includes(q)});document.querySelectorAll(".grade").forEach(g=>{let v=g.nextElementSibling;if(!v||!v.classList.contains("sem-res")){v=document.createElement("p");v.className="sem-res";v.setAttribute("role","status");g.after(v)}v.textContent=!q||g.querySelector("[data-busca]:not([hidden])")?"":"Nada encontrado para “"+b.value.trim()+"”."})});</script>
 </body></html>

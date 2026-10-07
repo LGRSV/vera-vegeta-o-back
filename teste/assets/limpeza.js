@@ -86,6 +86,7 @@
     anos: new Set(ANOS),
     pend: false,
     foco: null,
+    mais: guarda('limp-mais') === '1',   // "Anos e ordens de serviço" aberto (fechado por padrão)
     lista: false,            // lista de OS aberta
     grupos: new Set(),       // grupos (anos) abertos na lista
     sel: null,               // trecho selecionado no mapa
@@ -93,72 +94,95 @@
 
   const css = document.createElement('style');
   css.textContent = `
-.limp-card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--paper);display:grid;gap:8px;box-shadow:0 1px 0 var(--line)}
-.limp-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.limp-top h2{margin:0;font:700 20px/1.1 var(--f-display);flex:1;min-width:160px}
-.limp-top h2 small{display:block;margin-top:3px;font:500 12.5px var(--f-body);color:var(--muted)}
+.limp-card{border:0;box-shadow:none;background:none;border-radius:0;padding:var(--s5) 0 0;border-top:1px solid var(--line);display:grid;gap:var(--s3)}
+.limp-top{display:flex;align-items:center;gap:var(--s3)}
+.limp-top h2{margin:0;font:700 var(--t-xl)/1.1 var(--f-display);flex:1 1 auto;min-width:0;white-space:nowrap}
+.limp-top h2 small{display:block;margin-top:var(--s1);font:500 var(--t-xs)/1.4 var(--f-body);color:var(--muted);white-space:normal}
 .limp-card button,.limp-sec button,.limp-maplg button,.limp-chip button{font-family:var(--f-body)}
 .limp-card button:focus-visible,.limp-sec button:focus-visible,.limp-card summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.limp-sw{font-weight:600;font-size:13px;min-height:36px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
-.limp-sw[aria-pressed=true]{background:#15803d;border-color:#15803d;color:#fff}
-.limp-seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
-.limp-seg button{flex:1;font-weight:600;font-size:13px;min-height:36px;padding:6px 10px;border:0;background:var(--bg);color:var(--muted);cursor:pointer}
-.limp-seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
-.limp-anos{display:grid;gap:4px}
-.limp-ano-l{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:6px;background:var(--bg);overflow:hidden}
+/* interruptor "No mapa": o estado vem só do aria-pressed */
+.limp-sw{flex:none;display:inline-flex;align-items:center;gap:var(--s2);min-height:var(--alvo);padding:0 var(--s1) 0 var(--s2);border:0;border-radius:var(--r2);background:none;color:var(--fg);font:600 var(--t-sm) var(--f-body);cursor:pointer}
+.limp-sw::after{content:'';flex:none;width:36px;height:20px;border-radius:var(--rp);background-color:var(--line-forte);
+  background-image:radial-gradient(circle,var(--paper) 7.5px,transparent 8.5px);background-repeat:no-repeat;background-size:20px 20px;background-position:0 50%}
+.limp-sw[aria-pressed=true]::after{background-color:var(--accent);background-image:radial-gradient(circle,var(--on-accent) 7.5px,transparent 8.5px);background-position:16px 50%}
+.limp-sw:hover{background:var(--hover)}
+/* segmentado Por ano / Vencimento */
+.limp-seg{display:flex;gap:2px;padding:3px;border:0;border-radius:var(--r2);background:var(--hover)}
+.limp-seg button{flex:1;min-height:var(--alvo);padding:0 var(--s3);border:0;border-radius:7px;background:transparent;color:var(--muted);font:600 var(--t-sm) var(--f-body);white-space:nowrap;cursor:pointer}
+.limp-seg button[aria-pressed=true]{background:var(--seg-on,var(--paper));color:var(--fg);box-shadow:var(--sh1)}
+.limp-mais>div{display:grid;gap:var(--s3);padding-top:var(--s2)}
+/* anos: linhas com filete, sem caixa */
+.limp-anos{display:grid}
+.limp-ano-l{display:flex;align-items:stretch;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none}
 .limp-ano-l>button{all:unset;box-sizing:border-box;cursor:pointer;color:var(--fg)}
-.limp-ano-l .liga{flex:1;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:7px 10px;min-height:38px;font-size:13.5px}
+.limp-ano-l .liga{flex:1;display:grid;grid-template-columns:auto 1fr auto;gap:var(--s3);align-items:center;padding:0 var(--s2);min-height:var(--alvo);font-size:var(--t-sm)}
 .limp-ano-l .liga:focus-visible,.limp-ano-l .so:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .limp-ano-l .liga i{width:24px;height:8px;border-radius:4px;background:var(--c);box-shadow:0 0 0 1px #0005}
-.limp-ano-l .liga b{font:700 15px var(--f-mono)}
-.limp-ano-l .liga em{font-style:normal;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.limp-ano-l .liga b{font:600 var(--t-md) var(--f-mono);font-variant-numeric:tabular-nums}
+.limp-ano-l .liga em{font:var(--t-xs) var(--f-mono);font-style:normal;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .limp-ano-l .liga[aria-pressed=false]{color:var(--muted)}
 .limp-ano-l .liga[aria-pressed=false] i{background:transparent;box-shadow:inset 0 0 0 2px var(--c)}
 .limp-ano-l .liga[aria-pressed=false] b{text-decoration:line-through}
-.limp-ano-l .so{display:grid;place-items:center;padding:0 12px;border-left:1px solid var(--line);font-size:12px;font-weight:600;color:var(--muted)}
-.limp-ano-l .so:hover,.limp-ano-l .liga:hover{background:var(--paper)}
+.limp-ano-l .so{display:grid;place-items:center;padding:0 var(--s3);font:600 var(--t-xs) var(--f-body);color:var(--accent)}
+.limp-ano-l .so:hover,.limp-ano-l .liga:hover{background:var(--hover)}
+.limp-ano-l .so:hover{text-decoration:underline;text-underline-offset:2px}
 .limp-ano-l i.trac{background:repeating-linear-gradient(90deg,var(--c) 0 5px,transparent 5px 9px)!important;box-shadow:none!important}
 .limp-ano-l.fixo .liga{cursor:default}
-.limp-todos{justify-self:start;font-weight:600;font-size:12.5px;min-height:32px;padding:4px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
-.limp-bar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:#9ca3af}
+.limp-ano-l.fixo .liga:hover{background:none}
+.limp-todos{justify-self:start;min-height:32px;padding:0 var(--s2);border:0;border-radius:var(--r1);background:none;color:var(--accent);font:600 var(--t-xs) var(--f-body);cursor:pointer}
+.limp-todos:hover{background:var(--hover)}
+.limp-bar{display:flex;height:8px;border-radius:var(--rp);overflow:hidden;background:var(--sem)}
 .limp-bar span{display:block;height:100%}
-.limp-nota{font-size:12px;color:var(--muted);margin:0}
-.limp-lista>summary,.limp-grupo>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;min-height:40px}
+.limp-nota{font-size:var(--t-xs);color:var(--muted);margin:0}
+/* OS por ano */
+.limp-lista>summary,.limp-grupo>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:var(--s2);min-height:var(--alvo);border-radius:var(--r1)}
 .limp-lista>summary::-webkit-details-marker,.limp-grupo>summary::-webkit-details-marker{display:none}
-.limp-lista>summary{font-weight:600;font-size:14px;border-top:1px solid var(--line);padding-top:6px}
-.limp-lista>summary::before,.limp-grupo>summary::before{content:'▸';color:var(--muted);width:10px}
+.limp-lista>summary{font:600 var(--t-sm) var(--f-body)}
+.limp-lista>summary::before,.limp-grupo>summary::before{content:'▸';color:var(--muted);width:10px;flex:none;font-size:var(--t-sm)}
 .limp-lista[open]>summary::before,.limp-grupo[open]>summary::before{content:'▾'}
 .limp-lista>div{display:grid;gap:2px}
-.limp-grupo{display:grid;gap:4px}
-.limp-grupo>summary{font:700 14px var(--f-mono)}
+.limp-grupo{display:grid;gap:var(--s1)}
+.limp-grupo>summary{font:600 var(--t-md) var(--f-mono)}
 .limp-grupo>summary i{width:14px;height:8px;border-radius:4px;background:var(--c)}
-.limp-grupo>summary span{font:500 12.5px var(--f-body);color:var(--muted)}
-.limp-grupo>div{display:grid;gap:4px;padding:0 0 6px 18px}
-.limp-os-b{display:grid;gap:2px;text-align:left;width:100%;min-height:40px;padding:7px 9px;border-radius:6px;border:1px solid var(--line);border-left:5px solid var(--c);background:var(--bg);color:var(--fg);cursor:pointer;font-size:13px}
-.limp-os-b[aria-pressed=true]{border-color:var(--fg);border-left-color:var(--c);background:var(--sel)}
-.limp-os-b .q{font:600 12.5px var(--f-mono)}
-.limp-os-b .s{color:var(--muted);font-size:12px}
+.limp-grupo>summary span{font:500 var(--t-xs) var(--f-body);color:var(--muted)}
+.limp-grupo>div{display:grid;gap:var(--s1);padding:0 0 var(--s2) 18px}
+.limp-os-b{display:grid;gap:2px;text-align:left;width:100%;min-height:var(--alvo);padding:var(--s2) var(--s3);border:0;border-left:3px solid var(--c);border-radius:0 var(--r1) var(--r1) 0;
+  background:color-mix(in srgb,var(--fg) 4%,transparent);color:var(--fg);cursor:pointer;font-size:var(--t-sm)}
+.limp-os-b:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.limp-os-b[aria-pressed=true]{background:var(--sel)}
+.limp-os-b .q{font:600 var(--t-xs) var(--f-mono);font-variant-numeric:tabular-nums}
+.limp-os-b .s{color:var(--muted);font-size:var(--t-xs)}
 .limp-os-b.pend{border-left-style:dashed}
-.limp-foco{border-radius:0 0 6px 6px;margin-top:-6px;padding:8px 10px;background:var(--sel);border:1px solid var(--fg);border-top:0;font-size:13px;display:grid;gap:4px}
-.limp-foco .q{font:700 13px var(--f-mono)}
-.limp-sec{margin-top:10px;border-top:1px solid var(--line);padding-top:8px;display:grid;gap:6px}
-.limp-sec h3{font:700 15px var(--f-display);margin:0}
-.limp-selo{font:600 11px var(--f-mono);padding:1px 5px;border-radius:5px;color:#111;background:var(--c);margin-left:auto;white-space:nowrap}
-.limp-selo.nada{background:transparent;color:var(--muted);border:1px solid var(--line)}
-.limp-maplg{position:absolute;left:10px;bottom:34px;z-index:800;background:rgba(15,20,23,.88);color:#f3f4f4;border-radius:8px;padding:5px 6px;font:12px/1.2 var(--f-body);display:grid;gap:1px;max-width:calc(100% - 20px)}
-.limp-maplg button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:7px;min-height:28px;padding:3px 6px;border-radius:4px}
-.limp-maplg button:focus-visible{outline:2px solid #fde047;outline-offset:1px}
+.limp-foco{border:0;border-radius:var(--r1);margin-top:-2px;padding:var(--s2) var(--s3);background:var(--sel);font-size:var(--t-sm);display:grid;gap:var(--s1);overflow-wrap:anywhere}
+.limp-foco .q{font:600 var(--t-sm) var(--f-mono)}
+/* no detalhe do trecho */
+.limp-sec{border-top:1px solid var(--line);padding-top:var(--s3);display:grid;gap:var(--s2)}
+.limp-sec h3{font:700 var(--t-base) var(--f-display);margin:0}
+.limp-selo{font:600 var(--t-xs)/18px var(--f-mono);padding:0 5px;border-radius:var(--r1);color:#111;background:var(--c);margin-left:auto;white-space:nowrap}
+.limp-selo.nada{background:transparent;color:var(--muted);font-weight:400}
+/* na lista: coluna do selo com largura fixa (cabe "sem limpeza"), para a NAE e o km ficarem alinhados de uma linha a outra */
+.row{grid-template-columns:10px minmax(0,1fr) auto 5.75rem auto}
+.row .limp-selo{justify-self:start}
+/* sobre o mapa: legenda dos anos e OS em foco, no vidro escuro */
+.limp-maplg{position:absolute;left:12px;bottom:12px;z-index:800;display:grid;gap:0;max-width:calc(100% - 24px);padding:var(--s1);
+  background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);border:1px solid var(--vidro-borda);border-radius:var(--r2);box-shadow:var(--sh-vidro);font:var(--t-xs)/1.2 var(--f-body)}
+.limp-maplg button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:var(--s2);min-height:32px;padding:0 var(--s2);border-radius:var(--r1)}
+.limp-maplg button:hover{background:var(--vidro-hover)}
+.limp-maplg button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}
+@media (pointer:coarse){.limp-maplg button{min-height:40px}}   /* toque: alvo de 40 px */
 .limp-maplg button[aria-pressed=false]{opacity:.6;text-decoration:line-through}
 .limp-maplg button[aria-pressed=false] i{background:transparent;box-shadow:inset 0 0 0 2px var(--c)}
-.limp-maplg span{display:flex;align-items:center;gap:7px;min-height:24px;padding:2px 6px}
+.limp-maplg span{display:flex;align-items:center;gap:var(--s2);min-height:28px;padding:0 var(--s2)}
 .limp-maplg i{width:20px;height:6px;border-radius:3px;background:var(--c);flex:none}
-.limp-maplg b{font-family:var(--f-mono)}
-.limp-chip{position:absolute;right:10px;bottom:34px;z-index:805;display:flex;align-items:center;gap:2px;max-width:calc(100% - 20px);background:rgba(15,20,23,.92);color:#f3f4f4;border-radius:8px;padding:3px;border-left:5px solid var(--c);font:600 12.5px var(--f-mono);box-shadow:0 2px 10px #0007}
-.limp-chip span{padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.limp-chip button{all:unset;cursor:pointer;display:grid;place-items:center;min-width:36px;min-height:36px;border-radius:6px;font-size:17px}
-.limp-chip button:hover{background:#ffffff1f}
-.limp-chip button:focus-visible{outline:2px solid #fde047}
-.limp-tag{display:inline-flex;align-items:baseline;gap:6px;transform:translate(-50%,-140%);white-space:nowrap;cursor:pointer;
+.limp-maplg b{font-family:var(--f-mono);font-weight:600}
+.limp-chip{position:absolute;right:12px;bottom:28px;z-index:805;display:flex;align-items:center;gap:2px;max-width:calc(100% - 24px);padding:var(--s1) var(--s1) var(--s1) var(--s2);
+  background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);border:1px solid var(--vidro-borda);border-radius:var(--r2);
+  box-shadow:inset 4px 0 0 var(--c),var(--sh-vidro);font:600 var(--t-sm) var(--f-mono)}
+.limp-chip span{padding:0 var(--s2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.limp-chip button{all:unset;cursor:pointer;display:grid;place-items:center;min-width:40px;min-height:40px;border-radius:var(--r1);font-size:var(--t-lg)}
+.limp-chip button:hover{background:var(--vidro-hover)}
+.limp-chip button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}
+.limp-tag{display:inline-flex;align-items:baseline;gap:6px;transform:translate(-50%,-140%);white-space:nowrap;pointer-events:none;
   font:700 12.5px/1 var(--f-mono);color:#111;background:var(--c);padding:5px 8px;border-radius:6px;border:2px solid #0b0f14;box-shadow:0 2px 6px #0008}
 .limp-tag::after{content:'';position:absolute;left:50%;bottom:-8px;margin-left:-6px;border:6px solid transparent;border-top-color:#0b0f14;border-bottom:0}
 .limp-tag small{font:600 11px var(--f-body);opacity:.8}
@@ -172,13 +196,23 @@
 .limp-pop .sit::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:6px;box-shadow:0 0 0 1px #0004}
 .limp-pop .nada{color:#5a636a;font-style:italic}
 body.limp-on #legenda{display:none}
-body.limp-on .classes button{border-color:#9ca3af}
+body.limp-on .classes button{box-shadow:inset 0 -3px 0 #9ca3af}
 body.limp-on .lb{border-left-color:#9ca3af}
 body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
+body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
+@media (min-width:701px){body.tela-cheia.tc-gaveta .limp-chip{right:calc(min(420px,92vw) + 12px)}}
+@media (prefers-reduced-motion:no-preference){
+  .limp-sw,.limp-sw::after,.limp-seg button,.limp-ano-l .liga,.limp-ano-l .so,.limp-todos,.limp-os-b,.limp-maplg button,.limp-chip button{
+    transition:background-color var(--dur) var(--ease),color var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease),opacity var(--dur) var(--ease)}
+  .limp-sw::after{transition-property:background-color,background-position}
+}
 @media (max-width:640px){
-  .limp-maplg{top:56px;bottom:auto;left:52px;right:10px;display:flex;flex-wrap:wrap;gap:0 2px;max-width:none}
-  .limp-maplg button,.limp-maplg span{min-height:30px;padding:2px 5px}
-  .limp-chip{left:10px;right:10px;bottom:30px}
+  .limp-maplg{top:auto;bottom:28px;left:12px;right:12px;display:flex;flex-wrap:nowrap;gap:2px;max-width:none;padding:var(--s1) var(--s3);overflow-x:auto;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent);mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)}
+  .limp-maplg::-webkit-scrollbar{display:none}
+  .limp-maplg button,.limp-maplg span{flex:none;min-height:32px;padding:0 var(--s2);white-space:nowrap}
+  .limp-chip{left:12px;right:12px;bottom:72px}
+  @media (pointer:coarse){.limp-maplg button{min-height:40px}.limp-chip{bottom:80px}}   /* toque: alvo de 40 px */
   .limp-chip span{flex:1}
 }`;
   document.head.append(css);
@@ -274,7 +308,7 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
       const tronco = nomes.filter(n => classeDe(n) !== 'T3');
       const tr = (tronco.length ? tronco.slice(0, 2) : nomes.slice(0, 1)).join(' / ');
       return L.marker([(v[0] + v[2]) / 2, (v[1] + v[3]) / 2], {
-        zIndexOffset: 1000,
+        zIndexOffset: 1000, interactive: false, keyboard: false,     // não cobre o clique na rede (o balão da linha mostra a OS)
         icon: L.divIcon({ className: '', iconSize: null, html: `<div class="limp-tag" data-d="${esc(o.data)}" style="--c:${corAno(anoDe(o))}"><em>${esc(tr)}</em>${txt}<small>${ks.length > 1 ? ks.length + ' OS' : km(o.m)}</small></div>` }),
       }).on('click', e => { L.DomEvent.stopPropagation(e); focar(ks[0], true); });
     });
@@ -309,11 +343,12 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
     [selL, realce].forEach(g => g && g.eachLayer(l => l.bringToFront()));
   }
   // trecho tocado no mapa ou na lista: contorno amarelo por cima da camada de limpeza
-  window.__onSel = nome => {
+  window.__onSel = nome => {                              // um trecho ou vários (Ctrl+clique)
     st.sel = nome;
     if (selL) { selL.remove(); selL = null; }
-    if (map && nome && st.ligado) {
-      const vs = vaosDoTrecho[nome] || [];
+    const nomes = Array.isArray(nome) ? nome : nome ? [nome] : [];
+    if (map && nomes.length && st.ligado) {
+      const vs = nomes.flatMap(n => vaosDoTrecho[n] || []);
       selL = L.layerGroup(linhaDupla(vs, '#fde047', 4, 1, { dashArray: '1 0' })).addTo(map);
       if (realce) realce.eachLayer(l => l.bringToFront());
     }
@@ -334,7 +369,8 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
 
   function enquadra(vs) {
     if (!map || !vs.length) return;
-    if (celular() && !telaCheia()) document.querySelector('.mapbox').scrollIntoView({ block: 'start' });
+    const mb = document.querySelector('.mapbox');      // mapa fixo no alto (sticky): já está à vista, a página não pula
+    if (celular() && !telaCheia() && getComputedStyle(mb).position !== 'sticky') mb.scrollIntoView({ block: 'start' });
     map.invalidateSize();
     map.fitBounds(L.latLngBounds(vs.flatMap(seg)).pad(0.15), { maxZoom: 16 });
   }
@@ -349,7 +385,7 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
         L.polyline(vs.map(seg), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round', dashArray: o.data ? null : '8 6' }),
       ]).addTo(map);
       if (o.data) { st.grupos.add(String(anoDe(o))); } else st.grupos.add('pend');
-      st.lista = true;
+      st.mais = true; st.lista = true;                  // abre "Anos e ordens de serviço" antes do grupo e da OS
       if (enquadrar) enquadra(vs);
     }
     desenha();
@@ -378,7 +414,8 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
     chip.className = 'limp-chip';
     chip.hidden = true;
     mb.append(maplg, chip);
-    [maplg, chip].forEach(el => { L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el); });
+    // os dois são refeitos a cada clique (pinta): o clique não pode seguir até o mapa, que o tomaria por clique fora da rede e desfaria o trecho escolhido
+    [maplg, chip].forEach(el => { L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el); L.DomEvent.on(el, 'click', L.DomEvent.stopPropagation); });
     maplg.addEventListener('click', e => { const b = e.target.closest('button'); if (b) alternaAno(b.dataset.a); });
     chip.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
@@ -393,7 +430,8 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
   card.className = 'limp-card';
   card.setAttribute('aria-label', 'Limpeza de faixa');
   const legenda = $('legenda');
-  (legenda || document.querySelector('.panel').firstChild).before(card);
+  if ($('det')) $('det').after(card);                  // logo depois do detalhe do trecho (a lista vem antes, com rolagem própria)
+  else (legenda || document.querySelector('.panel').firstChild).before(card);
 
   function focoHtml(k) {
     const o = LP.os[k];
@@ -440,10 +478,11 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
     const lista = nOs ? `<details class="limp-lista"${st.lista ? ' open' : ''}><summary data-foco="lista">Ver as ${nOs} OS por ano</summary><div>
         ${ANOS.map(a => grupo(String(a), a, corAno(a), `${OS_ANO[a].length} OS · ${km(KM_ANO[a])}`, OS_ANO[a])).join('')}
         ${PEND.length ? grupo('pend', 'Pendentes', '#9ca3af', `${PEND.length} OS`, PEND) : ''}</div></details>` : '';
+    const seg = st.ligado ? `<div class="limp-seg" role="group" aria-label="Pintar o mapa por"><button type="button" data-acao="ano" data-foco="ano" aria-pressed="${st.vista === 'ano'}">Por ano</button><button type="button" data-acao="sit" data-foco="sit" aria-pressed="${st.vista === 'sit'}">Vencimento</button></div>` : '';
+    const resto = seg + corpo + lista;                   // anos e OS só quando alguém pede
     card.innerHTML = `<div class="limp-top"><h2>Limpeza de faixa<small>${sub}</small></h2>
-      <button type="button" class="limp-sw" data-acao="liga" data-foco="liga" aria-pressed="${st.ligado}">${st.ligado ? 'Ligada no mapa' : 'Mostrar no mapa'}</button></div>
-      ${st.ligado ? `<div class="limp-seg" role="group" aria-label="Pintar o mapa por"><button type="button" data-acao="ano" data-foco="ano" aria-pressed="${st.vista === 'ano'}">Por ano</button><button type="button" data-acao="sit" data-foco="sit" aria-pressed="${st.vista === 'sit'}">Vencimento</button></div>` : ''}
-      ${corpo}${lista}`;
+      <button type="button" class="limp-sw" data-acao="liga" data-foco="liga" aria-pressed="${st.ligado}" title="Mostrar a limpeza de faixa no mapa">No mapa</button></div>
+      ${resto ? `<details class="limp-mais"${st.mais ? ' open' : ''}><summary data-foco="mais">Anos e ordens de serviço</summary><div>${resto}</div></details>` : ''}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
 
     if (maplg) {
@@ -470,7 +509,8 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
   // <details> abertos/fechados pelo usuário ficam guardados (pinta() refaz o cartão)
   card.addEventListener('toggle', e => {
     const d = e.target;
-    if (d.classList.contains('limp-lista')) st.lista = d.open;
+    if (d.classList.contains('limp-mais')) { st.mais = d.open; guarda('limp-mais', d.open ? '1' : '0'); }
+    else if (d.classList.contains('limp-lista')) st.lista = d.open;
     else if (d.dataset.g) d.open ? st.grupos.add(d.dataset.g) : st.grupos.delete(d.dataset.g);
   }, true);
   card.addEventListener('click', e => {

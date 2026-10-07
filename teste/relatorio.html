@@ -3,8 +3,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Relatório de validação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/site.css"></head><body><div class="wrap">
-<nav class="migalhas"><a href="./">Municípios</a> → <b>Relatório</b></nav>
+<nav class="migalhas" aria-label="Caminho"><a href="./">Municípios</a><span aria-hidden="true">›</span><span aria-current="page">Relatório</span></nav>
 <pre class="relatorio"># Relatório de validação · trechos por município
 
 Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = ocorrências da Crítica (coletivas e individuais) associadas a um trecho ou não.
@@ -1909,6 +1911,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 - LD02027074: nenhum município com ≥ 100 m
 - LD02028074: nenhum município com ≥ 100 m
 </pre>
+<footer class="rodape"><p><a href="relatorio.html">Relatório de validação</a> · <a href="manifesto.json">manifesto.json</a></p></footer>
 </div>
-<script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();document.querySelectorAll("[data-busca]").forEach(e=>{e.hidden=!e.dataset.busca.includes(q)});});</script>
+<script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();document.querySelectorAll("[data-busca]").forEach(e=>{e.hidden=!e.dataset.busca.includes(q)});document.querySelectorAll(".grade").forEach(g=>{let v=g.nextElementSibling;if(!v||!v.classList.contains("sem-res")){v=document.createElement("p");v.className="sem-res";v.setAttribute("role","status");g.after(v)}v.textContent=!q||g.querySelector("[data-busca]:not([hidden])")?"":"Nada encontrado para “"+b.value.trim()+"”."})});</script>
 </body></html>

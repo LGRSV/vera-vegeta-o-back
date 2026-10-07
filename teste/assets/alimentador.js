@@ -11,7 +11,9 @@ const TIPO = {DJ:'disjuntor', '79':'religador', '03':'fusível 03', '33':'fusív
 const km = m => m < 1000 ? Math.round(m) + ' m' : (m / 1000).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
 const nv = q => q + (q === 1 ? ' vão' : ' vãos');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mil = x => Number(x).toLocaleString('pt-BR');     // 1996 → 1.996
 const $ = id => document.getElementById(id);
+const FECHA = '<button type="button" class="fecha" id="todos" aria-label="Limpar seleção" title="Limpar seleção">✕</button>';
 
 // legenda
 const nRamal = D.trechos.filter(t => t.tipo === 'ramal').length;
@@ -41,14 +43,14 @@ function listaOc(os, comTrecho) {
   return `<ul class="oc">${os.map(o => `<li class="${o.col ? 'col' : ''}"><span class="q">${comTrecho ? `<b>${esc(o.trecho)}</b> · ` : ''}${esc(o.dia)} · ${!o.col ? '1 consumidor · trafo ' + esc(o.ativo) : esc(ABR[o.abr] || o.abr) + ' ' + esc(o.prob || o.ativo) + (o.prob && o.prob !== o.ativo ? ' · trafo ' + esc(o.ativo) : '')}</span><br>` +
     `${esc(o.sub || o.causa)}${o.prog ? ' · <b>programada</b>' : ''} · ${o.cons} cons. · ${o.dur} min` +
     (o.lonlat && map ? ` · <button type="button" class="ir" data-ll="${o.lonlat[1]},${o.lonlat[0]}">ver no mapa</button>` : '') +
-    (o.de ? `<br><b>registrada no ${esc(o.de)}</b> (a Crítica conta lá; o ativo hoje fica aqui)` : '') +
+    (o.de ? `<br><b>registrada no ${raizAl ? `<a href="${raizAl}${encodeURIComponent(o.de)}/">${esc(o.de)}</a>` : esc(o.de)}</b> (a Crítica conta lá; o ativo hoje fica aqui)` : '') +
     (o.hoje ? `<br>ativo hoje no ${raizAl && o.hoje[1] ? `<a href="${raizAl}${encodeURIComponent(o.hoje[0])}/?t=${encodeURIComponent(o.hoje[1])}">${esc(o.hoje[0])} · ${esc(o.hoje[1])}</a>` : esc(o.hoje[0]) + (o.hoje[1] ? ' · ' + esc(o.hoje[1]) : '')}${o.hoje[1] ? ' (conta também lá)' : ''}` : '') +
     `</li>`).join('')}</ul>`;
 }
 function blocoNae(nome, l) {
   const os = doTrecho().filter(o => (l || [nome]).includes(o.trecho)), col = os.filter(o => o.col).length, ext = os.filter(o => o.de).length;
   const ind = $('ind').checked ? ` · ${os.length - col} individua${os.length - col === 1 ? 'l' : 'is'}` : '';
-  return `<dt>NAE ${rotMes($('mes').value)}</dt><dd><b>${os.length}</b> (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})${os.length ? listaOc(os, !!l) : ''}</dd>`;
+  return `<dt class="nae">NAE ${rotMes($('mes').value)}</dt><dd class="nae"><b>${os.length}</b> (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})${os.length ? listaOc(os, !!l) : ''}</dd>`;
 }
 function atualizaNae() {
   desenhaLista($('busca').value);
@@ -64,40 +66,106 @@ $('ind').addEventListener('change', atualizaNae);
 // lista
 const GRUPOS = [['principal', 'T1 e T2'], ['ramal', 'T2-A, T2-B… (um por religador)'], ['fusivel', 'Depois de fusível']];
 function fimTxt(t) { return t.fim.join(' / '); }
+let porNome = {}, marcadas = [];                         // linha de cada trecho; linhas escolhidas (aria-current)
+const linha = n => porNome[n] || null;
+let porPoste = null;                                       // poste → trechos dos vãos que chegam nele (busca na lista)
+const doPoste = () => porPoste || (porPoste = D.vaos.reduce((m, v) => { [v[6], v[7]].forEach(p => { if (p) (m[String(p).toLowerCase()] = m[String(p).toLowerCase()] || new Set()).add(D.trechos[v[4]].nome); }); return m; }, {}));
 function desenhaLista(filtro) {
   const q = (filtro || '').trim().toLowerCase();
-  const casa = t => !q || [t.nome, t.inicio, t.inicio_poste, ...t.fim, ...t.passa].some(s => String(s).toLowerCase().includes(q));
+  const casa = t => !q || [t.nome, t.inicio, t.inicio_poste, ...t.fim, ...t.passa].some(s => String(s).toLowerCase().includes(q))
+    || (q.length >= 3 && (doPoste()[q] || new Set()).has(t.nome));
   const cnt = NAE ? contagem() : null;
   $('lista').innerHTML = GRUPOS.map(([g, titulo]) => {
     const ts = D.trechos.filter(t => t.tipo === g && casa(t));
     if (!ts.length) return '';
-    return `<div class="grp">${titulo} · ${ts.length}</div>` + ts.map(t =>
-      `<button class="row" role="listitem" data-t="${esc(t.nome)}" aria-current="${escolhido(t.nome)}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
-      `<span title="${esc(t.inicio + ' → ' + fimTxt(t))}">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</span>${cnt ? `<strong class="nae ${cnt[t.nome] ? 'tem' : ''}" title="NAE no período">${cnt[t.nome] || 0}</strong>` : ''}<em>${km(t.ext)}</em></button>`).join('');
+    return `<div class="grp" role="heading" aria-level="3">${titulo} · ${mil(ts.length)}</div>` + ts.map(t =>
+      `<button type="button" class="row" tabindex="-1" data-t="${esc(t.nome)}" aria-current="${escolhido(t.nome)}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
+      `<span title="${esc(t.inicio + ' → ' + fimTxt(t))}">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</span>${cnt ? `<strong class="nae ${cnt[t.nome] ? 'tem' : ''}" title="NAE no período">${cnt[t.nome] || 0}<span class="vh"> NAE</span></strong>` : ''}<em>${km(t.ext)}</em></button>`).join('');
   }).join('') || '<p class="lede">Nada encontrado.</p>';
+  porNome = {};
+  $('lista').querySelectorAll('.row').forEach(b => { porNome[b.dataset.t] = b; });
+  marcadas = [...$('lista').querySelectorAll('.row[aria-current="true"]')];
+  tabLista();
 }
+// escolher um trecho só troca o aria-current das linhas (não refaz as ~2.000 linhas): mais rápido e o foco do teclado fica onde está
+function marcaLista() {
+  marcadas.forEach(b => b.setAttribute('aria-current', 'false'));
+  marcadas = (multi.length ? multi : sel ? [sel] : []).map(linha).filter(Boolean);
+  marcadas.forEach(b => b.setAttribute('aria-current', 'true'));
+  if (!$('lista').contains(document.activeElement)) tabLista();
+}
+// teclado: a lista é uma parada só do Tab (a linha escolhida ou a 1ª à vista); as setas andam de linha em linha
+function tabLista(alvo) {
+  const l = $('lista'), atual = l.querySelector('.row[tabindex="0"]');
+  alvo = alvo || marcadas.find(b => !b.hidden) || (atual && !atual.hidden ? atual : null) || l.querySelector('.row:not([hidden])');
+  if (atual && atual !== alvo) atual.tabIndex = -1;
+  if (alvo) alvo.tabIndex = 0;
+}
+window.__tabLista = () => tabLista();                     // extras.js: depois de filtrar por classe ou município
+$('lista').addEventListener('focusin', e => { const b = e.target.closest('.row'); if (b && b.tabIndex !== 0) tabLista(b); });
+$('lista').addEventListener('keydown', e => {
+  const b = e.target.closest('.row'), passo = {ArrowDown: 1, ArrowUp: -1, PageDown: 10, PageUp: -10, Home: -Infinity, End: Infinity}[e.key];
+  if (!b || passo === undefined || e.altKey) return;
+  e.preventDefault();
+  const vs = [...$('lista').querySelectorAll('.row:not([hidden])')], i = vs.indexOf(b);
+  const n = vs[Math.max(0, Math.min(vs.length - 1, i + passo))] || vs[passo < 0 ? 0 : vs.length - 1];
+  if (!n || n === b) return;
+  tabLista(n);
+  n.focus({preventScroll: true});
+  n.scrollIntoView({block: 'nearest'});                  // rola só o necessário (o título fixo do grupo fica de fora: scroll-margin)
+});
+// quem rola: o painel (computador e gaveta da tela cheia rolam por dentro) ou, sem isso, a página
+function rolador() {
+  const p = document.querySelector('.panel');
+  return p && getComputedStyle(p).overflowY !== 'visible' && p.scrollHeight > p.clientHeight ? p : null;
+}
+// parte da tela onde o painel aparece: o próprio painel, ou a página abaixo do mapa fixo no alto (celular)
+function areaVisivel(r) {
+  if (r) { const q = r.getBoundingClientRect(); return {top: q.top, bottom: q.bottom}; }
+  const mb = document.querySelector('.mapbox'), alto = mb && matchMedia('(max-width:980px)').matches && !document.body.classList.contains('tela-cheia');
+  return {top: alto ? Math.max(0, mb.getBoundingClientRect().bottom) : 0, bottom: innerHeight};
+}
+const suave = () => matchMedia('(prefers-reduced-motion:no-preference)').matches ? 'smooth' : 'auto';
+function rolaPara(r, y) { (r || window).scrollTo({top: Math.max(0, y), behavior: suave()}); }
+let daLista = false;                                      // escolha feita na própria lista: nada se mexe
 $('lista').addEventListener('click', e => {
   const b = e.target.closest('.row');
   if (!b) return;
-  const y = b.getBoundingClientRect().top;               // a linha tocada fica no mesmo lugar da tela (o detalhe acima muda de altura)
-  clique(b.dataset.t, e, true);
-  requestAnimationFrame(() => {                          // depois dos acréscimos ao detalhe (limpeza, NAE), antes de pintar
-    const n = document.querySelector(`.row[data-t="${CSS.escape(b.dataset.t)}"]`);
-    if (n) window.scrollBy(0, n.getBoundingClientRect().top - y);
+  const y = b.getBoundingClientRect().top;
+  daLista = true;
+  try { clique(b.dataset.t, e, true); } finally { daLista = false; }
+  requestAnimationFrame(() => {                          // depois dos acréscimos (limpeza, NAE, caminho no cabeçalho), antes de pintar
+    if (!b.isConnected) return;
+    const r = rolador(), rola = d => { if (d) r ? (r.scrollTop += d) : window.scrollBy(0, d); };
+    rola(b.getBoundingClientRect().top - y);             // a linha tocada fica no mesmo lugar da tela
+    // o detalhe vem logo abaixo da lista: se o começo dele não aparece, sobe o necessário, sem tirar a linha tocada da vista
+    const v = areaVisivel(r), falta = $('det').getBoundingClientRect().top + 120 - v.bottom, folga = b.getBoundingClientRect().top - v.top - 40;
+    if (falta > 0 && folga > 0) rola(Math.min(falta, folga));
   });
 });
-// rola só a lista até a linha, sem mexer na página (tocar no mapa não leva a tela até a lista)
-function naLista(b) {
-  const l = $('lista'), r = b.getBoundingClientRect(), c = l.getBoundingClientRect(), topo = 30;  // 30: título do grupo fixo no topo
-  if (r.top < c.top + topo) l.scrollTop -= c.top + topo - r.top;
-  else if (r.bottom > c.bottom) l.scrollTop += r.bottom - c.bottom;
+// trecho escolhido fora da lista (mapa, busca, link, detalhe): a lista rola por dentro até a linha e o detalhe aparece
+function naLista(nome) {
+  const b = linha(nome), l = $('lista'), p = rolador(), v = areaVisivel(p);
+  if (b && !b.hidden) {                                  // parte da lista que aparece (no celular, a de cima pode estar sob o mapa)
+    const r = b.getBoundingClientRect(), q = l.getBoundingClientRect(), c = {top: Math.max(q.top, v.top), bottom: Math.min(q.bottom, v.bottom)};
+    if (c.bottom - c.top < 100) Object.assign(c, {top: q.top, bottom: q.bottom});
+    const topo = (c.top === q.top ? 32 : 8);             // 32: título do grupo, fixo no alto da lista
+    if (r.top < c.top + topo) l.scrollTop -= c.top + topo - r.top;
+    else if (r.bottom > c.bottom - 8) l.scrollTop += r.bottom - c.bottom + 8;
+  }
+  if (document.activeElement === $('busca')) return;   // digitando na busca: o campo fica onde está
+  const det = $('det').getBoundingClientRect().top;
+  if (p) { if (det < v.top || det > v.top + (v.bottom - v.top) / 2) rolaPara(p, p.scrollTop + det - v.top - 8); }   // painel: o detalhe vai para o alto
+  else if (det < v.top) rolaPara(null, scrollY + det - v.top - 8);   // página (celular): só desce o detalhe que ficou escondido sob o mapa
 }
 
 // detalhe
 function detalhe(t, vao) {
-  const chips = l => l.length ? `<div class="chips">${l.map(n => `<button class="chip" data-t="${esc(n)}">${esc(n)}</button>`).join('')}</div>` : '—';
+  const chip = n => `<button class="chip" data-t="${esc(n)}">${esc(n)}</button>`;
+  const chips = l => l.length ? `<div class="chips">${l.slice(0, 8).map(chip).join('')}` +   // muitos: os 8 primeiros e o resto ao pedir
+    (l.length > 8 ? `<details class="mais"><summary>mais ${l.length - 8}</summary><div class="chips">${l.slice(8).map(chip).join('')}</div></details>` : '') + '</div>' : '—';
   const tipoTxt = {principal: t.zona === 1 ? 'tronco T1' : 'tronco T2', ramal: t.tronco ? 'T2 · tronco' : 'T2 · ramal', fusivel: `depois de fusível · T${t.zona}`}[t.tipo];
-  $('det').innerHTML = `<h2><i style="--c:${t.cor}"></i>${esc(t.nome)} <small>${tipoTxt}</small></h2><dl>
+  $('det').innerHTML = `<h2 tabindex="-1"><i style="--c:${t.cor}"></i>${esc(t.nome)} <small>${tipoTxt}</small></h2>${FECHA}<dl>
     <dt>Início</dt><dd><span class="mono">${esc(t.inicio)}</span> · ${TIPO[t.inicio_tipo] || t.inicio_tipo} · poste ${esc(t.inicio_poste)}</dd>
     ${t.passa.length ? `<dt>Passa por</dt><dd class="mono">${t.passa.map(esc).join(', ')}</dd>` : ''}
     <dt>Fim</dt><dd class="mono">${t.fim.map(esc).join('<br>')}</dd>
@@ -107,42 +175,53 @@ function detalhe(t, vao) {
     <dt>Derivações</dt><dd>${chips(t.derivacoes)}</dd>
     ${NAE ? blocoNae(t.nome) : ''}
     ${vao ? `<dt>Vão</dt><dd class="mono">${esc(vao[5])} · poste ${esc(vao[6])} → ${esc(vao[7])} · ${Math.round(vao[8])} m</dd>` : ''}
-  </dl><div><button class="chip" id="todos">Ver todos</button></div>`;
+  </dl>`;
 }
 // vários trechos (Ctrl ou ⌘ + clique): soma de extensão e NAE, e cada trecho com o seu
 function detalheVarios(l) {
   const ts = l.map(n => TR[n]), ext = ts.reduce((s, t) => s + t.ext, 0), c = NAE ? contagem() : {};
   const nae = NAE ? blocoNae(null, l) : '';
-  $('det').innerHTML = `<h2>${l.length} trechos <small>${km(ext)} · ${nv(ts.reduce((s, t) => s + t.qtd, 0))}</small></h2>
+  $('det').innerHTML = `<h2 tabindex="-1">${l.length} trechos <small>${km(ext)} · ${nv(ts.reduce((s, t) => s + t.qtd, 0))}</small></h2>${FECHA}
     <div class="varios">${ts.map(t => `<div><button class="chip" data-t="${esc(t.nome)}">${esc(t.nome)}</button><span>${km(t.ext)}</span>` +
       `${NAE ? `<span><b>${c[t.nome] || 0}</b> NAE</span>` : ''}<small class="mono">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</small></div>`).join('')}</div><dl>
     <dt>Extensão</dt><dd>${km(ext)} somados</dd>
     ${nae}
-  </dl><p class="lede">Ctrl (⌘ no Mac) + clique põe ou tira um trecho. Clique sem Ctrl volta a um trecho só.</p><div><button class="chip" id="todos">Ver todos</button></div>`;
+  </dl><p class="lede so-mouse">Ctrl (⌘ no Mac) + clique põe ou tira um trecho. Clique sem Ctrl volta a um trecho só.</p>`;
 }
 function resumoNae() {
   const os = doMes(), col = os.filter(o => o.col).length, fora = os.filter(o => !o.trecho), mot = {}, ext = doExt();
   fora.forEach(o => { const m = (o.fora || '').startsWith('hoje no ') ? 'com o ativo hoje em outro alimentador' : o.fora; mot[m] = (mot[m] || 0) + 1; });
-  return `<dt>NAE ${rotMes($('mes').value)}</dt><dd><b>${os.length}</b> no alimentador (${col} coletivas${$('ind').checked ? ` · ${os.length - col} individuais` : ''})` +
+  const pl = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+  return `<dt class="nae">NAE ${rotMes($('mes').value)}</dt><dd class="nae"><b>${os.length}</b> no alimentador (${pl(col, 'coletiva', 'coletivas')}${$('ind').checked ? ` · ${pl(os.length - col, 'individual', 'individuais')}` : ''})` +
     `${fora.length ? `<br>Sem trecho aqui: ${Object.entries(mot).map(([m, n]) => `${n} ${esc(m)}`).join(' · ')}${listaOc(fora)}` : ''}` +
     `${ext.length ? `<br>Mais ${ext.length} de outros alimentadores com o ativo hoje num trecho daqui: contam no trecho, não no total acima.` : ''}</dd>`;
 }
 function resumo() {
-  const total = D.trechos.reduce((s, t) => s + t.ext, 0);
+  const total = ((D.meta || {}).resumo || {}).extensao_m ?? D.trechos.reduce((s, t) => s + t.ext, 0);   // o mesmo total de 'Dados e procedência'
   const fus = D.trechos.filter(t => t.tipo === 'fusivel');
   const porZ = {};
   fus.forEach(t => { porZ[t.zona] = (porZ[t.zona] || 0) + 1; });
   const linha = t => `<dt>${esc(t.nome)}</dt><dd><span class="mono">${esc(t.inicio)} → ${esc(fimTxt(t))}</span> · ${km(t.ext)}</dd>`;
-  $('det').innerHTML = `<h2>${D.trechos.length} trechos <small>${km(total)} de rede</small></h2><dl>
-    ${D.trechos.filter(t => t.tipo !== 'fusivel').map(linha).join('')}
-    <dt>Fusíveis</dt><dd>${fus.length} trechos (${Object.entries(porZ).map(([z, n]) => `T${z}: ${n}`).join(' · ')})</dd>
+  const prin = D.trechos.filter(t => t.tipo !== 'fusivel');   // T1 e T2: início → fim de cada um, só quando pedir
+  $('det').innerHTML = `<h2 tabindex="-1">${mil(D.trechos.length)} trecho${D.trechos.length === 1 ? '' : 's'} <small>${km(total)} de rede</small></h2><dl>
+    <dt>Fusíveis</dt><dd>${fus.length ? `${mil(fus.length)} trecho${fus.length === 1 ? '' : 's'} (${Object.entries(porZ).map(([z, n]) => `T${z}: ${mil(n)}`).join(' · ')})` : 'nenhum trecho depois de fusível'}</dd>
     ${NAE ? resumoNae() : ''}
-  </dl><p class="lede">Toque num trecho no mapa ou na lista para ver início, fim e derivações. Para somar vários, segure Ctrl (⌘ no Mac) e clique em cada um.</p>`;
+  </dl>${prin.length ? `<details class="mais"><summary>T1 e T2 · início → fim</summary><dl>${prin.map(linha).join('')}</dl></details>` : ''}` +
+  `<p class="lede">Toque num trecho no mapa ou na lista para ver início, fim e derivações. <span class="so-mouse">Para somar vários, segure Ctrl (⌘ no Mac) e clique em cada um.</span></p>`;
 }
 $('det').addEventListener('click', e => {
   const v = e.target.closest('[data-ll]');               // ocorrência da lista: vai até o ativo no mapa
-  if (v) { if (map) { map.setView(v.dataset.ll.split(',').map(Number), 18); document.getElementById('map').scrollIntoView({block: 'nearest'}); } return; }
-  const b = e.target.closest('.chip'); if (!b) return; b.id === 'todos' ? limpar() : clique(b.dataset.t, e, true);
+  if (v) {
+    if (!map) return;
+    map.setView(v.dataset.ll.split(',').map(Number), 18);
+    const r = $('map').getBoundingClientRect();          // o mapa fica fixo no alto: só rola se ele estiver fora da tela
+    if (r.bottom < 0 || r.top > innerHeight) $('map').scrollIntoView({block: 'nearest'});
+    return;
+  }
+  const b = e.target.closest('.chip, #todos'); if (!b) return;
+  const tinhaFoco = b.contains(document.activeElement);  // o detalhe é refeito: o foco do teclado volta ao título dele (não cai no body)
+  b.id === 'todos' ? limpar() : clique(b.dataset.t, e, true);
+  if (tinhaFoco && !$('det').contains(document.activeElement)) $('det').querySelector('h2')?.focus({preventScroll: true});
 });
 
 // mapa
@@ -150,6 +229,7 @@ let map = null, sel = null, multi = [];                // multi: trechos escolhi
 const escolhido = n => n === sel || multi.includes(n);
 const linhas = {}, rotulos = {};
 const visivel = {T1: true, T2: true, T3: true};
+window.__visivel = visivel;                               // a camada de limpeza segue os botões T1/T2/T3
 let fusMarcas = null;                                     // pontos dos fusíveis: somem junto com o T3          // botões T1 / T2 / T3 sobre o mapa
 const classeDe = nome => nome.split('-')[0];          // nome do trecho → [polyline com todos os vãos, vãos]; rótulos no mapa
 let halo = null, marcas = null;
@@ -169,17 +249,15 @@ function clique(nome, e, enquadrar, vao) {
 function selecionar(nome, enquadrar, vao) {
   sel = nome; multi = [];
   detalhe(TR[nome], vao);
-  desenhaLista($('busca').value);
-  const b = document.querySelector(`.row[data-t="${CSS.escape(nome)}"]`);
-  if (b) naLista(b);
+  marcaLista();
+  if (!daLista) naLista(nome);
   realca([nome], enquadrar);
 }
 function selecionarVarios(l, ultimo) {
   sel = null; multi = l;
   detalheVarios(l);
-  desenhaLista($('busca').value);
-  const b = document.querySelector(`.row[data-t="${CSS.escape(ultimo)}"]`);
-  if (b) naLista(b);
+  marcaLista();
+  if (!daLista) naLista(ultimo);
   realca(l, false);
 }
 // destaca no mapa os trechos escolhidos: os outros ficam apagados; pinos de início e fim (com vários, só o início de cada um)
@@ -197,9 +275,10 @@ function realca(nomes, enquadrar) {
   marcas = L.layerGroup(nomes.length > 1 ? nomes.map(n => pino([TR[n].inicio_lat, TR[n].inicio_lon], 'ini', esc(n), TR[n].inicio))
     : [pino([t.inicio_lat, t.inicio_lon], 'ini', 'INÍCIO', t.inicio),
       ...t.fim.map((f, i) => pino(t.fim_pts[i], 'fim', 'FIM', f.replace('fim de linha · poste ', 'poste ') + (f.startsWith('fim de linha') ? ' (fim de linha)' : '')))]).addTo(map);
-  if (enquadrar) map.fitBounds(L.latLngBounds(nomes.flatMap(n => meus(n).flat())).pad(0.25), {maxZoom: 17});
+  if (enquadrar) map.fitBounds(L.latLngBounds(nomes.flatMap(n => meus(n).flat())).pad(0.12), {maxZoom: 17, paddingTopLeft: [24, 72], paddingBottomRight: [24, 64]});   // folga para os controles sobre o mapa
   marcaNae(nomes);
   rotulosT3();
+  if (window.__onSel) window.__onSel(nomes);               // contorno da seleção por cima da camada de limpeza
 }
 // ativos com NAE nos trechos escolhidos: um marcador vermelho por ativo, com quantas NAE teve (mês e filtro da tela)
 let naeMarcas = null;
@@ -216,8 +295,9 @@ function marcaNae(nomes) {
 function limpar() {
   sel = null; multi = [];
   marcaNae(null);
+  if (window.__onSel) window.__onSel(null);
   resumo();
-  desenhaLista($('busca').value);
+  marcaLista();
   if (!map) return;
   Object.values(linhas).forEach(([l]) => l.setStyle({opacity: 1}));
   if (halo) { halo.remove(); halo = null; }
@@ -241,7 +321,7 @@ function vaoPerto(vs, ll) {
 // rótulos: T1/T2 sempre; T3 só de perto e só os que estão na tela (mais leve em alimentador grande)
 function rotulo(t, c) {
   const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${escolhido(t.nome) ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}</div>`}), zIndexOffset: t.tipo === 'fusivel' ? 0 : 400})
-    .bindTooltip(`${t.inicio} → ${fimTxt(t)}`, {direction: 'top'})
+    .bindTooltip(`${esc(t.inicio)} → ${esc(fimTxt(t))}`, {direction: 'top'})
     .on('click', e => { L.DomEvent.stopPropagation(e); clique(t.nome, e.originalEvent, false); }).addTo(map);
   rotulos[t.nome] = m;
 }
@@ -253,6 +333,12 @@ function mostraClasses() {
     if (v && !rotulos[t.nome]) rotulo(t, contagem()); else if (!v && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; } });
   if (visivel.T3 && !map.hasLayer(fusMarcas)) fusMarcas.addTo(map); else if (!visivel.T3) fusMarcas.remove();
   rotulosT3();
+  const esc_ = (multi.length ? multi : sel ? [sel] : []), vis = esc_.filter(n => visivel[classeDe(n)]);
+  if (esc_.length) {                                        // seleção com classe escondida: some do mapa (a seleção fica)
+    if (vis.length) realca(vis, false);
+    else { if (halo) { halo.remove(); halo = null; } if (marcas) { marcas.remove(); marcas = null; } marcaNae(null); }
+  }
+  if (window.__onClasses) window.__onClasses();
 }
 function rotulosT3() {
   if (!map) return;
@@ -282,7 +368,7 @@ if (typeof L === 'undefined') {
     const t = D.trechos[i], vs = vaosDe[i];
     const l = L.polyline(vs.map(v => [[v[0], v[1]], [v[2], v[3]]]), {color: t.cor, weight: t.peso, opacity: 1, lineCap: 'round'}).addTo(map);
     l.on('click', e => { L.DomEvent.stopPropagation(e); clique(t.nome, e.originalEvent, false, vaoPerto(vs, e.latlng)); });
-    l.bindTooltip(t.nome, {sticky: true, direction: 'top', offset: [0, -8]});
+    l.bindTooltip(esc(t.nome), {sticky: true, direction: 'top', offset: [0, -8]});
     l.on('mouseover', () => l.setStyle({weight: t.peso + 3}));
     l.on('mouseout', () => l.setStyle({weight: t.peso}));
     linhas[t.nome] = [l, vs];
@@ -290,12 +376,12 @@ if (typeof L === 'undefined') {
   fusMarcas = L.layerGroup().addTo(map);
   D.fusiveis.forEach(a => {
     L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' || a.t === 'FTR' ? '#9ca3af' : '#fff', fillOpacity: 1})
-      .bindTooltip(`${a.nome} · ${TIPO[a.t] || a.t}${papel(a.nome) ? ' · ' + papel(a.nome) : ''}`, {direction: 'top'})
+      .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t] || a.t)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'})
       .on('click', e => { L.DomEvent.stopPropagation(e); if (a.trecho) clique(a.trecho, e.originalEvent, false); }).addTo(fusMarcas);
   });
   D.principais.forEach(a => {
     L.marker([a.lat, a.lon], {icon: L.divIcon({className: '', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500})
-      .bindTooltip(`${a.nome} · ${TIPO[a.t]} · poste ${a.poste}${papel(a.nome) ? ' · ' + papel(a.nome) : ''}`, {direction: 'top'}).addTo(map);
+      .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'}).addTo(map);
   });
   D.trechos.forEach(t => { if (t.tipo !== 'fusivel') rotulo(t); });
   const todos = L.latLngBounds(D.vaos.flatMap(v => [[v[0], v[1]], [v[2], v[3]]]));
@@ -327,8 +413,18 @@ $('busca').addEventListener('input', e => {
   const v = D.vaos.find(v => String(v[6]).toLowerCase() === qq || String(v[7]).toLowerCase() === qq);
   if (v) { selecionar(D.trechos[v[4]].nome, false, v); if (map) map.setView([v[2], v[3]], Math.max(map.getZoom(), 17)); }
 });
+// até 980 px o mapa fica fixo no alto da tela: o foco do teclado que cai embaixo dele (Shift+Tab, setas) desce para a vista.
+// (scroll-padding no html faria o mesmo, mas aí focar um controle do próprio mapa rolava a página para cima.)
+document.addEventListener('focusin', () => requestAnimationFrame(() => {   // depois da rolagem que o próprio navegador faz ao focar
+  const el = document.activeElement, mb = document.querySelector('.mapbox');
+  if (!el || !mb || mb.contains(el) || !matchMedia('(max-width:980px)').matches || document.body.classList.contains('tela-cheia')) return;
+  if (!(mb.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) || !el.matches(':focus-visible')) return;
+  const fundo = mb.getBoundingClientRect().bottom + 8, r = el.getBoundingClientRect();
+  if (r.top < fundo) window.scrollBy(0, r.top - fundo);
+}));
 window.__sel = selecionar;
 window.__clique = clique;
+window.__selecao = () => multi.length ? multi.slice() : sel ? [sel] : [];   // trechos escolhidos (croqui da faixa)
 window.__limpar = limpar;
-limpar();
-if (NAE) atualizaNae();
+if (NAE) atualizaNae();                                   // desenha a lista e o resumo (com a NAE nos rótulos do mapa)
+else { desenhaLista($('busca').value); limpar(); }
