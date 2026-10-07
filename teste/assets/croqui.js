@@ -101,14 +101,19 @@
     const pedidos = [];
     for (let x = tx0; x <= tx1; x++) for (let y = ty0; y <= ty1; y++) {
       pedidos.push(new Promise((ok, erro) => {
+        // sem foto neste zoom: com blankTile=false a Esri responde 404 (e não o quadro cinza "Map data not yet
+        // available"); aí entra o pedaço certo da foto do nível de cima, ampliado (até 6 níveis acima)
         const im = new Image(); im.crossOrigin = 'anonymous';
+        let k = 0;
         const t = setTimeout(() => erro(new Error('tempo')), 12000);
-        im.onload = () => { clearTimeout(t); ok([im, x, y]); }; im.onerror = () => { clearTimeout(t); erro(new Error('tile')); };
-        im.src = `${TILE}${zt}/${y}/${x}`;
+        const pede = () => { im.src = `${TILE}${zt - k}/${y >> k}/${x >> k}?blankTile=false`; };
+        im.onload = () => { clearTimeout(t); const f = 2 ** k, l = 256 / f; ok([im, x, y, (x % f) * l, (y % f) * l, l]); };
+        im.onerror = () => { if (++k <= 6 && zt - k >= 0) pede(); else { clearTimeout(t); erro(new Error('tile')); } };
+        pede();
       }));
     }
     return Promise.all(pedidos).then(ims => {
-      ims.forEach(([im, x, y]) => ctx.drawImage(im, x * tam - q.ox, y * tam - q.oy, tam + 0.5, tam + 0.5));
+      ims.forEach(([im, x, y, sx, sy, l]) => ctx.drawImage(im, sx, sy, l, l, x * tam - q.ox, y * tam - q.oy, tam + 0.5, tam + 0.5));
       ctx.getImageData(0, 0, 1, 1);                                          // falha aqui se a imagem não puder ser usada (CORS)
       return true;
     });

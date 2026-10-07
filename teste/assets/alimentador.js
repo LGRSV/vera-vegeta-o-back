@@ -358,7 +358,23 @@ if (typeof L === 'undefined') {
   map = L.map('map', {preferCanvas: true, renderer: L.canvas({tolerance: L.Browser.mobile ? 16 : 10}), zoomSnap: 0.25, zoomDelta: 0.5});
   window.__map = map;
   let falhas = 0;
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  // Satélite da Esri: onde não há foto num zoom, o servidor manda o quadro cinza "Map data not yet available".
+  // Com blankTile=false ele responde 404 e o quadro vira a foto do nível de cima ampliada (até 6 níveis acima).
+  const SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
+  const Satelite = L.TileLayer.extend({
+    getTileUrl: c => `${SAT}${c.z}/${c.y}/${c.x}?blankTile=false`,
+    createTile(c, done) { const t = L.TileLayer.prototype.createTile.call(this, c, done); t._xyz = c; t._k = 0; return t; },
+    _tileOnError(done, t, e) {
+      const c = t._xyz, k = ++t._k;
+      if (!c || k > 6 || c.z - k < 0) return L.TileLayer.prototype._tileOnError.call(this, done, t, e);
+      // pedaço deste quadro na foto de cima; sem a soma de cores do Leaflet (plus-lighter), que clareia a borda recortada
+    const f = 2 ** k, n = 256 * f, x = (c.x % f) * 256, y = (c.y % f) * 256;
+      Object.assign(t.style, {width: n + 'px', height: n + 'px', marginLeft: -x + 'px', marginTop: -y + 'px', mixBlendMode: 'normal',
+        clipPath: `inset(${y}px ${n - x - 256}px ${n - y - 256}px ${x}px)`});
+      t.src = `${SAT}${c.z - k}/${c.y >> k}/${c.x >> k}?blankTile=false`;
+    }
+  });
+  new Satelite(SAT + '{z}/{y}/{x}', {
     maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagem © Esri — Esri, Maxar, Earthstar Geographics'
   }).on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; }).addTo(map);
   // v = [lat1, lon1, lat2, lon2, idx_trecho, id, poste_ini, poste_fim, ext]
