@@ -28,7 +28,9 @@
     const tot = s.dia + s.vence + s.vencida + s.sem;
     return { s, tot, ult, prazo: tot ? (s.dia + s.vence) / tot : null };
   }
-  const prepara = a => { a.limp = limpeza(a.lp); a.n100 = a.km ? a.nae / a.km * 100000 : 0; return a; };
+  // NAE/100 km: a NAE da mesma rede dos km (nae_rede: onde o ativo está hoje no GIS, ferramentas/nae_rede.py);
+  // o trecho já conta a NAE onde o ativo está
+  const prepara = a => { a.limp = limpeza(a.lp); a.nae_rede ??= a.nae; a.n100 = a.km ? a.nae_rede / a.km * 100000 : 0; return a; };
   P.polos.forEach(p => { p.als.forEach(prepara); (p.trs || []).forEach(t => { t.polo = p.nome; prepara(t); }); });
 
   // regional e ETO: alimentador que passa por mais de um polo vira uma linha só (soma a rede, a NAE e a limpeza de cada polo)
@@ -37,7 +39,7 @@
     ps.forEach(p => p.als.forEach(a => {
       const x = m.get(a.al);
       if (!x) { m.set(a.al, { ...a, muns: a.muns.slice(), lp: JSON.parse(JSON.stringify(a.lp)), polos: [p.nome] }); return; }
-      ['km', 'nae', 'cons', 'chi', 'sem'].forEach(k => { x[k] = (x[k] || 0) + (a[k] || 0); });
+      ['km', 'nae', 'nae_rede', 'cons', 'chi', 'sem'].forEach(k => { x[k] = (x[k] || 0) + (a[k] || 0); });
       a.muns.forEach(c => { if (!x.muns.includes(c)) x.muns.push(c); });
       Object.entries(a.lp).forEach(([cl, ds]) => Object.entries(ds).forEach(([d, v]) => { (x.lp[cl] = x.lp[cl] || {})[d] = (x.lp[cl][d] || 0) + v; }));
       x.polos.push(p.nome);
@@ -311,7 +313,7 @@
             <td data-r="Consumidores">${nf(a.cons)}</td>
             <td data-r="CHI (h)">${nf(a.chi)}</td>
             <td data-r="${rotKm}">${km(a.km)}${a.km_total > a.km + 50 ? `<small>de ${km(a.km_total)} km</small>` : ''}</td>
-            <td data-r="NAE / 100 km">${nf(a.n100, 1)}</td>
+            <td data-r="NAE / 100 km">${nf(a.n100, 1)}${a.nae_rede !== a.nae ? `<small>${nf(a.nae_rede)} NAE nesta rede</small>` : ''}</td>
             <td class="t lim" data-r="Limpeza no prazo">${L.tot ? `<div class="pl-limw"><span class="pl-bar" title="${Object.entries(SIT).map(([k, [n]]) => `${n}: ${km(L.s[k])} km`).join(' · ')}">${
               Object.entries(SIT).map(([k, [, c]]) => L.s[k] ? `<i style="width:${100 * L.s[k] / L.tot}%;background:${c}"></i>` : '').join('')}</span><span class="pl-pc">${nf(100 * L.prazo)}%<span class="pl-np"> no prazo</span></span></div>`
               : '<span class="pl-vazio">sem dados de limpeza</span>'}</td>
@@ -321,7 +323,7 @@
       ${als.length > mostra ? `<button type="button" class="pl-mais" data-m="1">Mostrar mais ${nf(Math.min(POR_VEZ, als.length - mostra))} (de ${nf(als.length - mostra)} restantes)</button>` : ''}
       </div>
       <details class="pl-nota"${notaAberta ? ' open' : ''}><summary>Como contamos</summary><div class="pl-nota-c">
-        <p><b>Como conta:</b> alimentador que passa por mais de um polo aparece em cada um, com a rede e a NAE dos trechos que estão no polo (o trecho conta no município onde tem mais rede). NAE sem trecho localizado conta no polo onde o alimentador tem mais rede.${varios ? ' Na regional e na ETO, o alimentador aparece uma vez só, somando os polos.' : ''}</p>
+        <p><b>Como conta:</b> alimentador que passa por mais de um polo aparece em cada um, com a rede e a NAE dos trechos que estão no polo (o trecho conta no município onde tem mais rede). NAE sem trecho localizado conta no polo onde o alimentador tem mais rede. A coluna NAE segue a Crítica; o NAE / 100 km usa a NAE da mesma rede dos km: sai a NAE cujo ativo hoje está em outro alimentador no GIS e entra a de outro alimentador cujo ativo está aqui (uma vez só, se a Crítica lançou o evento nos dois). NAE de ativo que não está no GIS não entra, a não ser que o ativo esteja no export anterior do GIS em cima da rede de hoje.${varios ? ' Na regional e na ETO, o alimentador aparece uma vez só, somando os polos.' : ''}</p>
         ${tr ? '<p><b>Trechos:</b> só os que tiveram NAE no período; o trecho conta no polo do município onde tem mais rede. A NAE do trecho soma todos os ativos dele (chaves e transformadores), inclusive NAE registrada em outro alimentador cujo ativo hoje está no trecho. Tocar no trecho abre o mapa com ele selecionado.</p>' : ''}
         <p><b>Limpeza:</b> só OS executadas${P.equipes ? ' pelas equipes ' + esc(P.equipes.join(', ')) : ''}, pela data de execução; T1 a cada ${P.regra.T1} anos, T2 a cada ${P.regra.T2}, T3 a cada ${P.regra.T3}, contando da última limpeza de cada vão (situação de hoje).</p>
         <p>Polo de cada município: <code>${esc(P.fonte)}</code>.${P.fora.length ? ' ' + esc(P.fora.join('; ')) + '.' : ''}</p></div></details>`;

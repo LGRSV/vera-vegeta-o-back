@@ -232,7 +232,8 @@
   const ORD = {
     nae: { rot: 'NAE', val: a => a.nae, un: 'NAE' },
     cons: { rot: 'Consumidores', val: a => a.cons, un: 'cons.' },
-    km: { rot: 'NAE/100 km', val: a => a.km ? a.nae / a.km * 100 : 0, un: '/100 km' },
+    // NAE/100 km: a NAE da mesma rede dos km (nae_rede: onde o ativo está hoje no GIS, ferramentas/nae_rede.py)
+    km: { rot: 'NAE/100 km', val: a => a.km ? (a.nae_rede ?? a.nae) / a.km * 100 : 0, un: '/100 km' },
   };
   let ord = 'nae';
   const slugDe = cod => (porCod[cod] || {}).slug;
@@ -245,7 +246,7 @@
     const ls = R.als.slice().sort((a, b) => o.val(b) - o.val(a) || b.nae - a.nae);
     const vis = tres.matches ? ls : ls.slice(0, mostra);
     const max = Math.max(...ls.map(o.val), 1);
-    rank.innerHTML = `<h2>Alimentadores com mais NAE<small>Árvore/eucalipto na rede · ${R.meses.length ? rotMes(R.meses[0]) + ' a ' + rotMes(R.meses[1]) : ''}</small></h2>
+    rank.innerHTML = `<h2>Alimentadores com mais NAE<small>Árvore/eucalipto na rede · ${R.meses.length ? rotMes(R.meses[0]) + ' a ' + rotMes(R.meses[1]) : ''}${ord === 'km' ? ' · NAE contada no alimentador onde o ativo está hoje no GIS' : ''}</small></h2>
       <div class="mt-ord" role="group" aria-label="Ordenar por">${Object.entries(ORD).map(([k, x]) => `<button type="button" data-o="${k}" aria-pressed="${k === ord}">${x.rot}</button>`).join('')}</div>
       <ol class="mt-rl">${vis.map((a, i) => {
         const v = o.val(a), slug = a.muns.map(slugDe).find(Boolean), nomes = a.muns.map(c => (porCod[c] || {}).nome || c);
@@ -254,7 +255,7 @@
           <span class="p">${i + 1}º</span><b>${esc(a.al)}</b><span class="v">${nf(v)}<small>${o.un}</small></span>
           <span class="se">${esc(a.se)} · ${esc(nomes.slice(0, 3).join(', '))}${nomes.length > 3 ? ` e mais ${nomes.length - 3}` : ''}</span>
           <span class="bar"><i style="width:${100 * v / max}%"></i></span>
-          <span class="ex">${a.nae} NAE · ${a.cons.toLocaleString('pt-BR')} cons. · ${a.km >= 1 ? nf(a.km) : a.km.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} km · <span class="lp">limpeza: <em class="${velha ? 'velha' : ''}">${a.ult_limpeza ? a.ult_limpeza.split('-').reverse().join('/') : 'sem registro'}</em></span></span></a></li>`;
+          <span class="ex">${a.nae} NAE${ord === 'km' && a.nae_rede !== undefined && a.nae_rede !== a.nae ? ` (${a.nae_rede} com o ativo nesta rede)` : ''} · ${a.cons.toLocaleString('pt-BR')} cons. · ${a.km >= 1 ? nf(a.km) : a.km.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} km · <span class="lp">limpeza: <em class="${velha ? 'velha' : ''}">${a.ult_limpeza ? a.ult_limpeza.split('-').reverse().join('/') : 'sem registro'}</em></span></span></a></li>`;
       }).join('')}</ol>${vis.length < ls.length ? `<button type="button" class="mt-mais" data-mais>Mostrar mais ${Math.min(20, ls.length - vis.length)} (de ${ls.length})</button>` : ''}`;
   }
   rank.addEventListener('click', e => {
