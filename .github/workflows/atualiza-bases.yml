@@ -1,0 +1,11 @@
+# Atualização automática das bases do site (em construção): por enquanto só roda se chamado à mão.
+name: Atualizar bases do site
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "ok"
