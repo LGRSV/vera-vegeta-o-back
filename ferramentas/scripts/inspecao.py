@@ -1,16 +1,18 @@
 """Inspeção visual de MT no mapa do alimentador: lê a base de inspeção (OS INSP-RD, aba "Dados") e grava
 alimentadores/<AL>/inspecao.js com as inspeções EXECUTADAS e os vãos que cada uma cobriu.
 
-Onde a inspeção passou: a rede do ELEMENTO subindo até a ABRANGENCIA. Conferido na base de 13/10/2026: nas 1.170 OS
-com os dois ativos no mapa e em postes diferentes, a ABRANGENCIA está sempre a montante do ELEMENTO (e a
-MONT_ABRANGENCIA, a montante da ABRANGENCIA); as OS seguidas formam a corrida pela rede (a ABRANGENCIA de uma é o
-ELEMENTO da outra).
-  - ELEMENTO e ABRANGENCIA no mapa do alimentador da OS: os vãos do caminho entre os dois.
-  - Os dois no mesmo poste, ou só um deles no mapa: só o ponto (a OS aparece na lista e, ao tocar, marca o ponto).
-    O outro ativo não está no cadastro do site: em geral os "90..." (bloco de chave faca, sem ponto no GIS nem no KML).
+Onde a inspeção passou: o BLOCO do ELEMENTO, da chave do ELEMENTO descendo pela rede até as próximas chaves (cada
+uma é um fim do bloco). A ABRANGENCIA é a chave a montante do ELEMENTO (e a MONT_ABRANGENCIA, a montante dela).
+Conferido com as OS de manutenção geradas pelas inspeções (base de 13/10/2026): dos defeitos com poste no mapa, 96%
+estão abaixo do ELEMENTO sem nenhuma chave no meio, e só 2% fora; o caminho ELEMENTO → ABRANGENCIA (a leitura
+anterior) quase não tinha defeito.
+  - ELEMENTO no mapa do alimentador da OS: os vãos do bloco. O ramo sai da posição da chave (num poste com várias
+    saídas, só o ramo onde a chave está); para em todo poste com chave do mapa.
+  - Só a ABRANGENCIA no mapa: o bloco fica sem posição (o ELEMENTO, em geral um "90..." de bloco de chave faca, não
+    tem ponto no GIS nem no KML); a ABRANGENCIA fica de referência.
   - Nenhum dos dois: sem posição (fica na lista).
-Cada OS guarda também o ponto do ELEMENTO (pe, início) e o da ABRANGÊNCIA (pa, fim) quando estão no mapa: na página,
-são os pontos vermelhos de início e fim das inspeções.
+Cada OS guarda o ponto do ELEMENTO (pe, início do bloco), as chaves onde o bloco termina (fins: [lat, lon, código]) e
+o ponto da ABRANGENCIA (pa, a montante): na página, os pontos vermelhos de início e fim são pe e fins.
 Ativo no mapa: chave do alimentador (dados/alimentadores/<AL>.json) ou, pelo índice de ativos do site (dados/ativos:
 transformadores e chaves com coordenada), o poste do mapa mais perto, até LIM_M.
 Data da inspeção: FIM_EXEC; se o FIM vier mais de 60 dias depois do INICIO_EXEC (fechamento em lote), INICIO_EXEC
@@ -81,11 +83,16 @@ class Indice:
 
 
 class Rede:
-    """Mapa do alimentador (dados.js): árvore a partir do DJ, para o caminho entre dois postes."""
+    """Mapa do alimentador (dados.js): árvore a partir do DJ, para o bloco abaixo de uma chave."""
     def __init__(self, site, al):
         self.D = le_js(site / 'alimentadores' / al / 'dados.js')
         js = json.loads((site / 'dados' / 'alimentadores' / f'{al}.json').read_text(encoding='utf-8'))
         self.chave = {chave_ativo(c['nome']): c['poste'] for c in js['chaves'] if c.get('poste')}
+        self.ll_chave = {chave_ativo(c['nome']): (c['lonlat'][1], c['lonlat'][0]) for c in js['chaves'] if c.get('lonlat')}
+        self.nomes_poste = defaultdict(list)            # poste -> chaves dele (as chaves que fecham um bloco)
+        for c in js['chaves']:
+            if c.get('poste'):
+                self.nomes_poste[c['poste']].append(c['nome'])
         viz, self.coord = defaultdict(list), {}
         for i, v in enumerate(self.D['vaos']):
             viz[v[6]].append((v[7], i))
@@ -94,13 +101,44 @@ class Rede:
             self.coord.setdefault(v[7], (v[2], v[3]))
         raiz = self.D['trechos'][0]['inicio_poste']
         self.pai, self.nivel = {raiz: (None, None)}, {raiz: 0}
+        self.filhos = defaultdict(list)
         fila = deque([raiz])
         while fila:
             p = fila.popleft()
             for q, i in viz[p]:
                 if q not in self.pai:
                     self.pai[q], self.nivel[q] = (p, i), self.nivel[p] + 1
+                    self.filhos[p].append((q, i))
                     fila.append(q)
+
+    def dist_vao(self, i, lat, lon):
+        v = self.D['vaos'][i]
+        k = math.cos(math.radians(lat))
+        ax, ay, bx, by = (v[1] - lon) * k, v[0] - lat, (v[3] - lon) * k, v[2] - lat
+        dx, dy = bx - ax, by - ay
+        t = max(0.0, min(1.0, -(ax * dx + ay * dy) / ((dx * dx + dy * dy) or 1)))
+        return math.hypot(ax + t * dx, ay + t * dy)
+
+    def bloco(self, p0, ll=None):
+        """Vãos do bloco abaixo da chave no poste p0, até os postes com chave; e esses postes (os fins do bloco).
+        Com a posição da chave (ll), o bloco começa no ramo onde ela está; sem ela, em todos os ramos do poste."""
+        if p0 not in self.pai:
+            return [], []
+        inicio = list(self.filhos.get(p0, []))
+        if ll and inicio:
+            cand = inicio + ([(None, self.pai[p0][1])] if self.pai[p0][1] is not None else [])
+            q, i = min(cand, key=lambda qi: self.dist_vao(qi[1], *ll))
+            if q is not None:                           # a chave está num dos ramos que descem do poste
+                inicio = [(q, i)]
+        vs, fins, pilha = [], [], inicio
+        while pilha:
+            q, i = pilha.pop()
+            vs.append(i)
+            if self.nomes_poste.get(q):                 # outra chave: o bloco termina aqui
+                fins.append(q)
+                continue
+            pilha.extend(self.filhos.get(q, []))
+        return sorted(vs), fins
 
     def poste_perto(self, lat, lon):
         k = math.cos(math.radians(lat))
@@ -111,18 +149,6 @@ class Rede:
                 melhor, dmin = p, d
         return melhor, math.sqrt(dmin) * 111320
 
-    def caminho(self, a, b):
-        """Vãos entre os postes a e b pela árvore (None se algum não liga ao DJ)."""
-        if a not in self.pai or b not in self.pai:
-            return None
-        vs = []
-        while a != b:
-            if self.nivel[a] >= self.nivel[b]:
-                a, i = self.pai[a]
-            else:
-                b, i = self.pai[b]
-            vs.append(i)
-        return sorted(vs)
 
 
 def main(xlsx, site):
@@ -135,6 +161,13 @@ def main(xlsx, site):
     idx, redes = Indice(site), {}
     por_al = {a: [] for a in pags}
     cont, sem_pagina = Counter(), Counter()
+
+    def ll_indice(al, cod):
+        """posição do ativo no índice do site (trafo e outros que não são chave do mapa), para achar o ramo."""
+        for a, _tipo, _t, _papel, lat, lon in idx.busca(cod):
+            if a == al and lat is not None:
+                return lat, lon
+        return None
 
     def ponto(rede, al, cod):
         """código -> poste do mapa do alimentador (ou None)."""
@@ -158,18 +191,19 @@ def main(xlsx, site):
         rede = redes.get(al) or redes.setdefault(al, Rede(site, al))
         el, ab, mo = (texto(r.get(c)) for c in ('ELEMENTO', 'ABRANGENCIA', 'MONT_ABRANGENCIA'))
         pe, pa = ponto(rede, al, el), ponto(rede, al, ab)
-        vs, pt = [], None
-        if pe and pa and pe != pa and (c := rede.caminho(pe, pa)) is not None:
-            vs, metodo = c, 'entre o ELEMENTO e a ABRANGÊNCIA'
-        elif pe and pa:
-            pt, metodo = pe, 'ELEMENTO e ABRANGÊNCIA no mesmo ponto'
-        elif pe:
-            pt, metodo = pe, f'só o ponto do ELEMENTO: a ABRANGÊNCIA {ab or "(vazia)"} não está no mapa deste alimentador'
+        vs, fins, pt = [], [], None
+        if pe:
+            vs, fins = rede.bloco(pe, rede.ll_chave.get(chave_ativo(el)) or ll_indice(al, el))
+            if vs:
+                metodo = 'bloco abaixo do ELEMENTO, até as próximas chaves'
+            else:
+                pt, metodo = pe, 'só o ponto do ELEMENTO: não há rede do mapa abaixo dele'
         elif pa:
-            pt, metodo = pa, f'só o ponto da ABRANGÊNCIA: o ELEMENTO {el or "(vazio)"} não está no mapa deste alimentador'
+            pt, metodo = pa, (f'bloco sem posição: o ELEMENTO {el or "(vazio)"} não está no mapa deste alimentador; '
+                              'fica o ponto da ABRANGÊNCIA (a montante), de referência')
         else:
             metodo = 'sem posição: ELEMENTO e ABRANGÊNCIA não estão no mapa deste alimentador'
-        cont['no mapa (vãos)' if vs else 'só o ponto' if pt else 'sem posição'] += 1
+        cont['no mapa (bloco)' if vs else 'só o ponto' if pt else 'sem posição'] += 1
         num = texto(r.get('NUMERO_OS'))
         desc = texto(r.get('DESCRICAO_OS'))
         reg = {
@@ -183,8 +217,9 @@ def main(xlsx, site):
             'metodo': metodo,
             'm': round(sum(rede.D['vaos'][i][8] for i in vs), 1),
             'pt': list(rede.coord[pt]) if pt else None,
-            'pe': list(rede.coord[pe]) if pe else None,   # ponto do ELEMENTO (início) no mapa
-            'pa': list(rede.coord[pa]) if pa else None,   # ponto da ABRANGÊNCIA (fim) no mapa
+            'pe': list(rede.coord[pe]) if pe else None,   # ponto do ELEMENTO (início do bloco)
+            'fins': [[*rede.coord[f], ' / '.join(rede.nomes_poste[f])] for f in fins],   # chaves onde o bloco termina
+            'pa': list(rede.coord[pa]) if pa else None,   # ponto da ABRANGÊNCIA (a montante)
         }
         por_al[al].append((reg, vs))
 

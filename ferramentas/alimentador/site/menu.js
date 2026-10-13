@@ -19,6 +19,7 @@
     { tipo: 'critica', nome: 'Crítica (NAE)', arq: 'Critica-…_MM-AAAA.txt (ou .zip): troca o mês do arquivo' },
     { tipo: 'limpeza', nome: 'OS de limpeza de faixa', arq: 'planilha de OS (.xlsx, aba Dados), com todas as OS' },
     { tipo: 'inspecao', nome: 'Base de inspeção', arq: 'base de inspeção (.xlsx, aba Dados); entram só as executadas' },
+    { tipo: 'manutencao', nome: 'OS de manutenção da inspeção', arq: 'OS geradas pela inspeção (.xlsx); as canceladas ficam de fora' },
   ];
   const svg = (d, cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${d}</svg>`;
   const ICONE = {
@@ -40,6 +41,7 @@
     const env = b.enviado ? ` · último envio ${br(b.enviado)}` : '';
     if (t === 'critica') return b.meses ? `No site: ${mes(b.meses[0])} a ${mes(b.meses[1])}${env}` : '';
     if (t === 'limpeza') return b.os != null ? `No site: ${nf(b.os)} OS · processada ${br(b.processado)}${env}` : '';
+    if (t === 'manutencao') return b.os != null ? `No site: ${nf(b.os)} OS${b.ate ? ' criadas até ' + br(b.ate) : ''}${env}` : '';
     return b.os != null ? `No site: ${nf(b.os)} inspeções${b.ate ? ' até ' + br(b.ate) : ''}${env}` : '';
   };
   const css = document.createElement('style');

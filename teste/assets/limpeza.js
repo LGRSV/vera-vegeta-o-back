@@ -290,7 +290,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
         `<div class="sit" style="--c:${SIT[sit][1]}">${SIT[sit][0]} · próxima até ${br(iso(somaAnos(ult, REGRA[classe])))}</div>`
         : '<div class="nada">Sem registro de limpeza aqui</div>') +
       nexe.map(k => linha(k)).join('') + '</div>';
-    L.popup({ className: 'limp-popup', maxWidth: 300, autoPanPadding: [20, 20] }).setLatLng(e.latlng).setContent(html).openOn(map);
+    L.popup({ className: 'limp-popup', maxWidth: 300, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] }).setLatLng(e.latlng).setContent(html).openOn(map);
   }
   if (map) map.getContainer().addEventListener('click', e => {
     const a = e.target.closest('.limp-pop a[data-k]');

@@ -208,6 +208,13 @@
     }
     return dir.querySelector('.ctl-l2');
   };
+  // balão do mapa: o Leaflet desenha os balões por baixo dos cards do canto (que ficam fora do mapa), então o balão
+  // aberto perto do alto empurra o mapa até ficar abaixo deles (folga de cima = altura dos cards)
+  window.__folgaBalao = () => {
+    const dir = document.querySelector('.ctl-dir'), m = document.getElementById('map');
+    if (!dir || !m) return [20, 20];
+    return [20, Math.max(20, Math.round(dir.getBoundingClientRect().bottom - m.getBoundingClientRect().top) + 12)];
+  };
   // camadas que pintam a rede inteira (Faixa, Inspeção): ligar uma desliga as outras
   window.__camadas = window.__camadas || {};
   window.__soEsta = nome => Object.entries(window.__camadas).forEach(([k, c]) => { if (k !== nome) c.desliga(); });
