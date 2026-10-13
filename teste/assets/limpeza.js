@@ -3,6 +3,8 @@
 //   Por ano  — cada ano de limpeza executada com uma cor; liga/desliga por ano; a rede sem limpeza fica cinza-claro.
 //   Situação — pela regra T1 a cada 3 anos, T2 a cada 4, T3 a cada 5 (em dia / vence em 12 meses / vencida).
 // No painel: anos e OS por ano; tocar numa OS mostra e enquadra no mapa onde ela foi (com ‹ › no mapa para a próxima).
+// OS não executadas em dois grupos, cada um com liga/desliga e traço próprio no mapa: Criadas (CRIADA, tracejado) e
+// Pendentes (A REPROGRAMAR / REPROGRAMADA, pontilhado).
 // A posição vem das chaves/ativos citados na OS e dos km da descrição: é aproximada.
 (function () {
   const LP = window.LIMPEZA;
@@ -50,15 +52,25 @@
   const ANOS = [...new Set(LP.os.map(anoDe).filter(Boolean))].sort((a, b) => b - a);
   const OS_ANO = Object.fromEntries(ANOS.map(a => [a, LP.os.map((o, k) => k).filter(k => anoDe(LP.os[k]) === a)
     .sort((x, y) => LP.os[y].data.localeCompare(LP.os[x].data))]));
-  const PEND = LP.os.map((o, k) => k).filter(k => LP.os[k].sit !== 'EXECUTADA');
   const uniao = ks => { const s = new Set(); ks.forEach(k => vaosDaOs[k].forEach(v => s.add(v))); return [...s]; };
   const somaM = vs => vs.reduce((m, v) => m + v[8], 0);
   const VAOS_ANO = Object.fromEntries(ANOS.map(a => [a, uniao(OS_ANO[a])]));
   const KM_ANO = Object.fromEntries(ANOS.map(a => [a, somaM(VAOS_ANO[a])]));
-  const VAOS_PEND = uniao(PEND), KM_PEND = somaM(VAOS_PEND);
+  // não executadas: Criadas (CRIADA) e Pendentes (A REPROGRAMAR / REPROGRAMADA e qualquer outra situação não executada)
+  const grupoDe = o => o.sit === 'EXECUTADA' ? null : o.sit === 'CRIADA' ? 'cri' : 'pend';
+  const CINZA = '#9ca3af';
+  const NEXE = {
+    cri: { rot: 'Criadas', um: 'criada', cls: 'trac', nota: '' },
+    pend: { rot: 'Pendentes', um: 'pendente', cls: 'pont', nota: 'a reprogramar / reprogramada' },
+  };
+  Object.entries(NEXE).forEach(([g, x]) => {
+    x.ks = LP.os.map((o, k) => k).filter(k => grupoDe(LP.os[k]) === g);
+    x.vaos = uniao(x.ks); x.km = somaM(x.vaos);
+  });
+  const GRUPOS_NEXE = Object.entries(NEXE).filter(([, x]) => x.ks.length);
   const KM_LIMPO = somaM(uniao(LP.os.map((o, k) => k).filter(k => LP.os[k].data)));
   const KM_REDE = somaM(D.vaos);
-  const ORDEM = [...ANOS.flatMap(a => OS_ANO[a]), ...PEND].filter(k => vaosDaOs[k].length); // ‹ › no mapa
+  const ORDEM = [...ANOS.flatMap(a => OS_ANO[a]), ...NEXE.cri.ks, ...NEXE.pend.ks].filter(k => vaosDaOs[k].length); // ‹ › no mapa
 
   const vaosDoTrecho = {};
   D.vaos.forEach(v => (vaosDoTrecho[D.trechos[v[4]].nome] = vaosDoTrecho[D.trechos[v[4]].nome] || []).push(v));
@@ -84,7 +96,7 @@
     ligado: guarda('limp-ligado') !== '0',
     vista: guarda('limp-vista') === 'sit' ? 'sit' : 'ano',
     anos: new Set(ANOS),
-    pend: false,
+    nexe: new Set(),         // grupos de OS não executadas ligados no mapa ('cri', 'pend')
     foco: null,
     mais: guarda('limp-mais') === '1',   // "Anos e ordens de serviço" aberto (fechado por padrão)
     lista: false,            // lista de OS aberta
@@ -126,7 +138,9 @@
 .limp-ano-l .so{display:grid;place-items:center;padding:0 var(--s3);font:600 var(--t-xs) var(--f-body);color:var(--accent)}
 .limp-ano-l .so:hover,.limp-ano-l .liga:hover{background:var(--hover)}
 .limp-ano-l .so:hover{text-decoration:underline;text-underline-offset:2px}
-.limp-ano-l i.trac{background:repeating-linear-gradient(90deg,var(--c) 0 5px,transparent 5px 9px)!important;box-shadow:none!important}
+/* OS não executadas: tracejado (criadas) e pontilhado (pendentes), igual ao traço no mapa */
+.limp-card i.trac,.limp-maplg i.trac{background:repeating-linear-gradient(90deg,var(--c) 0 5px,transparent 5px 9px)!important;box-shadow:none!important}
+.limp-card i.pont,.limp-maplg i.pont{background:radial-gradient(circle,var(--c) 2.5px,transparent 3px) 0 50%/7px 100% repeat-x!important;box-shadow:none!important}
 .limp-ano-l.fixo .liga{cursor:default}
 .limp-ano-l.fixo .liga:hover{background:none}
 .limp-todos{justify-self:start;min-height:32px;padding:0 var(--s2);border:0;border-radius:var(--r1);background:none;color:var(--accent);font:600 var(--t-xs) var(--f-body);cursor:pointer}
@@ -152,7 +166,8 @@
 .limp-os-b[aria-pressed=true]{background:var(--sel)}
 .limp-os-b .q{font:600 var(--t-xs) var(--f-mono);font-variant-numeric:tabular-nums}
 .limp-os-b .s{color:var(--muted);font-size:var(--t-xs)}
-.limp-os-b.pend{border-left-style:dashed}
+.limp-os-b.cri{border-left-style:dashed}
+.limp-os-b.pend{border-left-style:dotted}
 .limp-foco{border:0;border-radius:var(--r1);margin-top:-2px;padding:var(--s2) var(--s3);background:var(--sel);font-size:var(--t-sm);display:grid;gap:var(--s1);overflow-wrap:anywhere}
 .limp-foco .q{font:600 var(--t-sm) var(--f-mono)}
 /* no detalhe do trecho */
@@ -192,6 +207,8 @@
 .limp-pop .t small{font:500 12px var(--f-body);color:#5a636a;margin-left:4px}
 .limp-pop .lb-l{border-left:5px solid var(--c);padding:2px 0 2px 7px;margin:3px 0}
 .limp-pop .lb-l b{font-family:var(--f-mono);font-size:12.5px}
+.limp-pop .lb-l.cri{border-left-style:dashed}
+.limp-pop .lb-l.pend{border-left-style:dotted}
 .limp-pop .sit{margin-top:5px;font-weight:600;font-size:12.5px;color:#1b2024}
 .limp-pop .sit::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:6px;box-shadow:0 0 0 1px #0004}
 .limp-pop .nada{color:#5a636a;font-style:italic}
@@ -263,15 +280,19 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     if ((oe.ctrlKey || oe.metaKey) && window.__clique) return window.__clique(nome, oe, false);   // Ctrl + clique: soma trechos, sem balão
     if (window.__sel) window.__sel(nome, false);
     const ks = (porVao[v[5]] || { ks: [] }).ks.slice().sort((a, b) => (LP.os[b].data || '9' + LP.os[b].criada).localeCompare(LP.os[a].data || '9' + LP.os[a].criada));
-    const exec = ks.filter(k => LP.os[k].data), pend = ks.filter(k => !LP.os[k].data);
+    const exec = ks.filter(k => LP.os[k].data), nexe = ['cri', 'pend'].flatMap(g => ks.filter(k => grupoDe(LP.os[k]) === g));
     const ult = exec.length ? LP.os[exec[0]].data : null;
     const sit = situacao(ult, classe);
-    const linha = (k, rot) => { const o = LP.os[k]; return `<div class="lb-l" style="--c:${o.data ? corAno(anoDe(o)) : '#9ca3af'}"><b>${rot} ${o.data ? br(o.data) : esc(o.sit.toLowerCase())}</b> · <a href="#" data-k="${k}">OS ${esc(o.os)}</a></div>`; };
+    const linha = (k, rot) => {
+      const o = LP.os[k], g = grupoDe(o);
+      const txt = o.data ? `${rot} ${br(o.data)}` : g === 'cri' ? `Criada em ${br(o.criada)}` : `Pendente (${esc(o.sit.toLowerCase())})`;
+      return `<div class="lb-l${g ? ' ' + g : ''}" style="--c:${o.data ? corAno(anoDe(o)) : CINZA}"><b>${txt}</b> · <a href="#" data-k="${k}">OS ${esc(o.os)}</a></div>`;
+    };
     const html = `<div class="limp-pop"><div class="t">Trecho ${esc(nome)} <small>${classe} · a cada ${REGRA[classe]} anos</small></div>` +
       (exec.length ? linha(exec[0], 'Limpo em') + exec.slice(1).map(k => linha(k, 'Antes:')).join('') +
         `<div class="sit" style="--c:${SIT[sit][1]}">${SIT[sit][0]} · próxima até ${br(iso(somaAnos(ult, REGRA[classe])))}</div>`
         : '<div class="nada">Sem registro de limpeza aqui</div>') +
-      pend.map(k => linha(k, 'Programada:')).join('') + '</div>';
+      nexe.map(k => linha(k)).join('') + '</div>';
     L.popup({ className: 'limp-popup', maxWidth: 300, autoPanPadding: [20, 20] }).setLatLng(e.latlng).setContent(html).openOn(map);
   }
   if (map) map.getContainer().addEventListener('click', e => {
@@ -326,11 +347,20 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       if (st.vista === 'ano') {
         ls.push(...fundo());
         if (!fundo().clicavel) { clicavel(fundo(), D.vaos.filter(vis)); fundo().clicavel = true; }
-        if (st.pend && VAOS_PEND.length) ls.push(L.polyline(VAOS_PEND.filter(vis).map(seg), { color: '#fff', weight: 4, dashArray: '6 7', opacity: op, interactive: false }));
         ANOS.slice().reverse().filter(a => st.anos.has(a)).forEach(a => {   // o ano mais recente fica por cima
           const vs = VAOS_ANO[a].filter(vis);
           if (vs.length) ls.push(...clicavel(linhaDupla(vs, corAno(a), 5, op), vs));
         });
+        // não executadas por cima dos anos (ligadas pelo usuário): criadas tracejado branco, pendentes pontilhado branco com borda
+        if (st.nexe.has('cri')) {
+          const vs = NEXE.cri.vaos.filter(vis);
+          if (vs.length) ls.push(L.polyline(vs.map(seg), { color: '#fff', weight: 4, dashArray: '6 7', opacity: op, interactive: false }));
+        }
+        if (st.nexe.has('pend')) {
+          const vs = NEXE.pend.vaos.filter(vis);
+          if (vs.length) ls.push(L.polyline(vs.map(seg), { color: '#0b0f14', weight: 9, dashArray: '1 11', lineCap: 'round', opacity: .8 * op, interactive: false }),
+            L.polyline(vs.map(seg), { color: '#fff', weight: 6, dashArray: '1 11', lineCap: 'round', opacity: op, interactive: false }));
+        }
         if (st.foco === null) ls.push(...etiquetas());
       } else {
         const g = { sem: [], vencida: [], vence: [], dia: [] };
@@ -382,9 +412,9 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       const cor = o.data ? corAno(anoDe(o)) : '#fff';
       realce = L.layerGroup([
         L.polyline(vs.map(seg), { color: '#fff', weight: 14, opacity: 1, interactive: false, lineCap: 'round' }),
-        L.polyline(vs.map(seg), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round', dashArray: o.data ? null : '8 6' }),
+        L.polyline(vs.map(seg), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round', dashArray: o.data ? null : grupoDe(o) === 'cri' ? '8 6' : '1 13' }),
       ]).addTo(map);
-      if (o.data) { st.grupos.add(String(anoDe(o))); } else st.grupos.add('pend');
+      st.grupos.add(o.data ? String(anoDe(o)) : grupoDe(o));
       st.mais = true; st.lista = true;                  // abre "Anos e ordens de serviço" antes do grupo e da OS
       if (enquadrar) enquadra(vs);
     }
@@ -397,7 +427,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     enquadra(VAOS_ANO[a]);
   }
   function alternaAno(a) {
-    if (a === 'pend') st.pend = !st.pend;
+    if (a in NEXE) st.nexe.has(a) ? st.nexe.delete(a) : st.nexe.add(a);
     else { a = +a; st.anos.has(a) ? st.anos.delete(a) : st.anos.add(a); }
     desenha(); pinta();
   }
@@ -436,22 +466,26 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   function focoHtml(k) {
     const o = LP.os[k];
     const ts = [...new Set(vaosDaOs[k].map(v => D.trechos[v[4]].nome))];
-    return `<div class="limp-foco"><span class="q">OS ${esc(o.os_completa)} · ${o.data ? 'executada ' + br(o.data) : esc(o.sit.toLowerCase()) + ' · criada ' + br(o.criada)}</span>
+    return `<div class="limp-foco"><span class="q">OS ${esc(o.os_completa)} · ${o.data ? 'executada ' + br(o.data) : grupoDe(o) === 'cri' ? 'criada ' + br(o.criada) : 'pendente (' + esc(o.sit.toLowerCase()) + ') · criada ' + br(o.criada)}</span>
       <span>${esc(o.desc)}</span>
       <span class="limp-nota">No mapa: ${vaosDaOs[k].length ? km(o.m) : 'sem localização'}${o.km_desc ? ` · descrição: ${String(o.km_desc).replace('.', ',')} km` : ''} · ${esc(o.metodo)}${o.al_os && o.al_os !== (D.meta || {}).al ? ` · OS lançada no ${esc(o.al_os)}` : ''}</span>
       ${o.ativos.length ? `<span class="limp-nota">Ativos: ${o.ativos.map(esc).join('; ')}</span>` : ''}
       ${ts.length ? `<span class="limp-nota">Trechos: ${ts.slice(0, 30).map(esc).join(', ')}${ts.length > 30 ? ` e mais ${ts.length - 30}` : ''}</span>` : ''}</div>`;
   }
   const osBtn = (k, comFoco) => {
-    const o = LP.os[k], pend = o.sit !== 'EXECUTADA';
-    const cor = pend ? '#9ca3af' : corAno(anoDe(o));
-    return `<button type="button" class="limp-os-b${pend ? ' pend' : ''}" data-k="${k}" style="--c:${cor}" aria-pressed="${st.foco === k}">` +
-      `<span class="q">${pend ? esc(o.sit.toLowerCase()) : br(o.data)} · OS ${esc(o.os)} · ${vaosDaOs[k].length ? km(o.m) : 'sem localização'}</span>` +
+    const o = LP.os[k], g = grupoDe(o);
+    const cor = g ? CINZA : corAno(anoDe(o));
+    const quando = !g ? br(o.data) : g === 'cri' ? 'criada ' + br(o.criada) : esc(o.sit.toLowerCase()) + ' · criada ' + br(o.criada);
+    return `<button type="button" class="limp-os-b${g ? ' ' + g : ''}" data-k="${k}" style="--c:${cor}" aria-pressed="${st.foco === k}">` +
+      `<span class="q">${quando} · OS ${esc(o.os)} · ${vaosDaOs[k].length ? km(o.m) : 'sem localização'}</span>` +
       `<span class="s">${esc(o.desc.slice(0, 110))}${o.desc.length > 110 ? '…' : ''}</span></button>` +
       (comFoco && st.foco === k ? focoHtml(k) : '');
   };
-  const grupo = (g, titulo, cor, info, ks) =>
-    `<details class="limp-grupo" data-g="${g}"${st.grupos.has(g) ? ' open' : ''}><summary style="--c:${cor}"><i></i>${titulo} <span>${info}</span></summary><div>${ks.map(k => osBtn(k, true)).join('')}</div></details>`;
+  const grupo = (g, titulo, cor, info, ks, cls) =>
+    `<details class="limp-grupo" data-g="${g}"${st.grupos.has(g) ? ' open' : ''}><summary style="--c:${cor}"><i${cls ? ` class="${cls}"` : ''}></i>${titulo} <span>${info}</span></summary><div>${ks.map(k => osBtn(k, true)).join('')}</div></details>`;
+  const plural = (n, um) => `${n} ${um}${n === 1 ? '' : 's'}`;
+  // linha liga/desliga de cada grupo de OS não executadas (painel)
+  const linhaNexe = ([g, x]) => `<div class="limp-ano-l"><button type="button" class="liga" data-a="${g}" data-foco="${g}" aria-pressed="${st.nexe.has(g)}" title="Mostrar/esconder no mapa as OS ${x.rot.toLowerCase()}${x.nota ? ' (' + x.nota + ')' : ''}"><i class="${x.cls}" style="--c:${CINZA}"></i><span>${x.rot} · ${x.ks.length} OS</span><em>${km(x.km)}</em></button></div>`;
 
   function pinta() {
     // guarda quem tinha o foco do teclado para devolver depois de refazer o cartão
@@ -459,16 +493,18 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
 
     const exec = LP.os.filter(o => o.sit === 'EXECUTADA').length;
-    const sub = `${exec} OS executada${exec === 1 ? '' : 's'} · ${km(KM_LIMPO)} de ${km(KM_REDE)} com registro`;
+    const sub = `${exec} OS executada${exec === 1 ? '' : 's'} · ${km(KM_LIMPO)} de ${km(KM_REDE)} com registro` +
+      GRUPOS_NEXE.map(([, x]) => ' · ' + plural(x.ks.length, x.um)).join('');
     let corpo = '';
     if (st.ligado && st.vista === 'ano') {
       corpo = ANOS.length ? `<div class="limp-anos">${ANOS.map(a => `<div class="limp-ano-l">
           <button type="button" class="liga" data-a="${a}" data-foco="a${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a} no mapa"><i style="--c:${corAno(a)}"></i><span><b>${a}</b> · ${OS_ANO[a].length} OS</span><em>${km(KM_ANO[a])}</em></button>
           <button type="button" class="so" data-so="${a}" data-foco="s${a}" title="Mostrar só ${a} e enquadrar no mapa">Ver só</button></div>`).join('')}
-        ${PEND.length ? `<div class="limp-ano-l"><button type="button" class="liga" data-a="pend" data-foco="pend" aria-pressed="${st.pend}" title="Mostrar/esconder as OS ainda não executadas"><i class="trac" style="--c:#9ca3af"></i><span>Programadas / pendentes · ${PEND.length} OS</span><em>${km(KM_PEND)}</em></button></div>` : ''}</div>
+        ${GRUPOS_NEXE.map(linhaNexe).join('')}</div>
         ${st.anos.size < ANOS.length ? '<button type="button" class="limp-todos" data-acao="todos" data-foco="todos">Mostrar todos os anos</button>' : ''}
-        <p class="limp-nota">Só limpezas executadas${EQ}, pela data de execução. Cinza-claro: sem registro de limpeza.</p>`
-        : `<p class="limp-nota">Nenhuma OS executada${EQ} caiu neste alimentador.</p>`;
+        <p class="limp-nota">Só limpezas executadas${EQ}, pela data de execução. Cinza-claro: sem registro de limpeza.${GRUPOS_NEXE.length ? ' Não executadas: criadas (tracejado) e pendentes, a reprogramar ou reprogramadas (pontilhado).' : ''}</p>`
+        : `<p class="limp-nota">Nenhuma OS executada${EQ} caiu neste alimentador.</p>` +
+          (GRUPOS_NEXE.length ? `<div class="limp-anos">${GRUPOS_NEXE.map(linhaNexe).join('')}</div>` : '');
     } else if (st.ligado) {
       corpo = `<div class="limp-bar">${['dia', 'vence', 'vencida', 'sem'].map(k => TOT_SIT[k] ? `<span style="width:${100 * TOT_SIT[k] / KM_REDE}%;background:${SIT[k][1]}"></span>` : '').join('')}</div>
         <div class="limp-anos">${Object.entries(SIT).map(([k, [n, c]]) => `<div class="limp-ano-l fixo"><button type="button" class="liga" tabindex="-1" aria-disabled="true"><i style="--c:${c}"></i><span>${n}</span><em>${km(TOT_SIT[k])}</em></button></div>`).join('')}</div>
@@ -477,7 +513,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const nOs = LP.os.length;
     const lista = nOs ? `<details class="limp-lista"${st.lista ? ' open' : ''}><summary data-foco="lista">Ver as ${nOs} OS por ano</summary><div>
         ${ANOS.map(a => grupo(String(a), a, corAno(a), `${OS_ANO[a].length} OS · ${km(KM_ANO[a])}`, OS_ANO[a])).join('')}
-        ${PEND.length ? grupo('pend', 'Pendentes', '#9ca3af', `${PEND.length} OS`, PEND) : ''}</div></details>` : '';
+        ${GRUPOS_NEXE.map(([g, x]) => grupo(g, x.rot, CINZA, `${x.ks.length} OS · ${km(x.km)}${x.nota ? ' · ' + x.nota : ''}`, x.ks, x.cls)).join('')}</div></details>` : '';
     const seg = st.ligado ? `<div class="limp-seg" role="group" aria-label="Pintar o mapa por"><button type="button" data-acao="ano" data-foco="ano" aria-pressed="${st.vista === 'ano'}">Por ano</button><button type="button" data-acao="sit" data-foco="sit" aria-pressed="${st.vista === 'sit'}">Vencimento</button></div>` : '';
     const resto = seg + corpo + lista;                   // anos e OS só quando alguém pede
     card.innerHTML = `<div class="limp-top"><h2>Limpeza de faixa<small>${sub}</small></h2>
@@ -489,6 +525,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       maplg.hidden = !st.ligado;
       maplg.innerHTML = st.vista === 'ano'
         ? ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a}"><i style="--c:${corAno(a)}"></i><b>${a}</b></button>`).join('') +
+          GRUPOS_NEXE.map(([g, x]) => `<button type="button" data-a="${g}" aria-pressed="${st.nexe.has(g)}" title="Mostrar/esconder as OS ${x.rot.toLowerCase()}${x.nota ? ' (' + x.nota + ')' : ''}"><i class="${x.cls}" style="--c:#fff"></i>${x.rot}</button>`).join('') +
           `<span><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem registro</span>`
         : Object.values(SIT).map(([n, c]) => `<span><i style="--c:${c}"></i>${n}</span>`).join('');
     }
@@ -496,7 +533,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       chip.hidden = st.foco === null;
       if (st.foco !== null) {
         const o = LP.os[st.foco];
-        chip.style.setProperty('--c', o.data ? corAno(anoDe(o)) : '#9ca3af');
+        chip.style.setProperty('--c', o.data ? corAno(anoDe(o)) : CINZA);
         chip.innerHTML = `<button type="button" data-v="-" title="OS anterior" aria-label="OS anterior">‹</button>` +
           `<span title="${esc(o.desc)}">OS ${esc(o.os)} · ${o.data ? br(o.data) : esc(o.sit.toLowerCase())} · ${km(o.m)}</span>` +
           `<button type="button" data-v="+" title="Próxima OS" aria-label="Próxima OS">›</button>` +
