@@ -1,6 +1,7 @@
 // Mapa em tela cheia (roda depois de alimentador.js, com window.__map).
 // Usa a tela cheia do navegador quando existe; no iPhone (sem essa função) o mapa ocupa a janela por CSS.
 // Em tela cheia, o botão "Painel" abre o painel lateral (limpeza, busca, detalhe) como gaveta sobre o mapa.
+// O botão "Tela cheia" fica num card embaixo do T1 T2 T3 (window.__ctlMapa, de extras.js); sem ele, volta ao ícone no canto esquerdo.
 (function () {
   const map = window.__map;
   const box = document.querySelector('.mapbox');
@@ -14,6 +15,7 @@
 .tc-ctl button:hover{background:#262d33}
 .tc-ctl button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:2px}
 .tc-ctl svg{width:20px;height:20px;pointer-events:none}   /* o clique é sempre do botão */
+.ctl-card .tc-btn svg{width:18px;height:18px;flex:none;pointer-events:none}
 .tc-btn .sai,.tc-btn[aria-pressed="true"] .abre{display:none}
 .tc-btn[aria-pressed="true"] .sai{display:block}
 .tc-ctl .tc-painel{width:auto;padding:0 var(--s3);font:600 var(--t-sm) var(--f-body);gap:6px;display:none}
@@ -27,7 +29,7 @@ body.tela-cheia .panel{position:fixed;top:0;right:0;bottom:0;z-index:1100;width:
 @media (prefers-reduced-motion:no-preference){body.tela-cheia.tc-anima .panel{transition:transform var(--dur-l) var(--ease),visibility 0s var(--dur-l)}}
 body.tela-cheia.tc-gaveta .panel{transform:none;visibility:visible;transition-delay:0s}
 body.tela-cheia .grp{background:var(--paper)}
-@media (min-width:701px){body.tela-cheia.tc-gaveta .classes{right:calc(min(420px,92vw) + 12px)}}
+@media (min-width:701px){body.tela-cheia.tc-gaveta .classes,body.tela-cheia.tc-gaveta .ctl-dir{right:calc(min(420px,92vw) + 12px)}}
 .tc-fecha-gaveta{display:none;position:sticky;top:0;z-index:2;justify-self:end;width:40px;height:40px;place-items:center;padding:0;border:0;border-radius:var(--r2);
   background:var(--paper);color:var(--fg);font:400 var(--t-lg)/1 var(--f-body);cursor:pointer}
 .tc-fecha-gaveta:hover{background:color-mix(in srgb,var(--fg) 6%,var(--paper))}
@@ -46,21 +48,30 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
   const ICON_ABRE = '<svg class="abre" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
   const ICON_SAI = '<svg class="sai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
 
+  const l2 = window.__ctlMapa ? window.__ctlMapa() : null;
+  const BTN_TC = `<button type="button" class="tc-btn" aria-pressed="false" title="Tela cheia" aria-label="Mapa em tela cheia">${ICON_ABRE}${ICON_SAI}` +
+    (l2 ? '<span class="abre">Tela cheia</span><span class="sai">Sair</span>' : '') + '</button>';
   const Ctl = L.Control.extend({
     options: { position: 'topleft' },
     onAdd() {
       const d = L.DomUtil.create('div', 'tc-ctl');
-      d.innerHTML = `<button type="button" class="tc-btn" aria-pressed="false" title="Tela cheia" aria-label="Mapa em tela cheia">${ICON_ABRE}${ICON_SAI}</button>` +
+      d.innerHTML = (l2 ? '' : BTN_TC) +
         `<button type="button" class="tc-painel" aria-expanded="false" title="Abrir o painel (limpeza, busca, detalhe)">☰ Painel</button>`;
       L.DomEvent.disableClickPropagation(d);
       L.DomEvent.on(d, 'click', L.DomEvent.stopPropagation);   // clique nos botões não chega ao mapa (que limparia a seleção)
-      d.querySelector('.tc-btn').addEventListener('click', alterna);
       d.querySelector('.tc-painel').addEventListener('click', () => gaveta(!document.body.classList.contains('tc-gaveta'), true));
       return d;
     },
   });
   const ctl = new Ctl().addTo(map);
-  const btn = ctl.getContainer().querySelector('.tc-btn');
+  if (l2) {                                            // card "Tela cheia" embaixo do T1 T2 T3, ao lado do "Faixa"
+    const c = document.createElement('div');
+    c.className = 'ctl-card';
+    c.innerHTML = BTN_TC;
+    l2.append(c);
+  }
+  const btn = (l2 || ctl.getContainer()).querySelector('.tc-btn');
+  btn.addEventListener('click', alterna);
   const btnPainel = ctl.getContainer().querySelector('.tc-painel');
 
   const fecha = document.createElement('button');

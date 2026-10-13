@@ -189,6 +189,33 @@
     });
   }
 
+  // canto direito do mapa: o card T1 T2 T3 em cima e, embaixo, um card por botão (Faixa em limpeza.js, Tela cheia em telacheia.js).
+  // Devolve a linha de baixo (criada na 1ª chamada); sem o card das classes (mapa não carregou), devolve null.
+  window.__ctlMapa = function () {
+    let l2 = document.querySelector('.ctl-l2');
+    const cls = document.getElementById('classes');
+    if (l2 || !cls) return l2;
+    const dir = document.createElement('div');
+    dir.className = 'ctl-dir';
+    cls.before(dir);
+    l2 = document.createElement('div');
+    l2.className = 'ctl-l2';
+    dir.append(cls, l2);
+    if (window.L) L.DomEvent.disableClickPropagation(l2);
+    l2.addEventListener('click', e => e.stopPropagation());   // clique nos cards não chega ao mapa (que limparia a seleção)
+    const s = document.createElement('style');
+    s.textContent = '.ctl-dir{position:absolute;right:12px;top:12px;z-index:810;display:flex;flex-direction:column;align-items:flex-end;gap:var(--s2);max-width:calc(100% - 76px)}' +
+      '.ctl-dir>.classes{position:static}' +
+      '.ctl-l2{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--s2)}.ctl-l2:empty{display:none}' +
+      '.ctl-card{display:flex;padding:var(--s1);background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--vidro-borda);border-radius:var(--r2);box-shadow:var(--sh-vidro)}' +
+      '.ctl-card button{display:inline-flex;align-items:center;gap:6px;font:600 var(--t-sm)/1 var(--f-mono);padding:0 var(--s3);border:0;border-radius:var(--r1);background-color:transparent;' +
+      'color:var(--vidro-fg);cursor:pointer;min-width:40px;min-height:40px;white-space:nowrap}' +
+      '.ctl-card button:hover{background-color:var(--vidro-hover)}.ctl-card button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:1px}' +
+      '@media (prefers-reduced-motion:no-preference){.ctl-card button{transition:background-color var(--dur) var(--ease),opacity var(--dur) var(--ease)}}';
+    document.head.append(s);
+    return l2;
+  };
+
   // vindo da busca de ativo da página inicial (?t=trecho&a=código&ll=lat,lon): seleciona o trecho e marca o ativo.
   // Espera o load para a limpeza de faixa (scripts seguintes) também pintar a seleção.
   const pq = new URLSearchParams(location.search), tq = pq.get('t'), ll = (pq.get('ll') || '').split(',').map(Number);

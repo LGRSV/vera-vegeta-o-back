@@ -112,12 +112,10 @@
 .limp-top h2 small{display:block;margin-top:var(--s1);font:500 var(--t-xs)/1.4 var(--f-body);color:var(--muted);white-space:normal}
 .limp-card button,.limp-sec button,.limp-maplg button,.limp-chip button{font-family:var(--f-body)}
 .limp-card button:focus-visible,.limp-sec button:focus-visible,.limp-card summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-/* interruptor "No mapa": o estado vem só do aria-pressed */
-.limp-sw{flex:none;display:inline-flex;align-items:center;gap:var(--s2);min-height:var(--alvo);padding:0 var(--s1) 0 var(--s2);border:0;border-radius:var(--r2);background:none;color:var(--fg);font:600 var(--t-sm) var(--f-body);cursor:pointer}
-.limp-sw::after{content:'';flex:none;width:36px;height:20px;border-radius:var(--rp);background-color:var(--line-forte);
-  background-image:radial-gradient(circle,var(--paper) 7.5px,transparent 8.5px);background-repeat:no-repeat;background-size:20px 20px;background-position:0 50%}
-.limp-sw[aria-pressed=true]::after{background-color:var(--accent);background-image:radial-gradient(circle,var(--on-accent) 7.5px,transparent 8.5px);background-position:16px 50%}
-.limp-sw:hover{background:var(--hover)}
+/* botão "Faixa" no mapa (card embaixo do T1 T2 T3), no jeito dos T1 T2 T3: ligado tem o filete com as cores dos anos; desligado fica riscado */
+.ctl-card .ctl-faixa{background-image:linear-gradient(90deg,#60a5fa,#22d3ee,#4ade80,#facc15,#fb923c);background-repeat:no-repeat;background-size:100% 3px;background-position:0 100%}
+.ctl-card .ctl-faixa[aria-pressed=false]{opacity:.6;text-decoration:line-through;background-image:none;box-shadow:inset 0 -3px 0 #5a636a}
+.limp-desl b{color:var(--fg)}
 /* segmentado Por ano / Vencimento */
 .limp-seg{display:flex;gap:2px;padding:3px;border:0;border-radius:var(--r2);background:var(--hover)}
 .limp-seg button{flex:1;min-height:var(--alvo);padding:0 var(--s3);border:0;border-radius:7px;background:transparent;color:var(--muted);font:600 var(--t-sm) var(--f-body);white-space:nowrap;cursor:pointer}
@@ -219,9 +217,8 @@ body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
 body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
 @media (min-width:701px){body.tela-cheia.tc-gaveta .limp-chip{right:calc(min(420px,92vw) + 12px)}}
 @media (prefers-reduced-motion:no-preference){
-  .limp-sw,.limp-sw::after,.limp-seg button,.limp-ano-l .liga,.limp-ano-l .so,.limp-todos,.limp-os-b,.limp-maplg button,.limp-chip button{
+  .limp-seg button,.limp-ano-l .liga,.limp-ano-l .so,.limp-todos,.limp-os-b,.limp-maplg button,.limp-chip button{
     transition:background-color var(--dur) var(--ease),color var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease),opacity var(--dur) var(--ease)}
-  .limp-sw::after{transition-property:background-color,background-position}
 }
 @media (max-width:640px){
   .limp-maplg{top:auto;bottom:28px;left:12px;right:12px;display:flex;flex-wrap:nowrap;gap:2px;max-width:none;padding:var(--s1) var(--s3);overflow-x:auto;scrollbar-width:none;
@@ -455,6 +452,22 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     });
   }
 
+  // botão "Faixa" no mapa (card embaixo do T1 T2 T3): liga/desliga a limpeza de faixa no mapa; os anos ficam no painel
+  const l2 = map && window.__ctlMapa ? window.__ctlMapa() : null;
+  let btnFaixa = null;
+  if (l2) {
+    const c = document.createElement('div');
+    c.className = 'ctl-card';
+    c.innerHTML = '<button type="button" class="ctl-faixa" aria-pressed="false" title="Mostrar ou esconder a limpeza de faixa no mapa">Faixa</button>';
+    l2.append(c);
+    btnFaixa = c.querySelector('button');
+    btnFaixa.addEventListener('click', () => {
+      st.ligado = !st.ligado; guarda('limp-ligado', st.ligado ? '1' : '0');
+      window.__onSel(st.sel);
+      desenha(); pinta();
+    });
+  }
+
   // ---------- cartão no painel ----------
   const card = document.createElement('section');
   card.className = 'limp-card';
@@ -516,11 +529,12 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
         ${GRUPOS_NEXE.map(([g, x]) => grupo(g, x.rot, CINZA, `${x.ks.length} OS · ${km(x.km)}${x.nota ? ' · ' + x.nota : ''}`, x.ks, x.cls)).join('')}</div></details>` : '';
     const seg = st.ligado ? `<div class="limp-seg" role="group" aria-label="Pintar o mapa por"><button type="button" data-acao="ano" data-foco="ano" aria-pressed="${st.vista === 'ano'}">Por ano</button><button type="button" data-acao="sit" data-foco="sit" aria-pressed="${st.vista === 'sit'}">Vencimento</button></div>` : '';
     const resto = seg + corpo + lista;                   // anos e OS só quando alguém pede
-    card.innerHTML = `<div class="limp-top"><h2>Limpeza de faixa<small>${sub}</small></h2>
-      <button type="button" class="limp-sw" data-acao="liga" data-foco="liga" aria-pressed="${st.ligado}" title="Mostrar a limpeza de faixa no mapa">No mapa</button></div>
+    card.innerHTML = `<div class="limp-top"><h2>Limpeza de faixa<small>${sub}</small></h2></div>
+      ${!st.ligado && btnFaixa ? '<p class="limp-nota limp-desl">Desligada no mapa: toque em <b>Faixa</b>, no canto do mapa, para ver as limpezas.</p>' : ''}
       ${resto ? `<details class="limp-mais"${st.mais ? ' open' : ''}><summary data-foco="mais">Anos e ordens de serviço</summary><div>${resto}</div></details>` : ''}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
 
+    if (btnFaixa) btnFaixa.setAttribute('aria-pressed', String(st.ligado));
     if (maplg) {
       maplg.hidden = !st.ligado;
       maplg.innerHTML = st.vista === 'ano'
@@ -557,10 +571,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     if (b.dataset.so) return soAno(+b.dataset.so);
     if (b.classList.contains('liga') && b.dataset.a) return alternaAno(b.dataset.a);
     const ac = b.dataset.acao;
-    if (ac === 'liga') {
-      st.ligado = !st.ligado; guarda('limp-ligado', st.ligado ? '1' : '0');
-      window.__onSel(st.sel);
-    } else if (ac === 'ano' || ac === 'sit') { st.vista = ac; guarda('limp-vista', ac); }
+    if (ac === 'ano' || ac === 'sit') { st.vista = ac; guarda('limp-vista', ac); }
     else if (ac === 'todos') st.anos = new Set(ANOS);
     else return;
     desenha(); pinta();
