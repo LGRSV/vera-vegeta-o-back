@@ -224,7 +224,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   function soAno(a) { st.anos = new Set([a]); desenha(); pinta(); enquadra(VAOS_ANO[a].flatMap(seg)); }
 
   // botão "Inspeção" no mapa, ao lado do "Faixa"
-  const l2 = map && window.__ctlMapa ? window.__ctlMapa(2) : null;
+  const l2 = map && window.__ctlMapa ? window.__ctlMapa() : null;
   let btn = null;
   if (l2) {
     const c = document.createElement('div');

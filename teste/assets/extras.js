@@ -189,10 +189,10 @@
     });
   }
 
-  // canto direito do mapa: o card T1 T2 T3 em cima e, embaixo, linhas de cards: na 2ª, Faixa (limpeza.js) e Inspeção
-  // (inspecao.js); na 3ª, Tela cheia (telacheia.js). Devolve a linha pedida (2 ou 3, criadas na 1ª chamada, na ordem);
-  // sem o card das classes (mapa não carregou), devolve null.
-  window.__ctlMapa = function (n = 2) {
+  // canto superior direito do mapa: o card T1 T2 T3 e, embaixo dele, a linha com Faixa (limpeza.js) e Inspeção
+  // (inspecao.js). Devolve a linha (criada na 1ª chamada); sem o card das classes (mapa não carregou), devolve null.
+  // O Tela cheia fica no canto inferior direito (telacheia.js), com o mesmo card (.ctl-card).
+  window.__ctlMapa = function () {
     const cls = document.getElementById('classes');
     let dir = document.querySelector('.ctl-dir');
     if (!dir) {
@@ -200,22 +200,18 @@
       dir = document.createElement('div');
       dir.className = 'ctl-dir';
       cls.before(dir);
-      dir.append(cls);
-      [2, 3].forEach(i => {
-        const l = document.createElement('div');
-        l.className = 'ctl-l ctl-l' + i;
-        if (window.L) L.DomEvent.disableClickPropagation(l);
-        l.addEventListener('click', e => e.stopPropagation());   // clique nos cards não chega ao mapa (que limparia a seleção)
-        dir.append(l);
-      });
-      estiloCtl();
+      const l = document.createElement('div');
+      l.className = 'ctl-l ctl-l2';
+      if (window.L) L.DomEvent.disableClickPropagation(l);
+      l.addEventListener('click', e => e.stopPropagation());   // clique nos cards não chega ao mapa (que limparia a seleção)
+      dir.append(cls, l);
     }
-    return dir.querySelector('.ctl-l' + n);
+    return dir.querySelector('.ctl-l2');
   };
   // camadas que pintam a rede inteira (Faixa, Inspeção): ligar uma desliga as outras
   window.__camadas = window.__camadas || {};
   window.__soEsta = nome => Object.entries(window.__camadas).forEach(([k, c]) => { if (k !== nome) c.desliga(); });
-  function estiloCtl() {
+  {
     const s = document.createElement('style');
     s.textContent = '.ctl-dir{position:absolute;right:12px;top:12px;z-index:810;display:flex;flex-direction:column;align-items:flex-end;gap:var(--s2);max-width:calc(100% - 76px)}' +
       '.ctl-dir>.classes{position:static}' +
