@@ -1,5 +1,5 @@
 // OS de manutenção geradas pela inspeção (roda depois de inspecao.js, com window.D e window.MANUTENCAO de
-// scripts/manutencao.py; as canceladas já ficaram de fora). Card "Manutenção" no mapa, ao lado do "Faixa" e do
+// scripts/manutencao.py; as canceladas já ficaram de fora). Card "Insp→manut" no mapa, ao lado do "Faixa" e do
 // "Inspeção": um losango por poste com as OS dele, na cor da pior situação; fica por cima do que estiver ligado.
 // Situação pela data do dia: vencida (não executada e o prazo já passou), no prazo, executada.
 // Posição: o poste da ESTRUTURA da OS. Sem o poste no mapa, tocar na OS mostra o bloco da inspeção que a gerou.
@@ -175,13 +175,13 @@
     pinta();
   };
 
-  // botão "Manutenção" no mapa, ao lado do "Faixa" e do "Inspeção"
+  // botão "Insp→manut" (OS de manutenção da inspeção) no mapa, ao lado do "Faixa" e do "Inspeção"
   const l2 = map && window.__ctlMapa ? window.__ctlMapa() : null;
   let btn = null;
   if (l2) {
     const c = document.createElement('div');
     c.className = 'ctl-card';
-    c.innerHTML = '<button type="button" class="ctl-mnt" aria-pressed="false" title="Mostrar ou esconder as OS de manutenção geradas pela inspeção">Manutenção</button>';
+    c.innerHTML = '<button type="button" class="ctl-mnt" aria-pressed="false" title="Mostrar ou esconder as OS de manutenção geradas pela inspeção">Insp→manut</button>';
     l2.append(c);
     btn = c.querySelector('button');
     btn.addEventListener('click', () => liga(!st.ligado));
@@ -224,14 +224,14 @@
     const lista = n ? `<details class="limp-lista"${st.lista ? ' open' : ''}><summary data-foco="lista">Ver as ${nf(n)} OS por situação</summary><div>
         ${ORDEM.filter(s => POR_SIT[s].length).map(s => grupo(s, SIT[s][0], SIT[s][1], `${nf(POR_SIT[s].length)} OS`, POR_SIT[s])).join('')}</div></details>` : '';
     const resto = corpo + tipos + nota + lista;
-    card.innerHTML = `<div class="limp-top"><h2>Manutenção<small>${sub}</small></h2></div>
-      ${!st.ligado && btn && n ? '<p class="limp-nota limp-desl">Desligada no mapa: toque em <b>Manutenção</b>, no canto do mapa, para ver as OS nos postes.</p>' : ''}
+    card.innerHTML = `<div class="limp-top"><h2>Insp→manut<small>${sub}</small></h2></div>
+      ${!st.ligado && btn && n ? '<p class="limp-nota limp-desl">Desligada no mapa: toque em <b>Insp→manut</b>, no canto do mapa, para ver as OS de manutenção nos postes.</p>' : ''}
       ${n ? `<details class="limp-mais"${st.mais ? ' open' : ''}><summary data-foco="mais">Situação, tipos e OS</summary><div>${resto}</div></details>` : ''}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
     if (btn) btn.setAttribute('aria-pressed', String(st.ligado));
     if (lg) {
       lg.hidden = !st.ligado || !n;
-      lg.innerHTML = '<span>Manutenção</span>' + ORDEM.map(s => `<button type="button" data-s="${s}" aria-pressed="${st.sits.has(s)}" title="Mostrar/esconder ${SIT[s][0].toLowerCase()}"><i style="--c:${SIT[s][1]}"></i><span class="nm">${SIT[s][0]}</span><em>${nf(POR_SIT[s].length)}</em></button>`).join('');
+      lg.innerHTML = '<span>Insp→manut</span>' + ORDEM.map(s => `<button type="button" data-s="${s}" aria-pressed="${st.sits.has(s)}" title="Mostrar/esconder ${SIT[s][0].toLowerCase()}"><i style="--c:${SIT[s][1]}"></i><span class="nm">${SIT[s][0]}</span><em>${nf(POR_SIT[s].length)}</em></button>`).join('');
     }
     if (det) det.querySelectorAll('.mnt-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));
   }
