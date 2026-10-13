@@ -461,12 +461,16 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     c.innerHTML = '<button type="button" class="ctl-faixa" aria-pressed="false" title="Mostrar ou esconder a limpeza de faixa no mapa">Faixa</button>';
     l2.append(c);
     btnFaixa = c.querySelector('button');
-    btnFaixa.addEventListener('click', () => {
-      st.ligado = !st.ligado; guarda('limp-ligado', st.ligado ? '1' : '0');
-      window.__onSel(st.sel);
-      desenha(); pinta();
-    });
+    btnFaixa.addEventListener('click', () => liga(!st.ligado));
   }
+  // Faixa e Inspeção pintam a rede inteira: ligar uma desliga a outra (window.__camadas, de extras.js)
+  function liga(on) {
+    if (on && window.__soEsta) window.__soEsta('faixa');
+    st.ligado = on; guarda('limp-ligado', on ? '1' : '0');
+    window.__onSel(st.sel);
+    desenha(); pinta();
+  }
+  if (window.__camadas) window.__camadas.faixa = { desliga: () => { if (st.ligado) liga(false); } };
 
   // ---------- cartão no painel ----------
   const card = document.createElement('section');

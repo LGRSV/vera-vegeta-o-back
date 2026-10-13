@@ -1,0 +1,1 @@
+window.INSPECAO = {"fonte":"BASE INSPEÇÃO.xlsx","gerado":"2026-10-13","base_ate":"2026-10-09","os":[{"os":"000767/2026","os_completa":"ETO-INPA03 000767/2026","eq":"ETO-INPA03","data":"2026-07-14","crit":"alta","elem":"5726861271","abr":"5726861271","mont":"0326853271","desc":"","metodo":"ELEMENTO e ABRANGÊNCIA no mesmo ponto","m":0,"pt":[-10.185866,-48.494759]}],"vaos":{}};

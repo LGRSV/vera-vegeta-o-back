@@ -1,7 +1,8 @@
 // Mapa em tela cheia (roda depois de alimentador.js, com window.__map).
 // Usa a tela cheia do navegador quando existe; no iPhone (sem essa função) o mapa ocupa a janela por CSS.
 // Em tela cheia, o botão "Painel" abre o painel lateral (limpeza, busca, detalhe) como gaveta sobre o mapa.
-// O botão "Tela cheia" fica num card embaixo do T1 T2 T3 (window.__ctlMapa, de extras.js); sem ele, volta ao ícone no canto esquerdo.
+// O botão "Tela cheia" fica num card na 3ª linha do canto direito, embaixo do Faixa e do Inspeção (window.__ctlMapa, de
+// extras.js); sem ele, volta ao ícone no canto esquerdo.
 (function () {
   const map = window.__map;
   const box = document.querySelector('.mapbox');
@@ -48,7 +49,7 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
   const ICON_ABRE = '<svg class="abre" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
   const ICON_SAI = '<svg class="sai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
 
-  const l2 = window.__ctlMapa ? window.__ctlMapa() : null;
+  const l2 = window.__ctlMapa ? window.__ctlMapa(3) : null;      // linha de baixo, só para o Tela cheia (embaixo do Faixa e do Inspeção)
   const BTN_TC = `<button type="button" class="tc-btn" aria-pressed="false" title="Tela cheia" aria-label="Mapa em tela cheia">${ICON_ABRE}${ICON_SAI}` +
     (l2 ? '<span class="abre">Tela cheia</span><span class="sai">Sair</span>' : '') + '</button>';
   const Ctl = L.Control.extend({
@@ -64,7 +65,7 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
     },
   });
   const ctl = new Ctl().addTo(map);
-  if (l2) {                                            // card "Tela cheia" embaixo do T1 T2 T3, ao lado do "Faixa"
+  if (l2) {                                            // card "Tela cheia"
     const c = document.createElement('div');
     c.className = 'ctl-card';
     c.innerHTML = BTN_TC;
@@ -131,7 +132,7 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
   // tocar numa OS ou trecho dentro da gaveta no celular: fecha a gaveta para mostrar o mapa
   painel.addEventListener('click', e => {
     if (!document.body.classList.contains('tc-gaveta') || window.innerWidth > 700) return;
-    if (e.target.closest('.limp-os-b, .row, .chip[data-t], .ir')) setTimeout(() => gaveta(false), 50);
+    if (e.target.closest('.limp-os-b, .insp-os-b, .row, .chip[data-t], .ir')) setTimeout(() => gaveta(false), 50);
   });
   window.__telaCheia = alterna;
 })();
