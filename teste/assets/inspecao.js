@@ -3,6 +3,8 @@
 // cinza-claro. Faixa e Inspeção pintam a rede inteira, então ligar uma desliga a outra (window.__soEsta, de extras.js).
 // No painel: anos (liga/desliga) e as inspeções por ano; tocar numa inspeção enquadra no mapa o caminho dela, ou o ponto
 // quando só um dos dois ativos está no mapa. Posição: a rede do ELEMENTO subindo até a ABRANGÊNCIA da OS.
+// Pontos vermelhos: o ativo de início (ELEMENTO) e o de fim (ABRANGÊNCIA) de cada inspeção, um ponto por lugar (a
+// ABRANGÊNCIA de uma costuma ser o ELEMENTO da seguinte); tocar mostra as inspeções que começam e terminam nele.
 // Usa o visual do cartão da limpeza (classes limp-* do limpeza.js) com botões próprios (insp-os-b).
 (function () {
   const IN = window.INSPECAO;
@@ -23,6 +25,7 @@
   const COR_ANO = { 2024: '#c084fc', 2025: '#818cf8', 2026: '#2dd4bf', 2027: '#a3e635' };
   const corAno = a => COR_ANO[a] || (a < 2024 ? '#e879f9' : '#bef264');
   const SEMCOR = '#cbd5e1';
+  const VERMELHO = '#dc2626';
 
   // ---------- dados ----------
   const vaoPorId = Object.fromEntries(D.vaos.map(v => [v[5], v]));
@@ -46,6 +49,20 @@
   const KM_REDE = somaM(D.vaos);
   const ext = m => m < 1000 ? Math.round(m) + ' m' : km(m);   // caminho curto (equipamentos vizinhos) em metros
   const onde = k => vaosDaOs[k].length ? ext(IN.os[k].m) : IN.os[k].pt ? 'só o ponto' : 'sem posição';
+  // ativos de início e fim no mapa, um ponto por lugar, com as inspeções que começam (ini) e terminam (fim) nele
+  const PONTOS = [];
+  {
+    const por = new Map();
+    const poe = (ll, cod, k, papel) => {
+      if (!ll) return;
+      const ch = ll[0].toFixed(6) + ',' + ll[1].toFixed(6);
+      let p = por.get(ch);
+      if (!p) { p = { ll, cods: [], ini: [], fim: [] }; por.set(ch, p); PONTOS.push(p); }
+      if (cod && !p.cods.includes(cod)) p.cods.push(cod);
+      p[papel].push(k);
+    };
+    IN.os.forEach((o, k) => { poe(o.pe, o.elem, k, 'ini'); poe(o.pa, o.abr, k, 'fim'); });
+  }
   const vaosDoTrecho = {};
   D.vaos.forEach(v => (vaosDoTrecho[D.trechos[v[4]].nome] = vaosDoTrecho[D.trechos[v[4]].nome] || []).push(v));
 
@@ -77,7 +94,11 @@
 .insp-pop .lb-l{border-left:5px solid var(--c);padding:2px 0 2px 7px;margin:3px 0}
 .insp-pop .lb-l b{font-family:var(--f-mono);font-size:12.5px}
 .insp-pop .nada{color:#5a636a;font-style:italic}
-.insp-pt{width:18px;height:18px;border-radius:50%;background:var(--c);border:3px solid #fff;box-shadow:0 0 0 2px #0b0f14,0 2px 6px #0008;transform:translate(-50%,-50%)}
+.insp-pt{position:relative;width:16px;height:16px;border-radius:50%;background:${VERMELHO};border:3px solid #fff;box-shadow:0 0 0 2px #0b0f14,0 2px 6px #0008;transform:translate(-50%,-50%)}
+.insp-pt span{position:absolute;left:18px;top:50%;transform:translateY(-50%);white-space:nowrap;padding:3px 7px;border-radius:6px;
+  background:var(--vidro);color:var(--vidro-fg);border:1px solid var(--vidro-borda);font:600 11.5px/1.2 var(--f-mono);box-shadow:var(--sh-vidro)}
+.insp-pt span b{font-family:var(--f-body);font-weight:700;margin-right:4px}
+.limp-maplg i.insp-dot{width:10px;height:10px;border-radius:50%;background:${VERMELHO};box-shadow:0 0 0 2px #fff}
 body.insp-on #legenda{display:none}
 body.insp-on .classes button{box-shadow:inset 0 -3px 0 #9ca3af}
 body.insp-on .lb{border-left-color:#9ca3af}
@@ -88,7 +109,8 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
 
   // ---------- mapa ----------
   const seg = v => [[v[0], v[1]], [v[2], v[3]]];
-  let camada = null, realce = null, selL = null, fundoCache = null;
+  let camada = null, realce = null, selL = null, fundoCache = null, pontosL = [];
+  const raio = () => map.getZoom() < 13 ? 3.5 : map.getZoom() < 16 ? 5 : 6.5;
   function linhaDupla(vs, cor, peso, opacidade, extra) {
     // contorno escuro por baixo: a cor aparece igual sobre mata escura ou solo claro
     return [L.polyline(vs.map(seg), { color: '#0b0f14', weight: peso + 4, opacity: .75 * opacidade, interactive: false, lineCap: 'round' }),
@@ -150,10 +172,32 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
         const vs = VAOS_ANO[a].filter(vis);
         if (vs.length) ls.push(...clicavel(linhaDupla(vs, corAno(a), 5, op), vs));
       });
-      camada = L.layerGroup(ls).addTo(map);
-    }
+      pontosL = pontos(op);
+      camada = L.layerGroup(ls.concat(pontosL)).addTo(map);
+    } else pontosL = [];
     [selL, realce].forEach(g => g && g.eachLayer(l => l.bringToFront && l.bringToFront()));
+    pontosL.forEach(l => l.bringToFront());          // os pontos ficam por cima do contorno do trecho escolhido
   }
+  // pontos vermelhos dos ativos de início e fim (só das inspeções dos anos ligados)
+  function pontos(op) {
+    const ano = k => st.anos.has(anoDe(IN.os[k]));
+    return PONTOS.filter(p => p.ini.some(ano) || p.fim.some(ano)).map(p => {
+      const ni = p.ini.filter(ano).length, nfim = p.fim.filter(ano).length;
+      const papel = [ni && `início de ${ni} inspeç${ni === 1 ? 'ão' : 'ões'}`, nfim && `fim de ${nfim}`].filter(Boolean).join(' · ');
+      return L.circleMarker(p.ll, { radius: raio(), color: '#fff', weight: 2, fillColor: VERMELHO, fillOpacity: op, opacity: op })
+        .bindTooltip(`<b>${esc(p.cods.join(' / ') || 'ativo')}</b><br>${papel}`, { direction: 'top', offset: [0, -6] })
+        .on('click', e => balaoPonto(e, p));
+    });
+  }
+  function balaoPonto(e, p) {
+    L.DomEvent.stopPropagation(e);
+    const linha = (k, rot) => { const o = IN.os[k]; return `<div class="lb-l" style="--c:${corAno(anoDe(o))}"><b>${rot} ${br(o.data)}</b> · <a href="#" data-k="${k}">OS ${esc(o.os)}</a> · ${esc(o.eq)}</div>`; };
+    const ord = ks => ks.slice().sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
+    const html = `<div class="insp-pop"><div class="t">${esc(p.cods.join(' / ') || 'Ativo')} <small>início e fim de inspeção</small></div>` +
+      ord(p.ini).map(k => linha(k, 'Início ·')).join('') + ord(p.fim).map(k => linha(k, 'Fim ·')).join('') + '</div>';
+    L.popup({ className: 'limp-popup', maxWidth: 300, autoPanPadding: [20, 20] }).setLatLng(p.ll).setContent(html).openOn(map);
+  }
+  if (map) map.on('zoomend', () => { const r = raio(); pontosL.forEach(l => l.setRadius(r)); });
   // trecho escolhido: contorno amarelo por cima da camada (a limpeza faz o mesmo quando ela está ligada)
   const onSelAntes = window.__onSel;
   window.__onSel = nome => {
@@ -183,16 +227,22 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     if (st.foco !== null) {
       const o = IN.os[k], vs = vaosDaOs[k], cor = corAno(anoDe(o));
       if (!st.ligado) liga(true);
+      // início e fim da inspeção em foco: ponto vermelho maior com o nome do ativo
+      const marca = (ll, rot, cod) => L.marker(ll, { interactive: false, keyboard: false, zIndexOffset: 2000,
+        icon: L.divIcon({ className: '', iconSize: null, html: `<div class="insp-pt"><span><b>${rot}</b>${esc(cod || '')}</span></div>` }) });
+      const mesmo = o.pe && o.pa && o.pe[0] === o.pa[0] && o.pe[1] === o.pa[1];
+      const marcas = mesmo ? [marca(o.pe, 'Início e fim', o.elem)]
+        : [o.pe && marca(o.pe, 'Início', o.elem), o.pa && marca(o.pa, 'Fim', o.abr)].filter(Boolean);
       if (map && vs.length) {
         realce = L.layerGroup([
           L.polyline(vs.map(seg), { color: '#fff', weight: 14, opacity: 1, interactive: false, lineCap: 'round' }),
           L.polyline(vs.map(seg), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round' }),
+          ...marcas,
         ]).addTo(map);
         if (enquadrar) enquadra(vs.flatMap(seg));
-      } else if (map && o.pt) {
-        realce = L.layerGroup([L.marker(o.pt, { interactive: false, keyboard: false, zIndexOffset: 2000,
-          icon: L.divIcon({ className: '', iconSize: null, html: `<div class="insp-pt" style="--c:${cor}"></div>` }) })]).addTo(map);
-        if (enquadrar) enquadra([o.pt], true);
+      } else if (map && (o.pt || marcas.length)) {
+        realce = L.layerGroup(marcas.length ? marcas : [marca(o.pt, 'Ponto', '')]).addTo(map);
+        if (enquadrar) enquadra([o.pt || o.pe || o.pa], true);
       }
       st.grupos.add(String(anoDe(o)));
       st.mais = true; st.lista = true;                  // abre "Anos e inspeções" e o grupo da OS
@@ -272,7 +322,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
           <button type="button" class="liga" data-a="${a}" data-foco="a${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a} no mapa"><i style="--c:${corAno(a)}"></i><span><b>${a}</b> · ${OS_ANO[a].length} OS</span><em>${ext(KM_ANO[a])}</em></button>
           <button type="button" class="so" data-so="${a}" data-foco="s${a}" title="Mostrar só ${a} e enquadrar no mapa">Ver só</button></div>`).join('')}</div>
         ${st.anos.size < ANOS.length ? '<button type="button" class="limp-todos" data-acao="todos" data-foco="todos">Mostrar todos os anos</button>' : ''}
-        <p class="limp-nota">Só inspeções executadas, pela data de execução. A inspeção vai do ELEMENTO subindo até a ABRANGÊNCIA da OS. Cinza-claro: sem inspeção registrada.</p>`;
+        <p class="limp-nota">Só inspeções executadas, pela data de execução. A inspeção vai do ELEMENTO subindo até a ABRANGÊNCIA da OS. Pontos vermelhos: o ativo de início (ELEMENTO) e o de fim (ABRANGÊNCIA); toque para ver as inspeções de cada um. Cinza-claro: sem inspeção registrada.</p>`;
     }
     const lista = n ? `<details class="limp-lista"${st.lista ? ' open' : ''}><summary data-foco="lista">Ver as ${nf(n)} inspeções por ano</summary><div>
         ${ANOS.map(a => grupo(String(a), a, corAno(a), `${OS_ANO[a].length} OS · ${ext(KM_ANO[a])}`, OS_ANO[a])).join('')}</div></details>` : '';
@@ -286,6 +336,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       maplg.hidden = !st.ligado;
       maplg.innerHTML = `<span><b>Inspeção</b></span>` +
         ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a}"><i style="--c:${corAno(a)}"></i><b>${a}</b></button>`).join('') +
+        (PONTOS.length ? '<span><i class="insp-dot"></i>início / fim</span>' : '') +
         `<span><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem inspeção</span>`;
     }
     if (det) det.querySelectorAll('.insp-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));

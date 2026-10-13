@@ -9,6 +9,8 @@ ELEMENTO da outra).
   - Os dois no mesmo poste, ou só um deles no mapa: só o ponto (a OS aparece na lista e, ao tocar, marca o ponto).
     O outro ativo não está no cadastro do site: em geral os "90..." (bloco de chave faca, sem ponto no GIS nem no KML).
   - Nenhum dos dois: sem posição (fica na lista).
+Cada OS guarda também o ponto do ELEMENTO (pe, início) e o da ABRANGÊNCIA (pa, fim) quando estão no mapa: na página,
+são os pontos vermelhos de início e fim das inspeções.
 Ativo no mapa: chave do alimentador (dados/alimentadores/<AL>.json) ou, pelo índice de ativos do site (dados/ativos:
 transformadores e chaves com coordenada), o poste do mapa mais perto, até LIM_M.
 Data da inspeção: FIM_EXEC; se o FIM vier mais de 60 dias depois do INICIO_EXEC (fechamento em lote), INICIO_EXEC
@@ -181,6 +183,8 @@ def main(xlsx, site):
             'metodo': metodo,
             'm': round(sum(rede.D['vaos'][i][8] for i in vs), 1),
             'pt': list(rede.coord[pt]) if pt else None,
+            'pe': list(rede.coord[pe]) if pe else None,   # ponto do ELEMENTO (início) no mapa
+            'pa': list(rede.coord[pa]) if pa else None,   # ponto da ABRANGÊNCIA (fim) no mapa
         }
         por_al[al].append((reg, vs))
 
