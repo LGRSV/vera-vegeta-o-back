@@ -17,7 +17,8 @@
 .tc-ctl button:hover{background:#262d33}
 .tc-ctl button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:2px}
 .tc-ctl svg{width:20px;height:20px;pointer-events:none}   /* o clique é sempre do botão */
-.ctl-card .tc-btn svg{width:18px;height:18px;flex:none;pointer-events:none}
+.ctl-card .tc-btn svg{width:20px;height:20px;flex:none;pointer-events:none}
+.tc-canto .tc-btn{width:40px;padding:0;justify-content:center}   /* só o ícone (o nome fica no title e no aria-label) */
 .tc-btn .sai,.tc-btn[aria-pressed="true"] .abre{display:none}
 .tc-btn[aria-pressed="true"] .sai{display:block}
 .tc-ctl .tc-painel{width:auto;padding:0 var(--s3);font:600 var(--t-sm) var(--f-body);gap:6px;display:none}
@@ -57,8 +58,7 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
   const ICON_SAI = '<svg class="sai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
 
   const canto = window.__ctlMapa && window.__ctlMapa() ? document.createElement('div') : null;   // canto inferior direito
-  const BTN_TC = `<button type="button" class="tc-btn" aria-pressed="false" title="Tela cheia" aria-label="Mapa em tela cheia">${ICON_ABRE}${ICON_SAI}` +
-    (canto ? '<span class="abre">Tela cheia</span><span class="sai">Sair</span>' : '') + '</button>';
+  const BTN_TC = `<button type="button" class="tc-btn" aria-pressed="false" title="Tela cheia" aria-label="Mapa em tela cheia">${ICON_ABRE}${ICON_SAI}</button>`;
   const Ctl = L.Control.extend({
     options: { position: 'topleft' },
     onAdd() {
@@ -78,7 +78,7 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
     box.append(canto);
     L.DomEvent.disableClickPropagation(canto);
     canto.addEventListener('click', e => e.stopPropagation());   // clique no card não chega ao mapa (que limparia a seleção)
-    const larg = () => box.style.setProperty('--tc-w', canto.offsetWidth + 'px');   // muda com "Tela cheia" / "Sair"
+    const larg = () => box.style.setProperty('--tc-w', canto.offsetWidth + 'px');
     if (window.ResizeObserver) new ResizeObserver(larg).observe(canto);
     larg();
   }
