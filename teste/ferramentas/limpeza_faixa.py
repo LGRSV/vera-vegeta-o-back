@@ -16,8 +16,14 @@ Data da limpeza: FIM_EXEC; se o FIM vier mais de 60 dias depois do INICIO (fecha
 Só OS EXECUTADA conta como limpeza, e só das equipes de EQUIPES (prefixo do NUMERO_OS, ex.: "ETO-RD-GU 004972/2022");
 CRIADA / A REPROGRAMAR / REPROGRAMADA aparecem como pendentes, de qualquer equipe.
 
+Atualização automática (sem o acervo de KMZ, scripts/atualiza_bases.py): OS que já está no limpeza.js publicado
+mantém a posição de lá (os vãos, o método e os ativos) e só troca situação, datas e descrição; OS nova é localizada
+pelas chaves do mapa e pelo índice de ativos do site (dados/ativos: transformadores, chaves e postes com coordenada),
+no lugar do KMZ. OS que saiu da planilha sai do site.
+
 Uso:
   python teste/ferramentas/limpeza_faixa.py "OS LIMPEZA DE FAIXA.xlsx" [saida.xlsx] [pasta_kmz ...]
+  python scripts/limpeza_faixa.py --site <pasta do site> "OS LIMPEZA DE FAIXA.xlsx"   (sem KMZ: índice do site)
   python teste/ferramentas/limpeza_faixa.py --so-equipes [pasta do site]   (aplica EQUIPES nos limpeza.js já gerados)
   pasta_kmz: pasta(s) com o export KMZ_GOOGLE_EARTH (SE_*/AL*/Equipamentos/..., Apoios_e_pontos/Postes.kmz).
 """
@@ -52,6 +58,55 @@ def conta(sit, numero_os):
 def carrega_dados_js(al):
     s = open(os.path.join(RAIZ, "alimentadores", al, "dados.js"), encoding="utf8").read()
     return json.loads(s[s.index("=") + 1:].strip().rstrip(";"))
+
+
+def usa_site(raiz):
+    """Troca a pasta do site (o padrão é a pasta acima de ferramentas/, quando o script está em teste/ferramentas)."""
+    global RAIZ
+    RAIZ = os.path.abspath(raiz)
+
+
+def chave_ativo(s):
+    """Código como o índice de ativos do site guarda (igual a gera_trechos.chave_ativo)."""
+    k = re.sub(r"[^0-9A-Z]", "", str(s).upper())
+    return (k.lstrip("0") or "0") if k.isdigit() else k
+
+
+def fatia(k):
+    h = 0                                         # mesma conta de gera_trechos.fatia
+    for ch in k:
+        h = (h * 31 + ord(ch)) & 0xFFFFFFFF
+    return f"{h % 256:02x}"
+
+
+class IndiceSite:
+    """dados/ativos do site no lugar do KMZ: código -> [(lon, lat, tipo, alimentador), ...] (lido por pedaço)."""
+    def __init__(self, raiz):
+        self.pasta, self.cache = os.path.join(raiz, "dados", "ativos"), {}
+
+    def busca(self, cod):
+        k = chave_ativo(cod)
+        f = fatia(k)
+        if f not in self.cache:
+            p = os.path.join(self.pasta, f + ".json")
+            self.cache[f] = json.load(open(p, encoding="utf8")) if os.path.exists(p) else {}
+        return [(lon, lat, tipo, al) for al, tipo, _t, _papel, lat, lon in self.cache[f].get(k, []) if lat is not None]
+
+
+def publicado(al):
+    """limpeza.js já publicado do alimentador: os_completa -> (registro, ids dos vãos)."""
+    p = os.path.join(RAIZ, "alimentadores", al, "limpeza.js")
+    if not os.path.exists(p):
+        return {}
+    s = open(p, encoding="utf8").read()
+    d = json.loads(s[s.index("=") + 1:].strip().rstrip(";"))
+    if not d:
+        return {}
+    ids = defaultdict(list)
+    for v, ks in d["vaos"].items():
+        for k in ks:
+            ids[k].append(v)
+    return {o["os_completa"]: (o, ids.get(k, [])) for k, o in enumerate(d["os"])}
 
 
 def data_exec(r):
@@ -194,9 +249,19 @@ class Rede:
 
 def main(xlsx, pastas_kmz=()):
     df = pd.read_excel(xlsx, sheet_name="Dados", dtype={"ELEMENTO": str, "ABRANGENCIA": str, "MONT_ABRANGENCIA": str})
-    als = sorted(os.path.basename(p)[:-5] for p in glob.glob(os.path.join(RAIZ, "dados", "alimentadores", "*.json")))
+    als = sorted(os.path.basename(p)[:-5] for p in glob.glob(os.path.join(RAIZ, "dados", "alimentadores", "*.json"))
+                 if os.path.exists(os.path.join(RAIZ, "alimentadores", os.path.basename(p)[:-5], "dados.js")))
     redes = {a: Rede(a) for a in als}
     kmz = indice_kmz(pastas_kmz)
+    site = None if pastas_kmz else IndiceSite(RAIZ)   # sem KMZ: o índice de ativos do site
+    antes = {a: publicado(a) for a in als} if site else {}   # sem KMZ: OS já publicada mantém a posição
+    id_vao = {a: {v[5]: i for i, v in enumerate(r.D["vaos"])} for a, r in redes.items()} if site else {}
+
+    def candidatos(cod):
+        """código -> [(lon, lat, tipo, alimentador)] do KMZ ou, sem KMZ, do índice do site."""
+        if site:
+            return site.busca(cod)
+        return [kmz[cod]] if cod in kmz else []
     dono = defaultdict(set)  # chave -> alimentadores (do mapa) onde ela existe
     for a, r in redes.items():
         for c in r.chave_poste:
@@ -207,16 +272,18 @@ def main(xlsx, pastas_kmz=()):
         """código do ativo -> (poste do mapa, como achou) ou None."""
         if cod in rede.chave_poste:
             return rede.chave_poste[cod], "chave no mapa"
-        if cod in kmz and kmz[cod][3] == a:  # só ativo do próprio alimentador (no urbano as redes correm lado a lado)
+        cand = [x for x in candidatos(cod) if x[3] == a]   # só ativo do próprio alimentador (no urbano as redes correm lado a lado)
+        if cand:
             key = (a, cod)
             if key not in perto_cache:
-                lon, lat, tipo, _ = kmz[cod]
+                lon, lat, tipo, _ = cand[0]
                 c0, c1, c2, c3 = rede.caixa
                 if not (c0 <= lat <= c1 and c2 <= lon <= c3):
                     perto_cache[key] = None
                     return None
                 p, d = rede.poste_perto(lon, lat)
-                perto_cache[key] = (p, f"{(tipo or 'ativo').lower()} do KMZ a {round(d)} m") if d <= RAIO_M else None
+                fonte = "do índice do site" if site else "do KMZ"
+                perto_cache[key] = (p, f"{(tipo or 'ativo').lower()} {fonte} a {round(d)} m") if d <= RAIO_M else None
             return perto_cache[key]
         return None
 
@@ -234,13 +301,27 @@ def main(xlsx, pastas_kmz=()):
 
         alvo = {a for c in cod_desc + extra for a in dono.get(c, ())}
         for c in cod_desc + extra:  # ativo do KMZ que cai em cima de um alimentador do mapa
-            if c in kmz and kmz[c][3] in redes and ponto(redes[kmz[c][3]], kmz[c][3], c):
-                alvo.add(kmz[c][3])
+            for x in candidatos(c):
+                if x[3] in redes and ponto(redes[x[3]], x[3], c):
+                    alvo.add(x[3])
         if r.ALIMENTADOR in redes:
             alvo.add(r.ALIMENTADOR)
+        num = re.sub(r"\s+", " ", str(r.NUMERO_OS))
+        ja = {a for a, ant in antes.items() if num in ant}
+        if ja:                                         # já publicada: fica só onde já estava
+            alvo = ja
 
         for a in alvo:
             rede = redes[a]
+            if num in antes.get(a, {}):                # já publicada: mantém a posição, atualiza o resto
+                o, ids = antes[a][num]
+                vs = sorted(id_vao[a][v] for v in ids if v in id_vao[a])
+                reg = dict(o, sit=r.SITUACAO, data=data_exec(r) if r.SITUACAO == "EXECUTADA" else None,
+                           criada=r.DATA_CRIACAO.date().isoformat() if not pd.isna(r.DATA_CRIACAO) else None,
+                           al_os=r.ALIMENTADOR, desc=re.sub(r"\s+", " ", desc.replace("�", "?")).strip()[:400],
+                           m=round(sum(rede.D["vaos"][i][8] for i in vs), 1))
+                por_al[a].append((reg, vs))
+                continue
             pts = {}  # código -> (poste, como)
             for c in cod_desc:
                 p = ponto(rede, a, c)
@@ -354,9 +435,12 @@ if __name__ == "__main__":
         antes, depois = so_equipes(*sys.argv[2:3])
         print(f"{antes} OS antes, {depois} depois (executadas só de {', '.join(EQUIPES)})")
         sys.exit(0)
-    xlsx = sys.argv[1]
-    saida = sys.argv[2] if len(sys.argv) > 2 else None
-    linhas, por_al = main(xlsx, sys.argv[3:])
+    if sys.argv[1] == "--site":                    # sem KMZ: índice do site e posição já publicada
+        usa_site(sys.argv[2])
+        xlsx, saida, pastas = sys.argv[3], None, []
+    else:
+        xlsx, saida, pastas = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else None), sys.argv[3:]
+    linhas, por_al = main(xlsx, pastas)
     if saida:
         with pd.ExcelWriter(saida) as w:
             pd.DataFrame(linhas).to_excel(w, sheet_name="Trechos", index=False)

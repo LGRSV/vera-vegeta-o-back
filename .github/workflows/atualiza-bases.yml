@@ -1,11 +1,69 @@
-# Atualização automática das bases do site (em construção): por enquanto só roda se chamado à mão.
+# Atualização automática das bases do site. Roda quando chega arquivo em bases/ (o menu "Atualizar bases" do site abre
+# a página de envio do GitHub na pasta da base): processa com ferramentas/scripts/atualiza_bases.py e publica em teste/.
+# Se algo der errado, não publica nada; o motivo fica no registro desta execução (aba Actions do repositório).
 name: Atualizar bases do site
 on:
+  push:
+    branches: [gh-pages]
+    paths: ['bases/**']
   workflow_dispatch:
+    inputs:
+      arquivo:
+        description: 'Arquivo já enviado para reprocessar (ex.: bases/inspecao/BASE INSPEÇÃO.xlsx)'
+        required: true
 permissions:
-  contents: read
+  contents: write
+  pages: write
+concurrency:
+  group: atualiza-bases
+  cancel-in-progress: false
 jobs:
-  teste:
+  atualiza:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUTF8: '1'
     steps:
-      - run: echo "ok"
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+          filter: blob:none
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Bibliotecas
+        run: pip install --quiet openpyxl pandas
+      - name: Arquivos novos
+        env:
+          ANTES: ${{ github.event.before }}
+          ARQ: ${{ github.event.inputs.arquivo }}
+        run: |
+          L="$RUNNER_TEMP/novos.txt"
+          if [ -n "$ARQ" ]; then
+            printf '%s\n' "$ARQ" > "$L"
+          elif [ -z "$ANTES" ] || [ "$ANTES" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$ANTES^{commit}" 2>/dev/null; then
+            git -c core.quotepath=off show --name-only --diff-filter=AM --format= HEAD -- bases/ > "$L"
+          else
+            git -c core.quotepath=off diff --name-only --diff-filter=AM "$ANTES" HEAD -- bases/ > "$L"
+          fi
+          echo "Arquivos novos:"; cat "$L"
+      - name: Processa
+        run: python ferramentas/scripts/atualiza_bases.py --site teste --lista "$RUNNER_TEMP/novos.txt"
+      - name: Publica
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add teste
+          if git diff --cached --quiet; then echo "Nada mudou no site."; exit 0; fi
+          git commit -q -m "/teste/: bases atualizadas pelo menu ($(xargs -d '\n' -n1 basename < "$RUNNER_TEMP/novos.txt" | paste -sd ',' - | sed 's/,/, /g'))"
+          for i in 1 2 3; do
+            if git pull -q --rebase origin gh-pages && git push -q origin HEAD:gh-pages; then echo "Publicado."; exit 0; fi
+            sleep 10
+          done
+          echo "Não consegui publicar (outra publicação ao mesmo tempo?)"; exit 1
+      - name: Pede a publicação do site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" > /dev/null || echo "(a publicação do GitHub Pages segue pelo envio)"
