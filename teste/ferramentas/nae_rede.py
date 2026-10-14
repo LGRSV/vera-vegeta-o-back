@@ -8,7 +8,8 @@ do GIS, então a NAE da conta tem que ser da mesma rede (campo nae_rede):
              + NAE de outro alimentador cujo ativo hoje está aqui, se a Crítica daqui ainda não tem o mesmo
                evento (mesmo ativo, mesma hora: a Crítica às vezes lança o evento nos dois alimentadores)
              - NAE cujo ativo não está no GIS ("fora do cadastro atual"), a não ser que o ativo esteja no export
-               anterior (../teste-acervo, 02/10) a até LIMITE_M de um vão de hoje: aí conta no alimentador desse vão.
+               anterior (02/10, em cadastro_anterior.json ao lado deste script) a até LIMITE_M de um vão de hoje:
+               aí conta no alimentador desse vão.
                A Crítica não traz coordenada, e o código vizinho não serve de referência (chaves de número
                seguido caem no mesmo trecho só 19% das vezes).
 Exemplo: AL02003097 tem 14,2 m de rede no GIS e 1 NAE no trafo 5700003097, que no GIS está no AL02003036
@@ -54,7 +55,14 @@ def evento(o):
 
 
 def cadastro_anterior(raiz):
-    """Chaves do export anterior do GIS (../teste-acervo, 02/10/2026): código sem zeros à esquerda -> (lat, lon)."""
+    """Chaves do export anterior do GIS (02/10/2026): código sem zeros à esquerda -> (lat, lon).
+
+    Vem de cadastro_anterior.json, ao lado deste script (as chaves do antigo /teste-acervo/, que saiu do site);
+    sem ele, da pasta ../teste-acervo, se existir."""
+    js = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cadastro_anterior.json")
+    if os.path.exists(js):
+        with open(js, encoding="utf-8") as f:
+            return {k: tuple(v) for k, v in json.load(f)["chaves"].items()}
     pos = {}
     for f in glob.glob(os.path.join(os.path.dirname(os.path.abspath(raiz)), "teste-acervo", "alimentadores", "*", "dados.js")):
         d = le_js(f)[1]
