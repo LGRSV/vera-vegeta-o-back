@@ -1,0 +1,29 @@
+{
+ "critica": {
+  "meses": [
+   "2026-01",
+   "2026-08"
+  ],
+  "nome": "Crítica (NAE)"
+ },
+ "inspecao": {
+  "arquivo": "BASE INSPEÇÃO.xlsx",
+  "ate": "2026-10-09",
+  "nome": "Base de inspeção",
+  "os": 2081,
+  "processado": "2026-10-13"
+ },
+ "limpeza": {
+  "arquivo": "OS LIMPEZA DE FAIXA.xlsx",
+  "nome": "OS de limpeza de faixa",
+  "os": 2615,
+  "processado": "2026-10-03"
+ },
+ "manutencao": {
+  "arquivo": "OS GERADAS PELA INSPEÇÃO.xlsx",
+  "ate": "2026-10-10",
+  "nome": "OS de manutenção da inspeção",
+  "os": 5323,
+  "processado": "2026-10-13"
+ }
+}
