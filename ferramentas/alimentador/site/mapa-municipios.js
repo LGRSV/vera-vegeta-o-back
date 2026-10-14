@@ -135,7 +135,7 @@
     if (!p) { dica.style.display = 'none'; return; }
     const m = porCod[p.dataset.cod], r = caixa.getBoundingClientRect();
     if (!reg) realca(m.reg);
-    dica.innerHTML = `${esc(m.nome)} <small>· ${(m.nae || 0).toLocaleString('pt-BR')} NAE${m.reg ? ` · Regional ${esc(m.reg)} · polo ${esc(m.polo)}` : ''}${m.slug ? ` · ${nAls(m)} · ${km(kmTot(m))}` : ' · sem dados ainda'}</small>` +
+    dica.innerHTML = `${esc(m.nome)} <small>· ${(m.nae || 0).toLocaleString('pt-BR')} NAE${m.reg ? ` · Regional ${esc(m.reg)} · ${esc(m.polo)}` : ''}${m.slug ? ` · ${nAls(m)} · ${km(kmTot(m))}` : ' · sem dados ainda'}</small>` +
       (!reg && m.reg ? `<small class="mt-dica-c">Clique para ver os polos da Regional ${esc(m.reg)}</small>` : '');
     dica.style.left = (e.clientX - r.left) + 'px'; dica.style.top = (e.clientY - r.top) + 'px'; dica.style.display = 'block';
   });
@@ -219,7 +219,7 @@
     legPolos.setAttribute('aria-label', `Polos da Regional ${r}`);
     legPolos.innerHTML = `<b class="mt-polos-t">Regional ${esc(r)}</b>` + ps.map((p, i) =>
       `<button type="button" class="mt-pchip" aria-pressed="true" data-polo="${esc(p.polo)}" style="--c:var(--polo-${CORES[i % CORES.length]})">` +
-      `<b>Polo ${esc(p.polo)}</b><span>${p.ms.length} municípios · ${p.nae.toLocaleString('pt-BR')} NAE</span></button>`).join('');
+      `<b>${esc(p.polo)}</b><span>${p.ms.length} municípios · ${p.nae.toLocaleString('pt-BR')} NAE</span></button>`).join('');
     legPolos.hidden = false;
     volta.setAttribute('aria-label', `Regional ${r}. Voltar ao Tocantins`);
     volta.hidden = false;
