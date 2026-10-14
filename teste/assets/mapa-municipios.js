@@ -59,7 +59,7 @@
   const leg = alvo.querySelector('.mt-regs');
   if (leg) leg.innerHTML = '<b>NAE-Vegetação</b>' +
     FAIXAS.map((l, i) => `<span><i class="nae-${i}" aria-hidden="true"></i>${rotFaixa(i)}</span>`).join('') +
-    (M.regs ? '<span><i class="lim" aria-hidden="true"></i><span class="lim-t">Limite das regionais</span></span>' : '');
+    (M.regs ? '<span class="lim-s"><i class="lim" aria-hidden="true"></i>Limite das regionais</span>' : '');
   // teclado: um só município na ordem do Tab (o escolhido, ou Palmas); as setas andam pelo mapa
   const roda = cod => {
     svg.querySelectorAll('.mun[tabindex="0"]').forEach(p => p.setAttribute('tabindex', '-1'));
@@ -141,9 +141,11 @@
   svg.addEventListener('mouseleave', () => { dica.style.display = 'none'; if (!reg) realca(null); });
 
   // regional aberta: o mapa aproxima nela, as outras somem e os polos se afastam um do outro (do centro da regional
-  // para fora), com o nome, os municípios e a NAE de cada polo ao lado. "← Tocantins" ou Esc voltam ao estado inteiro.
+  // para fora). Ao fim da animação cada polo ganha o contorno na cor dele, e a legenda ao lado (como o T1/T2/T3 do
+  // painel) lista os polos com a mesma cor, os municípios e a NAE; tocar num polo da legenda apaga ou acende ele no mapa.
+  // "← Tocantins" ou Esc voltam ao estado inteiro.
   let reg = null, anima = 0;
-  const TODO = [-6, -6, VW, M.h + 12], AFASTA = 0.32, DUR = 650;
+  const TODO = [-6, -6, VW, M.h + 12], AFASTA = 0.32, DUR = 650, CORES = ['a', 'b', 'c', 'd'];
   const calmo = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const vb = () => svg.getAttribute('viewBox').split(' ').map(Number);
   const une = (a, b) => !a ? b : { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) };
@@ -154,11 +156,13 @@
   }
   function voa(alvoVb) {             // anima o viewBox até o alvo
     cancelAnimationFrame(anima);
+    caixa.classList.remove('pronta');
+    caixa.classList.add('voando');
     const de = vb(), t0 = performance.now(), dur = calmo() ? 0 : DUR;
     const passo = agora => {
       const t = dur ? Math.min(1, (agora - t0) / dur) : 1, e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
       svg.setAttribute('viewBox', de.map((v, i) => +(v + (alvoVb[i] - v) * e).toFixed(2)).join(' '));
-      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; poeRotulos(); }
+      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); }
     };
     anima = requestAnimationFrame(passo);
   }
@@ -167,91 +171,77 @@
   volta.className = 'mt-volta';
   volta.hidden = true;
   volta.textContent = '← Tocantins';
-  (leg || caixa).append(volta);          // embaixo da legenda (no celular, no canto do mapa: site.css)
-  const rotPolos = document.createElement('div');
-  rotPolos.className = 'mt-polos';
-  rotPolos.setAttribute('aria-live', 'polite');
-  svg.after(rotPolos);
-  let desl = {}, modo = '', margem = 0;
-  // enquadra a regional aberta. No computador a legenda fica livre e, com os polos um embaixo do outro (Norte), o nome
-  // de cada polo vai à esquerda, na altura dele; senão vai no meio do polo. No celular só o nome vai no meio do polo,
-  // os números vão numa lista embaixo do mapa, e o topo fica livre para o "← Tocantins".
+  const legPolos = document.createElement('span');
+  legPolos.className = 'mt-polos';
+  legPolos.setAttribute('role', 'group');
+  legPolos.hidden = true;
+  (leg || caixa).append(volta, legPolos);   // embaixo da legenda (no celular, o "← Tocantins" vai no canto do mapa: site.css)
+  let desl = {};
+  // enquadra a regional aberta deixando livre a coluna da legenda (computador) ou o topo para o "← Tocantins" (celular)
   function enquadra() {
-    const ps = polosDe(reg);
-    let bb = null, cs = [];
-    ps.forEach(([polo, gp]) => {
+    let bb = null;
+    polosDe(reg).forEach(([polo, gp]) => {
       const b = caixaDe(gp), [dx, dy] = desl[polo];
       bb = une(bb, { x: b.x + dx, y: b.y + dy, x2: b.x2 + dx, y2: b.y2 + dy });
-      cs.push([(b.x + b.x2) / 2, (b.y + b.y2) / 2]);
     });
-    const vai = k => Math.max(...cs.map(c => c[k])) - Math.min(...cs.map(c => c[k]));
     const x = bb.x - 12, y = bb.y - 12, w = bb.x2 - bb.x + 24, h = bb.y2 - bb.y + 24, W = caixa.clientWidth;
-    modo = W < 700 ? 'cel' : vai(1) >= 1.5 * vai(0) ? 'esq' : 'meio';
-    rotPolos.dataset.modo = modo;
-    if (modo === 'cel') { const t = 52 * w / W; return [x, y - t, w, h + t]; }
-    const H = svg.clientHeight || 600, T = 0;
-    margem = leg && getComputedStyle(leg).position === 'absolute' ? leg.offsetWidth + 24 : 0;
-    const L = margem + (modo === 'esq' ? 250 : 0), k = Math.min((H - T) / h, Math.max(1e-3, W - 2 * L) / w);
-    const altura = H / k, sobra = altura - h - T / k;
-    return [x - L / k, y - T / k - sobra / 2, w + 2 * L / k, altura];
-  }
-  function poeRotulos() {
-    if (!reg) { rotPolos.innerHTML = ''; return; }
-    const ctm = svg.getScreenCTM(), cx = caixa.getBoundingClientRect(), sv = svg.getBoundingClientRect();
-    const tela = (x, y) => { const pt = svg.createSVGPoint(); pt.x = x; pt.y = y; return pt.matrixTransform(ctm); };
-    const ps = polosDe(reg).map(([polo]) => {
-      const ms = M.muns.filter(m => m.polo === polo), [dx, dy] = desl[polo];
-      return { polo, ms, nae: ms.reduce((s, m) => s + (m.nae || 0), 0),
-        x: ms.reduce((s, m) => s + m.c[0], 0) / ms.length + dx, y: ms.reduce((s, m) => s + m.c[1], 0) / ms.length + dy };
-    }).sort((a, b) => a.y - b.y || a.x - b.x);
-    const num = p => `<span>${p.ms.length} municípios · ${p.nae.toLocaleString('pt-BR')} NAE</span>`;
-    rotPolos.innerHTML = ps.map(p => {
-      const c = tela(p.x, p.y), left = modo === 'esq' ? sv.left + margem : c.x;
-      return `<p style="left:${(left - cx.left).toFixed(0)}px;top:${(c.y - cx.top).toFixed(0)}px"><b>Polo ${esc(p.polo)}</b>${modo === 'cel' ? '' : num(p)}</p>`;
-    }).join('') + (modo === 'cel' ? `<ul>${ps.map(p => `<li><b>Polo ${esc(p.polo)}</b>${num(p)}</li>`).join('')}</ul>` : '');
-    if (modo !== 'esq') rotPolos.querySelectorAll('p').forEach(e => {     // no celular, o nome não sai pela beira
-      const r = e.getBoundingClientRect(), d = Math.max(cx.left + 4 - r.left, 0) - Math.max(r.right - cx.right + 4, 0);
-      if (d) e.style.left = (parseFloat(e.style.left) + d) + 'px';
-    });
+    if (!leg || getComputedStyle(leg).position !== 'absolute') { const t = 52 * w / W; return [x, y - t, w, h + t]; }
+    const H = svg.clientHeight || 600, L = leg.offsetWidth + 24, k = Math.min(H / h, Math.max(1e-3, W - 2 * L) / w);
+    const altura = H / k;
+    return [x - L / k, y - (altura - h) / 2, w + 2 * L / k, altura];
   }
   function entra(r, teclado, cod) {
     if (!r || reg === r) return;
     reg = r;
     realca(null);
     dica.style.display = 'none';
-    const ps = polosDe(r);
-    const rb = ps.reduce((a, [, gp]) => une(a, caixaDe(gp)), null), rc = [(rb.x + rb.x2) / 2, (rb.y + rb.y2) / 2];
+    const ps = polosDe(r).map(([polo, gp]) => {
+      const ms = M.muns.filter(m => m.polo === polo), b = caixaDe(gp);
+      return { polo, gp, ms, nae: ms.reduce((s, m) => s + (m.nae || 0), 0), cx: (b.x + b.x2) / 2, cy: (b.y + b.y2) / 2, b };
+    });
+    const vai = k => Math.max(...ps.map(p => p[k])) - Math.min(...ps.map(p => p[k]));
+    const eixo = vai('cy') >= vai('cx') ? 'cy' : 'cx';            // legenda na ordem do mapa: de cima para baixo ou da esquerda para a direita
+    ps.sort((a, b) => a[eixo] - b[eixo]);
+    const rb = ps.reduce((a, p) => une(a, p.b), null), rc = [(rb.x + rb.x2) / 2, (rb.y + rb.y2) / 2];
     desl = {};
-    ps.forEach(([polo, gp]) => {
-      const b = caixaDe(gp);
-      desl[polo] = [((b.x + b.x2) / 2 - rc[0]) * AFASTA, ((b.y + b.y2) / 2 - rc[1]) * AFASTA];
+    ps.forEach((p, i) => {
+      desl[p.polo] = [(p.cx - rc[0]) * AFASTA, (p.cy - rc[1]) * AFASTA];
+      p.gp.style.setProperty('--pc', `var(--polo-${CORES[i % CORES.length]})`);
     });
     Object.entries(grp).forEach(([polo, gp]) => {
       const dentro = gp.dataset.reg === r;
       gp.classList.toggle('fora', !dentro);
+      gp.classList.remove('desliga');
       gp.style.transform = dentro ? `translate(${desl[polo][0].toFixed(1)}px,${desl[polo][1].toFixed(1)}px)` : '';
     });
     caixa.classList.add('aberta');
-    rotPolos.innerHTML = '';
-    const lt = alvo.querySelector('.lim-t');
-    if (lt) lt.textContent = 'Limite dos polos';
-    volta.textContent = '← Tocantins';
+    legPolos.setAttribute('aria-label', `Polos da Regional ${r}`);
+    legPolos.innerHTML = `<b class="mt-polos-t">Regional ${esc(r)}</b>` + ps.map((p, i) =>
+      `<button type="button" class="mt-pchip" aria-pressed="true" data-polo="${esc(p.polo)}" style="--c:var(--polo-${CORES[i % CORES.length]})">` +
+      `<b>Polo ${esc(p.polo)}</b><span>${p.ms.length} municípios · ${p.nae.toLocaleString('pt-BR')} NAE</span></button>`).join('');
+    legPolos.hidden = false;
     volta.setAttribute('aria-label', `Regional ${r}. Voltar ao Tocantins`);
     volta.hidden = false;
     voa(enquadra());
     const prim = porCod[cod] && porCod[cod].slug ? porCod[cod] : M.muns.filter(m => m.reg === r && m.slug).sort((a, b) => kmTot(b) - kmTot(a))[0];
     if (prim) { roda(prim.cod); if (teclado) el[prim.cod].focus({ preventScroll: true }); }
   }
+  legPolos.addEventListener('click', e => {
+    const bt = e.target.closest('.mt-pchip');
+    if (!bt) return;
+    const liga = bt.getAttribute('aria-pressed') !== 'true';
+    bt.setAttribute('aria-pressed', String(liga));
+    grp[bt.dataset.polo].classList.toggle('desliga', !liga);
+  });
   function sai() {
     if (!reg) return;
     const r = reg;
     reg = null;
-    Object.values(grp).forEach(gp => { gp.classList.remove('fora'); gp.style.transform = ''; });
+    Object.values(grp).forEach(gp => { gp.classList.remove('fora', 'desliga'); gp.style.transform = ''; });
+    const tinha = document.activeElement === volta || legPolos.contains(document.activeElement);
     caixa.classList.remove('aberta');
-    rotPolos.innerHTML = '';
-    const lt = alvo.querySelector('.lim-t');
-    if (lt) lt.textContent = 'Limite das regionais';
-    const tinha = document.activeElement === volta;
+    legPolos.hidden = true;
+    legPolos.innerHTML = '';
     volta.hidden = true;
     voa(TODO);
     const m = M.muns.find(x => x.reg === r && x.slug);
@@ -259,7 +249,7 @@
   }
   volta.addEventListener('click', sai);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && reg && !e.defaultPrevented) sai(); });
-  if (window.ResizeObserver) new ResizeObserver(() => { if (reg && !anima) { svg.setAttribute('viewBox', enquadra().join(' ')); poeRotulos(); } }).observe(caixa);
+  if (window.ResizeObserver) new ResizeObserver(() => { if (reg && !anima) svg.setAttribute('viewBox', enquadra().join(' ')); }).observe(caixa);
 
   // no estado inteiro, escolher um município abre a regional dele; com a regional aberta, abre a página do município
   const abre = cod => { const m = porCod[cod]; if (m && m.slug) location.href = `municipios/${m.slug}/`; };
