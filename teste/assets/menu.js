@@ -1,6 +1,7 @@
 // Menu do site: botão de três barras no canto superior esquerdo de todas as páginas, com os scripts para baixar e,
 // no site publicado no GitHub Pages, "Atualizar bases": cada base abre a página de envio do GitHub na pasta dela
-// (bases/critica, bases/limpeza, bases/inspecao); a automação .github/workflows/atualiza-bases.yml processa e publica.
+// (bases/critica, bases/limpeza, bases/inspecao, bases/manutencao, bases/executadas); a automação
+// .github/workflows/atualiza-bases.yml processa e publica.
 // O que o site tem de cada base vem de dados/bases.json (scripts/atualiza_bases.py).
 // O caminho dos arquivos sai do endereço deste script (assets/menu.js), então funciona em qualquer nível de página.
 (function () {
@@ -20,6 +21,7 @@
     { tipo: 'limpeza', nome: 'OS de limpeza de faixa', arq: 'planilha de OS (.xlsx, aba Dados), com todas as OS' },
     { tipo: 'inspecao', nome: 'Base de inspeção', arq: 'base de inspeção (.xlsx, aba Dados); entram só as executadas' },
     { tipo: 'manutencao', nome: 'OS de manutenção da inspeção', arq: 'OS geradas pela inspeção (.xlsx); as canceladas ficam de fora' },
+    { tipo: 'executadas', nome: 'OS de manutenção executadas', arq: 'OS_STATUS_Executadas (.zip com o .txt); entram as corretivas e preventivas' },
   ];
   const svg = (d, cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${d}</svg>`;
   const ICONE = {
@@ -42,6 +44,7 @@
     if (t === 'critica') return b.meses ? `No site: ${mes(b.meses[0])} a ${mes(b.meses[1])}${env}` : '';
     if (t === 'limpeza') return b.os != null ? `No site: ${nf(b.os)} OS · processada ${br(b.processado)}${env}` : '';
     if (t === 'manutencao') return b.os != null ? `No site: ${nf(b.os)} OS${b.ate ? ' criadas até ' + br(b.ate) : ''}${env}` : '';
+    if (t === 'executadas') return b.os != null ? `No site: ${nf(b.os)} OS${b.ate ? ' executadas até ' + br(b.ate) : ''}${env}` : '';
     return b.os != null ? `No site: ${nf(b.os)} inspeções${b.ate ? ' até ' + br(b.ate) : ''}${env}` : '';
   };
   const css = document.createElement('style');

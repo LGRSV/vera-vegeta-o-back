@@ -6,10 +6,12 @@ O tipo vem da pasta do arquivo:
   bases/limpeza/   planilha de OS de limpeza de faixa (.xlsx, aba Dados)
   bases/inspecao/  base de inspeção (.xlsx, aba Dados)
   bases/manutencao/ OS de manutenção geradas pela inspeção (.xlsx, 1ª aba; as canceladas ficam de fora)
+  bases/executadas/ OS_STATUS_Executadas (.zip com o .txt; o .txt sozinho passa do limite de envio do GitHub)
 O que roda, na ordem: Crítica (atualiza_critica.py), limpeza (limpeza_faixa.py sem o acervo de KMZ: OS já publicada
-mantém a posição), inspeção (inspecao.py), manutenção (manutencao.py); depois a interface (gera_trechos --so-interface), o NAE/100 km da mesma
-rede (teste/ferramentas/nae_rede.py) e a validação dos arquivos. Grava dados/bases.json (o que o menu mostra: arquivo e
-data de cada base). Qualquer erro sai com código 1 e a automação não publica nada.
+mantém a posição), inspeção (inspecao.py), manutenção da inspeção (manutencao.py), manutenção executada
+(executadas.py); depois a interface (gera_trechos --so-interface), o NAE/100 km da mesma rede
+(teste/ferramentas/nae_rede.py) e a validação dos arquivos. Grava dados/bases.json (o que o menu mostra: arquivo e data
+de cada base). Qualquer erro sai com código 1 e a automação não publica nada.
 
 Uso:
   python scripts/atualiza_bases.py --site teste [--lista arquivos.txt] [arquivo ...]
@@ -32,15 +34,15 @@ AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 sys.path.insert(0, str(AQUI.parent))
 
-TIPOS = ('critica', 'limpeza', 'inspecao', 'manutencao')
+TIPOS = ('critica', 'limpeza', 'inspecao', 'manutencao', 'executadas')
 NOMES = {'critica': 'Crítica (NAE)', 'limpeza': 'OS de limpeza de faixa', 'inspecao': 'Base de inspeção',
-         'manutencao': 'OS de manutenção da inspeção'}
+         'manutencao': 'OS de manutenção da inspeção', 'executadas': 'OS de manutenção executadas'}
 MES = re.compile(r'(?<!\d)(0[1-9]|1[0-2])[-_.](20\d\d)(?!\d)')
 
 # o que a automação precisa (pasta ferramentas/ do gh-pages): os scripts e a parte do pacote alimentador que eles usam
 FERRAMENTAS = {
     'scripts': ['gera_trechos.py', 'atualiza_critica.py', 'ativos_gis.py', 'inspecao.py', 'limpeza_faixa.py',
-                'manutencao.py', 'atualiza_bases.py'],
+                'manutencao.py', 'executadas.py', 'atualiza_bases.py'],
     'alimentador': ['__init__.py', 'critica.py', 'daimon.py', 'gerar_trechos.py', 'regras.py', 'trechos.py',
                     'mapa_trechos.html', 'site_indice.html', 'leaflet/leaflet.css', 'leaflet/leaflet.js',
                     'leaflet/LICENSE', 'site/*'],
@@ -131,19 +133,20 @@ def estado(site, feitos, hoje):
     r = le_js(site / 'assets' / 'ranking-nae.js') or {}
     if r.get('meses'):
         est.setdefault('critica', {})['meses'] = r['meses']
-    for t, arq, chave in (('limpeza', 'limpeza.js', 'gerado'), ('inspecao', 'inspecao.js', 'gerado'),
-                          ('manutencao', 'manutencao.js', 'gerado')):
+    for t, arq in (('limpeza', 'limpeza.js'), ('inspecao', 'inspecao.js'), ('manutencao', 'manutencao.js'),
+                   ('executadas', 'executadas.js')):
         oss, info = set(), None
         for f in sorted((site / 'alimentadores').glob(f'*/{arq}')):
             d = le_js(f)
-            if d:
-                oss |= {o['os_completa'] for o in d['os']}   # a mesma OS em dois alimentadores conta uma vez
+            if d:                                       # a mesma OS em dois alimentadores conta uma vez
+                oss |= {o[0] if isinstance(o, list) else o['os_completa'] for o in d['os']}   # executadas: OS em lista
                 info = info or d
         if info:
-            est.setdefault(t, {}).update(os=len(oss), processado=info.get(chave))
+            est.setdefault(t, {}).update(os=len(oss), processado=info.get('gerado'))
             est[t].setdefault('arquivo', info.get('fonte'))   # base que não veio pelo menu: o arquivo de origem gravado
-            if t in ('inspecao', 'manutencao') and info.get('base_ate'):
-                est[t]['ate'] = info['base_ate']
+            ate = info.get('ate') if t == 'executadas' else info.get('base_ate') if t in ('inspecao', 'manutencao') else None
+            if ate:
+                est[t]['ate'] = ate
     for t in TIPOS:
         est.setdefault(t, {})['nome'] = NOMES[t]
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -163,7 +166,7 @@ def atualiza(site, arquivos, hoje=None):
         if t:
             por[t].append(a)
         else:
-            print(f'ignorado (fora de bases/critica, bases/limpeza ou bases/inspecao): {a}')
+            print(f'ignorado (fora das pastas de bases/: {", ".join(TIPOS)}): {a}')
     feitos = {t: v for t, v in por.items() if v}
     if not feitos:
         print('nenhuma base nova para processar')
@@ -194,6 +197,12 @@ def atualiza(site, arquivos, hoje=None):
                 r = roda('Manutenção: ' + a.name, manutencao.main, str(a), str(site))
                 print(f"{r['validas']} OS (sem {r['canceladas']} canceladas) · {r['situacao']}")
                 feitos['manutencao'] = [a]
+        if 'executadas' in feitos:
+            import executadas
+            for a in feitos['executadas'][-1:]:       # a base traz todas as OS executadas: vale a última enviada
+                r = roda('Manutenção executada: ' + a.name, executadas.main, str(a), str(site))
+                print(f"{r['manutencao']} OS de manutenção (MC e MP) · {r['em_paginas']} no site · {r['situacao']}")
+                feitos['executadas'] = [a]
     roda('Páginas e rankings', gt.main, ['--saida', str(site), '--so-interface'])
     print('\n== NAE/100 km da mesma rede', flush=True)
     nae_rede(site)

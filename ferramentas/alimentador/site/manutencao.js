@@ -1,6 +1,7 @@
 // OS de manutenção geradas pela inspeção (roda depois de inspecao.js, com window.D e window.MANUTENCAO de
 // scripts/manutencao.py; as canceladas já ficaram de fora). Card "Insp→manut" no mapa, ao lado do "Faixa" e do
-// "Inspeção": um losango por poste com as OS dele, na cor da pior situação; fica por cima do que estiver ligado.
+// "Inspeção": um losango por poste com as OS dele, na cor da pior situação; fica por cima do que estiver ligado
+// (menos a Manutenção, de executadas.js, que também é de losangos: ligar uma desliga a outra).
 // Situação pela data do dia: vencida (não executada e o prazo já passou), no prazo, executada.
 // Posição: o poste da ESTRUTURA da OS. Sem o poste no mapa, tocar na OS mostra o bloco da inspeção que a gerou.
 // No painel: totais, tipos e as OS por situação. Usa o visual do cartão da limpeza (classes limp-* do limpeza.js).
@@ -151,9 +152,11 @@
   }
   function liga(on) {
     st.ligado = on; guarda('mnt-ligado', on ? '1' : '0');
+    if (on && window.__soEsteLosango) window.__soEsteLosango('mnt');
     if (!on) st.foco = null;
     desenha(); pinta();
   }
+  if (window.__losangos) window.__losangos.mnt = { desliga: () => { if (st.ligado) liga(false); } };
   function alternaSit(s) { st.sits.has(s) ? st.sits.delete(s) : st.sits.add(s); desenha(); pinta(); }
 
   // legenda (filtro por situação) no canto de cima, embaixo do + e −; criada depois dos outros controles da página

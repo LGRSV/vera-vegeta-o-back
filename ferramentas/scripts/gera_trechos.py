@@ -479,8 +479,8 @@ def ativos_interface(saida):
         shutil.copyfile(PKG / 'leaflet' / f, a / 'leaflet' / f)
     (a / 'alimentador.css').write_text(css, encoding='utf-8')
     (a / 'alimentador.js').write_text('const D = window.D;\n' + js, encoding='utf-8')
-    for f in ('extras.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'telacheia.js', 'busca-ativo.js',
-              'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js'):
+    for f in ('extras.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
+              'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
     return modelo
@@ -550,6 +550,8 @@ def pagina_alimentador(modelo, c):
                '<script src="inspecao.js"></script>\n<script src="../../assets/inspecao.js"></script>\n'
                # OS de manutenção geradas pela inspeção: manutencao.js do alimentador vem de scripts/manutencao.py
                '<script src="manutencao.js"></script>\n<script src="../../assets/manutencao.js"></script>\n'
+               # OS de manutenção executadas nos ativos: executadas.js do alimentador vem de scripts/executadas.py
+               '<script src="executadas.js"></script>\n<script src="../../assets/executadas.js"></script>\n'
                '<script src="../../assets/telacheia.js"></script>\n'
                # croqui de limpeza de faixa (o modelo, assets/croqui-modelo.js, só carrega quando pedido)
                '<script src="../../assets/croqui.js"></script>\n<script src="../../assets/menu.js"></script>', h, count=1, flags=re.S)
@@ -877,6 +879,9 @@ def interface(saida):
             mnt = saida / 'alimentadores' / c['alimentador'] / 'manutencao.js'
             if not mnt.exists():                       # até rodar scripts/manutencao.py: página sem o card de manutenção
                 mnt.write_text('window.MANUTENCAO = null;\n', encoding='utf-8')
+            exe = saida / 'alimentadores' / c['alimentador'] / 'executadas.js'
+            if not exe.exists():                       # até rodar scripts/executadas.py: página sem o card Manutenção
+                exe.write_text('window.EXECUTADAS = null;\n', encoding='utf-8')
     cards = []
     for m in man['municipios']:
         tot = sum(a['m_no_municipio'] for a in m['alimentadores'])

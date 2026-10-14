@@ -6,6 +6,13 @@
   ],
   "nome": "Crítica (NAE)"
  },
+ "executadas": {
+  "arquivo": "OS_STATUS_Executadas_2021-2026.zip",
+  "ate": "2026-10-15",
+  "nome": "OS de manutenção executadas",
+  "os": 215325,
+  "processado": "2026-10-14"
+ },
  "inspecao": {
   "arquivo": "BASE INSPEÇÃO.xlsx",
   "ate": "2026-10-09",
