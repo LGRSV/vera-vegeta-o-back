@@ -40,7 +40,7 @@
   /* só página inicial (mapa SVG do TO; regras na seção 'Página inicial') */
   --mt-vazio:#e3e6e1; --mt-vazio-h:#d4d8d2; --mt-borda:#b4bab3; --mt-tem:#eeb99c;
   /* NAE por município no mapa da página inicial (0, 1–10, 11–30, 31–100, 101–200, 201+) */
-  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#2563eb; --polo-b:#7c3aed; --polo-c:#0f766e; --polo-d:#be185d;
+  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#0057a8; --polo-b:#f7941d; --polo-c:#29a3e0; --polo-d:#c25e00;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   color-scheme:dark;
@@ -54,7 +54,7 @@
   --sh2:0 1px 2px rgb(0 0 0 / .3),0 12px 32px -12px rgb(0 0 0 / .7);
   --mt-vazio:#252c31; --mt-vazio-h:#2f383e; --mt-borda:#46525a; --mt-tem:#6e3a24;
   /* no escuro, o mapa fica igual ao do claro (o tom avermelhado sobre o fundo escuro) */
-  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#60a5fa; --polo-b:#a78bfa; --polo-c:#2dd4bf; --polo-d:#f472b6;
+  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#3d8fe0; --polo-b:#ffa438; --polo-c:#6cc4f2; --polo-d:#e07a1f;
 }}
 :root[data-theme="dark"]{
   color-scheme:dark;
@@ -68,7 +68,7 @@
   --sh2:0 1px 2px rgb(0 0 0 / .3),0 12px 32px -12px rgb(0 0 0 / .7);
   --mt-vazio:#252c31; --mt-vazio-h:#2f383e; --mt-borda:#46525a; --mt-tem:#6e3a24;
   /* no escuro, o mapa fica igual ao do claro (o tom avermelhado sobre o fundo escuro) */
-  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#60a5fa; --polo-b:#a78bfa; --polo-c:#2dd4bf; --polo-d:#f472b6;
+  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#3d8fe0; --polo-b:#ffa438; --polo-c:#6cc4f2; --polo-d:#e07a1f;
 }
 
 /* ====== Base ====== */
@@ -206,6 +206,7 @@ header.cab>.cab-link{justify-self:center}
 .mun.nae-0{fill:var(--nae0)}.mun.nae-1{fill:var(--nae1)}.mun.nae-2{fill:var(--nae2)}.mun.nae-3{fill:var(--nae3)}.mun.nae-4{fill:var(--nae4)}.mun.nae-5{fill:var(--nae5)}
 /* limite das regionais (Norte, Centro, Sul) por cima dos municípios, no vermelho do site (o mesmo nos dois temas) */
 .mt-regc path{fill:none;stroke:var(--mt-lim);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none}
+/* cores dos polos (--polo-a…d): azul e laranja no estilo Energisa */
 /* regional aberta (mapa-municipios.js): os polos se afastam (transform no grupo), as outras regionais somem e o contorno
    passa a ser o dos polos; no estado inteiro, passar o mouse numa regional apaga as outras */
 .mt-polo{transition:transform .65s cubic-bezier(.45,0,.55,1),opacity .4s}
@@ -213,6 +214,7 @@ header.cab>.cab-link{justify-self:center}
 .mt-polo.fora{opacity:0;pointer-events:none}
 .mt-poloc{fill:none;stroke:var(--pc,var(--mt-lim));stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none;opacity:0;transition:opacity .4s}
 .aberta.pronta .mt-poloc{opacity:1}
+.mt-poloc.fundo{stroke:var(--paper);stroke-width:7}
 .mt-regc{transition:opacity .3s}.aberta .mt-regc{opacity:0}
 .aberta .mt-nomes{display:none}
 .mt-dica .mt-dica-c{display:block;margin-top:2px;font-size:var(--t-xs)}

@@ -44,13 +44,14 @@
     grupo(m).append(p);
     el[m.cod] = p;
   });
-  Object.entries(grp).forEach(([polo, gp]) => {
+  // contorno do polo: um traço claro por baixo (fundo) faz a cor aparecer também sobre os municípios laranja
+  Object.entries(grp).forEach(([polo, gp]) => ['mt-poloc fundo', 'mt-poloc'].forEach(cl => {
     const c = document.createElementNS(NS, 'path');
-    c.setAttribute('class', 'mt-poloc');
+    c.setAttribute('class', cl);
     c.setAttribute('aria-hidden', 'true');
     c.setAttribute('d', (M.pols || {})[polo] || '');
     gp.append(c);
-  });
+  }));
   const regs = document.createElementNS(NS, 'g');
   regs.setAttribute('class', 'mt-regc');
   regs.setAttribute('aria-hidden', 'true');
