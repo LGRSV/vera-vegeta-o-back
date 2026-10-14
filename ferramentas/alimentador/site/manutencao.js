@@ -118,10 +118,11 @@
     });
     camada = L.layerGroup(ms).addTo(map);
   }
+  const numInsp = o => o.insp.split(' ').pop();   // "ETO-INPS01 000421/2026" -> "000421/2026"
   function linhaOs(k) {
     const o = MN.os[k], s = sitDe(o);
     return `<div class="lb-l" style="--c:${SIT[s][1]}"><b>${esc(o.tipo)}</b> · ${quando(o)}${o.crit ? ' · ' + esc(o.crit) : ''}` +
-      `<small>${esc(o.defeito)}</small><small>OS ${esc(o.os)} · ${esc(o.eq)}${o.insp ? ` · da inspeção <a href="#" data-i="${esc(o.insp)}">${esc(o.insp.split(' ').pop())}</a>` : ''}</small></div>`;
+      `<small>${esc(o.defeito)}</small><small>${o.insp ? `INSP <a href="#" data-i="${esc(o.insp)}">${esc(numInsp(o))}</a>${o.insp_data ? ' (' + br(o.insp_data) + ')' : ''} → ` : ''}MANUT ${esc(o.os)} · ${esc(o.eq)}</small></div>`;
   }
   function balao(e, p) {
     L.DomEvent.stopPropagation(e);
@@ -206,7 +207,7 @@
 
   const focoHtml = k => {
     const o = MN.os[k];
-    return `<div class="limp-foco"><span class="q">OS ${esc(o.os_completa)} · ${esc(o.tipo)} · ${quando(o)}</span>
+    return `<div class="limp-foco"><span class="q">${o.insp ? `INSP ${esc(o.insp)} → ` : ''}MANUT ${esc(o.os_completa)} · ${esc(o.tipo)} · ${quando(o)}</span>
       <span>${esc(o.defeito)}</span>
       <span class="limp-nota">Situação: ${esc(o.sit.toLowerCase())}${o.crit ? ' · criticidade ' + esc(o.crit) : ''} · criada ${br(o.criada)} · prazo ${br(o.limite)}${o.exec ? ' · executada ' + br(o.exec) : ''}</span>
       <span class="limp-nota">Equipe ${esc(o.eq)}${o.executora ? ' (' + esc(o.executora) + ')' : ''} · ${o.ll ? 'poste ' + esc(o.poste) : `poste ${esc(o.poste || '—')} não está no mapa: ${vaiInspecao.tem(o.insp) ? 'aparece o bloco da inspeção que a gerou' : 'a inspeção que a gerou também não está no mapa'}`}</span>
@@ -215,7 +216,7 @@
   const osBtn = (k, comFoco) => {
     const o = MN.os[k];
     return `<button type="button" class="mnt-os-b" data-k="${k}" style="--c:${SIT[sitDe(o)][1]}" aria-pressed="${st.foco === k}">` +
-      `<span class="q">${esc(o.tipo)} · ${quando(o)} · OS ${esc(o.os)}</span><span class="s">${esc(o.defeito.slice(0, 110))}${o.defeito.length > 110 ? '…' : ''}${o.ll ? '' : ' · sem o poste no mapa'}</span></button>` +
+      `<span class="q">${o.insp ? `INSP ${esc(numInsp(o))} → ` : ''}MANUT ${esc(o.os)} · ${esc(o.tipo)} · ${quando(o)}</span><span class="s">${esc(o.defeito.slice(0, 110))}${o.defeito.length > 110 ? '…' : ''}${o.ll ? '' : ' · sem o poste no mapa'}</span></button>` +
       (comFoco && st.foco === k ? focoHtml(k) : '');
   };
   // linha de uma situação (o mesmo visual da Faixa): a cor liga/desliga no mapa, o resto abre as OS logo abaixo
@@ -269,7 +270,7 @@
       .sort((a, b) => ORDEM.indexOf(sitDe(MN.os[a])) - ORDEM.indexOf(sitDe(MN.os[b])));
     if (!ks.length) return '';
     const cont = ORDEM.map(s => [s, ks.filter(k => sitDe(MN.os[k]) === s).length]).filter(([, c]) => c);
-    return `<section class="limp-sec mnt-sec" aria-live="off"><h3>Manutenção (da inspeção)</h3>
+    return `<section class="limp-sec mnt-sec" aria-live="off"><h3>Insp→manut</h3>
       <dl><dt>OS</dt><dd>${cont.map(([s, c]) => `${nf(c)} ${SIT[s][0].toLowerCase()}`).join(' · ')}</dd></dl>
       ${ks.map(k => osBtn(k, false)).join('')}</section>`;
   }
