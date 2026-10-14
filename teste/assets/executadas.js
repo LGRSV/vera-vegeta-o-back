@@ -1,10 +1,13 @@
 // OS de manutenção EXECUTADAS nos ativos do alimentador (roda depois de manutencao.js, com window.D e window.EXECUTADAS
 // de scripts/executadas.py: corretivas MC e preventivas MP; inspeção, manobra e construção ficaram de fora).
-// Card "Manutenção" no mapa, ao lado do "Insp→manut": um losango por ativo manutencionado (poste, transformador ou
+// "Manutenção" no menu Camadas do mapa, com o "Insp→manut": um losango por ativo manutencionado (poste, transformador ou
 // chave), na cor do ano da execução mais recente (as mesmas cores de ano da Faixa); o número é a quantidade de OS.
-// Filtros: ano (legenda do mapa e painel) e tipo de serviço (painel). Ligar a Manutenção desliga o Insp→manut e
-// vice-versa (os dois são losangos). Posição: o poste da ESTRUTURA da OS; sem ele no mapa, o ativo da ESTRUTURA ou o
+// Filtro do mapa: ano (legenda do mapa e painel); o mapa mostra todos os tipos de serviço. Liga junto com o Insp→manut
+// (no mesmo poste, o losango da Manutenção fica um pouco deslocado; manutencao.js).
+// Posição: o poste da ESTRUTURA da OS; sem ele no mapa, o ativo da ESTRUTURA ou o
 // ELEMENTO (o trafo ou a chave que atende o local). Usa o visual do cartão da limpeza (classes limp-* do limpeza.js).
+// Em "Dados" (Downloads, extras.js): a lista de tipos de serviço (vale só para o download) e "Baixar N OS (Excel)", o CSV
+// das OS dos tipos marcados (todos os anos).
 (function () {
   const EX = window.EXECUTADAS;
   if (!EX || !window.D) return;
@@ -32,8 +35,6 @@
   const nomeAtivo = a => `${NOME_AT[a[1]] || 'Chave'} ${a[0]}`;
   const COMO = { p: 'poste da ESTRUTURA da OS', e: 'ativo da ESTRUTURA da OS',
     l: 'ELEMENTO da OS (o poste da OS não está no mapa: é o trafo ou a chave que atende o local)' };
-  const SEM_POS = OS.filter(o => o[4] < 0).length;
-  const OUTRO_AL = OS.filter(o => o[7]).length;
   // OS de cada ativo (já vêm da mais recente para a mais antiga)
   const DO_ATIVO = AT.map(() => []);
   OS.forEach((o, k) => { if (o[4] >= 0) DO_ATIVO[o[4]].push(k); });
@@ -44,14 +45,19 @@
   const st = {
     ligado: guarda('exe-ligado') === '1',
     anos: new Set(ANOS),
-    tipo: -1,                                         // -1: todos os tipos de serviço
+    tipos: new Set(),        // tipos de serviço do download (índices em EX.tipos); vazio: todos
+    tiposAberto: false,      // lista de marcar dos tipos aberta (em "Dados")
     foco: null,
-    mais: guarda('exe-mais') === '1',
-    lista: false,
-    grupos: new Set(),
+    grupos: new Set(),       // anos abertos, com as OS embaixo
   };
-  const passa = k => st.anos.has(anoDe(k)) && (st.tipo < 0 || OS[k][1] === st.tipo);
-  const contaAno = a => OS.reduce((n, o, k) => n + (anoDe(k) === a && (st.tipo < 0 || o[1] === st.tipo)), 0);
+  const doTipo = k => !st.tipos.size || st.tipos.has(OS[k][1]);   // só o download
+  const passa = k => st.anos.has(anoDe(k));
+  const contaAno = a => OS.reduce((n, o, k) => n + (anoDe(k) === a), 0);
+  const N_TIPO = EX.tipos.map(() => 0);
+  OS.forEach(o => { N_TIPO[o[1]]++; });
+  const TIPOS_ORD = EX.tipos.map((t, i) => i).sort((a, b) => N_TIPO[b] - N_TIPO[a]);   // mais OS primeiro
+  // texto curto do botão: "Todos os tipos", o tipo escolhido ou "3 tipos"
+  const rotTipos = () => !st.tipos.size ? 'Todos os tipos' : st.tipos.size === 1 ? TIPO_TXT[[...st.tipos][0]] : `${st.tipos.size} tipos`;
 
   const css = document.createElement('style');
   css.textContent = `
@@ -86,16 +92,24 @@
 .exe-os-b:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .exe-os-b .q{font:600 var(--t-xs) var(--f-mono);font-variant-numeric:tabular-nums}
 .exe-os-b .s{color:var(--muted);font-size:var(--t-xs)}
-.exe-tipo{display:grid;gap:var(--s1);font:600 var(--t-xs) var(--f-body);color:var(--muted)}
-.exe-tipo select{font:var(--t-sm) var(--f-body);color:var(--fg);background:var(--paper,transparent);border:1px solid var(--line);border-radius:var(--r1);min-height:var(--alvo);padding:0 var(--s2);max-width:100%}
-.exe-tipo select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+/* tipos de serviço do download, em "Dados": o botão no visual do botão de meses do NAE; a lista abre embaixo dele, no painel */
+.exe-tipos{flex:1 1 100%;min-width:0}   /* min-width:0: o nome longo do tipo não alarga o painel (sem rolagem lateral no celular) */
+.exe-tipos-b{display:block;width:100%;min-height:var(--alvo);padding:0 32px 0 var(--s3);border:1px solid var(--line-forte,var(--line));border-radius:var(--r2);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%238c948f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center/12px;
+  color:var(--fg);font:var(--t-sm) var(--f-body);cursor:pointer}
+.exe-tipos-b[aria-expanded=true]{border-color:var(--accent)}
+.exe-tipos-b:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.mes-lista.exe-tipos-l{position:static;width:auto;min-width:0;max-width:none;margin-top:var(--s1);box-shadow:none}
+.exe-tipos-l label{white-space:normal;font-size:var(--t-sm);line-height:1.25;padding-block:4px}
+.exe-tipos-l label span{flex:1;min-width:0}
+.exe-tipos-l small{font-family:var(--f-mono);white-space:nowrap}
 .exe-pop .t{font:700 15px var(--f-display);margin-bottom:2px}
 .exe-pop .t small{font:500 12px var(--f-body);color:#5a636a;margin-left:4px}
 .exe-pop .onde{font-size:12px;color:#5a636a;margin-bottom:4px}
 .exe-pop .lb-l{border-left:5px solid var(--c);padding:3px 0 3px 7px;margin:4px 0;font-size:12.5px;line-height:1.35}
 .exe-pop .lb-l b{font-family:var(--f-mono);font-size:12.5px}
 .exe-pop .lb-l small{display:block;color:#5a636a}
-@media (prefers-reduced-motion:no-preference){.exe-os-b,.exe-lg button{transition:background-color var(--dur) var(--ease)}}`;
+@media (prefers-reduced-motion:no-preference){.exe-os-b,.exe-lg button{transition:background-color var(--dur) var(--ease),border-color var(--dur) var(--ease)}}`;
   document.head.append(css);
 
   // ---------- mapa ----------
@@ -157,31 +171,29 @@
     map.invalidateSize();
     map.setView(ll, Math.max(map.getZoom(), 17));
   }
-  function focar(k, enquadrar) {
+  function focar(k, enquadrar, doPainel) {
     st.foco = st.foco === k ? null : k;
     if (st.foco !== null) {
       const o = OS[k];
-      st.grupos.add(anoDe(k));
-      st.mais = true; st.lista = true;
+      st.grupos.add(anoDe(k));                          // abre a linha do ano da OS
       if (o[4] >= 0) {
         if (!st.ligado) liga(true);
         st.anos.add(anoDe(k));
-        if (st.tipo >= 0 && st.tipo !== o[1]) st.tipo = -1;   // o filtro de tipo escondia a OS
         if (enquadrar) enquadra([AT[o[4]][3], AT[o[4]][4]]);
       }
     }
     desenha(); pinta();
+    if (!doPainel && window.__rolaPainel) window.__rolaPainel(card, st.foco);
   }
   function liga(on) {
     st.ligado = on; guarda('exe-ligado', on ? '1' : '0');
-    if (on && window.__soEsteLosango) window.__soEsteLosango('exe');
     if (!on) st.foco = null;
     desenha(); pinta();
   }
-  if (window.__losangos) window.__losangos.exe = { desliga: () => { if (st.ligado) liga(false); } };
   function alternaAno(a) { st.anos.has(a) ? st.anos.delete(a) : st.anos.add(a); desenha(); pinta(); }
 
-  // legenda (filtro por ano) no canto de cima, embaixo do + e −; criada depois dos outros controles da página
+  // legenda (filtro por ano), criada depois dos outros controles da página; extras.js a põe na coluna da direita,
+  // embaixo do menu Camadas
   let lg = null;
   const poeLegenda = () => {
     if (!map || lg) return;
@@ -200,7 +212,7 @@
     pinta();
   };
 
-  // botão "Manutenção" no mapa, na linha do "Faixa", "Inspeção" e "Insp→manut"
+  // botão "Manutenção" no menu Camadas do mapa (extras.js), com "Faixa", "Inspeção" e "Insp→manut"
   const l2 = map && window.__ctlMapa ? window.__ctlMapa() : null;
   let btn = null;
   if (l2) {
@@ -235,66 +247,127 @@
       `${o[4] >= 0 ? (o[5] ? ' · ' : '') + esc(nomeAtivo(AT[o[4]])) : (o[5] ? ' · ' : '') + 'sem posição no mapa'}</span></button>` +
       (comFoco && st.foco === k ? focoHtml(k) : '');
   };
-  // grupos da lista por ano: o conteúdo só é montado com o grupo aberto (há alimentador com milhares de OS)
-  const grupo = a => {
-    const ks = OS.map((o, k) => k).filter(k => anoDe(k) === a && (st.tipo < 0 || OS[k][1] === st.tipo));
-    if (!ks.length) return '';
-    const aberto = st.grupos.has(a);
-    return `<details class="limp-grupo" data-g="${a}"${aberto ? ' open' : ''}><summary style="--c:${corAno(a)}"><i></i>${rotAno(a)} <span>${nf(ks.length)} OS</span></summary>` +
-      `<div>${aberto ? ks.map(k => osBtn(k, true)).join('') : ''}</div></details>`;
-  };
-  const opcoesTipo = () => {
-    const n = EX.tipos.map(() => 0);
-    OS.forEach(o => { n[o[1]]++; });
-    return `<option value="-1"${st.tipo < 0 ? ' selected' : ''}>Todos (${nf(OS.length)} OS)</option>` +
-      EX.tipos.map((t, i) => [i, n[i]]).sort((a, b) => b[1] - a[1])
-        .map(([i, c]) => `<option value="${i}"${st.tipo === i ? ' selected' : ''}>${esc(TIPO_TXT[i])} · ${nf(c)}</option>`).join('');
-  };
+  // linha de um ano (o mesmo visual da Faixa): a cor liga/desliga no mapa, o resto abre as OS do ano logo abaixo; elas
+  // só são montadas com a linha aberta (há alimentador com milhares de OS)
+  function linha(a) {
+    const n = contaAno(a), aberto = st.grupos.has(a) && n > 0, id = 'exe-g-' + a, on = st.anos.has(a);
+    const i = `<i style="--c:${corAno(a)}"></i>`;
+    const ks = aberto ? OS.map((o, k) => k).filter(k => anoDe(k) === a) : [];
+    return `<div class="limp-ano-l${st.ligado && !on ? ' off' : ''}">` +
+      (st.ligado ? `<button type="button" class="liga" data-a="${a}" data-foco="a${a}" aria-pressed="${on}" aria-label="${rotAno(a)} no mapa" title="Mostrar/esconder no mapa">${i}</button>`
+        : `<span class="cor" aria-hidden="true">${i}</span>`) +
+      `<button type="button" class="abre" data-g="${a}" data-foco="g${a}" aria-expanded="${aberto}" aria-controls="${id}"${n ? '' : ' disabled'}><span><b>${rotAno(a)}</b></span><em>${nf(n)} OS</em></button>` +
+      `</div><div class="limp-oss" id="${id}" role="group" aria-label="OS de ${rotAno(a)}"${aberto ? '' : ' hidden'}>${ks.map(k => osBtn(k, true)).join('')}</div>`;
+  }
+  // ---------- Downloads (em "Dados", extras.js): tipos de serviço para marcar e a planilha das OS desses tipos ----------
+  // CSV pelo window.__csv (BOM, ';', CRLF, dd/mm/aaaa, vírgula decimal, proteção contra fórmula); todos os anos
+  const ONDE_CSV = { p: 'poste da ESTRUTURA', e: 'ativo da ESTRUTURA', l: 'ELEMENTO' };
+  const COLS = ['Alimentador', 'OS', 'Tipo de serviço', 'Classe', 'Execução', 'Equipe', 'Criticidade', 'Ativo', 'Trecho',
+    'Latitude', 'Longitude', 'Posição', 'Alimentador da OS', 'Descrição'];
+  const AL = String((D.meta && D.meta.al) || 'alimentador');
+  // OS dos tipos marcados, da mais recente para a mais antiga
+  const osDoDownload = () => OS.map((o, k) => k).filter(doTipo).sort((a, b) => (OS[b][2] || '').localeCompare(OS[a][2] || ''));
+  function baixaOs() {
+    const C = window.__csv, ks = osDoDownload();
+    if (!C || !ks.length) return;
+    const linhas = ks.map(k => {
+      const o = OS[k], t = EX.tipos[o[1]], a = o[4] >= 0 ? AT[o[4]] : null;
+      return [AL, o[0], nomeTipo(t), classe(t), C.data(o[2]), o[3], o[6], a ? nomeAtivo(a) : '', a ? a[2] : '',
+        a ? C.num(a[3]) : '', a ? C.num(a[4]) : '', a ? ONDE_CSV[a[5]] || '' : 'sem posição', o[7] && o[7] !== AL ? o[7] : '', o[5]];
+    });
+    const datas = ks.map(k => OS[k][2]).filter(Boolean), hoje = new Date().toISOString().slice(0, 10);
+    const de = datas.length ? datas[datas.length - 1] : hoje, ate = datas.length ? datas[0] : hoje;
+    C(`OS_manutencao_${C.arq(AL)}_${de}_a_${ate}.csv`, COLS, linhas);
+  }
+
+  // tipos de serviço: botão com a lista de marcar (um, vários ou todos), no jeito do NAE dos meses (mapa_trechos.html);
+  // a lista abre embaixo do botão, dentro de "Dados"
+  let dlx = null, dlBtn = null;
+  if (OS.length && window.__baixar && window.__csv) {
+    dlx = window.__baixar('exe');
+    const t = document.createElement('div');
+    t.className = 'exe-tipos';
+    t.innerHTML = `<button type="button" class="exe-tipos-b" aria-expanded="false" aria-controls="exe-tipos-l"></button>` +
+      `<div class="mes-lista exe-tipos-l" id="exe-tipos-l" role="group" aria-label="Tipos de serviço do download" hidden>` +
+      `<label class="mes-tds"><input type="checkbox" value=""> Todos <small>${nf(OS.length)} OS</small></label>` +
+      TIPOS_ORD.map(i => `<label><input type="checkbox" value="${i}"> <span>${esc(TIPO_TXT[i])}</span> <small>${nf(N_TIPO[i])}</small></label>`).join('') +
+      '</div>';
+    dlx.append(t);
+    dlBtn = window.__baixar.botao('exe', '', baixaOs);
+    dlBtn.classList.add('exe-baixa');
+  }
+  function pintaDl() {
+    if (!dlx) return;
+    const b = dlx.querySelector('.exe-tipos-b'), nv = OS.reduce((c, o, k) => c + doTipo(k), 0);
+    b.textContent = rotTipos();
+    b.setAttribute('aria-label', `Tipos de serviço do download: ${rotTipos()}`);
+    dlx.querySelectorAll('.exe-tipos-l input').forEach(i => { i.checked = i.value ? st.tipos.has(+i.value) : !st.tipos.size; });
+    dlBtn.querySelector('.dl-t').textContent = `Baixar ${nf(nv)} OS (Excel)`;
+    dlBtn.title = `Planilha (CSV para o Excel) com as ${nf(nv)} OS de manutenção executadas ${st.tipos.size ? 'dos tipos marcados' : 'de todos os tipos'}`;
+    dlBtn.setAttribute('aria-disabled', String(!nv));
+  }
+  function abreTipos(sim, foco) {
+    st.tiposAberto = sim;
+    if (!dlx) return;
+    const l = dlx.querySelector('.exe-tipos-l'), b = dlx.querySelector('.exe-tipos-b');
+    l.hidden = !sim;
+    b.setAttribute('aria-expanded', String(sim));
+    if (sim && foco) (l.querySelector('input:checked') || l.querySelector('input')).focus();
+  }
+  if (dlx) {
+    // marcar "Todos" volta a todos; marcar um tipo a partir de todos fica só ele; todos marcados um a um = todos
+    dlx.addEventListener('change', e => {
+      if (!e.target.closest('.exe-tipos-l')) return;
+      const v = e.target.value;
+      if (!v) st.tipos.clear(); else if (e.target.checked) st.tipos.add(+v); else st.tipos.delete(+v);
+      if (st.tipos.size === EX.tipos.length) st.tipos.clear();
+      pintaDl();
+    });
+    dlx.addEventListener('click', e => { if (e.target.closest('.exe-tipos-b')) abreTipos(!st.tiposAberto, true); });
+    // abre e fecha: botão, Esc (só a lista, antes do Esc da tela cheia), clique fora ou Tab para fora; ↑ ↓ Home End andam na lista
+    dlx.addEventListener('keydown', e => {
+      if (e.target.matches('.exe-tipos-b') && e.key === 'ArrowDown' && !st.tiposAberto) { e.preventDefault(); return abreTipos(true, true); }
+      const is = e.target.closest('.exe-tipos-l') ? [...dlx.querySelectorAll('.exe-tipos-l input')] : [], i = is.indexOf(e.target);
+      const passo = { ArrowDown: 1, ArrowUp: -1, Home: -Infinity, End: Infinity }[e.key];
+      if (i < 0 || passo === undefined) return;
+      e.preventDefault();
+      is[Math.max(0, Math.min(is.length - 1, i + passo))].focus();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape' || !st.tiposAberto) return;
+      e.stopPropagation();
+      const volta = dlx.querySelector('.exe-tipos-l').contains(document.activeElement);
+      abreTipos(false);
+      if (volta) dlx.querySelector('.exe-tipos-b').focus();
+    }, true);
+    document.addEventListener('pointerdown', e => { if (st.tiposAberto && !e.target.closest('.exe-tipos')) abreTipos(false); }, true);
+    dlx.addEventListener('focusout', e => { if (st.tiposAberto && e.target.closest('.exe-tipos') && e.relatedTarget && !e.relatedTarget.closest('.exe-tipos')) abreTipos(false); });
+    pintaDl();
+  }
 
   function pinta() {
     const f = document.activeElement;
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
     const n = OS.length;
     const noMapa = AT.length;
-    const sub = n ? `${nf(n)} OS de manutenção executadas (corretivas e preventivas) em ${nf(noMapa)} ativos no mapa` +
-      (EX.de ? ` · execução de ${br(EX.de)} a ${br(EX.ate)}` : '') : 'Nenhuma OS de manutenção executada neste alimentador';
-    const anos = `<div class="limp-anos">${ANOS.map(a => `<div class="limp-ano-l">
-        <button type="button" class="liga" data-a="${a}" data-foco="a${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder no mapa"><i style="--c:${corAno(a)}"></i><b>${rotAno(a)}</b><em>${nf(contaAno(a))} OS</em></button></div>`).join('')}</div>`;
-    const tipo = `<label class="exe-tipo">Tipo de serviço<select data-foco="tipo">${opcoesTipo()}</select></label>`;
-    const nota = `<p class="limp-nota">No mapa, um losango por ativo manutencionado, na cor do ano da OS mais recente; o número é a quantidade de OS. ` +
-      `Posição: o poste da ESTRUTURA da OS; sem ele no mapa (rede BT), o ativo da ESTRUTURA ou o ELEMENTO (o trafo ou a chave que atende o local).` +
-      `${OUTRO_AL ? ` ${nf(OUTRO_AL)} OS são de outro alimentador, mas o ativo hoje está neste.` : ''}${SEM_POS ? ` ${nf(SEM_POS)} OS sem posição: só na lista.` : ''}</p>`;
-    const lista = `<details class="limp-lista"${st.lista ? ' open' : ''}><summary data-foco="lista">Ver as OS por ano</summary><div>${st.lista ? ANOS.map(grupo).join('') : ''}</div></details>`;
+    const sub = n ? `${nf(n)} OS executadas · ${nf(noMapa)} ativos` : 'Nenhuma OS de manutenção executada';
+    card.hidden = !st.ligado && !!btn;                    // bloco da Manutenção só com ela ligada no mapa
     card.innerHTML = `<div class="limp-top"><h2>Manutenção<small>${sub}</small></h2></div>
-      ${!st.ligado && btn && n ? '<p class="limp-nota limp-desl">Desligada no mapa: toque em <b>Manutenção</b>, no canto do mapa, para ver os ativos manutencionados.</p>' : ''}
-      ${n ? `<details class="limp-mais"${st.mais ? ' open' : ''}><summary data-foco="mais">Anos, tipos e OS</summary><div>${anos}${tipo}${nota}${lista}</div></details>` : ''}`;
+      ${n ? `<div class="limp-anos">${ANOS.map(linha).join('')}</div>` : ''}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
     if (btn) btn.setAttribute('aria-pressed', String(st.ligado));
     if (lg) {
       lg.hidden = !st.ligado || !n;
-      lg.innerHTML = `<span>Manutenção${st.tipo >= 0 ? `<small title="${esc(TIPO_TXT[st.tipo])}">${esc(nomeTipo(EX.tipos[st.tipo]))}</small>` : ''}</span>` +
+      lg.innerHTML = '<span>Manutenção</span>' +
         ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${rotAno(a)}"><i style="--c:${corAno(a)}"></i><span class="nm">${rotAno(a)}</span><em>${nf(contaAno(a))}</em></button>`).join('');
     }
     if (det) det.querySelectorAll('.exe-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));
   }
-  card.addEventListener('toggle', e => {
-    const d = e.target;
-    if (d.classList.contains('limp-mais')) { st.mais = d.open; guarda('exe-mais', d.open ? '1' : '0'); }
-    else if (d.classList.contains('limp-lista')) { if (st.lista !== d.open) { st.lista = d.open; if (d.open) pinta(); } }
-    else if (d.dataset.g) {
-      const a = +d.dataset.g;
-      if (d.open === st.grupos.has(a)) return;
-      d.open ? st.grupos.add(a) : st.grupos.delete(a);
-      if (d.open) pinta();                            // monta as OS do ano aberto
-    }
-  }, true);
-  card.addEventListener('change', e => {
-    if (e.target.matches('.exe-tipo select')) { st.tipo = +e.target.value; st.foco = null; desenha(); pinta(); }
-  });
   card.addEventListener('click', e => {
     const b = e.target.closest('button');
     if (!b) return;
-    if (b.dataset.k !== undefined) return focar(+b.dataset.k, true);
+    if (b.dataset.k !== undefined) return focar(+b.dataset.k, true, true);
+    if (b.classList.contains('abre')) { const a = +b.dataset.g; st.grupos.has(a) ? st.grupos.delete(a) : st.grupos.add(a); return pinta(); }   // monta as OS do ano aberto
     if (b.classList.contains('liga') && b.dataset.a) return alternaAno(+b.dataset.a);
   });
 
@@ -312,7 +385,7 @@
     return `<section class="limp-sec exe-sec" aria-live="off"><h3>Manutenção executada</h3>
       <dl><dt>OS</dt><dd>${nf(ks.length)} · ${porAno.map(([a, c]) => `${rotAno(a)}: ${nf(c)}`).join(' · ')}</dd></dl>
       ${ks.slice(0, MAX_TRECHO).map(k => osBtn(k, false)).join('')}
-      ${ks.length > MAX_TRECHO ? `<p class="limp-nota">Mostrando as ${MAX_TRECHO} mais recentes; as outras estão no card Manutenção e nos losangos do mapa.</p>` : ''}</section>`;
+      ${ks.length > MAX_TRECHO ? `<p class="limp-nota">As ${MAX_TRECHO} mais recentes.</p>` : ''}</section>`;
   }
   function poeDetalhe() {
     if (!det || det.querySelector('.exe-sec')) return;

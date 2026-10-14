@@ -1,7 +1,9 @@
-// Croqui de limpeza de faixa: do trecho selecionado (ou de vários, com Ctrl+clique) sai o Excel do modelo da Energisa
+// Croqui de limpeza de faixa: do trecho selecionado (ou de vários, com Ctrl+clique; sem nenhum, do alimentador inteiro)
+// sai o Excel do modelo da Energisa
 // já preenchido — chave inicial e final, coordenadas UTM (SIRGAS 2000, fuso do ponto), alimentador, extensão,
 // município — e as duas figuras do trecho (satélite e esquema da rede) desenhadas aqui.
 // O modelo vem de assets/croqui-modelo.js (scripts/croqui_modelo.py), carregado só quando o croqui é pedido.
+// O botão "Croqui da faixa" fica em "Dados" › Downloads › Faixa (extras.js), não no detalhe do trecho.
 (function () {
   const D = window.D, M = (D && D.meta) || {};
   const det = document.getElementById('det'), lista = document.getElementById('lista');
@@ -63,15 +65,31 @@
     const perto = ll => { let melhor = null, dm = Infinity; pts.forEach((p, k) => { const x = dist(p, ll); if (x < dm) { dm = x; melhor = k; } }); return dm < 60 ? melhor : null; };
     const s = perto(ini.ll), t = perto(fim.ll);
     if (!s || !t) return null;
-    const dd = new Map([[s, 0]]), feito = new Set();
-    for (;;) {
-      let u = null, du = Infinity;
-      dd.forEach((v, k) => { if (!feito.has(k) && v < du) { du = v; u = k; } });
-      if (u === null) return null;
+    const dd = new Map([[s, 0]]), feito = new Set(), fila = [[0, s]];   // fila: heap binário de [distância, vértice]
+    const sobe = () => { let i = fila.length - 1; while (i) { const p = (i - 1) >> 1; if (fila[p][0] <= fila[i][0]) break; [fila[p], fila[i]] = [fila[i], fila[p]]; i = p; } };
+    const tira = () => {
+      const topo = fila[0], fim = fila.pop();
+      if (fila.length) {
+        fila[0] = fim;
+        for (let i = 0; ;) {
+          const a = 2 * i + 1, b = a + 1;
+          let m = i;
+          if (a < fila.length && fila[a][0] < fila[m][0]) m = a;
+          if (b < fila.length && fila[b][0] < fila[m][0]) m = b;
+          if (m === i) break;
+          [fila[m], fila[i]] = [fila[i], fila[m]]; i = m;
+        }
+      }
+      return topo;
+    };
+    while (fila.length) {
+      const [du, u] = tira();
+      if (feito.has(u)) continue;
       if (u === t) return du;
       feito.add(u);
-      (viz.get(u) || []).forEach(([w, m]) => { if (du + m < (dd.get(w) ?? Infinity)) dd.set(w, du + m); });
+      (viz.get(u) || []).forEach(([w, m]) => { if (du + m < (dd.get(w) ?? Infinity)) { dd.set(w, du + m); fila.push([du + m, w]); sobe(); } });
     }
+    return null;
   }
   const textoFim = c => {                                   // 'fim de linha · poste 123' → 'FIM DE LINHA (POSTE 123)'; poste N… é sem número
     if (!/^fim de linha/i.test(c)) return c;
@@ -341,9 +359,7 @@
 
   // ---------- janela ----------
   const css = document.createElement('style');
-  css.textContent = `.croqui-btn{font:600 var(--t-sm,13px)/1 var(--f-body,system-ui);padding:0 var(--s3,12px);min-height:var(--alvo,40px);border:1px solid var(--line-forte,var(--line));border-radius:var(--r2,10px);background:var(--paper);color:var(--fg);cursor:pointer;display:inline-flex;gap:var(--s2,8px);align-items:center;margin:var(--s1,4px) 0 var(--s3,12px);transition:border-color var(--dur,160ms) var(--ease,ease),background var(--dur,160ms) var(--ease,ease)}
-.croqui-btn:hover{border-color:var(--accent);background:var(--hover,transparent)}.croqui-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-dialog.croqui{border:1px solid var(--line);border-radius:var(--r3,14px);padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--paper);color:var(--fg);box-shadow:var(--sh2,0 20px 60px rgba(0,0,0,.35))}
+  css.textContent = `dialog.croqui{border:1px solid var(--line);border-radius:var(--r3,14px);padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--paper);color:var(--fg);box-shadow:var(--sh2,0 20px 60px rgba(0,0,0,.35))}
 dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
 @media (prefers-reduced-motion:no-preference){dialog.croqui[open]{animation:croqui-entra var(--dur-l,220ms) var(--ease,ease)}}
 @keyframes croqui-entra{from{opacity:0;transform:translateY(6px)}}
@@ -374,8 +390,10 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
     } catch (e) { municipiosDoTrecho = {}; }
     return municipiosDoTrecho;
   }
-  async function abre() {
-    const nomes = selecionados();
+  // nomes: os trechos do croqui; sem eles, os selecionados no mapa; sem seleção, o alimentador inteiro
+  async function abre(nomesPedidos) {
+    const sel = Array.isArray(nomesPedidos) ? nomesPedidos.filter(n => TR[n]) : selecionados();
+    const todos = !sel.length, nomes = todos ? D.trechos.map(t => t.nome) : sel;
     if (!nomes.length) return;
     const d = dados(nomes);
     let prop = {};
@@ -393,7 +411,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       <p>Preenchido a partir do mapa. Confira e complete OS, obra e deslocamento se quiser (dá para completar depois no Excel).</p>
       <div class="fig" role="img" aria-label="Figura do trecho no croqui"></div>
       <dl><dt>Alimentador</dt><dd>${esc(M.al)} · ${esc(M.se_nome || M.se || '')}</dd>
-        <dt>Trecho${nomes.length > 1 ? 's' : ''}</dt><dd>${esc(nomes.join(', '))}</dd>
+        <dt>Trecho${nomes.length > 1 ? 's' : ''}</dt><dd>${todos ? `alimentador inteiro (${nomes.length} trechos)` : esc(nomes.join(', '))}</dd>
         <dt>Extensão</dt><dd class="u-ext">${nf(d.ext / 1000, 2)} km</dd>
         <dt>Município</dt><dd>${esc(listaMun(d.muns)) || '—'}</dd>
         <dt>Início</dt><dd class="u-ini"></dd><dt>Fim</dt><dd class="u-fim"></dd></dl>
@@ -462,7 +480,8 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
           os: f.os.value.trim(), obra: f.obra.value.trim(), mun: munCroqui(d.muns) };
         const blob = await excel(c, sat, gis);
         const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob); link.download = `CROQUI_CH_${String(ini.cod).replace(/[^\w.-]+/g, '_')}.xlsx`;
+        const arq = s => String(s ?? '').replace(/[^\w.-]+/g, '_'), ch = arq(ini.cod), al = arq(M.al);   // com o código do alimentador
+        link.href = URL.createObjectURL(blob); link.download = `CROQUI_CH_${ch}${al && !ch.includes(al) ? '_' + al : ''}.xlsx`;
         document.body.append(link); link.click(); link.remove();
         setTimeout(() => URL.revokeObjectURL(link.href), 30000);
         dlg.close();
@@ -475,18 +494,19 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
   }
   window.__croqui = abre;
 
-  // botão no detalhe do trecho (o detalhe é refeito a cada seleção)
-  function poeBotao() {
-    if (det.querySelector('.croqui-btn') || !selecionados().length) return;
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'croqui-btn';
-    b.innerHTML = '<span aria-hidden="true">⬇</span> Croqui da faixa';
-    b.title = 'Gerar o croqui de limpeza de faixa (Excel) já preenchido com os dados deste trecho';
-    b.addEventListener('click', abre);
-    const h2 = det.querySelector('h2');
-    h2 ? h2.after(b) : det.prepend(b);
+  // botão em "Dados" › Downloads › Faixa (extras.js): os trechos selecionados no mapa ou, sem seleção, o alimentador inteiro
+  if (window.__baixar) {
+    const b = window.__baixar.botao('faixa', 'Croqui da faixa', () => abre());
+    b.classList.add('croqui-dl');
+    const alvo = b.querySelector('.dl-t'), rot = alvo.textContent;
+    const atualiza = () => {
+      const n = selecionados();
+      const txt = `${rot} · ${n.length === 1 ? n[0] : n.length ? n.length + ' trechos' : 'alimentador'}`;
+      if (alvo.textContent !== txt) alvo.textContent = txt;
+      b.title = `Croqui de limpeza de faixa (Excel), já preenchido: ${n.length ? (n.length === 1 ? 'trecho ' : 'trechos ') + n.join(', ') : 'alimentador inteiro (nenhum trecho selecionado)'}`;
+    };
+    new MutationObserver(atualiza).observe(det, { childList: true });
+    if (lista) new MutationObserver(atualiza).observe(lista, { attributes: true, subtree: true, attributeFilter: ['aria-current'] });
+    atualiza();
   }
-  new MutationObserver(poeBotao).observe(det, { childList: true });
-  if (lista) new MutationObserver(poeBotao).observe(lista, { attributes: true, subtree: true, attributeFilter: ['aria-current'] });
-  poeBotao();
 })();

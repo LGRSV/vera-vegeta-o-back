@@ -1,10 +1,10 @@
 // OS de manutenção geradas pela inspeção (roda depois de inspecao.js, com window.D e window.MANUTENCAO de
-// scripts/manutencao.py; as canceladas já ficaram de fora). Card "Insp→manut" no mapa, ao lado do "Faixa" e do
-// "Inspeção": um losango por poste com as OS dele, na cor da pior situação; fica por cima do que estiver ligado
-// (menos a Manutenção, de executadas.js, que também é de losangos: ligar uma desliga a outra).
+// scripts/manutencao.py; as canceladas já ficaram de fora). "Insp→manut" no menu Camadas do mapa, com "Faixa" e
+// "Inspeção": um losango por poste com as OS dele, na cor da pior situação; fica por cima do que estiver ligado (com a
+// Manutenção, de executadas.js, também ligada, o losango dela no mesmo poste fica um pouco deslocado: os dois aparecem).
 // Situação pela data do dia: vencida (não executada e o prazo já passou), no prazo, executada.
 // Posição: o poste da ESTRUTURA da OS. Sem o poste no mapa, tocar na OS mostra o bloco da inspeção que a gerou.
-// No painel: totais, tipos e as OS por situação. Usa o visual do cartão da limpeza (classes limp-* do limpeza.js).
+// No painel: o alimentador ao lado do polo dele (as três situações), tipos e uma linha por situação (liga/desliga no mapa; abre as OS dela embaixo). Usa o visual do cartão da limpeza (classes limp-* do limpeza.js).
 (function () {
   const MN = window.MANUTENCAO;
   if (!MN || !window.D) return;
@@ -24,8 +24,15 @@
   const sitDe = o => o.sit === 'EXECUTADA' ? 'exec' : o.limite && o.limite < HOJE ? 'venc' : 'pend';
   const quando = o => sitDe(o) === 'exec' ? `executada ${br(o.exec)}` : sitDe(o) === 'venc' ? `venceu ${br(o.limite)}` : `prazo ${br(o.limite)}`;
   const POR_SIT = Object.fromEntries(ORDEM.map(s => [s, MN.os.map((o, k) => k).filter(k => sitDe(MN.os[k]) === s)]));
+  // o polo do alimentador (assets/manutencao-polos.js, gera_trechos.manutencao_polos): a mesma conta por situação, somada
+  // nos alimentadores do polo, para comparar no bloco
+  const MP = window.MANUT_POLOS, PID = MP && MP.al[(D.meta || {}).al], PO = PID && MP.polos[PID];
+  const DO_POLO = PO && {
+    venc: Object.entries(PO.lim).reduce((s, [d, n]) => s + (d && d < HOJE ? n : 0), 0),
+    pend: Object.entries(PO.lim).reduce((s, [d, n]) => s + (d && d < HOJE ? 0 : n), 0),
+    exec: PO.exec,
+  };
   const TIPOS = Object.entries(MN.os.reduce((m, o) => (m[o.tipo] = (m[o.tipo] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]);
-  const SEM_POSTE = MN.os.filter(o => !o.ll).length;
   // um ponto por poste
   const POSTES = new Map();
   MN.os.forEach((o, k) => {
@@ -41,9 +48,7 @@
     ligado: guarda('mnt-ligado') === '1',
     sits: new Set(ORDEM),
     foco: null,
-    mais: guarda('mnt-mais') === '1',
-    lista: false,
-    grupos: new Set(),
+    grupos: new Set(),       // situações abertas, com as OS embaixo
   };
 
   const css = document.createElement('style');
@@ -57,6 +62,9 @@
   color:#fff;font:700 10.5px/16px var(--f-mono);text-align:center;box-shadow:0 0 0 1.5px #fff}
 .mnt-m.foco i{left:-11px;top:-11px;width:22px;height:22px;border-width:3px;box-shadow:0 0 0 3px #fde047,0 2px 8px #000a}
 .mnt-m.apaga{opacity:.35}
+/* Manutenção (executadas.js) também ligada: o losango dela desce para a direita, para não cobrir o deste no mesmo poste */
+.leaflet-marker-pane:has(.mnt-m) .exe-m{left:9px;top:9px}
+.mnt-polo{margin-top:var(--s2)}.mnt-polo td:first-child{font:600 var(--t-sm) var(--f-body)}.mnt-polo small{font-weight:400;color:var(--muted)}
 .mnt-lg{display:grid;gap:0;padding:var(--s1);background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);
   border:1px solid var(--vidro-borda);border-radius:var(--r2);box-shadow:var(--sh-vidro);font:var(--t-xs)/1.2 var(--f-body)}
 .mnt-lg[hidden]{display:none}
@@ -136,12 +144,11 @@
     map.invalidateSize();
     map.setView(ll, Math.max(map.getZoom(), 17));
   }
-  function focar(k, enquadrar) {
+  function focar(k, enquadrar, doPainel) {
     st.foco = st.foco === k ? null : k;
     if (st.foco !== null) {
       const o = MN.os[k];
-      st.grupos.add(sitDe(o));
-      st.mais = true; st.lista = true;
+      st.grupos.add(sitDe(o));                          // abre a linha da situação da OS
       if (o.ll) {
         if (!st.ligado) liga(true);
         st.sits.add(sitDe(o));
@@ -149,17 +156,17 @@
       } else if (o.insp) vaiInspecao(o.insp);     // sem o poste no mapa: o bloco da inspeção que a gerou
     }
     desenha(); pinta();
+    if (!doPainel && window.__rolaPainel) window.__rolaPainel(card, st.foco);
   }
   function liga(on) {
     st.ligado = on; guarda('mnt-ligado', on ? '1' : '0');
-    if (on && window.__soEsteLosango) window.__soEsteLosango('mnt');
     if (!on) st.foco = null;
     desenha(); pinta();
   }
-  if (window.__losangos) window.__losangos.mnt = { desliga: () => { if (st.ligado) liga(false); } };
   function alternaSit(s) { st.sits.has(s) ? st.sits.delete(s) : st.sits.add(s); desenha(); pinta(); }
 
-  // legenda (filtro por situação) no canto de cima, embaixo do + e −; criada depois dos outros controles da página
+  // legenda (filtro por situação), criada depois dos outros controles da página; extras.js a põe na coluna da direita,
+  // embaixo do menu Camadas
   let lg = null;
   const poeLegenda = () => {
     if (!map || lg) return;
@@ -178,7 +185,7 @@
     pinta();
   };
 
-  // botão "Insp→manut" (OS de manutenção da inspeção) no mapa, ao lado do "Faixa" e do "Inspeção"
+  // botão "Insp→manut" (OS de manutenção da inspeção) no menu Camadas do mapa (extras.js)
   const l2 = map && window.__ctlMapa ? window.__ctlMapa() : null;
   let btn = null;
   if (l2) {
@@ -211,25 +218,31 @@
       `<span class="q">${esc(o.tipo)} · ${quando(o)} · OS ${esc(o.os)}</span><span class="s">${esc(o.defeito.slice(0, 110))}${o.defeito.length > 110 ? '…' : ''}${o.ll ? '' : ' · sem o poste no mapa'}</span></button>` +
       (comFoco && st.foco === k ? focoHtml(k) : '');
   };
-  const grupo = (g, titulo, cor, info, ks) =>
-    `<details class="limp-grupo" data-g="${g}"${st.grupos.has(g) ? ' open' : ''}><summary style="--c:${cor}"><i></i>${titulo} <span>${info}</span></summary><div>${ks.map(k => osBtn(k, true)).join('')}</div></details>`;
+  // linha de uma situação (o mesmo visual da Faixa): a cor liga/desliga no mapa, o resto abre as OS logo abaixo
+  // (montadas só com a linha aberta)
+  function linha(s) {
+    const ks = POR_SIT[s], aberto = st.grupos.has(s) && ks.length > 0, id = 'mnt-g-' + s, on = st.sits.has(s);
+    const i = `<i style="--c:${SIT[s][1]}"></i>`;
+    return `<div class="limp-ano-l${st.ligado && !on ? ' off' : ''}">` +
+      (st.ligado ? `<button type="button" class="liga" data-a="${s}" data-foco="a${s}" aria-pressed="${on}" aria-label="${SIT[s][0]} no mapa" title="Mostrar/esconder no mapa">${i}</button>`
+        : `<span class="cor" aria-hidden="true">${i}</span>`) +
+      `<button type="button" class="abre" data-g="${s}" data-foco="g${s}" aria-expanded="${aberto}" aria-controls="${id}"${ks.length ? '' : ' disabled'}><span>${SIT[s][0]}</span><em>${nf(ks.length)} OS</em></button>` +
+      `</div><div class="limp-oss" id="${id}" role="group" aria-label="OS ${SIT[s][0].toLowerCase()}"${aberto ? '' : ' hidden'}>${aberto ? ks.map(k => osBtn(k, true)).join('') : ''}</div>`;
+  }
 
   function pinta() {
     const f = document.activeElement;
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
     const n = MN.os.length;
-    const sub = n ? `${nf(n)} OS geradas pelas inspeções (sem as canceladas) · ${ORDEM.map(s => `${nf(POR_SIT[s].length)} ${SIT[s][0].toLowerCase()}`).join(' · ')}` +
-      (MN.base_ate ? ` · base até ${br(MN.base_ate)}` : '') : 'Nenhuma OS de manutenção gerada pela inspeção neste alimentador';
-    const corpo = st.ligado && n ? `<div class="limp-anos">${ORDEM.map(s => `<div class="limp-ano-l">
-        <button type="button" class="liga" data-s="${s}" data-foco="s${s}" aria-pressed="${st.sits.has(s)}" title="Mostrar/esconder no mapa"><i style="--c:${SIT[s][1]}"></i><span>${SIT[s][0]}</span><em>${nf(POR_SIT[s].length)} OS</em></button></div>`).join('')}</div>` : '';
+    const sub = n ? `${nf(n)} OS · ${ORDEM.map(s => `${nf(POR_SIT[s].length)} ${SIT[s][0].toLowerCase()}`).join(' · ')}` : 'Nenhuma OS gerada pela inspeção';
     const tipos = n ? `<p class="mnt-tipos">${TIPOS.map(([t, c]) => `<b>${esc(t.charAt(0) + t.slice(1).toLowerCase())}</b> ${nf(c)}`).join(' · ')}</p>` : '';
-    const nota = n ? `<p class="limp-nota">No mapa, um losango por poste (o da ESTRUTURA da OS), na cor da pior situação; o número é a quantidade de OS no poste. Vencida: não executada e o prazo já passou (pela data de hoje).${SEM_POSTE ? ` ${nf(SEM_POSTE)} OS sem o poste no mapa: tocar mostra o bloco da inspeção que a gerou.` : ''}</p>` : '';
-    const lista = n ? `<details class="limp-lista"${st.lista ? ' open' : ''}><summary data-foco="lista">Ver as ${nf(n)} OS por situação</summary><div>
-        ${ORDEM.filter(s => POR_SIT[s].length).map(s => grupo(s, SIT[s][0], SIT[s][1], `${nf(POR_SIT[s].length)} OS`, POR_SIT[s])).join('')}</div></details>` : '';
-    const resto = corpo + tipos + nota + lista;
+    const polo = DO_POLO ? `<table class="resumo-classe mnt-polo"><tr><th></th>${ORDEM.map(s => `<th>${SIT[s][0]}</th>`).join('')}</tr>` +
+      `<tr><td>${esc((D.meta || {}).al)}</td>${ORDEM.map(s => `<td>${nf(POR_SIT[s].length)}</td>`).join('')}</tr>` +
+      `<tr><td>Polo ${esc(PO.nome)} <small>${nf(PO.als)} alim.</small></td>${ORDEM.map(s => `<td>${nf(DO_POLO[s])}</td>`).join('')}</tr></table>` : '';
+    const resto = polo + (n ? tipos + `<div class="limp-anos">${ORDEM.map(linha).join('')}</div>` : '');
+    card.hidden = !st.ligado && !!btn;                    // bloco do Insp→manut só com ele ligado no mapa
     card.innerHTML = `<div class="limp-top"><h2>Insp→manut<small>${sub}</small></h2></div>
-      ${!st.ligado && btn && n ? '<p class="limp-nota limp-desl">Desligada no mapa: toque em <b>Insp→manut</b>, no canto do mapa, para ver as OS de manutenção nos postes.</p>' : ''}
-      ${n ? `<details class="limp-mais"${st.mais ? ' open' : ''}><summary data-foco="mais">Situação, tipos e OS</summary><div>${resto}</div></details>` : ''}`;
+      ${resto}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
     if (btn) btn.setAttribute('aria-pressed', String(st.ligado));
     if (lg) {
@@ -238,19 +251,14 @@
     }
     if (det) det.querySelectorAll('.mnt-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));
   }
-  card.addEventListener('toggle', e => {
-    const d = e.target;
-    if (d.classList.contains('limp-mais')) { st.mais = d.open; guarda('mnt-mais', d.open ? '1' : '0'); }
-    else if (d.classList.contains('limp-lista')) st.lista = d.open;
-    else if (d.dataset.g) d.open ? st.grupos.add(d.dataset.g) : st.grupos.delete(d.dataset.g);
-  }, true);
   card.addEventListener('click', e => {
     const a = e.target.closest('a[data-i]');
     if (a) { e.preventDefault(); vaiInspecao(a.dataset.i); return; }
     const b = e.target.closest('button');
     if (!b) return;
-    if (b.dataset.k !== undefined) return focar(+b.dataset.k, true);
-    if (b.classList.contains('liga') && b.dataset.s) return alternaSit(b.dataset.s);
+    if (b.dataset.k !== undefined) return focar(+b.dataset.k, true, true);
+    if (b.classList.contains('abre')) { const g = b.dataset.g; st.grupos.has(g) ? st.grupos.delete(g) : st.grupos.add(g); return pinta(); }
+    if (b.classList.contains('liga') && b.dataset.a) return alternaSit(b.dataset.a);
   });
 
   // ---------- detalhe do trecho: OS nos postes dele ----------
@@ -275,6 +283,24 @@
   if (det) {
     new MutationObserver(poeDetalhe).observe(det, { childList: true });
     det.addEventListener('click', e => { const b = e.target.closest('.mnt-os-b'); if (b) focar(+b.dataset.k, true); });
+  }
+
+  // ---------- Downloads (em "Dados", extras.js): todas as OS geradas pela inspeção ----------
+  if (window.__baixar && window.__csv && MN.os.length) {
+    const C = window.__csv;
+    const SIT_CSV = { venc: 'vencida', pend: 'no prazo', exec: 'executada' };
+    window.__baixar.botao('mnt', 'OS da inspeção (Excel)', () => {
+      const ks = MN.os.map((o, k) => k).sort((a, b) => (MN.os[b].criada || '').localeCompare(MN.os[a].criada || ''));
+      C(`OS_da_inspecao_${C.al}.csv`,
+        ['Alimentador', 'OS', 'Situação', 'Situação hoje', 'Tipo', 'Defeito', 'Criticidade', 'Criada', 'Prazo', 'Execução', 'Equipe', 'Executora',
+          'Inspeção', 'Data da inspeção', 'Poste', 'Trechos', 'Latitude', 'Longitude'],
+        ks.map(k => {
+          const o = MN.os[k];
+          return [D.meta.al, o.os_completa || o.os, o.sit, SIT_CSV[sitDe(o)], o.tipo, o.defeito, o.crit, C.data(o.criada), C.data(o.limite),
+            C.data(o.exec), o.eq, o.executora, o.insp, C.data(o.insp_data), o.poste, o.poste ? C.trechosPoste(o.poste) : '',
+            o.ll ? C.num(o.ll[0]) : '', o.ll ? C.num(o.ll[1]) : ''];
+        }));
+    }, `Planilha (CSV para o Excel) com as ${MN.os.length} OS geradas pela inspeção`);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', poeLegenda); else poeLegenda();

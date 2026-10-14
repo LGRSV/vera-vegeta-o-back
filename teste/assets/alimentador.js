@@ -24,16 +24,31 @@ $('legenda').innerHTML = leg.map(([n, c, k]) => `<span><i class="${k}" style="--
 
 // interrupções (NAE): coletiva = atuou DJ, religador, fusível ou trafo; individual = um consumidor
 const NAE = D.nae || null;
+const ROT_NAE = ((D.meta || {}).origem || {}).nae_filtro === 'arvore' ? 'NAE - vegetação' : 'NAE';   // NAE só de árvore/eucalipto
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const rotMes1 = m => `${MESES[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`;
-const rotMes = m => m === 'todos' ? `${rotMes1(NAE.meses[0])} a ${rotMes1(NAE.meses[NAE.meses.length - 1])}` : rotMes1(m);
+// meses escolhidos (botão #mes, lista de marcar): vazio = todos
+const mesSel = new Set();
+const noPeriodo = m => !mesSel.size || mesSel.has(m);
+const escolhidos = () => NAE.meses.filter(noPeriodo);
+const segue = (a, b) => { const n = +a.slice(0, 4) * 12 + +a.slice(5, 7); return +b.slice(0, 4) * 12 + +b.slice(5, 7) === n + 1; };
+// texto curto do botão "Meses: …": "todos", "mar/2026", "mar, abr/2026", "3 meses"
+function rotBotao() {
+  const ms = escolhidos();
+  if (!mesSel.size && NAE.meses.length > 1) return 'todos';
+  if (ms.length === 1) return rotMes1(ms[0]);
+  return ms.length === 2 && ms[0].slice(0, 4) === ms[1].slice(0, 4) ? `${MESES[+ms[0].slice(5, 7) - 1]}, ${rotMes1(ms[1])}` : `${ms.length} meses`;
+}
 const ABR = {DJ: 'DJ', RL: 'religador', 'CH FUS': 'fusível', CH: 'chave', TR: 'trafo', UC: 'consumidor'};
 if (NAE && NAE.meses.length) {
   $('ctrl').hidden = false;
-  $('mes').innerHTML = (NAE.meses.length > 1 ? `<option value="todos" selected>Todos (${rotMes('todos')})</option>` : '') +
-    NAE.meses.map(m => `<option value="${m}">${rotMes(m)}</option>`).join('');
+  $('mes-lista').innerHTML = (NAE.meses.length > 1 ? `<label class="mes-tds"><input type="checkbox" value="" checked> Todos <small>${rotMes1(NAE.meses[0])} a ${rotMes1(NAE.meses[NAE.meses.length - 1])}</small></label>` : '') +
+    NAE.meses.map(m => `<label><input type="checkbox" value="${m}"${NAE.meses.length > 1 ? '' : ' checked'}> ${rotMes1(m)}</label>`).join('');
+  $('mes-lista').append(document.querySelector('label[for="ind"]'));   // "Contar individuais" fica na lista, embaixo dos meses
+  document.querySelector('label[for="ind"]').classList.add('mes-ind');
+  $('mes').querySelector('.mes-txt').textContent = rotBotao();
 }
-const filtra = l => (l || []).filter(o => ($('mes').value === 'todos' || o.mes === $('mes').value) && (o.col || $('ind').checked));
+const filtra = l => (l || []).filter(o => noPeriodo(o.mes) && (o.col || $('ind').checked));
 const doMes = () => NAE ? filtra(NAE.oc) : [];            // NAE deste alimentador (Crítica): o total do alimentador
 const doExt = () => NAE ? filtra(NAE.ext) : [];           // NAE de outro alimentador cujo ativo hoje está num trecho daqui
 const doTrecho = () => [...doMes(), ...doExt()];          // bloco do trecho: soma a NAE de todos os ativos do trecho
@@ -50,7 +65,7 @@ function listaOc(os, comTrecho) {
 function blocoNae(nome, l) {
   const os = doTrecho().filter(o => (l || [nome]).includes(o.trecho)), col = os.filter(o => o.col).length, ext = os.filter(o => o.de).length;
   const ind = $('ind').checked ? ` · ${os.length - col} individua${os.length - col === 1 ? 'l' : 'is'}` : '';
-  return `<dt class="nae">NAE ${rotMes($('mes').value)}</dt><dd class="nae"><b>${os.length}</b> (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})${os.length ? listaOc(os, !!l) : ''}</dd>`;
+  return `<dt class="nae">${ROT_NAE}</dt><dd class="nae"><b>${os.length}</b> (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})${os.length ? listaOc(os, !!l) : ''}</dd>`;
 }
 function atualizaNae() {
   desenhaLista($('busca').value);
@@ -60,11 +75,59 @@ function atualizaNae() {
   Object.entries(rotulos).forEach(([n, m]) => { const el = m.getElement(); if (el) { el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : ''); el.firstChild.classList.toggle('oc', !!c[n]); } });
   rotulosT3();
 }
-$('mes').addEventListener('change', atualizaNae);
 $('ind').addEventListener('change', atualizaNae);
+// lista dos meses: marcar "Todos" volta a todos; marcar um mês a partir de todos fica só ele; todos marcados um a um = todos
+function marcaMeses() {
+  $('mes-lista').querySelectorAll('input:not(#ind)').forEach(i => { i.checked = i.value ? mesSel.has(i.value) || NAE.meses.length === 1 : !mesSel.size; });
+  $('mes').querySelector('.mes-txt').textContent = rotBotao();
+}
+$('mes-lista').addEventListener('change', e => {
+  if (e.target.id === 'ind') return;                     // "Contar individuais" tem o próprio aviso
+  const v = e.target.value;
+  if (!v) mesSel.clear(); else if (e.target.checked) mesSel.add(v); else mesSel.delete(v);
+  if (mesSel.size === NAE.meses.length) mesSel.clear();
+  marcaMeses();
+  atualizaNae();
+});
+// abre e fecha: botão, Esc (só a lista, antes do Esc da tela cheia), clique fora ou Tab para fora; ↑ ↓ Home End andam na lista
+const abreMes = (sim, foco) => {
+  $('mes-lista').hidden = !sim;
+  $('mes').setAttribute('aria-expanded', String(sim));
+  if (sim && foco) ($('mes-lista').querySelector('input:checked') || $('mes-lista').querySelector('input')).focus();
+};
+$('mes').addEventListener('click', () => abreMes($('mes-lista').hidden, true));
+$('mes').addEventListener('keydown', e => { if (e.key === 'ArrowDown' && $('mes-lista').hidden) { e.preventDefault(); abreMes(true, true); } });
+$('mes-lista').addEventListener('keydown', e => {
+  const is = [...$('mes-lista').querySelectorAll('input')], i = is.indexOf(e.target), passo = {ArrowDown: 1, ArrowUp: -1, Home: -Infinity, End: Infinity}[e.key];
+  if (i < 0 || passo === undefined) return;
+  e.preventDefault();
+  is[Math.max(0, Math.min(is.length - 1, i + passo))].focus();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || $('mes-lista').hidden) return;
+  e.stopPropagation();
+  if ($('mes-lista').contains(document.activeElement)) $('mes').focus();
+  abreMes(false);
+}, true);
+document.addEventListener('pointerdown', e => { if (!$('mes-lista').hidden && !$('mes').parentElement.contains(e.target)) abreMes(false); }, true);
+$('mes').parentElement.addEventListener('focusout', e => { if (e.relatedTarget && !$('mes').parentElement.contains(e.relatedTarget)) abreMes(false); });
 
 // lista
 const GRUPOS = [['principal', 'T1 e T2'], ['ramal', 'T2-A, T2-B… (um por religador)'], ['fusivel', 'Depois de fusível']];
+// ordem da lista: maior NAE primeiro (padrão), menor NAE primeiro, ou T1 › T2 › T3 (os grupos acima). Empate e sem NAE: a ordem
+// dos trechos (T1, T2, T2-A…, T3-A…). Fica guardada no navegador.
+let ordemLista = (() => { try { return localStorage.getItem('ordem-lista') || 'nae'; } catch (e) { return 'nae'; } })();
+if (!['nae', 'nae-', 'hier'].includes(ordemLista)) ordemLista = 'nae';
+if (NAE && NAE.meses.length) {                           // sem NAE a lista fica sempre em T1 › T2 › T3 (sem o seletor)
+  $('ord-lista').hidden = false;
+  $('ordem').value = ordemLista;
+  $('ordem').addEventListener('change', e => {
+    ordemLista = e.target.value;
+    try { localStorage.setItem('ordem-lista', ordemLista); } catch (x) { /* sem armazenamento */ }
+    desenhaLista($('busca').value);
+    $('lista').scrollTop = 0;
+  });
+}
 function fimTxt(t) { return t.fim.join(' / '); }
 let porNome = {}, marcadas = [];                         // linha de cada trecho; linhas escolhidas (aria-current)
 const linha = n => porNome[n] || null;
@@ -75,8 +138,11 @@ function desenhaLista(filtro) {
   const casa = t => !q || [t.nome, t.inicio, t.inicio_poste, ...t.fim, ...t.passa].some(s => String(s).toLowerCase().includes(q))
     || (q.length >= 3 && (doPoste()[q] || new Set()).has(t.nome));
   const cnt = NAE ? contagem() : null;
-  $('lista').innerHTML = GRUPOS.map(([g, titulo]) => {
-    const ts = D.trechos.filter(t => t.tipo === g && casa(t));
+  const ord = cnt ? ordemLista : 'hier', pos = new Map(D.trechos.map((t, i) => [t, i]));
+  const blocos = ord === 'hier' ? GRUPOS.map(([g, titulo]) => [titulo, D.trechos.filter(t => t.tipo === g && casa(t))])
+    : [[ord === 'nae' ? 'Maior NAE primeiro' : 'Menor NAE primeiro', D.trechos.filter(casa).sort((a, b) =>
+      ((cnt[b.nome] || 0) - (cnt[a.nome] || 0)) * (ord === 'nae' ? 1 : -1) || pos.get(a) - pos.get(b))]];
+  $('lista').innerHTML = blocos.map(([titulo, ts]) => {
     if (!ts.length) return '';
     return `<div class="grp" role="heading" aria-level="3">${titulo} · ${mil(ts.length)}</div>` + ts.map(t =>
       `<button type="button" class="row" tabindex="-1" data-t="${esc(t.nome)}" aria-current="${escolhido(t.nome)}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
@@ -139,8 +205,9 @@ $('lista').addEventListener('click', e => {
     const r = rolador(), rola = d => { if (d) r ? (r.scrollTop += d) : window.scrollBy(0, d); };
     rola(b.getBoundingClientRect().top - y);             // a linha tocada fica no mesmo lugar da tela
     // o detalhe vem logo abaixo da lista: se o começo dele não aparece, sobe o necessário, sem tirar a linha tocada da vista
-    const v = areaVisivel(r), falta = $('det').getBoundingClientRect().top + 120 - v.bottom, folga = b.getBoundingClientRect().top - v.top - 40;
-    if (falta > 0 && folga > 0) rola(Math.min(falta, folga));
+    const v = areaVisivel(r), d = $('det').getBoundingClientRect().top, falta = d + 120 - v.bottom, folga = b.getBoundingClientRect().top - v.top - 40;
+    if (d < v.top) rolaPara(r, (r ? r.scrollTop : scrollY) + d - v.top - 8);   // no site o detalhe vem antes da lista (extras.js): ele vai para o alto
+    else if (falta > 0 && folga > 0) rola(Math.min(falta, folga));
   });
 });
 // trecho escolhido fora da lista (mapa, busca, link, detalhe): a lista rola por dentro até a linha e o detalhe aparece
@@ -189,25 +256,18 @@ function detalheVarios(l) {
   </dl><p class="lede so-mouse">Ctrl (⌘ no Mac) + clique põe ou tira um trecho. Clique sem Ctrl volta a um trecho só.</p>`;
 }
 function resumoNae() {
-  const os = doMes(), col = os.filter(o => o.col).length, fora = os.filter(o => !o.trecho), mot = {}, ext = doExt();
-  fora.forEach(o => { const m = (o.fora || '').startsWith('hoje no ') ? 'com o ativo hoje em outro alimentador' : o.fora; mot[m] = (mot[m] || 0) + 1; });
-  const pl = (n, s, p) => `${n} ${n === 1 ? s : p}`;
-  return `<dt class="nae">NAE ${rotMes($('mes').value)}</dt><dd class="nae"><b>${os.length}</b> no alimentador (${pl(col, 'coletiva', 'coletivas')}${$('ind').checked ? ` · ${pl(os.length - col, 'individual', 'individuais')}` : ''})` +
-    `${fora.length ? `<br>Sem trecho aqui: ${Object.entries(mot).map(([m, n]) => `${n} ${esc(m)}`).join(' · ')}${listaOc(fora)}` : ''}` +
-    `${ext.length ? `<br>Mais ${ext.length} de outros alimentadores com o ativo hoje num trecho daqui: contam no trecho, não no total acima.` : ''}</dd>`;
+  return `<dt class="nae">${ROT_NAE}</dt><dd class="nae"><b>${doMes().length}</b> no alimentador</dd>`;
 }
 function resumo() {
-  const total = ((D.meta || {}).resumo || {}).extensao_m ?? D.trechos.reduce((s, t) => s + t.ext, 0);   // o mesmo total de 'Dados e procedência'
-  const fus = D.trechos.filter(t => t.tipo === 'fusivel');
-  const porZ = {};
-  fus.forEach(t => { porZ[t.zona] = (porZ[t.zona] || 0) + 1; });
-  const linha = t => `<dt>${esc(t.nome)}</dt><dd><span class="mono">${esc(t.inicio)} → ${esc(fimTxt(t))}</span> · ${km(t.ext)}</dd>`;
-  const prin = D.trechos.filter(t => t.tipo !== 'fusivel');   // T1 e T2: início → fim de cada um, só quando pedir
-  $('det').innerHTML = `<h2 tabindex="-1">${mil(D.trechos.length)} trecho${D.trechos.length === 1 ? '' : 's'} <small>${km(total)} de rede</small></h2><dl>
-    <dt>Fusíveis</dt><dd>${fus.length ? `${mil(fus.length)} trecho${fus.length === 1 ? '' : 's'} (${Object.entries(porZ).map(([z, n]) => `T${z}: ${mil(n)}`).join(' · ')})` : 'nenhum trecho depois de fusível'}</dd>
-    ${NAE ? resumoNae() : ''}
-  </dl>${prin.length ? `<details class="mais"><summary>T1 e T2 · início → fim</summary><dl>${prin.map(linha).join('')}</dl></details>` : ''}` +
-  `<p class="lede">Toque num trecho no mapa ou na lista para ver início, fim e derivações. <span class="so-mouse">Para somar vários, segure Ctrl (⌘ no Mac) e clique em cada um.</span></p>`;
+  const total = ((D.meta || {}).resumo || {}).extensao_m ?? D.trechos.reduce((s, t) => s + t.ext, 0);
+  // trechos e extensão por classe (T1, T2, T3): as informações gerais do alimentador, no alto do painel, sem título (o Total já dá)
+  const cl = {T1: [0, 0], T2: [0, 0], T3: [0, 0]};
+  D.trechos.forEach(t => { const c = cl[t.nome.split('-')[0]]; if (c) { c[0]++; c[1] += t.ext; } });
+  const tabela = `<table class="resumo-classe"><tr><th>Classe</th><th>Trechos</th><th>Extensão</th></tr>` +
+    Object.entries(cl).map(([k, [n, m]]) => `<tr><td>${k}</td><td>${mil(n)}</td><td>${km(m)}</td></tr>`).join('') +
+    `<tr><th>Total</th><th>${mil(D.trechos.length)}</th><th>${km(total)}</th></tr></table>`;
+  $('det').innerHTML = `${tabela}
+  ${NAE ? `<dl>${resumoNae()}</dl>` : ''}`;
 }
 $('det').addEventListener('click', e => {
   const v = e.target.closest('[data-ll]');               // ocorrência da lista: vai até o ativo no mapa

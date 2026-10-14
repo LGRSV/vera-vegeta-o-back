@@ -1,8 +1,10 @@
 // Mapa em tela cheia (roda depois de alimentador.js, com window.__map).
 // Usa a tela cheia do navegador quando existe; no iPhone (sem essa função) o mapa ocupa a janela por CSS.
-// Em tela cheia, o botão "Painel" abre o painel lateral (limpeza, busca, detalhe) como gaveta sobre o mapa.
+// Em tela cheia, o item "Painel" do Menu do mapa (o mesmo das camadas, de extras.js) abre o painel lateral (limpeza, busca,
+// detalhe) como gaveta sobre o mapa; sem o Menu, um botão "☰ Painel" no canto faz isso. A barra de busca e
+// município (acima do mapa, de extras.js) entra no alto da gaveta e volta para cima do mapa ao sair.
 // O botão "Tela cheia" fica num card no canto inferior direito do mapa (o card .ctl-card de extras.js); o chip da OS em
-// foco e, no celular, a legenda dos anos andam para não ficar embaixo dele (--tc-w: largura do card).
+// foco anda para não ficar embaixo dele (--tc-w: largura do card).
 // Sem extras.js (sem o card), volta ao ícone no canto esquerdo.
 (function () {
   const map = window.__map;
@@ -22,6 +24,7 @@
 .tc-btn .sai,.tc-btn[aria-pressed="true"] .abre{display:none}
 .tc-btn[aria-pressed="true"] .sai{display:block}
 .tc-ctl .tc-painel{width:auto;padding:0 var(--s3);font:600 var(--t-sm) var(--f-body);gap:6px;display:none}
+.ctl-l2>.tc-painel-c{border-bottom:1px solid var(--vidro-borda);padding-bottom:2px;margin-bottom:2px}
 body.tela-cheia{overflow:hidden}
 body.tela-cheia .mapbox{position:fixed;inset:0;z-index:1000;border-radius:0;border:0;box-shadow:none}
 body.tela-cheia #map{height:100vh;height:100dvh;min-height:0}
@@ -32,21 +35,21 @@ body.tela-cheia .panel{position:fixed;top:0;right:0;bottom:0;z-index:1100;width:
 @media (prefers-reduced-motion:no-preference){body.tela-cheia.tc-anima .panel{transition:transform var(--dur-l) var(--ease),visibility 0s var(--dur-l)}}
 body.tela-cheia.tc-gaveta .panel{transform:none;visibility:visible;transition-delay:0s}
 body.tela-cheia .grp{background:var(--paper)}
-@media (min-width:701px){body.tela-cheia.tc-gaveta .classes,body.tela-cheia.tc-gaveta .ctl-dir,body.tela-cheia.tc-gaveta .tc-canto{right:calc(min(420px,92vw) + 12px)}}
-/* canto inferior direito, acima do crédito do mapa; o chip da OS em foco fica à esquerda dele e, no celular, a legenda
-   dos anos termina antes dele e o chip sobe */
+@media (min-width:701px){body.tela-cheia.tc-gaveta .tc-canto{right:calc(min(420px,92vw) + 12px)}}   /* T1 T2 T3 e Menu ficam à esquerda: a gaveta não os cobre */
+/* canto inferior direito, acima do crédito do mapa; o chip da OS em foco fica à esquerda dele */
 .tc-canto{position:absolute;right:12px;bottom:28px;z-index:810}
 .mapbox .limp-chip{right:calc(20px + var(--tc-w,0px))}
 @media (min-width:701px){body.tela-cheia.tc-gaveta .mapbox .limp-chip{right:calc(min(420px,92vw) + 20px + var(--tc-w,0px))}}
-@media (max-width:640px){.mapbox .limp-maplg{right:calc(20px + var(--tc-w,0px))}.mapbox .limp-chip{right:12px;bottom:86px}}
 .tc-fecha-gaveta{display:none;position:sticky;top:0;z-index:2;justify-self:end;width:40px;height:40px;place-items:center;padding:0;border:0;border-radius:var(--r2);
   background:var(--paper);color:var(--fg);font:400 var(--t-lg)/1 var(--f-body);cursor:pointer}
 .tc-fecha-gaveta:hover{background:color-mix(in srgb,var(--fg) 6%,var(--paper))}
 body.tela-cheia .tc-fecha-gaveta{display:grid}
+/* na gaveta, a barra de busca fica em pé: busca e, embaixo, o município */
+body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s2)}
 @media (min-width:457px){   /* gaveta de 420 px: o ✕ fica na mesma linha da busca */
   body.tela-cheia .panel{grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s2)}
   body.tela-cheia .panel>*{grid-column:1/-1}
-  body.tela-cheia .panel>.busca{grid-column:1;grid-row:1}
+  body.tela-cheia .panel>:is(.busca,.barra-busca){grid-column:1;grid-row:1}
   body.tela-cheia .panel>.tc-fecha-gaveta{grid-column:2;grid-row:1}
 }
 @media (prefers-reduced-motion:no-preference){.tc-ctl button,.tc-fecha-gaveta{transition:background-color var(--dur) var(--ease),color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}}`;
@@ -63,7 +66,7 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
     options: { position: 'topleft' },
     onAdd() {
       const d = L.DomUtil.create('div', 'tc-ctl');
-      d.innerHTML = (canto ? '' : BTN_TC) +
+      d.innerHTML = BTN_TC +
         `<button type="button" class="tc-painel" aria-expanded="false" title="Abrir o painel (limpeza, busca, detalhe)">☰ Painel</button>`;
       L.DomEvent.disableClickPropagation(d);
       L.DomEvent.on(d, 'click', L.DomEvent.stopPropagation);   // clique nos botões não chega ao mapa (que limparia a seleção)
@@ -71,7 +74,7 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
       return d;
     },
   });
-  const ctl = new Ctl().addTo(map);
+  const ctl = canto ? null : new Ctl().addTo(map);   // com o Menu do mapa, o painel abre por ele (item "Painel")
   if (canto) {                                            // card "Tela cheia"
     canto.className = 'tc-canto ctl-card';
     canto.innerHTML = BTN_TC;
@@ -84,7 +87,21 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
   }
   const btn = (canto || ctl.getContainer()).querySelector('.tc-btn');
   btn.addEventListener('click', alterna);
-  const btnPainel = ctl.getContainer().querySelector('.tc-painel');
+  // item "Painel" no Menu do mapa: só em tela cheia (entra e sai da lista com ela), marcado com a gaveta aberta
+  const lista = canto ? window.__ctlMapa() : null;
+  let itemPainel = null;
+  if (lista) {
+    itemPainel = document.createElement('div');
+    itemPainel.className = 'ctl-card tc-painel-c';
+    itemPainel.innerHTML = '<button type="button" class="tc-painel-m" aria-pressed="false" title="Painel lateral (resumo, camadas, dados)">Painel</button>';
+    itemPainel.firstChild.addEventListener('click', () => {
+      const abrir = !document.body.classList.contains('tc-gaveta');
+      const menu = document.querySelector('.ctl-cam-b');
+      if (menu && menu.getAttribute('aria-expanded') === 'true') menu.click();   // fecha o Menu; o painel abre na lateral
+      gaveta(abrir, true);
+    });
+  }
+  const btnPainel = itemPainel ? itemPainel.firstChild : ctl.getContainer().querySelector('.tc-painel');
 
   const fecha = document.createElement('button');
   fecha.type = 'button';
@@ -94,6 +111,14 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
   fecha.setAttribute('aria-label', 'Fechar painel');
   fecha.addEventListener('click', () => gaveta(false, true));
   painel.prepend(fecha);
+  const barra = document.querySelector('.barra-busca'), stage = document.querySelector('.stage');
+  // a barra de busca vai para a gaveta (logo depois do ✕) e volta para cima do mapa; quem digitava continua no campo
+  function moveBarra(ligado) {
+    if (!barra || !stage) return;
+    const f = barra.contains(document.activeElement) ? document.activeElement : null;
+    if (ligado) fecha.after(barra); else stage.before(barra);
+    if (f) f.focus({ preventScroll: true });
+  }
 
   const nativo = () => document.fullscreenElement || document.webkitFullscreenElement;
   let centro = null, yAntes = 0, voltar = null;
@@ -104,6 +129,8 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
     if (ligado) yAntes = window.scrollY;               // em tela cheia a página encolhe e a rolagem vai a 0: ao sair, volta ao mesmo lugar
     if (!ligado) document.body.classList.remove('tc-anima');
     document.body.classList.toggle('tela-cheia', ligado);
+    moveBarra(ligado);
+    if (itemPainel) { if (ligado) lista.prepend(itemPainel); else itemPainel.remove(); }
     if (!ligado) { gaveta(false); voltar = yAntes; volta(); }
     // a gaveta só anima depois de já estar fora da tela (sem isso, ela passaria deslizando ao entrar na tela cheia)
     else { void painel.offsetWidth; document.body.classList.add('tc-anima'); }
@@ -126,9 +153,10 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
   }
   function gaveta(abrir, foco) {
     document.body.classList.toggle('tc-gaveta', abrir);
-    btnPainel.setAttribute('aria-expanded', abrir);
+    btnPainel.setAttribute(itemPainel ? 'aria-pressed' : 'aria-expanded', abrir);
     if (abrir) painel.scrollTop = 0;
-    if (foco) (abrir ? fecha : btnPainel).focus({ preventScroll: true });   // teclado: o foco vai para dentro e volta ao botão
+    // teclado: o foco vai para dentro e volta ao botão (o do Menu, que fica fechado: o botão do Menu)
+    if (foco) (abrir ? fecha : itemPainel ? document.querySelector('.ctl-cam-b') : btnPainel).focus({ preventScroll: true });
   }
   // saiu da tela cheia nativa pelo Esc / gesto do sistema: volta o layout
   // (a saída da tela cheia nativa chega depois e muda o tamanho da janela: devolve a rolagem de novo)
@@ -143,7 +171,7 @@ body.tela-cheia .tc-fecha-gaveta{display:grid}
   // tocar numa OS ou trecho dentro da gaveta no celular: fecha a gaveta para mostrar o mapa
   painel.addEventListener('click', e => {
     if (!document.body.classList.contains('tc-gaveta') || window.innerWidth > 700) return;
-    if (e.target.closest('.limp-os-b, .insp-os-b, .row, .chip[data-t], .ir')) setTimeout(() => gaveta(false), 50);
+    if (e.target.closest('.limp-os-b, .insp-os-b, .row, .chip[data-t], .ir, .ativo-hit button')) setTimeout(() => gaveta(false), 50);
   });
   window.__telaCheia = alterna;
 })();

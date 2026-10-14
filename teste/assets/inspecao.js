@@ -1,7 +1,8 @@
 // Inspeção visual de MT (roda depois de limpeza.js, com window.D e window.INSPECAO de scripts/inspecao.py).
-// Card "Inspeção" no mapa, ao lado do "Faixa": pinta a rede inspecionada com a cor do ano da execução; o resto fica
-// cinza-claro. Faixa e Inspeção pintam a rede inteira, então ligar uma desliga a outra (window.__soEsta, de extras.js).
-// No painel: anos (liga/desliga) e as inspeções por ano; tocar numa inspeção enquadra no mapa o bloco dela.
+// "Inspeção" no menu Camadas do mapa, com a "Faixa": pinta a rede inspecionada com a cor do ano da execução; o resto fica
+// cinza-claro. Com a Faixa também ligada, a inspeção vira uma borda larga na cor do ano em volta da linha da Faixa (o
+// cinza e o toque na rede ficam com a Faixa, cujo balão mostra também as inspeções do vão) e a legenda fica ao lado da dela.
+// No painel: uma linha por ano (liga/desliga no mapa; abre as inspeções do ano embaixo dela); tocar numa inspeção enquadra no mapa o bloco dela.
 // Posição: o BLOCO do ELEMENTO da OS, da chave dele descendo pela rede até as próximas chaves (scripts/inspecao.py).
 // Pontos vermelhos: o início do bloco (ELEMENTO) e as chaves onde ele termina, um ponto por lugar (a chave que fecha um
 // bloco costuma abrir o seguinte); tocar mostra as inspeções que começam e terminam nele.
@@ -71,9 +72,7 @@
     ligado: guarda('insp-ligado') === '1',
     anos: new Set(ANOS),
     foco: null,
-    mais: guarda('insp-mais') === '1',
-    lista: false,
-    grupos: new Set(),
+    grupos: new Set(),       // anos abertos, com as inspeções embaixo
     sel: null,
   };
 
@@ -100,6 +99,8 @@
 .insp-pt span b{font-family:var(--f-body);font-weight:700;margin-right:4px}
 .insp-pt.fim{width:13px;height:13px;border-width:2px}
 .insp-pt.ref{background:#9ca3af}
+.insp-junto{margin-top:8px;padding-top:6px;border-top:1px solid #0002}
+.insp-junto .t{font-size:13.5px}
 .limp-maplg i.insp-dot{width:10px;height:10px;border-radius:50%;background:${VERMELHO};box-shadow:0 0 0 2px #fff}
 body.insp-on #legenda{display:none}
 body.insp-on .classes button{box-shadow:inset 0 -3px 0 #9ca3af}
@@ -112,6 +113,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   // ---------- mapa ----------
   const seg = v => [[v[0], v[1]], [v[2], v[3]]];
   let camada = null, realce = null, selL = null, fundoCache = null, pontosL = [];
+  let comFaixa = false, bordas = [], arruma = 0;     // Faixa também ligada: bordas largas por baixo dela
   const raio = () => map.getZoom() < 13 ? 3.5 : map.getZoom() < 16 ? 5 : 6.5;
   function linhaDupla(vs, cor, peso, opacidade, extra) {
     // contorno escuro por baixo: a cor aparece igual sobre mata escura ou solo claro
@@ -138,6 +140,15 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     });
     return melhor;
   }
+  // inspeções de um vão, da mais recente para a mais antiga (balão da Inspeção e, com a Faixa ligada, o balão dela)
+  function linhasVao(v) {
+    const ks = porVao[v[5]].ks.slice().sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
+    return ks.length ? ks.map((k, i) => {
+      const o = IN.os[k], rot = !i ? 'Inspecionado em' : o.data === IN.os[ks[0]].data ? 'Também em' : 'Antes:';
+      return `<div class="lb-l" style="--c:${corAno(anoDe(o))}"><b>${rot} ${br(o.data)}</b> · <a href="#" data-k="${k}">OS ${esc(o.os)}</a> · ${esc(o.eq)}</div>`;
+    }).join('') : '<div class="nada">Sem inspeção executada registrada aqui</div>';
+  }
+  window.__balaoInsp = v => st.ligado && porVao[v[5]] ? `<div class="insp-pop insp-junto"><div class="t">Inspeção visual</div>${linhasVao(v)}</div>` : '';
   // balão ao tocar na rede: trecho + inspeções daquele vão
   function balao(e, vs) {
     L.DomEvent.stopPropagation(e);
@@ -147,13 +158,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const oe = e.originalEvent || {};
     if ((oe.ctrlKey || oe.metaKey) && window.__clique) return window.__clique(nome, oe, false);   // Ctrl + clique: soma trechos
     if (window.__sel) window.__sel(nome, false);
-    const ks = porVao[v[5]].ks.slice().sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
-    const html = `<div class="insp-pop"><div class="t">Trecho ${esc(nome)} <small>inspeção visual</small></div>` +
-      (ks.length ? ks.map((k, i) => {
-        const o = IN.os[k], rot = !i ? 'Inspecionado em' : o.data === IN.os[ks[0]].data ? 'Também em' : 'Antes:';
-        return `<div class="lb-l" style="--c:${corAno(anoDe(o))}"><b>${rot} ${br(o.data)}</b> · <a href="#" data-k="${k}">OS ${esc(o.os)}</a> · ${esc(o.eq)}</div>`;
-      }).join('')
-        : '<div class="nada">Sem inspeção executada registrada aqui</div>') + '</div>';
+    const html = `<div class="insp-pop"><div class="t">Trecho ${esc(nome)} <small>inspeção visual</small></div>${linhasVao(v)}</div>`;
     L.popup({ className: 'limp-popup', maxWidth: 300, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] }).setLatLng(e.latlng).setContent(html).openOn(map);
   }
   if (map) map.getContainer().addEventListener('click', e => {
@@ -167,19 +172,35 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     if (camada) camada.remove();
     camada = null;
     document.body.classList.toggle('insp-on', st.ligado);
+    comFaixa = document.body.classList.contains('limp-on');
+    bordas = [];
     if (st.ligado) {
       const op = st.foco === null ? 1 : .35;
-      const ls = [...fundo()];
+      const ls = comFaixa ? [] : [...fundo()];
       ANOS.slice().reverse().filter(a => st.anos.has(a)).forEach(a => {   // o ano mais recente fica por cima
         const vs = VAOS_ANO[a].filter(vis);
-        if (vs.length) ls.push(...clicavel(linhaDupla(vs, corAno(a), 5, op), vs));
+        if (!vs.length) return;
+        // com a Faixa: borda larga por baixo de tudo (a linha da Faixa, com o contorno escuro, fica no meio dela)
+        if (comFaixa) bordas.push(L.polyline(vs.map(seg), { color: corAno(a), weight: 15, opacity: .9 * op, interactive: false, lineCap: 'round' }));
+        else ls.push(...clicavel(linhaDupla(vs, corAno(a), 5, op), vs));
       });
       pontosL = pontos(op);
-      camada = L.layerGroup(ls.concat(pontosL)).addTo(map);
+      camada = L.layerGroup(ls.concat(bordas, pontosL)).addTo(map);
+      bordas.slice().reverse().forEach(l => l.bringToBack());   // a mais recente fica por cima das mais antigas
     } else pontosL = [];
     [selL, realce].forEach(g => g && g.eachLayer(l => l.bringToFront && l.bringToFront()));
     pontosL.forEach(l => l.bringToFront());          // os pontos ficam por cima do contorno do trecho escolhido
   }
+  // a Faixa redesenha por cima (ao ligar, trocar de ano…): os pontos voltam para cima dela; ligar/desligar a Faixa troca o jeito
+  if (map) map.on('layeradd layerremove', () => {
+    if (!st.ligado || arruma) return;
+    arruma = requestAnimationFrame(() => {
+      arruma = 0;
+      if (comFaixa !== document.body.classList.contains('limp-on')) return desenha();
+      [selL, realce].forEach(g => g && g.eachLayer(l => l.bringToFront && l.bringToFront()));
+      pontosL.forEach(l => l.bringToFront());
+    });
+  });
   // pontos vermelhos dos ativos de início e fim (só das inspeções dos anos ligados)
   function pontos(op) {
     const ano = k => st.anos.has(anoDe(IN.os[k]));
@@ -223,7 +244,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     if (zoomPonto) map.setView(lls[0], Math.max(map.getZoom(), 16));
     else map.fitBounds(L.latLngBounds(lls).pad(0.15), { maxZoom: 16 });
   }
-  function focar(k, enquadrar) {
+  function focar(k, enquadrar, doPainel) {
     st.foco = st.foco === k ? null : k;
     if (realce) { realce.remove(); realce = null; }
     if (st.foco !== null) {
@@ -248,19 +269,17 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
         if (enquadrar) enquadra([o.pe || o.pt || o.pa], true);
       }
       st.grupos.add(String(anoDe(o)));
-      st.mais = true; st.lista = true;                  // abre "Anos e inspeções" e o grupo da OS
     }
     desenha();
     pinta();
+    if (!doPainel && window.__rolaPainel) window.__rolaPainel(card, st.foco);
   }
   function liga(on) {
-    if (on && window.__soEsta) window.__soEsta('insp');
     st.ligado = on; guarda('insp-ligado', on ? '1' : '0');
     if (!on && realce) { realce.remove(); realce = null; st.foco = null; }
     window.__onSel(st.sel);
     desenha(); pinta();
   }
-  if (window.__camadas) window.__camadas.insp = { desliga: () => { if (st.ligado) liga(false); } };
   // outra camada (Manutenção) mostra a inspeção que gerou uma OS: liga a Inspeção e foca nela (soVer: só diz se ela
   // está no mapa deste alimentador)
   window.__focaInspecao = (num, soVer) => {
@@ -272,7 +291,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     return true;
   };
 
-  // legenda dos anos sobre o mapa (o mesmo vidro da legenda da limpeza)
+  // legenda dos anos sobre o mapa (o mesmo vidro da legenda da limpeza; extras.js a põe na coluna embaixo do menu Camadas)
   let maplg = null;
   if (map && window.L) {
     maplg = document.createElement('div');
@@ -284,9 +303,8 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     maplg.addEventListener('click', e => { const b = e.target.closest('button[data-a]'); if (b) alternaAno(+b.dataset.a); });
   }
   function alternaAno(a) { st.anos.has(a) ? st.anos.delete(a) : st.anos.add(a); desenha(); pinta(); }
-  function soAno(a) { st.anos = new Set([a]); desenha(); pinta(); enquadra(VAOS_ANO[a].flatMap(seg)); }
 
-  // botão "Inspeção" no mapa, ao lado do "Faixa"
+  // botão "Inspeção" no menu Camadas do mapa (extras.js), com o "Faixa"
   const l2 = map && window.__ctlMapa ? window.__ctlMapa() : null;
   let btn = null;
   if (l2) {
@@ -321,51 +339,44 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       `<span class="q">${br(o.data)} · OS ${esc(o.os)} · ${onde(k)}</span><span class="s">${esc(o.eq)} · bloco do ${esc(o.elem || '—')}</span></button>` +
       (comFoco && st.foco === k ? focoHtml(k) : '');
   };
-  const grupo = (g, titulo, cor, info, ks) =>
-    `<details class="limp-grupo" data-g="${g}"${st.grupos.has(g) ? ' open' : ''}><summary style="--c:${cor}"><i></i>${titulo} <span>${info}</span></summary><div>${ks.map(k => osBtn(k, true)).join('')}</div></details>`;
+  // linha de um ano (o mesmo visual da Faixa): a cor liga/desliga no mapa, o resto abre as inspeções logo abaixo
+  // (montadas só com o ano aberto), "só" deixa só aquele ano no mapa
+  function linha(a) {
+    const g = String(a), ks = OS_ANO[a], aberto = st.grupos.has(g), id = 'insp-g-' + g, on = st.anos.has(a);
+    const i = `<i style="--c:${corAno(a)}"></i>`;
+    return `<div class="limp-ano-l${st.ligado && !on ? ' off' : ''}">` +
+      (st.ligado ? `<button type="button" class="liga" data-a="${a}" data-foco="a${a}" aria-pressed="${on}" aria-label="${a} no mapa" title="Mostrar/esconder ${a} no mapa">${i}</button>`
+        : `<span class="cor" aria-hidden="true">${i}</span>`) +
+      `<button type="button" class="abre" data-g="${g}" data-foco="g${g}" aria-expanded="${aberto}" aria-controls="${id}"><span><b>${a}</b> · ${ks.length} OS</span><em>${ext(KM_ANO[a])}</em></button>` +
+      `</div><div class="limp-oss" id="${id}" role="group" aria-label="Inspeções de ${a}"${aberto ? '' : ' hidden'}>${aberto ? ks.map(k => osBtn(k, true)).join('') : ''}</div>`;
+  }
 
   function pinta() {
     const f = document.activeElement;
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
     const n = IN.os.length;
-    const sub = n ? `${nf(n)} inspeç${n === 1 ? 'ão executada' : 'ões executadas'} · ${ext(KM_INSP)} de ${km(KM_REDE)} inspecionados` +
-      (IN.base_ate ? ` · base até ${br(IN.base_ate)}` : '') : `Nenhuma inspeção executada na base${IN.base_ate ? ' (até ' + br(IN.base_ate) + ')' : ''}`;
-    let corpo = '';
-    if (st.ligado && ANOS.length) {
-      corpo = `<div class="limp-anos">${ANOS.map(a => `<div class="limp-ano-l">
-          <button type="button" class="liga" data-a="${a}" data-foco="a${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a} no mapa"><i style="--c:${corAno(a)}"></i><span><b>${a}</b> · ${OS_ANO[a].length} OS</span><em>${ext(KM_ANO[a])}</em></button>
-          <button type="button" class="so" data-so="${a}" data-foco="s${a}" title="Mostrar só ${a} e enquadrar no mapa">Ver só</button></div>`).join('')}</div>
-        ${st.anos.size < ANOS.length ? '<button type="button" class="limp-todos" data-acao="todos" data-foco="todos">Mostrar todos os anos</button>' : ''}
-        <p class="limp-nota">Só inspeções executadas, pela data de execução. A inspeção cobre o bloco do ELEMENTO da OS: da chave dele descendo pela rede até as próximas chaves (conferido com os defeitos das OS de manutenção geradas pelas inspeções: 92% caem no bloco). Pontos vermelhos: o início do bloco (ELEMENTO) e as chaves onde ele termina; toque para ver as inspeções de cada um. Cinza-claro: sem inspeção registrada.</p>`;
-    }
-    const lista = n ? `<details class="limp-lista"${st.lista ? ' open' : ''}><summary data-foco="lista">Ver as ${nf(n)} inspeções por ano</summary><div>
-        ${ANOS.map(a => grupo(String(a), a, corAno(a), `${OS_ANO[a].length} OS · ${ext(KM_ANO[a])}`, OS_ANO[a])).join('')}</div></details>` : '';
-    const resto = corpo + lista;
+    const sub = n ? `${nf(n)} inspeç${n === 1 ? 'ão executada' : 'ões executadas'} · ${ext(KM_INSP)} de ${km(KM_REDE)}` : 'Nenhuma inspeção executada';
+    const resto = ANOS.length ? `<div class="limp-anos">${ANOS.map(linha).join('')}</div>` +
+      (st.ligado && st.anos.size < ANOS.length ? '<button type="button" class="limp-todos" data-acao="todos" data-foco="todos">Mostrar todos os anos</button>' : '') : '';
+    card.hidden = !st.ligado && !!btn;                    // bloco da Inspeção só com ela ligada no mapa
     card.innerHTML = `<div class="limp-top"><h2>Inspeção visual<small>${sub}</small></h2></div>
-      ${!st.ligado && btn && n ? '<p class="limp-nota limp-desl">Desligada no mapa: toque em <b>Inspeção</b>, no canto do mapa, para ver a rede inspecionada.</p>' : ''}
-      ${resto ? `<details class="limp-mais"${st.mais ? ' open' : ''}><summary data-foco="mais">Anos e inspeções</summary><div>${resto}</div></details>` : ''}`;
+      ${resto}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
     if (btn) btn.setAttribute('aria-pressed', String(st.ligado));
     if (maplg) {
       maplg.hidden = !st.ligado;
-      maplg.innerHTML = `<span><b>Inspeção</b></span>` +
+      maplg.innerHTML = `<span class="lg-cab"><b>Inspeção</b></span>` +
         ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a}"><i style="--c:${corAno(a)}"></i><b>${a}</b></button>`).join('') +
-        (PONTOS.length ? '<span><i class="insp-dot"></i>início / fim</span>' : '') +
-        `<span><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem inspeção</span>`;
+        (PONTOS.length ? '<span class="lg-info"><i class="insp-dot"></i>início / fim</span>' : '') +
+        `<span class="lg-info"><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem inspeção</span>`;
     }
     if (det) det.querySelectorAll('.insp-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));
   }
-  card.addEventListener('toggle', e => {
-    const d = e.target;
-    if (d.classList.contains('limp-mais')) { st.mais = d.open; guarda('insp-mais', d.open ? '1' : '0'); }
-    else if (d.classList.contains('limp-lista')) st.lista = d.open;
-    else if (d.dataset.g) d.open ? st.grupos.add(d.dataset.g) : st.grupos.delete(d.dataset.g);
-  }, true);
   card.addEventListener('click', e => {
     const b = e.target.closest('button');
     if (!b) return;
-    if (b.dataset.k !== undefined) return focar(+b.dataset.k, true);
-    if (b.dataset.so) return soAno(+b.dataset.so);
+    if (b.dataset.k !== undefined) return focar(+b.dataset.k, true, true);
+    if (b.classList.contains('abre')) { const g = b.dataset.g; st.grupos.has(g) ? st.grupos.delete(g) : st.grupos.add(g); return pinta(); }
     if (b.classList.contains('liga') && b.dataset.a) return alternaAno(+b.dataset.a);
     if (b.dataset.acao === 'todos') { st.anos = new Set(ANOS); desenha(); pinta(); }
   });
@@ -393,7 +404,23 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     det.addEventListener('click', e => { const b = e.target.closest('.insp-os-b'); if (b) focar(+b.dataset.k, true); });
   }
 
-  if (st.ligado && window.__soEsta) window.__soEsta('insp');   // ficou ligada da última vez: a Faixa sai
+  // ---------- Downloads (em "Dados", extras.js): todas as inspeções do alimentador ----------
+  if (window.__baixar && window.__csv && IN.os.length) {
+    const C = window.__csv;
+    window.__baixar.botao('insp', 'Inspeções (Excel)', () => {
+      const ks = IN.os.map((o, k) => k).sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
+      C(`Inspecoes_${C.al}.csv`,
+        ['Alimentador', 'OS', 'Equipe', 'Execução', 'Criticidade', 'ELEMENTO', 'ABRANGÊNCIA', 'Montante da ABRANGÊNCIA', 'Trechos',
+          'Extensão no mapa (km)', 'Chaves de fim do bloco', 'Latitude', 'Longitude', 'Posição no mapa', 'Descrição'],
+        ks.map(k => {
+          const o = IN.os[k], ll = o.pe || o.pt || o.pa;
+          return [D.meta.al, o.os_completa || o.os, o.eq, C.data(o.data), o.crit, o.elem, o.abr, o.mont, C.trechos(vaosDaOs[k].map(v => v[5])),
+            vaosDaOs[k].length ? C.num(o.m / 1000, 2) : '', (o.fins || []).map(f => f[2]).join(', '),
+            ll ? C.num(ll[0]) : '', ll ? C.num(ll[1]) : '', o.metodo, o.desc];
+        }));
+    }, `Planilha (CSV para o Excel) com as ${IN.os.length} inspeções`);
+  }
+
   poeDetalhe();
   desenha();
   pinta();

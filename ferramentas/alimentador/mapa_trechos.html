@@ -88,9 +88,9 @@ p{margin:0}
 details>summary{cursor:pointer;list-style:none}
 details>summary::-webkit-details-marker{display:none}
 /* summary dos textos que só abrem quando alguém pede: ▸ fechado, ▾ aberto */
-:is(.mais,.dados,.limp-mais)>summary{display:flex;align-items:center;gap:6px;min-height:var(--alvo);font:600 var(--t-md)/1.3 var(--f-body);color:var(--fg);border-radius:var(--r1)}
-:is(.regra,.mais,.dados,.limp-mais)>summary::before{content:'▸';flex:none;width:10px;color:var(--muted);font-size:var(--t-sm)}
-:is(.regra,.mais,.dados,.limp-mais)[open]>summary::before{content:'▾'}
+:is(.mais,.dados)>summary{display:flex;align-items:center;gap:6px;min-height:var(--alvo);font:600 var(--t-md)/1.3 var(--f-body);color:var(--fg);border-radius:var(--r1)}
+:is(.regra,.mais,.dados)>summary::before{content:'▸';flex:none;width:10px;color:var(--muted);font-size:var(--t-sm)}
+:is(.regra,.mais,.dados)[open]>summary::before{content:'▾'}
 
 /* ====== Cabeçalho ====== */
 header{display:grid;gap:var(--s2);max-width:80ch}
@@ -104,9 +104,13 @@ header{display:grid;gap:var(--s2);max-width:80ch}
 .migalhas .mig-t:empty{display:none}
 @media (pointer:coarse){.migalhas a{display:inline-flex;align-items:center;min-height:40px}}
 .al-site .wrap>.foot{display:none}   /* site: a nota vai para "Dados e procedência" (extras.js); sem isso ela aparece e depois pula */
-/* site: o painel aparece de uma vez, já completo (filtros, lista, detalhe), quando todos os scripts rodaram — sem ir empurrando a lista */
-.al-site:not(.al-pronto) .panel>:not(.busca){visibility:hidden;opacity:0}
-@media (prefers-reduced-motion:no-preference){.al-site .panel>:not(.busca){transition:opacity var(--dur-l) var(--ease)}}
+/* site: o painel aparece de uma vez, já completo (filtros, lista, detalhe), quando todos os scripts rodaram — sem ir empurrando a lista
+   (a busca também, até subir para a barra acima do mapa; a barra, que na tela cheia entra na gaveta, fica de fora) */
+.al-site:not(.al-pronto) .panel>:not(.barra-busca){visibility:hidden;opacity:0}
+@media (prefers-reduced-motion:no-preference){.al-site .panel>:not(.barra-busca){transition:opacity var(--dur-l) var(--ease)}}
+/* site: a busca e o município sobem para uma barra acima do mapa (extras.js); até ela chegar, o lugar fica guardado e o mapa não desce */
+.al-site:not(.al-pronto) .wrap:not(:has(>.barra-busca))>.stage{margin-top:calc(40px + var(--s5))}
+@media (max-width:980px){.al-site:not(.al-pronto) .wrap:not(:has(>.barra-busca))>.stage{margin-top:calc(44px + var(--s5))}}
 .eyebrow{font:600 var(--t-xs)/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 h1{font:700 var(--t-h1)/1.1 var(--f-display);letter-spacing:-.01em;margin:0}
 .sub{font-size:var(--t-md);color:var(--muted);margin-top:calc(-1 * var(--s1))}
@@ -164,19 +168,32 @@ h1{font:700 var(--t-h1)/1.1 var(--f-display);letter-spacing:-.01em;margin:0}
 .ferramentas:not(:has(>:not([hidden]))){display:none}
 .filtros,.ctrl{display:contents}
 .ferramentas label{display:grid;gap:2px;align-content:start;min-width:0;font-size:var(--t-xs);color:var(--muted)}
-.ferramentas label[for="ind"]{justify-self:start;display:inline-flex;align-items:center;gap:var(--s2);min-height:var(--alvo);margin-top:calc(var(--s1) - var(--s3));font-size:var(--t-sm);color:var(--fg);cursor:pointer}
+.ctrl label[for="ind"]{justify-self:start;display:inline-flex;align-items:center;gap:var(--s2);min-height:var(--alvo);font-size:var(--t-sm);color:var(--fg);white-space:nowrap;cursor:pointer}
+.ferramentas label[for="ind"]{margin-top:calc(var(--s1) - var(--s3))}
 /* Classe: segmentado curto (mesma receita de .limp-seg e do ranking por polo) */
-.f-classe{display:flex;gap:2px;padding:3px;border:0;border-radius:var(--r2);background:var(--hover)}
-.f-classe button{flex:1 1 0;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:var(--alvo);padding:0 var(--s2);border:0;border-radius:7px;background:transparent;color:var(--muted);font:600 var(--t-sm) var(--f-body);white-space:nowrap;cursor:pointer}
-.f-classe button i{flex:none;width:8px;height:8px;border-radius:2px;background:var(--c)}
-.f-classe button:hover{color:var(--fg)}
-.f-classe button[aria-pressed="true"]{background:var(--seg-on,var(--paper));color:var(--fg);box-shadow:var(--sh1)}
-.f-classe button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 #ind{flex:none;width:18px;height:18px;margin:0;accent-color:var(--accent);cursor:pointer}
 .filtros select,#mes{-webkit-appearance:none;appearance:none;width:100%;min-width:0;min-height:40px;padding:0 32px 0 var(--s3);border:1px solid var(--line-forte);border-radius:var(--r2);
   background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%238c948f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center/12px;
   color:var(--fg);font:var(--t-base) var(--f-body);text-overflow:ellipsis;cursor:pointer}
 @media (max-width:980px){.busca,.filtros select,#mes{min-height:44px;font-size:16px}}   /* 16 px: o iPhone não dá zoom no campo */
+/* NAE: botão com a lista de meses para marcar (um, vários ou todos); a lista abre embaixo, alinhada à direita do botão */
+.mes{position:relative;min-width:0}
+#mes{display:block;text-align:left;white-space:nowrap;overflow:hidden}
+#mes[aria-expanded="true"]{border-color:var(--accent)}
+.mes-lista{position:absolute;z-index:1200;top:calc(100% + var(--s1));right:0;min-width:100%;width:max-content;max-width:min(320px,calc(100vw - 32px));
+  max-height:min(380px,60vh);overflow-y:auto;overscroll-behavior:contain;display:grid;padding:6px;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2)}
+.ferramentas .mes-lista label,.mes-lista label{display:flex;align-items:center;gap:10px;min-height:var(--alvo);padding:0 10px;border-radius:calc(var(--r2) - 2px);
+  font:var(--t-base) var(--f-body);color:var(--fg);white-space:nowrap;cursor:pointer}
+.mes-lista label:hover{background:var(--hover)}
+.mes-lista label:has(:focus-visible){box-shadow:inset 0 0 0 2px var(--accent)}
+.mes-lista input{flex:none;width:18px;height:18px;margin:0;accent-color:var(--accent);cursor:pointer}
+.mes-lista input:focus-visible{outline:none}
+.mes-lista small{font-size:var(--t-xs);color:var(--muted)}
+.mes-lista .mes-tds{margin-bottom:6px;box-shadow:0 7px 0 -6px var(--line)}   /* filete entre "Todos" e os meses */
+.mes-lista .mes-tds:has(:focus-visible){box-shadow:inset 0 0 0 2px var(--accent)}
+.mes-lista .mes-ind{margin-top:6px;box-shadow:0 -7px 0 -6px var(--line)}   /* filete entre os meses e "Contar individuais" */
+.mes-lista .mes-ind:has(:focus-visible){box-shadow:inset 0 0 0 2px var(--accent)}
 
 /* ====== Detalhe do trecho ====== */
 .det{display:grid;gap:var(--s3);position:relative;min-width:0;border:0;background:none;padding:0}
@@ -231,6 +248,10 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 @media (min-width:981px){.lista{max-height:clamp(200px,calc(min(78vh,760px) - 440px),360px)}}   /* o começo do detalhe aparece embaixo, no painel */
 .lista>.lede{padding:var(--s3) var(--s2)}
 .lista:empty{display:none}
+/* ordem da lista: embaixo dela, à esquerda (some com a lista) */
+.ord-lista{justify-self:start;display:inline-flex;align-items:center;gap:var(--s2);font-size:var(--t-xs);color:var(--muted)}
+.ord-lista select{min-height:32px;padding:0 var(--s2);font:500 var(--t-xs) var(--f-body);color:var(--fg);background:var(--paper);border:1px solid var(--line);border-radius:var(--r1)}
+.lista:is(:empty,[hidden])+.ord-lista,.ord-lista[hidden]{display:none}
 .grp{position:sticky;top:0;z-index:1;margin:0;font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:var(--s3) var(--s2) var(--s2);background:var(--bg)}
 .row{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto auto;grid-template-areas:"sw nome nae selo km" ". rota rota rota rota";grid-auto-flow:row;column-gap:var(--s2);row-gap:2px;align-items:center;
   width:100%;min-height:48px;padding:var(--s2);text-align:left;border:0;border-radius:var(--r2);background:transparent;color:var(--fg);cursor:pointer;font:var(--t-sm)/1.3 var(--f-body)}
@@ -251,6 +272,11 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 .legend i{display:inline-block;width:22px;height:5px;border-radius:2px;background:var(--c)}
 .legend i.fino{height:3px}
 .foot{font-size:var(--t-xs);color:var(--muted);max-width:80ch}
+.resumo-classe{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.resumo-classe td,.resumo-classe th{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line)}
+.resumo-classe tr:first-child th{font:500 var(--t-xs) var(--f-body);color:var(--muted)}
+.resumo-classe td+td,.resumo-classe th+th{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.resumo-classe td:first-child{font:600 var(--t-sm) var(--f-mono)}
 /* marcadores */
 .at{display:flex;align-items:center;gap:4px;white-space:nowrap}
 .at b{display:inline-grid;place-items:center;min-width:28px;height:20px;padding:0 4px;background:#fbfbf9;color:#1b2024;border:2px solid #1b2024;border-radius:3px;font:600 11.5px/1 var(--f-mono)}
@@ -293,9 +319,9 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
     ey.textContent = m[1];
     h1.textContent = m[2];
     h1.after(mk('p', 'sub', 'Trechos por ativo'));
-    var nav = mk('nav', 'migalhas'), a = mk('a', '', 'Municípios'), sep = mk('span', '', '›'), al = mk('span', '', m[2]), t = mk('span', 'mig-t');
-    nav.setAttribute('aria-label', 'Caminho'); a.href = '../../'; sep.setAttribute('aria-hidden', 'true'); al.setAttribute('aria-current', 'page'); t.id = 'mig-trecho';
-    nav.append(a, sep, mk('span', 'mig-mun'), al, t);
+    var nav = mk('nav', 'migalhas'), a = mk('a', '', 'Municípios'), t = mk('span', 'mig-t');
+    nav.setAttribute('aria-label', 'Caminho'); a.href = '../../'; t.id = 'mig-trecho';
+    nav.append(a, mk('span', 'mig-mun'), t);   // sem o código do alimentador (já está no título logo abaixo)
     document.querySelector('header').prepend(nav);
     document.addEventListener('DOMContentLoaded', function () { document.documentElement.classList.add('al-pronto'); });   // depois de dados.js, alimentador.js, extras.js, limpeza.js
   })();
@@ -312,11 +338,13 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
       <input class="busca" id="busca" type="search" placeholder="Buscar trecho, ativo ou poste" aria-label="Buscar trecho, ativo ou poste">
       <div class="ferramentas" id="ferramentas">
         <div class="ctrl" id="ctrl" hidden>
-          <label for="mes">NAE em <select id="mes"></select></label>
+          <div class="mes"><button type="button" id="mes" aria-expanded="false" aria-controls="mes-lista"><span class="mes-rot">Meses</span><span class="mes-sep">: </span><span class="mes-txt">todos</span></button>
+            <div class="mes-lista" id="mes-lista" role="group" aria-label="Meses do NAE" hidden></div></div>
           <label for="ind"><input type="checkbox" id="ind" checked> Contar individuais</label>
         </div>
       </div>
       <div class="lista" id="lista" role="region" aria-label="Lista de trechos"></div>
+      <label class="ord-lista" id="ord-lista" hidden>Ordem <select id="ordem" aria-label="Ordem da lista de trechos"><option value="nae">Maior NAE</option><option value="nae-">Menor NAE</option><option value="hier">T1 › T2 › T3</option></select></label>
       <section class="det" id="det" aria-live="polite"></section>
       <div class="legend" id="legenda"></div>
     </aside>
@@ -352,16 +380,31 @@ $('legenda').innerHTML = leg.map(([n, c, k]) => `<span><i class="${k}" style="--
 
 // interrupções (NAE): coletiva = atuou DJ, religador, fusível ou trafo; individual = um consumidor
 const NAE = D.nae || null;
+const ROT_NAE = ((D.meta || {}).origem || {}).nae_filtro === 'arvore' ? 'NAE - vegetação' : 'NAE';   // NAE só de árvore/eucalipto
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const rotMes1 = m => `${MESES[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`;
-const rotMes = m => m === 'todos' ? `${rotMes1(NAE.meses[0])} a ${rotMes1(NAE.meses[NAE.meses.length - 1])}` : rotMes1(m);
+// meses escolhidos (botão #mes, lista de marcar): vazio = todos
+const mesSel = new Set();
+const noPeriodo = m => !mesSel.size || mesSel.has(m);
+const escolhidos = () => NAE.meses.filter(noPeriodo);
+const segue = (a, b) => { const n = +a.slice(0, 4) * 12 + +a.slice(5, 7); return +b.slice(0, 4) * 12 + +b.slice(5, 7) === n + 1; };
+// texto curto do botão "Meses: …": "todos", "mar/2026", "mar, abr/2026", "3 meses"
+function rotBotao() {
+  const ms = escolhidos();
+  if (!mesSel.size && NAE.meses.length > 1) return 'todos';
+  if (ms.length === 1) return rotMes1(ms[0]);
+  return ms.length === 2 && ms[0].slice(0, 4) === ms[1].slice(0, 4) ? `${MESES[+ms[0].slice(5, 7) - 1]}, ${rotMes1(ms[1])}` : `${ms.length} meses`;
+}
 const ABR = {DJ: 'DJ', RL: 'religador', 'CH FUS': 'fusível', CH: 'chave', TR: 'trafo', UC: 'consumidor'};
 if (NAE && NAE.meses.length) {
   $('ctrl').hidden = false;
-  $('mes').innerHTML = (NAE.meses.length > 1 ? `<option value="todos" selected>Todos (${rotMes('todos')})</option>` : '') +
-    NAE.meses.map(m => `<option value="${m}">${rotMes(m)}</option>`).join('');
+  $('mes-lista').innerHTML = (NAE.meses.length > 1 ? `<label class="mes-tds"><input type="checkbox" value="" checked> Todos <small>${rotMes1(NAE.meses[0])} a ${rotMes1(NAE.meses[NAE.meses.length - 1])}</small></label>` : '') +
+    NAE.meses.map(m => `<label><input type="checkbox" value="${m}"${NAE.meses.length > 1 ? '' : ' checked'}> ${rotMes1(m)}</label>`).join('');
+  $('mes-lista').append(document.querySelector('label[for="ind"]'));   // "Contar individuais" fica na lista, embaixo dos meses
+  document.querySelector('label[for="ind"]').classList.add('mes-ind');
+  $('mes').querySelector('.mes-txt').textContent = rotBotao();
 }
-const filtra = l => (l || []).filter(o => ($('mes').value === 'todos' || o.mes === $('mes').value) && (o.col || $('ind').checked));
+const filtra = l => (l || []).filter(o => noPeriodo(o.mes) && (o.col || $('ind').checked));
 const doMes = () => NAE ? filtra(NAE.oc) : [];            // NAE deste alimentador (Crítica): o total do alimentador
 const doExt = () => NAE ? filtra(NAE.ext) : [];           // NAE de outro alimentador cujo ativo hoje está num trecho daqui
 const doTrecho = () => [...doMes(), ...doExt()];          // bloco do trecho: soma a NAE de todos os ativos do trecho
@@ -378,7 +421,7 @@ function listaOc(os, comTrecho) {
 function blocoNae(nome, l) {
   const os = doTrecho().filter(o => (l || [nome]).includes(o.trecho)), col = os.filter(o => o.col).length, ext = os.filter(o => o.de).length;
   const ind = $('ind').checked ? ` · ${os.length - col} individua${os.length - col === 1 ? 'l' : 'is'}` : '';
-  return `<dt class="nae">NAE ${rotMes($('mes').value)}</dt><dd class="nae"><b>${os.length}</b> (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})${os.length ? listaOc(os, !!l) : ''}</dd>`;
+  return `<dt class="nae">${ROT_NAE}</dt><dd class="nae"><b>${os.length}</b> (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})${os.length ? listaOc(os, !!l) : ''}</dd>`;
 }
 function atualizaNae() {
   desenhaLista($('busca').value);
@@ -388,11 +431,59 @@ function atualizaNae() {
   Object.entries(rotulos).forEach(([n, m]) => { const el = m.getElement(); if (el) { el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : ''); el.firstChild.classList.toggle('oc', !!c[n]); } });
   rotulosT3();
 }
-$('mes').addEventListener('change', atualizaNae);
 $('ind').addEventListener('change', atualizaNae);
+// lista dos meses: marcar "Todos" volta a todos; marcar um mês a partir de todos fica só ele; todos marcados um a um = todos
+function marcaMeses() {
+  $('mes-lista').querySelectorAll('input:not(#ind)').forEach(i => { i.checked = i.value ? mesSel.has(i.value) || NAE.meses.length === 1 : !mesSel.size; });
+  $('mes').querySelector('.mes-txt').textContent = rotBotao();
+}
+$('mes-lista').addEventListener('change', e => {
+  if (e.target.id === 'ind') return;                     // "Contar individuais" tem o próprio aviso
+  const v = e.target.value;
+  if (!v) mesSel.clear(); else if (e.target.checked) mesSel.add(v); else mesSel.delete(v);
+  if (mesSel.size === NAE.meses.length) mesSel.clear();
+  marcaMeses();
+  atualizaNae();
+});
+// abre e fecha: botão, Esc (só a lista, antes do Esc da tela cheia), clique fora ou Tab para fora; ↑ ↓ Home End andam na lista
+const abreMes = (sim, foco) => {
+  $('mes-lista').hidden = !sim;
+  $('mes').setAttribute('aria-expanded', String(sim));
+  if (sim && foco) ($('mes-lista').querySelector('input:checked') || $('mes-lista').querySelector('input')).focus();
+};
+$('mes').addEventListener('click', () => abreMes($('mes-lista').hidden, true));
+$('mes').addEventListener('keydown', e => { if (e.key === 'ArrowDown' && $('mes-lista').hidden) { e.preventDefault(); abreMes(true, true); } });
+$('mes-lista').addEventListener('keydown', e => {
+  const is = [...$('mes-lista').querySelectorAll('input')], i = is.indexOf(e.target), passo = {ArrowDown: 1, ArrowUp: -1, Home: -Infinity, End: Infinity}[e.key];
+  if (i < 0 || passo === undefined) return;
+  e.preventDefault();
+  is[Math.max(0, Math.min(is.length - 1, i + passo))].focus();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || $('mes-lista').hidden) return;
+  e.stopPropagation();
+  if ($('mes-lista').contains(document.activeElement)) $('mes').focus();
+  abreMes(false);
+}, true);
+document.addEventListener('pointerdown', e => { if (!$('mes-lista').hidden && !$('mes').parentElement.contains(e.target)) abreMes(false); }, true);
+$('mes').parentElement.addEventListener('focusout', e => { if (e.relatedTarget && !$('mes').parentElement.contains(e.relatedTarget)) abreMes(false); });
 
 // lista
 const GRUPOS = [['principal', 'T1 e T2'], ['ramal', 'T2-A, T2-B… (um por religador)'], ['fusivel', 'Depois de fusível']];
+// ordem da lista: maior NAE primeiro (padrão), menor NAE primeiro, ou T1 › T2 › T3 (os grupos acima). Empate e sem NAE: a ordem
+// dos trechos (T1, T2, T2-A…, T3-A…). Fica guardada no navegador.
+let ordemLista = (() => { try { return localStorage.getItem('ordem-lista') || 'nae'; } catch (e) { return 'nae'; } })();
+if (!['nae', 'nae-', 'hier'].includes(ordemLista)) ordemLista = 'nae';
+if (NAE && NAE.meses.length) {                           // sem NAE a lista fica sempre em T1 › T2 › T3 (sem o seletor)
+  $('ord-lista').hidden = false;
+  $('ordem').value = ordemLista;
+  $('ordem').addEventListener('change', e => {
+    ordemLista = e.target.value;
+    try { localStorage.setItem('ordem-lista', ordemLista); } catch (x) { /* sem armazenamento */ }
+    desenhaLista($('busca').value);
+    $('lista').scrollTop = 0;
+  });
+}
 function fimTxt(t) { return t.fim.join(' / '); }
 let porNome = {}, marcadas = [];                         // linha de cada trecho; linhas escolhidas (aria-current)
 const linha = n => porNome[n] || null;
@@ -403,8 +494,11 @@ function desenhaLista(filtro) {
   const casa = t => !q || [t.nome, t.inicio, t.inicio_poste, ...t.fim, ...t.passa].some(s => String(s).toLowerCase().includes(q))
     || (q.length >= 3 && (doPoste()[q] || new Set()).has(t.nome));
   const cnt = NAE ? contagem() : null;
-  $('lista').innerHTML = GRUPOS.map(([g, titulo]) => {
-    const ts = D.trechos.filter(t => t.tipo === g && casa(t));
+  const ord = cnt ? ordemLista : 'hier', pos = new Map(D.trechos.map((t, i) => [t, i]));
+  const blocos = ord === 'hier' ? GRUPOS.map(([g, titulo]) => [titulo, D.trechos.filter(t => t.tipo === g && casa(t))])
+    : [[ord === 'nae' ? 'Maior NAE primeiro' : 'Menor NAE primeiro', D.trechos.filter(casa).sort((a, b) =>
+      ((cnt[b.nome] || 0) - (cnt[a.nome] || 0)) * (ord === 'nae' ? 1 : -1) || pos.get(a) - pos.get(b))]];
+  $('lista').innerHTML = blocos.map(([titulo, ts]) => {
     if (!ts.length) return '';
     return `<div class="grp" role="heading" aria-level="3">${titulo} · ${mil(ts.length)}</div>` + ts.map(t =>
       `<button type="button" class="row" tabindex="-1" data-t="${esc(t.nome)}" aria-current="${escolhido(t.nome)}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
@@ -467,8 +561,9 @@ $('lista').addEventListener('click', e => {
     const r = rolador(), rola = d => { if (d) r ? (r.scrollTop += d) : window.scrollBy(0, d); };
     rola(b.getBoundingClientRect().top - y);             // a linha tocada fica no mesmo lugar da tela
     // o detalhe vem logo abaixo da lista: se o começo dele não aparece, sobe o necessário, sem tirar a linha tocada da vista
-    const v = areaVisivel(r), falta = $('det').getBoundingClientRect().top + 120 - v.bottom, folga = b.getBoundingClientRect().top - v.top - 40;
-    if (falta > 0 && folga > 0) rola(Math.min(falta, folga));
+    const v = areaVisivel(r), d = $('det').getBoundingClientRect().top, falta = d + 120 - v.bottom, folga = b.getBoundingClientRect().top - v.top - 40;
+    if (d < v.top) rolaPara(r, (r ? r.scrollTop : scrollY) + d - v.top - 8);   // no site o detalhe vem antes da lista (extras.js): ele vai para o alto
+    else if (falta > 0 && folga > 0) rola(Math.min(falta, folga));
   });
 });
 // trecho escolhido fora da lista (mapa, busca, link, detalhe): a lista rola por dentro até a linha e o detalhe aparece
@@ -517,25 +612,18 @@ function detalheVarios(l) {
   </dl><p class="lede so-mouse">Ctrl (⌘ no Mac) + clique põe ou tira um trecho. Clique sem Ctrl volta a um trecho só.</p>`;
 }
 function resumoNae() {
-  const os = doMes(), col = os.filter(o => o.col).length, fora = os.filter(o => !o.trecho), mot = {}, ext = doExt();
-  fora.forEach(o => { const m = (o.fora || '').startsWith('hoje no ') ? 'com o ativo hoje em outro alimentador' : o.fora; mot[m] = (mot[m] || 0) + 1; });
-  const pl = (n, s, p) => `${n} ${n === 1 ? s : p}`;
-  return `<dt class="nae">NAE ${rotMes($('mes').value)}</dt><dd class="nae"><b>${os.length}</b> no alimentador (${pl(col, 'coletiva', 'coletivas')}${$('ind').checked ? ` · ${pl(os.length - col, 'individual', 'individuais')}` : ''})` +
-    `${fora.length ? `<br>Sem trecho aqui: ${Object.entries(mot).map(([m, n]) => `${n} ${esc(m)}`).join(' · ')}${listaOc(fora)}` : ''}` +
-    `${ext.length ? `<br>Mais ${ext.length} de outros alimentadores com o ativo hoje num trecho daqui: contam no trecho, não no total acima.` : ''}</dd>`;
+  return `<dt class="nae">${ROT_NAE}</dt><dd class="nae"><b>${doMes().length}</b> no alimentador</dd>`;
 }
 function resumo() {
-  const total = ((D.meta || {}).resumo || {}).extensao_m ?? D.trechos.reduce((s, t) => s + t.ext, 0);   // o mesmo total de 'Dados e procedência'
-  const fus = D.trechos.filter(t => t.tipo === 'fusivel');
-  const porZ = {};
-  fus.forEach(t => { porZ[t.zona] = (porZ[t.zona] || 0) + 1; });
-  const linha = t => `<dt>${esc(t.nome)}</dt><dd><span class="mono">${esc(t.inicio)} → ${esc(fimTxt(t))}</span> · ${km(t.ext)}</dd>`;
-  const prin = D.trechos.filter(t => t.tipo !== 'fusivel');   // T1 e T2: início → fim de cada um, só quando pedir
-  $('det').innerHTML = `<h2 tabindex="-1">${mil(D.trechos.length)} trecho${D.trechos.length === 1 ? '' : 's'} <small>${km(total)} de rede</small></h2><dl>
-    <dt>Fusíveis</dt><dd>${fus.length ? `${mil(fus.length)} trecho${fus.length === 1 ? '' : 's'} (${Object.entries(porZ).map(([z, n]) => `T${z}: ${mil(n)}`).join(' · ')})` : 'nenhum trecho depois de fusível'}</dd>
-    ${NAE ? resumoNae() : ''}
-  </dl>${prin.length ? `<details class="mais"><summary>T1 e T2 · início → fim</summary><dl>${prin.map(linha).join('')}</dl></details>` : ''}` +
-  `<p class="lede">Toque num trecho no mapa ou na lista para ver início, fim e derivações. <span class="so-mouse">Para somar vários, segure Ctrl (⌘ no Mac) e clique em cada um.</span></p>`;
+  const total = ((D.meta || {}).resumo || {}).extensao_m ?? D.trechos.reduce((s, t) => s + t.ext, 0);
+  // trechos e extensão por classe (T1, T2, T3): as informações gerais do alimentador, no alto do painel, sem título (o Total já dá)
+  const cl = {T1: [0, 0], T2: [0, 0], T3: [0, 0]};
+  D.trechos.forEach(t => { const c = cl[t.nome.split('-')[0]]; if (c) { c[0]++; c[1] += t.ext; } });
+  const tabela = `<table class="resumo-classe"><tr><th>Classe</th><th>Trechos</th><th>Extensão</th></tr>` +
+    Object.entries(cl).map(([k, [n, m]]) => `<tr><td>${k}</td><td>${mil(n)}</td><td>${km(m)}</td></tr>`).join('') +
+    `<tr><th>Total</th><th>${mil(D.trechos.length)}</th><th>${km(total)}</th></tr></table>`;
+  $('det').innerHTML = `${tabela}
+  ${NAE ? `<dl>${resumoNae()}</dl>` : ''}`;
 }
 $('det').addEventListener('click', e => {
   const v = e.target.closest('[data-ll]');               // ocorrência da lista: vai até o ativo no mapa

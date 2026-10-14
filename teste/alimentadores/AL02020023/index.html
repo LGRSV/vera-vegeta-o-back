@@ -26,9 +26,9 @@
     ey.textContent = m[1];
     h1.textContent = m[2];
     h1.after(mk('p', 'sub', 'Trechos por ativo'));
-    var nav = mk('nav', 'migalhas'), a = mk('a', '', 'Municípios'), sep = mk('span', '', '›'), al = mk('span', '', m[2]), t = mk('span', 'mig-t');
-    nav.setAttribute('aria-label', 'Caminho'); a.href = '../../'; sep.setAttribute('aria-hidden', 'true'); al.setAttribute('aria-current', 'page'); t.id = 'mig-trecho';
-    nav.append(a, sep, mk('span', 'mig-mun'), al, t);
+    var nav = mk('nav', 'migalhas'), a = mk('a', '', 'Municípios'), t = mk('span', 'mig-t');
+    nav.setAttribute('aria-label', 'Caminho'); a.href = '../../'; t.id = 'mig-trecho';
+    nav.append(a, mk('span', 'mig-mun'), t);   // sem o código do alimentador (já está no título logo abaixo)
     document.querySelector('header').prepend(nav);
     document.addEventListener('DOMContentLoaded', function () { document.documentElement.classList.add('al-pronto'); });   // depois de dados.js, alimentador.js, extras.js, limpeza.js
   })();
@@ -45,27 +45,34 @@
       <input class="busca" id="busca" type="search" placeholder="Buscar trecho, ativo ou poste" aria-label="Buscar trecho, ativo ou poste">
       <div class="ferramentas" id="ferramentas">
         <div class="ctrl" id="ctrl" hidden>
-          <label for="mes">NAE em <select id="mes"></select></label>
+          <div class="mes"><button type="button" id="mes" aria-expanded="false" aria-controls="mes-lista"><span class="mes-rot">Meses</span><span class="mes-sep">: </span><span class="mes-txt">todos</span></button>
+            <div class="mes-lista" id="mes-lista" role="group" aria-label="Meses do NAE" hidden></div></div>
           <label for="ind"><input type="checkbox" id="ind" checked> Contar individuais</label>
         </div>
       </div>
       <div class="lista" id="lista" role="region" aria-label="Lista de trechos"></div>
+      <label class="ord-lista" id="ord-lista" hidden>Ordem <select id="ordem" aria-label="Ordem da lista de trechos"><option value="nae">Maior NAE</option><option value="nae-">Menor NAE</option><option value="hier">T1 › T2 › T3</option></select></label>
       <section class="det" id="det" aria-live="polite"></section>
       <div class="legend" id="legenda"></div>
     </aside>
   </div>
-  <p class="foot">Fim do trecho: o religador onde começa o T2 seguinte; senão, seguindo a linha principal (rumo ao ponto mais distante do DJ), a 1ª chave onde começa outro trecho ou, se não houver, o poste de fim de linha. Chaves 88 não aparecem. Imagem de satélite: Esri World Imagery, carregada ao vivo.</p>
+  <p class="foot">Fim do trecho: o religador onde começa o T2 seguinte; senão, seguindo a linha principal (rumo ao ponto mais distante do DJ), a 1ª chave onde começa outro trecho ou, se não houver, o poste de fim de linha. Chaves que não dividem trecho (88, faca e outras) só aparecem com o mapa de perto. Imagem de satélite: Esri World Imagery, carregada ao vivo.</p>
 </div>
 
 <script src="../../assets/leaflet/leaflet.js"></script>
 <script src="dados.js"></script>
 <script src="../../assets/alimentador.js"></script>
 <script src="../../assets/extras.js"></script>
+<script src="municipios.js"></script>
+<script src="../../assets/municipios.js"></script>
+<script src="chaves.js"></script>
+<script src="../../assets/chaves.js"></script>
 <script src="limpeza.js"></script>
 <script src="../../assets/limpeza.js"></script>
 <script src="inspecao.js"></script>
 <script src="../../assets/inspecao.js"></script>
 <script src="manutencao.js"></script>
+<script src="../../assets/manutencao-polos.js"></script>
 <script src="../../assets/manutencao.js"></script>
 <script src="executadas.js"></script>
 <script src="../../assets/executadas.js"></script>

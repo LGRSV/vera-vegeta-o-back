@@ -11,6 +11,8 @@ relatório de validação. Determinístico: as mesmas entradas geram os mesmos a
     python scripts/gera_trechos.py --saida <pasta do site> --comparar <clone gh-pages publicado>
 
 Sem --malha, baixa a malha municipal do Tocantins da API do IBGE na 1ª vez e guarda em --cache.
+Com --so-interface, as divisas no mapa do alimentador (municipios.js) saem da malha de --malha ou do --cache; baixa
+só se alguma página ainda está sem elas.
 Nada é publicado: o script só grava em --saida. Ver scripts/README-gera_trechos.md.
 """
 import argparse
@@ -39,6 +41,7 @@ PKG = RAIZ / 'alimentador'
 IBGE_MALHA = ('https://servicodados.ibge.gov.br/api/v3/malhas/estados/17?intrarregiao=municipio'
               '&formato=application/vnd.geo+json&qualidade=maxima')
 IBGE_NOMES = 'https://servicodados.ibge.gov.br/api/v1/localidades/estados/17/municipios'
+IBGE_ORIGEM = 'IBGE, API de malhas v3 (qualidade máxima)'
 PASSO_M = 20          # amostra ao longo de cada vão (README do vera-vegetacao)
 MIN_M = 100           # extensão mínima dentro do município para o alimentador aparecer nele
 LON, LAT = (-51.0, -45.0), (-14.0, -5.0)     # caixa do Tocantins, para conferir a ordem [lon, lat]
@@ -75,8 +78,10 @@ class Malha:
 
     def __init__(self, municipios, origem):
         self.nome, self.origem, self.polis, self.grade = {}, origem, [], {}
+        self.aneis, self._simples, self._donos = {}, {}, None     # contornos para as divisas no mapa (divisas_js)
         for cod, nome, poligonos in sorted(municipios):
             self.nome[cod] = nome
+            self.aneis.setdefault(cod, []).extend(tuple((p[0], p[1]) for p in anel) for aneis in poligonos for anel in aneis)
             for aneis in poligonos:
                 arestas = [(x1, y1, x2, y2) for anel in aneis for (x1, y1, *_), (x2, y2, *_) in zip(anel, anel[1:])
                            if y1 != y2]
@@ -96,6 +101,9 @@ class Malha:
                 for gx in range(math.floor(caixa[0] / self.G), math.floor(caixa[2] / self.G) + 1):
                     for gy in range(math.floor(caixa[1] / self.G), math.floor(caixa[3] / self.G) + 1):
                         self.grade.setdefault((gx, gy), []).append(i)
+        self.caixas = {cod: (min(p[0] for a in aneis for p in a), min(p[1] for a in aneis for p in a),
+                             max(p[0] for a in aneis for p in a), max(p[1] for a in aneis for p in a))
+                       for cod, aneis in self.aneis.items() if aneis}
 
     def municipio(self, lon, lat):
         for i in self.grade.get((math.floor(lon / self.G), math.floor(lat / self.G)), ()):
@@ -127,7 +135,7 @@ def carregar_malha(arquivo, cache):
                 (cache / nome).write_bytes(corpo)
         geo = json.loads((cache / 'malha-TO.geojson').read_text(encoding='utf-8'))
         nomes = {str(m['id']): m['nome'] for m in json.loads((cache / 'municipios-TO.json').read_text(encoding='utf-8'))}
-        origem = 'IBGE, API de malhas v3 (qualidade máxima)'
+        origem = IBGE_ORIGEM
     municipios = []
     for f in geo['features']:
         p = f['properties']
@@ -136,6 +144,23 @@ def carregar_malha(arquivo, cache):
         municipios.append((cod, nomes.get(cod) or p.get('name') or p.get('nome') or p.get('NM_MUN') or cod,
                            g['coordinates'] if g['type'] == 'MultiPolygon' else [g['coordinates']]))
     return Malha(municipios, origem)
+
+
+def malha_salva(arquivo, cache, saida):
+    """--so-interface: a malha de --malha ou a do cache. Baixa do IBGE só se alguma página medida com a malha do IBGE
+    ainda está sem as divisas (municipios.js); sem internet, segue sem elas (as já gravadas ficam como estão)."""
+    if arquivo or all((Path(cache) / f).exists() for f in ('malha-TO.geojson', 'municipios-TO.json')):
+        return carregar_malha(arquivo, cache)
+    sem = lambda al: not (saida / 'alimentadores' / al / 'municipios.js').exists() or \
+        (saida / 'alimentadores' / al / 'municipios.js').read_text(encoding='utf-8') == 'window.MUNICIPIOS = null;\n'
+    if not any(c['validacao']['status'] != 'falha' and c['origem'].get('malha') == IBGE_ORIGEM and sem(c['alimentador'])
+               for c in carregar_dados(saida)):
+        return None
+    try:
+        return carregar_malha(None, cache)
+    except (OSError, ValueError) as e:
+        print(f'aviso: malha do IBGE não baixou ({e}); páginas sem as divisas dos municípios')
+        return None
 
 
 def por_municipio(malha, a, b, ext):
@@ -147,6 +172,166 @@ def por_municipio(malha, a, b, ext):
         cod = malha.municipio(a[1] + (b[1] - a[1]) * f, a[0] + (b[0] - a[0]) * f)
         m[cod] = m.get(cod, 0) + ext / n
     return m
+
+
+# ---------------------------------------------------------------- divisas no mapa do alimentador
+
+DIVISA_TOL = (25, 40, 60, 100, 150, 250, 400)   # m do Douglas–Peucker: a 1ª que deixa o arquivo abaixo de DIVISA_MAX
+DIVISA_MAX = 60000                              # bytes do municipios.js de um alimentador (rede muito grande passa)
+DIVISA_FOLGA = (3000, 15000)                    # área em volta da rede: 35% do lado maior, entre 3 e 15 km
+KX, KY = 111320 * math.cos(math.radians(10)), 110574     # m por grau no Tocantins (folga e tolerância)
+
+
+def _dp(pts, tol):
+    """Douglas–Peucker (pontas mantidas), com a distância em metros."""
+    manter, pilha, t2 = [False] * len(pts), [(0, len(pts) - 1)], (tol / KY) ** 2
+    manter[0] = manter[-1] = True
+    while pilha:
+        i, j = pilha.pop()
+        ax, ay = pts[i][0] * KX / KY, pts[i][1]
+        dx, dy = pts[j][0] * KX / KY - ax, pts[j][1] - ay
+        l2, dmax, k = dx * dx + dy * dy, t2, None
+        for m in range(i + 1, j):
+            px, py = pts[m][0] * KX / KY - ax, pts[m][1] - ay
+            f = max(0, min(1, (px * dx + py * dy) / l2)) if l2 else 0
+            d = (px - f * dx) ** 2 + (py - f * dy) ** 2
+            if d > dmax:
+                dmax, k = d, m
+        if k is not None:
+            manter[k] = True
+            pilha += [(i, k), (k, j)]
+    return [p for p, f in zip(pts, manter) if f]
+
+
+def _simplifica(malha, cod, tol):
+    """Anéis do município simplificados por arco (pedaço de divisa com os mesmos vizinhos), cada arco num sentido fixo:
+    a divisa de dois municípios sai com os mesmos pontos nos dois. Devolve também os lados (simplificados) que nenhum
+    outro município usa: a divisa do Tocantins."""
+    if (cod, tol) in malha._simples:
+        return malha._simples[cod, tol]
+    if malha._donos is None:                         # aresta → municípios que a usam (uma vez por malha)
+        malha._donos = {}
+        for c, aneis in malha.aneis.items():
+            for anel in aneis:
+                for p, q in zip(anel, anel[1:]):
+                    malha._donos.setdefault((min(p, q), max(p, q)), set()).add(c)
+    out, uf = [], set()
+    for anel in malha.aneis[cod]:
+        anel = list(anel) + ([anel[0]] if anel[0] != anel[-1] else [])
+        if len(anel) < 4:
+            continue
+        dono = [frozenset(malha._donos.get((min(p, q), max(p, q)), ())) for p, q in zip(anel, anel[1:])]
+        cortes = [i for i in range(len(dono)) if dono[i] != dono[i - 1]]
+        if not cortes:                               # anel inteiro com o mesmo vizinho: começa no menor ponto
+            k = anel.index(min(anel[:-1]))
+            arco = anel[k:-1] + anel[:k + 1]
+            if arco[1] > arco[-2]:
+                arco.reverse()
+            novo = _dp(arco, tol)
+            if len(dono[0]) == 1:
+                uf |= {(min(p, q), max(p, q)) for p, q in zip(novo, novo[1:])}
+        else:
+            cortes0 = cortes[0]
+            gira = anel[cortes0:-1] + anel[:cortes0 + 1]
+            cortes = [i - cortes0 for i in cortes] + [len(gira) - 1]
+            novo = [gira[0]]
+            for i, j in zip(cortes, cortes[1:]):
+                arco = gira[i:j + 1]
+                pedaco = _dp(arco, tol) if arco[0] <= arco[-1] else _dp(arco[::-1], tol)[::-1]
+                if len(dono[(i + cortes0) % len(dono)]) == 1:
+                    uf |= {(min(p, q), max(p, q)) for p, q in zip(pedaco, pedaco[1:])}
+                novo += pedaco[1:]
+        if len(novo) >= 4:
+            out.append(novo)
+    malha._simples[cod, tol] = out, uf
+    return out, uf
+
+
+def _cruza(p, q, eixo, val):
+    if q < p:                                        # a mesma conta nos dois sentidos (divisa em comum sai igual)
+        p, q = q, p
+    f = (val - p[eixo]) / (q[eixo] - p[eixo])
+    r = [0.0, 0.0]
+    r[eixo], r[1 - eixo] = val, p[1 - eixo] + (q[1 - eixo] - p[1 - eixo]) * f
+    return tuple(r)
+
+
+def _recorta(anel, caixa):
+    """Sutherland–Hodgman: o anel recortado pela caixa (oeste, sul, leste, norte) continua fechado; os lados novos ficam
+    em cima da borda da caixa (a página não desenha esses)."""
+    pts = anel[:-1]
+    for eixo, val, sentido in ((0, caixa[0], 1), (0, caixa[2], -1), (1, caixa[1], 1), (1, caixa[3], -1)):
+        dentro, novo = lambda p: (p[eixo] - val) * sentido >= 0, []
+        for i, q in enumerate(pts):
+            p = pts[i - 1]
+            if dentro(q) != dentro(p):
+                novo.append(_cruza(p, q, eixo, val))
+            if dentro(q):
+                novo.append(q)
+        pts = novo
+    return pts + pts[:1]
+
+
+def _lado_uf(p, q, lados_uf, na_borda):
+    """O lado p→q do anel recortado é (parte de) um lado da divisa do Tocantins?"""
+    if (min(p, q), max(p, q)) in lados_uf:
+        return True
+    if not (na_borda(p) or na_borda(q)):
+        return False
+    mx, my = (p[0] + q[0]) / 2, (p[1] + q[1]) / 2       # pedaço recortado: o meio dele fica em cima do lado original
+    for a, b in lados_uf:
+        if min(a[0], b[0]) - 1e-9 <= mx <= max(a[0], b[0]) + 1e-9 and min(a[1], b[1]) - 1e-9 <= my <= max(a[1], b[1]) + 1e-9 \
+                and abs((b[0] - a[0]) * (my - a[1]) - (b[1] - a[1]) * (mx - a[0])) <= 1e-9 * math.hypot(b[0] - a[0], b[1] - a[1]):
+            return True
+    return False
+
+
+def divisas_js(malha, c):
+    """municipios.js do alimentador: window.MUNICIPIOS = [{cod, nome, corte, linhas: [[[lat, lon], ...], ...], uf}] com
+    os municípios que a rede cruza e os vizinhos que aparecem em volta dela. Anéis fechados, recortados na área em volta
+    da rede (`corte`, [[sul, oeste], [norte, leste]]) e simplificados (Douglas–Peucker, DIVISA_TOL), 5 casas decimais.
+    `uf` (só quando há): [anel, de, até] = os lados de linhas[anel][de] a linhas[anel][até] que são a divisa do Tocantins
+    (lado que nenhum outro município da malha usa)."""
+    xs = [x for v in c['vaos'] for x in (v[0], v[2])]
+    ys = [y for v in c['vaos'] for y in (v[1], v[3])]
+    folga = min(DIVISA_FOLGA[1], max(DIVISA_FOLGA[0], .35 * max((max(xs) - min(xs)) * KX, (max(ys) - min(ys)) * KY)))
+    caixa = (round(min(xs) - folga / KX, 5), round(min(ys) - folga / KY, 5),
+             round(max(xs) + folga / KX, 5), round(max(ys) + folga / KY, 5))
+    ordem = {m['cod']: i for i, m in enumerate(c['municipios'])}     # os da rede primeiro (mais rede antes)
+    cods = sorted((cod for cod, b in malha.caixas.items()
+                   if b[0] <= caixa[2] and b[2] >= caixa[0] and b[1] <= caixa[3] and b[3] >= caixa[1]),
+                  key=lambda cod: (ordem.get(cod, len(ordem)), slug(malha.nome[cod]), cod))
+    na_borda = lambda p: p[0] in (caixa[0], caixa[2]) or p[1] in (caixa[1], caixa[3])
+    for tol in DIVISA_TOL:
+        muns = []
+        for cod in cods:
+            linhas, uf = [], []
+            aneis, lados_uf = _simplifica(malha, cod, tol)
+            for anel in aneis:
+                r, eh_uf = [], []
+                pts = _recorta(anel, caixa)
+                for k, (x, y) in enumerate(pts):
+                    p = [round(y, 5), round(x, 5)]
+                    if r and p == r[-1]:
+                        continue
+                    if r:
+                        eh_uf.append(_lado_uf(pts[k - 1], pts[k], lados_uf, na_borda))
+                    r.append(p)
+                area = sum(a[1] * b[0] - b[1] * a[0] for a, b in zip(r, r[1:]))
+                if len(r) >= 4 and abs(area) > 1e-9:
+                    for k, f in enumerate(eh_uf):         # trechos seguidos de lados da divisa do TO
+                        if f and (k == 0 or not eh_uf[k - 1]):
+                            uf.append([len(linhas), k, k + 1])
+                        elif f:
+                            uf[-1][2] = k + 1
+                    linhas.append(r)
+            if linhas:
+                muns.append(dict(cod=cod, nome=malha.nome[cod], corte=[[caixa[1], caixa[0]], [caixa[3], caixa[2]]],
+                                 linhas=linhas, **({'uf': uf} if uf else {})))
+        js = 'window.MUNICIPIOS = ' + json.dumps(muns, ensure_ascii=False, separators=(',', ':')) + ';\n'
+        if len(js.encode('utf-8')) <= DIVISA_MAX:
+            break
+    return js
 
 
 # ---------------------------------------------------------------- fontes
@@ -479,7 +664,7 @@ def ativos_interface(saida):
         shutil.copyfile(PKG / 'leaflet' / f, a / 'leaflet' / f)
     (a / 'alimentador.css').write_text(css, encoding='utf-8')
     (a / 'alimentador.js').write_text('const D = window.D;\n' + js, encoding='utf-8')
-    for f in ('extras.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
+    for f in ('extras.js', 'municipios.js', 'chaves.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
               'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
@@ -537,19 +722,25 @@ def pagina_alimentador(modelo, c):
              '<meta name="robots" content="noindex, nofollow">'),
             (f'<link rel="stylesheet" href="{cdn}leaflet.css">', '<link rel="stylesheet" href="../../assets/leaflet/leaflet.css">'),
             (f'<script src="{cdn}leaflet.js"></script>', '<script src="../../assets/leaflet/leaflet.js"></script>'),
-            ('%%ROTULO%%', html.escape(f'{c["se"]} {c["se_nome"]} · Alimentador {al}'))]:
+            ('%%ROTULO%%', html.escape(f'{c["se"]} {c["se_nome"]} · Alimentador {al}')),
+            ('Chaves 88 não aparecem.', 'Chaves que não dividem trecho (88, faca e outras) só aparecem com o mapa de perto.')]:
         assert h.count(x) == 1, x[:50]
         h = h.replace(x, y)
     h = re.sub(r'<style>\n.*?</style>', '<link rel="stylesheet" href="../../assets/alimentador.css">', h, count=1, flags=re.S)
     h = re.sub(r'<script>\nconst D = %%DADOS%%;\n.*?</script>',
                '<script src="dados.js"></script>\n<script src="../../assets/alimentador.js"></script>\n'
                '<script src="../../assets/extras.js"></script>\n'
+               # divisas dos municípios em tracejado: municipios.js do alimentador sai da interface, com a malha
+               '<script src="municipios.js"></script>\n<script src="../../assets/municipios.js"></script>\n'
+               # chaves que não dividem trecho (88, faca…): chaves.js do alimentador sai da interface, dos dados do site
+               '<script src="chaves.js"></script>\n<script src="../../assets/chaves.js"></script>\n'
                # limpeza de faixa: limpeza.js do alimentador vem de scripts/limpeza_faixa.py (sem ele, a camada não aparece)
                '<script src="limpeza.js"></script>\n<script src="../../assets/limpeza.js"></script>\n'
                # inspeção visual de MT: inspecao.js do alimentador vem de scripts/inspecao.py (sem ele, o card não aparece)
                '<script src="inspecao.js"></script>\n<script src="../../assets/inspecao.js"></script>\n'
                # OS de manutenção geradas pela inspeção: manutencao.js do alimentador vem de scripts/manutencao.py
-               '<script src="manutencao.js"></script>\n<script src="../../assets/manutencao.js"></script>\n'
+               '<script src="manutencao.js"></script>\n<script src="../../assets/manutencao-polos.js"></script>\n'
+               '<script src="../../assets/manutencao.js"></script>\n'
                # OS de manutenção executadas nos ativos: executadas.js do alimentador vem de scripts/executadas.py
                '<script src="executadas.js"></script>\n<script src="../../assets/executadas.js"></script>\n'
                '<script src="../../assets/telacheia.js"></script>\n'
@@ -654,6 +845,53 @@ def mapa_e_ranking(saida, dados, man):
                                          als=als), ensure_ascii=False, separators=(',', ':')) + ';\n',
         encoding='utf-8')
     return vb
+
+
+def polo_principal(c, polo_de):
+    """Polo onde o alimentador tem mais rede (km dos trechos por município); None se não tem rede em polo nenhum."""
+    km = {}
+    for t in c['trechos']:
+        for cod, m in (t.get('municipios') or {}).items():
+            if cod in polo_de:
+                km[polo_de[cod]] = km.get(polo_de[cod], 0) + m
+    return max(km, key=km.get) if km else None
+
+
+def manutencao_polos(saida, dados):
+    """assets/manutencao-polos.js (window.MANUT_POLOS): OS geradas pela inspeção somadas por polo, para o bloco Insp→manut
+    comparar o alimentador com o polo dele. Cada alimentador conta inteiro no polo onde tem mais rede (polo_principal).
+    Por polo: alimentadores com página, OS executadas e, das não executadas, quantas por data limite (vencida ou no prazo
+    a página decide com a data do dia, como no manutencao.js). Sem nenhum manutencao.js com OS: window.MANUT_POLOS = null."""
+    cfg = json.loads((PKG / 'site' / 'polos.json').read_text(encoding='utf-8'))
+    polo_de = {cod: p['id'] for p in cfg['polos'] for cod in p['municipios']}
+    polos = {p['id']: dict(nome=p['nome'], regional=p['regional'], als=0, exec=0, lim={}) for p in cfg['polos']}
+    al_polo, base, tem = {}, None, False
+    for c in dados:
+        if c['validacao']['status'] == 'falha':
+            continue
+        pid = polo_principal(c, polo_de)
+        if not pid:
+            continue
+        al_polo[c['alimentador']] = pid
+        q = polos[pid]
+        q['als'] += 1
+        mn = le_js(saida / 'alimentadores' / c['alimentador'] / 'manutencao.js')
+        if not mn:
+            continue
+        base = max(filter(None, [base, mn.get('base_ate')]), default=None)
+        for o in mn['os']:
+            tem = True
+            if o['sit'] == 'EXECUTADA':
+                q['exec'] += 1
+            else:
+                d = o.get('limite') or ''
+                q['lim'][d] = q['lim'].get(d, 0) + 1
+    for q in polos.values():
+        q['lim'] = dict(sorted(q['lim'].items()))
+    obj = dict(base_ate=base, polos=polos, al=al_polo) if tem else None
+    (saida / 'assets' / 'manutencao-polos.js').write_text(
+        'window.MANUT_POLOS = ' + json.dumps(obj, ensure_ascii=False, separators=(',', ':')) + ';\n', encoding='utf-8')
+    return obj
 
 
 def ranking_polos(saida, dados, man):
@@ -861,7 +1099,27 @@ def nae_resumo(c):
     return sum(1 for o in oc if o['trecho']), sum(1 for o in oc if not o['trecho'])
 
 
-def interface(saida):
+DIVIDEM = set(regras.PROTECAO) | {'SEC', 'FTR'}   # chaves que abrem ou fecham trecho (já desenhadas pelo alimentador.js)
+
+
+def chaves_js(c):
+    """chaves.js do alimentador: window.CHAVES = [[nome, tipo, lat, lon], ...] das chaves que não dividem trecho (88, faca 80,
+    passagem…), para o destaque no mapa de perto (assets/chaves.js). Sai dos dados do site (dados/alimentadores/<AL>.json)."""
+    cs = [[ch['nome'], ch['tipo'], round(ch['lonlat'][1], 7), round(ch['lonlat'][0], 7)]
+          for ch in c['chaves'] if ch['tipo'] not in DIVIDEM]
+    return 'window.CHAVES = ' + json.dumps(cs, ensure_ascii=False, separators=(',', ':')) + ';\n'
+
+
+def grava_divisas(arq, c, malha):
+    """municipios.js do alimentador (divisas no mapa). Só com a mesma malha que mediu os municípios dele; sem ela, fica o
+    arquivo que já existe (ou null: a página fica sem as divisas)."""
+    if malha and c['origem'].get('malha') == malha.origem:
+        arq.write_text(divisas_js(malha, c), encoding='utf-8')
+    elif not arq.exists():
+        arq.write_text('window.MUNICIPIOS = null;\n', encoding='utf-8')
+
+
+def interface(saida, malha=None):
     dados = carregar_dados(saida)
     modelo = ativos_interface(saida)
     man = manifesto(dados)
@@ -882,6 +1140,8 @@ def interface(saida):
             exe = saida / 'alimentadores' / c['alimentador'] / 'executadas.js'
             if not exe.exists():                       # até rodar scripts/executadas.py: página sem o card Manutenção
                 exe.write_text('window.EXECUTADAS = null;\n', encoding='utf-8')
+            grava_divisas(saida / 'alimentadores' / c['alimentador'] / 'municipios.js', c, malha)
+            (saida / 'alimentadores' / c['alimentador'] / 'chaves.js').write_text(chaves_js(c), encoding='utf-8')
     cards = []
     for m in man['municipios']:
         tot = sum(a['m_no_municipio'] for a in m['alimentadores'])
@@ -908,6 +1168,7 @@ def interface(saida):
                            rodape=f'<p>Malha do IBGE, amostra a cada {PASSO_M}&nbsp;m; mínimo de {MIN_M}&nbsp;m.</p>'), encoding='utf-8')
     vb = mapa_e_ranking(saida, dados, man)
     ranking_polos(saida, dados, man)
+    manutencao_polos(saida, dados)
     indice_ativos(saida, dados)
     corpo = ('<header class="cab"><h1>Trechos por município</h1><p>Escolha o município no mapa ou na lista, depois o '
              'alimentador.</p><a class="cab-link" href="polos/">Ranking dos alimentadores por polo →</a></header>\n'
@@ -1092,7 +1353,7 @@ def main(argv=None):
     if a.validar:
         return 0 if validar_saida(saida) else 1
     if a.so_interface:
-        interface(saida)
+        interface(saida, malha_salva(a.malha, a.cache, saida))
         return 0 if validar_saida(saida) else 1
     if a.comparar:
         comparar(saida, a.comparar)
@@ -1116,7 +1377,7 @@ def main(argv=None):
         r = c.get('resumo')
         print(f'{al}: {c["validacao"]["status"]}' + (f' · {r["trechos"]} trechos · {km(r["extensao_m"])} km · '
               + ', '.join(f'{m["nome"]} {km(m["m"])} km' for m in c['municipios']) if r else f' · {c.get("erro")}'))
-    dados, man = interface(saida)
+    dados, man = interface(saida, malha)
     relatorio(saida, dados, man, sem_kml)
     ok = validar_saida(saida)
     print(f'{len(man["municipios"])} município(s) · {sum(c["validacao"]["status"] != "falha" for c in dados)} alimentador(es) '
