@@ -1,5 +1,5 @@
 """Atualiza as bases do site a partir dos arquivos novos: é o que a automação do GitHub roda quando alguém envia um
-arquivo pelo menu "Atualizar bases" (também roda à mão).
+arquivo pelo menu "Atualização de dados" (também roda à mão).
 
 O tipo vem da pasta do arquivo:
   bases/critica/   Critica*.txt com MM-AAAA no nome (o mês do arquivo é trocado inteiro), ou .zip com eles
@@ -10,8 +10,8 @@ O tipo vem da pasta do arquivo:
 O que roda, na ordem: Crítica (atualiza_critica.py), limpeza (limpeza_faixa.py sem o acervo de KMZ: OS já publicada
 mantém a posição), inspeção (inspecao.py), manutenção da inspeção (manutencao.py), manutenção executada
 (executadas.py); depois a interface (gera_trechos --so-interface), o NAE/100 km da mesma rede
-(teste/ferramentas/nae_rede.py) e a validação dos arquivos. Grava dados/bases.json (o que o menu mostra: arquivo e data
-de cada base). Qualquer erro sai com código 1 e a automação não publica nada.
+(teste/ferramentas/nae_rede.py) e a validação dos arquivos. Grava dados/bases.json (o que o menu mostra: data da última
+atualização, enviado ou processado, e o período de cada base). Qualquer erro sai com código 1 e a automação não publica nada.
 
 Uso:
   python scripts/atualiza_bases.py --site teste [--lista arquivos.txt] [arquivo ...]

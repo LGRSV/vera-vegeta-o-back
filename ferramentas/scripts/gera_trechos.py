@@ -803,24 +803,80 @@ def ultima_limpeza(lp, al):
     return max(ds) if ds else None
 
 
+def nae_por_municipio(dados):
+    """NAE de cada município (código IBGE → ocorrências): cada ocorrência conta no município onde o trecho dela tem mais
+    rede; sem trecho, no município onde o alimentador tem mais rede (mesma ideia do polo em ranking_polos)."""
+    nae = {}
+    for c in dados:
+        if c['validacao']['status'] == 'falha':
+            continue
+        tot, do_t = {}, {}
+        for t in c['trechos']:
+            mm = {k: m for k, m in (t.get('municipios') or {}).items() if k != 'None'}
+            for k, m in mm.items():
+                tot[k] = tot.get(k, 0) + m
+            do_t[t['nome']] = max(mm, key=mm.get) if mm else None
+        principal = max(tot, key=tot.get) if tot else None
+        for o in (c.get('nae') or {}).get('oc', []):
+            cod = do_t.get(o.get('trecho')) or principal
+            if cod:
+                nae[cod] = nae.get(cod, 0) + 1
+    return nae
+
+
+def contorno_regionais(geo_muns, reg_de):
+    """Contorno de cada regional no mapa da página inicial (path SVG): as arestas dos municípios da regional que não são
+    divididas com outro município da mesma regional. Os contornos dos 139 municípios vêm da mesma malha, então os
+    vizinhos têm as arestas iguais."""
+    por_reg = {}
+    for m in geo_muns:
+        r = reg_de.get(m['cod'])
+        if not r:
+            continue
+        cont = por_reg.setdefault(r, {})
+        for anel in re.findall(r'M([^MZz]+)', m['d']):
+            v = [float(x) for x in re.findall(r'-?\d+(?:\.\d+)?', anel)]
+            pts = list(zip(v[::2], v[1::2]))
+            for a, b in zip(pts, pts[1:] + pts[:1]):
+                if a != b:
+                    k = (a, b) if a < b else (b, a)
+                    cont[k] = cont.get(k, 0) + 1
+    fmt = lambda x: f'{x:g}'
+    return {r: ''.join(f'M{fmt(a[0])},{fmt(a[1])}L{fmt(b[0])},{fmt(b[1])}' for (a, b), n in sorted(cont.items()) if n == 1)
+            for r, cont in por_reg.items()}
+
+
 def mapa_e_ranking(saida, dados, man):
     """assets/mapa-municipios-dados.js (window.MUN) e assets/ranking-nae.js (window.RANK).
 
     A geometria dos 139 municípios é estática (contornos já projetados, em
     alimentador/site/mapa-municipios-geo.json); o que a rodada preenche é
-    quais municípios têm alimentador (`slug`, `als`) e o ranking por NAE.
+    quais municípios têm alimentador (`slug`, `als`), a regional e o polo de cada um (`reg`, `polo`, de polos.json),
+    a NAE de cada município (`nae`, nae_por_municipio: o mapa pinta por ela), o contorno das regionais (`regs`) e dos
+    polos (`pols`: clicar numa regional abre ela dividida nos polos) e o
+    ranking por NAE (ranking-nae.js: lido pelo atualiza_bases;
+    a página inicial não mostra mais o ranking, que fica na página dos polos, visão ETO).
     """
     geo = json.loads((PKG / 'site' / 'mapa-municipios-geo.json').read_text(encoding='utf-8'))
     por_cod = {m['cod']: m for m in man['municipios']}
+    cfg = json.loads((PKG / 'site' / 'polos.json').read_text(encoding='utf-8'))
+    polo_de = {cod: p for p in cfg['polos'] for cod in p['municipios']}
+    nae_mun = nae_por_municipio(dados)
     muns = []
     for g in geo['muns']:
         m = por_cod.get(g['cod'])
+        g = dict(g, nae=nae_mun.get(g['cod'], 0))
+        if g['cod'] in polo_de:
+            g = dict(g, reg=polo_de[g['cod']]['regional'], polo=polo_de[g['cod']]['nome'])
         if m:
             g = dict(g, nome=m['nome'], slug=m['slug'], als=[dict(cod=a['cod'], se=a['se_nome'], m=a['m_no_municipio'])
                                              for a in m['alimentadores']])
         muns.append(g)
     (saida / 'assets' / 'mapa-municipios-dados.js').write_text(
-        'window.MUN=' + json.dumps(dict(w=geo['w'], h=geo['h'], muns=muns), ensure_ascii=False,
+        'window.MUN=' + json.dumps(dict(w=geo['w'], h=geo['h'], muns=muns,
+                                        regs=contorno_regionais(geo['muns'], {c: p['regional'] for c, p in polo_de.items()}),
+                                        pols=contorno_regionais(geo['muns'], {c: p['nome'] for c, p in polo_de.items()})),
+                                   ensure_ascii=False,
                                    separators=(',', ':')) + ';\n', encoding='utf-8')
     vb = f'-6 -6 {geo["w"] + 12} {geo["h"] + 12}'      # mesmo viewBox de assets/mapa-municipios.js
 
@@ -1043,7 +1099,7 @@ def indice_ativos(saida, dados):
     Transformadores do GIS ('ativos_kml'): o trecho do vão mais próximo (scripts/ativos_gis.py).
     Poste: os trechos dos vãos que chegam nele. Postes N123 (pontos sem número no cadastro) ficam de fora.
     """
-    idx = {}
+    idx, nomes = {}, {}                              # nomes: código → {como está no cadastro: tipo} (lista suspensa)
     for c in dados:
         if c['validacao']['status'] == 'falha':
             continue
@@ -1060,6 +1116,7 @@ def indice_ativos(saida, dados):
             if re.fullmatch(r'N\d+', p):
                 continue
             ns = unicos(ns)
+            nomes.setdefault(chave_ativo(p), {})[p] = 'poste'
             idx.setdefault(chave_ativo(p), []).append([al, 'poste', ns[0], ', '.join(ns) if len(ns) > 1 else '', *onde[p]])
         for ch in c['chaves']:
             n = ch['nome']
@@ -1074,6 +1131,7 @@ def indice_ativos(saida, dados):
             if not alvo and papel:                     # só fim de trecho (ponta de linha)
                 alvo = next(t['nome'] for t in ts if n in (t.get('fim') or []))
             if alvo:
+                nomes.setdefault(chave_ativo(n), {})[n] = ch['tipo']
                 idx.setdefault(chave_ativo(n), []).append([al, ch['tipo'], alvo, ' · '.join(papel), ch['lonlat'][1],
                                                            ch['lonlat'][0]])
         # transformadores do GIS (camada Transformadores do acervo; scripts/ativos_gis.py)
@@ -1082,6 +1140,7 @@ def indice_ativos(saida, dados):
             if nome in ja or d is None:
                 continue
             papel = (f'no {t}' + (f' (a {d:g} m da rede)' if d > 5 else '')) if t else f'fora da rede do site ({d:g} m)'
+            nomes.setdefault(chave_ativo(nome), {})[nome] = tipo
             idx.setdefault(chave_ativo(nome), []).append([al, tipo, t or '', papel, lat, lon])
     pasta = saida / 'dados' / 'ativos'
     if pasta.exists():
@@ -1091,7 +1150,31 @@ def indice_ativos(saida, dados):
         por.setdefault(fatia(k), {})[k] = idx[k]
     for f, d in por.items():
         grava_json(pasta / f'{f}.json', d)
+    sugestoes_ativos(saida, nomes)
     return len(idx)
+
+
+def sugestoes_ativos(saida, nomes):
+    """dados/ativos-pref/<2 primeiros caracteres do código>.json: a lista suspensa da busca de ativo da página inicial.
+
+    Cada arquivo: tipo → códigos como estão no cadastro (com os zeros da frente), separados por espaço (~100 arquivos,
+    o maior com ~1 MB antes do gzip). A página, a partir de 3 caracteres digitados, baixa o arquivo dos 2 primeiros
+    (no mesmo formato de chave_ativo) e mostra os que começam com o que se digitou;
+    ao escolher um, a busca de sempre (dados/ativos/<fatia>.json) diz o alimentador e o trecho.
+    """
+    pasta = saida / 'dados' / 'ativos-pref'
+    if pasta.exists():
+        shutil.rmtree(pasta)
+    por = {}
+    for k, ns in nomes.items():
+        if len(k) < 3:
+            continue
+        g = por.setdefault(k[:2], {})
+        for nome, tipo in ns.items():
+            g.setdefault(tipo, []).append(nome)
+    for f, d in por.items():
+        grava_json(pasta / f'{f}.json', {t: ' '.join(sorted(set(v))) for t, v in sorted(d.items())})
+    return len(por)
 
 
 def nae_resumo(c):
@@ -1142,12 +1225,7 @@ def interface(saida, malha=None):
                 exe.write_text('window.EXECUTADAS = null;\n', encoding='utf-8')
             grava_divisas(saida / 'alimentadores' / c['alimentador'] / 'municipios.js', c, malha)
             (saida / 'alimentadores' / c['alimentador'] / 'chaves.js').write_text(chaves_js(c), encoding='utf-8')
-    cards = []
     for m in man['municipios']:
-        tot = sum(a['m_no_municipio'] for a in m['alimentadores'])
-        cards.append(f'<a class="card" data-busca="{html.escape(slug(m["nome"]).replace("-", " "))}" '
-                     f'href="municipios/{m["slug"]}/"><b>{html.escape(m["nome"])}</b><span>{len(m["alimentadores"])}&nbsp;'
-                     f'alimentador{"es" if len(m["alimentadores"]) != 1 else ""} · {km(tot)}&nbsp;km&nbsp;de&nbsp;rede</span></a>')
         linhas = []
         for a in m['alimentadores']:
             n = a['trechos']
@@ -1170,28 +1248,23 @@ def interface(saida, malha=None):
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
     indice_ativos(saida, dados)
-    corpo = ('<header class="cab"><h1>Trechos por município</h1><p>Escolha o município no mapa ou na lista, depois o '
-             'alimentador.</p><a class="cab-link" href="polos/">Ranking dos alimentadores por polo →</a></header>\n'
+    corpo = ('<header class="cab"><h1>Trechos por município</h1><a class="cab-link" href="polos/#eto">Ranking dos alimentadores →</a></header>\n'
              # casca do mapa já no HTML (estilo em assets/site.css; o svg com viewBox reserva a altura do mapa):
              # os scripts só preenchem, e a página não pula ao carregar. Mesmos ids de antes (busca-ativo.js e
-             # mapa-municipios.js); a busca de município (#busca) também filtra a lista 'Todos os municípios'.
+             # mapa-municipios.js); a busca de município (#busca) abre a lista suspensa de todos os municípios.
              '<div id="mapa-to" class="mapa-to"><div class="mt-barra">'
-             '<form class="ativo" id="ativo" role="search"><label for="ativo-q" class="rot">Em que trecho está o ativo?</label>'
+             '<form class="ativo" id="ativo" role="search"><label for="ativo-q" class="rot">Selecione o ativo</label>'
              '<div class="campo"><input class="busca" id="ativo-q" type="search" inputmode="search" autocomplete="off" '
-             'placeholder="Ex.: 0300350016" aria-describedby="ativo-dica"><button type="submit">Buscar</button>'
-             '<div id="ativo-res" aria-live="polite"></div></div><span id="ativo-dica" class="dica">Código da chave '
-             '(fusível, religador, faca…), do transformador ou número do poste</span></form>'
+             'placeholder="Ex.: 0300350016" enterkeyhint="search">'   # sem botão: o Enter busca
+             '<div id="ativo-res" aria-live="polite"></div></div></form>'
              '<div class="mt-bmun"><label for="busca" class="rot">Município</label>'
-             '<input class="busca" id="busca" type="search" aria-label="Buscar município" '
-             'placeholder="Buscar município"></div></div>\n'
-             '<aside class="mt-rank" aria-label="Ranking de alimentadores por NAE"></aside>\n'
+             '<div class="mun-cx"><input class="busca" id="busca" type="search" role="combobox" aria-autocomplete="list" '
+             'aria-expanded="false" aria-controls="mun-lista" autocomplete="off" placeholder="Buscar município">'
+             '<div class="mun-lista" id="mun-lista" role="listbox" aria-label="Municípios" hidden></div></div></div></div>\n'
              f'<div class="mt-mapa"><svg role="group" aria-label="Mapa dos municípios do Tocantins" tabindex="-1" viewBox="{vb}"></svg>'
-             '<div class="mt-dica" aria-hidden="true"></div></div>\n'
-             '<div class="mt-lado"><section class="mt-sel" aria-live="polite"></section></div></div>\n'
-             '<section class="bloco" aria-labelledby="todos"><h2 class="sec" id="todos">Todos os municípios</h2>\n'
-             f'<div class="grade">{"".join(cards)}</div></section>\n'
+             '<div class="mt-dica" aria-hidden="true"></div>'
+             '<p class="mt-regs" aria-label="Legenda do mapa"></p></div></div>\n'   # legenda: mapa-municipios.js
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
-             '<script src="assets/ranking-nae.js"></script>\n'
              '<script src="assets/mapa-municipios.js"></script>\n'
              '<script src="assets/busca-ativo.js"></script>')
     (saida / 'index.html').write_text(casca('Trechos por município', corpo, '', rodape=(

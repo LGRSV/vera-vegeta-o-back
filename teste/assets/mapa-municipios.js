@@ -1,7 +1,8 @@
 // Mapa dos municípios do Tocantins na página inicial (usa window.MUN de mapa-municipios-dados.js).
-// Município com alimentador no site: colorido e clicável (mostra os alimentadores ao lado).
-// A busca (#busca) e os blocos (.card[data-busca]) da página ficam ligados ao mapa.
-// A casca (#mapa-to com barra, ranking, svg com viewBox e painel) vem pronta no HTML de scripts/gera_trechos.py
+// Cada município pintado pela NAE dele (faixas), com o contorno das regionais por cima. Clicar numa regional aproxima
+// nela e separa os polos (cada polo controla um grupo de municípios); aí clicar num município abre a página dele.
+// A busca de município (#busca) abre a lista suspensa de todos os municípios (#mun-lista) e acende os achados no mapa.
+// A casca (#mapa-to com a barra e o svg com viewBox) vem pronta no HTML de scripts/gera_trechos.py
 // e todo o estilo está em assets/site.css: este script só preenche, nada muda de tamanho nem de lugar ao carregar.
 (function () {
   const M = window.MUN, alvo = document.getElementById('mapa-to');
@@ -12,24 +13,53 @@
   const kmTot = m => m.als.reduce((s, a) => s + a.m, 0);
   const nAls = m => `${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}`;
   const porCod = Object.fromEntries(M.muns.map(m => [m.cod, m]));
-  const porBusca = Object.fromEntries(M.muns.map(m => [m.busca, m]));
-  const calmo = matchMedia('(prefers-reduced-motion: reduce)');
 
-  const svg = alvo.querySelector('.mt-mapa svg'), dica = alvo.querySelector('.mt-dica'), sel = alvo.querySelector('.mt-sel'), caixa = svg.parentNode;
-  const celular = matchMedia('(max-width:860px)');
+  const svg = alvo.querySelector('.mt-mapa svg'), dica = alvo.querySelector('.mt-dica'), caixa = svg.parentNode;
   const VW = M.w + 12;
   svg.setAttribute('viewBox', `-6 -6 ${VW} ${M.h + 12}`);
   const NS = 'http://www.w3.org/2000/svg', el = {}, rot = {};
   let foco = null, achou = new Set();
+  // cor de cada município pela NAE dele (faixas; a legenda sai daqui) e, por cima, o contorno das regionais
+  const FAIXAS = [0, 1, 11, 31, 101, 201];
+  const faixa = n => FAIXAS.reduce((k, l, i) => n >= l ? i : k, 0);
+  const rotFaixa = i => i === 0 ? 'Sem NAE' : i === FAIXAS.length - 1 ? `${FAIXAS[i]} ou mais` : `${FAIXAS[i]} a ${FAIXAS[i + 1] - 1}`;
+  // municípios agrupados por polo (o grupo é o que se afasta ao abrir a regional), com o contorno do polo no fim do grupo
+  const grp = {};
+  const grupo = m => {
+    if (!m.polo) return svg;
+    if (!grp[m.polo]) {
+      const gp = grp[m.polo] = document.createElementNS(NS, 'g');
+      gp.setAttribute('class', 'mt-polo');
+      gp.dataset.reg = m.reg;
+      svg.append(gp);
+    }
+    return grp[m.polo];
+  };
   M.muns.forEach(m => {
     const p = document.createElementNS(NS, 'path');
     p.setAttribute('d', m.d);
-    p.setAttribute('class', 'mun ' + (m.slug ? 'tem' : 'sem'));
+    p.setAttribute('class', `mun ${m.slug ? 'tem' : 'sem'} nae-${faixa(m.nae || 0)}`);
     if (m.slug) { p.setAttribute('tabindex', '-1'); p.setAttribute('role', 'button'); p.setAttribute('aria-label', m.nome); }
     p.dataset.cod = m.cod;
-    svg.append(p);
+    grupo(m).append(p);
     el[m.cod] = p;
   });
+  Object.entries(grp).forEach(([polo, gp]) => {
+    const c = document.createElementNS(NS, 'path');
+    c.setAttribute('class', 'mt-poloc');
+    c.setAttribute('aria-hidden', 'true');
+    c.setAttribute('d', (M.pols || {})[polo] || '');
+    gp.append(c);
+  });
+  const regs = document.createElementNS(NS, 'g');
+  regs.setAttribute('class', 'mt-regc');
+  regs.setAttribute('aria-hidden', 'true');
+  Object.values(M.regs || {}).forEach(d => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); regs.append(p); });
+  svg.append(regs);
+  const leg = alvo.querySelector('.mt-regs');
+  if (leg) leg.innerHTML = '<b>NAE-Vegetação</b>' +
+    FAIXAS.map((l, i) => `<span><i class="nae-${i}" aria-hidden="true"></i>${rotFaixa(i)}</span>`).join('') +
+    (M.regs ? '<span><i class="lim" aria-hidden="true"></i><span class="lim-t">Limite das regionais</span></span>' : '');
   // teclado: um só município na ordem do Tab (o escolhido, ou Palmas); as setas andam pelo mapa
   const roda = cod => {
     svg.querySelectorAll('.mun[tabindex="0"]').forEach(p => p.setAttribute('tabindex', '-1'));
@@ -42,6 +72,7 @@
   const REF = ['palmas', 'araguaina', 'gurupi', 'porto nacional', 'paraiso do tocantins', 'guarai', 'colinas do tocantins',
     'miracema do tocantins', 'pedro afonso', 'araguatins', 'tocantinopolis', 'dianopolis', 'natividade', 'formoso do araguaia', 'arraias'];
   const g = document.createElementNS(NS, 'g');
+  g.setAttribute('class', 'mt-nomes');
   g.setAttribute('aria-hidden', 'true');
   M.muns.forEach(m => {
     const t = document.createElementNS(NS, 'text');
@@ -89,11 +120,12 @@
   rotulos();
   if (window.ResizeObserver) new ResizeObserver(escala).observe(svg); else escala();
 
-  // contorno por cima dos vizinhos (antes do <g> dos nomes); quem está com o foco do teclado não o perde
+  // contorno do município por cima dos vizinhos (antes do contorno das regionais e dos nomes); quem está com o foco do teclado não o perde
   const traz = p => {
-    if (p.nextSibling === g) return;
+    const gp = p.parentNode, fim = gp.querySelector('.mt-poloc');
+    if (p.nextSibling === fim && gp.nextSibling === regs) return;
     const tinha = document.activeElement === p;
-    svg.insertBefore(p, g);
+    if (fim) { gp.insertBefore(p, fim); svg.insertBefore(gp, regs); } else svg.insertBefore(p, regs);
     if (tinha && document.activeElement !== p) p.focus({ preventScroll: true });
   };
 
@@ -101,50 +133,142 @@
     const p = e.target.closest('.mun');
     if (!p) { dica.style.display = 'none'; return; }
     const m = porCod[p.dataset.cod], r = caixa.getBoundingClientRect();
-    dica.innerHTML = `${esc(m.nome)} <small>${m.slug ? `· ${nAls(m)} · ${km(kmTot(m))}` : '· sem dados ainda'}</small>`;
+    if (!reg) realca(m.reg);
+    dica.innerHTML = `${esc(m.nome)} <small>· ${(m.nae || 0).toLocaleString('pt-BR')} NAE${m.reg ? ` · Regional ${esc(m.reg)} · polo ${esc(m.polo)}` : ''}${m.slug ? ` · ${nAls(m)} · ${km(kmTot(m))}` : ' · sem dados ainda'}</small>` +
+      (!reg && m.reg ? `<small class="mt-dica-c">Clique para ver os polos da Regional ${esc(m.reg)}</small>` : '');
     dica.style.left = (e.clientX - r.left) + 'px'; dica.style.top = (e.clientY - r.top) + 'px'; dica.style.display = 'block';
   });
-  svg.addEventListener('mouseleave', () => {
-    dica.style.display = 'none';
-    document.querySelectorAll('.card.acende').forEach(c => c.classList.remove('acende'));
-  });
+  svg.addEventListener('mouseleave', () => { dica.style.display = 'none'; if (!reg) realca(null); });
 
-  // painel ao lado: só redesenha (e anima) quando o conteúdo muda
-  let pintado = '';
-  const pinta = h => { if (h !== pintado) sel.innerHTML = pintado = h; };
-  const nTem = M.muns.filter(m => m.slug).length;
-  const LEG = '<p class="mt-leg"><i aria-hidden="true"></i>Sem dados ainda</p>';
-  function resumo(nada) {
-    pinta(`<h2>Tocantins</h2><p>${nTem} de ${M.muns.length} municípios com alimentador no site. Clique ou toque num município no mapa ` +
-      `ou busque pelo nome acima.</p>${nada ? `<p class="mt-nada">Nenhum município com “${esc(nada)}”.</p>` : ''}${LEG}`);
+  // regional aberta: o mapa aproxima nela, as outras somem e os polos se afastam um do outro (do centro da regional
+  // para fora), com o nome, os municípios e a NAE de cada polo ao lado. "← Tocantins" ou Esc voltam ao estado inteiro.
+  let reg = null, anima = 0;
+  const TODO = [-6, -6, VW, M.h + 12], AFASTA = 0.32, DUR = 650;
+  const calmo = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const vb = () => svg.getAttribute('viewBox').split(' ').map(Number);
+  const une = (a, b) => !a ? b : { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) };
+  const caixaDe = e => { const r = e.getBBox(); return { x: r.x, y: r.y, x2: r.x + r.width, y2: r.y + r.height }; };
+  const polosDe = r => Object.entries(grp).filter(([, gp]) => gp.dataset.reg === r);
+  function realca(r) {
+    Object.values(grp).forEach(gp => gp.classList.toggle('apaga', !!r && gp.dataset.reg !== r));
   }
-  function achados(ms) {
-    pinta('<h2>Encontrados</h2><p>Escolha o município:</p>' + ms.map(m =>
-      `<button type="button" class="al nome" data-cod="${esc(m.cod)}"><b>${esc(m.nome)}</b>` +
-      `<span>${m.slug ? `${nAls(m)} · ${km(kmTot(m))}` : 'Sem dados ainda'}</span></button>`).join(''));
+  function voa(alvoVb) {             // anima o viewBox até o alvo
+    cancelAnimationFrame(anima);
+    const de = vb(), t0 = performance.now(), dur = calmo() ? 0 : DUR;
+    const passo = agora => {
+      const t = dur ? Math.min(1, (agora - t0) / dur) : 1, e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+      svg.setAttribute('viewBox', de.map((v, i) => +(v + (alvoVb[i] - v) * e).toFixed(2)).join(' '));
+      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; poeRotulos(); }
+    };
+    anima = requestAnimationFrame(passo);
   }
-  function tiraFoco() {
-    if (!foco) return;
-    el[foco].classList.remove('foco');
-    foco = null;
+  const volta = document.createElement('button');
+  volta.type = 'button';
+  volta.className = 'mt-volta';
+  volta.hidden = true;
+  volta.textContent = '← Tocantins';
+  (leg || caixa).append(volta);          // embaixo da legenda (no celular, no canto do mapa: site.css)
+  const rotPolos = document.createElement('div');
+  rotPolos.className = 'mt-polos';
+  rotPolos.setAttribute('aria-live', 'polite');
+  svg.after(rotPolos);
+  let desl = {}, modo = '', margem = 0;
+  // enquadra a regional aberta. No computador a legenda fica livre e, com os polos um embaixo do outro (Norte), o nome
+  // de cada polo vai à esquerda, na altura dele; senão vai no meio do polo. No celular só o nome vai no meio do polo,
+  // os números vão numa lista embaixo do mapa, e o topo fica livre para o "← Tocantins".
+  function enquadra() {
+    const ps = polosDe(reg);
+    let bb = null, cs = [];
+    ps.forEach(([polo, gp]) => {
+      const b = caixaDe(gp), [dx, dy] = desl[polo];
+      bb = une(bb, { x: b.x + dx, y: b.y + dy, x2: b.x2 + dx, y2: b.y2 + dy });
+      cs.push([(b.x + b.x2) / 2, (b.y + b.y2) / 2]);
+    });
+    const vai = k => Math.max(...cs.map(c => c[k])) - Math.min(...cs.map(c => c[k]));
+    const x = bb.x - 12, y = bb.y - 12, w = bb.x2 - bb.x + 24, h = bb.y2 - bb.y + 24, W = caixa.clientWidth;
+    modo = W < 700 ? 'cel' : vai(1) >= 1.5 * vai(0) ? 'esq' : 'meio';
+    rotPolos.dataset.modo = modo;
+    if (modo === 'cel') { const t = 52 * w / W; return [x, y - t, w, h + t]; }
+    const H = svg.clientHeight || 600, T = 0;
+    margem = leg && getComputedStyle(leg).position === 'absolute' ? leg.offsetWidth + 24 : 0;
+    const L = margem + (modo === 'esq' ? 250 : 0), k = Math.min((H - T) / h, Math.max(1e-3, W - 2 * L) / w);
+    const altura = H / k, sobra = altura - h - T / k;
+    return [x - L / k, y - T / k - sobra / 2, w + 2 * L / k, altura];
   }
-  function escolhe(cod, rola) {
+  function poeRotulos() {
+    if (!reg) { rotPolos.innerHTML = ''; return; }
+    const ctm = svg.getScreenCTM(), cx = caixa.getBoundingClientRect(), sv = svg.getBoundingClientRect();
+    const tela = (x, y) => { const pt = svg.createSVGPoint(); pt.x = x; pt.y = y; return pt.matrixTransform(ctm); };
+    const ps = polosDe(reg).map(([polo]) => {
+      const ms = M.muns.filter(m => m.polo === polo), [dx, dy] = desl[polo];
+      return { polo, ms, nae: ms.reduce((s, m) => s + (m.nae || 0), 0),
+        x: ms.reduce((s, m) => s + m.c[0], 0) / ms.length + dx, y: ms.reduce((s, m) => s + m.c[1], 0) / ms.length + dy };
+    }).sort((a, b) => a.y - b.y || a.x - b.x);
+    const num = p => `<span>${p.ms.length} municípios · ${p.nae.toLocaleString('pt-BR')} NAE</span>`;
+    rotPolos.innerHTML = ps.map(p => {
+      const c = tela(p.x, p.y), left = modo === 'esq' ? sv.left + margem : c.x;
+      return `<p style="left:${(left - cx.left).toFixed(0)}px;top:${(c.y - cx.top).toFixed(0)}px"><b>Polo ${esc(p.polo)}</b>${modo === 'cel' ? '' : num(p)}</p>`;
+    }).join('') + (modo === 'cel' ? `<ul>${ps.map(p => `<li><b>Polo ${esc(p.polo)}</b>${num(p)}</li>`).join('')}</ul>` : '');
+    if (modo !== 'esq') rotPolos.querySelectorAll('p').forEach(e => {     // no celular, o nome não sai pela beira
+      const r = e.getBoundingClientRect(), d = Math.max(cx.left + 4 - r.left, 0) - Math.max(r.right - cx.right + 4, 0);
+      if (d) e.style.left = (parseFloat(e.style.left) + d) + 'px';
+    });
+  }
+  function entra(r, teclado, cod) {
+    if (!r || reg === r) return;
+    reg = r;
+    realca(null);
+    dica.style.display = 'none';
+    const ps = polosDe(r);
+    const rb = ps.reduce((a, [, gp]) => une(a, caixaDe(gp)), null), rc = [(rb.x + rb.x2) / 2, (rb.y + rb.y2) / 2];
+    desl = {};
+    ps.forEach(([polo, gp]) => {
+      const b = caixaDe(gp);
+      desl[polo] = [((b.x + b.x2) / 2 - rc[0]) * AFASTA, ((b.y + b.y2) / 2 - rc[1]) * AFASTA];
+    });
+    Object.entries(grp).forEach(([polo, gp]) => {
+      const dentro = gp.dataset.reg === r;
+      gp.classList.toggle('fora', !dentro);
+      gp.style.transform = dentro ? `translate(${desl[polo][0].toFixed(1)}px,${desl[polo][1].toFixed(1)}px)` : '';
+    });
+    caixa.classList.add('aberta');
+    rotPolos.innerHTML = '';
+    const lt = alvo.querySelector('.lim-t');
+    if (lt) lt.textContent = 'Limite dos polos';
+    volta.textContent = '← Tocantins';
+    volta.setAttribute('aria-label', `Regional ${r}. Voltar ao Tocantins`);
+    volta.hidden = false;
+    voa(enquadra());
+    const prim = porCod[cod] && porCod[cod].slug ? porCod[cod] : M.muns.filter(m => m.reg === r && m.slug).sort((a, b) => kmTot(b) - kmTot(a))[0];
+    if (prim) { roda(prim.cod); if (teclado) el[prim.cod].focus({ preventScroll: true }); }
+  }
+  function sai() {
+    if (!reg) return;
+    const r = reg;
+    reg = null;
+    Object.values(grp).forEach(gp => { gp.classList.remove('fora'); gp.style.transform = ''; });
+    caixa.classList.remove('aberta');
+    rotPolos.innerHTML = '';
+    const lt = alvo.querySelector('.lim-t');
+    if (lt) lt.textContent = 'Limite das regionais';
+    const tinha = document.activeElement === volta;
+    volta.hidden = true;
+    voa(TODO);
+    const m = M.muns.find(x => x.reg === r && x.slug);
+    if (tinha && m) { roda(m.cod); el[m.cod].focus({ preventScroll: true }); }
+  }
+  volta.addEventListener('click', sai);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && reg && !e.defaultPrevented) sai(); });
+  if (window.ResizeObserver) new ResizeObserver(() => { if (reg && !anima) { svg.setAttribute('viewBox', enquadra().join(' ')); poeRotulos(); } }).observe(caixa);
+
+  // no estado inteiro, escolher um município abre a regional dele; com a regional aberta, abre a página do município
+  const abre = cod => { const m = porCod[cod]; if (m && m.slug) location.href = `municipios/${m.slug}/`; };
+  const escolhe = (cod, teclado) => {
     const m = porCod[cod];
-    tiraFoco();
-    foco = cod;
-    el[cod].classList.add('foco');
-    if (m.slug) roda(cod);
-    traz(el[cod]);
-    rotulos();
-    pinta(m.slug
-      ? `<h2>${esc(m.nome)}</h2><p>${nAls(m)} · ${km(kmTot(m))} de rede no município</p>` +
-        m.als.map(a => `<a class="al" href="alimentadores/${esc(a.cod)}/?m=${esc(m.slug)}"><b>${esc(a.cod)}</b><span>${esc(a.se)} · ${km(a.m)} aqui</span></a>`).join('') +
-        `<a class="abre" href="municipios/${esc(m.slug)}/">Abrir a página do município →</a>`
-      : `<h2>${esc(m.nome)}</h2><p>Ainda sem alimentador processado no site.</p>${LEG}`);
-    if (rola && celular.matches) sel.scrollIntoView({ block: sel.offsetHeight > innerHeight * .8 ? 'start' : 'nearest', behavior: calmo.matches ? 'auto' : 'smooth' });
-  }
-  svg.addEventListener('click', e => { const p = e.target.closest('.mun'); if (p) escolhe(p.dataset.cod, true); });
-  sel.addEventListener('click', e => { const b = e.target.closest('button.al[data-cod]'); if (b) escolhe(b.dataset.cod, true); });
+    if (!reg && m.reg) entra(m.reg, teclado, cod);
+    else if (!reg || m.reg === reg) abre(cod);
+  };
+  svg.addEventListener('click', e => { const p = e.target.closest('.mun'); if (p) escolhe(p.dataset.cod); });
 
   // setas: vai ao município mais perto na direção (dentro de um cone de ±56°)
   const centro = {};
@@ -160,7 +284,7 @@
     const [x0, y0] = cen(p.dataset.cod);
     let melhor = null, dist = Infinity;
     M.muns.forEach(m => {
-      if (!m.slug || m.cod === p.dataset.cod) return;
+      if (!m.slug || m.cod === p.dataset.cod || (reg && m.reg !== reg)) return;
       const [x, y] = cen(m.cod), dx = x - x0, dy = y - y0;
       const frente = dx * d[0] + dy * d[1], lado = Math.abs(dx * d[1] + dy * d[0]);
       if (frente <= 0 || lado > frente * 1.5) return;
@@ -180,99 +304,55 @@
   });
   svg.addEventListener('focusout', () => { if (foco) traz(el[foco]); });
 
-  // busca da página (campo #busca, já na barra em cima do mapa): destaca no mapa (também os municípios sem dados);
-  // um resultado só = já escolhe
-  const busca = document.getElementById('busca');
-  if (busca) {
-    const bm = busca.closest('.mt-bmun') || busca;
-    // celular: com texto no campo, o painel sobe para logo abaixo da barra (.buscando, em site.css);
-    // se o teclado ainda cobrir o resultado, o campo vai para o alto da tela e o resultado aparece embaixo dele
-    const mostraSel = () => {
-      if (!celular.matches) return;
-      const vv = window.visualViewport, fundo = vv ? vv.offsetTop + vv.height : innerHeight;
-      if (sel.getBoundingClientRect().top > fundo - 120) bm.scrollIntoView({ block: 'start', behavior: calmo.matches ? 'auto' : 'smooth' });
+  // município: o campo #busca abre a lista suspensa (#mun-lista) com todos os municípios, filtrada pelo que se digita;
+  // os achados acendem no mapa. Setas andam na lista, Enter abre o município (ou o único achado), Esc fecha.
+  const busca = document.getElementById('busca'), lista = document.getElementById('mun-lista');
+  if (busca && lista) {
+    const todos = M.muns.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    let ops = [], ativo = -1;
+    const acende = cod => { Object.values(el).forEach(p => p.classList.remove('acende')); if (cod) el[cod].classList.add('acende'); };
+    const marca = i => {
+      ops.forEach((o, k) => o.classList.toggle('marcado', k === i));
+      ativo = i;
+      if (i >= 0) { busca.setAttribute('aria-activedescendant', ops[i].id); ops[i].scrollIntoView({ block: 'nearest' }); acende(ops[i].dataset.cod); }
+      else { busca.removeAttribute('aria-activedescendant'); acende(null); }
     };
-    busca.addEventListener('input', () => {
-      const txt = busca.value.trim(), q = semAcento(txt);
+    const abreLista = sim => {
+      lista.hidden = !sim;
+      busca.setAttribute('aria-expanded', String(sim));
+      if (!sim) marca(-1);
+    };
+    function filtra() {
+      const q = semAcento(busca.value.trim());
+      const ms = todos.filter(m => !q || m.busca.includes(q));
       achou.forEach(c => el[c].classList.remove('achou'));
-      achou = new Set();
-      alvo.classList.toggle('buscando', !!q);
-      if (!q) { tiraFoco(); rotulos(); resumo(); return; }
-      const ms = M.muns.filter(m => m.busca.includes(q));
-      ms.forEach(m => { el[m.cod].classList.add('achou'); achou.add(m.cod); });
-      if (ms.length === 1) escolhe(ms[0].cod);
-      else {
-        tiraFoco();
-        rotulos();
-        if (ms.length >= 2 && ms.length <= 8) achados(ms); else resumo(ms.length ? '' : txt);
-      }
-      mostraSel();
+      achou = new Set(q ? ms.map(m => m.cod) : []);
+      achou.forEach(c => el[c].classList.add('achou'));
+      rotulos();
+      lista.innerHTML = ms.map((m, i) => m.slug
+        ? `<a class="mun-op" role="option" id="mun-op-${i}" data-cod="${esc(m.cod)}" href="municipios/${esc(m.slug)}/" tabindex="-1"><b>${esc(m.nome)}</b><span>${nAls(m)} · ${km(kmTot(m))}</span></a>`
+        : `<div class="mun-op sem" role="option" id="mun-op-${i}" data-cod="${esc(m.cod)}" aria-disabled="true"><b>${esc(m.nome)}</b><span>sem dados ainda</span></div>`).join('')
+        || `<p class="vazio">Nenhum município com “${esc(busca.value.trim())}”.</p>`;
+      ops = [...lista.querySelectorAll('.mun-op')];
+      abreLista(true);
+      marca(q && ops.length === 1 ? 0 : -1);
+    }
+    busca.addEventListener('input', filtra);
+    busca.addEventListener('focus', filtra);
+    busca.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (lista.hidden) filtra();
+        if (!ops.length) return;
+        marca(e.key === 'ArrowDown' ? Math.min(ops.length - 1, ativo + 1) : Math.max(0, ativo - 1));
+      } else if (e.key === 'Enter') {
+        const o = ops[ativo >= 0 ? ativo : 0];
+        if (o && o.href) { e.preventDefault(); location.href = o.href; }
+      } else if (e.key === 'Escape' && !lista.hidden) { e.preventDefault(); abreLista(false); }
     });
+    lista.addEventListener('mousedown', e => e.preventDefault());   // clicar na lista não tira o foco do campo antes do clique
+    lista.addEventListener('mouseover', e => { const o = e.target.closest('.mun-op'); if (o) marca(ops.indexOf(o)); });
+    document.addEventListener('pointerdown', e => { if (!lista.hidden && !busca.parentElement.contains(e.target)) abreLista(false); });
+    busca.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== busca) abreLista(false); }, 0));
   }
-  // blocos da página: passar o mouse acende o município no mapa
-  document.querySelectorAll('.card[data-busca]').forEach(c => {
-    const m = porBusca[c.dataset.busca];
-    if (!m) return;
-    c.addEventListener('mouseenter', () => el[m.cod].classList.add('acende'));
-    c.addEventListener('mouseleave', () => el[m.cod].classList.remove('acende'));
-  });
-  svg.addEventListener('mouseover', e => {
-    const p = e.target.closest('.mun.tem');
-    document.querySelectorAll('.card.acende').forEach(c => c.classList.remove('acende'));
-    if (p) document.querySelector(`.card[data-busca="${CSS.escape(porCod[p.dataset.cod].busca)}"]`)?.classList.add('acende');
-  });
-  resumo();
-
-  // ---------- ranking de alimentadores por NAE (window.RANK de ranking-nae.js) ----------
-  const R = window.RANK, rank = alvo.querySelector('.mt-rank');
-  if (!R || !R.als.length) { rank.remove(); return; }
-  const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-  const rotMes = m => `${MES[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`;
-  const nf = n => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
-  const ORD = {
-    nae: { rot: 'NAE', val: a => a.nae, un: 'NAE' },
-    cons: { rot: 'Consumidores', val: a => a.cons, un: 'cons.' },
-    // NAE/100 km: a NAE da mesma rede dos km (nae_rede: onde o ativo está hoje no GIS, ferramentas/nae_rede.py)
-    km: { rot: 'NAE/100 km', val: a => a.km ? (a.nae_rede ?? a.nae) / a.km * 100 : 0, un: '/100 km' },
-  };
-  let ord = 'nae';
-  const slugDe = cod => (porCod[cod] || {}).slug;
-  const hoje = new Date();
-  const anosDesde = d => d ? (hoje - new Date(d + 'T00:00:00')) / 31557600000 : Infinity;
-  const tres = matchMedia('(min-width:1181px)');          // 3 colunas: lista inteira com rolagem; senão, de 10 em 10
-  let mostra = 10;
-  function pintaRank() {
-    const o = ORD[ord];
-    const ls = R.als.slice().sort((a, b) => o.val(b) - o.val(a) || b.nae - a.nae);
-    const vis = tres.matches ? ls : ls.slice(0, mostra);
-    const max = Math.max(...ls.map(o.val), 1);
-    rank.innerHTML = `<h2>Alimentadores com mais NAE<small>Árvore/eucalipto na rede · ${R.meses.length ? rotMes(R.meses[0]) + ' a ' + rotMes(R.meses[1]) : ''}${ord === 'km' ? ' · NAE contada no alimentador onde o ativo está hoje no GIS' : ''}</small></h2>
-      <div class="mt-ord" role="group" aria-label="Ordenar por">${Object.entries(ORD).map(([k, x]) => `<button type="button" data-o="${k}" aria-pressed="${k === ord}">${x.rot}</button>`).join('')}</div>
-      <ol class="mt-rl">${vis.map((a, i) => {
-        const v = o.val(a), slug = a.muns.map(slugDe).find(Boolean), nomes = a.muns.map(c => (porCod[c] || {}).nome || c);
-        const velha = anosDesde(a.ult_limpeza) > 3;
-        return `<li><a class="mt-ra${a.nae ? '' : ' zero'}" href="alimentadores/${esc(a.al)}/${slug ? '?m=' + esc(slug) : ''}" data-al="${esc(a.al)}">
-          <span class="p">${i + 1}º</span><b>${esc(a.al)}</b><span class="v">${nf(v)}<small>${o.un}</small></span>
-          <span class="se">${esc(a.se)} · ${esc(nomes.slice(0, 3).join(', '))}${nomes.length > 3 ? ` e mais ${nomes.length - 3}` : ''}</span>
-          <span class="bar"><i style="width:${100 * v / max}%"></i></span>
-          <span class="ex">${a.nae} NAE${ord === 'km' && a.nae_rede !== undefined && a.nae_rede !== a.nae ? ` (${a.nae_rede} com o ativo nesta rede)` : ''} · ${a.cons.toLocaleString('pt-BR')} cons. · ${a.km >= 1 ? nf(a.km) : a.km.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} km · <span class="lp">limpeza: <em class="${velha ? 'velha' : ''}">${a.ult_limpeza ? a.ult_limpeza.split('-').reverse().join('/') : 'sem registro'}</em></span></span></a></li>`;
-      }).join('')}</ol>${vis.length < ls.length ? `<button type="button" class="mt-mais" data-mais>Mostrar mais ${Math.min(20, ls.length - vis.length)} (de ${ls.length})</button>` : ''}`;
-  }
-  rank.addEventListener('click', e => {
-    const b = e.target.closest('[data-o],[data-mais]');
-    if (!b) return;
-    if (b.dataset.o) ord = b.dataset.o; else mostra += 20;
-    pintaRank();
-    if (b.hasAttribute('data-mais')) rank.querySelectorAll('.mt-ra')[mostra - 20]?.focus();   // foco no 1º item novo
-    else rank.querySelector(`[data-o="${ord}"]`)?.focus();                                      // o botão escolhido continua com o foco
-  });
-  tres.addEventListener('change', pintaRank);
-  // passar o mouse no alimentador acende os municípios dele no mapa
-  const apaga = () => Object.values(el).forEach(p => p.classList.remove('acende'));
-  const acende = a => (R.als.find(x => x.al === a.dataset.al) || { muns: [] }).muns.forEach(c => el[c] && el[c].classList.add('acende'));
-  rank.addEventListener('mouseover', e => { const a = e.target.closest('.mt-ra'); apaga(); if (a) acende(a); });
-  rank.addEventListener('mouseleave', apaga);
-  rank.addEventListener('focusin', e => { const a = e.target.closest('.mt-ra'); apaga(); if (a) acende(a); });
-  rank.addEventListener('focusout', e => { if (!rank.contains(e.relatedTarget)) apaga(); });
-  pintaRank();
 })();
