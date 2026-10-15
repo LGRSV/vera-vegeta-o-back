@@ -9,15 +9,18 @@
 // Ativo (ou Enter) busca no índice dados/ativos/<fatia>.json (gerados por scripts/gera_trechos.py), que diz o alimentador
 // e o trecho. OS: com número/ano (ex.: 002507/2026, com ou sem a equipe na frente) aparece "Buscar a OS…", que procura em
 // dados/os/<fatia>.json. Cada resultado abre a página do alimentador ou mostra o alimentador no mapa.
-// A lista e o resultado abrem presos ao campo (não empurram o mapa); fecham com Esc ou clicando fora. "/" leva ao campo.
+// Fechada, só o olho do ARGOS aparece; tocar nele abre o campo. A lista e o resultado abrem presos ao olho (não empurram
+// o mapa); fecham com Esc ou clicando fora. "/" abre a busca.
 (function () {
   const form = document.getElementById('ativo');
   if (!form) return;
   const q = document.getElementById('ativo-q'), res = document.getElementById('ativo-res');
   const barra = document.querySelector('.mt-barra');     // página de versão antiga, com o formulário fora da barra
   if (barra && !barra.contains(form)) barra.prepend(form);
-  q.hidden = false;                                      // o campo fica sempre à vista; a lupa só leva o foco até ele
-  window.ARGOS_BUSCA = true;                             // mapa-municipios.js: a lista do município aberto fica aqui, embaixo da logo
+  // fechada, só o olho do ARGOS aparece; tocar nele abre o campo (e a lista). Página antiga, sem o olho: campo sempre à vista
+  const lupa = document.getElementById('lupa');
+  if (!lupa) q.hidden = false;
+  window.ARGOS_BUSCA = true;                            // mapa-municipios.js: a lista do município aberto fica aqui, embaixo da logo
   const mapa = () => window.ARGOS_MAPA || null;
   const P = window.ARGOS_PAG || { url: p => p, alvo: '', abre: p => { location.href = p; } };
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -217,6 +220,7 @@
   function vaiNoMapa(alvo) {
     q.value = '';
     fecha();
+    if (lupa) { q.hidden = true; lupa.setAttribute('aria-expanded', 'false'); }   // escolheu: o campo fecha, fica o olho
     q.blur();
     indoAl = alvo.al || null;
     Promise.resolve(mapa().vai(alvo)).finally(() => { indoAl = null; });
@@ -287,19 +291,29 @@
       }).join('') + '</ul>';
   });
 
-  // lupa: leva o foco ao campo (e mostra o próximo nível do mapa)
-  const lupa = document.getElementById('lupa');
+  // olho: abre o campo (e a lista com o próximo nível do mapa); com o campo vazio, tocar de novo fecha
+  const abreCampo = sim => {
+    if (!lupa) { if (sim) q.focus(); return; }
+    q.hidden = !sim;
+    lupa.setAttribute('aria-expanded', String(sim));
+    if (sim) { q.focus(); if (!q.value.trim()) atalhos(); }
+    else { q.value = ''; fecha(); }
+  };
   if (lupa) {
-    lupa.removeAttribute('aria-expanded');
-    lupa.setAttribute('aria-label', 'Ir para a busca');
-    lupa.addEventListener('click', () => { q.focus(); if (!q.value.trim()) atalhos(); });
+    lupa.setAttribute('aria-expanded', String(!q.hidden));
+    lupa.setAttribute('aria-label', 'Abrir a busca: regional, polo, município, alimentador, ativo ou OS');
+    lupa.addEventListener('click', () => { if (q.hidden) abreCampo(true); else if (!q.value.trim()) abreCampo(false); else q.focus(); });
+    // saiu do campo vazio, sem lista aberta: fecha e fica só o olho
+    q.addEventListener('blur', () => setTimeout(() => {
+      if (!q.hidden && !q.value.trim() && !form.contains(document.activeElement) && !res.innerHTML) abreCampo(false);
+    }, 150));
   }
-  // "/" leva à busca (fora de campos de texto)
+  // "/" abre a busca (fora de campos de texto)
   document.addEventListener('keydown', e => {
     if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target.closest && e.target.closest('input,textarea,select,[contenteditable="true"]')) return;
     e.preventDefault();
-    q.focus();
+    abreCampo(true);
   });
   // a lista acompanha o mapa: abrir um município abre embaixo da logo a lista dos alimentadores dele (no lugar da caixa que
   // ficava ao lado do mapa); ao dar zoom num alimentador ela fecha para mostrar o mapa; com o campo em uso, só atualiza
@@ -314,10 +328,14 @@
   });
   // fecha a lista: Esc (no campo ou na lista; o foco volta ao campo), clique fora do formulário ou o foco saindo dele
   form.addEventListener('keydown', e => {
-    if (e.key !== 'Escape' || !res.innerHTML) return;
+    if (e.key !== 'Escape') return;
+    if (!res.innerHTML) {                         // sem lista: o Esc fecha o campo (e o foco volta ao olho)
+      if (lupa && !q.hidden) { e.preventDefault(); abreCampo(false); lupa.focus(); }
+      return;
+    }
     e.preventDefault();                           // sem isto o Esc também apagaria o texto do campo e subiria um nível no mapa
     fecha();
-    q.focus();
+    if (!q.hidden) q.focus();
   });
   // (só a lista que já estava aberta quando o foco saiu: a do município abre logo depois de escolher, com o campo sem foco)
   form.addEventListener('focusout', () => { if (!sug.length) return; const era = res.firstChild; setTimeout(() => { if (!form.contains(document.activeElement) && sug.length && res.firstChild === era) fecha(); }, 0); });
