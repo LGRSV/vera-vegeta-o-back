@@ -338,7 +338,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
   }
   $('#ref').value = S.P.ref;
   const poloSel = $('#f-polo');
-  poloSel.add(new Option('Todos', 'todos'));
+  poloSel.add(new Option('Todos os polos', 'todos'));
   POLOS.forEach((p) => poloSel.add(new Option(p, p)));
   const munSel = $('#f-mun');
   munSel.add(new Option('Todos', 'todos'));
@@ -356,26 +356,20 @@ if (typeof module !== 'undefined') module.exports = VERA;
   const nomeCrit = (c) => (c.k === 'avenc' ? 'Limpeza de faixa a vencer em ' + S.P.aVencer + ' meses' : c.nome);
   function desenharPesos() {
     $('#pesos').innerHTML = V.CRIT.map((c) =>
-      '<div class="peso"><label for="k-' + c.k + '"><span class="amostra" style="background:' + corGrupo(c) + '"></span>' + esc(nomeCrit(c)) + '</label>' +
+      '<div class="peso"><label for="k-' + c.k + '" title="' + esc(nomeCrit(c)) + '"><span class="amostra" style="background:' + corGrupo(c) + '"></span>' + esc(c.curto) + '</label>' +
       '<input type="range" id="k-' + c.k + '" data-k="' + c.k + '" min="0" max="50" step="1" value="' + Math.min(S.W[c.k], 50) + '">' +
       '<input type="number" id="nk-' + c.k + '" data-k="' + c.k + '" min="0" max="100" step="1" value="' + S.W[c.k] + '" aria-label="' + esc(c.nome) + ' em %"><span class="pct">%</span>' +
-      (c.k === 'hier' ? '<div class="classes" id="hier-classes"></div>' : '') + '</div>').join('') +
-      '<div class="total-pesos" id="total-pesos"><span>Total</span><b id="total-valor"></b></div>';
+      (c.k === 'hier' ? '<div class="classes" id="hier-classes"></div>' : '') + '</div>').join('');
     atualizarSomas();
   }
   function atualizarSomas() {
     const tot = totalPesos(), ok = pesosValidos(), d = 100 - tot;
-    $('#total-valor').textContent = fmtN(tot) + '%' + (d > 0 ? ' · faltam ' + fmtN(d) : d < 0 ? ' · sobram ' + fmtN(-d) : '');
-    $('#total-pesos').classList.toggle('alerta', !ok);
     const av = $('#aviso-pesos');
     av.hidden = ok;
     if (!ok) av.textContent = 'Os pesos somam ' + fmtN(tot) + '%; precisam somar 100%. Enquanto isso, o ranking usa os últimos pesos válidos.';
     $('#distrib').innerHTML = V.CRIT.filter((c) => S.W[c.k] > 0).map((c) =>
       '<span style="width:' + (tot ? (100 * S.W[c.k]) / tot : 0).toFixed(2) + '%;background:' + corGrupo(c) + '" title="' + esc(c.curto) + ': ' + S.W[c.k] + '%"></span>').join('');
     atualizarHier();
-    const p = V.PERFIS[S.perfil].w, padrao = V.parametrosPadrao().hier;
-    const igual = V.CRIT.every((c) => S.W[c.k] === p[c.k]) && [1, 2, 3].every((c) => S.P.hier[c] === padrao[c]);
-    $('#prem-resumo').textContent = V.CRIT.length + ' critérios · ' + (igual ? 'pesos do perfil ' + V.PERFIS[S.perfil].nome : 'pesos ajustados');
   }
   // Hierarquia do trecho: T1 recebe o peso inteiro do critério; T2 e T3 recebem uma parte dele (padrão 10, 5 e 3 pontos)
   const nfHier = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
@@ -384,9 +378,9 @@ if (typeof module !== 'undefined') module.exports = VERA;
     const el = $('#hier-classes');
     if (!el) return;
     if (!el.children.length) {
-      el.innerHTML = '<span>Pontos por classe:</span><span>T1 <b id="hier-1"></b></span>' +
+      el.innerHTML = '<span>T1 <b id="hier-1"></b></span>' +
         [2, 3].map((c) => '<label>T' + c + ' <input type="number" id="hier-' + c + '" data-h="' + c + '" min="0" step="0.5" aria-label="Pontos da hierarquia para T' + c + '"></label>').join('') +
-        '<span>% do score</span>';
+        '';
     }
     $('#hier-1').textContent = nfHier.format(pontosHier(1));
     for (const c of [2, 3]) {
@@ -491,15 +485,6 @@ if (typeof module !== 'undefined') module.exports = VERA;
     if (r.bonus > 0) h += '<span class="plano" style="width:' + r.bonus.toFixed(2) + '%"></span>';
     return '<div class="score"><div class="barra" role="img" aria-label="Score ' + Math.floor(r.score) + '">' + h + '</div><b>' + Math.floor(r.score) + '</b></div>';
   }
-  function motivo(r) {
-    if (r.status !== 'Elegível') return '<span class="chip estado">' + esc(r.status) + '</span>';
-    const top = V.CRIT.filter((c) => r.pts[c.k] > 0.05).sort((a, b) => r.pts[b.k] - r.pts[a.k]).slice(0, 2).map((c) => c.curto);
-    let h = esc(top.join(' · ') || '—');
-    if (r.faixa < r.fScore) h += ' <span class="chip piso" title="' + esc(r.regras.filter((g) => g.tipo === 'piso').map((g) => g.txt).join('; ')) + '">subiu por regra</span>';
-    const v = validacoes[r.t.id];
-    if (v) h += ' <span class="chip">' + esc(v.decisao) + '</span>';
-    return h;
-  }
   function filtrar(semFaixa) {
     const f = S.f;
     return S.out.ranked.filter((r) => {
@@ -518,19 +503,18 @@ if (typeof module !== 'undefined') module.exports = VERA;
     const base = filtrar(true), lista = filtrar(false);
     const cont = { 1: [0, 0], 2: [0, 0], 3: [0, 0], 4: [0, 0] };
     for (const r of base) if (r.status === 'Elegível') { cont[r.faixa][0]++; cont[r.faixa][1] += r.t.km; }
-    const nomes = { 1: 'P1 · executar', 2: 'P2 · alta', 3: 'P3 · média', 4: 'P4 · ciclo' };
+    const nomes = { 1: 'P1', 2: 'P2', 3: 'P3', 4: 'P4' };
     $('#resumo').innerHTML = [1, 2, 3, 4].map((n) =>
-      '<button type="button" class="tile' + (S.f.faixa === n ? ' on' : '') + '" data-faixa="' + n + '" aria-pressed="' + (S.f.faixa === n) + '"><span class="t f' + n + '"><span class="ponto"></span>' + nomes[n] + '</span><span class="v">' + fmtN(cont[n][0]) + '</span><span class="k">' + fmtN(cont[n][1]) + ' km</span></button>').join('');
+      '<button type="button" class="tile' + (S.f.faixa === n ? ' on' : '') + '" data-faixa="' + n + '" aria-pressed="' + (S.f.faixa === n) + '"><span class="t f' + n + '"><span class="ponto"></span>' + nomes[n] + '</span><span class="v">' + fmtN(cont[n][0]) + '</span></button>').join('');
     const MAX = 200;
     $('#corpo').innerHTML = lista.length ? lista.slice(0, MAX).map((r) => {
       const t = r.t;
       const mv = r.mov === 'novo' ? '<span class="mov sobe">novo</span>' : r.mov > 0 ? '<span class="mov sobe">▲ ' + r.mov + '</span>' : r.mov < 0 ? '<span class="mov desce">▼ ' + -r.mov + '</span>' : '';
       return '<tr data-i="' + t.i + '" tabindex="0"' + (S.sel === t.i ? ' class="sel"' : '') + '>' +
         '<td class="r num muted">' + (r.pos ?? '—') + mv + '</td>' +
-        '<td><span class="trecho-id">' + esc(t.id) + '</span><span class="sub">T' + t.c + ' · ' + fmtKm(t.km) + ' km · ' + esc(t.mun) + '</span></td>' +
-        '<td>' + FAIXA(r.faixa) + '</td><td>' + barra(r) + '</td><td class="motivo">' + motivo(r) + '</td></tr>';
-    }).join('') : '<tr><td colspan="5" class="vazio">Nenhum trecho com esses filtros.</td></tr>';
-    $('#rodape').textContent = fmtN(Math.min(MAX, lista.length)) + ' de ' + fmtN(lista.length) + ' trechos, por faixa e score. Clique num trecho para ver o porquê.' + (pesosValidos() ? '' : ' Pesos fora de 100%: ranking com os últimos pesos válidos.');
+        '<td><span class="trecho-id">' + esc(t.id) + '</span></td>' +
+        '<td>' + FAIXA(r.faixa) + '</td><td>' + barra(r) + '</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="vazio">Nenhum trecho.</td></tr>';
     // computador: a ficha da direita nunca fica vazia; abre o primeiro trecho da lista
     if (S.sel === null && lista.length && !gaveta.matches) abrirFicha(lista[0].t.i, true);
   }
@@ -538,8 +522,6 @@ if (typeof module !== 'undefined') module.exports = VERA;
     const b = e.target.closest('[data-faixa]'); if (!b) return;
     const n = Number(b.dataset.faixa); S.f.faixa = S.f.faixa === n ? null : n; renderRanking();
   });
-  $('#legenda').innerHTML = V.BLOCOS.map((b) => '<span><span class="amostra" style="background:' + b.cor + '"></span>' + b.nome + '</span>').join('') +
-    '<span><span class="amostra" style="background:repeating-linear-gradient(45deg,var(--muted) 0 2px,transparent 2px 4px)"></span>Plano climático</span>';
   $('#corpo').addEventListener('click', (e) => { const tr = e.target.closest('tr[data-i]'); if (tr) abrirFicha(Number(tr.dataset.i)); });
   $('#corpo').addEventListener('keydown', (e) => { if (e.key === 'Enter') { const tr = e.target.closest('tr[data-i]'); if (tr) abrirFicha(Number(tr.dataset.i)); } });
 
@@ -574,11 +556,9 @@ if (typeof module !== 'undefined') module.exports = VERA;
     if (!manter) focoAnterior = document.activeElement;
     S.sel = i;
     document.querySelectorAll('#corpo tr').forEach((tr) => tr.classList.toggle('sel', Number(tr.dataset.i) === i));
-    const stNome = { real: 'dado real', est: 'estimado', falta: 'sem dado' };
-    const linhasCrit = V.CRIT.map((c) => {
-      const x = r.v[c.k], p = r.pts[c.k];
-      return '<tr><td>' + esc(nomeCrit(c)) + '</td><td class="st-' + x.st + '">' + esc(x.dado) + '</td><td class="r num">' + (x.st === 'falta' ? '—' : x.s.toFixed(2).replace('.', ',')) + '</td><td class="r num">' + S.W[c.k] + '</td><td class="r num">' + (p === null ? '—' : fmt1((100 * p) / r.den)) + '</td><td class="st-' + x.st + '">' + stNome[x.st] + '</td></tr>';
-    }).join('');
+    // critérios com pontos, do maior para o menor; o dado de cada um fica no title (passar o mouse)
+    const linhasCrit = V.CRIT.filter((c) => r.pts[c.k] > 0).sort((a, b) => r.pts[b.k] - r.pts[a.k]).map((c) =>
+      '<li title="' + esc(nomeCrit(c) + ': ' + r.v[c.k].dado) + '"><span class="amostra" style="background:' + corGrupo(c) + '"></span><span>' + esc(c.curto) + '</span><b>' + fmt1((100 * r.pts[c.k]) / r.den) + '</b></li>').join('');
     const ocs = f.usadas.slice().sort((a, b) => b.d - a.d);
     const rgNome = ['chave do trecho', 'vão mais próximo', 'abrangência DJ'];
     const evOc = ocs.length ? '<div class="lista-ev"><table class="tab-mini"><thead><tr><th>Data</th><th class="r">Consum.</th><th class="r">Min</th><th>Tipo</th><th>Associação</th><th class="r">Peso</th></tr></thead><tbody>' +
@@ -589,24 +569,22 @@ if (typeof module !== 'undefined') module.exports = VERA;
       t.os.slice().sort((a, b) => b[0] - a[0]).map((o) => '<tr><td class="num">' + V.dataDe(ctx, o[0]) + '</td><td class="mono">' + esc(o[3]) + '</td><td>' + sitN[o[1]] + '</td><td class="r num">' + pct(o[2]) + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="dica">Nenhuma OS de limpeza de faixa associada.</p>';
     const val = validacoes[t.id];
     gav.innerHTML =
-      '<div class="g-cab"><div class="g-topo"><div><span class="eyebrow">' + esc(t.se) + ' · ' + esc(t.polo) + '</span><h2 id="g-titulo">' + esc(t.id) + '</h2></div><button class="fechar" type="button" id="fechar">Fechar</button></div>' +
-      '<div class="chips">' + FAIXA(r.faixa) + '<span class="chip">T' + t.c + '</span><span class="chip">' + fmtKm(t.km) + ' km</span><span class="chip">' + esc(t.mun) + '</span><span class="chip">' + esc(r.fila) + '</span><span class="chip estado">' + esc(r.status) + (r.pos ? ' · #' + r.pos : '') + '</span></div></div>' +
-      '<div class="kpis"><div class="kpi"><span>Score</span><b>' + Math.floor(r.score) + '</b></div><div class="kpi"><span>Criticidade histórica</span><b>' + Math.round(r.CH) + '</b></div><div class="kpi"><span>Urgência atual</span><b>' + Math.round(r.UA) + '</b></div><div class="kpi"><span>Confiança</span><b>' + pct(r.conf) + '</b></div></div>' +
+      '<div class="g-cab"><div class="g-topo"><div><h2 id="g-titulo">' + esc(t.id) + '</h2></div><button class="fechar" type="button" id="fechar">Fechar</button></div>' +
+      '<div class="chips">' + FAIXA(r.faixa) + '<span class="chip">' + fmtKm(t.km) + ' km</span>' + (r.status !== 'Elegível' ? '<span class="chip estado">' + esc(r.status) + '</span>' : '') + '</div></div>' +
+      '<div class="kpis"><div class="kpi"><span>Score</span><b>' + Math.floor(r.score) + '</b></div><div class="kpi"><span>Histórico</span><b>' + Math.round(r.CH) + '</b></div><div class="kpi"><span>Urgência</span><b>' + Math.round(r.UA) + '</b></div><div class="kpi"><span>Confiança</span><b>' + pct(r.conf) + '</b></div></div>' +
       barra(r) +
-      '<section><h3>Justificativa</h3><p class="just" style="margin-top:8px">' + esc(V.justificar(ctx, r, S.P, S.W)) + '</p></section>' +
-      '<section><h3>Regras aplicadas</h3>' + (r.regras.length ? '<ul class="regras" style="margin-top:8px">' + r.regras.map((g) => '<li><span class="chip ' + g.tipo + '">' + g.id + '</span><span>' + esc(g.txt) + '</span></li>').join('') + '</ul>' : '<p class="dica" style="margin-top:8px">Nenhuma regra disparou; a faixa vem só do score.</p>') + '</section>' +
-      '<section><h3>Critérios</h3><div class="tabela-wrap" style="margin-top:8px"><table class="tab-mini"><thead><tr><th>Critério</th><th>Dado</th><th class="r">0–1</th><th class="r">Peso %</th><th class="r">Pontos</th><th>Fonte</th></tr></thead><tbody>' + linhasCrit + '</tbody></table></div>' +
-      '<p class="dica" style="margin-top:6px">Pontos = peso × valor 0–1 ÷ soma dos pesos com dado × 100. O score é a soma dos pontos' + (r.bonus ? ' mais o bônus do plano' : '') + '.</p></section>' +
-      '<section class="excecoes"><h3>Testar exceções</h3>' +
+      '<section><h3>Critérios</h3><ul class="crit-lista">' + linhasCrit + '</ul></section>' +
+      (r.regras.length ? '<section><h3>Regras</h3><ul class="regras" style="margin-top:8px">' + r.regras.map((g) => '<li><span class="chip ' + g.tipo + '">' + g.id + '</span><span>' + esc(g.txt) + '</span></li>').join('') + '</ul></section>' : '') +
+      '<details class="g-mais"><summary>Testar exceções</summary><div class="excecoes">' +
       '<label><input type="checkbox" id="x-ga"' + (S.flags.ga.has(t.i) ? ' checked' : '') + '> Há cliente Grupo A ou essencial a jusante</label>' +
-      '<label><input type="checkbox" id="x-plano"' + (S.flags.plano.has(t.i) ? ' checked' : '') + '> Incluir este trecho no plano climático</label></section>' +
-      '<section><h3>Ocorrências usadas</h3><div style="margin-top:8px">' + evOc + '</div></section>' +
-      '<section><h3>Limpezas de faixa</h3><div style="margin-top:8px">' + evOs + '</div></section>' +
-      '<section class="validacao"><h3>Validação técnica</h3><div class="val-botoes">' +
+      '<label><input type="checkbox" id="x-plano"' + (S.flags.plano.has(t.i) ? ' checked' : '') + '> Incluir este trecho no plano climático</label></div></details>' +
+      '<details class="g-mais"><summary>Ocorrências (' + ocs.length + ')</summary>' + evOc + '</details>' +
+      '<details class="g-mais"><summary>Limpezas (' + t.os.length + ')</summary>' + evOs + '</details>' +
+      '<details class="g-mais"><summary>Validar' + (val ? ' · ' + esc(val.decisao) : '') + '</summary><div class="validacao"><div class="val-botoes">' +
       [['Aprovado', 'Aprovar'], ['Adiado', 'Adiar'], ['Rejeitado', 'Rejeitar']].map(([d, rot]) => '<button type="button" class="botao" data-dec="' + d + '" aria-pressed="' + Boolean(val && val.decisao === d) + '">' + rot + '</button>').join('') + '</div>' +
       '<div class="campo"><label for="v-motivo">Motivo</label><select id="v-motivo"><option>Confirmo a prioridade</option><option>Executado e não registrado</option><option>Sem acesso ou autorização</option><option>Aguardar inspeção</option><option>Dado incorreto</option><option>Outro</option></select></div>' +
       '<div class="campo"><label for="v-obs">Observação</label><input type="text" id="v-obs" value="' + esc(val ? val.obs : '') + '"></div>' +
-      '<p class="val-reg">' + (val ? esc(val.decisao + ' em ' + val.quando + ' · ' + val.motivo + ' · score ' + val.score + ' · metodologia ' + val.perfil) : 'Registro guardado só neste navegador (teste). No sistema real vai para validacao_tecnica com usuário e data.') + '</p></section>';
+      '<p class="val-reg">' + (val ? esc(val.decisao + ' em ' + val.quando + ' · ' + val.motivo + ' · score ' + val.score + ' · metodologia ' + val.perfil) : '') + '</p></div></details>';
     if (val) $('#v-motivo').value = val.motivo;
     if (gaveta.matches && !manter) { gav.classList.add('aberta'); fundo.hidden = false; $('#fechar').focus(); }
     $('#fechar').addEventListener('click', fecharFicha);
@@ -714,7 +692,8 @@ if (typeof module !== 'undefined') module.exports = VERA;
   $('#sec-pacotes').addEventListener('toggle', (e) => { if (e.target.open) renderPacotes(); });
   $('#sec-dados').addEventListener('toggle', (e) => { if (e.target.open) renderRetro(); });
   function abrirSecao() {
-    const sec = { premissas: 'sec-premissas', opcoes: 'sec-opcoes', pacotes: 'sec-pacotes', metodologia: 'sec-metodologia', dados: 'sec-dados' }[location.hash.slice(1)];
+    if (location.hash === '#premissas') { abrePrem(true); $('#sec-premissas').scrollIntoView(); return; }
+    const sec = { opcoes: 'sec-opcoes', pacotes: 'sec-pacotes', metodologia: 'sec-metodologia', dados: 'sec-dados' }[location.hash.slice(1)];
     if (sec) { const d = document.getElementById(sec); d.open = true; d.scrollIntoView(); }
   }
   window.addEventListener('hashchange', abrirSecao);
@@ -738,9 +717,6 @@ if (typeof module !== 'undefined') module.exports = VERA;
     };
     let ord = 'nae', mostra = 10;
     const slugDe = (cod) => (porCod[cod] || {}).slug;
-    const nomesDe = (a) => a.muns.map((c) => (porCod[c] || {}).nome || c);
-    const hoje = new Date();
-    const anosDesde = (d) => d ? (hoje - new Date(d + 'T00:00:00')) / 31557600000 : Infinity;
     const largo = matchMedia('(min-width:1340px)');          // coluna da esquerda: lista inteira com rolagem; senão, de 10 em 10
     const doAl = (cod) => R.als.find((a) => a.al === cod);
     function pintaRank() {
@@ -748,16 +724,13 @@ if (typeof module !== 'undefined') module.exports = VERA;
       const ls = R.als.slice().sort((a, b) => o.val(b) - o.val(a) || b.nae - a.nae);
       const vis = largo.matches ? ls : ls.slice(0, mostra);
       const max = Math.max(...ls.map(o.val), 1);
-      rank.innerHTML = `<h2 class="pz-h2">Alimentadores com mais NAE<small>Árvore/eucalipto na rede · ${R.meses.length ? rotMes(R.meses[0]) + ' a ' + rotMes(R.meses[1]) : ''}${ord === 'km' ? ' · NAE contada no alimentador onde o ativo está hoje no GIS' : ''} · clique para ver os trechos</small></h2>
+      rank.innerHTML = `<h2 class="pz-h2" title="NAE árvore/eucalipto · ${R.meses.length ? rotMes(R.meses[0]) + ' a ' + rotMes(R.meses[1]) : ''}">Alimentadores</h2>
         <div class="mt-ord" role="group" aria-label="Ordenar por">${Object.entries(ORD).map(([k, x]) => `<button type="button" data-o="${k}" aria-pressed="${k === ord}">${x.rot}</button>`).join('')}</div>
         <ol class="mt-rl">${vis.map((a, i) => {
-          const v = o.val(a), nomes = nomesDe(a);
-          const velha = anosDesde(a.ult_limpeza) > 3;
+          const v = o.val(a);
           return `<li><button type="button" class="mt-ra${a.nae ? '' : ' zero'}" data-al="${esc(a.al)}" aria-pressed="${S.f.al === a.al}">
-            <span class="p">${i + 1}º</span><b>${esc(a.al)}</b><span class="v">${nf(v)}<small>${o.un}</small></span>
-            <span class="se">${esc(a.se)} · ${esc(nomes.slice(0, 3).join(', '))}${nomes.length > 3 ? ` e mais ${nomes.length - 3}` : ''}</span>
-            <span class="bar"><i style="width:${100 * v / max}%"></i></span>
-            <span class="ex">${a.nae} NAE${ord === 'km' && a.nae_rede !== undefined && a.nae_rede !== a.nae ? ` (${a.nae_rede} com o ativo nesta rede)` : ''} · ${a.cons.toLocaleString('pt-BR')} cons. · ${a.km >= 1 ? nf(a.km) : a.km.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} km · <span class="lp">limpeza: <em class="${velha ? 'velha' : ''}">${a.ult_limpeza ? a.ult_limpeza.split('-').reverse().join('/') : 'sem registro'}</em></span></span></button></li>`;
+            <span class="p">${i + 1}º</span><b>${esc(a.al)}</b><span class="v" title="${a.nae} NAE · ${a.cons.toLocaleString('pt-BR')} cons. · ${nf(a.km)} km">${nf(v)}</span>
+            <span class="bar"><i style="width:${100 * v / max}%"></i></span></button></li>`;
         }).join('')}</ol>${vis.length < ls.length ? `<button type="button" class="mt-mais" data-mais>Mostrar mais ${Math.min(20, ls.length - vis.length)} (de ${ls.length})</button>` : ''}`;
     }
     // chip do filtro na barra: o alimentador escolhido, quantos trechos dele estão na fila e o link para a página dele no site
@@ -766,9 +739,8 @@ if (typeof module !== 'undefined') module.exports = VERA;
       el.hidden = !cod;
       if (!cod) { el.innerHTML = ''; return; }
       const a = doAl(cod), slug = a && a.muns.map(slugDe).find(Boolean);
-      const n = S.out ? S.out.ranked.filter((r) => r.t.al === cod && r.status === 'Elegível').length : 0;
-      el.innerHTML = '<span>Alimentador <b>' + esc(cod) + '</b> · ' + fmtN(n) + ' trecho' + (n === 1 ? '' : 's') + ' na fila</span>' +
-        '<a href="' + SITE + 'alimentadores/' + esc(cod) + '/' + (slug ? '?m=' + esc(slug) : '') + '"' + (noSite ? '' : ' target="_blank" rel="noopener"') + '>Abrir no mapa</a>' +
+      el.innerHTML = '<b>' + esc(cod) + '</b>' +
+        '<a href="' + SITE + 'alimentadores/' + esc(cod) + '/' + (slug ? '?m=' + esc(slug) : '') + '"' + (noSite ? '' : ' target="_blank" rel="noopener"') + ' title="Abrir no mapa" aria-label="Abrir no mapa">↗</a>' +
         '<button type="button" data-tira aria-label="Tirar o filtro do alimentador">×</button>';
     }
     function filtraAl(cod) {
@@ -792,6 +764,11 @@ if (typeof module !== 'undefined') module.exports = VERA;
     const recalcularAntes = recalcular;
     recalcular = function () { recalcularAntes(); chipAl(); };
   }
+
+  // premissas: o botão da barra abre e fecha o painel dos pesos
+  const premBtn = $('#prem-btn'), prem = $('#sec-premissas');
+  function abrePrem(sim) { prem.hidden = !sim; premBtn.setAttribute('aria-expanded', String(sim)); }
+  premBtn.addEventListener('click', () => abrePrem(prem.hidden));
 
   perfilSel.value = S.perfil;
   dicaPerfil(); desenharPesos(); preencherParams(); grafSaz();

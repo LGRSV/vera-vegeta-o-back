@@ -11,49 +11,48 @@
 <header class="cab"><h1><b>ARGOS</b> <span>PRIORIZAÇÃO</span></h1><a class="cab-link" href="../">Mapa</a></header>
 <div class="pz-app">
 <div class="pz" id="pz">
-  <div class="pz-barra" role="search" aria-label="Filtros dos trechos">
-    <div class="campo pz-busca"><label for="f-busca" class="rot">Buscar trecho</label><input class="busca" type="search" id="f-busca" placeholder="Ex.: LD03010004" autocomplete="off" enterkeyhint="search"></div>
-    <div class="campo"><label for="f-polo" class="rot">Polo</label><select id="f-polo"></select></div>
-    <div class="campo"><span class="rot">Classe</span>
-      <div class="chk" id="f-classe">
+  <div class="pz-topo">
+    <div class="pz-barra" role="search" aria-label="Filtros dos trechos">
+      <input class="busca pz-busca" type="search" id="f-busca" placeholder="Buscar trecho" aria-label="Buscar trecho" autocomplete="off" enterkeyhint="search">
+      <select id="f-polo" aria-label="Polo"></select>
+      <div class="chk" id="f-classe" role="group" aria-label="Classe">
         <label><input type="checkbox" value="1" checked> T1</label>
         <label><input type="checkbox" value="2" checked> T2</label>
         <label><input type="checkbox" value="3" checked> T3</label>
       </div>
+      <div class="pz-al" id="f-al" hidden></div>
+      <button type="button" class="pz-prem-btn" id="prem-btn" aria-expanded="false" aria-controls="sec-premissas">Premissas</button>
     </div>
-    <div class="pz-al" id="f-al" hidden></div>
+    <section class="pz-prem" id="sec-premissas" aria-label="Premissas" hidden>
+      <div class="prem-corpo">
+        <div class="distrib" id="distrib" role="img" aria-label="Distribuição dos pesos"></div>
+        <div class="pesos" id="pesos"></div>
+        <p class="aviso-pesos" id="aviso-pesos" role="status" hidden></p>
+        <div class="botoes-pesos"><button class="botao" id="restaurar" type="button">Restaurar padrão</button></div>
+      </div>
+    </section>
   </div>
-
-  <details class="pz-prem" id="sec-premissas">
-    <summary><span class="prem-tit">Premissas</span><span class="distrib" id="distrib" role="img" aria-label="Distribuição dos pesos"></span><span class="prem-resumo" id="prem-resumo"></span></summary>
-    <div class="prem-corpo">
-      <div class="pesos" id="pesos"></div>
-      <p class="aviso-pesos" id="aviso-pesos" role="status" hidden></p>
-      <div class="botoes-pesos"><button class="botao" id="restaurar" type="button">Restaurar padrão</button></div>
-    </div>
-  </details>
 
   <aside class="mt-rank pz-rank" id="rank" aria-label="Ranking de alimentadores por NAE"></aside>
 
   <section class="pz-centro conteudo" id="pz-centro" aria-labelledby="pz-tit">
-    <h2 class="pz-h2" id="pz-tit">Trechos para limpeza de faixa<small>Prioridade P1 a P4 pelo score e pelas regras · referência 07/10/2026</small></h2>
+    <h2 class="pz-h2" id="pz-tit" title="Limpeza de faixa · referência 07/10/2026">Trechos</h2>
     <div class="resumo" id="resumo"></div>
     <div class="tabela-wrap">
       <table>
-        <thead><tr><th class="r">#</th><th>Trecho</th><th>Faixa</th><th>Score</th><th>Principal motivo</th></tr></thead>
+        <thead><tr><th class="r">#</th><th>Trecho</th><th>Faixa</th><th>Score</th></tr></thead>
         <tbody id="corpo"></tbody>
       </table>
     </div>
-    <div class="pe-tabela"><p class="rodape-tab" id="rodape"></p><div class="legenda" id="legenda"></div></div>
   </section>
 
-  <aside class="pz-ficha gaveta" id="gaveta" aria-label="Ficha do trecho"><p class="dica">Escolha um trecho na lista para ver o porquê da prioridade.</p></aside>
+  <aside class="pz-ficha gaveta" id="gaveta" aria-label="Ficha do trecho"><p class="dica">Escolha um trecho.</p></aside>
 </div>
 <div class="fundo" id="fundo" hidden></div>
 
 <footer class="rodape-pagina">
   <details class="secao" id="sec-opcoes">
-    <summary>Opções avançadas</summary>
+    <summary>Opções</summary>
     <div class="opcoes">
       <div class="col">
       <div class="campo">
@@ -91,7 +90,7 @@
     </div>
   </details>
   <details class="secao" id="sec-pacotes">
-    <summary>Pacotes de execução</summary>
+    <summary>Pacotes</summary>
 
   <div class="doc" style="max-width:none;gap:14px">
     <p class="nota">O pacote nasce do próximo trecho elegível do ranking (o líder) e herda a faixa dele. Vizinhos entram por proximidade; os de faixa inferior entram como aproveitamento, limitados a uma fração da capacidade. Assim o ganho operacional nunca passa um trecho de faixa superior para trás. Distâncias são em linha reta entre centros dos trechos, multiplicadas pelo fator de estrada, partindo da SE do líder.</p>
@@ -302,7 +301,7 @@
 </div>
   </details>
   <details class="secao" id="sec-dados">
-    <summary>Dados e validação</summary>
+    <summary>Dados</summary>
     <ul class="fontes" id="fontes"></ul>
 
 <div class="doc">
