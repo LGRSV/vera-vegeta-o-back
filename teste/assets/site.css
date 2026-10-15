@@ -232,12 +232,17 @@ header.cab>.cab-link{justify-self:center}
 .mt-pchip[aria-pressed=false]{opacity:.6;text-decoration:line-through;box-shadow:inset 0 -4px 0 var(--muted)}
 .mt-pchip:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .mt-polo.desliga{opacity:.15}
+/* polo aberto: os municípios se afastam (transform no path), o contorno do polo some e entram os nomes dos municípios */
+.mt-polo .mun{transition:transform .65s cubic-bezier(.45,0,.55,1)}
+.aberta.polo .mt-poloc{opacity:0}
+.mt-nomes2 .mt-rot{animation:mt-surge .3s ease-out}
+.mt-regs span.mt-pchip{display:grid;cursor:default}
 .aberta .lim-s{display:none}
 @keyframes mt-surge{from{opacity:0}to{opacity:1}}
 @media (max-width:860px){.mt-regs .mt-polos{order:-1;flex:1 1 100%;max-width:none;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:0}.mt-regs .mt-polos-t{grid-column:1/-1;flex:none}}
 /* com a regional aberta (e enquanto anima) o que está fora do recorte não cria rolagem lateral */
 .aberta svg,.voando svg{overflow:hidden}
-@media (prefers-reduced-motion:reduce){.mt-polo,.mt-poloc,.mt-regc{transition:none}.mt-pchip{animation:none}}
+@media (prefers-reduced-motion:reduce){.mt-polo,.mt-polo .mun,.mt-poloc,.mt-regc{transition:none}.mt-pchip,.mt-nomes2 .mt-rot{animation:none}}
 .mun.tem:hover,.mun.acende{stroke:var(--fg);stroke-opacity:1;stroke-width:2.5}
 .mun.sem:hover{fill:var(--mt-vazio-h)}
 .mun.achou{stroke:var(--fg);stroke-opacity:1;stroke-width:2}
