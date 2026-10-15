@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>RASCUNHO · AL01043081 · trechos</title>
+<!-- tema: escuro (fundo preto) por padrão; o Night shift do menu (Shift+K) troca para o claro -->
+<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}document.documentElement.dataset.theme=t==='claro'?'light':'dark'})()</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../../assets/leaflet/leaflet.css">
+<link rel="stylesheet" href="../../assets/alimentador.css">
+</head><body>
+<div class="wrap">
+<p style="margin:8px 0;padding:6px 10px;border-radius:6px;background:#f59e0b;color:#111;font:600 13px sans-serif">Rascunho: ativos da linha com o mapa de perto (zoom 16+) e divisas dos municípios e do Tocantins. <a href="index.html" style="color:#111">Voltar à página normal</a></p>
+  <header>
+    <span class="eyebrow">SE-2ITG SE ITAGUATINS · Alimentador AL01043081</span>
+    <h1>Trechos por ativo</h1>
+    <details class="regra"><summary>Como os trechos são divididos</summary><p class="lede"><b>T1</b> vai do DJ ao 1º religador. <b>T2</b> vai do 1º ao 2º religador; cada religador seguinte abre um novo T2: <b>T2-A, T2-B…</b>, em ordem a partir do DJ. <b>T3-A, T3-B…</b> é cada fusível, em ordem a partir do DJ; fusível dentro de fusível também é T3 (não existe T4). Exceção: o 1º fusível da linha principal a menos de 300 m depois de um religador não abre T3 (o trecho segue T2 até a chave seguinte). Cada trecho vai de chave até chave: toque num trecho no mapa ou na lista para ver a chave de início e de fim.</p></details>
+  </header>
+  <script>
+  // Página do site (CSS em assets/): o cabeçalho já sai pronto (caminho, código do alimentador e subtítulo), antes dos dados,
+  // que são pesados. Sem isso a página e o mapa desciam uns 60 px quando o extras.js montava o cabeçalho. extras.js só completa o município e o trecho.
+  (function () {
+    var ey = document.querySelector('header .eyebrow'), m = ey && /^(.*\S)\s*·\s*Alimentador\s+(\S+)\s*$/.exec(ey.textContent);
+    if (!m || !document.querySelector('link[href$="assets/alimentador.css"]')) return;
+    document.documentElement.classList.add('al-site');
+    var h1 = document.querySelector('header h1'), mk = function (tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; };
+    ey.textContent = m[1];
+    h1.textContent = m[2];
+    h1.after(mk('p', 'sub', 'Trechos por ativo'));
+    var nav = mk('nav', 'migalhas'), a = mk('a', '', 'Municípios'), t = mk('span', 'mig-t');
+    nav.setAttribute('aria-label', 'Caminho'); a.href = '../../'; t.id = 'mig-trecho';
+    nav.append(a, mk('span', 'mig-mun'), t);   // sem o código do alimentador (já está no título logo abaixo)
+    document.querySelector('header').prepend(nav);
+    document.addEventListener('DOMContentLoaded', function () { document.documentElement.classList.add('al-pronto'); });   // depois de dados.js, alimentador.js, extras.js, limpeza.js
+  })();
+  </script>
+
+  <div class="stage">
+    <div class="mapbox">
+      <div id="map" role="region" aria-label="Mapa dos trechos"></div>
+      <div class="classes" id="classes" role="group" aria-label="Mostrar no mapa"></div>
+      <div class="banner" id="nosat" hidden><b>A imagem de satélite não carregou.</b> Confira a internet. Os trechos aparecem igual.</div>
+      <div class="banner" id="nolib" hidden><b>O mapa não carregou.</b> A biblioteca de mapa (Leaflet) não foi encontrada.</div>
+    </div>
+    <aside class="panel">
+      <input class="busca" id="busca" type="search" placeholder="Buscar trecho, ativo ou poste" aria-label="Buscar trecho, ativo ou poste">
+      <div class="ferramentas" id="ferramentas">
+        <div class="ctrl" id="ctrl" hidden>
+          <div class="mes"><button type="button" id="mes" aria-expanded="false" aria-controls="mes-lista"><span class="mes-rot">Meses</span><span class="mes-sep">: </span><span class="mes-txt">todos</span></button>
+            <div class="mes-lista" id="mes-lista" role="group" aria-label="Meses do NAE" hidden></div></div>
+          <label for="ind"><input type="checkbox" id="ind" checked> Contar individuais</label>
+        </div>
+      </div>
+      <div class="lista" id="lista" role="region" aria-label="Lista de trechos"></div>
+      <label class="ord-lista" id="ord-lista" hidden>Ordem <select id="ordem" aria-label="Ordem da lista de trechos"><option value="nae">Maior NAE</option><option value="nae-">Menor NAE</option><option value="hier">T1 › T2 › T3</option></select></label>
+      <section class="det" id="det" aria-live="polite"></section>
+      <div class="legend" id="legenda"></div>
+    </aside>
+  </div>
+  <p class="foot">Fim do trecho: o religador onde começa o T2 seguinte; senão, seguindo a linha principal (rumo ao ponto mais distante do DJ), a 1ª chave onde começa outro trecho ou, se não houver, o poste de fim de linha. Chaves que não dividem trecho (88, faca e outras) só aparecem com o mapa de perto. Imagem de satélite: Esri World Imagery, carregada ao vivo.</p>
+</div>
+
+<script src="../../assets/leaflet/leaflet.js"></script>
+<script src="dados.js"></script>
+<script src="../../assets/alimentador.js"></script>
+<script src="../../assets/extras.js"></script>
+<script src="divisas.js"></script>
+<script src="../../dados/tocantins.js"></script>
+<script src="../../assets/municipios-rascunho.js"></script>
+<script src="chaves.js"></script>
+<script src="../../assets/chaves.js"></script>
+<script src="limpeza.js"></script>
+<script src="../../assets/limpeza.js"></script>
+<script src="inspecao.js"></script>
+<script src="../../assets/inspecao.js"></script>
+<script src="manutencao.js"></script>
+<script src="../../assets/manutencao-polos.js"></script>
+<script src="../../assets/manutencao.js"></script>
+<script src="executadas.js"></script>
+<script src="../../assets/executadas.js"></script>
+<script src="../../assets/telacheia.js"></script>
+<script src="../../assets/croqui.js"></script>
+<script src="../../assets/menu.js"></script>
+<script src="../../assets/ativos-zoom.js"></script>
+</body></html>
