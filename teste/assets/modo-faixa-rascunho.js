@@ -5,6 +5,9 @@
 //   3) com trecho escolhido aparece um painel mínimo: Leve / Pesada (ligar um e arrastar sobre a rede, como um marcador,
 //      pinta só os vãos dos trechos escolhidos; o km de cada um aparece no botão) e, embaixo, "Baixar croqui" (o croqui
 //      de limpeza de faixa do painel, croqui.js, já com os trechos escolhidos e os km marcados).
+// Marca em pedaços de PASSO m (não o vão inteiro): o pincel pinta só o que passa por baixo dele; Leve não cobre Pesada
+// nem o contrário (para trocar: Apagar, ou segurar Shift enquanto pinta). O Ctrl+Z desfaz a última alteração (o último
+// traço, ou o último trecho escolhido/tirado); Ctrl+Shift+Z ou Ctrl+Y refaz.
 // Atalhos: Ctrl+M liga/desliga · L leve · P pesada · B apagar · Espaço (segurar) move o mapa · Ctrl+Z desfaz ·
 // Esc solta a ferramenta (de novo: sai). Celular: abre em tela cheia; 1 dedo pinta, 2 dedos andam/dão zoom.
 // Roda depois de alimentador.js (window.__map, window.D). Os km são a soma dos vãos (D.vaos[i][8], metros).
@@ -20,7 +23,11 @@
   const vaosDe = T.map(() => []); V.forEach((v, i) => vaosDe[v[4]].push(i));
   const extDe = vaosDe.map(l => l.reduce((s, i) => s + V[i][8], 0));
   let ativo = false, ferr = null, temp = false, entrouTC = false, camadasDesligadas = [];
-  const sel = new Set(), marca = new Uint8Array(V.length), undo = [];
+  // pedaços: o vão i tem np[i] pedaços iguais (de até PASSO m), guardados a partir de off[i] em marca (0 sem, 1 leve, 2 pesada)
+  const PASSO = 5;
+  const np = new Int32Array(V.length), off = new Int32Array(V.length + 1);
+  V.forEach((v, i) => { np[i] = Math.max(1, Math.ceil(v[8] / PASSO)); off[i + 1] = off[i] + np[i]; });
+  const sel = new Set(), marca = new Uint8Array(off[V.length]), undo = [], redo = [];
   let selV = [];
   const pintando = () => ferr !== null && !temp;                  // com Leve/Pesada/Apagar ligado, arrastar pinta
   const toque = e => (e && e.pointerType) ? e.pointerType !== 'mouse' : matchMedia('(pointer:coarse)').matches;
@@ -67,10 +74,16 @@
   const agenda = () => { if (!quadro) quadro = requestAnimationFrame(() => { quadro = 0; desenha(); ui(); }); };
   function desenha() {
     const todos = [], le = [], pe = [], porCor = new Map();
+    const sem = c => { if (!porCor.has(c)) porCor.set(c, []); return porCor.get(c); };
     for (const i of selV) {
-      const v = V[i], s = [[v[0], v[1]], [v[2], v[3]]]; todos.push(s);
-      if (marca[i] === 1) le.push(s); else if (marca[i] === 2) pe.push(s);
-      else { const c = T[v[4]].cor; if (!porCor.has(c)) porCor.set(c, []); porCor.get(c).push(s); }
+      const v = V[i], n = np[i], o = off[i], ponto = t => [v[0] + (v[2] - v[0]) * t, v[1] + (v[3] - v[1]) * t];
+      todos.push([[v[0], v[1]], [v[2], v[3]]]);
+      for (let j = 0; j < n;) {                                   // corridas de pedaços com a mesma marca
+        const m = marca[o + j]; let k = j + 1; while (k < n && marca[o + k] === m) k++;
+        const seg = [ponto(j / n), ponto(k / n)];
+        (m === 1 ? le : m === 2 ? pe : sem(T[v[4]].cor)).push(seg);
+        j = k;
+      }
     }
     lCas.setLatLngs(todos); lLeve.setLatLngs(le); lPes.setLatLngs(pe);
     lSem.clearLayers(); porCor.forEach((ss, c) => lSem.addLayer(L.polyline(ss, Object.assign({}, base, { color: c, weight: 5.5, opacity: 1 }))));
@@ -84,23 +97,47 @@
   }
 
   // ---------- pintura ----------
-  let pincel = 14, stroke = null;
-  function pinta(px, py, alvo, rec) {
-    const a = selP || (selP = projeta(selV)), R2 = pincel * pincel; let tocou = 0;
+  let pincel = 8, stroke = null;
+  // pedaços do vão (k na lista dos escolhidos) dentro do círculo do pincel: o trecho da reta do vão que cai no círculo
+  function pinta(px, py, alvo, cobre) {
+    const a = selP || (selP = projeta(selV)), R = pincel; let tocou = 0;
     for (let k = 0; k < selV.length; k++) {
-      if (fora(a, k, px, py, pincel) || d2(px, py, a, k) > R2) continue;
+      if (fora(a, k, px, py, R)) continue;
+      const x1 = a[k * 4], y1 = a[k * 4 + 1], dx = a[k * 4 + 2] - x1, dy = a[k * 4 + 3] - y1, l2 = dx * dx + dy * dy, l = Math.sqrt(l2);
+      let t0, t1;
+      if (l < 1e-9) { if ((px - x1) ** 2 + (py - y1) ** 2 > R * R) continue; t0 = 0; t1 = 1; }
+      else {
+        const t = ((px - x1) * dx + (py - y1) * dy) / l2, hx = x1 + t * dx - px, hy = y1 + t * dy - py, h2 = hx * hx + hy * hy;
+        if (h2 > R * R) continue;
+        const c = Math.sqrt(R * R - h2) / l; t0 = Math.max(0, t - c); t1 = Math.min(1, t + c);
+        if (t0 >= t1) continue;
+      }
       tocou++;
-      const i = selV[k]; if (marca[i] === alvo) continue;
-      if (!rec.has(i)) rec.set(i, marca[i]);
-      marca[i] = alvo;
+      const i = selV[k], n = np[i], o = off[i], j0 = Math.floor(t0 * n), j1 = Math.min(n - 1, Math.ceil(t1 * n) - 1), ml = V[i][8] / n;
+      for (let j = j0; j <= j1; j++) {
+        const q = o + j, m = marca[q];
+        if (m === alvo || (alvo && m && !cobre)) continue;            // Leve não cobre Pesada (nem o contrário) sem o Shift
+        if (!stroke.rec.has(q)) stroke.rec.set(q, m);
+        marca[q] = alvo;
+      }
     }
     return tocou;
   }
-  const fecha = rec => { if (rec.size) { undo.push(rec); if (undo.length > 200) undo.shift(); agenda(); } };
-  function desfaz() { const rec = undo.pop(); if (!rec) return; rec.forEach((antes, i) => { marca[i] = antes; }); agenda(); }
+  // desfazer: cada alteração é um item — um traço inteiro ({m: pedaço → marca de antes}) ou um trecho escolhido/tirado ({t})
+  const guarda = a => { undo.push(a); if (undo.length > 500) undo.shift(); redo.length = 0; };
+  function troca(de, para) {
+    const a = de.pop(); if (!a) return false;
+    if (a.m) { const volta = new Map(); a.m.forEach((antes, q) => { volta.set(q, marca[q]); marca[q] = antes; }); para.push({ m: volta }); agenda(); }
+    else { sel.has(a.t) ? sel.delete(a.t) : sel.add(a.t); para.push(a); muda(); }   // escolher/tirar desfaz a si mesmo
+    return true;
+  }
+  const desfaz = () => troca(undo, redo), refaz = () => troca(redo, undo);
   function totais() {
     let le = 0, pe = 0, s = 0;
-    for (const i of selV) { const m = V[i][8]; if (marca[i] === 1) le += m; else if (marca[i] === 2) pe += m; else s += m; }
+    for (const i of selV) {
+      const n = np[i], o = off[i], ml = V[i][8] / n;
+      for (let j = 0; j < n; j++) { const m = marca[o + j]; if (m === 1) le += ml; else if (m === 2) pe += ml; else s += ml; }
+    }
     return { leve: le, pesada: pe, falta: s };
   }
 
@@ -210,27 +247,31 @@
     if (!ativo || e.button > 0) return;
     ativos.add(e.pointerId);
     if (ativos.size > 1) {                                        // 2 dedos: pinça/andar; o pontinho do 1º dedo sai
-      if (stroke) { stroke.rec.forEach((antes, i) => { marca[i] = antes; }); stroke = null; agenda(); }
+      if (stroke) { stroke.rec.forEach((antes, q) => { marca[q] = antes; }); stroke = null; agenda(); }
       return;
     }
     const alvo = ALVO[ferr]; if (alvo === undefined) return;
-    pincel = toque(e) ? 22 : 14;
+    pincel = toque(e) ? 14 : 8;
     capa.setPointerCapture(e.pointerId);
-    const [x, y] = abs(e), rec = new Map();
-    stroke = { rec, x, y, alvo, tocou: pinta(x, y, alvo, rec) };
+    const [x, y] = abs(e);
+    stroke = { rec: new Map(), x, y, alvo, cobre: e.shiftKey, tocou: 0 };
+    stroke.tocou = pinta(x, y, alvo, stroke.cobre);
     mostraPincel(e); agenda();
   });
   capa.addEventListener('pointermove', e => {
     mostraPincel(e);
     if (!stroke || ativos.size > 1) return;
     const [x, y] = abs(e), s = stroke, n = Math.max(1, Math.ceil(Math.hypot(x - s.x, y - s.y) / (pincel / 2)));
-    for (let k = 1; k <= n; k++) s.tocou += pinta(s.x + (x - s.x) * k / n, s.y + (y - s.y) * k / n, s.alvo, s.rec);
+    s.cobre = s.cobre || e.shiftKey;
+    for (let k = 1; k <= n; k++) s.tocou += pinta(s.x + (x - s.x) * k / n, s.y + (y - s.y) * k / n, s.alvo, s.cobre);
     s.x = x; s.y = y; agenda();
   });
   const solta = e => {
     ativos.delete(e.pointerId);
     if (!stroke) return;
-    const s = stroke; stroke = null; fecha(s.rec);
+    const s = stroke; stroke = null;
+    if (s.rec.size) guarda({ m: s.rec });
+    agenda();
     if (!s.tocou) aviso('Aí não tem trecho escolhido: arraste sobre os de contorno branco.');
   };
   capa.addEventListener('pointerup', solta); capa.addEventListener('pointercancel', solta);
@@ -251,6 +292,7 @@
     const [x, y] = abs(e), k = vaoPerto(x, y, toque(e) ? 22 : 12);
     if (k < 0) return;
     const ti = V[k][4]; sel.has(ti) ? sel.delete(ti) : sel.add(ti);
+    guarda({ t: ti });
     muda(); lHover.setLatLngs([]); bDica.style.display = 'none';
   }, true);
   mc.addEventListener('dblclick', e => { if (ativo) e.stopPropagation(); }, true);
@@ -279,19 +321,15 @@
     if (b.id === 'fx-desfaz') return desfaz();
     if (b.id === 'fx-croqui') return croqui();
   });
-  // croqui: o do painel (croqui.js) com os trechos escolhidos; os km marcados entram no "Tamanho da faixa"
+  // croqui: o do painel com os trechos escolhidos e o marcado no mapa no mesmo croqui (Leve = Expedita, Pesada =
+  // Convencional; croqui-rascunho.js, que nas páginas de rascunho entra no lugar do croqui.js)
   async function croqui() {
     if (!window.__croqui) { aviso('O croqui não está disponível nesta página.'); return; }
-    const nomes = [...sel].sort((a, b) => a - b).map(i => T[i].nome), t = totais(), marcado = t.leve + t.pesada;
+    const t = totais();
+    if (!t.leve && !t.pesada) { aviso('Marque Leve ou Pesada antes de baixar o croqui.'); return; }
+    const nomes = [...sel].sort((a, b) => a - b).map(i => T[i].nome);
     const bt = $('fx-croqui'); bt.disabled = true;
-    try { await window.__croqui(nomes); } finally { bt.disabled = false; }
-    const dlg = [...document.querySelectorAll('dialog.croqui')].pop();
-    if (!dlg) return;
-    const f = dlg.querySelector('form'), info = document.createElement('p');
-    info.className = 'fx-croqui-km';
-    info.innerHTML = `Marcado no mapa: <b style="color:${COR[1]}">Leve ${km(t.leve)} km</b> · <b style="color:${COR[2]}">Pesada ${km(t.pesada)} km</b>${t.falta ? ` · sem marca ${km(t.falta)} km` : ''}`;
-    (dlg.querySelector('.fig') || f.firstElementChild).before(info);
-    if (marcado && f && f.km) { f.km.value = (Math.round(marcado / 10) / 100).toFixed(2); f.km.dispatchEvent(new Event('input')); }
+    try { await window.__croqui(nomes, { leve: t.leve / 1000, pesada: t.pesada / 1000 }); } finally { bt.disabled = false; }
   }
 
   // ---------- ligar e desligar ----------
@@ -330,7 +368,11 @@
     if (!ativo || document.querySelector('dialog[open]')) return;
     if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); if (ferr) { ferr = null; aplicaFerr(); } else desliga(); return; }
     if (editavel(e.target)) return;
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); desfaz(); return; }
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyZ' || e.code === 'KeyY')) {   // Ctrl+Z desfaz a última alteração; Ctrl+Shift+Z / Ctrl+Y refaz
+      e.preventDefault(); e.stopPropagation();
+      if (e.code === 'KeyY' || e.shiftKey) refaz(); else desfaz();
+      return;
+    }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const f = { l: 'leve', p: 'pesada', b: 'apagar' }[e.key.toLowerCase()];
     if (f && sel.size) { e.preventDefault(); setFerr(f); }
@@ -338,5 +380,5 @@
   }, true);
   window.addEventListener('keyup', e => { if (ativo && e.code === 'Space' && temp) { temp = false; aplicaFerr(); } }, true);
 
-  window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, ferr: () => ferr };
+  window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length };
 })();
