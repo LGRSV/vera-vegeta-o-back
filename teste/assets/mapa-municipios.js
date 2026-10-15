@@ -29,6 +29,98 @@
   const VW = M.w + 12;
   svg.setAttribute('viewBox', `-6 -6 ${VW} ${M.h + 12}`);
   const NS = 'http://www.w3.org/2000/svg', el = {}, rot = {};
+  // varre um d só com M e L absolutos e sem espaços (o formato de dados/redes, M.regs e M.pols) e chama
+  // f(éM, x, y, i0, i1) a cada ponto (d.slice(i0, i1) é o texto "x,y"); devolve false se o formato for outro.
+  // Lê os números direto dos códigos dos caracteres: sem criar uma string por número.
+  const varre = (d, f) => {
+    if (!d || /[^ML\d.,-]/.test(d)) return false;
+    const n = d.length;
+    let k = 0;
+    const num = () => {
+      let neg = false, v = 0, fr = 0;
+      if (d.charCodeAt(k) === 45) { neg = true; k++; }
+      for (; k < n; k++) {
+        const c = d.charCodeAt(k);
+        if (c === 46) { fr = 1; continue; }
+        if (c < 48 || c > 57) break;
+        if (fr) { fr *= 10; v += (c - 48) / fr; } else v = v * 10 + c - 48;
+      }
+      return neg ? -v : v;
+    };
+    while (k < n) {
+      const c = d.charCodeAt(k);
+      if (c !== 77 && c !== 76) return false;
+      const i0 = ++k, x = num();
+      if (d.charCodeAt(k) !== 44) return false;
+      k++;
+      const y = num();
+      f(c === 77, x, y, i0, k);
+    }
+    return true;
+  };
+  // pedaços por célula da grade. O navegador desenha (raster) o mapa em ladrilhos e, em cada ladrilho, traça INTEIRO
+  // cada path que encosta nele: o contorno de uma regional (mais de 1.000 trechos) ou a rede de um alimentador (até
+  // 160 kB) num path só eram traçados de novo em cada ladrilho, a cada quadro do voo. Cortado numa grade, cada ladrilho
+  // só traça os pedaços perto dele. Sem perder nada: as coordenadas são as mesmas; trechos seguidos viram uma linha só
+  // (mesmo desenho com ponta e junta redondas) e some só o segmento de comprimento zero que repete o ponto onde a linha
+  // anterior já terminou. Formato inesperado: fica inteiro. O corte de cada (chave, célula) é guardado.
+  // junto (opcional): outro leitor {f, fim} que aproveita a mesma passada pelo texto (a miniatura da rede, miniador)
+  const cortes = new Map();
+  function pedacos(chave, d, cel, junto) {
+    const k = chave + '|' + cel;
+    let r = cortes.get(k);
+    if (r) return r;
+    const bal = new Map();
+    let pena = null, px = 0, py = 0, fim = null, fx = 0, fy = 0, kFim = NaN;   // pena: último M; fim: onde a linha atual termina
+    const corta = (eM, x, y, i0, i1) => {
+      const p = d.slice(i0, i1);
+      if (eM) { pena = p; px = x; py = y; return; }
+      let ini = fim, ix = fx, iy = fy;
+      if (pena !== null) { ini = pena; ix = px; iy = py; pena = null; }
+      if (ini === null || (ini === p && ini === fim)) return;    // segmento nulo sobre o fim da linha anterior: já desenhado
+      const kc = Math.floor(ix / cel) * 1e5 + Math.floor(iy / cel);
+      let a = bal.get(kc);
+      if (!a) bal.set(kc, a = []);
+      a.push(kc === kFim && ini === fim ? 'L' + p : 'M' + ini + 'L' + p);
+      fim = p; fx = x; fy = y; kFim = kc;
+    };
+    const ok = varre(d, junto ? (eM, x, y, i0, i1) => { corta(eM, x, y, i0, i1); junto.f(eM, x, y); } : corta);
+    r = ok ? [...bal.values()].map(a => a.join('')) : [d];
+    cortes.set(k, r);
+    if (junto) junto.fim(ok);
+    return r;
+  }
+  // n pontos espalhados por igual ao longo de um contorno (unidades do mapa), como path.getPointAtLength(L·(i+½)/n):
+  // as bandeirinhas procuram lugar nesses pontos. Feito uma vez por contorno, em JS (o contorno agora é um grupo de
+  // pedaços, e 90 getPointAtLength num path de mil trechos custavam caro a cada pouso); formato inesperado: um path solto
+  const amostras = new Map();
+  function amostra(chave, d, n) {
+    const k = chave + '|' + n;
+    let out = amostras.get(k);
+    if (out) return out;
+    const seg = [];                                          // [x0, y0, x1, y1, comprimento]
+    let x0 = 0, y0 = 0, L = 0;
+    const ok = varre(d, (eM, x, y) => {
+      if (!eM) { const c = Math.hypot(x - x0, y - y0); seg.push([x0, y0, x, y, c]); L += c; }
+      x0 = x; y0 = y;
+    });
+    out = [];
+    if (ok) {
+      for (let i = 0, j = 0, acum = 0; i < n && L; i++) {
+        const alvo = L * (i + .5) / n;
+        while (j < seg.length - 1 && acum + seg[j][4] < alvo) acum += seg[j++][4];
+        const [a, b, c, e, s] = seg[j], f = s ? Math.min(1, (alvo - acum) / s) : 0;
+        out.push([a + (c - a) * f, b + (e - b) * f]);
+      }
+    } else if (d) {
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', d);
+      const T = p.getTotalLength();
+      for (let i = 0; i < n && T; i++) { const q = p.getPointAtLength(T * (i + .5) / n); out.push([q.x, q.y]); }
+    }
+    amostras.set(k, out);
+    return out;
+  }
   let foco = null, achou = new Set();
   // cor de cada município pela NAE dele (faixas; a legenda sai daqui) e, por cima, o contorno das regionais
   const FAIXAS = [0, 1, 11, 31, 101, 201];
@@ -55,18 +147,26 @@
     grupo(m).append(p);
     el[m.cod] = p;
   });
+  // contornos (polos e regionais) em pedaços por célula da grade de 128 unidades (ver pedacos): o desenho é o mesmo,
+  // mas cada ladrilho do raster só traça os pedaços perto dele (antes, os 3 contornos das regionais e os 8 dos polos
+  // inteiros, em todo ladrilho, a cada quadro do voo)
+  const emPedacos = (alvo, chave, d) => pedacos(chave, d, 128).forEach(dd => {
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', dd);
+    alvo.append(p);
+  });
   // contorno do polo: um traço claro por baixo (fundo) faz a cor aparecer também sobre os municípios laranja
   Object.entries(grp).forEach(([polo, gp]) => ['mt-poloc fundo', 'mt-poloc'].forEach(cl => {
-    const c = document.createElementNS(NS, 'path');
+    const c = document.createElementNS(NS, 'g');
     c.setAttribute('class', cl);
     c.setAttribute('aria-hidden', 'true');
-    c.setAttribute('d', (M.pols || {})[polo] || '');
+    emPedacos(c, 'polo:' + polo, (M.pols || {})[polo] || '');
     gp.append(c);
   }));
   const regs = document.createElementNS(NS, 'g');
   regs.setAttribute('class', 'mt-regc');
   regs.setAttribute('aria-hidden', 'true');
-  Object.values(M.regs || {}).forEach(d => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); regs.append(p); });
+  Object.entries(M.regs || {}).forEach(([r, d]) => emPedacos(regs, 'reg:' + r, d));
   svg.append(regs);
   // legenda das faixas de NAE: fixa lá em cima, na barra da lupa (que acompanha a rolagem), logo depois do olho, com o
   // título "NAE-Vegetação" acima da faixa de cores. Clicar nela (ou arrastar para cima) esconde: sobra só uma orelhinha,
@@ -170,11 +270,13 @@
     const px = g2.getImageData(0, 0, W, H).data;
     return (x, y) => { const i = x / E | 0, j = y / E | 0; return i >= 0 && j >= 0 && i < W && j < H && px[(j * W + i) * 4 + 3] > 0; };
   }
-  function contorno(path, n) {                             // n pontos ao longo do contorno, em px da caixa
-    const t = path && path.getScreenCTM(), c = caixa.getBoundingClientRect(), L = path ? path.getTotalLength() : 0, out = [];
-    if (!t || !L) return out;
-    for (let i = 0; i < n; i++) { const q = path.getPointAtLength(L * (i + .5) / n); out.push({ x: t.a * q.x + t.c * q.y + t.e - c.left, y: t.b * q.x + t.d * q.y + t.f - c.top }); }
-    return out;
+  // n pontos ao longo do contorno k.chave (d em k.d), em px da caixa (t: matriz do svg na tela, c: retângulo da caixa);
+  // k.desl: o quanto o grupo está afastado (polo na regional aberta), no lugar de ler o transform do grupo (que é o mesmo
+  // no fim da transição)
+  function contorno(k, n, t, c) {
+    const [dx, dy] = k.desl || [0, 0];
+    if (!t) return [];
+    return amostra(k.chave, k.d, n).map(([x, y]) => (x += dx, y += dy, { x: t.a * x + t.c * y + t.e - c.left, y: t.b * x + t.d * y + t.f - c.top }));
   }
   // melhor lugar para um cartão w×h em cima de um ponto do contorno, com o fio de 14 a 40 px: o que menos cobre o mapa,
   // depois o fio que não atravessa o desenho, depois o fio mais curto
@@ -193,13 +295,14 @@
     }
     return melhor;
   }
-  // põe cada cartão (k.e) no lugar achado no contorno (k.path) e devolve os fios; sem lugar, o cartão fica no meio do grupo
+  // põe cada cartão (k.e) no lugar achado no contorno (k.chave/k.d) e devolve os fios; sem lugar, o cartão fica no meio do grupo
   function bandeiras(cards, ms) {
     const c = caixa.getBoundingClientRect(), noMapa = mascara(ms), ctm = svg.getScreenCTM(), linhas = [];
     let feitos = [];
     try { feitos = [tc, volta].filter(o => o && o.offsetParent).map(o => rel(o.getBoundingClientRect())); } catch (e) { /* ainda montando */ }
-    cards.forEach(k => {
-      const w = k.e.offsetWidth, h = k.e.offsetHeight, b = planta(contorno(k.path, 90), w, h, noMapa, feitos, c.width, c.height);
+    const tam = cards.map(k => [k.e.offsetWidth, k.e.offsetHeight]);   // lidos todos antes de mexer em qualquer cartão
+    cards.forEach((k, i) => {
+      const [w, h] = tam[i], b = planta(contorno(k, 90, ctm, c), w, h, noMapa, feitos, c.width, c.height);
       if (!b) {
         const pt = svg.createSVGPoint();
         [pt.x, pt.y] = k.centro;
@@ -229,7 +332,7 @@
   cartoes.addEventListener('click', e => { const b = e.target.closest('button'); if (b) entra(b.dataset.reg, e.detail === 0); });
   const poeCartoes = () => {                                // só no estado inteiro e parado (o contorno é lido da tela)
     if (caixa.classList.contains('aberta') || caixa.classList.contains('voando') || !svg.getBoundingClientRect().width) return;
-    fios.innerHTML = bandeiras([...cartoes.children].map((e, i) => ({ e, path: regs.children[i], centro: regInfo[i].a })), M.muns);
+    fios.innerHTML = bandeiras([...cartoes.children].map((e, i) => ({ e, chave: 'reg:' + regInfo[i].r, d: M.regs[regInfo[i].r], centro: regInfo[i].a })), M.muns);
   };
   const prio = t => t.dataset.cod === foco ? 2 : achou.has(t.dataset.cod) ? 1 : 0;
   const X0 = -6, X1 = M.w + 6;
@@ -256,10 +359,20 @@
     });
     desamontoa();
   }
-  // letra de ~11,5 px na tela em qualquer largura do mapa
-  const escala = () => {
+  // letra de ~11,5 px na tela em qualquer largura do mapa.
+  // Em voo não mede nada (no celular a altura do svg muda a cada quadro), nem com uma regional aberta (nomes e cartões
+  // só aparecem no estado inteiro): o pouso no estado inteiro chama escala(true). Sem forca, só refaz se o tamanho do
+  // svg mudou: o ResizeObserver avisa logo depois do pouso a mudança que o próprio pouso já tratou (era tudo em dobro).
+  let anima = 0;                                           // id do requestAnimationFrame do voo (0 = parado)
+  let reg = null, pol = null, mdesl = {}, corDe = {};      // nível aberto (regional, polo) e os afastamentos
+  let tamSvg = '';
+  const escala = forca => {
+    if (anima || reg) return;
     const r = svg.getBoundingClientRect();                 // o SVG pode ficar limitado pela altura (max-height)
     if (!r.width || !r.height) return;
+    const k = r.width + 'x' + r.height;
+    if (forca !== true && k === tamSvg) return;
+    tamSvg = k;
     g.style.setProperty('--k', (1 / Math.min(r.width / VW, r.height / (M.h + 12))).toFixed(3));
     poeCartoes();
     desamontoa();
@@ -305,8 +418,38 @@
   // "← Tocantins" ou Esc voltam ao estado inteiro.
   // Polo aberto (clicar num polo da regional aberta): do mesmo jeito, o mapa aproxima no polo e os municípios dele se
   // afastam um do outro, com o nome de cada um; aí clicar num município abre a página dele. "← Regional" ou Esc voltam.
-  let reg = null, pol = null, anima = 0, mdesl = {}, corDe = {};
   const TODO = [-6, -6, VW, M.h + 12], AFASTA = 0.32, AFASTA_MUN = 0.30, DUR = 650, CORES = ['a', 'b', 'c', 'd'];
+  // cubic-bezier como no CSS: acha o t da curva para o x pedido (Newton; bisseção se não convergir)
+  const bezier = (x1, y1, x2, y2) => {
+    const c = (a, b, t) => ((1 - 3 * b + 3 * a) * t + (3 * b - 6 * a)) * t * t + 3 * a * t;
+    const dc = (a, b, t) => (3 - 9 * b + 9 * a) * t * t + (6 * b - 12 * a) * t + 3 * a;
+    return x => {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      let t = x;
+      for (let i = 0; i < 8; i++) { const e = c(x1, x2, t) - x, d = dc(x1, x2, t); if (Math.abs(e) < 1e-6 || Math.abs(d) < 1e-6) break; t -= e / d; }
+      if (!(t >= 0 && t <= 1) || Math.abs(c(x1, x2, t) - x) > 1e-4) {
+        let lo = 0, hi = 1;
+        for (let i = 0; i < 40; i++) { t = (lo + hi) / 2; if (c(x1, x2, t) < x) lo = t; else hi = t; }
+      }
+      return c(y1, y2, t);
+    };
+  };
+  // a câmera usa a MESMA curva das transições dos polos e municípios (site.css: .mt-polo e .mt-polo .mun): o mapa e os
+  // grupos que se afastam andam juntos, sem um "escorregar" sobre o outro no meio do voo
+  const curva = bezier(.45, 0, .55, 1);
+  // trajeto da câmera: a escala muda em progressão geométrica (zoom de ritmo constante: não "dispara" no fim ao
+  // aproximar nem no começo ao afastar) e o canto anda junto, de modo que o ponto fixo do zoom fica parado na tela
+  const eixo = (x0, w0, x1, w1) => {
+    const r = w1 / w0;
+    if (!(r > 0) || Math.abs(r - 1) < 1e-3) return e => [x0 + (x1 - x0) * e, w0 + (w1 - w0) * e];
+    const lr = Math.log(r);
+    return e => { const s = Math.exp(lr * e); return [x0 + (x1 - x0) * (s - 1) / (r - 1), w0 * s]; };
+  };
+  const trajeto = (a, b) => {
+    const X = eixo(a[0], a[2], b[0], b[2]), Y = eixo(a[1], a[3], b[1], b[3]);
+    return e => { const [x, w] = X(e), [y, h] = Y(e); return [x, y, w, h]; };
+  };
   const calmo = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const vb = () => svg.getAttribute('viewBox').split(' ').map(Number);
   const une = (a, b) => !a ? b : { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) };
@@ -320,20 +463,42 @@
   }
   const soma = (a, b) => [a[0] + b[0], a[1] + b[1]];
   const tr = d => `translate(${d[0].toFixed(1)}px,${d[1].toFixed(1)}px)`;
-  function voa(alvoVb) {             // anima o viewBox até o alvo
+  // voo: anima o viewBox até o alvo. O relógio começa no 1º quadro (o mesmo em que começam as transições CSS dos polos
+  // e municípios): sem salto no início mesmo se o clique custou caro. Em voo só o viewBox muda; nada mede o DOM.
+  // Nomes e cartões somem (site.css: .voando) e voltam no pouso, já no lugar novo; a rede do município entra no pouso.
+  function voa(alvoVb) {
     cancelAnimationFrame(anima);
     caixa.classList.remove('pronta');
     caixa.classList.add('voando');
-    const de = vb(), t0 = performance.now(), dur = calmo() ? 0 : DUR;
-    document.dispatchEvent(new CustomEvent('argos-nivel', { detail: { reg, pol, mun, al: alf } }));   // a busca acompanha o nível
+    const de = vb(), dur = calmo() ? 0 : DUR, cam = trajeto(de, alvoVb);
+    let t0 = 0;
     const passo = agora => {
-      const t = dur ? Math.min(1, (agora - t0) / dur) : 1, e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
-      svg.setAttribute('viewBox', de.map((v, i) => +(v + (alvoVb[i] - v) * e).toFixed(2)).join(' '));
-      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); if (!reg) poeCartoes(); poeNomes(); poeSelos(); }
+      if (!t0) t0 = agora;
+      const t = dur ? Math.min(1, (agora - t0) / dur) : 1;
+      if (t > 0) svg.setAttribute('viewBox', (t < 1 ? cam(curva(t)) : alvoVb).map(v => +v.toFixed(4)).join(' '));
+      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; pousa(); }
     };
     selos.innerHTML = '';
     fios.innerHTML = '';
-    anima = requestAnimationFrame(passo);
+    anima = requestAnimationFrame(passo);           // antes do evento: quem ouve já vê o voo em andamento (quieto)
+    document.dispatchEvent(new CustomEvent('argos-nivel', { detail: { reg, pol, mun, al: alf } }));   // a busca acompanha o nível
+  }
+  // trabalho que pode esperar o voo (miniaturas da rede): quieto() resolve depois do pouso, um por tarefa
+  // (sem tarefa longa logo depois do pouso); se outro voo começa, o resto espera o próximo pouso
+  const esperas = [];
+  const quieto = () => anima ? new Promise(res => esperas.push(res)) : Promise.resolve();
+  const solta = () => { if (anima || !esperas.length) return; esperas.shift()(); setTimeout(solta, 0); };
+  // pouso: o que esperou o voo (medidas, nomes, cartões, rede) entra de uma vez
+  function pousa() {
+    caixa.classList.remove('voando');
+    caixa.classList.toggle('pronta', !!reg);
+    if (reg && chaveEnq() !== baseEnq) svg.setAttribute('viewBox', enquadra().join(' '));   // a caixa mudou de tamanho em pleno voo
+    tamCaixa = chaveCaixa();                        // nomes e cartões abaixo saem neste tamanho (o ResizeObserver compara com ele)
+    if (!reg) escala(true);                         // estado inteiro: letra dos nomes e bandeirinhas das regionais
+    poeNomes();
+    poeSelos();
+    agendaRede();
+    setTimeout(solta, 0);
   }
   const volta = document.createElement('button');
   volta.type = 'button';
@@ -400,6 +565,9 @@
   marcaTc();
   caixa.append(tc);
   let desl = {};
+  // tamanho em que o último enquadramento foi feito (no celular só a largura conta: a altura sai do próprio viewBox)
+  let baseEnq = '';
+  const chaveEnq = () => caixa.clientWidth + 'x' + (matchMedia('(max-width:860px)').matches ? '' : svg.clientHeight || 600);
   // enquadra a regional aberta deixando livre a coluna da legenda (computador) ou o topo para o "← Tocantins" (celular)
   const move = (b, [dx, dy]) => ({ x: b.x + dx, y: b.y + dy, x2: b.x2 + dx, y2: b.y2 + dy });
   function enquadra() {
@@ -410,7 +578,7 @@
     else polosDe(reg).forEach(([polo, gp]) => { bb = une(bb, move(caixaDe(gp), desl[polo])); });
     const x = bb.x - 12, y = bb.y - 12, w = bb.x2 - bb.x + 24, h = bb.y2 - bb.y + 24, W = caixa.clientWidth;
     // celular (mesmo corte do site.css): sobra o topo para a seta de voltar e o pé para a seta dos polos
-    if (matchMedia('(max-width:860px)').matches) { const t = 52 * w / W, f = 52 * w / W; return [x, y - t, w, h + t + f]; }
+    if (matchMedia('(max-width:860px)').matches) { const t = 52 * w / W, f = 52 * w / W; baseEnq = W + 'x'; return [x, y - t, w, h + t + f]; }
     // a coluna da esquerda (seta e lista de alimentadores) fica livre; a legenda fica na barra, em cima do mapa
     // com a busca da barra, a lista do município aberto abre embaixo da logo (largura fixa no site.css): o lado esquerdo fica livre para ela
     const lista = window.ARGOS_BUSCA && mun && !alf ? Math.min(460, innerWidth - 32) : 0;
@@ -418,6 +586,7 @@
     const T = reg && !pol && !mun && !alf ? 56 : 0;
     const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg && caixa.contains(leg) ? leg.offsetWidth : 0, lista) + 24, L2 = T ? 120 : 24;
     const k = Math.min((H - T) / h, Math.max(1e-3, W - L1 - L2) / w);
+    baseEnq = W + 'x' + H;
     const altura = H / k;
     return [x - L1 / k, y - T / k - ((H - T) / k - h) / 2, w + (L1 + L2) / k, altura];
   }
@@ -518,10 +687,85 @@
       .then(pk => (pk && pk[al]) || null)).then(r => { if (!r) delete redes[al]; return r; }));
   const camada = document.createElementNS(NS, 'g');
   camada.setAttribute('class', 'mt-redes');
+  // rede em pedaços (ver pedacos), numa célula de ~180 px na tela no zoom de chegada; em potência de 2 para
+  // reaproveitar o corte entre zooms parecidos
+  const CEL_PX = 180;
+  const celula = alvoVb => {
+    const ppu = Math.min(svg.clientWidth / alvoVb[2], (svg.clientHeight || 1e9) / alvoVb[3]) || 1;
+    return 2 ** Math.round(Math.log2(CEL_PX / ppu));
+  };
+  // miniatura da rede (lista da busca e caixa ao lado do mapa): {d, b} com a mesma rede numa grade de 1/120 do tamanho
+  // dela (meio pixel numa miniatura de 56 px), sem segmentos nulos nem repetidos, escrita em unidades da grade (inteiros
+  // de 0 a 120; b é a caixa nessas unidades, para o viewBox): fica 5 a 20 vezes menor e sem formatar números. O navegador
+  // lia e desenhava a rede inteira (até 160 kB) em cada miniatura.
+  // A leitura do texto (varre) é o que mais custa: com o município aberto a miniatura sai na mesma passada do corte da
+  // rede para a tela (pedacos com junto), em vez de ler a rede duas vezes.
+  const minis = new Map();
+  function miniD(al, r) {
+    const s = minis.get(al);
+    if (s) return s;
+    if (mun && porCod[mun].als.some(a => a.cod === al) && !cortes.has(al + '|' + celMun)) pedacos(al, r.d, celMun, miniador(al, r));
+    else { const mm = miniador(al, r); mm.fim(varre(r.d, mm.f)); }
+    return minis.get(al);
+  }
+  function miniador(al, r) {                                    // {f: um ponto por vez, fim: guarda a miniatura}
+    const [x0, y0, x1, y1] = r.b, q = Math.max(x1 - x0, y1 - y0, .05) / 120;
+    const out = [], visto = new Set();                          // chaves numéricas: ponto da grade e segmento (par de pontos)
+    let pk = -1, pgx = 0, pgy = 0, fk = -1, fgx = 0, fgy = 0, uk = -1;   // p: último M; f: fim do último segmento; u: último escrito
+    const f = (eM, x, y) => {
+      const gx = Math.round((x - x0) / q), gy = Math.round((y - y0) / q), k = (gx + 64) * 4096 + (gy + 64);
+      if (eM) { pk = k; pgx = gx; pgy = gy; return; }
+      let ik = fk, igx = fgx, igy = fgy;
+      if (pk >= 0) { ik = pk; igx = pgx; igy = pgy; pk = -1; }
+      fk = k; fgx = gx; fgy = gy;
+      if (ik < 0 || ik === k) return;
+      const sk = ik < k ? ik * 16777216 + k : k * 16777216 + ik;
+      if (visto.has(sk)) return;
+      visto.add(sk);
+      out.push(ik === uk ? 'L' + gx + ',' + gy : 'M' + igx + ',' + igy + 'L' + gx + ',' + gy);
+      uk = k;
+    };
+    return { f, fim: ok => { minis.set(al, ok ? { d: out.join(''), b: [0, 0, (x1 - x0) / q, (y1 - y0) / q] } : { d: r.d, b: r.b }); } };
+  }
+  // a rede chega aos poucos (um JSON por alimentador) e entra na tela fora do voo: em lotes de ~24 ms de trabalho por
+  // quadro, cada lote com o seu esmaecer (um só grupo anima, não cada path). Cada lote faz o navegador repintar a rede
+  // toda: lotes maiores (menos quadros) terminam antes no celular, sem passar de ~70 ms por quadro no computador
+  let fila = [], filaId = 0, celMun = 1;
+  const agendaRede = () => { if (!filaId && !anima && fila.length) filaId = requestAnimationFrame(despeja); };
+  const lote = () => { const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'lote'); return g; };
+  function despeja() {
+    filaId = 0;
+    if (anima || !mun || !fila.length) return;
+    const gF = camada.querySelector('.mt-redes-f'), gD = camada.querySelector('.mt-redes-d');
+    if (!gF || !gD) { fila = []; return; }
+    const lf = lote(), ld = lote(), t0 = performance.now();
+    while (fila.length && performance.now() - t0 < 24) {     // o resto fica para o próximo quadro
+      const [al, r] = fila.shift();
+      pedacos(al, r.d, celMun, minis.has(al) ? null : miniador(al, r)).forEach(d => {   // a miniatura sai junto
+        const f = document.createElementNS(NS, 'path');
+        f.setAttribute('d', d);
+        lf.append(f);
+        const p = f.cloneNode();
+        p.dataset.al = al;
+        if (realcado === al) p.classList.add('on');
+        ld.append(p);
+      });
+    }
+    gF.append(lf);
+    gD.append(ld);
+    agendaRede();
+  }
+  // realce de um alimentador (mouse na rede ou na lista). A rede agora tem muitos pedaços por alimentador e o mousemove
+  // chama isto a cada pixel: só mexe quando o alimentador muda, e só nos pedaços do que apaga e do que acende
+  let realcado = null;
+  const pedacosDe = al => camada.querySelectorAll(`path[data-al="${CSS.escape(al)}"]`);
   const realceAl = al => {
     if (alf) al = null;
+    if (al === realcado) return;
+    if (realcado) pedacosDe(realcado).forEach(p => p.classList.remove('on'));
+    realcado = al;
     camada.classList.toggle('realce', !!al);
-    camada.querySelectorAll('path[data-al]').forEach(p => p.classList.toggle('on', p.dataset.al === al));
+    if (al) pedacosDe(al).forEach(p => p.classList.add('on'));
     legAl.querySelectorAll('.mt-al').forEach(a => a.classList.toggle('on', a.dataset.al === al));
   };
   function entraMun(cod, teclado) {
@@ -529,8 +773,8 @@
     if (!pol || mun || !m || !m.slug || m.polo !== pol) return;
     mun = cod;
     dica.style.display = 'none';
-    nomes2.innerHTML = '';
-    caixa.classList.add('nivel-mun');
+    realcado = null;
+    caixa.classList.add('nivel-mun');                   // os nomes do polo somem no voo (site.css: .voando) e saem no pouso
     M.muns.forEach(x => { if (x.polo === pol) el[x.cod].classList.toggle('fora-m', x.cod !== cod); });
     el[cod].classList.add('aberto-m');
     camada.innerHTML = `<defs><clipPath id="mt-corte"><path d="${m.d}"/></clipPath></defs>` +
@@ -548,21 +792,37 @@
     legAl.classList.toggle('aberta', puxada);
     volta.setAttribute('aria-label', `${m.nome}. Voltar ao polo ${pol}`);
     volta.title = `Voltar ao polo ${pol}`;
-    voa(enquadra());
+    const alvoVb = enquadra();
+    celMun = celula(alvoVb);
+    fila = [];
+    voa(alvoVb);
     roda(cod);
     if (teclado) el[cod].focus({ preventScroll: true });
-    als.forEach(a => rede(a.cod, m.polo).then(r => {
-      if (mun !== cod || !r) return;
-      [['.mt-redes-f', ''], ['.mt-redes-d', a.cod]].forEach(([g, al]) => {
-        const p = document.createElementNS(NS, 'path');
-        p.setAttribute('d', r.d);
-        if (al) p.dataset.al = al;
-        camada.querySelector(g).append(p);
-      });
-      const mini = legAl.querySelector(`.mt-al[data-al="${a.cod}"] .mt-al-m`), [x0, y0, x1, y1] = r.b;
-      const w = Math.max(x1 - x0, .05), h = Math.max(y1 - y0, .05), f = Math.max(w, h) * .08;
-      if (mini) mini.innerHTML = `<svg viewBox="${x0 - f} ${y0 - f} ${w + 2 * f} ${h + 2 * f}"><path d="${r.d}"/></svg>`;
-    }));
+    // a rede vai para a fila e entra depois do pouso (despeja); a miniatura só se a caixa ao lado do mapa estiver à
+    // vista (com a busca da barra a lista é a dela, busca-ativo.js, e a caixa fica escondida). Os pedidos saem aos
+    // poucos, alguns por quadro (cada fetch custa ~0,5 ms; dezenas de uma vez seguravam o clique e o 1º quadro do voo)
+    const pede = als.slice();
+    const pedeMais = () => {
+      if (mun !== cod) return;
+      const t0 = performance.now();
+      while (pede.length && performance.now() - t0 < 4) {
+        const a = pede.shift();
+        rede(a.cod, m.polo).then(r => {
+          if (mun !== cod || !r) return;
+          fila.push([a.cod, r]);
+          agendaRede();
+          if (!legAl.hidden) quieto().then(() => miniCaixa(a.cod, r));
+        });
+      }
+      if (pede.length) requestAnimationFrame(pedeMais);
+    };
+    requestAnimationFrame(pedeMais);
+  }
+  // miniatura na caixa ao lado do mapa (só sem a busca da barra)
+  function miniCaixa(al, r) {
+    const mini = legAl.querySelector(`.mt-al[data-al="${al}"] .mt-al-m`), mn = miniD(al, r), [x0, y0, x1, y1] = mn.b;
+    const w = Math.max(x1 - x0, .05), h = Math.max(y1 - y0, .05), f = Math.max(w, h) * .08;
+    if (mini) mini.innerHTML = `<svg viewBox="${x0 - f} ${y0 - f} ${w + 2 * f} ${h + 2 * f}"><path d="${mn.d}"/></svg>`;
   }
   // alimentador em foco (escolhido na busca ou em "Ver no mapa"): o mapa aproxima na rede inteira dele, que fica forte e
   // sem corte; os outros apagam. Clicar num alimentador (na lista ou na rede) abre direto a página dele.
@@ -584,17 +844,21 @@
     let gf = camada.querySelector('.mt-redes-a');
     if (!gf) { gf = document.createElementNS(NS, 'g'); gf.setAttribute('class', 'mt-redes-a'); camada.append(gf); }
     gf.innerHTML = '';
-    const pa = document.createElementNS(NS, 'path');
-    pa.setAttribute('d', r.d);
-    pa.dataset.al = al;
-    gf.append(pa);
     legAl.querySelectorAll('.mt-al').forEach(a => a.classList.toggle('foco', a.dataset.al === al));
     const ab = legAl.querySelector('.mt-amun');
     if (ab) { ab.href = pag(`alimentadores/${encodeURIComponent(al)}/`); ab.textContent = `Abrir ${al} →`; }
     trilhaMun();
     volta.setAttribute('aria-label', `${al}. Voltar a ${porCod[mun].nome}`);
     volta.title = `Voltar a ${porCod[mun].nome}`;
-    voa(enquadra());
+    const alvoVb = enquadra(), la = lote();               // a rede dele também em pedaços (célula do zoom no alimentador)
+    pedacos(al, r.d, celula(alvoVb)).forEach(dd => {
+      const pa = document.createElementNS(NS, 'path');
+      pa.setAttribute('d', dd);
+      pa.dataset.al = al;
+      la.append(pa);
+    });
+    gf.append(la);
+    voa(alvoVb);
   }
   function saiAl(animar = true) {
     if (!alf) return;
@@ -623,6 +887,10 @@
     legAl.hidden = true;
     legAl.innerHTML = '';
     M.muns.forEach(x => el[x.cod].classList.remove('fora-m', 'aberto-m'));
+    fila = [];                                         // a rede que ainda não entrou não entra mais
+    cancelAnimationFrame(filaId);
+    filaId = 0;
+    realcado = null;
     camada.remove();
     camada.innerHTML = '';
     camada.classList.remove('realce');
@@ -704,52 +972,69 @@
     }
     // 1º: nome DENTRO do município (cartão inteiro; no celular, compacto; depois compacto). 2º: os que não couberam
     // ganham o nome FORA, ao lado, ligado ao município por um fio fino (ninguém fica sem nome). 3º: só o número dentro.
-    const fios = document.createElementNS(NS, 'svg');
-    fios.setAttribute('class', 'mt-fios');
-    nomes2.append(fios);
+    // Tudo o que vem do DOM é lido antes de escrever qualquer coisa: os cartões dos 3 níveis de todos os municípios são
+    // medidos de uma vez (uma leitura de layout só), a escolha é só conta e as escritas ficam para o fim. Antes cada
+    // tentativa escrevia no cartão e a medida (ou o isPointInFill) seguinte refazia o layout, dezenas de vezes por polo.
+    // A escolha é a mesma de antes, na mesma ordem.
     const caixaR = (s, w, h) => ({ left: s.x - w / 2, right: s.x + w / 2, top: s.y - h / 2, bottom: s.y + h / 2 });
     const cabe = R => !(R.left < livre.left || R.right > livre.right || R.top < livre.top || R.bottom > livre.bottom) && !ocupado.some(o => bate(R, o));
-    const poe = (t, s, R) => { t.style.left = (s.x - c0.left).toFixed(1) + 'px'; t.style.top = (s.y - c0.top).toFixed(1) + 'px'; ocupado.push(R); };
-    const mede = (t, m, nv) => { t.innerHTML = NIVEIS_ROT[nv](m); t.dataset.nv = nv; t.style.left = '0px'; t.style.top = '0px'; return [t.offsetWidth, t.offsetHeight]; };
-    const sobra = [], ponta = {};
+    const itens = [];
     ms.forEach(m => {
       const it = cand(m), cache = [];                           // pontos em cache e gerados só quando preciso
       const ponto = k => { while (cache.length <= k) { const r = it.next(); if (r.done) return null; cache.push(r.value); } return cache[k]; };
       if (!ponto(0)) return;
       const [dx, dy] = soma(desl[pol], mdesl[m.cod]);
-      const tela = q => aTela(q.x + dx, q.y + dy);
-      ponta[m.cod] = { tela, ponto };
-      const t = document.createElement('span');
-      t.className = 'mt-mn';
-      nomes2.append(t);
-      for (let nv = celular ? 1 : 0; nv < 2; nv++) {
-        const [w, h] = mede(t, m, nv);
-        for (let k = 0, q; (q = ponto(k)); k++) { const s = tela(q), R = caixaR(s, w, h); if (cabe(R)) { poe(t, s, R); return; } }
-      }
-      sobra.push([m, t]);
+      itens.push({ m, ponto, tela: q => aTela(q.x + dx, q.y + dy), nv: -1, s: null, fora: false });
     });
+    const medir = document.createDocumentFragment();
+    itens.forEach(x => {
+      x.t = NIVEIS_ROT.map((f, nv) => {
+        const t = document.createElement('span');
+        t.className = 'mt-mn';
+        t.dataset.nv = nv;
+        t.innerHTML = f(x.m);
+        t.style.cssText = 'left:0;top:0;visibility:hidden';
+        medir.append(t);
+        return t;
+      });
+    });
+    nomes2.append(medir);
+    itens.forEach(x => { x.tam = x.t.map(t => [t.offsetWidth, t.offsetHeight]); });
+    const dentro = (x, nv) => {                                 // primeiro ponto do município onde o cartão nv cabe
+      const [w, h] = x.tam[nv];
+      for (let k = 0, q; (q = x.ponto(k)); k++) { const s = x.tela(q), R = caixaR(s, w, h); if (cabe(R)) { ocupado.push(R); x.nv = nv; x.s = s; return true; } }
+      return false;
+    };
+    const sobra = [];
+    itens.forEach(x => { for (let nv = celular ? 1 : 0; nv < 2; nv++) if (dentro(x, nv)) return; sobra.push(x); });
     const ANG = 16, RAIOS = celular ? [30, 42, 56, 72, 90] : [38, 52, 68, 86, 108, 132, 160];
-    const resto = [];
-    const fora = (t, m, w, h) => {                              // põe o cartão ao lado do município, ligado por um fio
-      const s0 = ponta[m.cod].tela(ponta[m.cod].ponto(0));
+    const linhas = [];
+    const fora = (x, nv) => {                                   // põe o cartão ao lado do município, ligado por um fio
+      const [w, h] = x.tam[nv], s0 = x.tela(x.ponto(0));
       for (const r of RAIOS) for (let i = 0; i < ANG; i++) {
         const a = i / ANG * 2 * Math.PI - Math.PI / 2, s = { x: s0.x + Math.cos(a) * r, y: s0.y + Math.sin(a) * r * .75 }, R = caixaR(s, w, h);
         if (!cabe(R)) continue;
-        poe(t, s, R);
-        t.classList.add('fora');
+        ocupado.push(R);
+        x.nv = nv; x.s = s; x.fora = true;
         const x0 = s0.x - c0.left, y0 = s0.y - c0.top, x1 = s.x - c0.left, y1 = s.y - c0.top;
-        fios.insertAdjacentHTML('beforeend', `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"/><circle cx="${x0.toFixed(1)}" cy="${y0.toFixed(1)}" r="2.5"/>`);
+        linhas.push(`<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"/><circle cx="${x0.toFixed(1)}" cy="${y0.toFixed(1)}" r="2.5"/>`);
         return true;
       }
       return false;
     };
-    sobra.forEach(([m, t]) => { const [w, h] = mede(t, m, 1); if (!fora(t, m, w, h)) resto.push([m, t]); });
-    resto.forEach(([m, t]) => {                                 // último recurso: só o número, dentro; senão fora, com fio
-      if (!legAberta) { t.remove(); return; }                   // sem NAE (legenda recolhida) não há o rótulo só do número
-      const [w, h] = mede(t, m, 2), { tela, ponto } = ponta[m.cod];
-      for (let k = 0, q; (q = ponto(k)); k++) { const s = tela(q), R = caixaR(s, w, h); if (cabe(R)) { poe(t, s, R); return; } }
-      if (!fora(t, m, w, h)) t.remove();
-    });
+    const resto = sobra.filter(x => !fora(x, 1));
+    // último recurso: só o número, dentro; senão fora, com fio. Sem NAE (legenda recolhida) não há o rótulo só do número
+    if (legAberta) resto.forEach(x => { if (!dentro(x, 2)) fora(x, 2); });
+    // escritas: o svg dos fios na frente e, na ordem dos municípios, só o cartão escolhido de cada um, no lugar
+    const fios = document.createElementNS(NS, 'svg');
+    fios.setAttribute('class', 'mt-fios');
+    fios.innerHTML = linhas.join('');
+    nomes2.prepend(fios);
+    itens.forEach(x => x.t.forEach((t, nv) => {
+      if (nv !== x.nv) { t.remove(); return; }
+      t.style.cssText = `left:${(x.s.x - c0.left).toFixed(1)}px;top:${(x.s.y - c0.top).toFixed(1)}px`;
+      if (x.fora) t.classList.add('fora');
+    }));
   }
   // cartão de cada polo: bandeirinha logo acima do contorno do polo, com o fio na cor dele
   function poeSelos() {
@@ -762,7 +1047,7 @@
       e.style.setProperty('--c', corDe[p.polo]);
       e.innerHTML = `<b>${esc(p.polo)}</b><i>${p.nae.toLocaleString('pt-BR')} NAE</i>`;
       selos.append(e);
-      return { e, cor: corDe[p.polo], path: grp[p.polo].querySelector('.mt-poloc:not(.fundo)'), centro: soma(meio(p.ms).c, desl[p.polo]) };
+      return { e, cor: corDe[p.polo], chave: 'polo:' + p.polo, d: (M.pols || {})[p.polo] || '', desl: desl[p.polo], centro: soma(meio(p.ms).c, desl[p.polo]) };
     });
     if (cards.length) fios.innerHTML = bandeiras(cards, M.muns.filter(m => m.reg === reg));
   }
@@ -799,7 +1084,18 @@
     if (e.key !== 'Escape' || e.defaultPrevented) return;
     if (reg) sobe(); else if (alvo.classList.contains('mt-cheia')) cobre(false);
   });
-  if (window.ResizeObserver) new ResizeObserver(() => { if (reg && !anima) { svg.setAttribute('viewBox', enquadra().join(' ')); poeNomes(); poeSelos(); } }).observe(caixa);
+  // caixa mudou de tamanho: reenquadra e repõe nomes e cartões. Compara com o tamanho em que o pouso já os pôs: no
+  // celular a altura da caixa acompanha o próprio viewBox (muda a cada voo) e o aviso que chega logo depois do pouso
+  // repetia todo o trabalho dos nomes e das bandeirinhas. Em voo não faz nada (o pouso confere).
+  function chaveCaixa() { return caixa.clientWidth + 'x' + caixa.clientHeight; }
+  let tamCaixa = '';
+  if (window.ResizeObserver) new ResizeObserver(() => {
+    if (anima) return;
+    const k = chaveCaixa();
+    if (k === tamCaixa) return;
+    tamCaixa = k;
+    if (reg) { svg.setAttribute('viewBox', enquadra().join(' ')); poeNomes(); poeSelos(); }
+  }).observe(caixa);
 
   // no estado inteiro, escolher um município abre a regional dele; com a regional aberta, abre o polo dele; com o polo
   // aberto, abre o município (a rede dos alimentadores); com o município aberto, abre a página dele
@@ -948,7 +1244,11 @@
     acesos.forEach(c => { el[c].classList.add('acende'); if (acesos.length === 1) traz(el[c]); });
     if (!reg && (a.cod || a.al)) { achou = new Set(acesos); rotulos(); }   // no estado inteiro aparecem os nomes
   }
-  // rede do alimentador (para a miniatura na lista da busca) e o destaque dela no mapa com o município aberto
-  const redeDe = al => { const m = porCod[mun] || M.muns.find(x => x.als.some(a => a.cod === al)); return m ? rede(al, m.polo) : Promise.resolve(null); };
+  // rede do alimentador para a miniatura na lista da busca ({d, b} de miniD, a versão leve; pedida e desenhada depois do
+  // pouso, uma por tarefa) e o destaque dela no mapa com o município aberto
+  const redeDe = al => {
+    const m = porCod[mun] || M.muns.find(x => x.als.some(a => a.cod === al));
+    return m ? quieto().then(() => rede(al, m.polo)).then(r => r && miniD(al, r)) : Promise.resolve(null);
+  };
   window.ARGOS_MAPA = { nivel: () => ({ reg, pol, mun, al: alf }), vai, previa, rede: redeDe, realceAl: al => { if (mun) realceAl(al); } };
 })();
