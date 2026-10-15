@@ -1394,7 +1394,7 @@ def interface(saida, malha=None):
     indice_ativos(saida, dados)
     indice_os(saida, dados)
     corpo = ('<header class="cab"><h1><b>ARGOS</b> <span>MANUTENÇÃO</span></h1>'
-             '<a class="cab-link" href="priorizacao/">Ranking</a></header>\n'   # Ranking da tela inicial abre a Priorização
+             '<a class="cab-link" href="polos/#eto">Ranking</a></header>\n'
              # casca do mapa já no HTML (estilo em assets/site.css; o svg com viewBox reserva a altura do mapa):
              # os scripts só preenchem, e a página não pula ao carregar. Busca única atrás da lupa (busca-ativo.js):
              # ativo, município ou alimentador, com a lista aparecendo enquanto se digita.
@@ -1489,7 +1489,7 @@ def validar_saida(saida):
             print(f'  falha {c["alimentador"]}: {"; ".join(c["validacao"]["criticas"])}')
     for p in sorted(saida.rglob('*.html')):
         for ref in re.findall(r'(?:href|src)="([^"#?]+)', p.read_text(encoding='utf-8')):
-            if re.match(r'https?:|mailto:', ref):
+            if re.match(r'https?:|mailto:', ref) or '${' in ref:   # ${...}: modelo dentro de um script, não é link
                 continue
             alvo = (p.parent / ref)
             if not (alvo / 'index.html' if ref.endswith('/') else alvo).exists():
