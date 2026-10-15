@@ -40,7 +40,7 @@
   /* só página inicial (mapa SVG do TO; regras na seção 'Página inicial') */
   --mt-vazio:#e3e6e1; --mt-vazio-h:#d4d8d2; --mt-borda:#b4bab3; --mt-tem:#eeb99c;
   /* NAE por município no mapa da página inicial (0, 1–10, 11–30, 31–100, 101–200, 201+) */
-  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#0057a8; --polo-b:#f7941d; --polo-c:#29a3e0; --polo-d:#c25e00;
+  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#0057a8; --polo-b:#f7941d; --polo-c:#29a3e0; --polo-d:#c25e00; --rede:#0057a8; --mun-aberto:#f8f3ec;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   color-scheme:dark;
@@ -54,7 +54,7 @@
   --sh2:0 1px 2px rgb(0 0 0 / .3),0 12px 32px -12px rgb(0 0 0 / .7);
   --mt-vazio:#252c31; --mt-vazio-h:#2f383e; --mt-borda:#46525a; --mt-tem:#6e3a24;
   /* no escuro, o mapa fica igual ao do claro (o tom avermelhado sobre o fundo escuro) */
-  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#3d8fe0; --polo-b:#ffa438; --polo-c:#6cc4f2; --polo-d:#e07a1f;
+  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#3d8fe0; --polo-b:#ffa438; --polo-c:#6cc4f2; --polo-d:#e07a1f; --rede:#5aa6ec; --mun-aberto:#232b30;
 }}
 :root[data-theme="dark"]{
   color-scheme:dark;
@@ -68,7 +68,7 @@
   --sh2:0 1px 2px rgb(0 0 0 / .3),0 12px 32px -12px rgb(0 0 0 / .7);
   --mt-vazio:#252c31; --mt-vazio-h:#2f383e; --mt-borda:#46525a; --mt-tem:#6e3a24;
   /* no escuro, o mapa fica igual ao do claro (o tom avermelhado sobre o fundo escuro) */
-  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#3d8fe0; --polo-b:#ffa438; --polo-c:#6cc4f2; --polo-d:#e07a1f;
+  --nae0:#f4f1ec; --nae1:#fde3c8; --nae2:#fbbf8f; --nae3:#f28f55; --nae4:#d65a28; --nae5:#9e3510; --mt-lim:#b8431f; --polo-a:#3d8fe0; --polo-b:#ffa438; --polo-c:#6cc4f2; --polo-d:#e07a1f; --rede:#5aa6ec; --mun-aberto:#232b30;
 }
 
 /* ====== Base ====== */
@@ -151,7 +151,7 @@ header.cab>.cab-link{justify-self:center}
 .mt-barra{grid-area:barra}.mt-mapa{grid-area:mapa}
 
 /* barra: só a lupa (busca-ativo.js); tocar nela abre o campo da busca única (ativo, município ou alimentador) */
-.mt-barra{display:flex;justify-content:center}
+.mt-barra{display:flex;justify-content:center;position:sticky;top:var(--s2);z-index:30}   /* a lupa fica sempre à mão, em qualquer nível do mapa */
 .mt-barra .ativo{width:min(100%,460px)}
 .mt-barra .ativo .campo{justify-content:center}
 .mt-barra .busca{max-width:none}
@@ -214,7 +214,10 @@ header.cab>.cab-link{justify-self:center}
 .aberta.pronta .mt-poloc{opacity:1}
 .mt-poloc.fundo{stroke:var(--paper);stroke-width:7}
 .mt-regc{transition:opacity .3s}.aberta .mt-regc{opacity:0}
-.aberta .mt-nomes{display:none}
+.aberta .mt-nomes,.aberta .mt-nomes-reg{display:none}
+/* nome das regionais no estado inteiro (no lugar das cidades de referência) */
+.mt-nomes-reg text{font:700 calc(17px * var(--k,1)) var(--f-body);letter-spacing:.06em;text-transform:uppercase;fill:var(--fg);paint-order:stroke;
+  stroke:var(--bg);stroke-width:calc(4px * var(--k,1));stroke-linejoin:round;text-anchor:middle;dominant-baseline:central;pointer-events:none}
 .mt-dica .mt-dica-c{display:block;margin-top:2px;font-size:var(--t-xs)}
 .mt-volta{position:static;justify-self:start;min-height:var(--alvo);padding:0 var(--s4);border:1px solid var(--line);border-radius:var(--r2);
   background:var(--paper);color:var(--accent);font:600 var(--t-sm) var(--f-body);cursor:pointer}
@@ -234,6 +237,29 @@ header.cab>.cab-link{justify-self:center}
 .mt-pchip[aria-pressed=false]{opacity:.6;text-decoration:line-through;box-shadow:inset 0 -4px 0 var(--muted)}
 .mt-pchip:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .mt-polo.desliga{opacity:.15}
+/* município aberto: só ele no mapa, claro, com a rede dos alimentadores numa cor só (--rede); fora dele a rede fica apagada */
+.mun.fora-m{opacity:0;pointer-events:none;transition:opacity .4s}
+.mun.aberto-m{fill:var(--mun-aberto)!important;stroke:var(--mt-lim)!important;stroke-width:3!important;transition:fill .4s}
+.mt-redes path{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.mt-redes-f path{stroke:var(--muted);stroke-width:1;opacity:.28;pointer-events:none}
+.mt-redes-d path{stroke:var(--rede);stroke-width:1.7;pointer-events:stroke;cursor:pointer;transition:opacity .15s}
+.mt-redes.realce .mt-redes-d path{opacity:.15}
+.mt-redes.realce .mt-redes-d path.on{opacity:1;stroke-width:2.8}
+.mt-redes path{animation:mt-surge .35s ease-out}
+/* lista dos alimentadores do município aberto (na caixinha dos polos): miniatura da rede, código, NAE e km no município */
+.nivel-mun .mt-lado{max-width:290px}
+.nivel-mun .mt-polos-c{max-height:min(68vh,620px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:2px}
+.mt-amun{font:600 var(--t-sm) var(--f-body);text-decoration:none;padding:2px 0 var(--s1)}
+.mt-amun:hover{text-decoration:underline}
+.mt-al{display:grid;grid-template-columns:64px minmax(0,1fr);grid-template-rows:auto auto;column-gap:var(--s2);align-items:center;padding:6px;
+  border:1px solid var(--line);border-radius:var(--r1);background:var(--paper);color:var(--fg);text-decoration:none}
+.mt-al:hover,.mt-al.on{border-color:var(--rede);background:var(--hover)}
+.mt-al:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.mt-al-m{grid-row:1/3;width:64px;height:46px;border-radius:6px;background:var(--bg)}
+.mt-mapa .mt-al-m svg{display:block;width:64px;height:46px;min-height:0;max-height:none;margin:0}
+.mt-al-m path{fill:none;stroke:var(--rede);stroke-width:1.2;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.mt-al b{font:600 var(--t-sm) var(--f-mono)}
+.mt-al>span:last-child{font-size:var(--t-xs);color:var(--muted)}
 /* polo aberto: os municípios se afastam (transform no path), o contorno do polo some e entram os nomes dos municípios */
 .mt-polo .mun{transition:transform .65s cubic-bezier(.45,0,.55,1)}
 .aberta.polo .mt-poloc{opacity:0}
@@ -244,7 +270,7 @@ span.mt-pchip{cursor:default}
 @media (max-width:860px){
   .mt-lado{display:contents}
   /* celular: a caixinha dos polos fica presa embaixo do mapa; a seta puxa ela para cima */
-  .mt-lado .mt-polos{position:absolute;left:50%;bottom:0;z-index:3;transform:translateX(-50%);display:grid;justify-items:center;gap:0;width:max-content;max-width:calc(100% - 16px)}
+  .mt-lado .mt-polos{position:absolute;left:50%;bottom:0;z-index:5;transform:translateX(-50%);display:grid;justify-items:center;gap:0;width:max-content;max-width:calc(100% - 16px)}
   .mt-puxa{display:grid;place-items:center;width:48px;height:24px;padding:0;border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;
     background:var(--paper);color:var(--muted);cursor:pointer}
   .mt-puxa svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
@@ -253,6 +279,12 @@ span.mt-pchip{cursor:default}
   .mt-polos-c{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--s1);padding:var(--s2);background:var(--paper);border:1px solid var(--line);
     border-radius:var(--r2);box-shadow:var(--sh2)}
   .mt-polos-t{flex:1 1 100%;text-align:center}
+  /* município aberto: a lista ocupa a largura e rola por dentro, sem cobrir o mapa inteiro */
+  .nivel-mun .mt-lado .mt-polos{display:flex;flex-direction:column;align-items:center;width:calc(100% - 16px);max-height:62%}
+  .nivel-mun .mt-polos-c{display:grid;justify-items:stretch;align-content:start;width:100%;min-height:0;max-height:none;overflow:auto}
+  .nivel-mun .mt-polos-c .mt-amun{text-align:center}
+  .nivel-mun .mt-al{grid-template-columns:48px minmax(0,1fr);padding:4px 6px}
+  .nivel-mun .mt-al-m,.mt-mapa.nivel-mun .mt-al-m svg{width:48px;height:34px}
 }
 /* selo vermelho com a NAE de cada polo, no meio dele */
 .mt-selos span{position:absolute;z-index:2;transform:translate(-50%,-50%);padding:3px 8px;border-radius:6px;background:#b8431f;color:#fff;
@@ -260,7 +292,7 @@ span.mt-pchip{cursor:default}
 .mt-selos span.off{opacity:.35}
 /* com a regional aberta (e enquanto anima) o que está fora do recorte não cria rolagem lateral */
 .aberta svg,.voando svg{overflow:hidden}
-@media (prefers-reduced-motion:reduce){.mt-polo,.mt-polo .mun,.mt-poloc,.mt-regc{transition:none}.mt-pchip,.mt-nomes2 .mt-rot,.mt-selos span{animation:none}}
+@media (prefers-reduced-motion:reduce){.mt-polo,.mt-polo .mun,.mt-poloc,.mt-regc,.mun.fora-m,.mun.aberto-m{transition:none}.mt-pchip,.mt-nomes2 .mt-rot,.mt-selos span,.mt-redes path{animation:none}}
 .mun.tem:hover,.mun.acende{stroke:var(--fg);stroke-opacity:1;stroke-width:2.5}
 .mun.sem:hover{fill:var(--mt-vazio-h)}
 .mun.achou{stroke:var(--fg);stroke-opacity:1;stroke-width:2}
@@ -277,14 +309,17 @@ span.mt-pchip{cursor:default}
 
 /* município: busca com a lista suspensa de todos os municípios (mapa-municipios.js) */
 /* legenda (faixas de NAE e o limite das regionais): no canto do mapa (computador) ou embaixo dele (celular) */
-.mt-regs{position:absolute;right:0;top:0;z-index:4;margin:0;font-size:var(--t-sm);color:var(--fg);background:var(--paper);
+.mt-regs{position:absolute;right:0;bottom:0;z-index:4;margin:0;font-size:var(--t-sm);color:var(--fg);background:var(--paper);
   border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--sh1)}
 .mt-regs>summary{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);min-height:var(--alvo);padding:0 var(--s3);
   font:700 var(--t-sm) var(--f-body);cursor:pointer;list-style:none;user-select:none}
 .mt-regs>summary::-webkit-details-marker{display:none}
-.mt-regs>summary::after{content:'';width:7px;height:7px;margin-top:-3px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(45deg);transition:transform .2s}
-.mt-regs[open]>summary::after{transform:rotate(-135deg);margin-top:3px}
-.mt-regs-c{display:grid;gap:var(--s1);padding:0 var(--s3) var(--s3)}
+.mt-regs>summary::after{content:'';width:7px;height:7px;border:solid var(--muted);border-width:0 2px 2px 0;transition:transform .2s}
+.mt-regs>summary::after{transform:rotate(-135deg);margin-top:3px}
+.mt-regs[open]>summary::after{transform:rotate(45deg);margin-top:-3px}
+/* abre para cima: o conteúdo fica em cima do quadrado */
+.mt-regs-c{position:absolute;right:-1px;bottom:calc(100% + 4px);display:grid;gap:var(--s1);min-width:calc(100% + 2px);padding:var(--s3);white-space:nowrap;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--sh2)}
 .mt-regs-c>span{display:inline-flex;align-items:center;gap:var(--s2)}
 .mt-regs i{flex:none;width:18px;height:12px;border-radius:3px;box-shadow:inset 0 0 0 1px var(--mt-borda)}
 .mt-regs b{font:700 var(--t-sm) var(--f-body)}.mt-regs small{display:block;margin:-2px 0 var(--s1);font-size:var(--t-xs);color:var(--muted)}

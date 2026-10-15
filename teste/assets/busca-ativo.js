@@ -1,8 +1,10 @@
-// Página inicial: busca única atrás da lupa — ativo (chave, transformador, poste), município ou alimentador.
+// Página inicial: busca única atrás da lupa — ativo (chave, transformador, poste), município, alimentador ou OS.
 // Tocar na lupa abre o campo. Ao digitar, a lista suspensa mostra os municípios e os alimentadores que batem (dados do
 // mapa, window.MUN) e, com 3 caracteres ou mais, os ativos cujo código começa assim (dados/ativos-pref/<2 primeiros>.json).
 // Escolher um município ou alimentador abre a página dele; escolher um ativo (ou dar Enter) busca no índice
 // dados/ativos/<fatia>.json (gerados por scripts/gera_trechos.py), que diz o alimentador e o trecho.
+// OS: com número/ano (ex.: 002507/2026, com ou sem a equipe na frente) aparece "Buscar a OS…", que procura em
+// dados/os/<fatia>.json as OS de faixa, inspeção, manutenção e executadas com esse número.
 // A lista e o resultado abrem presos ao campo (não empurram o mapa); fecham com Esc ou clicando fora.
 // O formulário já vem no HTML dentro da barra em cima do mapa (.mt-barra) e o estilo está em assets/site.css:
 // nada muda de lugar nem de cara quando este script carrega.
@@ -37,7 +39,11 @@
   }, 150));
 
   const chave = s => { const k = String(s).toUpperCase().replace(/[^0-9A-Z]/g, ''); return /^\d+$/.test(k) ? (k.replace(/^0+/, '') || '0') : k; };
-  const fatia = k => { let h = 0; for (let i = 0; i < k.length; i++) h = (Math.imul(h, 31) + k.charCodeAt(i)) >>> 0; return (h % 256).toString(16).padStart(2, '0'); };
+  const hash = k => { let h = 0; for (let i = 0; i < k.length; i++) h = (Math.imul(h, 31) + k.charCodeAt(i)) >>> 0; return h; };
+  const fatia = k => (hash(k) % 256).toString(16).padStart(2, '0');
+  const fatiaOS = k => (hash(k) % 64).toString(16).padStart(2, '0');      // FATIAS_OS de scripts/gera_trechos.py
+  const chaveOS = s => { const m = String(s).match(/(\d{1,7})\s*\/\s*(\d{4})(?!\d)/); return m ? `${+m[1]}/${m[2]}` : null; };
+  const BASE_OS = { f: 'Limpeza de faixa', i: 'Inspeção', m: 'Manutenção (gerada pela inspeção)', e: 'Executada' };
   const cache = {};
   const baixa = f => cache[f] || (cache[f] = fetch(`dados/${f}.json`).then(r => r.ok ? r.json() : {}).catch(() => { delete cache[f]; return null; }));
 
@@ -69,8 +75,10 @@
     }
     if (meu !== pedido) return;
     if (!txt) { fechaSug(); res.innerHTML = ''; return; }
+    const kOS = chaveOS(txt);
     const at = achados.slice(0, ms.length || as.length ? 8 : 12);
-    sug = [...ms.map(m => ({ href: `municipios/${m.slug}/` })), ...as.map(c => ({ href: `alimentadores/${encodeURIComponent(c)}/` })), ...at.map(([c]) => ({ ativo: c }))];
+    sug = [...(kOS ? [{ os: txt }] : []), ...ms.map(m => ({ href: `municipios/${m.slug}/` })), ...as.map(c => ({ href: `alimentadores/${encodeURIComponent(c)}/` })),
+      ...at.map(([c]) => ({ ativo: c }))];
     if (!sug.length) {
       fechaSug();
       res.innerHTML = n.length < 2 ? '' : `<p>Nada encontrado para <b>${esc(txt)}</b>.</p>`;
@@ -80,6 +88,7 @@
     const op = (b, sp, cl = '') => `<li class="sug-op" role="option" id="ativo-sug-${i}" data-i="${i++}"><b${cl}>${b}</b><span>${sp}</span></li>`;
     const bloco = (t, itens) => itens.length ? `<li class="sug-t" role="presentation">${t}</li>` + itens.join('') : '';
     res.innerHTML = `<ul class="sug" role="listbox" aria-label="Resultados">` +
+      bloco('OS', kOS ? [op(`OS ${esc(txt)}`, 'buscar nas bases de faixa, inspeção, manutenção e executadas')] : []) +
       bloco('Municípios', ms.map(m => op(esc(m.nome), `${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}`, ' class="nome"'))) +
       bloco('Alimentadores', as.map(c => op(esc(c), esc(se[c] || '')))) +
       bloco('Ativos', at.map(([c, tipo]) => op(esc(c), esc(TIPO[tipo] || 'Chave ' + tipo)))) + '</ul>' +
@@ -93,7 +102,7 @@
     if (!sug.length || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter')) return;
     if (e.key === 'Enter') {
       // Enter sem escolher: se só veio município ou alimentador, abre o primeiro; senão busca o ativo digitado
-      const i = marcado >= 0 ? marcado : sug.some(o => o.ativo) ? -1 : 0;
+      const i = marcado >= 0 ? marcado : sug[0] && sug[0].os ? 0 : sug.some(o => o.ativo) ? -1 : 0;
       if (i >= 0) { e.preventDefault(); escolhe(i); }
       return;
     }
@@ -104,15 +113,38 @@
   res.addEventListener('click', e => { const o = e.target.closest('.sug-op'); if (o) escolhe(+o.dataset.i); });
   function escolhe(i) {
     if (sug[i].href) { location.href = sug[i].href; return; }
+    if (sug[i].os) { buscaOS(sug[i].os); return; }
     q.value = sug[i].ativo;
     fechaSug();
     form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+  }
+
+  // OS: todas as que têm esse número/ano; com a equipe digitada (ex.: ETO-RD-PO 002507/2026) fica só a dela
+  async function buscaOS(txt) {
+    clearTimeout(espera); pedido++; fechaSug();
+    const k = chaveOS(txt);
+    res.innerHTML = '<p>Buscando a OS…</p>';
+    const d = await baixa('os/' + fatiaOS(k));
+    if (d === null) { res.innerHTML = '<p>Não foi possível carregar o índice de OS. Confira a internet e tente de novo.</p>'; return; }
+    const equipe = s => String(s).replace(/\d{1,7}\s*\/\s*\d{4}.*$/, '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+    const todas = d[k] || [], eq = equipe(txt), comEquipe = /[A-Z]/.test(eq);
+    const daEquipe = comEquipe ? todas.filter(h => equipe(h[0]).includes(eq)) : [];
+    const hits = daEquipe.length ? daEquipe : todas;
+    if (!hits.length) { res.innerHTML = `<p>A OS <b>${esc(txt)}</b> não está nas bases de faixa, inspeção, manutenção nem executadas.</p>`; return; }
+    const mostra = hits.slice(0, 40);
+    res.innerHTML = `<p>${hits.length === 1 ? '1 OS' : hits.length + ' OS'} com o número <b>${esc(k)}</b>${comEquipe && !daEquipe.length ? ' (nenhuma da equipe digitada; mostrando todas)' : ''}:</p><ul>` +
+      mostra.map(([os, al, base, info, lat, lon]) =>
+        `<li><a href="alimentadores/${encodeURIComponent(al)}/${lat != null ? `?a=${encodeURIComponent(os)}&ll=${lat},${lon}` : ''}">` +
+        `<b>${esc(os)}</b><span>${esc(BASE_OS[base] || base)}${info ? ' · ' + esc(info) : ''}</span><span>${esc(al)}${se[al] ? ' · ' + esc(se[al]) : ''}</span>` +
+        '<span class="ir">Abrir no mapa →</span></a></li>').join('') + '</ul>' +
+      (hits.length > mostra.length ? `<p class="sug-mais">e mais ${hits.length - mostra.length}: digite a equipe junto (ex.: ETO-RD-PO ${esc(k)})</p>` : '');
   }
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
     clearTimeout(espera); pedido++; fechaSug();
     const txt = q.value.trim(), k = chave(txt);
+    if (chaveOS(txt)) { buscaOS(txt); return; }
     if (!k) { res.innerHTML = ''; return; }
     res.innerHTML = '<p>Buscando…</p>';
     const d = await baixa('ativos/' + fatia(k));

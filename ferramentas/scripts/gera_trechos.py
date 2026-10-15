@@ -862,6 +862,7 @@ def mapa_e_ranking(saida, dados, man):
     cfg = json.loads((PKG / 'site' / 'polos.json').read_text(encoding='utf-8'))
     polo_de = {cod: p for p in cfg['polos'] for cod in p['municipios']}
     nae_mun = nae_por_municipio(dados)
+    nae_al = {c['alimentador']: len((c.get('nae') or {}).get('oc', [])) for c in dados if c['validacao']['status'] != 'falha'}
     muns = []
     for g in geo['muns']:
         m = por_cod.get(g['cod'])
@@ -869,8 +870,8 @@ def mapa_e_ranking(saida, dados, man):
         if g['cod'] in polo_de:
             g = dict(g, reg=polo_de[g['cod']]['regional'], polo=polo_de[g['cod']]['nome'])
         if m:
-            g = dict(g, nome=m['nome'], slug=m['slug'], als=[dict(cod=a['cod'], se=a['se_nome'], m=a['m_no_municipio'])
-                                             for a in m['alimentadores']])
+            g = dict(g, nome=m['nome'], slug=m['slug'], als=[dict(cod=a['cod'], se=a['se_nome'], m=a['m_no_municipio'],
+                                                                  n=nae_al.get(a['cod'], 0)) for a in m['alimentadores']])
         muns.append(g)
     (saida / 'assets' / 'mapa-municipios-dados.js').write_text(
         'window.MUN=' + json.dumps(dict(w=geo['w'], h=geo['h'], muns=muns,
@@ -901,6 +902,57 @@ def mapa_e_ranking(saida, dados, man):
                                          als=als), ensure_ascii=False, separators=(',', ':')) + ';\n',
         encoding='utf-8')
     return vb
+
+
+# lon/lat → coordenadas do mapa de municípios da página inicial (mapa-municipios-geo.json, já projetado).
+# Ajuste por regressão + refino com a rede dos alimentadores que ficam quase todos num município só: 96,7% dos pontos
+# dos vãos caem dentro do município certo (o resto fica na divisa, onde a malha simplificada do mapa perde detalhe).
+PROJ_MUN = (112.8878, 5722.7136, -111.6377, -574.6836)     # x = a·lon + b, y = c·lat + d
+REDE_TOL = 25                                              # m do Douglas–Peucker na rede da prévia
+
+
+def redes_mapa(saida, dados):
+    """dados/redes/<AL>.json: a rede de cada alimentador já nas coordenadas do mapa de municípios, para a prévia do
+    município aberto na página inicial (mapa-municipios.js). {d: path SVG (linhas encadeadas e simplificadas),
+    b: [x0, y0, x1, y1]}. Só a forma: as contas (NAE, km) continuam saindo dos dados de cada alimentador."""
+    a, b, c_, d = PROJ_MUN
+    pasta = saida / 'dados' / 'redes'
+    pasta.mkdir(parents=True, exist_ok=True)
+    for c in dados:
+        if c['validacao']['status'] == 'falha':
+            continue
+        viz = {}
+        for v in c['vaos']:
+            p, q = (v[0], v[1]), (v[2], v[3])
+            if p != q:
+                viz.setdefault(p, []).append(q)
+                viz.setdefault(q, []).append(p)
+        usados, linhas = set(), []
+        # encadeia: começa nas pontas e nos pontos de derivação (grau ≠ 2) e anda até o próximo deles
+        inicios = [p for p, ns in viz.items() if len(ns) != 2] or list(viz)[:1]
+        for p0 in inicios + list(viz):
+            for q in viz[p0]:
+                if (p0, q) in usados:
+                    continue
+                linha, prev, cur = [p0], p0, q
+                usados |= {(p0, q), (q, p0)}
+                while True:
+                    linha.append(cur)
+                    if len(viz[cur]) != 2:
+                        break
+                    nxt = viz[cur][0] if viz[cur][1] == prev else viz[cur][1]
+                    if (cur, nxt) in usados:
+                        break
+                    usados |= {(cur, nxt), (nxt, cur)}
+                    prev, cur = cur, nxt
+                linhas.append(_dp(linha, REDE_TOL))
+        xy = [[(round(a * lon + b, 2), round(c_ * lat + d, 2)) for lon, lat in ln] for ln in linhas]
+        xs = [x for ln in xy for x, _ in ln]
+        ys = [y for ln in xy for _, y in ln]
+        f = lambda v: f'{v:g}'
+        grava_json(pasta / f'{c["alimentador"]}.json', dict(
+            d=''.join('M' + 'L'.join(f'{f(x)},{f(y)}' for x, y in ln) for ln in xy),
+            b=[min(xs), min(ys), max(xs), max(ys)]))
 
 
 def polo_principal(c, polo_de):
@@ -1154,6 +1206,60 @@ def indice_ativos(saida, dados):
     return len(idx)
 
 
+FATIAS_OS = 64        # poucas fatias: a cópia da página no Artifact tem limite de arquivos
+
+
+def chave_os(s):
+    """'ETO-RD-PO 002507/2026', '2507/2026' e '002507 / 2026' → '2507/2026' (número sem zeros à esquerda + ano)."""
+    m = re.search(r'(\d{1,7})\s*/\s*(\d{4})(?!\d)', str(s))
+    return f'{int(m.group(1))}/{m.group(2)}' if m else None
+
+
+def fatia_os(k):
+    h = 0                                         # mesma conta em assets/busca-ativo.js
+    for ch in k:
+        h = (h * 31 + ord(ch)) & 0xFFFFFFFF
+    return f'{h % FATIAS_OS:02x}'
+
+
+def indice_os(saida, dados):
+    """dados/os/<fatia>.json: número/ano da OS → [[OS completa, alimentador, base, situação ou data, lat, lon], ...].
+
+    Bases (base: f, i, m, e): faixa (limpeza.js), inspeção (inspecao.js), manutenção (manutencao.js) e executadas
+    (executadas.js), lidas dos arquivos de cada alimentador já gerados. lat/lon: onde a OS cai no mapa, com 4 casas
+    (~10 m; null quando a base não diz)."""
+    idx = {}
+    for c in dados:
+        if c['validacao']['status'] == 'falha':
+            continue
+        al, pasta = c['alimentador'], saida / 'alimentadores' / c['alimentador']
+        def poe(os_, base, info, ll):
+            k = chave_os(os_)
+            if k:
+                lat, lon = (round(ll[0], 4), round(ll[1], 4)) if ll else (None, None)
+                idx.setdefault(k, []).append([os_, al, base, info, lat, lon])
+        lp = le_js(pasta / 'limpeza.js') or {}
+        for o in lp.get('os') or []:
+            poe(o.get('os_completa') or o['os'], 'f', o.get('sit') or '', None)
+        ins = le_js(pasta / 'inspecao.js') or {}
+        for o in ins.get('os') or []:
+            poe(o.get('os_completa') or o['os'], 'i', o.get('data') or '', o.get('pe'))
+        mn = le_js(pasta / 'manutencao.js') or {}
+        for o in mn.get('os') or []:
+            poe(o.get('os_completa') or o['os'], 'm', o.get('sit') or '', o.get('ll'))
+        ex = le_js(pasta / 'executadas.js') or {}
+        ats = ex.get('ativos') or []
+        for o in ex.get('os') or []:
+            a = ats[o[1]] if isinstance(o[1], int) and o[1] < len(ats) else None
+            poe(o[0], 'e', o[2] or '', (a[3], a[4]) if a else None)
+    fatias = {}
+    for k, v in idx.items():
+        fatias.setdefault(fatia_os(k), {})[k] = v
+    for f in range(FATIAS_OS):
+        grava_json(saida / 'dados' / 'os' / f'{f:02x}.json', fatias.get(f'{f:02x}', {}))
+    return len(idx)
+
+
 def sugestoes_ativos(saida, nomes):
     """dados/ativos-pref/<2 primeiros caracteres do código>.json: a lista suspensa da busca de ativo da página inicial.
 
@@ -1245,21 +1351,23 @@ def interface(saida, malha=None):
         p.write_text(casca(f'{m["nome"]} · alimentadores', corpo, '../../',
                            rodape=f'<p>Malha do IBGE, amostra a cada {PASSO_M}&nbsp;m; mínimo de {MIN_M}&nbsp;m.</p>'), encoding='utf-8')
     vb = mapa_e_ranking(saida, dados, man)
+    redes_mapa(saida, dados)
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
     indice_ativos(saida, dados)
-    corpo = ('<header class="cab"><h1>Trechos por município</h1><a class="cab-link" href="polos/#eto">Ranking</a></header>\n'
+    indice_os(saida, dados)
+    corpo = ('<header class="cab"><h1>ARGOS Manutenção</h1><a class="cab-link" href="polos/#eto">Ranking</a></header>\n'
              # casca do mapa já no HTML (estilo em assets/site.css; o svg com viewBox reserva a altura do mapa):
              # os scripts só preenchem, e a página não pula ao carregar. Busca única atrás da lupa (busca-ativo.js):
              # ativo, município ou alimentador, com a lista aparecendo enquanto se digita.
              '<div id="mapa-to" class="mapa-to"><div class="mt-barra">'
              '<form class="ativo" id="ativo" role="search"><div class="campo">'
-             '<button type="button" class="lupa" id="lupa" aria-label="Buscar ativo, município ou alimentador" '
+             '<button type="button" class="lupa" id="lupa" aria-label="Buscar ativo, município, alimentador ou OS" '
              'aria-expanded="false" aria-controls="ativo-q"><svg viewBox="0 0 24 24" aria-hidden="true">'
              '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
-             '<label for="ativo-q" class="vh">Buscar ativo, município ou alimentador</label>'
+             '<label for="ativo-q" class="vh">Buscar ativo, município, alimentador ou OS</label>'
              '<input class="busca" id="ativo-q" type="search" inputmode="search" autocomplete="off" '
-             'placeholder="Ativo, município ou alimentador" enterkeyhint="search" hidden>'
+             'placeholder="Ativo, município, alimentador ou OS" enterkeyhint="search" hidden>'
              '<div id="ativo-res" aria-live="polite"></div></div></form></div>\n'
              f'<div class="mt-mapa"><svg role="group" aria-label="Mapa dos municípios do Tocantins" tabindex="-1" viewBox="{vb}"></svg>'
              '<div class="mt-dica" aria-hidden="true"></div>'
@@ -1267,7 +1375,7 @@ def interface(saida, malha=None):
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
              '<script src="assets/mapa-municipios.js"></script>\n'
              '<script src="assets/busca-ativo.js"></script>')
-    (saida / 'index.html').write_text(casca('Trechos por município', corpo, '', rodape=(
+    (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', rodape=(
         '<p>T1 do DJ ao 1º religador, T2 de religador a religador (T2-A, T2-B…), T3-A, T3-B… depois de cada fusível.</p>')),
         encoding='utf-8')
     (saida / '.nojekyll').touch()
