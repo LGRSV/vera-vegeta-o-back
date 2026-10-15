@@ -1,0 +1,1 @@
+window.ATIVOS = {"tr":[],"eq":[]};
