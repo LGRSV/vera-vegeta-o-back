@@ -386,3 +386,107 @@ span.mt-pchip{cursor:default}
   .mun{transition:fill var(--dur) var(--ease)}
   #ativo-res:not(:empty){animation:entra var(--dur) var(--ease)}
 }
+
+/* ====== Tipografia e design do mapa: cartão preto em regionais, polos, municípios e balão; título em wordmark ====== */
+:root{
+  /* linguagem do "cartão preto" (o das regionais), agora um token usado nos dois temas */
+  --cartao:#111314; --cartao-2:#1c2124; --cartao-fg:#f2f3f2; --cartao-mute:#a9b2b8; --cartao-borda:rgba(255,255,255,.16); --selo:#b8431f;
+}
+/* 1) título: ARGOS em cima (wordmark espaçado), MANUTENÇÃO embaixo (pequeno, entre dois filetes); fica na MESMA linha do menu */
+.mnu{position:relative;z-index:40}   /* acima da barra fixa da busca (30), para a lista do menu abrir por cima dela */
+header.cab{position:relative;margin-top:calc(-1 * (var(--alvo) + var(--s5)))}
+@media (min-width:861px){header.cab{margin-top:calc(-1 * (var(--alvo) + var(--s6)))}}
+header.cab h1{display:flex;flex-direction:column;align-items:center;line-height:1;letter-spacing:0}
+header.cab h1 b{font:700 clamp(28px,3.4vw,36px)/1 var(--f-display);letter-spacing:.22em;margin-right:-.22em}
+header.cab h1 span{display:flex;align-items:center;gap:10px;margin:9px 0 0;font:600 10.5px/1 var(--f-body);letter-spacing:.46em;color:var(--muted)}
+header.cab h1 span::before,header.cab h1 span::after{content:"";width:22px;height:1px;background:var(--mt-lim)}
+header.cab h1 span::after{margin-left:-.46em}
+/* "Ranking" vira um botão irmão do menu, no canto oposto */
+header.cab>.cab-link{position:absolute;top:0;right:0;gap:6px;min-height:var(--alvo);padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--paper);color:var(--fg);font:600 var(--t-xs)/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:var(--sh1)}
+header.cab>.cab-link::after{content:"→";color:var(--accent);font-size:14px;letter-spacing:0}
+header.cab>.cab-link:hover{background:var(--hover);text-decoration:none}
+
+/* 2) cartão preto nos dois temas: regionais, polos da barra, rótulos de município e balão do mouse */
+.mt-regcards button{background:var(--cartao);border-color:var(--cartao-borda);color:var(--cartao-fg);box-shadow:0 8px 20px -8px rgb(0 0 0 / .55)}
+.mt-regcards b{color:var(--cartao-fg)}
+.mt-regcards button:hover{border-color:var(--selo);background:var(--cartao-2)}
+.mt-regcards i,.mt-pchip i,.mt-selos span{font-variant-numeric:tabular-nums}
+.mt-barra .mt-pchip{background:var(--cartao);color:var(--cartao-fg);border-color:var(--cartao-borda)}
+.mt-barra .mt-pchip:hover{background:var(--cartao-2)}
+.mt-barra .mt-pchip span{color:var(--cartao-mute)}
+.mt-barra .mt-pchip b{font-weight:600}
+.mt-rchip,.mt-barra .mt-pchip.mt-atual{background:var(--cartao)}
+.mt-dica{padding:8px 11px 9px;background:var(--cartao);color:var(--cartao-fg);border:1px solid var(--cartao-borda);box-shadow:0 10px 24px -8px rgb(0 0 0 / .6);font:inherit}
+.mt-dica .mt-dica-h{display:flex;align-items:center;gap:12px}
+.mt-dica b{font:600 var(--t-md)/1.2 var(--f-body)}
+.mt-dica b.cod{font:600 var(--t-sm)/1.2 var(--f-mono)}
+.mt-dica i{margin-left:auto;padding:2px 6px;border-radius:5px;background:var(--selo);color:#fff;font:700 var(--t-xs)/1.2 var(--f-mono);font-style:normal;font-variant-numeric:tabular-nums}
+.mt-dica small{display:block;margin-top:4px;font:400 var(--t-xs)/1.35 var(--f-body);color:var(--cartao-mute);opacity:1}
+.mt-dica .mt-dica-c{margin-top:6px;padding-top:6px;border-top:1px solid var(--cartao-borda);color:var(--cartao-fg);opacity:.75}
+
+/* 3) municípios do polo aberto: mini cartão com o nome e, EMBAIXO, a NAE em selo vermelho (substitui .mt-nomes2 .mt-rot) */
+.mt-nomes2{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.mt-mn{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:3px;padding:4px 8px 5px;border-radius:8px;white-space:nowrap;
+  background:color-mix(in srgb,var(--cartao) 94%,transparent);border:1px solid var(--cartao-borda);box-shadow:0 4px 12px -4px rgb(0 0 0 / .6);animation:mt-surge .3s ease-out}
+.mt-mn b{font:600 12.5px/1.1 var(--f-body);color:var(--cartao-fg);letter-spacing:.005em}
+.mt-mn i{padding:1px 6px;border-radius:4px;background:var(--selo);color:#fff;font:700 10.5px/1.25 var(--f-mono);font-style:normal;font-variant-numeric:tabular-nums}
+.mt-mn i.zero{background:#4a5359;color:#dfe4e6}
+.mt-mn[data-nv="2"]{padding:0;border:0;background:none;box-shadow:none}
+.mt-mn[data-nv="2"] i{box-shadow:0 0 0 1.5px var(--cartao),0 2px 6px rgb(0 0 0 / .5)}
+@media (max-width:860px){
+  .mt-mn{padding:3px 6px 4px;gap:2px;border-radius:7px}
+  .mt-mn b{font-size:10.5px}.mt-mn i{font-size:9.5px;padding:1px 4px}
+}
+
+/* 4) legenda: rampa horizontal com as faixas (substitui a lista vertical) */
+.mt-regs-c{gap:var(--s2);padding:var(--s3)}
+.mt-regs-t{font:700 var(--t-xs)/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mt-rampa{display:flex}
+.mt-rampa>span{display:grid;gap:5px;width:44px}
+.mt-rampa i{display:block;width:100%;height:10px;border-radius:0;box-shadow:inset 0 0 0 1px var(--mt-borda)}
+.mt-rampa>span:first-child i{border-radius:5px 0 0 5px}.mt-rampa>span:last-child i{border-radius:0 5px 5px 0}
+.mt-rampa em{font:600 var(--t-xs)/1 var(--f-display);font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums;text-align:center}
+.mt-regs{border-radius:var(--r2)}
+.mt-regs>summary{letter-spacing:.01em}
+.mt-regs .lim-s{font:500 var(--t-xs)/1 var(--f-body);color:var(--muted)}
+
+/* 5) lista de alimentadores do município: nome em destaque, NAE em selo, km em cinza (mesma linguagem do cartão) */
+.mt-lh{display:grid;gap:3px}
+.mt-lh b{font:700 var(--t-xl)/1.1 var(--f-display);letter-spacing:.01em}
+.mt-lh small{font:600 var(--t-xs)/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mt-amun{display:inline-flex;align-items:center;font:600 var(--t-sm)/1.2 var(--f-body);padding:0 0 var(--s2)}
+.mt-al{row-gap:4px}
+.mt-al b{font:600 var(--t-md)/1.2 var(--f-mono);letter-spacing:.01em}
+.mt-al>span:last-child{display:flex;align-items:center;gap:8px;font-size:var(--t-xs)}
+.mt-al i{padding:1px 6px;border-radius:4px;background:var(--selo);color:#fff;font:700 var(--t-xs)/1.25 var(--f-mono);font-style:normal;font-variant-numeric:tabular-nums}
+.mt-al em{font:400 var(--t-xs)/1.2 var(--f-body);font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums}
+/* cartão compacto (nível 2 de colisão) e cartão do polo no nível da regional (nome em cima, NAE embaixo, filete na cor do polo) */
+.mt-mn[data-nv="1"]{padding:3px 6px 4px;gap:2px;border-radius:7px}
+.mt-mn[data-nv="1"] b{font-size:10.5px}.mt-mn[data-nv="1"] i{font-size:9.5px;padding:1px 4px}
+.mt-selos .mt-mn.mt-pm{z-index:2;padding:6px 12px 7px;gap:4px;border-radius:var(--r2);box-shadow:inset 0 -3px 0 var(--c),0 8px 20px -8px rgb(0 0 0 / .55)}
+.mt-selos .mt-mn.mt-pm b{font:700 var(--t-sm)/1.1 var(--f-body);letter-spacing:.08em;text-transform:uppercase}
+.mt-selos .mt-mn.mt-pm i{font-size:var(--t-xs);padding:2px 7px;border-radius:5px}
+.mt-selos .mt-mn.off{opacity:.35}
+/* o mapa cabe inteiro na tela com o título compacto */
+@media (min-width:861px){.mt-mapa svg{height:min(calc(100svh - 204px),1100px)}}
+.mt-rampa>span{width:auto;min-width:48px;flex:1 0 auto}
+.mt-rampa em{padding:0 4px;white-space:nowrap}
+@media (max-width:480px){
+  header.cab h1 b{font-size:24px;letter-spacing:.18em;margin-right:-.18em}
+  header.cab>.cab-link{padding:0 10px;font-size:10px;letter-spacing:.06em}
+  header.cab h1 span{gap:7px;letter-spacing:.38em;font-size:10px}
+  header.cab h1 span::before,header.cab h1 span::after{width:12px}
+  header.cab h1 span::after{margin-left:-.38em}
+}
+/* sem repetir dado: com os cartões dos polos no mapa, os botões da barra ficam só com o nome (a NAE já está no cartão) */
+.mt-barra .mt-pchip:not(.mt-atual) i{display:none}
+/* a legenda das faixas de NAE só vale para o mapa colorido: no município (rede dos alimentadores) ela some e libera a lista */
+.nivel-mun .mt-regs{display:none}
+@media (max-width:860px){
+  .mt-selos .mt-mn.mt-pm{padding:4px 9px 5px;gap:3px}
+  .mt-selos .mt-mn.mt-pm b{font-size:10.5px;letter-spacing:.06em}
+  .mt-selos .mt-mn.mt-pm i{font-size:9.5px;padding:1px 5px}
+}
+/* telas muito estreitas: o título não cabe entre o ☰ e o Ranking; volta para baixo do menu, com o Ranking embaixo dele */
+@media (max-width:360px){header.cab{margin-top:0}header.cab>.cab-link{position:static;justify-self:center;margin-top:var(--s2)}}

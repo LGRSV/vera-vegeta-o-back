@@ -61,7 +61,7 @@
   // legenda: canto inferior esquerdo, já aberta (details open) e recolhível; no celular começa fechada para não cobrir o mapa
   if (leg && matchMedia('(max-width:860px)').matches) leg.open = false;
   if (leg) leg.innerHTML = '<summary>NAE-Vegetação</summary><div class="mt-regs-c">' +
-    FAIXAS.map((l, i) => `<span><i class="nae-${i}" aria-hidden="true"></i>${rotFaixa(i)}</span>`).join('') +
+    '<div class="mt-rampa" role="list">' + FAIXAS.map((l, i) => `<span role="listitem" title="${rotFaixa(i)}"><i class="nae-${i}" aria-hidden="true"></i><em aria-hidden="true">${i === 0 ? '0' : i === FAIXAS.length - 1 ? l + '+' : l + '–' + (FAIXAS[i + 1] - 1)}</em><span class="vh">${rotFaixa(i)}</span></span>`).join('') + '</div>' +
     (M.regs ? '<span class="lim-s"><i class="lim" aria-hidden="true"></i>Limite das regionais</span>' : '') + '</div>';
   // teclado: um só município na ordem do Tab (o escolhido, ou Palmas); as setas andam pelo mapa
   const roda = cod => {
@@ -159,7 +159,7 @@
     if (rd) {
       const m = porCod[mun], a = m.als.find(x => x.cod === rd.dataset.al), r = caixa.getBoundingClientRect();
       realceAl(a.cod);
-      dica.innerHTML = `${esc(a.cod)} <small>· ${esc(a.se)} · ${(a.n || 0).toLocaleString('pt-BR')} NAE · ${km(a.m)} em ${esc(m.nome)}</small>` +
+      dica.innerHTML = `<span class="mt-dica-h"><b class="cod">${esc(a.cod)}</b><i>${(a.n || 0).toLocaleString('pt-BR')} NAE</i></span><small>${esc(a.se)} · ${km(a.m)} em ${esc(m.nome)}</small>` +
         `<small class="mt-dica-c">${alf === a.cod ? 'Clique para abrir o alimentador' : 'Clique para dar zoom no alimentador'}</small>`;
       dica.style.left = (e.clientX - r.left) + 'px'; dica.style.top = (e.clientY - r.top) + 'px'; dica.style.display = 'block';
       return;
@@ -169,7 +169,7 @@
     if (!p) { dica.style.display = 'none'; return; }
     const m = porCod[p.dataset.cod], r = caixa.getBoundingClientRect();
     if (!reg) realca(m.reg); else if (!pol) realcaPolo(m.reg === reg ? m.polo : null);
-    dica.innerHTML = `${esc(m.nome)} <small>· ${(m.nae || 0).toLocaleString('pt-BR')} NAE${m.reg ? ` · Regional ${esc(m.reg)} · ${esc(m.polo)}` : ''}${m.slug ? ` · ${nAls(m)} · ${km(kmTot(m))}` : ' · sem dados ainda'}</small>` +
+    dica.innerHTML = `<span class="mt-dica-h"><b>${esc(m.nome)}</b><i>${(m.nae || 0).toLocaleString('pt-BR')} NAE</i></span><small>${m.reg ? `Regional ${esc(m.reg)} · ${esc(m.polo)}` : ''}${m.slug ? `${m.reg ? ' · ' : ''}${nAls(m)} · ${km(kmTot(m))}` : `${m.reg ? ' · ' : ''}sem dados ainda`}</small>` +
       (!reg && m.reg ? `<small class="mt-dica-c">Clique para ver os polos da Regional ${esc(m.reg)}</small>` :
         reg && !pol && m.reg === reg ? `<small class="mt-dica-c">Clique para ver os municípios de ${esc(m.polo)}</small>` :
         pol && !mun && m.polo === pol && m.slug ? '<small class="mt-dica-c">Clique para ver os alimentadores</small>' : '');
@@ -184,7 +184,7 @@
   // Polo aberto (clicar num polo da regional aberta): do mesmo jeito, o mapa aproxima no polo e os municípios dele se
   // afastam um do outro, com o nome de cada um; aí clicar num município abre a página dele. "← Regional" ou Esc voltam.
   let reg = null, pol = null, anima = 0, mdesl = {}, corDe = {};
-  const TODO = [-6, -6, VW, M.h + 12], AFASTA = 0.32, AFASTA_MUN = 0.22, DUR = 650, CORES = ['a', 'b', 'c', 'd'];
+  const TODO = [-6, -6, VW, M.h + 12], AFASTA = 0.32, AFASTA_MUN = 0.30, DUR = 650, CORES = ['a', 'b', 'c', 'd'];
   const calmo = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const vb = () => svg.getAttribute('viewBox').split(' ').map(Number);
   const une = (a, b) => !a ? b : { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) };
@@ -323,7 +323,7 @@
     dica.style.display = 'none';
     const b = caixaDe(grp[polo]), pc = [(b.x + b.x2) / 2, (b.y + b.y2) / 2], ms = M.muns.filter(m => m.polo === polo);
     mdesl = {};
-    const g0 = Math.hypot(b.x2 - b.x, b.y2 - b.y) * 0.025;        // folga mínima: os do meio do polo também se soltam
+    const g0 = Math.hypot(b.x2 - b.x, b.y2 - b.y) * 0.04;         // folga mínima: os do meio do polo também se soltam
     ms.forEach(m => {
       const c = cen(m.cod), dx = c[0] - pc[0], dy = c[1] - pc[1], d = Math.hypot(dx, dy) || 1, f = AFASTA_MUN + g0 / d;
       mdesl[m.cod] = [dx * f, dy * f];
@@ -380,10 +380,10 @@
     trilhaMun();
     legAl.setAttribute('aria-label', `Alimentadores de ${m.nome}`);
     legAl.hidden = false;
-    legAl.innerHTML = caixaPolos(`${esc(m.nome)} · ${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}`,
+    legAl.innerHTML = caixaPolos(`<span class="mt-lh"><b>${esc(m.nome)}</b><small>${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}</small></span>`,
       `<a class="mt-amun" href="municipios/${esc(m.slug)}/">Abrir ${esc(m.nome)} →</a>` + als.map(a =>
         `<button type="button" class="mt-al" data-al="${esc(a.cod)}" title="Clique para dar zoom; clique de novo para abrir"><span class="mt-al-m" aria-hidden="true"></span>` +
-        `<b>${esc(a.cod)}</b><span>${(a.n || 0).toLocaleString('pt-BR')} NAE · ${km(a.m)} aqui</span></button>`).join(''));
+        `<b>${esc(a.cod)}</b><span><i>${(a.n || 0).toLocaleString('pt-BR')} NAE</i><em>${km(a.m)} aqui</em></span></button>`).join(''));
     legAl.classList.toggle('aberta', puxada);
     volta.setAttribute('aria-label', `${m.nome}. Voltar ao polo ${pol}`);
     volta.title = `Voltar ao polo ${pol}`;
@@ -499,26 +499,71 @@
     if (tinha && m) { roda(m.cod); el[m.cod].focus({ preventScroll: true }); }
   }
   // nome de cada município do polo aberto, já no lugar afastado (entra depois da animação; os que se cruzam somem)
-  const nomes2 = document.createElementNS(NS, 'g');
-  nomes2.setAttribute('class', 'mt-nomes2');
+  // nome de cada município do polo aberto, no lugar afastado (entra depois da animação). Cada rótulo é um mini cartão
+  // preto (como o das regionais): nome e, EMBAIXO, a NAE num selo vermelho. Sem sobreposição: os rótulos entram do
+  // maior NAE para o menor, procurando um ponto livre DENTRO do próprio município; se o cartão inteiro não cabe, tenta
+  // só nome+número, depois só o número; se nem assim, o município fica sem rótulo (o nome continua no balão do mouse).
+  const nomes2 = document.createElement('div');
+  nomes2.className = 'mt-nomes2';
   nomes2.setAttribute('aria-hidden', 'true');
-  svg.append(nomes2);
+  caixa.append(nomes2);
+  const fmt = n => (n || 0).toLocaleString('pt-BR');
+  const zero = m => m.nae ? '' : ' class="zero"';
+  const NIVEIS_ROT = [
+    m => `<b>${esc(m.nome)}</b><i${zero(m)}>${fmt(m.nae)} NAE</i>`,      // cartão completo
+    m => `<b>${esc(m.nome)}</b><i${zero(m)}>${fmt(m.nae)} NAE</i>`,      // cartão compacto (letra menor, via data-nv)
+    m => `<i${zero(m)}>${fmt(m.nae)}</i>`,                               // só o número
+  ];
+  const bate = (a, b, f = 8) => a.left < b.right + f && a.right + f > b.left && a.top < b.bottom + f && a.bottom + f > b.top;
   function poeNomes() {
     nomes2.innerHTML = '';
     if (!pol || mun || anima) return;
-    const r = svg.getBoundingClientRect(), v = vb();
-    if (!r.width) return;
-    nomes2.style.setProperty('--k', Math.max(v[2] / r.width, v[3] / r.height).toFixed(4));
-    const ok = [];
-    M.muns.filter(m => m.polo === pol).sort((a, b) => (b.nae || 0) - (a.nae || 0)).forEach(m => {
-      const t = document.createElementNS(NS, 'text'), [x, y] = soma(soma(m.c, desl[pol]), mdesl[m.cod]);
-      t.setAttribute('x', x); t.setAttribute('y', y);
-      t.setAttribute('class', 'mt-rot');
-      t.textContent = m.nome;
+    const r = svg.getBoundingClientRect(), v = vb(), c0 = caixa.getBoundingClientRect(), ctm = svg.getScreenCTM();
+    if (!r.width || !ctm) return;
+    const celular = matchMedia('(max-width:860px)').matches, ocupado = [];   // legenda e seta de voltar também entram na conta
+    [leg, volta].forEach(o => { if (o && o.offsetParent) ocupado.push(o.getBoundingClientRect()); });
+    const livre = { left: Math.max(r.left, c0.left) + 2, top: Math.max(r.top, c0.top) + 2, right: Math.min(r.right, c0.right) - 2, bottom: Math.min(r.bottom, c0.bottom) - 2 };
+    const pt = svg.createSVGPoint(), u = Math.max(v[2] / r.width, v[3] / r.height);   // unidades do mapa por pixel de tela
+    const aTela = (x, y) => { pt.x = x; pt.y = y; return pt.matrixTransform(ctm); };
+    const ms = M.muns.filter(m => m.polo === pol).sort((a, b) => (b.nae || 0) - (a.nae || 0));
+    // pontos candidatos no próprio município: o centro e anéis em volta (em pixels de tela)
+    const ANEIS = [0, 9, 18, 28, 40, 54];
+    function* cand(m) {                                         // preguiçoso: só testa o próximo ponto se o anterior não coube
+      const p = el[m.cod], [cx, cy] = m.c;
+      for (const rr of ANEIS) {
+        const n = rr ? 12 : 1;
+        for (let i = 0; i < n; i++) {
+          const a = i / n * 2 * Math.PI + (rr % 2 ? .26 : 0), q = new DOMPoint(cx + Math.cos(a) * rr * u, cy + Math.sin(a) * rr * u * .8);
+          if (p.isPointInFill(q)) yield q;
+        }
+      }
+    }
+    let nomeados = 0;                                           // celular: só os 10 de maior NAE levam o nome; os demais, o número
+    ms.forEach(m => {
+      const it = cand(m), cache = [];                           // pontos em cache e gerados só quando preciso, para os 3 níveis
+      const ponto = k => { while (cache.length <= k) { const r = it.next(); if (r.done) return null; cache.push(r.value); } return cache[k]; };
+      if (!ponto(0)) return;
+      const [dx, dy] = soma(desl[pol], mdesl[m.cod]);
+      const t = document.createElement('span');
+      t.className = 'mt-mn';
       nomes2.append(t);
-      const q = t.getBBox();
-      if (ok.some(o => q.x < o.x + o.width + 2 && q.x + q.width + 2 > o.x && q.y < o.y + o.height && q.y + q.height > o.y)) t.remove();
-      else ok.push(q);
+      for (let nv = celular ? (nomeados < 10 ? 1 : 2) : 0; nv < NIVEIS_ROT.length; nv++) {      // celular: já começa no cartão compacto
+        t.innerHTML = NIVEIS_ROT[nv](m);
+        t.dataset.nv = nv;
+        t.style.left = '0px'; t.style.top = '0px';
+        const w = t.offsetWidth, h = t.offsetHeight;
+        for (let k = 0, q; (q = ponto(k)); k++) {
+          const s = aTela(q.x + dx, q.y + dy);
+          const R = { left: s.x - w / 2, right: s.x + w / 2, top: s.y - h / 2, bottom: s.y + h / 2 };
+          if (R.left < livre.left || R.right > livre.right || R.top < livre.top || R.bottom > livre.bottom) continue;
+          if (ocupado.some(o => bate(R, o))) continue;
+          t.style.left = (s.x - c0.left).toFixed(1) + 'px'; t.style.top = (s.y - c0.top).toFixed(1) + 'px';
+          ocupado.push(R);
+          if (nv < 2) nomeados++;
+          return;
+        }
+      }
+      t.remove();
     });
   }
   // selo de cada polo: no município do polo mais perto do meio dele (o selo sempre cai dentro do polo)
@@ -532,8 +577,8 @@
       const pt = svg.createSVGPoint();
       [pt.x, pt.y] = soma(m.c, desl[p.polo]);
       const s = pt.matrixTransform(ctm);
-      return `<span data-polo="${esc(p.polo)}" style="left:${(s.x - cx.left).toFixed(0)}px;top:${(s.y - cx.top).toFixed(0)}px"` +
-        `${grp[p.polo].classList.contains('desliga') ? ' class="off"' : ''}>${p.nae.toLocaleString('pt-BR')}</span>`;
+      return `<div class="mt-mn mt-pm${grp[p.polo].classList.contains('desliga') ? ' off' : ''}" data-polo="${esc(p.polo)}" style="--c:${corDe[p.polo]};left:${(s.x - cx.left).toFixed(0)}px;top:${(s.y - cx.top).toFixed(0)}px">` +
+        `<b>${esc(p.polo)}</b><i>${p.nae.toLocaleString('pt-BR')} NAE</i></div>`;
     }).join('');
   }
   legPolos.addEventListener('click', e => {
