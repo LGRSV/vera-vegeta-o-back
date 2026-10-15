@@ -8,6 +8,17 @@
   const M = window.MUN, alvo = document.getElementById('mapa-to');
   if (!M || !alvo || !alvo.querySelector('.mt-mapa svg')) return;
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // páginas que a cópia do Artifact não leva (municípios, alimentadores, polos, relatório) abrem no site publicado, em outra aba;
+  // no próprio site (github.io) e no teste local tudo continua relativo, como antes
+  const SITE = 'https://lgrsv.github.io/vera-vegeta-o-back/teste/';
+  const noSite = /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+  const pag = p => noSite ? p : SITE + p;
+  const alvoA = noSite ? '' : ' target="_blank" rel="noopener"';
+  const vaiPag = p => { if (noSite) location.href = p; else window.open(SITE + p, '_blank', 'noopener'); };
+  window.ARGOS_PAG = { url: pag, alvo: alvoA, abre: vaiPag };
+  if (!noSite) document.querySelectorAll('.cab-link[href], .rodape a[href]').forEach(a => {
+    a.href = pag(a.getAttribute('href')); a.target = '_blank'; a.rel = 'noopener';
+  });
   const km = m => (m / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
   const semAcento = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const kmTot = m => m.als.reduce((s, a) => s + a.m, 0);
@@ -203,6 +214,7 @@
     caixa.classList.remove('pronta');
     caixa.classList.add('voando');
     const de = vb(), t0 = performance.now(), dur = calmo() ? 0 : DUR;
+    document.dispatchEvent(new CustomEvent('argos-nivel', { detail: { reg, pol, mun, al: alf } }));   // a busca acompanha o nível
     const passo = agora => {
       const t = dur ? Math.min(1, (agora - t0) / dur) : 1, e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
       svg.setAttribute('viewBox', de.map((v, i) => +(v + (alvoVb[i] - v) * e).toFixed(2)).join(' '));
@@ -255,7 +267,9 @@
     // celular (mesmo corte do site.css): sobra o topo para a seta de voltar e o pé para a seta dos polos
     if (matchMedia('(max-width:860px)').matches) { const t = 52 * w / W, f = 52 * w / W; return [x, y - t, w, h + t + f]; }
     // a coluna da esquerda (seta, lista de alimentadores e, embaixo, a legenda) fica livre
-    const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg ? leg.offsetWidth : 0) + 24, L2 = 24;
+    // com a busca da barra, a lista do município aberto abre embaixo da logo: o lado esquerdo fica livre para ela
+    const lista = window.ARGOS_BUSCA && mun && !alf ? ((document.querySelector('.mt-barra .ativo') || {}).offsetWidth || 0) : 0;
+    const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg ? leg.offsetWidth : 0, lista) + 24, L2 = 24;
     const k = Math.min(H / h, Math.max(1e-3, W - L1 - L2) / w);
     const altura = H / k;
     return [x - L1 / k, y - (altura - h) / 2, w + (L1 + L2) / k, altura];
@@ -379,9 +393,9 @@
     const als = m.als.slice().sort((a, b) => b.m - a.m);
     trilhaMun();
     legAl.setAttribute('aria-label', `Alimentadores de ${m.nome}`);
-    legAl.hidden = false;
+    legAl.hidden = !!window.ARGOS_BUSCA;                // com a busca da barra, a lista abre embaixo da logo (busca-ativo.js)
     legAl.innerHTML = caixaPolos(`<span class="mt-lh"><b>${esc(m.nome)}</b><small>${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}</small></span>`,
-      `<a class="mt-amun" href="municipios/${esc(m.slug)}/">Abrir ${esc(m.nome)} →</a>` + als.map(a =>
+      als.map(a =>
         `<button type="button" class="mt-al" data-al="${esc(a.cod)}" title="Clique para dar zoom; clique de novo para abrir"><span class="mt-al-m" aria-hidden="true"></span>` +
         `<b>${esc(a.cod)}</b><span><i>${(a.n || 0).toLocaleString('pt-BR')} NAE</i><em>${km(a.m)} aqui</em></span></button>`).join(''));
     legAl.classList.toggle('aberta', puxada);
@@ -406,7 +420,7 @@
   // alimentador em foco (clicar nele na lista ou na rede): o mapa aproxima na rede inteira dele, que fica forte e sem
   // corte; os outros apagam. Clicar nele de novo (ou em "Abrir …") abre a página do alimentador.
   let alf = null, alCaixa = null;
-  const abreAl = al => { location.href = `alimentadores/${encodeURIComponent(al)}/`; };
+  const abreAl = al => vaiPag(`alimentadores/${encodeURIComponent(al)}/`);
   function trilhaMun() {
     const m = porCod[mun];
     legPolos.innerHTML = passo('estado', 'Tocantins') + passo('regional', esc(reg)) + passo('polo', esc(pol)) +
@@ -429,7 +443,7 @@
     gf.append(pa);
     legAl.querySelectorAll('.mt-al').forEach(a => a.classList.toggle('foco', a.dataset.al === al));
     const ab = legAl.querySelector('.mt-amun');
-    if (ab) { ab.href = `alimentadores/${encodeURIComponent(al)}/`; ab.textContent = `Abrir ${al} →`; }
+    if (ab) { ab.href = pag(`alimentadores/${encodeURIComponent(al)}/`); ab.textContent = `Abrir ${al} →`; }
     trilhaMun();
     volta.setAttribute('aria-label', `${al}. Voltar a ${porCod[mun].nome}`);
     volta.title = `Voltar a ${porCod[mun].nome}`;
@@ -446,7 +460,7 @@
     const m = porCod[mun];
     legAl.querySelectorAll('.mt-al.foco').forEach(a => a.classList.remove('foco'));
     const ab = legAl.querySelector('.mt-amun');
-    if (ab) { ab.href = `municipios/${m.slug}/`; ab.textContent = `Abrir ${m.nome} →`; }
+    if (ab) { ab.href = pag(`municipios/${m.slug}/`); ab.textContent = `Abrir ${m.nome} →`; }
     trilhaMun();
     volta.setAttribute('aria-label', `${m.nome}. Voltar ao polo ${pol}`);
     volta.title = `Voltar ao polo ${pol}`;
@@ -615,7 +629,7 @@
 
   // no estado inteiro, escolher um município abre a regional dele; com a regional aberta, abre o polo dele; com o polo
   // aberto, abre o município (a rede dos alimentadores); com o município aberto, abre a página dele
-  const abre = cod => { const m = porCod[cod]; if (m && m.slug) location.href = `municipios/${m.slug}/`; };
+  const abre = cod => { const m = porCod[cod]; if (m && m.slug) vaiPag(`municipios/${m.slug}/`); };
   const escolhe = (cod, teclado) => {
     const m = porCod[cod];
     if (!reg && m.reg) entra(m.reg, teclado, cod);
@@ -715,4 +729,52 @@
     document.addEventListener('pointerdown', e => { if (!lista.hidden && !busca.parentElement.contains(e.target)) abreLista(false); });
     busca.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== busca) abreLista(false); }, 0));
   }
+
+  // ---------- ponte com a busca da barra (busca-ativo.js) ----------
+  // vai({reg}|{polo}|{cod}|{al}): o mapa anda até lá pelo mesmo caminho dos cliques (regional › polo › município ›
+  // alimentador), subindo só o que não serve. O alimentador abre no município onde ele tem mais km — de preferência
+  // dentro do que já está aberto (município, polo ou regional).
+  const kmAl = (m, al) => { const a = m.als.find(x => x.cod === al); return a ? a.m : 0; };
+  function munDoAl(al) {
+    const ms = M.muns.filter(m => m.slug && kmAl(m, al) > 0);
+    if (!ms.length) return null;
+    if (mun && ms.some(m => m.cod === mun)) return mun;
+    const dentro = ms.filter(m => pol ? m.polo === pol : reg ? m.reg === reg : true);
+    return (dentro.length ? dentro : ms).sort((a, b) => kmAl(b, al) - kmAl(a, al))[0].cod;
+  }
+  async function vai({ reg: r, polo, cod, al } = {}) {
+    if (al) cod = munDoAl(al);
+    const m = porCod[cod];
+    if (m) { r = m.reg; polo = m.polo; }
+    if (polo && !r) { const x = M.muns.find(y => y.polo === polo); r = x && x.reg; }
+    previa(null);
+    if (!r) { sai(); return; }
+    if (reg && reg !== r) sai();
+    if (pol && pol !== polo) saiPolo(!polo);
+    if (mun && mun !== cod) saiMun(!cod);
+    if (alf && alf !== al) saiAl(!al);
+    if (!reg) entra(r);
+    if (polo && !pol) entraPolo(polo);
+    if (cod && !mun) entraMun(cod);
+    if (al && mun) await focaAl(al);
+  }
+  // previa(alvo): acende no mapa o que está marcado na lista da busca, sem mudar de nível (null apaga)
+  let acesos = [];
+  function previa(a) {
+    acesos.forEach(c => el[c].classList.remove('acende'));
+    acesos = [];
+    if (!reg) realca(null); else if (!pol) realcaPolo(null);
+    if (achou.size) { achou = new Set(); rotulos(); }
+    if (!a) return;
+    const regDe = a.reg || (a.polo && (M.muns.find(x => x.polo === a.polo) || {}).reg);
+    if (!a.polo && !a.cod && !a.al) { if (!reg) realca(regDe); return; }
+    if (a.polo && !reg) realca(regDe);
+    if (a.polo && reg === regDe && !pol) { realcaPolo(a.polo); return; }
+    acesos = a.cod ? [a.cod] : M.muns.filter(m => a.al ? kmAl(m, a.al) > 0 : m.polo === a.polo).map(m => m.cod);
+    acesos.forEach(c => { el[c].classList.add('acende'); if (acesos.length === 1) traz(el[c]); });
+    if (!reg && (a.cod || a.al)) { achou = new Set(acesos); rotulos(); }   // no estado inteiro aparecem os nomes
+  }
+  // rede do alimentador (para a miniatura na lista da busca) e o destaque dela no mapa com o município aberto
+  const redeDe = al => { const m = porCod[mun] || M.muns.find(x => x.als.some(a => a.cod === al)); return m ? rede(al, m.polo) : Promise.resolve(null); };
+  window.ARGOS_MAPA = { nivel: () => ({ reg, pol, mun, al: alf }), vai, previa, rede: redeDe, realceAl: al => { if (mun) realceAl(al); } };
 })();
