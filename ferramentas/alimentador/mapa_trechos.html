@@ -2,6 +2,8 @@
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trechos · %%TITULO%%</title>
+<!-- tema: escuro (fundo preto) por padrão; o Night shift do menu (Shift+K) troca para o claro -->
+<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}document.documentElement.dataset.theme=t==='claro'?'light':'dark'})()</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -49,8 +51,8 @@
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   color-scheme:dark;
-  --bg:#14181b; --paper:#1b2024; --fg:#e7eaeb; --muted:#9aa4ab;
-  --line:#30383e; --line-forte:#5f6b73;
+  --bg:#000; --paper:#111314; --fg:#e7eaeb; --muted:#9aa4ab;
+  --line:#2a2f33; --line-forte:#5f6b73;
   --accent:#f08a5d; --on-accent:#14181b;
   --sel:#352b27; --hover:rgb(231 234 235 / .06); --seg-on:#323a41;
   --alerta:#ef4444; --alerta-fundo:#c81e1e; --aviso:#f59e0b; --sem:#343c42;
@@ -60,8 +62,8 @@
 }}
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#14181b; --paper:#1b2024; --fg:#e7eaeb; --muted:#9aa4ab;
-  --line:#30383e; --line-forte:#5f6b73;
+  --bg:#000; --paper:#111314; --fg:#e7eaeb; --muted:#9aa4ab;
+  --line:#2a2f33; --line-forte:#5f6b73;
   --accent:#f08a5d; --on-accent:#14181b;
   --sel:#352b27; --hover:rgb(231 234 235 / .06); --seg-on:#323a41;
   --alerta:#ef4444; --alerta-fundo:#c81e1e; --aviso:#f59e0b; --sem:#343c42;

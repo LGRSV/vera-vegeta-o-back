@@ -32,6 +32,7 @@
     enviar: '<path d="M12 16V5"/><path d="m7 10 5-5 5 5"/><path d="M5 20h14"/>',
     baixar: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>',
     fechar: '<path d="M6 6l12 12M18 6 6 18"/>',
+    lua: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
   };
   const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -63,6 +64,10 @@
     '.mnu-lista a:hover,.mnu-lista button:hover,.mnu-lista :focus-visible{background:var(--hover,rgb(0 0 0 / .05));outline:none}' +
     '.mnu-lista :focus-visible{box-shadow:inset 0 0 0 2px var(--accent,#b8431f)}' +
     '.mnu-sep{height:1px;margin:6px 4px;background:var(--line,#d6dad6)}' +
+    '.mnu-tema span{flex:1}.mnu-tema kbd{font:600 11px/1 var(--f-mono,monospace);padding:4px 6px;border:1px solid var(--line,#d6dad6);border-radius:6px;color:var(--muted,#5a636a)}' +
+    '.mnu-sw{position:relative;flex:none;width:32px;height:18px;border-radius:9px;background:var(--line-forte,#8c948f);transition:background .15s}' +
+    '.mnu-sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .15s}' +
+    '.mnu-tema[aria-pressed="true"] .mnu-sw{background:var(--accent,#b8431f)}.mnu-tema[aria-pressed="true"] .mnu-sw::after{left:16px}' +
     '.mnu-dlg{width:min(440px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:16px;border:1px solid var(--line,#d6dad6);' +
     'border-radius:var(--r3,14px);background:var(--paper,#fbfbf9);color:var(--fg,#1b2024);box-shadow:var(--sh2);' +
     'font:var(--t-md,14px)/1.4 var(--f-body,system-ui)}' +
@@ -100,6 +105,7 @@
   box.innerHTML = `<button type="button" class="mnu-btn" aria-expanded="false" aria-controls="mnu-lista" aria-label="Menu">${svg(ICONE.barras, '')}</button>` +
     `<ul class="mnu-lista" id="mnu-lista" hidden>` +
     `<li><button type="button" aria-haspopup="dialog">${svg(ICONE.enviar, '')}Atualização de dados</button></li>` +
+    `<li><button type="button" class="mnu-tema" aria-pressed="true">${svg(ICONE.lua, '')}<span>Night shift</span><kbd>Shift K</kbd><i class="mnu-sw" aria-hidden="true"></i></button></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
     `<li><a href="${raiz}assets/scripts/trechos-kml.zip" download>${svg(ICONE.baixar, '')}Script KML → trechos (.zip)</a></li></ul>`;
   wrap.prepend(box);
@@ -281,5 +287,23 @@
     (form && !form.hidden ? inChave : zona).focus();
   });
   lista.querySelector('a').addEventListener('click', () => abre(false));
+  // Night shift: ligado = tema escuro (fundo preto, o padrão); desligado = claro. Guarda a escolha neste navegador e vale
+  // para todas as páginas (o <head> de cada página lê "tema" antes do CSS). Atalho: Shift+K fora dos campos de texto.
+  const btTema = lista.querySelector('.mnu-tema');
+  const mostraTema = () => btTema.setAttribute('aria-pressed', String(document.documentElement.dataset.theme !== 'light'));
+  const trocaTema = () => {
+    const claro = document.documentElement.dataset.theme !== 'light';
+    document.documentElement.dataset.theme = claro ? 'light' : 'dark';
+    try { localStorage.setItem('tema', claro ? 'claro' : 'escuro'); } catch { /* sem armazenamento: vale só nesta página */ }
+    mostraTema();
+  };
+  mostraTema();
+  btTema.addEventListener('click', trocaTema);
+  document.addEventListener('keydown', e => {
+    if (!e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || e.code !== 'KeyK') return;
+    if (e.target.closest && e.target.closest('input,textarea,select,[contenteditable="true"]')) return;
+    e.preventDefault();
+    trocaTema();
+  });
   document.addEventListener('pointerdown', e => { if (!lista.hidden && !box.contains(e.target)) abre(false); });
 })();

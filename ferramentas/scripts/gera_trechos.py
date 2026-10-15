@@ -762,10 +762,16 @@ def migalhas(inicio, atual):
             f'<span aria-current="page">{html.escape(atual)}</span></nav>\n')
 
 
+# tema antes do CSS (sem piscar): escuro, de fundo preto, por padrão; "claro" só quando escolhido no Night shift do menu
+TEMA = ("<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}"
+        "document.documentElement.dataset.theme=t==='claro'?'light':'dark'})()</script>")
+
+
 def casca(titulo, corpo, raiz, rodape=''):
     return (f'<!doctype html>\n<html lang="pt-BR"><head><meta charset="utf-8">\n'
             f'<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
             f'<meta name="robots" content="noindex, nofollow">\n<title>{html.escape(titulo)}</title>\n'
+            f'{TEMA}\n'
             f'{FONTES}<link rel="stylesheet" href="{raiz}assets/site.css"></head><body><div class="wrap">\n{corpo}\n'
             f'<footer class="rodape">{rodape}<p><a href="{raiz}relatorio.html">Relatório de validação</a> · '
             f'<a href="{raiz}manifesto.json">manifesto.json</a></p></footer>\n</div>\n'
@@ -1363,8 +1369,10 @@ def interface(saida, malha=None):
              '<div id="mapa-to" class="mapa-to"><div class="mt-barra">'
              '<form class="ativo" id="ativo" role="search"><div class="campo">'
              '<button type="button" class="lupa" id="lupa" aria-label="Buscar ativo, município, alimentador ou OS" '
-             'aria-expanded="false" aria-controls="ativo-q"><svg viewBox="0 0 24 24" aria-hidden="true">'
-             '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
+             'aria-expanded="false" aria-controls="ativo-q"><svg viewBox="1 9 46 30" aria-hidden="true">'   # o olho do ARGOS
+             '<path d="M3 24C10 12 38 12 45 24C38 36 10 36 3 24Z"/><ellipse cx="24" cy="24" rx="15.5" ry="8.5" transform="rotate(14 24 24)"/>'
+             '<circle cx="23.2" cy="23.2" r="5.2"/><path d="m27 27 3.6 3.6"/><g class="no"><circle cx="24.7" cy="15.5" r="2.5"/>'
+             '<circle cx="8.8" cy="21.7" r="2.5"/><circle cx="36.8" cy="30.9" r="2.5"/></g></svg></button>'
              '<label for="ativo-q" class="vh">Buscar ativo, município, alimentador ou OS</label>'
              '<input class="busca" id="ativo-q" type="search" inputmode="search" autocomplete="off" '
              'placeholder="Ativo, município, alimentador ou OS" enterkeyhint="search" hidden>'
