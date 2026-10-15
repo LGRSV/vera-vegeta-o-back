@@ -665,7 +665,7 @@ def ativos_interface(saida):
     (a / 'alimentador.css').write_text(css, encoding='utf-8')
     (a / 'alimentador.js').write_text('const D = window.D;\n' + js, encoding='utf-8')
     for f in ('extras.js', 'municipios.js', 'chaves.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
-              'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js'):
+              'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js', 'argos.png'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
     return modelo
@@ -1362,24 +1362,23 @@ def interface(saida, malha=None):
     manutencao_polos(saida, dados)
     indice_ativos(saida, dados)
     indice_os(saida, dados)
-    corpo = ('<header class="cab"><h1>ARGOS Manutenção</h1><a class="cab-link" href="polos/#eto">Ranking</a></header>\n'
+    corpo = ('<header class="cab"><h1><b>ARGOS</b> <span>MANUTENÇÃO</span></h1>'
+             '<a class="cab-link" href="polos/#eto">Ranking</a></header>\n'
              # casca do mapa já no HTML (estilo em assets/site.css; o svg com viewBox reserva a altura do mapa):
              # os scripts só preenchem, e a página não pula ao carregar. Busca única atrás da lupa (busca-ativo.js):
              # ativo, município ou alimentador, com a lista aparecendo enquanto se digita.
              '<div id="mapa-to" class="mapa-to"><div class="mt-barra">'
              '<form class="ativo" id="ativo" role="search"><div class="campo">'
              '<button type="button" class="lupa" id="lupa" aria-label="Buscar ativo, município, alimentador ou OS" '
-             'aria-expanded="false" aria-controls="ativo-q"><svg viewBox="1 9 46 30" aria-hidden="true">'   # o olho do ARGOS
-             '<path d="M3 24C10 12 38 12 45 24C38 36 10 36 3 24Z"/><ellipse cx="24" cy="24" rx="15.5" ry="8.5" transform="rotate(14 24 24)"/>'
-             '<circle cx="23.2" cy="23.2" r="5.2"/><path d="m27 27 3.6 3.6"/><g class="no"><circle cx="24.7" cy="15.5" r="2.5"/>'
-             '<circle cx="8.8" cy="21.7" r="2.5"/><circle cx="36.8" cy="30.9" r="2.5"/></g></svg></button>'
+             'aria-expanded="false" aria-controls="ativo-q">'
+             '<img class="argos-img" src="assets/argos.png" alt="" width="34" height="23"></button>'   # o olho do ARGOS (logo)
              '<label for="ativo-q" class="vh">Buscar ativo, município, alimentador ou OS</label>'
              '<input class="busca" id="ativo-q" type="search" inputmode="search" autocomplete="off" '
              'placeholder="Ativo, município, alimentador ou OS" enterkeyhint="search" hidden>'
              '<div id="ativo-res" aria-live="polite"></div></div></form></div>\n'
              f'<div class="mt-mapa"><svg role="group" aria-label="Mapa dos municípios do Tocantins" tabindex="-1" viewBox="{vb}"></svg>'
              '<div class="mt-dica" aria-hidden="true"></div>'
-             '<details class="mt-regs"><summary>NAE-Vegetação</summary></details></div></div>\n'   # legenda: mapa-municipios.js
+             '<details class="mt-regs" open><summary>NAE-Vegetação</summary></details></div></div>\n'   # legenda: mapa-municipios.js
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
              '<script src="assets/mapa-municipios.js"></script>\n'
              '<script src="assets/busca-ativo.js"></script>')

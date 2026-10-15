@@ -151,11 +151,11 @@ header.cab>.cab-link{justify-self:center}
 .mt-barra{grid-area:barra}.mt-mapa{grid-area:mapa}
 
 /* barra: só a lupa (busca-ativo.js); tocar nela abre o campo da busca única (ativo, município ou alimentador) */
-.mt-barra{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:var(--s2) var(--s3);position:sticky;top:var(--s2);z-index:30}   /* a lupa fica sempre à mão, em qualquer nível do mapa */
+.mt-barra{display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:var(--s2) var(--s3);position:sticky;top:var(--s2);z-index:30}   /* a lupa fica sempre à mão, em qualquer nível do mapa */
 .mt-barra .ativo{width:auto;max-width:100%}
 .mt-barra .ativo:has(.busca:not([hidden])){width:min(100%,460px)}
 /* polos da regional aberta na barra da lupa: o nome da regional e um botão por polo */
-.mt-barra .mt-polos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--s1);padding:4px;border-radius:var(--r2);
+.mt-barra .mt-polos{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:var(--s1);padding:4px;border-radius:var(--r2);
   background:color-mix(in srgb,var(--bg) 88%,transparent)}
 .mt-barra .mt-polos[hidden]{display:none}
 .mt-barra .mt-pchip{min-height:36px;padding:4px 10px 6px;display:inline-flex;align-items:center;gap:var(--s2)}
@@ -168,12 +168,19 @@ b.mt-atual{font:700 var(--t-sm) var(--f-body);color:var(--fg);padding:0 2px}
 .mt-pchip i{font:700 var(--t-xs)/1.2 var(--f-mono);font-style:normal;padding:2px 6px;border-radius:5px;background:#b8431f;color:#fff;font-variant-numeric:tabular-nums}
 .mt-rchip b{letter-spacing:.06em;text-transform:uppercase}
 .mt-rchip{box-shadow:inset 0 -4px 0 var(--mt-lim)}
-.mt-barra .ativo .campo{justify-content:center}
+.mt-barra .ativo .campo{justify-content:flex-start}
 .mt-barra .busca{max-width:none}
 .ativo .lupa{flex:none;display:grid;place-items:center;width:var(--alvo);min-height:var(--alvo);padding:0;border:1px solid var(--line);border-radius:999px;
   background:var(--paper);color:var(--fg);box-shadow:var(--sh1)}
-.ativo .lupa svg{width:30px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
-.ativo .lupa svg .no{fill:var(--paper)}
+.ativo .lupa{width:48px}
+.ativo .lupa img{display:block;width:34px;height:auto}
+/* logo do ARGOS: traço branco sobre transparente (assets/argos.png); no tema claro vira preto */
+.argos-img{pointer-events:none}
+:root[data-theme="light"] .argos-img{filter:invert(1)}
+/* título da página inicial: ARGOS em negrito em cima, MANUTENÇÃO menor e normal embaixo, centralizados */
+header.cab h1{display:flex;flex-direction:column;align-items:center;line-height:1;letter-spacing:.04em}
+header.cab h1 b{font-weight:700}
+header.cab h1 span{font-weight:400;font-size:.55em;letter-spacing:.14em;margin-top:.2em}
 .ativo .lupa:hover{filter:none;background:var(--hover);color:var(--accent)}
 .ativo .lupa[aria-expanded=true]{border-color:var(--accent);color:var(--accent)}
 .ativo .busca[hidden]{display:none}
@@ -231,6 +238,14 @@ b.mt-atual{font:700 var(--t-sm) var(--f-body);color:var(--fg);padding:0 2px}
 .mt-poloc.fundo{stroke:var(--paper);stroke-width:7}
 .mt-regc{transition:opacity .3s}.aberta .mt-regc{opacity:0}
 .aberta .mt-nomes{display:none}
+/* regionais no estado inteiro: cartãozinho com o nome e a NAE, todos no mesmo eixo (meio do mapa); clicar abre a regional */
+.mt-regcards button{position:absolute;z-index:2;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:2px;padding:5px 12px 6px;
+  border:1px solid var(--line);border-radius:var(--r2);background:color-mix(in srgb,var(--paper) 92%,transparent);box-shadow:var(--sh1);cursor:pointer;
+  font:inherit;color:var(--fg);transition:opacity .3s,border-color .15s}
+.mt-regcards button:hover{border-color:var(--accent)}
+.mt-regcards b{font:700 var(--t-sm)/1.1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--fg)}
+.mt-regcards i{font:700 var(--t-xs)/1.2 var(--f-mono);font-style:normal;padding:2px 7px;border-radius:5px;background:#b8431f;color:#fff}
+.aberta .mt-regcards button,.voando .mt-regcards button{opacity:0;pointer-events:none}
 .mt-dica .mt-dica-c{display:block;margin-top:2px;font-size:var(--t-xs)}
 .mt-volta{position:static;justify-self:start;min-height:var(--alvo);padding:0 var(--s4);border:1px solid var(--line);border-radius:var(--r2);
   background:var(--paper);color:var(--accent);font:600 var(--t-sm) var(--f-body);cursor:pointer}

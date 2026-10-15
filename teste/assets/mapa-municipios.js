@@ -58,7 +58,8 @@
   Object.values(M.regs || {}).forEach(d => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); regs.append(p); });
   svg.append(regs);
   const leg = alvo.querySelector('.mt-regs');
-  // legenda: um quadrado no canto superior direito do mapa que abre para baixo (details), com as faixas de NAE
+  // legenda: canto inferior esquerdo, já aberta (details open) e recolhível; no celular começa fechada para não cobrir o mapa
+  if (leg && matchMedia('(max-width:860px)').matches) leg.open = false;
   if (leg) leg.innerHTML = '<summary>NAE-Vegetação</summary><div class="mt-regs-c">' +
     FAIXAS.map((l, i) => `<span><i class="nae-${i}" aria-hidden="true"></i>${rotFaixa(i)}</span>`).join('') +
     (M.regs ? '<span class="lim-s"><i class="lim" aria-hidden="true"></i>Limite das regionais</span>' : '') + '</div>';
@@ -86,11 +87,28 @@
     rot[m.cod] = t;
   });
   svg.append(g);
-  // NAE de cada regional (os botões do estado inteiro, na barra da lupa)
+  // regionais no estado inteiro: um cartãozinho com o nome e a NAE de cada uma, todos alinhados no meio do mapa, cada um
+  // na altura do meio dos municípios da sua regional; clicar abre a regional (e eles somem até voltar ao Tocantins).
+  // Os cartões dos polos só aparecem na barra da lupa depois de abrir uma regional.
+  const cartoes = document.createElement('div');
+  cartoes.className = 'mt-regcards';
   const regInfo = Object.keys(M.regs || {}).map(r => {
     const ms = M.muns.filter(m => m.reg === r);
-    return { r, nae: ms.reduce((s, m) => s + (m.nae || 0), 0) };
+    return { r, y: ms.reduce((s, m) => s + m.c[1], 0) / ms.length, nae: ms.reduce((s, m) => s + (m.nae || 0), 0) };
   });
+  cartoes.innerHTML = regInfo.map(i => `<button type="button" data-reg="${esc(i.r)}" aria-label="Abrir a Regional ${esc(i.r)}, ${i.nae.toLocaleString('pt-BR')} NAE">` +
+    `<b>${esc(i.r)}</b><i>${i.nae.toLocaleString('pt-BR')} NAE</i></button>`).join('');
+  caixa.append(cartoes);
+  cartoes.addEventListener('click', e => { const b = e.target.closest('button'); if (b) entra(b.dataset.reg, e.detail === 0); });
+  const poeCartoes = () => {                                // posição pelo viewBox do estado inteiro (-6 -6 VW M.h+12)
+    const r = svg.getBoundingClientRect(), c = caixa.getBoundingClientRect(), H = M.h + 12;
+    if (!r.width) return;
+    const k = Math.min(r.width / VW, r.height / H), oy = (r.height - H * k) / 2;
+    [...cartoes.children].forEach((e, i) => {
+      e.style.left = (r.left - c.left + r.width / 2).toFixed(0) + 'px';
+      e.style.top = (r.top - c.top + oy + (regInfo[i].y + 6) * k).toFixed(0) + 'px';
+    });
+  };
   const prio = t => t.dataset.cod === foco ? 2 : achou.has(t.dataset.cod) ? 1 : 0;
   const X0 = -6, X1 = M.w + 6;
   function desamontoa() {            // os que se cruzam somem (o escolhido e os achados ganham dos outros)
@@ -121,6 +139,7 @@
     const r = svg.getBoundingClientRect();                 // o SVG pode ficar limitado pela altura (max-height)
     if (!r.width || !r.height) return;
     g.style.setProperty('--k', (1 / Math.min(r.width / VW, r.height / (M.h + 12))).toFixed(3));
+    poeCartoes();
     desamontoa();
   };
   rotulos();
@@ -281,15 +300,14 @@
   // (regionais, polos) como cartõezinhos com a NAE — clicar num deles abre ele e tira os outros do mapa
   const passo = (ir, txt) => `<button type="button" class="mt-passo" data-ir="${ir}">${txt}</button><span class="mt-sep" aria-hidden="true">›</span>`;
   const atual = txt => `<b class="mt-atual" aria-current="location">${txt}</b>`;
-  function legendaEstado() {
-    legPolos.hidden = false;
-    legPolos.setAttribute('aria-label', 'Regionais');
-    legPolos.innerHTML = regInfo.map(i =>
-      `<button type="button" class="mt-pchip mt-rchip" data-reg="${esc(i.r)}" aria-label="Regional ${esc(i.r)}, ${numeros(0, i.nae)}"><b>${esc(i.r)}</b>${nae(i.nae)}</button>`).join('');
+  function legendaEstado() {                               // estado inteiro: a barra só tem a busca (as regionais estão no mapa)
+    legPolos.hidden = true;
+    legPolos.innerHTML = '';
   }
   legendaEstado();
   function legendaRegional(ps) {
     if (ps) psReg = ps;
+    legPolos.hidden = false;
     legPolos.setAttribute('aria-label', `Polos da Regional ${reg}`);
     legPolos.innerHTML = passo('estado', 'Tocantins') + atual(esc(reg)) + '<span class="mt-sep" aria-hidden="true">·</span>' + psReg.map(p =>
       `<button type="button" class="mt-pchip" data-polo="${esc(p.polo)}" style="--c:${corDe[p.polo]}" ` +
