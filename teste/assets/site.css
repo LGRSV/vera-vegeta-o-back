@@ -490,3 +490,29 @@ header.cab>.cab-link:hover{background:var(--hover);text-decoration:none}
 }
 /* telas muito estreitas: o título não cabe entre o ☰ e o Ranking; volta para baixo do menu, com o Ranking embaixo dele */
 @media (max-width:360px){header.cab{margin-top:0}header.cab>.cab-link{position:static;justify-self:center;margin-top:var(--s2)}}
+/* ====== Busca integrada ao mapa (busca-ativo.js + window.ARGOS_MAPA de mapa-municipios.js) ======
+   O campo fica sempre à vista. Cada opção: ícone do tipo, nome (o trecho digitado em destaque), contexto numa linha
+   (polo, regional, subestação…) e a NAE no mesmo selo vermelho dos cartões do mapa. */
+.sug-op{align-items:center;gap:var(--s2)}
+.sug-op .so-i{flex:none;width:18px;height:18px;fill:none;stroke:var(--muted);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sug-op:hover .so-i,.sug-op.marcado .so-i{stroke:var(--accent)}
+.sug-op .so-x{flex:1;min-width:0;display:grid;gap:1px;text-align:left;color:var(--fg);font-size:inherit}
+.sug-op .so-x b{font:600 var(--t-base)/1.3 var(--f-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.so-al .so-x b,.so-ativo .so-x b,.so-os .so-x b{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.so-reg .so-x b{font-size:var(--t-sm);letter-spacing:.08em;text-transform:uppercase}
+.sug-op .so-x small{font-size:var(--t-xs);line-height:1.35;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sug-op mark{background:none;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.sug-op .so-n{flex:none;font:700 var(--t-xs)/1.2 var(--f-mono);font-style:normal;padding:2px 7px;border-radius:5px;background:#b8431f;color:#fff;font-variant-numeric:tabular-nums}
+/* resultado de ativo e OS: o link abre a página do alimentador; o botão mostra o alimentador aqui no mapa */
+#ativo-res li.res-li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--s2);padding-right:var(--s2)}
+.ativo .ir-mapa{min-height:36px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--rp);background:var(--paper);color:var(--fg);
+  font:600 var(--t-xs) var(--f-body);white-space:nowrap;cursor:pointer}
+.ativo .ir-mapa:hover{filter:none;border-color:var(--accent);color:var(--accent)}
+/* lista dos alimentadores do município aberto: abre embaixo da logo (busca-ativo.js), com a miniatura da rede de cada um;
+   passar o mouse acende a rede no mapa, o 1º toque dá zoom e tocar no que está em foco abre a página dele */
+#ativo-res.lista-mun{max-height:min(45svh,440px)}
+.sug-op .so-mini{flex:none;width:56px;height:40px;border-radius:6px;background:var(--bg);overflow:hidden}
+.sug-op .so-mini svg{display:block;width:100%;height:100%}
+.sug-op .so-mini path{fill:none;stroke:var(--rede);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.sug-op.foco{box-shadow:inset 0 0 0 1px var(--rede)}
+.sug-op.foco .so-x small{color:var(--fg)}
