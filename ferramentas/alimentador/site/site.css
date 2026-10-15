@@ -409,6 +409,7 @@ span.mt-pchip{cursor:default}
 }
 /* 1) título: ARGOS em cima (wordmark espaçado), MANUTENÇÃO embaixo (pequeno, entre dois filetes); fica na MESMA linha do menu */
 .mnu{position:relative;z-index:40}   /* acima da barra fixa da busca (30), para a lista do menu abrir por cima dela */
+.mnu{pointer-events:none}.mnu>*{pointer-events:auto}   /* a faixa do menu ocupa a largura toda: só o botão e a lista recebem clique (o Ranking/Mapa do cabeçalho fica clicável) */
 header.cab{position:relative;margin-top:calc(-1 * (var(--alvo) + var(--s5)))}
 @media (min-width:861px){header.cab{margin-top:calc(-1 * (var(--alvo) + var(--s6)))}}
 header.cab h1{display:flex;flex-direction:column;align-items:center;line-height:1;letter-spacing:0}
