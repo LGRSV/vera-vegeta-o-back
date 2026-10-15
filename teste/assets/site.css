@@ -528,7 +528,7 @@ header.cab>.cab-link:hover{background:var(--hover);text-decoration:none}
    A legenda das faixas de NAE fica na barra da lupa (que acompanha a rolagem), logo depois do olho, numa linha só. O botão
    "NAE-Vegetação" recolhe ela; recolhida, o #mapa-to ganha .sem-nae e os números de NAE saem do mapa (fica só a cor).
    (#mapa-to na frente: estas regras valem sobre as da legenda antiga em <details>) */
-#mapa-to .mt-barra .mt-regs{position:relative;left:auto;bottom:auto;z-index:auto;display:block;max-width:100%;margin:0 0 10px;
+#mapa-to .mt-barra .mt-regs{position:relative;left:auto;bottom:auto;z-index:auto;display:block;max-width:100%;margin:0 auto 10px;
   padding:7px var(--s3) 8px;border:1px solid var(--line);border-radius:var(--r2);background:var(--paper);box-shadow:var(--sh1);
   cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
 #mapa-to .mt-barra .mt-regs-c{position:static;display:grid;gap:6px;min-width:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;
@@ -544,7 +544,10 @@ header.cab>.cab-link:hover{background:var(--hover);text-decoration:none}
 .mt-regs:hover .mt-regs-b,.mt-regs-b:focus-visible{color:var(--accent)}
 .mt-regs-b:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .mt-regs-m,.mt-regs-o{display:none}
-#mapa-to .mt-barra .mt-regs.fechada{margin:0;padding:0;border:0;background:none;box-shadow:none}
+#mapa-to .mt-barra .mt-regs.fechada{margin:0 auto;padding:0;border:0;background:none;box-shadow:none}
+/* mais ao centro e sempre em cima: as margens automáticas centralizam a legenda (ou a orelhinha) no espaço livre da barra;
+   no computador a trilha dos polos continua junto do olho e a legenda vem depois dela */
+@media (min-width:861px){#mapa-to .mt-barra .mt-regs{order:1}}
 .mt-regs.fechada .mt-regs-b{position:static;transform:none;height:30px;margin:0;padding:0 10px;border-top:1px solid var(--line);border-radius:0 0 12px 12px;box-shadow:var(--sh1)}
 .mt-regs.fechada .mt-regs-b svg{transform:rotate(180deg)}
 .mt-regs.fechada .mt-regs-m{display:inline-flex}.mt-regs.fechada .mt-regs-o{display:inline}
