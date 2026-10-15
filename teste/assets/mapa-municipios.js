@@ -145,11 +145,32 @@
   // regionais no estado inteiro: um cartãozinho com o nome e a NAE de cada uma, todos alinhados no meio do mapa, cada um
   // na altura do meio dos municípios da sua regional; clicar abre a regional (e eles somem até voltar ao Tocantins).
   // Os cartões dos polos só aparecem na barra da lupa depois de abrir uma regional.
+  // Bandeirinhas (pedido do usuário): os cartões das regionais, e na regional os dos polos, ficam à direita do mapa, cada
+  // um ligado por um fio a um ponto dentro da sua regional/polo (o município mais perto do meio dela), e não cobrem o mapa.
+  const fios = document.createElement('div');
+  fios.className = 'mt-fios';
+  fios.setAttribute('aria-hidden', 'true');
+  caixa.append(fios);
+  let fiosR = '';                                          // fios das regionais (estado inteiro), refeitos a cada redimensionamento
+  const fio = (ax, ay, bx, by, cor) => `<i class="mt-fio" style="left:${ax.toFixed(1)}px;top:${ay.toFixed(1)}px;width:${Math.hypot(bx - ax, by - ay).toFixed(1)}px;` +
+    `transform:rotate(${Math.atan2(by - ay, bx - ax).toFixed(4)}rad)${cor ? ';--c:' + cor : ''}"></i><i class="mt-pino" style="left:${ax.toFixed(1)}px;top:${ay.toFixed(1)}px${cor ? ';--c:' + cor : ''}"></i>`;
+  // empilha na coluna da direita, de cima para baixo na ordem dos pontos, sem um cartão encostar no outro
+  const empilha = (its, alto) => {
+    its.sort((a, b) => a.ay - b.ay);
+    let fim = -Infinity;
+    its.forEach(t => { t.y = Math.max(t.ay, fim + t.h / 2 + 8); fim = t.y + t.h / 2; });
+    const sobra = fim - (alto - 4);
+    if (sobra > 0) its.forEach(t => { t.y -= sobra; });
+  };
+  const meio = ms => {                                     // município mais perto do meio do grupo: o ponto cai dentro dele
+    const mx = ms.reduce((s, m) => s + m.c[0], 0) / ms.length, my = ms.reduce((s, m) => s + m.c[1], 0) / ms.length;
+    return ms.reduce((a, b) => Math.hypot(b.c[0] - mx, b.c[1] - my) < Math.hypot(a.c[0] - mx, a.c[1] - my) ? b : a);
+  };
   const cartoes = document.createElement('div');
   cartoes.className = 'mt-regcards';
   const regInfo = Object.keys(M.regs || {}).map(r => {
     const ms = M.muns.filter(m => m.reg === r);
-    return { r, y: ms.reduce((s, m) => s + m.c[1], 0) / ms.length, nae: ms.reduce((s, m) => s + (m.nae || 0), 0) };
+    return { r, a: meio(ms).c, nae: ms.reduce((s, m) => s + (m.nae || 0), 0) };
   });
   cartoes.innerHTML = regInfo.map(i => `<button type="button" data-reg="${esc(i.r)}" aria-label="Abrir a Regional ${esc(i.r)}, ${i.nae.toLocaleString('pt-BR')} NAE">` +
     `<b>${esc(i.r)}</b><i>${i.nae.toLocaleString('pt-BR')} NAE</i></button>`).join('');
@@ -158,11 +179,15 @@
   const poeCartoes = () => {                                // posição pelo viewBox do estado inteiro (-6 -6 VW M.h+12)
     const r = svg.getBoundingClientRect(), c = caixa.getBoundingClientRect(), H = M.h + 12;
     if (!r.width) return;
-    const k = Math.min(r.width / VW, r.height / H), oy = (r.height - H * k) / 2;
-    [...cartoes.children].forEach((e, i) => {
-      e.style.left = (r.left - c.left + r.width / 2).toFixed(0) + 'px';
-      e.style.top = (r.top - c.top + oy + (regInfo[i].y + 6) * k).toFixed(0) + 'px';
-    });
+    const k = Math.min(r.width / VW, r.height / H), ox = (r.width - VW * k) / 2, oy = (r.height - H * k) / 2;
+    const px = x => r.left - c.left + ox + (x + 6) * k, py = y => r.top - c.top + oy + (y + 6) * k;
+    const its = [...cartoes.children].map((e, i) => ({ e, ax: px(regInfo[i].a[0]), ay: py(regInfo[i].a[1]), w: e.offsetWidth, h: e.offsetHeight }));
+    empilha(its, c.height);
+    // coluna logo à direita do estado; no celular (mapa da largura toda) encosta na borda da direita
+    const col = Math.max(4, Math.min(px(M.w) + 20, c.width - Math.max(...its.map(t => t.w)) - 4));
+    its.forEach(t => { t.e.style.left = col.toFixed(0) + 'px'; t.e.style.top = t.y.toFixed(0) + 'px'; });
+    fiosR = its.map(t => fio(t.ax, t.ay, col, t.y)).join('');
+    if (!caixa.classList.contains('aberta') && !caixa.classList.contains('voando')) fios.innerHTML = fiosR;
   };
   const prio = t => t.dataset.cod === foco ? 2 : achou.has(t.dataset.cod) ? 1 : 0;
   const X0 = -6, X1 = M.w + 6;
@@ -262,9 +287,10 @@
     const passo = agora => {
       const t = dur ? Math.min(1, (agora - t0) / dur) : 1, e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
       svg.setAttribute('viewBox', de.map((v, i) => +(v + (alvoVb[i] - v) * e).toFixed(2)).join(' '));
-      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); poeNomes(); poeSelos(); }
+      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); if (!reg) fios.innerHTML = fiosR; poeNomes(); poeSelos(); }
     };
     selos.innerHTML = '';
+    fios.innerHTML = '';
     anima = requestAnimationFrame(passo);
   }
   const volta = document.createElement('button');
@@ -346,7 +372,8 @@
     // a coluna da esquerda (seta e lista de alimentadores) fica livre; a legenda fica na barra, em cima do mapa
     // com a busca da barra, a lista do município aberto abre embaixo da logo (largura fixa no site.css): o lado esquerdo fica livre para ela
     const lista = window.ARGOS_BUSCA && mun && !alf ? Math.min(460, innerWidth - 32) : 0;
-    const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg && caixa.contains(leg) ? leg.offsetWidth : 0, lista) + 24, L2 = 24;
+    // na regional, a coluna da direita fica livre para as bandeirinhas dos polos
+    const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg && caixa.contains(leg) ? leg.offsetWidth : 0, lista) + 24, L2 = reg && !pol && !mun && !alf ? 200 : 24;
     const k = Math.min(H / h, Math.max(1e-3, W - L1 - L2) / w);
     const altura = H / k;
     return [x - L1 / k, y - (altura - h) / 2, w + (L1 + L2) / k, altura];
@@ -658,20 +685,31 @@
       t.remove();
     });
   }
-  // selo de cada polo: no município do polo mais perto do meio dele (o selo sempre cai dentro do polo)
+  // cartão de cada polo: bandeirinha à direita da regional, com o fio na cor do polo até o município do polo mais perto do
+  // meio dele (o ponto sempre cai dentro do polo)
   function poeSelos() {
     selos.innerHTML = '';
     if (!reg || pol || anima) return;
     const ctm = svg.getScreenCTM(), cx = caixa.getBoundingClientRect();
-    selos.innerHTML = psReg.map(p => {
-      const mx = p.ms.reduce((s, m) => s + m.c[0], 0) / p.ms.length, my = p.ms.reduce((s, m) => s + m.c[1], 0) / p.ms.length;
-      const m = p.ms.reduce((a, b) => Math.hypot(b.c[0] - mx, b.c[1] - my) < Math.hypot(a.c[0] - mx, a.c[1] - my) ? b : a);
+    let dir = -Infinity;
+    const its = psReg.map(p => {
       const pt = svg.createSVGPoint();
-      [pt.x, pt.y] = soma(m.c, desl[p.polo]);
+      [pt.x, pt.y] = soma(meio(p.ms).c, desl[p.polo]);
       const s = pt.matrixTransform(ctm);
-      return `<div class="mt-mn mt-pm${grp[p.polo].classList.contains('desliga') ? ' off' : ''}" data-polo="${esc(p.polo)}" style="--c:${corDe[p.polo]};left:${(s.x - cx.left).toFixed(0)}px;top:${(s.y - cx.top).toFixed(0)}px">` +
-        `<b>${esc(p.polo)}</b><i>${p.nae.toLocaleString('pt-BR')} NAE</i></div>`;
-    }).join('');
+      dir = Math.max(dir, grp[p.polo].getBoundingClientRect().right - cx.left);
+      const e = document.createElement('div');
+      e.className = 'mt-mn mt-pm' + (grp[p.polo].classList.contains('desliga') ? ' off' : '');
+      e.dataset.polo = p.polo;
+      e.style.setProperty('--c', corDe[p.polo]);
+      e.innerHTML = `<b>${esc(p.polo)}</b><i>${p.nae.toLocaleString('pt-BR')} NAE</i>`;
+      selos.append(e);
+      return { e, cor: corDe[p.polo], ax: s.x - cx.left, ay: s.y - cx.top, w: e.offsetWidth, h: e.offsetHeight };
+    });
+    if (!its.length) return;
+    empilha(its, cx.height);
+    const col = Math.max(4, Math.min(dir + 20, cx.width - Math.max(...its.map(t => t.w)) - 4));
+    its.forEach(t => { t.e.style.left = col.toFixed(0) + 'px'; t.e.style.top = t.y.toFixed(0) + 'px'; });
+    fios.innerHTML = its.map(t => fio(t.ax, t.ay, col, t.y, t.cor)).join('');
   }
   legPolos.addEventListener('click', e => {
     const bt = e.target.closest('button');
