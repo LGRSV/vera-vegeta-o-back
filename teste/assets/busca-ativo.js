@@ -1,7 +1,8 @@
-// Página inicial: em que alimentador e trecho está uma chave, um transformador ou um poste.
-// Ao digitar (3 caracteres ou mais), a lista suspensa mostra os ativos cujo código começa assim (dados/ativos-pref/<2
-// primeiros>.json); escolher um (clique, setas + Enter) ou dar Enter busca no índice dados/ativos/<fatia>.json (gerados por
-// scripts/gera_trechos.py), que diz o alimentador e o trecho. Baixa só os pedaços do que se digita.
+// Página inicial: busca única atrás da lupa — ativo (chave, transformador, poste), município ou alimentador.
+// Tocar na lupa abre o campo. Ao digitar, a lista suspensa mostra os municípios e os alimentadores que batem (dados do
+// mapa, window.MUN) e, com 3 caracteres ou mais, os ativos cujo código começa assim (dados/ativos-pref/<2 primeiros>.json).
+// Escolher um município ou alimentador abre a página dele; escolher um ativo (ou dar Enter) busca no índice
+// dados/ativos/<fatia>.json (gerados por scripts/gera_trechos.py), que diz o alimentador e o trecho.
 // A lista e o resultado abrem presos ao campo (não empurram o mapa); fecham com Esc ou clicando fora.
 // O formulário já vem no HTML dentro da barra em cima do mapa (.mt-barra) e o estilo está em assets/site.css:
 // nada muda de lugar nem de cara quando este script carrega.
@@ -17,7 +18,23 @@
     TR: 'Transformador', ET: 'Transformador', EP: 'Transformador particular', Capacitor: 'Banco de capacitor', Regulador: 'Regulador de tensão',
     Chave: 'Chave', ChaveNA: 'Chave NA' };
   const se = {};                                  // alimentador → subestação (dados do mapa da página inicial)
-  ((window.MUN || {}).muns || []).forEach(m => (m.als || []).forEach(a => { se[a.cod] = a.se; }));
+  const muns = ((window.MUN || {}).muns || []).filter(m => m.slug);
+  muns.forEach(m => (m.als || []).forEach(a => { se[a.cod] = a.se; }));
+  const als = Object.keys(se).sort();
+  const semAcento = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  // lupa: abre e fecha o campo (fechado, só a lupa aparece)
+  const lupa = document.getElementById('lupa');
+  const abreCampo = sim => {
+    if (!lupa) return;
+    q.hidden = !sim;
+    lupa.setAttribute('aria-expanded', String(sim));
+    if (sim) q.focus(); else { q.value = ''; res.innerHTML = ''; fechaSug(); }
+  };
+  if (lupa) lupa.addEventListener('click', () => abreCampo(q.hidden || !q.value.trim() ? q.hidden : true));
+  q.addEventListener('blur', () => setTimeout(() => {
+    if (lupa && !form.contains(document.activeElement) && !q.value.trim() && !res.innerHTML) abreCampo(false);
+  }, 150));
 
   const chave = s => { const k = String(s).toUpperCase().replace(/[^0-9A-Z]/g, ''); return /^\d+$/.test(k) ? (k.replace(/^0+/, '') || '0') : k; };
   const fatia = k => { let h = 0; for (let i = 0; i < k.length; i++) h = (Math.imul(h, 31) + k.charCodeAt(i)) >>> 0; return (h % 256).toString(16).padStart(2, '0'); };
@@ -40,19 +57,33 @@
     if (o) { q.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } else q.removeAttribute('aria-activedescendant');
   };
   async function sugere() {
-    const txt = q.value.trim(), k = chave(txt), meu = ++pedido;
-    if (k.length < 3) { fechaSug(); res.innerHTML = ''; return; }
-    const d = await baixa('ativos-pref/' + k.slice(0, 2));
-    if (meu !== pedido) return;                     // já digitaram outra coisa
-    if (d === null) { fechaSug(); res.innerHTML = '<p>Não foi possível carregar a lista. Confira a internet e tente de novo.</p>'; return; }
-    const achados = [];
-    Object.entries(d).forEach(([tipo, lista]) => lista.split(' ').forEach(n => { if (chave(n).startsWith(k)) achados.push([n, tipo]); }));
-    achados.sort((a, b) => (chave(b[0]) === k) - (chave(a[0]) === k) || peso(a[1]) - peso(b[1]) || a[0].length - b[0].length || a[0].localeCompare(b[0]));
-    sug = achados.slice(0, 12);
-    if (!sug.length) { fechaSug(); res.innerHTML = `<p>Nenhum ativo começa com <b>${esc(txt)}</b>.</p>`; return; }
-    res.innerHTML = `<ul class="sug" role="listbox" aria-label="Ativos">${sug.map(([n, tipo], i) =>
-      `<li class="sug-op" role="option" id="ativo-sug-${i}" data-i="${i}"><b>${esc(n)}</b><span>${esc(TIPO[tipo] || 'Chave ' + tipo)}</span></li>`).join('')}</ul>` +
-      (achados.length > sug.length ? `<p class="sug-mais">e mais ${(achados.length - sug.length).toLocaleString('pt-BR')}: continue digitando</p>` : '');
+    const txt = q.value.trim(), k = chave(txt), meu = ++pedido, n = semAcento(txt), K = txt.toUpperCase().replace(/[^0-9A-Z]/g, '');
+    const ms = n.length >= 2 ? muns.filter(m => m.busca.includes(n)).sort((a, b) => a.busca.indexOf(n) - b.busca.indexOf(n) || a.nome.localeCompare(b.nome, 'pt-BR')).slice(0, 5) : [];
+    const as = K.length >= 2 ? als.filter(c => c.includes(K)).sort((a, b) => a.indexOf(K) - b.indexOf(K) || a.localeCompare(b)).slice(0, 5) : [];
+    let achados = [];
+    if (k.length >= 3) {
+      const d = await baixa('ativos-pref/' + k.slice(0, 2));
+      if (meu !== pedido) return;                   // já digitaram outra coisa
+      if (d) Object.entries(d).forEach(([tipo, lista]) => lista.split(' ').forEach(c => { if (chave(c).startsWith(k)) achados.push([c, tipo]); }));
+      achados.sort((a, b) => (chave(b[0]) === k) - (chave(a[0]) === k) || peso(a[1]) - peso(b[1]) || a[0].length - b[0].length || a[0].localeCompare(b[0]));
+    }
+    if (meu !== pedido) return;
+    if (!txt) { fechaSug(); res.innerHTML = ''; return; }
+    const at = achados.slice(0, ms.length || as.length ? 8 : 12);
+    sug = [...ms.map(m => ({ href: `municipios/${m.slug}/` })), ...as.map(c => ({ href: `alimentadores/${encodeURIComponent(c)}/` })), ...at.map(([c]) => ({ ativo: c }))];
+    if (!sug.length) {
+      fechaSug();
+      res.innerHTML = n.length < 2 ? '' : `<p>Nada encontrado para <b>${esc(txt)}</b>.</p>`;
+      return;
+    }
+    let i = 0;
+    const op = (b, sp, cl = '') => `<li class="sug-op" role="option" id="ativo-sug-${i}" data-i="${i++}"><b${cl}>${b}</b><span>${sp}</span></li>`;
+    const bloco = (t, itens) => itens.length ? `<li class="sug-t" role="presentation">${t}</li>` + itens.join('') : '';
+    res.innerHTML = `<ul class="sug" role="listbox" aria-label="Resultados">` +
+      bloco('Municípios', ms.map(m => op(esc(m.nome), `${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}`, ' class="nome"'))) +
+      bloco('Alimentadores', as.map(c => op(esc(c), esc(se[c] || '')))) +
+      bloco('Ativos', at.map(([c, tipo]) => op(esc(c), esc(TIPO[tipo] || 'Chave ' + tipo)))) + '</ul>' +
+      (achados.length > at.length ? `<p class="sug-mais">e mais ${(achados.length - at.length).toLocaleString('pt-BR')} ativos: continue digitando</p>` : '');
     q.setAttribute('aria-expanded', 'true');
     marca(-1);
   }
@@ -60,14 +91,20 @@
   q.addEventListener('input', () => { clearTimeout(espera); espera = setTimeout(sugere, 120); });
   q.addEventListener('keydown', e => {
     if (!sug.length || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter')) return;
-    if (e.key === 'Enter') { if (marcado >= 0) { e.preventDefault(); escolhe(marcado); } return; }
+    if (e.key === 'Enter') {
+      // Enter sem escolher: se só veio município ou alimentador, abre o primeiro; senão busca o ativo digitado
+      const i = marcado >= 0 ? marcado : sug.some(o => o.ativo) ? -1 : 0;
+      if (i >= 0) { e.preventDefault(); escolhe(i); }
+      return;
+    }
     e.preventDefault();
     marca(e.key === 'ArrowDown' ? Math.min(sug.length - 1, marcado + 1) : Math.max(0, marcado - 1));
   });
   res.addEventListener('mousedown', e => { if (e.target.closest('.sug-op')) e.preventDefault(); });   // o campo não perde o foco
   res.addEventListener('click', e => { const o = e.target.closest('.sug-op'); if (o) escolhe(+o.dataset.i); });
   function escolhe(i) {
-    q.value = sug[i][0];
+    if (sug[i].href) { location.href = sug[i].href; return; }
+    q.value = sug[i].ativo;
     fechaSug();
     form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
   }
@@ -96,7 +133,8 @@
   });
   // fecha a lista: Esc (no campo ou na lista; o foco volta ao campo) ou clique fora do formulário
   form.addEventListener('keydown', e => {
-    if (e.key !== 'Escape' || !res.innerHTML) return;
+    if (e.key !== 'Escape') return;
+    if (!res.innerHTML) { if (lupa && !q.hidden) { e.preventDefault(); abreCampo(false); lupa.focus(); } return; }
     e.preventDefault();                           // sem isto o Esc também apagaria o texto do campo de busca
     res.innerHTML = '';
     fechaSug();

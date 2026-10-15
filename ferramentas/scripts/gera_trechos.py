@@ -1248,22 +1248,22 @@ def interface(saida, malha=None):
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
     indice_ativos(saida, dados)
-    corpo = ('<header class="cab"><h1>Trechos por município</h1><a class="cab-link" href="polos/#eto">Ranking dos alimentadores →</a></header>\n'
+    corpo = ('<header class="cab"><h1>Trechos por município</h1><a class="cab-link" href="polos/#eto">Ranking</a></header>\n'
              # casca do mapa já no HTML (estilo em assets/site.css; o svg com viewBox reserva a altura do mapa):
-             # os scripts só preenchem, e a página não pula ao carregar. Mesmos ids de antes (busca-ativo.js e
-             # mapa-municipios.js); a busca de município (#busca) abre a lista suspensa de todos os municípios.
+             # os scripts só preenchem, e a página não pula ao carregar. Busca única atrás da lupa (busca-ativo.js):
+             # ativo, município ou alimentador, com a lista aparecendo enquanto se digita.
              '<div id="mapa-to" class="mapa-to"><div class="mt-barra">'
-             '<form class="ativo" id="ativo" role="search"><label for="ativo-q" class="rot">Selecione o ativo</label>'
-             '<div class="campo"><input class="busca" id="ativo-q" type="search" inputmode="search" autocomplete="off" '
-             'placeholder="Ex.: 0300350016" enterkeyhint="search">'   # sem botão: o Enter busca
-             '<div id="ativo-res" aria-live="polite"></div></div></form>'
-             '<div class="mt-bmun"><label for="busca" class="rot">Município</label>'
-             '<div class="mun-cx"><input class="busca" id="busca" type="search" role="combobox" aria-autocomplete="list" '
-             'aria-expanded="false" aria-controls="mun-lista" autocomplete="off" placeholder="Buscar município">'
-             '<div class="mun-lista" id="mun-lista" role="listbox" aria-label="Municípios" hidden></div></div></div></div>\n'
+             '<form class="ativo" id="ativo" role="search"><div class="campo">'
+             '<button type="button" class="lupa" id="lupa" aria-label="Buscar ativo, município ou alimentador" '
+             'aria-expanded="false" aria-controls="ativo-q"><svg viewBox="0 0 24 24" aria-hidden="true">'
+             '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
+             '<label for="ativo-q" class="vh">Buscar ativo, município ou alimentador</label>'
+             '<input class="busca" id="ativo-q" type="search" inputmode="search" autocomplete="off" '
+             'placeholder="Ativo, município ou alimentador" enterkeyhint="search" hidden>'
+             '<div id="ativo-res" aria-live="polite"></div></div></form></div>\n'
              f'<div class="mt-mapa"><svg role="group" aria-label="Mapa dos municípios do Tocantins" tabindex="-1" viewBox="{vb}"></svg>'
              '<div class="mt-dica" aria-hidden="true"></div>'
-             '<p class="mt-regs" aria-label="Legenda do mapa"></p></div></div>\n'   # legenda: mapa-municipios.js
+             '<details class="mt-regs"><summary>NAE-Vegetação</summary></details></div></div>\n'   # legenda: mapa-municipios.js
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
              '<script src="assets/mapa-municipios.js"></script>\n'
              '<script src="assets/busca-ativo.js"></script>')

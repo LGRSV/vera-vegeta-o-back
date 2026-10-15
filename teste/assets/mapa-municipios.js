@@ -58,9 +58,10 @@
   Object.values(M.regs || {}).forEach(d => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); regs.append(p); });
   svg.append(regs);
   const leg = alvo.querySelector('.mt-regs');
-  if (leg) leg.innerHTML = '<b>NAE-Vegetação</b>' +
+  // legenda: um quadrado no canto superior direito do mapa que abre para baixo (details), com as faixas de NAE
+  if (leg) leg.innerHTML = '<summary>NAE-Vegetação</summary><div class="mt-regs-c">' +
     FAIXAS.map((l, i) => `<span><i class="nae-${i}" aria-hidden="true"></i>${rotFaixa(i)}</span>`).join('') +
-    (M.regs ? '<span class="lim-s"><i class="lim" aria-hidden="true"></i>Limite das regionais</span>' : '');
+    (M.regs ? '<span class="lim-s"><i class="lim" aria-hidden="true"></i>Limite das regionais</span>' : '') + '</div>';
   // teclado: um só município na ordem do Tab (o escolhido, ou Palmas); as setas andam pelo mapa
   const roda = cod => {
     svg.querySelectorAll('.mun[tabindex="0"]').forEach(p => p.setAttribute('tabindex', '-1'));
@@ -171,8 +172,9 @@
     const passo = agora => {
       const t = dur ? Math.min(1, (agora - t0) / dur) : 1, e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
       svg.setAttribute('viewBox', de.map((v, i) => +(v + (alvoVb[i] - v) * e).toFixed(2)).join(' '));
-      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); poeNomes(); }
+      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); poeNomes(); poeSelos(); }
     };
+    selos.innerHTML = '';
     anima = requestAnimationFrame(passo);
   }
   const volta = document.createElement('button');
@@ -184,7 +186,17 @@
   legPolos.className = 'mt-polos';
   legPolos.setAttribute('role', 'group');
   legPolos.hidden = true;
-  (leg || caixa).append(volta, legPolos);   // embaixo da legenda (no celular, o "← Tocantins" vai no canto do mapa: site.css)
+  // coluna da esquerda do mapa (regional ou polo aberto): "← volta" e a legenda dos polos; no celular a legenda dos polos
+  // vai para baixo do mapa e o "← volta" fica no canto do mapa (site.css)
+  const lado = document.createElement('div');
+  lado.className = 'mt-lado';
+  lado.append(volta, legPolos);
+  caixa.append(lado);
+  // NAE de cada polo num selo vermelho no meio dele (regional aberta, depois da animação)
+  const selos = document.createElement('div');
+  selos.className = 'mt-selos';
+  selos.setAttribute('aria-hidden', 'true');
+  caixa.append(selos);
   let desl = {};
   // enquadra a regional aberta deixando livre a coluna da legenda (computador) ou o topo para o "← Tocantins" (celular)
   const move = (b, [dx, dy]) => ({ x: b.x + dx, y: b.y + dy, x2: b.x2 + dx, y2: b.y2 + dy });
@@ -193,8 +205,9 @@
     if (pol) M.muns.forEach(m => { if (m.polo === pol) bb = une(bb, move(caixaDe(el[m.cod]), soma(desl[pol], mdesl[m.cod]))); });
     else polosDe(reg).forEach(([polo, gp]) => { bb = une(bb, move(caixaDe(gp), desl[polo])); });
     const x = bb.x - 12, y = bb.y - 12, w = bb.x2 - bb.x + 24, h = bb.y2 - bb.y + 24, W = caixa.clientWidth;
-    if (!leg || getComputedStyle(leg).position !== 'absolute') { const t = 52 * w / W; return [x, y - t, w, h + t]; }
-    const H = svg.clientHeight || 600, L = leg.offsetWidth + 24, k = Math.min(H / h, Math.max(1e-3, W - 2 * L) / w);
+    if (getComputedStyle(lado).position !== 'absolute') { const t = 52 * w / W; return [x, y - t, w, h + t]; }
+    const H = svg.clientHeight || 600, L = Math.max(lado.offsetWidth, leg ? leg.offsetWidth : 0) + 24;
+    const k = Math.min(H / h, Math.max(1e-3, W - 2 * L) / w);
     const altura = H / k;
     return [x - L / k, y - (altura - h) / 2, w + 2 * L / k, altura];
   }
@@ -232,7 +245,7 @@
     if (prim) { roda(prim.cod); if (teclado) el[prim.cod].focus({ preventScroll: true }); }
   }
   let psReg = [];
-  const numeros = (ms, nae) => `${ms.length} municípios · ${nae.toLocaleString('pt-BR')} NAE`;
+  const numeros = (ms, nae) => `${nae.toLocaleString('pt-BR')} NAE`;
   function legendaRegional(ps) {
     if (ps) psReg = ps;
     legPolos.setAttribute('aria-label', `Polos da Regional ${reg}`);
@@ -305,17 +318,34 @@
       else ok.push(q);
     });
   }
+  // selo de cada polo: no município do polo mais perto do meio dele (o selo sempre cai dentro do polo)
+  function poeSelos() {
+    selos.innerHTML = '';
+    if (!reg || pol || anima) return;
+    const ctm = svg.getScreenCTM(), cx = caixa.getBoundingClientRect();
+    selos.innerHTML = psReg.map(p => {
+      const mx = p.ms.reduce((s, m) => s + m.c[0], 0) / p.ms.length, my = p.ms.reduce((s, m) => s + m.c[1], 0) / p.ms.length;
+      const m = p.ms.reduce((a, b) => Math.hypot(b.c[0] - mx, b.c[1] - my) < Math.hypot(a.c[0] - mx, a.c[1] - my) ? b : a);
+      const pt = svg.createSVGPoint();
+      [pt.x, pt.y] = soma(m.c, desl[p.polo]);
+      const s = pt.matrixTransform(ctm);
+      return `<span data-polo="${esc(p.polo)}" style="left:${(s.x - cx.left).toFixed(0)}px;top:${(s.y - cx.top).toFixed(0)}px"` +
+        `${grp[p.polo].classList.contains('desliga') ? ' class="off"' : ''}>${p.nae.toLocaleString('pt-BR')}</span>`;
+    }).join('');
+  }
   legPolos.addEventListener('click', e => {
     const bt = e.target.closest('.mt-pchip');
-    if (!bt) return;
+    if (!bt || bt.tagName !== 'BUTTON') return;
     const liga = bt.getAttribute('aria-pressed') !== 'true';
     bt.setAttribute('aria-pressed', String(liga));
     grp[bt.dataset.polo].classList.toggle('desliga', !liga);
+    poeSelos();
   });
   function sai() {
     if (!reg) return;
     saiPolo(false);
     nomes2.innerHTML = '';
+    selos.innerHTML = '';
     const r = reg;
     reg = null;
     Object.values(grp).forEach(gp => { gp.classList.remove('fora', 'desliga'); gp.style.transform = ''; });
@@ -331,7 +361,7 @@
   const sobe = () => (pol ? saiPolo() : sai());
   volta.addEventListener('click', sobe);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && reg && !e.defaultPrevented) sobe(); });
-  if (window.ResizeObserver) new ResizeObserver(() => { if (reg && !anima) { svg.setAttribute('viewBox', enquadra().join(' ')); poeNomes(); } }).observe(caixa);
+  if (window.ResizeObserver) new ResizeObserver(() => { if (reg && !anima) { svg.setAttribute('viewBox', enquadra().join(' ')); poeNomes(); poeSelos(); } }).observe(caixa);
 
   // no estado inteiro, escolher um município abre a regional dele; com a regional aberta, abre o polo dele; com o polo
   // aberto, abre a página do município
