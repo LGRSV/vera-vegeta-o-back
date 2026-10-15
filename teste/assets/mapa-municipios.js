@@ -148,7 +148,7 @@
   // Bandeirinhas (pedido do usuário): os cartões das regionais, e na regional os dos polos, ficam à direita do mapa, cada
   // um ligado por um fio a um ponto dentro da sua regional/polo (o município mais perto do meio dela), e não cobrem o mapa.
   const fios = document.createElement('div');
-  fios.className = 'mt-fios';
+  fios.className = 'mt-bandeiras';
   fios.setAttribute('aria-hidden', 'true');
   caixa.append(fios);
   let fiosR = '';                                          // fios das regionais (estado inteiro), refeitos a cada redimensionamento
@@ -632,7 +632,7 @@
     m => `<b>${esc(m.nome)}</b><i${zero(m)}>${fmt(m.nae)} NAE</i>`,      // cartão compacto (letra menor, via data-nv)
     m => `<i${zero(m)}>${fmt(m.nae)}</i>`,                               // só o número
   ];
-  const bate = (a, b, f = 8) => a.left < b.right + f && a.right + f > b.left && a.top < b.bottom + f && a.bottom + f > b.top;
+  const bate = (a, b, f = matchMedia('(max-width:860px)').matches ? 4 : 8) => a.left < b.right + f && a.right + f > b.left && a.top < b.bottom + f && a.bottom + f > b.top;
   function poeNomes() {
     nomes2.innerHTML = '';
     if (!pol || mun || anima) return;
@@ -640,7 +640,6 @@
     if (!r.width || !ctm) return;
     const celular = matchMedia('(max-width:860px)').matches, ocupado = [];   // seta de voltar (e a legenda, se estiver no mapa) também entram na conta
     [caixa.contains(leg) ? leg : null, volta, tc].forEach(o => { if (o && o.offsetParent) ocupado.push(o.getBoundingClientRect()); });
-    const fim = legAberta ? NIVEIS_ROT.length : NIVEIS_ROT.length - 1;     // sem NAE (legenda recolhida) não há o rótulo só do número
     const livre = { left: Math.max(r.left, c0.left) + 2, top: Math.max(r.top, c0.top) + 2, right: Math.min(r.right, c0.right) - 2, bottom: Math.min(r.bottom, c0.bottom) - 2 };
     const pt = svg.createSVGPoint(), u = Math.max(v[2] / r.width, v[3] / r.height);   // unidades do mapa por pixel de tela
     const aTela = (x, y) => { pt.x = x; pt.y = y; return pt.matrixTransform(ctm); };
@@ -657,32 +656,53 @@
         }
       }
     }
-    let nomeados = 0;                                           // celular: só os 10 de maior NAE levam o nome; os demais, o número
+    // 1º: nome DENTRO do município (cartão inteiro; no celular, compacto; depois compacto). 2º: os que não couberam
+    // ganham o nome FORA, ao lado, ligado ao município por um fio fino (ninguém fica sem nome). 3º: só o número dentro.
+    const fios = document.createElementNS(NS, 'svg');
+    fios.setAttribute('class', 'mt-fios');
+    nomes2.append(fios);
+    const caixaR = (s, w, h) => ({ left: s.x - w / 2, right: s.x + w / 2, top: s.y - h / 2, bottom: s.y + h / 2 });
+    const cabe = R => !(R.left < livre.left || R.right > livre.right || R.top < livre.top || R.bottom > livre.bottom) && !ocupado.some(o => bate(R, o));
+    const poe = (t, s, R) => { t.style.left = (s.x - c0.left).toFixed(1) + 'px'; t.style.top = (s.y - c0.top).toFixed(1) + 'px'; ocupado.push(R); };
+    const mede = (t, m, nv) => { t.innerHTML = NIVEIS_ROT[nv](m); t.dataset.nv = nv; t.style.left = '0px'; t.style.top = '0px'; return [t.offsetWidth, t.offsetHeight]; };
+    const sobra = [], ponta = {};
     ms.forEach(m => {
-      const it = cand(m), cache = [];                           // pontos em cache e gerados só quando preciso, para os 3 níveis
+      const it = cand(m), cache = [];                           // pontos em cache e gerados só quando preciso
       const ponto = k => { while (cache.length <= k) { const r = it.next(); if (r.done) return null; cache.push(r.value); } return cache[k]; };
       if (!ponto(0)) return;
       const [dx, dy] = soma(desl[pol], mdesl[m.cod]);
+      const tela = q => aTela(q.x + dx, q.y + dy);
+      ponta[m.cod] = { tela, ponto };
       const t = document.createElement('span');
       t.className = 'mt-mn';
       nomes2.append(t);
-      for (let nv = celular ? (nomeados < 10 || !legAberta ? 1 : 2) : 0; nv < fim; nv++) {      // celular: já começa no cartão compacto
-        t.innerHTML = NIVEIS_ROT[nv](m);
-        t.dataset.nv = nv;
-        t.style.left = '0px'; t.style.top = '0px';
-        const w = t.offsetWidth, h = t.offsetHeight;
-        for (let k = 0, q; (q = ponto(k)); k++) {
-          const s = aTela(q.x + dx, q.y + dy);
-          const R = { left: s.x - w / 2, right: s.x + w / 2, top: s.y - h / 2, bottom: s.y + h / 2 };
-          if (R.left < livre.left || R.right > livre.right || R.top < livre.top || R.bottom > livre.bottom) continue;
-          if (ocupado.some(o => bate(R, o))) continue;
-          t.style.left = (s.x - c0.left).toFixed(1) + 'px'; t.style.top = (s.y - c0.top).toFixed(1) + 'px';
-          ocupado.push(R);
-          if (nv < 2) nomeados++;
-          return;
-        }
+      for (let nv = celular ? 1 : 0; nv < 2; nv++) {
+        const [w, h] = mede(t, m, nv);
+        for (let k = 0, q; (q = ponto(k)); k++) { const s = tela(q), R = caixaR(s, w, h); if (cabe(R)) { poe(t, s, R); return; } }
       }
-      t.remove();
+      sobra.push([m, t]);
+    });
+    const ANG = 16, RAIOS = celular ? [30, 42, 56, 72, 90] : [38, 52, 68, 86, 108, 132, 160];
+    const resto = [];
+    const fora = (t, m, w, h) => {                              // põe o cartão ao lado do município, ligado por um fio
+      const s0 = ponta[m.cod].tela(ponta[m.cod].ponto(0));
+      for (const r of RAIOS) for (let i = 0; i < ANG; i++) {
+        const a = i / ANG * 2 * Math.PI - Math.PI / 2, s = { x: s0.x + Math.cos(a) * r, y: s0.y + Math.sin(a) * r * .75 }, R = caixaR(s, w, h);
+        if (!cabe(R)) continue;
+        poe(t, s, R);
+        t.classList.add('fora');
+        const x0 = s0.x - c0.left, y0 = s0.y - c0.top, x1 = s.x - c0.left, y1 = s.y - c0.top;
+        fios.insertAdjacentHTML('beforeend', `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"/><circle cx="${x0.toFixed(1)}" cy="${y0.toFixed(1)}" r="2.5"/>`);
+        return true;
+      }
+      return false;
+    };
+    sobra.forEach(([m, t]) => { const [w, h] = mede(t, m, 1); if (!fora(t, m, w, h)) resto.push([m, t]); });
+    resto.forEach(([m, t]) => {                                 // último recurso: só o número, dentro; senão fora, com fio
+      if (!legAberta) { t.remove(); return; }                   // sem NAE (legenda recolhida) não há o rótulo só do número
+      const [w, h] = mede(t, m, 2), { tela, ponto } = ponta[m.cod];
+      for (let k = 0, q; (q = ponto(k)); k++) { const s = tela(q), R = caixaR(s, w, h); if (cabe(R)) { poe(t, s, R); return; } }
+      if (!fora(t, m, w, h)) t.remove();
     });
   }
   // cartão de cada polo: bandeirinha à direita da regional, com o fio na cor do polo até o município do polo mais perto do
