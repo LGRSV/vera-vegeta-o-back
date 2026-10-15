@@ -68,9 +68,11 @@
   regs.setAttribute('aria-hidden', 'true');
   Object.values(M.regs || {}).forEach(d => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); regs.append(p); });
   svg.append(regs);
-  // legenda das faixas de NAE: fixa lá em cima, na barra da lupa (que acompanha a rolagem), numa linha só e aberta; o botão
-  // "NAE-Vegetação" recolhe ela e, recolhida, os números de NAE saem do mapa em todos os níveis (cartões das regionais, dos
-  // polos e dos municípios, botões da barra, balão do mouse e listas): fica só a cor. A escolha fica guardada no navegador.
+  // legenda das faixas de NAE: fixa lá em cima, na barra da lupa (que acompanha a rolagem), logo depois do olho, com o
+  // título "NAE-Vegetação" acima da faixa de cores. Clicar nela (ou arrastar para cima) esconde: sobra só uma orelhinha,
+  // que clicada (ou puxada para baixo) traz de volta. Escondida, os números de NAE saem do mapa em todos os níveis
+  // (cartões das regionais, dos polos e dos municípios, botões da barra, balão do mouse e listas): fica só a cor.
+  // A escolha fica guardada no navegador.
   let leg = alvo.querySelector('.mt-regs');
   const barra = alvo.querySelector('.mt-barra');
   let legAberta = true;
@@ -80,11 +82,13 @@
     nova.className = 'mt-regs';
     leg.replaceWith(nova);
     leg = nova;
-    leg.innerHTML = '<button type="button" class="mt-regs-b" aria-controls="mt-regs-c"><span>NAE<span class="mt-regs-x">-Vegetação</span></span></button>' +
-      '<div class="mt-regs-c" id="mt-regs-c"><div class="mt-rampa" role="list" aria-label="Faixas de NAE">' + FAIXAS.map((l, i) => `<span role="listitem" title="${rotFaixa(i)}"><i class="nae-${i}" aria-hidden="true"></i>` +
+    const cores = FAIXAS.map((l, i) => `<i class="nae-${i}"></i>`).join('');
+    leg.innerHTML = '<div class="mt-regs-c" id="mt-regs-c"><b class="mt-regs-t" aria-hidden="true">NAE-Vegetação</b>' +
+      '<div class="mt-rampa" role="list" aria-label="Faixas de NAE-Vegetação">' + FAIXAS.map((l, i) => `<span role="listitem" title="${rotFaixa(i)}"><i class="nae-${i}" aria-hidden="true"></i>` +
       `<em aria-hidden="true"><span class="mt-f-l">${i === 0 ? '0' : i === FAIXAS.length - 1 ? l + '+' : l + '–' + (FAIXAS[i + 1] - 1)}</span><span class="mt-f-c">${i === FAIXAS.length - 1 ? l + '+' : l}</span></em>` +
-      `<span class="vh">${rotFaixa(i)}</span></span>`).join('') + '</div>' +
-      (M.regs ? '<span class="lim-s"><i class="lim" aria-hidden="true"></i>Limite das regionais</span>' : '') + '</div>';
+      `<span class="vh">${rotFaixa(i)}</span></span>`).join('') + '</div></div>' +
+      `<button type="button" class="mt-regs-b" aria-controls="mt-regs-c" aria-label="Legenda NAE-Vegetação"><span class="mt-regs-m" aria-hidden="true">${cores}</span>` +
+      '<span class="mt-regs-o">NAE</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>';
     (barra || caixa).append(leg);
   }
   const legBt = leg && leg.querySelector('.mt-regs-b'), legC = leg && leg.querySelector('.mt-regs-c');
@@ -95,14 +99,25 @@
       leg.classList.toggle('fechada', !sim);
       legC.hidden = !sim;
       legBt.setAttribute('aria-expanded', String(sim));
-      legBt.title = sim ? 'Esconder a legenda e os números de NAE do mapa' : 'Mostrar a legenda e os números de NAE no mapa';
+      leg.title = legBt.title = sim ? 'Esconder a legenda e os números de NAE (clique ou arraste para cima)' : 'Mostrar a legenda e os números de NAE (clique ou puxe para baixo)';
     }
     if (!guarda) return;
     try { localStorage.setItem('argos-legenda', sim ? 'aberta' : 'fechada'); } catch (e) { /* só nesta visita */ }
     poeNomes();                                         // sem o número os cartões dos municípios encolhem: cabem mais nomes
   }
   legenda(legAberta);
-  if (legBt) legBt.addEventListener('click', () => legenda(!legAberta, true));
+  if (leg) {                                            // clique em qualquer ponto dela, ou arrastar: para cima esconde, para baixo mostra
+    let y0 = null, arrastou = false;
+    leg.addEventListener('pointerdown', e => { if (!e.button) { y0 = e.clientY; arrastou = false; } });
+    document.addEventListener('pointermove', e => {      // no documento: a orelhinha é pequena e o arrasto sai dela
+      if (y0 === null) return;
+      const dy = e.clientY - y0;
+      if (legAberta ? dy < -16 : dy > 16) { y0 = null; arrastou = true; legenda(!legAberta, true); }
+    });
+    document.addEventListener('pointerup', () => { y0 = null; setTimeout(() => { arrastou = false; }, 0); });   // o clique que vem logo depois do arrasto é ignorado
+    document.addEventListener('pointercancel', () => { y0 = null; });
+    leg.addEventListener('click', () => { if (arrastou) { arrastou = false; return; } legenda(!legAberta, true); });
+  }
   // teclado: um só município na ordem do Tab (o escolhido, ou Palmas); as setas andam pelo mapa
   const roda = cod => {
     svg.querySelectorAll('.mun[tabindex="0"]').forEach(p => p.setAttribute('tabindex', '-1'));

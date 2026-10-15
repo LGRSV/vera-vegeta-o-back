@@ -528,26 +528,33 @@ header.cab>.cab-link:hover{background:var(--hover);text-decoration:none}
    A legenda das faixas de NAE fica na barra da lupa (que acompanha a rolagem), logo depois do olho, numa linha só. O botão
    "NAE-Vegetação" recolhe ela; recolhida, o #mapa-to ganha .sem-nae e os números de NAE saem do mapa (fica só a cor).
    (#mapa-to na frente: estas regras valem sobre as da legenda antiga em <details>) */
-#mapa-to .mt-barra .mt-regs{position:static;left:auto;bottom:auto;z-index:auto;flex-wrap:nowrap;display:flex;align-items:center;gap:var(--s3);max-width:100%;min-height:var(--alvo);
-  padding:0 var(--s3) 0 0;box-shadow:var(--sh1)}
-#mapa-to .mt-barra .mt-regs.fechada{padding-right:0}
-.mt-regs-b{display:inline-flex;align-items:center;gap:var(--s2);flex:none;min-height:var(--alvo);padding:0 var(--s2) 0 var(--s3);border:0;
-  border-radius:var(--r2);background:none;color:var(--fg);font:700 var(--t-sm) var(--f-body);letter-spacing:.01em;white-space:nowrap;cursor:pointer}
-.mt-regs-b:hover{color:var(--accent)}
-.mt-regs-b:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.mt-regs-b::after{content:'';width:7px;height:7px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(135deg);margin-left:2px;transition:transform .2s}
-.mt-regs.fechada .mt-regs-b::after{transform:rotate(-45deg);margin-left:0}
-.mt-regs.fechada .mt-regs-b{padding-right:var(--s3);color:var(--muted)}
-#mapa-to .mt-barra .mt-regs-c{position:static;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);min-width:0;padding:0;
-  border:0;border-radius:0;background:none;box-shadow:none;white-space:nowrap}
+#mapa-to .mt-barra .mt-regs{position:relative;left:auto;bottom:auto;z-index:auto;display:block;max-width:100%;margin:0 0 10px;
+  padding:7px var(--s3) 8px;border:1px solid var(--line);border-radius:var(--r2);background:var(--paper);box-shadow:var(--sh1);
+  cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+#mapa-to .mt-barra .mt-regs-c{position:static;display:grid;gap:6px;min-width:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;
+  white-space:nowrap;animation:mt-desce .18s ease-out}
 #mapa-to .mt-barra .mt-regs-c[hidden]{display:none}
+#mapa-to .mt-barra .mt-regs-t{font:700 10.5px/1 var(--f-mono);letter-spacing:.1em}
+@keyframes mt-desce{from{opacity:0;transform:translateY(-6px)}}
+/* orelhinha: pendurada embaixo do painel (seta para cima = esconder); recolhida, sobra só ela, com a mini faixa de cores */
+.mt-regs-b{position:absolute;left:50%;top:100%;transform:translateX(-50%);display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-width:48px;height:22px;margin-top:-1px;padding:0 10px;border:1px solid var(--line);border-top:0;border-radius:0 0 9px 9px;
+  background:var(--paper);color:var(--muted);font:700 var(--t-xs)/1 var(--f-body);letter-spacing:.06em;cursor:pointer}
+.mt-regs-b svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.mt-regs:hover .mt-regs-b,.mt-regs-b:focus-visible{color:var(--accent)}
+.mt-regs-b:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.mt-regs-m,.mt-regs-o{display:none}
+#mapa-to .mt-barra .mt-regs.fechada{margin:0;padding:0;border:0;background:none;box-shadow:none}
+.mt-regs.fechada .mt-regs-b{position:static;transform:none;height:30px;margin:0;padding:0 10px;border-top:1px solid var(--line);border-radius:0 0 12px 12px;box-shadow:var(--sh1)}
+.mt-regs.fechada .mt-regs-b svg{transform:rotate(180deg)}
+.mt-regs.fechada .mt-regs-m{display:inline-flex}.mt-regs.fechada .mt-regs-o{display:inline}
+#mapa-to .mt-regs-m i{width:5px;height:10px;border-radius:0;box-shadow:none}
+.mt-regs-m i:first-child{border-radius:2px 0 0 2px}.mt-regs-m i:last-child{border-radius:0 2px 2px 0}
 .mt-f-c{display:none}
+@media (prefers-reduced-motion:reduce){#mapa-to .mt-barra .mt-regs-c{animation:none}.mt-regs-b svg{transition:none}}
 /* no município (rede dos alimentadores) a rampa de cores não vale: a legenda some e libera a barra, como antes */
 #mapa-to:has(.mt-mapa.nivel-mun) .mt-barra .mt-regs{display:none}
-@media (max-width:700px){#mapa-to .mt-barra .mt-regs .lim-s{display:none}}
 @media (max-width:600px){
-  #mapa-to .mt-barra .mt-regs{gap:var(--s2);padding-right:var(--s2)}
-  .mt-regs-x{display:none}
   #mapa-to .mt-barra .mt-rampa>span{min-width:30px}
   .mt-f-l{display:none}.mt-f-c{display:inline}
 }
