@@ -35,6 +35,7 @@
     lua: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
     doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h6"/>',
     dados: '<path d="M8 4c-2 0-2 1.5-2 3v2c0 1.5-1 3-2 3 1 0 2 1.5 2 3v2c0 1.5 0 3 2 3"/><path d="M16 4c2 0 2 1.5 2 3v2c0 1.5 1 3 2 3-1 0-2 1.5-2 3v2c0 1.5 0 3-2 3"/>',
+    slides: '<path d="M3 4h18"/><path d="M5 4v11h14V4"/><path d="m10.5 7.5 3.5 2-3.5 2z"/><path d="M12 15v3"/><path d="m8 21 4-3 4 3"/>',
   };
   // relatórios (antes no rodapé da página inicial): o relatório e o manifesto só existem no site publicado; fora dele
   // (a cópia do Artifact) abrem lá, em outra aba
@@ -132,6 +133,8 @@
       `<span role="listitem"><i style="--c:${c}">${t}</i><span>${txt}${ex ? ` <small>(${ex})</small>` : ''}</span></span>`).join('') + `</div></li>` +
     `<li><a class="mnu-rel" href="${doSite('relatorio.html')}"${outraAba}>${svg(ICONE.doc, '')}<span>Relatório de validação<small>Trechos, NAE e avisos por município</small></span></a></li>` +
     `<li><a class="mnu-rel" href="${doSite('manifesto.json')}"${outraAba}>${svg(ICONE.dados, '')}<span>manifesto.json<small>Municípios e alimentadores em JSON</small></span></a></li>` +
+    // apresentação do ARGOS (23 slides; textos editáveis na própria página), sempre em outra aba: ocupa a tela toda
+    `<li><a class="mnu-rel" href="${doSite('apresentacao/')}" target="_blank" rel="noopener">${svg(ICONE.slides, '')}<span>Apresentação<small>23 slides do ARGOS, em tela cheia</small></span></a></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
     `<li><a href="${raiz}assets/scripts/trechos-kml.zip" download>${svg(ICONE.baixar, '')}Script KML → trechos (.zip)</a></li></ul>`;
   wrap.prepend(box);

@@ -1017,3 +1017,61 @@
   };
   if (!poe()) addEventListener('DOMContentLoaded', poe, { once: true });
 })();
+
+// Filtro de município (Filtros → município, de extras.js) também no MAPA: antes ele só escondia linhas da lista do painel
+// (que fica atrás do olho) e o mapa continuava igual. Com um município escolhido, os trechos que não passam nele ficam
+// bem apagados e sem rótulo, as camadas Faixa e Inspeção só desenham os do município e o mapa enquadra os que passam;
+// "Todos os municípios" volta tudo. A escolha de trecho
+// (alimentador.js) refaz a transparência das linhas: o apagado é reaplicado depois dela.
+(function () {
+  const fm = document.getElementById('f-mun'), map = window.__map, D = window.D;
+  if (!fm || !map || !window.L || !D || !D.meta || !D.meta.trecho_mun) return;
+  const tm = D.meta.trecho_mun, APAGA = 0.1;
+  let linhas = null;                                      // nome do trecho → polyline (o texto do balão de cada linha é o nome)
+  const indice = () => {
+    if (linhas) return linhas;
+    linhas = {};
+    const nomes = new Set(D.trechos.map(t => t.nome));
+    map.eachLayer(l => { if (l instanceof L.Polyline && l.getTooltip && l.getTooltip()) { const n = l.getTooltip().getContent(); if (nomes.has(n)) linhas[n] = l; } });
+    return linhas;
+  };
+  const fora = n => { const m = fm.value; return !!m && !(tm[n] || []).includes(m); };
+  let antes = {};                                         // opacidade que alimentador.js deu à linha (para voltar)
+  function aplica() {
+    const ls = indice();
+    Object.entries(ls).forEach(([n, l]) => {
+      const o = l.options.opacity;
+      if (fora(n)) { if (o !== APAGA) { antes[n] = o; l.setStyle({ opacity: APAGA }); } l.options.interactive = false; if (l._path) l._path.style.pointerEvents = 'none'; }
+      else {
+        if (o === APAGA) { l.setStyle({ opacity: antes[n] != null ? antes[n] : 1 }); delete antes[n]; }
+        l.options.interactive = true; if (l._path) l._path.style.pointerEvents = '';
+      }
+    });
+    rotulos();
+  }
+  function rotulos() {                                    // rótulos dos trechos (T1 T2 T3) fora do município somem
+    document.querySelectorAll('.leaflet-marker-pane .lb').forEach(e => {
+      const n = (e.firstChild && e.firstChild.nodeType === 3 ? e.firstChild.textContent : e.textContent).trim();
+      const p = e.parentElement;
+      if (p) p.style.display = fora(n) ? 'none' : '';
+    });
+  }
+  function enquadra() {
+    const m = fm.value, ls = indice();
+    if (!m) return;
+    let b = null;
+    Object.entries(ls).forEach(([n, l]) => { if (!fora(n)) { const lb = l.getBounds(); b = b ? b.extend(lb) : L.latLngBounds(lb.getSouthWest(), lb.getNorthEast()); } });
+    if (b && b.isValid()) map.fitBounds(b.pad(0.06), { maxZoom: 16, paddingTopLeft: [24, 72], paddingBottomRight: [24, 64] });
+  }
+  // as camadas (Faixa, Inspeção: limpeza.js, inspecao.js) perguntam por trecho se está fora e redesenham com a troca
+  window.__munFora = fora;
+  window.__munSel = fm.value;
+  fm.addEventListener('change', () => { window.__munSel = fm.value; aplica(); if (window.__onClasses) window.__onClasses(); enquadra(); });
+  // a escolha de trecho e a volta ao normal (alimentador.js) mexem na transparência; os rótulos são refeitos ao mover
+  let pend = 0;
+  const depois = () => { if (pend) return; pend = requestAnimationFrame(() => { pend = 0; if (fm.value) aplica(); }); };
+  const lista = document.getElementById('lista');
+  if (lista) new MutationObserver(depois).observe(lista, { subtree: true, attributes: true, attributeFilter: ['aria-current'] });
+  map.on('click moveend zoomend layeradd', depois);
+  if (fm.value) aplica();                                 // página aberta já com o município (?m=)
+})();
