@@ -282,7 +282,7 @@
       const m = porCod[mun], a = m.als.find(x => x.cod === rd.dataset.al), r = caixa.getBoundingClientRect();
       realceAl(a.cod);
       dica.innerHTML = `<span class="mt-dica-h"><b class="cod">${esc(a.cod)}</b><i>${(a.n || 0).toLocaleString('pt-BR')} NAE</i></span><small>${esc(a.se)} · ${km(a.m)} em ${esc(m.nome)}</small>` +
-        `<small class="mt-dica-c">${alf === a.cod ? 'Clique para abrir o alimentador' : 'Clique para dar zoom no alimentador'}</small>`;
+        '<small class="mt-dica-c">Clique para abrir o painel do alimentador</small>';
       dica.style.left = (e.clientX - r.left) + 'px'; dica.style.top = (e.clientY - r.top) + 'px'; dica.style.display = 'block';
       return;
     }
@@ -543,7 +543,7 @@
     legAl.hidden = !!window.ARGOS_BUSCA;                // com a busca da barra, a lista abre embaixo da logo (busca-ativo.js)
     legAl.innerHTML = caixaPolos(`<span class="mt-lh"><b>${esc(m.nome)}</b><small>${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}</small></span>`,
       als.map(a =>
-        `<button type="button" class="mt-al" data-al="${esc(a.cod)}" title="Clique para dar zoom; clique de novo para abrir"><span class="mt-al-m" aria-hidden="true"></span>` +
+        `<button type="button" class="mt-al" data-al="${esc(a.cod)}" title="Clique para abrir o painel do alimentador"><span class="mt-al-m" aria-hidden="true"></span>` +
         `<b>${esc(a.cod)}</b><span><i>${(a.n || 0).toLocaleString('pt-BR')} NAE</i><em>${km(a.m)} aqui</em></span></button>`).join(''));
     legAl.classList.toggle('aberta', puxada);
     volta.setAttribute('aria-label', `${m.nome}. Voltar ao polo ${pol}`);
@@ -564,8 +564,8 @@
       if (mini) mini.innerHTML = `<svg viewBox="${x0 - f} ${y0 - f} ${w + 2 * f} ${h + 2 * f}"><path d="${r.d}"/></svg>`;
     }));
   }
-  // alimentador em foco (clicar nele na lista ou na rede): o mapa aproxima na rede inteira dele, que fica forte e sem
-  // corte; os outros apagam. Clicar nele de novo (ou em "Abrir …") abre a página do alimentador.
+  // alimentador em foco (escolhido na busca ou em "Ver no mapa"): o mapa aproxima na rede inteira dele, que fica forte e
+  // sem corte; os outros apagam. Clicar num alimentador (na lista ou na rede) abre direto a página dele.
   let alf = null, alCaixa = null;
   const abreAl = al => vaiPag(`alimentadores/${encodeURIComponent(al)}/`);
   function trilhaMun() {
@@ -636,7 +636,7 @@
   legAl.addEventListener('focusin', e => { const a = e.target.closest('.mt-al'); realceAl(a ? a.dataset.al : null); });
   legAl.addEventListener('click', e => {
     const al = e.target.closest('.mt-al');
-    if (al) { if (alf === al.dataset.al) abreAl(al.dataset.al); else focaAl(al.dataset.al); return; }
+    if (al) { abreAl(al.dataset.al); return; }        // 1 clique abre o painel do alimentador (pedido do usuário)
     const px = e.target.closest('.mt-puxa');
     if (!px) return;
     puxada = !puxada;
@@ -813,7 +813,7 @@
   };
   svg.addEventListener('click', e => {
     const r = e.target.closest('.mt-redes path[data-al]');
-    if (r) { if (alf === r.dataset.al) abreAl(r.dataset.al); else focaAl(r.dataset.al); return; }
+    if (r) { abreAl(r.dataset.al); return; }          // 1 clique na rede abre o painel do alimentador (T1/T2/T3, camadas)
     const p = e.target.closest('.mun');
     if (p) escolhe(p.dataset.cod);
   });

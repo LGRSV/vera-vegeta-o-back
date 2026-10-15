@@ -82,9 +82,8 @@
     mun: (m, n) => ({ s: { cod: m.cod }, tipo: 'mun', t: realce(m.nome, n), c: `Polo ${esc(m.polo)} · ${esc(m.reg)} · ${plural(m.als.length, 'alimentador', 'alimentadores')}`, nae: m.nae }),
     al: (a, n, k) => ({ s: { al: a.cod }, tipo: 'al', t: realce(a.cod, k), c: `${realce(a.se, n)} · ${plural(a.muns.length, 'município', 'municípios')} · ${kmTxt(a.m)}`, nae: a.nae }),
     // alimentador do município aberto (a lista que ficava ao lado do mapa): miniatura da rede, código e NAE (sem km e SE,
-    // pedido do usuário); só o que está em foco ganha a linha que explica o 2º toque
-    almun: (a, m, foco) => ({ s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: a.n || 0,
-      c: foco ? 'Em foco no mapa · toque de novo para abrir a página' : '' }),
+    // pedido do usuário); o que está em foco no mapa fica marcado
+    almun: (a, m, foco) => ({ s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: a.n || 0, c: foco ? 'Em foco no mapa' : '' }),
     ativo: ([c, tipo], k) => ({ s: { ativo: c }, tipo: 'ativo', t: realce(c, k), c: esc(TIPO[tipo] || 'Chave ' + tipo) }),
     os: txt => ({ s: { os: txt }, tipo: 'os', t: `OS ${esc(txt)}`, c: 'buscar nas bases de faixa, inspeção, manutenção e executadas' })
   };
@@ -230,8 +229,8 @@
     const s = sug[i];
     if (!s) return;
     if (s.os) { buscaOS(s.os); return; }
-    // alimentador do município aberto: 1º toque dá zoom na rede; tocar no que já está em foco abre a página dele
-    if (s.almun && mapa() && mapa().nivel().al === s.almun) { fecha(); P.abre(`alimentadores/${encodeURIComponent(s.almun)}/`); return; }
+    // alimentador do município aberto: 1 toque abre o painel dele (passar o mouse ou marcar com as setas acende a rede)
+    if (s.almun) { fecha(); P.abre(`alimentadores/${encodeURIComponent(s.almun)}/`); return; }
     if (s.ativo) {
       q.value = s.ativo;
       fechaSug();
