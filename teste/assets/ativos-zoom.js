@@ -77,25 +77,31 @@
     zAntes = z;
     vivos.forEach((m, k) => { if (!quer.has(k) || (mudouRaio && k[0] === 'p')) { pontos.removeLayer(m); vivos.delete(k); } });
     quer.forEach(([tipo, lat, lon, txt], k) => { if (!vivos.has(k)) { const m = ponto(k, tipo, lat, lon, txt()); vivos.set(k, m); pontos.addLayer(m); } });
+    if (lg) {                                               // a legenda antes dos códigos: ela também tampa o mapa
+      lg.hidden = z < Z_EQ;
+      lg.querySelector('.atv-p').hidden = z < Z_POSTE;
+    }
     // códigos escritos: só bem de perto, no máximo ROTULOS e sem um cobrir o outro (equipamentos e trafos antes dos
     // postes: o trafo fica no poste, e o número do poste não pode esconder o código do trafo)
     rotulos.clearLayers();
     if (z >= Z_COD) {
       const caixas = [], tela = map.getSize();
+      // o que fica por cima do mapa (olho, legendas, tela cheia, controles): nenhum código embaixo
+      const mc = map.getContainer(), mr = mc.getBoundingClientRect(), sobre = [...mc.querySelectorAll('.leaflet-control')];
+      if (mc.parentElement) for (const el of mc.parentElement.children) if (el !== mc) sobre.push(el, ...el.children);
+      const tampa = sobre.map(el => el.getBoundingClientRect()).filter(b => b.width && b.height)
+        .map(b => [b.left - mr.left, b.top - mr.top, b.right - mr.left, b.bottom - mr.top]);
       [...quer.keys()].sort((x, y) => 'etp'.indexOf(x[0]) - 'etp'.indexOf(y[0])).forEach(k => {
         if (caixas.length >= ROTULOS) return;
         const [, lat, lon] = quer.get(k), p = map.latLngToContainerPoint([lat, lon]);
         if (p.x < 0 || p.y < 0 || p.x > tela.x || p.y > tela.y) return;
         const c = [p.x + 5, p.y - 9, p.x + 5 + 7 * (k.length - 1) + 12, p.y + 9];      // onde o código fica escrito
         if (caixas.some(o => c[0] < o[2] && o[0] < c[2] && c[1] < o[3] && o[1] < c[3])) return;
+        if (tampa.some(o => c[0] < o[2] && o[0] < c[2] && c[1] < o[3] && o[1] < c[3])) return;
         caixas.push(c);
         rotulos.addLayer(L.marker([lat, lon], { interactive: false, keyboard: false,
           icon: L.divIcon({ className: '', iconSize: null, html: `<div class="atv-cod">${esc(k.slice(1))}</div>` }) }));
       });
-    }
-    if (lg) {
-      lg.hidden = z < Z_EQ;
-      lg.querySelector('.atv-p').hidden = z < Z_POSTE;
     }
   }
 
