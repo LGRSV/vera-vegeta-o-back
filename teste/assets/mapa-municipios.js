@@ -675,12 +675,15 @@
     m => `<b>${esc(m.nome)}</b><i${zero(m)}>${fmt(m.nae)} NAE</i>`,      // cartão compacto (letra menor, via data-nv)
     m => `<i${zero(m)}>${fmt(m.nae)}</i>`,                               // só o número
   ];
-  const bate = (a, b, f = matchMedia('(max-width:860px)').matches ? 4 : 8) => a.left < b.right + f && a.right + f > b.left && a.top < b.bottom + f && a.bottom + f > b.top;
+  const FOLGA_ROT = () => (matchMedia('(max-width:860px)').matches ? 4 : 8);   // folga entre rótulos (menor no celular)
+  let folgaRot = 8;
+  const bate = (a, b, f = folgaRot) => a.left < b.right + f && a.right + f > b.left && a.top < b.bottom + f && a.bottom + f > b.top;
   function poeNomes() {
     nomes2.innerHTML = '';
     if (!pol || mun || anima) return;
     const r = svg.getBoundingClientRect(), v = vb(), c0 = caixa.getBoundingClientRect(), ctm = svg.getScreenCTM();
     if (!r.width || !ctm) return;
+    folgaRot = FOLGA_ROT();                                     // uma vez por cálculo (matchMedia a cada comparação custava ~120 ms)
     const celular = matchMedia('(max-width:860px)').matches, ocupado = [];   // seta de voltar (e a legenda, se estiver no mapa) também entram na conta
     [caixa.contains(leg) ? leg : null, volta, tc].forEach(o => { if (o && o.offsetParent) ocupado.push(o.getBoundingClientRect()); });
     const livre = { left: Math.max(r.left, c0.left) + 2, top: Math.max(r.top, c0.top) + 2, right: Math.min(r.right, c0.right) - 2, bottom: Math.min(r.bottom, c0.bottom) - 2 };

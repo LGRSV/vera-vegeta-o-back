@@ -16,9 +16,9 @@ Exemplo: AL02003097 tem 14,2 m de rede no GIS e 1 NAE no trafo 5700003097, que n
 (T3-HY). Antes: 1 NAE / 0,0142 km = 7.042 NAE/100 km. Agora: 0 no AL02003097 e +1 no AL02003036.
 
 Grava nae_rede em assets/ranking-nae.js (por alimentador) e em assets/ranking-polos-dados.js (por alimentador
-em cada polo). No polo: a NAE que sai sai do polo onde o alimentador tem mais rede (é onde a NAE sem trecho
-conta, e toda NAE com o ativo em outro alimentador está sem trecho); a que entra vai para o polo do trecho do
-ativo, ou para o polo onde o alimentador tem mais rede se o ativo não tem trecho.
+em cada polo). No polo: a NAE que sai sai do polo principal do alimentador (o do município onde ele tem mais
+rede, como no mapa: é onde a NAE sem trecho conta, e toda NAE com o ativo em outro alimentador está sem trecho);
+a que entra vai para o polo do trecho do ativo, ou para o polo principal se o ativo não tem trecho.
 Antes de gravar, refaz a NAE de cada alimentador em cada polo a partir dos dados.js e para se não bater com
 o que já está no arquivo. Roda depois de gerar o site; rodar de novo dá o mesmo resultado.
 
@@ -149,7 +149,9 @@ def main(raiz=RAIZ):
             polo_do_trecho[(t["al"], t["t"])] = p["id"]
         for a in p["als"]:
             linhas[a["al"]][p["id"]] = a
-    principal = {al: max(ps, key=lambda pid: ps[pid]["km"]) for al, ps in linhas.items()}
+    # polo onde conta a NAE sem trecho: o do município onde o alimentador tem mais rede (gravado pelo gera_trechos em
+    # "principal", igual ao mapa da página inicial); arquivo antigo, sem o campo: o polo onde ele tem mais rede
+    principal = {al: P.get("principal", {}).get(al) or max(ps, key=lambda pid: ps[pid]["km"]) for al, ps in linhas.items()}
     polo = lambda al, trecho: (polo_do_trecho.get((al, trecho)) if trecho else None) or principal[al]
 
     erros = []

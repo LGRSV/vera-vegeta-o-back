@@ -8,6 +8,17 @@
   const M = window.MUN, alvo = document.getElementById('mapa-to');
   if (!M || !alvo || !alvo.querySelector('.mt-mapa svg')) return;
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // páginas que a cópia do Artifact não leva (municípios, alimentadores, polos, relatório) abrem no site publicado, em outra aba;
+  // no próprio site (github.io) e no teste local tudo continua relativo, como antes
+  const SITE = 'https://lgrsv.github.io/vera-vegeta-o-back/teste/';
+  const noSite = /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+  const pag = p => noSite ? p : SITE + p;
+  const alvoA = noSite ? '' : ' target="_blank" rel="noopener"';
+  const vaiPag = p => { if (noSite) location.href = p; else window.open(SITE + p, '_blank', 'noopener'); };
+  window.ARGOS_PAG = { url: pag, alvo: alvoA, abre: vaiPag };
+  if (!noSite) document.querySelectorAll('.cab-link[href], .rodape a[href]').forEach(a => {
+    a.href = pag(a.getAttribute('href')); a.target = '_blank'; a.rel = 'noopener';
+  });
   const km = m => (m / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
   const semAcento = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const kmTot = m => m.als.reduce((s, a) => s + a.m, 0);
@@ -57,12 +68,56 @@
   regs.setAttribute('aria-hidden', 'true');
   Object.values(M.regs || {}).forEach(d => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); regs.append(p); });
   svg.append(regs);
-  const leg = alvo.querySelector('.mt-regs');
-  // legenda: canto inferior esquerdo, já aberta (details open) e recolhível; no celular começa fechada para não cobrir o mapa
-  if (leg && matchMedia('(max-width:860px)').matches) leg.open = false;
-  if (leg) leg.innerHTML = '<summary>NAE-Vegetação</summary><div class="mt-regs-c">' +
-    '<div class="mt-rampa" role="list">' + FAIXAS.map((l, i) => `<span role="listitem" title="${rotFaixa(i)}"><i class="nae-${i}" aria-hidden="true"></i><em aria-hidden="true">${i === 0 ? '0' : i === FAIXAS.length - 1 ? l + '+' : l + '–' + (FAIXAS[i + 1] - 1)}</em><span class="vh">${rotFaixa(i)}</span></span>`).join('') + '</div>' +
-    (M.regs ? '<span class="lim-s"><i class="lim" aria-hidden="true"></i>Limite das regionais</span>' : '') + '</div>';
+  // legenda das faixas de NAE: fixa lá em cima, na barra da lupa (que acompanha a rolagem), logo depois do olho, com o
+  // título "NAE-Vegetação" acima da faixa de cores. Clicar nela (ou arrastar para cima) esconde: sobra só uma orelhinha,
+  // que clicada (ou puxada para baixo) traz de volta. Escondida, os números de NAE saem do mapa em todos os níveis
+  // (cartões das regionais, dos polos e dos municípios, botões da barra, balão do mouse e listas): fica só a cor.
+  // A escolha fica guardada no navegador.
+  let leg = alvo.querySelector('.mt-regs');
+  const barra = alvo.querySelector('.mt-barra');
+  let legAberta = true;
+  try { legAberta = localStorage.getItem('argos-legenda') !== 'fechada'; } catch (e) { /* sem armazenamento: aberta */ }
+  if (leg) {
+    const nova = document.createElement('div');
+    nova.className = 'mt-regs';
+    leg.replaceWith(nova);
+    leg = nova;
+    const cores = FAIXAS.map((l, i) => `<i class="nae-${i}"></i>`).join('');
+    leg.innerHTML = '<div class="mt-regs-c" id="mt-regs-c"><b class="mt-regs-t" aria-hidden="true">NAE-Vegetação</b>' +
+      '<div class="mt-rampa" role="list" aria-label="Faixas de NAE-Vegetação">' + FAIXAS.map((l, i) => `<span role="listitem" title="${rotFaixa(i)}"><i class="nae-${i}" aria-hidden="true"></i>` +
+      `<em aria-hidden="true"><span class="mt-f-l">${i === 0 ? '0' : i === FAIXAS.length - 1 ? l + '+' : l + '–' + (FAIXAS[i + 1] - 1)}</span><span class="mt-f-c">${i === FAIXAS.length - 1 ? l + '+' : l}</span></em>` +
+      `<span class="vh">${rotFaixa(i)}</span></span>`).join('') + '</div></div>' +
+      `<button type="button" class="mt-regs-b" aria-controls="mt-regs-c" aria-label="Legenda NAE-Vegetação"><span class="mt-regs-m" aria-hidden="true">${cores}</span>` +
+      '<span class="mt-regs-o">NAE</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>';
+    (barra || caixa).append(leg);
+  }
+  const legBt = leg && leg.querySelector('.mt-regs-b'), legC = leg && leg.querySelector('.mt-regs-c');
+  function legenda(sim, guarda) {
+    legAberta = sim;
+    alvo.classList.toggle('sem-nae', !sim);
+    if (leg) {
+      leg.classList.toggle('fechada', !sim);
+      legC.hidden = !sim;
+      legBt.setAttribute('aria-expanded', String(sim));
+      leg.title = legBt.title = sim ? 'Esconder a legenda e os números de NAE (clique ou arraste para cima)' : 'Mostrar a legenda e os números de NAE (clique ou puxe para baixo)';
+    }
+    if (!guarda) return;
+    try { localStorage.setItem('argos-legenda', sim ? 'aberta' : 'fechada'); } catch (e) { /* só nesta visita */ }
+    poeNomes();                                         // sem o número os cartões dos municípios encolhem: cabem mais nomes
+  }
+  legenda(legAberta);
+  if (leg) {                                            // clique em qualquer ponto dela, ou arrastar: para cima esconde, para baixo mostra
+    let y0 = null, arrastou = false;
+    leg.addEventListener('pointerdown', e => { if (!e.button) { y0 = e.clientY; arrastou = false; } });
+    document.addEventListener('pointermove', e => {      // no documento: a orelhinha é pequena e o arrasto sai dela
+      if (y0 === null) return;
+      const dy = e.clientY - y0;
+      if (legAberta ? dy < -16 : dy > 16) { y0 = null; arrastou = true; legenda(!legAberta, true); }
+    });
+    document.addEventListener('pointerup', () => { y0 = null; setTimeout(() => { arrastou = false; }, 0); });   // o clique que vem logo depois do arrasto é ignorado
+    document.addEventListener('pointercancel', () => { y0 = null; });
+    leg.addEventListener('click', () => { if (arrastou) { arrastou = false; return; } legenda(!legAberta, true); });
+  }
   // teclado: um só município na ordem do Tab (o escolhido, ou Palmas); as setas andam pelo mapa
   const roda = cod => {
     svg.querySelectorAll('.mun[tabindex="0"]').forEach(p => p.setAttribute('tabindex', '-1'));
@@ -90,24 +145,91 @@
   // regionais no estado inteiro: um cartãozinho com o nome e a NAE de cada uma, todos alinhados no meio do mapa, cada um
   // na altura do meio dos municípios da sua regional; clicar abre a regional (e eles somem até voltar ao Tocantins).
   // Os cartões dos polos só aparecem na barra da lupa depois de abrir uma regional.
+  // Bandeirinhas (pedido do usuário): o cartão de cada regional, e na regional o de cada polo, fica fora do desenho, logo
+  // acima do contorno dela, preso por um fio curto que sobe de um ponto do contorno. O lugar é procurado ao longo do
+  // contorno: o que não cobre o mapa nem outro cartão, com o fio mais curto.
+  const fios = document.createElement('div');
+  fios.className = 'mt-bandeiras';
+  fios.setAttribute('aria-hidden', 'true');
+  caixa.append(fios);
+  const fio = (ax, ay, bx, by, cor) => `<i class="mt-fio" style="left:${ax.toFixed(1)}px;top:${ay.toFixed(1)}px;width:${Math.hypot(bx - ax, by - ay).toFixed(1)}px;` +
+    `transform:rotate(${Math.atan2(by - ay, bx - ax).toFixed(4)}rad)${cor ? ';--c:' + cor : ''}"></i><i class="mt-pino" style="left:${ax.toFixed(1)}px;top:${ay.toFixed(1)}px${cor ? ';--c:' + cor : ''}"></i>`;
+  const rel = r => { const c = caixa.getBoundingClientRect(); return { left: r.left - c.left, right: r.right - c.left, top: r.top - c.top, bottom: r.bottom - c.top }; };
+  const p2d = {};
+  function mascara(ms) {                                   // o que está desenhado na tela (px da caixa, de 2 em 2 px)
+    const c = caixa.getBoundingClientRect(), E = 2, W = Math.max(1, Math.ceil(c.width / E)), H = Math.max(1, Math.ceil(c.height / E));
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const g2 = cv.getContext('2d');
+    ms.forEach(m => {
+      const t = el[m.cod].getScreenCTM();
+      if (!t) return;
+      g2.setTransform(t.a / E, t.b / E, t.c / E, t.d / E, (t.e - c.left) / E, (t.f - c.top) / E);
+      g2.fill(p2d[m.cod] || (p2d[m.cod] = new Path2D(m.d)));
+    });
+    const px = g2.getImageData(0, 0, W, H).data;
+    return (x, y) => { const i = x / E | 0, j = y / E | 0; return i >= 0 && j >= 0 && i < W && j < H && px[(j * W + i) * 4 + 3] > 0; };
+  }
+  function contorno(path, n) {                             // n pontos ao longo do contorno, em px da caixa
+    const t = path && path.getScreenCTM(), c = caixa.getBoundingClientRect(), L = path ? path.getTotalLength() : 0, out = [];
+    if (!t || !L) return out;
+    for (let i = 0; i < n; i++) { const q = path.getPointAtLength(L * (i + .5) / n); out.push({ x: t.a * q.x + t.c * q.y + t.e - c.left, y: t.b * q.x + t.d * q.y + t.f - c.top }); }
+    return out;
+  }
+  // melhor lugar para um cartão w×h em cima de um ponto do contorno, com o fio de 14 a 40 px: o que menos cobre o mapa,
+  // depois o fio que não atravessa o desenho, depois o fio mais curto
+  function planta(pts, w, h, noMapa, obst, CW, CH) {
+    let melhor = null;
+    for (const p of pts) for (const L of [14, 24, 40]) for (const al of [.5, .15, .85]) {
+      const x = p.x - w * al, y = p.y - L - h;
+      if (x < 2 || y < 2 || x + w > CW - 2 || y + h > CH - 2) continue;
+      const R = { left: x, top: y, right: x + w, bottom: y + h };
+      if (obst.some(o => R.left < o.right + 6 && R.right + 6 > o.left && R.top < o.bottom + 6 && R.bottom + 6 > o.top)) continue;
+      let cobre = 0, corta = 0;
+      for (let i = 0; i <= 4; i++) for (let j = 0; j <= 2; j++) if (noMapa(x + w * i / 4, y + h * j / 2)) cobre++;
+      for (let k = 1; k <= 3; k++) if (noMapa(p.x, p.y - 3 - (L - 3) * k / 3)) corta++;
+      const nota = cobre * 100 + corta * 30 + L + Math.abs(al - .5) * 8;
+      if (!melhor || nota < melhor.nota) melhor = { nota, x, y, ax: p.x, ay: p.y, R };
+    }
+    return melhor;
+  }
+  // põe cada cartão (k.e) no lugar achado no contorno (k.path) e devolve os fios; sem lugar, o cartão fica no meio do grupo
+  function bandeiras(cards, ms) {
+    const c = caixa.getBoundingClientRect(), noMapa = mascara(ms), ctm = svg.getScreenCTM(), linhas = [];
+    let feitos = [];
+    try { feitos = [tc, volta].filter(o => o && o.offsetParent).map(o => rel(o.getBoundingClientRect())); } catch (e) { /* ainda montando */ }
+    cards.forEach(k => {
+      const w = k.e.offsetWidth, h = k.e.offsetHeight, b = planta(contorno(k.path, 90), w, h, noMapa, feitos, c.width, c.height);
+      if (!b) {
+        const pt = svg.createSVGPoint();
+        [pt.x, pt.y] = k.centro;
+        const s = pt.matrixTransform(ctm);
+        k.e.style.left = (s.x - c.left - w / 2).toFixed(0) + 'px'; k.e.style.top = (s.y - c.top - h / 2).toFixed(0) + 'px';
+        return;
+      }
+      k.e.style.left = b.x.toFixed(0) + 'px'; k.e.style.top = b.y.toFixed(0) + 'px';
+      feitos.push(b.R, { left: b.ax - 2, right: b.ax + 2, top: b.y + h, bottom: b.ay });   // o fio também não pode ser coberto
+      linhas.push(fio(b.ax, b.ay, b.ax, b.y + h, k.cor));
+    });
+    return linhas.join('');
+  }
+  const meio = ms => {                                     // município mais perto do meio do grupo: o ponto cai dentro dele
+    const mx = ms.reduce((s, m) => s + m.c[0], 0) / ms.length, my = ms.reduce((s, m) => s + m.c[1], 0) / ms.length;
+    return ms.reduce((a, b) => Math.hypot(b.c[0] - mx, b.c[1] - my) < Math.hypot(a.c[0] - mx, a.c[1] - my) ? b : a);
+  };
   const cartoes = document.createElement('div');
   cartoes.className = 'mt-regcards';
   const regInfo = Object.keys(M.regs || {}).map(r => {
     const ms = M.muns.filter(m => m.reg === r);
-    return { r, y: ms.reduce((s, m) => s + m.c[1], 0) / ms.length, nae: ms.reduce((s, m) => s + (m.nae || 0), 0) };
+    return { r, a: meio(ms).c, nae: ms.reduce((s, m) => s + (m.nae || 0), 0) };
   });
   cartoes.innerHTML = regInfo.map(i => `<button type="button" data-reg="${esc(i.r)}" aria-label="Abrir a Regional ${esc(i.r)}, ${i.nae.toLocaleString('pt-BR')} NAE">` +
     `<b>${esc(i.r)}</b><i>${i.nae.toLocaleString('pt-BR')} NAE</i></button>`).join('');
   caixa.append(cartoes);
   cartoes.addEventListener('click', e => { const b = e.target.closest('button'); if (b) entra(b.dataset.reg, e.detail === 0); });
-  const poeCartoes = () => {                                // posição pelo viewBox do estado inteiro (-6 -6 VW M.h+12)
-    const r = svg.getBoundingClientRect(), c = caixa.getBoundingClientRect(), H = M.h + 12;
-    if (!r.width) return;
-    const k = Math.min(r.width / VW, r.height / H), oy = (r.height - H * k) / 2;
-    [...cartoes.children].forEach((e, i) => {
-      e.style.left = (r.left - c.left + r.width / 2).toFixed(0) + 'px';
-      e.style.top = (r.top - c.top + oy + (regInfo[i].y + 6) * k).toFixed(0) + 'px';
-    });
+  const poeCartoes = () => {                                // só no estado inteiro e parado (o contorno é lido da tela)
+    if (caixa.classList.contains('aberta') || caixa.classList.contains('voando') || !svg.getBoundingClientRect().width) return;
+    fios.innerHTML = bandeiras([...cartoes.children].map((e, i) => ({ e, path: regs.children[i], centro: regInfo[i].a })), M.muns);
   };
   const prio = t => t.dataset.cod === foco ? 2 : achou.has(t.dataset.cod) ? 1 : 0;
   const X0 = -6, X1 = M.w + 6;
@@ -203,12 +325,14 @@
     caixa.classList.remove('pronta');
     caixa.classList.add('voando');
     const de = vb(), t0 = performance.now(), dur = calmo() ? 0 : DUR;
+    document.dispatchEvent(new CustomEvent('argos-nivel', { detail: { reg, pol, mun, al: alf } }));   // a busca acompanha o nível
     const passo = agora => {
       const t = dur ? Math.min(1, (agora - t0) / dur) : 1, e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
       svg.setAttribute('viewBox', de.map((v, i) => +(v + (alvoVb[i] - v) * e).toFixed(2)).join(' '));
-      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); poeNomes(); poeSelos(); }
+      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); if (!reg) poeCartoes(); poeNomes(); poeSelos(); }
     };
     selos.innerHTML = '';
+    fios.innerHTML = '';
     anima = requestAnimationFrame(passo);
   }
   const volta = document.createElement('button');
@@ -242,6 +366,39 @@
   selos.className = 'mt-selos';
   selos.setAttribute('aria-hidden', 'true');
   caixa.append(selos);
+  // tela cheia: o mapa todo (barra da lupa, legenda e mapa) cobre a tela; o mesmo botão ou Esc voltam. Sem a API de tela
+  // cheia (iPhone, ou dentro de um iframe que não permite) o mapa cobre a janela (classe .mt-cheia no site.css)
+  const tc = document.createElement('button');
+  tc.type = 'button';
+  tc.className = 'mt-tc';
+  const ICO_TC = { abre: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', sai: 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5' };
+  const nativa = () => (document.fullscreenElement || document.webkitFullscreenElement) === alvo;
+  const cheia = () => nativa() || alvo.classList.contains('mt-cheia');
+  const marcaTc = () => {
+    const sim = cheia();
+    tc.setAttribute('aria-label', sim ? 'Sair da tela cheia' : 'Mapa em tela cheia');
+    tc.title = sim ? 'Sair da tela cheia (Esc)' : 'Mapa em tela cheia';
+    tc.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${sim ? ICO_TC.sai : ICO_TC.abre}"/></svg>`;
+  };
+  const cobre = sim => {
+    alvo.classList.toggle('mt-cheia', sim);
+    document.documentElement.classList.toggle('mt-cheia-trava', sim);   // a página atrás não rola
+    marcaTc();
+  };
+  function telaCheia(sim) {
+    if (!sim) {
+      if (alvo.classList.contains('mt-cheia')) cobre(false);
+      else if (nativa()) { const p = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (p && p.catch) p.catch(() => {}); }
+      return;
+    }
+    const pede = alvo.requestFullscreen || alvo.webkitRequestFullscreen;
+    if (!pede || !(document.fullscreenEnabled || document.webkitFullscreenEnabled)) { cobre(true); return; }
+    try { const p = pede.call(alvo); if (p && p.catch) p.catch(() => cobre(true)); } catch (e) { cobre(true); }
+  }
+  tc.addEventListener('click', () => telaCheia(!cheia()));
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, marcaTc));
+  marcaTc();
+  caixa.append(tc);
   let desl = {};
   // enquadra a regional aberta deixando livre a coluna da legenda (computador) ou o topo para o "← Tocantins" (celular)
   const move = (b, [dx, dy]) => ({ x: b.x + dx, y: b.y + dy, x2: b.x2 + dx, y2: b.y2 + dy });
@@ -254,11 +411,15 @@
     const x = bb.x - 12, y = bb.y - 12, w = bb.x2 - bb.x + 24, h = bb.y2 - bb.y + 24, W = caixa.clientWidth;
     // celular (mesmo corte do site.css): sobra o topo para a seta de voltar e o pé para a seta dos polos
     if (matchMedia('(max-width:860px)').matches) { const t = 52 * w / W, f = 52 * w / W; return [x, y - t, w, h + t + f]; }
-    // a coluna da esquerda (seta, lista de alimentadores e, embaixo, a legenda) fica livre
-    const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg ? leg.offsetWidth : 0) + 24, L2 = 24;
-    const k = Math.min(H / h, Math.max(1e-3, W - L1 - L2) / w);
+    // a coluna da esquerda (seta e lista de alimentadores) fica livre; a legenda fica na barra, em cima do mapa
+    // com a busca da barra, a lista do município aberto abre embaixo da logo (largura fixa no site.css): o lado esquerdo fica livre para ela
+    const lista = window.ARGOS_BUSCA && mun && !alf ? Math.min(460, innerWidth - 32) : 0;
+    // na regional sobra uma faixa em cima e um pouco à direita para as bandeirinhas dos polos
+    const T = reg && !pol && !mun && !alf ? 56 : 0;
+    const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg && caixa.contains(leg) ? leg.offsetWidth : 0, lista) + 24, L2 = T ? 120 : 24;
+    const k = Math.min((H - T) / h, Math.max(1e-3, W - L1 - L2) / w);
     const altura = H / k;
-    return [x - L1 / k, y - (altura - h) / 2, w + (L1 + L2) / k, altura];
+    return [x - L1 / k, y - T / k - ((H - T) / k - h) / 2, w + (L1 + L2) / k, altura];
   }
   function entra(r, teclado, cod) {
     if (!r || reg === r) return;
@@ -379,9 +540,9 @@
     const als = m.als.slice().sort((a, b) => b.m - a.m);
     trilhaMun();
     legAl.setAttribute('aria-label', `Alimentadores de ${m.nome}`);
-    legAl.hidden = false;
+    legAl.hidden = !!window.ARGOS_BUSCA;                // com a busca da barra, a lista abre embaixo da logo (busca-ativo.js)
     legAl.innerHTML = caixaPolos(`<span class="mt-lh"><b>${esc(m.nome)}</b><small>${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}</small></span>`,
-      `<a class="mt-amun" href="municipios/${esc(m.slug)}/">Abrir ${esc(m.nome)} →</a>` + als.map(a =>
+      als.map(a =>
         `<button type="button" class="mt-al" data-al="${esc(a.cod)}" title="Clique para dar zoom; clique de novo para abrir"><span class="mt-al-m" aria-hidden="true"></span>` +
         `<b>${esc(a.cod)}</b><span><i>${(a.n || 0).toLocaleString('pt-BR')} NAE</i><em>${km(a.m)} aqui</em></span></button>`).join(''));
     legAl.classList.toggle('aberta', puxada);
@@ -406,7 +567,7 @@
   // alimentador em foco (clicar nele na lista ou na rede): o mapa aproxima na rede inteira dele, que fica forte e sem
   // corte; os outros apagam. Clicar nele de novo (ou em "Abrir …") abre a página do alimentador.
   let alf = null, alCaixa = null;
-  const abreAl = al => { location.href = `alimentadores/${encodeURIComponent(al)}/`; };
+  const abreAl = al => vaiPag(`alimentadores/${encodeURIComponent(al)}/`);
   function trilhaMun() {
     const m = porCod[mun];
     legPolos.innerHTML = passo('estado', 'Tocantins') + passo('regional', esc(reg)) + passo('polo', esc(pol)) +
@@ -429,7 +590,7 @@
     gf.append(pa);
     legAl.querySelectorAll('.mt-al').forEach(a => a.classList.toggle('foco', a.dataset.al === al));
     const ab = legAl.querySelector('.mt-amun');
-    if (ab) { ab.href = `alimentadores/${encodeURIComponent(al)}/`; ab.textContent = `Abrir ${al} →`; }
+    if (ab) { ab.href = pag(`alimentadores/${encodeURIComponent(al)}/`); ab.textContent = `Abrir ${al} →`; }
     trilhaMun();
     volta.setAttribute('aria-label', `${al}. Voltar a ${porCod[mun].nome}`);
     volta.title = `Voltar a ${porCod[mun].nome}`;
@@ -446,7 +607,7 @@
     const m = porCod[mun];
     legAl.querySelectorAll('.mt-al.foco').forEach(a => a.classList.remove('foco'));
     const ab = legAl.querySelector('.mt-amun');
-    if (ab) { ab.href = `municipios/${m.slug}/`; ab.textContent = `Abrir ${m.nome} →`; }
+    if (ab) { ab.href = pag(`municipios/${m.slug}/`); ab.textContent = `Abrir ${m.nome} →`; }
     trilhaMun();
     volta.setAttribute('aria-label', `${m.nome}. Voltar ao polo ${pol}`);
     volta.title = `Voltar ao polo ${pol}`;
@@ -514,14 +675,17 @@
     m => `<b>${esc(m.nome)}</b><i${zero(m)}>${fmt(m.nae)} NAE</i>`,      // cartão compacto (letra menor, via data-nv)
     m => `<i${zero(m)}>${fmt(m.nae)}</i>`,                               // só o número
   ];
-  const bate = (a, b, f = 8) => a.left < b.right + f && a.right + f > b.left && a.top < b.bottom + f && a.bottom + f > b.top;
+  const FOLGA_ROT = () => (matchMedia('(max-width:860px)').matches ? 4 : 8);   // folga entre rótulos (menor no celular)
+  let folgaRot = 8;
+  const bate = (a, b, f = folgaRot) => a.left < b.right + f && a.right + f > b.left && a.top < b.bottom + f && a.bottom + f > b.top;
   function poeNomes() {
     nomes2.innerHTML = '';
     if (!pol || mun || anima) return;
     const r = svg.getBoundingClientRect(), v = vb(), c0 = caixa.getBoundingClientRect(), ctm = svg.getScreenCTM();
     if (!r.width || !ctm) return;
-    const celular = matchMedia('(max-width:860px)').matches, ocupado = [];   // legenda e seta de voltar também entram na conta
-    [leg, volta].forEach(o => { if (o && o.offsetParent) ocupado.push(o.getBoundingClientRect()); });
+    folgaRot = FOLGA_ROT();                                     // uma vez por cálculo (matchMedia a cada comparação custava ~120 ms)
+    const celular = matchMedia('(max-width:860px)').matches, ocupado = [];   // seta de voltar (e a legenda, se estiver no mapa) também entram na conta
+    [caixa.contains(leg) ? leg : null, volta, tc].forEach(o => { if (o && o.offsetParent) ocupado.push(o.getBoundingClientRect()); });
     const livre = { left: Math.max(r.left, c0.left) + 2, top: Math.max(r.top, c0.top) + 2, right: Math.min(r.right, c0.right) - 2, bottom: Math.min(r.bottom, c0.bottom) - 2 };
     const pt = svg.createSVGPoint(), u = Math.max(v[2] / r.width, v[3] / r.height);   // unidades do mapa por pixel de tela
     const aTela = (x, y) => { pt.x = x; pt.y = y; return pt.matrixTransform(ctm); };
@@ -538,48 +702,69 @@
         }
       }
     }
-    let nomeados = 0;                                           // celular: só os 10 de maior NAE levam o nome; os demais, o número
+    // 1º: nome DENTRO do município (cartão inteiro; no celular, compacto; depois compacto). 2º: os que não couberam
+    // ganham o nome FORA, ao lado, ligado ao município por um fio fino (ninguém fica sem nome). 3º: só o número dentro.
+    const fios = document.createElementNS(NS, 'svg');
+    fios.setAttribute('class', 'mt-fios');
+    nomes2.append(fios);
+    const caixaR = (s, w, h) => ({ left: s.x - w / 2, right: s.x + w / 2, top: s.y - h / 2, bottom: s.y + h / 2 });
+    const cabe = R => !(R.left < livre.left || R.right > livre.right || R.top < livre.top || R.bottom > livre.bottom) && !ocupado.some(o => bate(R, o));
+    const poe = (t, s, R) => { t.style.left = (s.x - c0.left).toFixed(1) + 'px'; t.style.top = (s.y - c0.top).toFixed(1) + 'px'; ocupado.push(R); };
+    const mede = (t, m, nv) => { t.innerHTML = NIVEIS_ROT[nv](m); t.dataset.nv = nv; t.style.left = '0px'; t.style.top = '0px'; return [t.offsetWidth, t.offsetHeight]; };
+    const sobra = [], ponta = {};
     ms.forEach(m => {
-      const it = cand(m), cache = [];                           // pontos em cache e gerados só quando preciso, para os 3 níveis
+      const it = cand(m), cache = [];                           // pontos em cache e gerados só quando preciso
       const ponto = k => { while (cache.length <= k) { const r = it.next(); if (r.done) return null; cache.push(r.value); } return cache[k]; };
       if (!ponto(0)) return;
       const [dx, dy] = soma(desl[pol], mdesl[m.cod]);
+      const tela = q => aTela(q.x + dx, q.y + dy);
+      ponta[m.cod] = { tela, ponto };
       const t = document.createElement('span');
       t.className = 'mt-mn';
       nomes2.append(t);
-      for (let nv = celular ? (nomeados < 10 ? 1 : 2) : 0; nv < NIVEIS_ROT.length; nv++) {      // celular: já começa no cartão compacto
-        t.innerHTML = NIVEIS_ROT[nv](m);
-        t.dataset.nv = nv;
-        t.style.left = '0px'; t.style.top = '0px';
-        const w = t.offsetWidth, h = t.offsetHeight;
-        for (let k = 0, q; (q = ponto(k)); k++) {
-          const s = aTela(q.x + dx, q.y + dy);
-          const R = { left: s.x - w / 2, right: s.x + w / 2, top: s.y - h / 2, bottom: s.y + h / 2 };
-          if (R.left < livre.left || R.right > livre.right || R.top < livre.top || R.bottom > livre.bottom) continue;
-          if (ocupado.some(o => bate(R, o))) continue;
-          t.style.left = (s.x - c0.left).toFixed(1) + 'px'; t.style.top = (s.y - c0.top).toFixed(1) + 'px';
-          ocupado.push(R);
-          if (nv < 2) nomeados++;
-          return;
-        }
+      for (let nv = celular ? 1 : 0; nv < 2; nv++) {
+        const [w, h] = mede(t, m, nv);
+        for (let k = 0, q; (q = ponto(k)); k++) { const s = tela(q), R = caixaR(s, w, h); if (cabe(R)) { poe(t, s, R); return; } }
       }
-      t.remove();
+      sobra.push([m, t]);
+    });
+    const ANG = 16, RAIOS = celular ? [30, 42, 56, 72, 90] : [38, 52, 68, 86, 108, 132, 160];
+    const resto = [];
+    const fora = (t, m, w, h) => {                              // põe o cartão ao lado do município, ligado por um fio
+      const s0 = ponta[m.cod].tela(ponta[m.cod].ponto(0));
+      for (const r of RAIOS) for (let i = 0; i < ANG; i++) {
+        const a = i / ANG * 2 * Math.PI - Math.PI / 2, s = { x: s0.x + Math.cos(a) * r, y: s0.y + Math.sin(a) * r * .75 }, R = caixaR(s, w, h);
+        if (!cabe(R)) continue;
+        poe(t, s, R);
+        t.classList.add('fora');
+        const x0 = s0.x - c0.left, y0 = s0.y - c0.top, x1 = s.x - c0.left, y1 = s.y - c0.top;
+        fios.insertAdjacentHTML('beforeend', `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"/><circle cx="${x0.toFixed(1)}" cy="${y0.toFixed(1)}" r="2.5"/>`);
+        return true;
+      }
+      return false;
+    };
+    sobra.forEach(([m, t]) => { const [w, h] = mede(t, m, 1); if (!fora(t, m, w, h)) resto.push([m, t]); });
+    resto.forEach(([m, t]) => {                                 // último recurso: só o número, dentro; senão fora, com fio
+      if (!legAberta) { t.remove(); return; }                   // sem NAE (legenda recolhida) não há o rótulo só do número
+      const [w, h] = mede(t, m, 2), { tela, ponto } = ponta[m.cod];
+      for (let k = 0, q; (q = ponto(k)); k++) { const s = tela(q), R = caixaR(s, w, h); if (cabe(R)) { poe(t, s, R); return; } }
+      if (!fora(t, m, w, h)) t.remove();
     });
   }
-  // selo de cada polo: no município do polo mais perto do meio dele (o selo sempre cai dentro do polo)
+  // cartão de cada polo: bandeirinha logo acima do contorno do polo, com o fio na cor dele
   function poeSelos() {
     selos.innerHTML = '';
     if (!reg || pol || anima) return;
-    const ctm = svg.getScreenCTM(), cx = caixa.getBoundingClientRect();
-    selos.innerHTML = psReg.map(p => {
-      const mx = p.ms.reduce((s, m) => s + m.c[0], 0) / p.ms.length, my = p.ms.reduce((s, m) => s + m.c[1], 0) / p.ms.length;
-      const m = p.ms.reduce((a, b) => Math.hypot(b.c[0] - mx, b.c[1] - my) < Math.hypot(a.c[0] - mx, a.c[1] - my) ? b : a);
-      const pt = svg.createSVGPoint();
-      [pt.x, pt.y] = soma(m.c, desl[p.polo]);
-      const s = pt.matrixTransform(ctm);
-      return `<div class="mt-mn mt-pm${grp[p.polo].classList.contains('desliga') ? ' off' : ''}" data-polo="${esc(p.polo)}" style="--c:${corDe[p.polo]};left:${(s.x - cx.left).toFixed(0)}px;top:${(s.y - cx.top).toFixed(0)}px">` +
-        `<b>${esc(p.polo)}</b><i>${p.nae.toLocaleString('pt-BR')} NAE</i></div>`;
-    }).join('');
+    const cards = psReg.map(p => {
+      const e = document.createElement('div');
+      e.className = 'mt-mn mt-pm' + (grp[p.polo].classList.contains('desliga') ? ' off' : '');
+      e.dataset.polo = p.polo;
+      e.style.setProperty('--c', corDe[p.polo]);
+      e.innerHTML = `<b>${esc(p.polo)}</b><i>${p.nae.toLocaleString('pt-BR')} NAE</i>`;
+      selos.append(e);
+      return { e, cor: corDe[p.polo], path: grp[p.polo].querySelector('.mt-poloc:not(.fundo)'), centro: soma(meio(p.ms).c, desl[p.polo]) };
+    });
+    if (cards.length) fios.innerHTML = bandeiras(cards, M.muns.filter(m => m.reg === reg));
   }
   legPolos.addEventListener('click', e => {
     const bt = e.target.closest('button');
@@ -610,12 +795,15 @@
   }
   const sobe = () => (alf ? saiAl() : mun ? saiMun() : pol ? saiPolo() : sai());
   volta.addEventListener('click', sobe);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && reg && !e.defaultPrevented) sobe(); });
+  document.addEventListener('keydown', e => {      // Esc sobe um nível; no estado inteiro, sai da tela cheia
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    if (reg) sobe(); else if (alvo.classList.contains('mt-cheia')) cobre(false);
+  });
   if (window.ResizeObserver) new ResizeObserver(() => { if (reg && !anima) { svg.setAttribute('viewBox', enquadra().join(' ')); poeNomes(); poeSelos(); } }).observe(caixa);
 
   // no estado inteiro, escolher um município abre a regional dele; com a regional aberta, abre o polo dele; com o polo
   // aberto, abre o município (a rede dos alimentadores); com o município aberto, abre a página dele
-  const abre = cod => { const m = porCod[cod]; if (m && m.slug) location.href = `municipios/${m.slug}/`; };
+  const abre = cod => { const m = porCod[cod]; if (m && m.slug) vaiPag(`municipios/${m.slug}/`); };
   const escolhe = (cod, teclado) => {
     const m = porCod[cod];
     if (!reg && m.reg) entra(m.reg, teclado, cod);
@@ -715,4 +903,52 @@
     document.addEventListener('pointerdown', e => { if (!lista.hidden && !busca.parentElement.contains(e.target)) abreLista(false); });
     busca.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== busca) abreLista(false); }, 0));
   }
+
+  // ---------- ponte com a busca da barra (busca-ativo.js) ----------
+  // vai({reg}|{polo}|{cod}|{al}): o mapa anda até lá pelo mesmo caminho dos cliques (regional › polo › município ›
+  // alimentador), subindo só o que não serve. O alimentador abre no município onde ele tem mais km — de preferência
+  // dentro do que já está aberto (município, polo ou regional).
+  const kmAl = (m, al) => { const a = m.als.find(x => x.cod === al); return a ? a.m : 0; };
+  function munDoAl(al) {
+    const ms = M.muns.filter(m => m.slug && kmAl(m, al) > 0);
+    if (!ms.length) return null;
+    if (mun && ms.some(m => m.cod === mun)) return mun;
+    const dentro = ms.filter(m => pol ? m.polo === pol : reg ? m.reg === reg : true);
+    return (dentro.length ? dentro : ms).sort((a, b) => kmAl(b, al) - kmAl(a, al))[0].cod;
+  }
+  async function vai({ reg: r, polo, cod, al } = {}) {
+    if (al) cod = munDoAl(al);
+    const m = porCod[cod];
+    if (m) { r = m.reg; polo = m.polo; }
+    if (polo && !r) { const x = M.muns.find(y => y.polo === polo); r = x && x.reg; }
+    previa(null);
+    if (!r) { sai(); return; }
+    if (reg && reg !== r) sai();
+    if (pol && pol !== polo) saiPolo(!polo);
+    if (mun && mun !== cod) saiMun(!cod);
+    if (alf && alf !== al) saiAl(!al);
+    if (!reg) entra(r);
+    if (polo && !pol) entraPolo(polo);
+    if (cod && !mun) entraMun(cod);
+    if (al && mun) await focaAl(al);
+  }
+  // previa(alvo): acende no mapa o que está marcado na lista da busca, sem mudar de nível (null apaga)
+  let acesos = [];
+  function previa(a) {
+    acesos.forEach(c => el[c].classList.remove('acende'));
+    acesos = [];
+    if (!reg) realca(null); else if (!pol) realcaPolo(null);
+    if (achou.size) { achou = new Set(); rotulos(); }
+    if (!a) return;
+    const regDe = a.reg || (a.polo && (M.muns.find(x => x.polo === a.polo) || {}).reg);
+    if (!a.polo && !a.cod && !a.al) { if (!reg) realca(regDe); return; }
+    if (a.polo && !reg) realca(regDe);
+    if (a.polo && reg === regDe && !pol) { realcaPolo(a.polo); return; }
+    acesos = a.cod ? [a.cod] : M.muns.filter(m => a.al ? kmAl(m, a.al) > 0 : m.polo === a.polo).map(m => m.cod);
+    acesos.forEach(c => { el[c].classList.add('acende'); if (acesos.length === 1) traz(el[c]); });
+    if (!reg && (a.cod || a.al)) { achou = new Set(acesos); rotulos(); }   // no estado inteiro aparecem os nomes
+  }
+  // rede do alimentador (para a miniatura na lista da busca) e o destaque dela no mapa com o município aberto
+  const redeDe = al => { const m = porCod[mun] || M.muns.find(x => x.als.some(a => a.cod === al)); return m ? rede(al, m.polo) : Promise.resolve(null); };
+  window.ARGOS_MAPA = { nivel: () => ({ reg, pol, mun, al: alf }), vai, previa, rede: redeDe, realceAl: al => { if (mun) realceAl(al); } };
 })();

@@ -42,7 +42,7 @@ MES = re.compile(r'(?<!\d)(0[1-9]|1[0-2])[-_.](20\d\d)(?!\d)')
 # o que a automação precisa (pasta ferramentas/ do gh-pages): os scripts e a parte do pacote alimentador que eles usam
 FERRAMENTAS = {
     'scripts': ['gera_trechos.py', 'atualiza_critica.py', 'ativos_gis.py', 'inspecao.py', 'limpeza_faixa.py',
-                'manutencao.py', 'executadas.py', 'atualiza_bases.py'],
+                'manutencao.py', 'executadas.py', 'atualiza_bases.py', 'ativos_js.py', 'divisas.py'],
     'alimentador': ['__init__.py', 'critica.py', 'daimon.py', 'gerar_trechos.py', 'regras.py', 'trechos.py',
                     'mapa_trechos.html', 'site_indice.html', 'leaflet/leaflet.css', 'leaflet/leaflet.js',
                     'leaflet/LICENSE', 'site/*'],

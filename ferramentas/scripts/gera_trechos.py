@@ -767,14 +767,14 @@ TEMA = ("<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}
         "document.documentElement.dataset.theme=t==='claro'?'light':'dark'})()</script>")
 
 
-def casca(titulo, corpo, raiz, rodape=''):
+def casca(titulo, corpo, raiz, rodape='', sem_rodape=False):
     return (f'<!doctype html>\n<html lang="pt-BR"><head><meta charset="utf-8">\n'
             f'<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
             f'<meta name="robots" content="noindex, nofollow">\n<title>{html.escape(titulo)}</title>\n'
             f'{TEMA}\n'
             f'{FONTES}<link rel="stylesheet" href="{raiz}assets/site.css"></head><body><div class="wrap">\n{corpo}\n'
-            f'<footer class="rodape">{rodape}<p><a href="{raiz}relatorio.html">Relatório de validação</a> · '
-            f'<a href="{raiz}manifesto.json">manifesto.json</a></p></footer>\n</div>\n'
+            + ('' if sem_rodape else f'<footer class="rodape">{rodape}<p><a href="{raiz}relatorio.html">Relatório de validação</a> · '
+               f'<a href="{raiz}manifesto.json">manifesto.json</a></p></footer>\n') + '</div>\n'
             '<script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value'
             '.normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase();document.querySelectorAll("[data-busca]")'
             '.forEach(e=>{e.hidden=!e.dataset.busca.includes(q)});document.querySelectorAll(".grade").forEach(g=>{let v=g.nextElementSibling;'
@@ -962,12 +962,18 @@ def redes_mapa(saida, dados):
 
 
 def polo_principal(c, polo_de):
-    """Polo onde o alimentador tem mais rede (km dos trechos por município); None se não tem rede em polo nenhum."""
-    km = {}
+    """Polo do município onde o alimentador tem mais rede (o mesmo município que o mapa da página inicial usa para a NAE
+    sem trecho, em nae_por_municipio); se esse município não está em polo nenhum, o polo onde o alimentador tem mais
+    rede. None se não tem rede em polo nenhum."""
+    mun, km = {}, {}
     for t in c['trechos']:
         for cod, m in (t.get('municipios') or {}).items():
+            if cod != 'None':
+                mun[cod] = mun.get(cod, 0) + m
             if cod in polo_de:
                 km[polo_de[cod]] = km.get(polo_de[cod], 0) + m
+    if mun and polo_de.get(max(mun, key=mun.get)):
+        return polo_de[max(mun, key=mun.get)]
     return max(km, key=km.get) if km else None
 
 
@@ -1013,7 +1019,7 @@ def ranking_polos(saida, dados, man):
 
     O polo vem do município (alimentador/site/polos.json, da planilha de cidades por polo DCMD). O alimentador entra
     em cada polo onde tem rede (≥ MIN_M) ou NAE: km e NAE de cada trecho contam no polo do município onde o trecho tem
-    mais rede; NAE sem trecho conta no polo onde o alimentador tem mais rede. Limpeza: metros de cada classe pela data
+    mais rede; NAE sem trecho conta no polo do município onde o alimentador tem mais rede (como no mapa). Limpeza: metros de cada classe pela data
     da última limpeza executada de cada vão (a situação, em dia ou vencida, é calculada na página com a data do dia).
     """
     cfg = json.loads((PKG / 'site' / 'polos.json').read_text(encoding='utf-8'))
@@ -1024,6 +1030,7 @@ def ranking_polos(saida, dados, man):
     linhas = {p['id']: [] for p in cfg['polos']}
     trechos_p = {p['id']: [] for p in cfg['polos']}       # trechos com NAE, no polo do município de mais rede
     meses, regra, equipes = set(), {'T1': 3, 'T2': 4, 'T3': 5}, None
+    principais = {}                                     # alimentador → polo onde conta a NAE sem trecho (nae_rede.py usa)
     for c in dados:
         if c['validacao']['status'] == 'falha':
             continue
@@ -1037,7 +1044,8 @@ def ranking_polos(saida, dados, man):
                 km[polo_de[cod]] = km.get(polo_de[cod], 0) + m
         if not km:
             continue
-        principal = max(km, key=km.get)
+        principal = polo_principal(c, polo_de)          # polo do município de mais rede (como no mapa da página inicial)
+        principais[al] = principal
         mun_t = {t['nome']: {k: m for k, m in (t.get('municipios') or {}).items() if k != 'None'} for t in ts}   # 'None': fora do TO
         polo_t = {n: polo_de.get(max(mm, key=mm.get)) if mm else None for n, mm in mun_t.items()}
         nae = {}                                        # polo → [NAE, consumidores, consumidor×min, NAE sem trecho]
@@ -1094,6 +1102,7 @@ def ranking_polos(saida, dados, man):
                 lp={cl: {d: round(m) for d, m in sorted(ds.items())} for cl, ds in sorted(limp.get(p, {}).items())}))
     dados_js = dict(meses=[min(meses), max(meses)] if meses else [], regra=regra, equipes=equipes, fonte=cfg['fonte'],
                     fora=cfg['fora'], muns={g['cod']: nome_de.get(g['cod'], g['nome']) for g in geo},
+                    principal=principais,
                     polos=[dict(id=p['id'], nome=p['nome'], regional=p['regional'], equipe=p['equipe'],
                                 n_muns=len(p['municipios']),
                                 als=sorted(linhas[p['id']], key=lambda a: (-a['nae'], -a['km'], a['al'])),
@@ -1372,19 +1381,18 @@ def interface(saida, malha=None):
              '<button type="button" class="lupa" id="lupa" aria-label="Buscar ativo, município, alimentador ou OS" '
              'aria-expanded="false" aria-controls="ativo-q">'
              '<img class="argos-img" src="assets/argos.png" alt="" width="34" height="23"></button>'   # o olho do ARGOS (logo)
-             '<label for="ativo-q" class="vh">Buscar ativo, município, alimentador ou OS</label>'
+             '<label for="ativo-q" class="vh">Buscar regional, polo, município, alimentador, ativo ou OS</label>'
              '<input class="busca" id="ativo-q" type="search" inputmode="search" autocomplete="off" '
-             'placeholder="Ativo, município, alimentador ou OS" enterkeyhint="search" hidden>'
-             '<div id="ativo-res" aria-live="polite"></div></div></form></div>\n'
+             'placeholder="Município, alimentador, ativo, OS" enterkeyhint="search" hidden>'   # fechada, só o olho; tocar nele abre
+             '<div id="ativo-res" aria-live="polite"></div></div></form>'
+             '<details class="mt-regs" open><summary>NAE-Vegetação</summary></details></div>\n'   # legenda na barra, ao lado do olho (mapa-municipios.js)
              f'<div class="mt-mapa"><svg role="group" aria-label="Mapa dos municípios do Tocantins" tabindex="-1" viewBox="{vb}"></svg>'
-             '<div class="mt-dica" aria-hidden="true"></div>'
-             '<details class="mt-regs" open><summary>NAE-Vegetação</summary></details></div></div>\n'   # legenda: mapa-municipios.js
+             '<div class="mt-dica" aria-hidden="true"></div></div></div>\n'
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
              '<script src="assets/mapa-municipios.js"></script>\n'
              '<script src="assets/busca-ativo.js"></script>')
-    (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', rodape=(
-        '<p>T1 do DJ ao 1º religador, T2 de religador a religador (T2-A, T2-B…), T3-A, T3-B… depois de cada fusível.</p>')),
-        encoding='utf-8')
+    (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True),   # página inicial sem rodapé (pedido do usuário)
+                                      encoding='utf-8')
     (saida / '.nojekyll').touch()
     relatorio(saida, dados, man)
     return dados, man
