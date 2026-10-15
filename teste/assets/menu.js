@@ -33,7 +33,19 @@
     baixar: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>',
     fechar: '<path d="M6 6l12 12M18 6 6 18"/>',
     lua: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
+    doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h6"/>',
+    dados: '<path d="M8 4c-2 0-2 1.5-2 3v2c0 1.5-1 3-2 3 1 0 2 1.5 2 3v2c0 1.5 0 3 2 3"/><path d="M16 4c2 0 2 1.5 2 3v2c0 1.5 1 3 2 3-1 0-2 1.5-2 3v2c0 1.5 0 3-2 3"/>',
   };
+  // relatórios (antes no rodapé da página inicial): o relatório e o manifesto só existem no site publicado; fora dele
+  // (a cópia do Artifact) abrem lá, em outra aba
+  const noSite = /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+  const doSite = p => noSite ? raiz + p : 'https://lgrsv.github.io/vera-vegeta-o-back/teste/' + p;
+  const outraAba = noSite ? '' : ' target="_blank" rel="noopener"';
+  const TRECHOS = [
+    ['T1', '#3b82f6', 'do DJ ao 1º religador', ''],
+    ['T2', '#22c55e', 'de religador a religador', 'T2-A, T2-B…'],
+    ['T3', '#facc15', 'depois de cada fusível', 'T3-A, T3-B…'],
+  ];
   const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
   const mes = m => MESES[+m.slice(5, 7) - 1] + '/' + m.slice(0, 4);
@@ -64,6 +76,14 @@
     '.mnu-lista a:hover,.mnu-lista button:hover,.mnu-lista :focus-visible{background:var(--hover,rgb(0 0 0 / .05));outline:none}' +
     '.mnu-lista :focus-visible{box-shadow:inset 0 0 0 2px var(--accent,#b8431f)}' +
     '.mnu-sep{height:1px;margin:6px 4px;background:var(--line,#d6dad6)}' +
+    '.mnu-gt{display:block;padding:8px 10px 4px;font:700 var(--t-xs,12px)/1.2 var(--f-body,system-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#5a636a)}' +
+    '.mnu-tr{display:grid;gap:6px;margin:2px 4px 6px;padding:10px;border:1px solid var(--line,#d6dad6);border-radius:calc(var(--r2,10px) - 2px);background:var(--bg,#f3f4f1)}' +
+    '.mnu-tr>span{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px;font-size:var(--t-sm,13px);line-height:1.3;color:var(--fg,#1b2024)}' +
+    '.mnu-tr i{min-width:30px;padding:2px 0;border-radius:6px;background:var(--c);color:#0b1220;font:700 11px/1.3 var(--f-mono,monospace);font-style:normal;text-align:center}' +
+    '.mnu-tr small{color:var(--muted,#5a636a);font-size:var(--t-xs,12px)}' +
+    '.mnu-lista a.mnu-rel{align-items:flex-start;font-weight:600;font-size:var(--t-base,15px);color:var(--fg,#1b2024)}' +
+    '.mnu-rel svg{color:var(--accent,#b8431f);margin-top:1px}.mnu-rel span{display:grid;gap:1px}' +
+    '.mnu-rel small{font-weight:400;font-size:var(--t-xs,12px);color:var(--muted,#5a636a)}' +
     '.mnu-tema span{flex:1}.mnu-tema kbd{font:600 11px/1 var(--f-mono,monospace);padding:4px 6px;border:1px solid var(--line,#d6dad6);border-radius:6px;color:var(--muted,#5a636a)}' +
     '.mnu-sw{position:relative;flex:none;width:32px;height:18px;border-radius:9px;background:var(--line-forte,#8c948f);transition:background .15s}' +
     '.mnu-sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .15s}' +
@@ -106,6 +126,12 @@
     `<ul class="mnu-lista" id="mnu-lista" hidden>` +
     `<li><button type="button" aria-haspopup="dialog">${svg(ICONE.enviar, '')}Atualização de dados</button></li>` +
     `<li><button type="button" class="mnu-tema" aria-pressed="true">${svg(ICONE.lua, '')}<span>Night shift</span><kbd>Shift K</kbd><i class="mnu-sw" aria-hidden="true"></i></button></li>` +
+    `<li class="mnu-sep" aria-hidden="true"></li>` +
+    `<li role="presentation"><span class="mnu-gt" id="mnu-rel-t">Relatórios</span></li>` +
+    `<li><div class="mnu-tr" role="list" aria-labelledby="mnu-rel-t">` + TRECHOS.map(([t, c, txt, ex]) =>
+      `<span role="listitem"><i style="--c:${c}">${t}</i><span>${txt}${ex ? ` <small>(${ex})</small>` : ''}</span></span>`).join('') + `</div></li>` +
+    `<li><a class="mnu-rel" href="${doSite('relatorio.html')}"${outraAba}>${svg(ICONE.doc, '')}<span>Relatório de validação<small>Trechos, NAE e avisos por município</small></span></a></li>` +
+    `<li><a class="mnu-rel" href="${doSite('manifesto.json')}"${outraAba}>${svg(ICONE.dados, '')}<span>manifesto.json<small>Municípios e alimentadores em JSON</small></span></a></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
     `<li><a href="${raiz}assets/scripts/trechos-kml.zip" download>${svg(ICONE.baixar, '')}Script KML → trechos (.zip)</a></li></ul>`;
   wrap.prepend(box);
@@ -286,7 +312,7 @@
     poeBases(fresco);
     (form && !form.hidden ? inChave : zona).focus();
   });
-  lista.querySelector('a').addEventListener('click', () => abre(false));
+  lista.querySelectorAll('a').forEach(a => a.addEventListener('click', () => abre(false)));
   // Night shift: ligado = tema escuro (fundo preto, o padrão); desligado = claro. Guarda a escolha neste navegador e vale
   // para todas as páginas (o <head> de cada página lê "tema" antes do CSS). Atalho: Shift+K fora dos campos de texto.
   const btTema = lista.querySelector('.mnu-tema');
