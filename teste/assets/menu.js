@@ -36,6 +36,7 @@
     doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h6"/>',
     dados: '<path d="M8 4c-2 0-2 1.5-2 3v2c0 1.5-1 3-2 3 1 0 2 1.5 2 3v2c0 1.5 0 3 2 3"/><path d="M16 4c2 0 2 1.5 2 3v2c0 1.5 1 3 2 3-1 0-2 1.5-2 3v2c0 1.5 0 3-2 3"/>',
     slides: '<path d="M3 4h18"/><path d="M5 4v11h14V4"/><path d="m10.5 7.5 3.5 2-3.5 2z"/><path d="M12 15v3"/><path d="m8 21 4-3 4 3"/>',
+    ranking: '<path d="M5 20V11M12 20V4M19 20v-6"/>',
   };
   // relatórios (antes no rodapé da página inicial): o relatório e o manifesto só existem no site publicado; fora dele
   // (a cópia do Artifact) abrem lá, em outra aba
@@ -127,6 +128,8 @@
     `<ul class="mnu-lista" id="mnu-lista" hidden>` +
     `<li><button type="button" aria-haspopup="dialog">${svg(ICONE.enviar, '')}Atualização de dados</button></li>` +
     `<li><button type="button" class="mnu-tema" aria-pressed="true">${svg(ICONE.lua, '')}<span>Night shift</span><kbd>Shift K</kbd><i class="mnu-sw" aria-hidden="true"></i></button></li>` +
+    `<li class="mnu-sep" aria-hidden="true"></li>` +
+    `<li><a class="mnu-rel" href="${raiz}priorizacao/">${svg(ICONE.ranking, '')}<span>Priorização de faixa<small>Alimentadores com mais NAE e trechos P1 a P4</small></span></a></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
     `<li role="presentation"><span class="mnu-gt" id="mnu-rel-t">Relatórios</span></li>` +
     `<li><div class="mnu-tr" role="list" aria-labelledby="mnu-rel-t">` + TRECHOS.map(([t, c, txt, ex]) =>
