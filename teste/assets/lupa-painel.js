@@ -1,20 +1,22 @@
-// Painel do alimentador: a lupa do ARGOS (como na página inicial) no lugar da busca solta, dos botões T1 T2 T3 e do "Menu"
-// das camadas em cima do mapa. A barra fica DENTRO do mapa, no canto de cima: de primeira só o olho do ARGOS; tocar no olho
-// abre olho · campo "Trecho, ativo ou poste" · botão Filtros, com a lista das classes. Tocar de novo no olho (campo vazio),
-// Esc ou clicar fora (campo vazio) fecha e fica só o olho. Escolher um trecho ou um resultado também fecha.
+// Painel do alimentador: a lupa do ARGOS (como na página inicial) no lugar da busca solta e do "Menu" das camadas em cima
+// do mapa. A barra fica DENTRO do mapa, no canto de cima: de primeira o olho do ARGOS e, à direita dele, os bloquinhos
+// T1 T2 T3 (pedido do usuário: voltaram); tocar no olho abre olho · campo "Trecho, ativo ou poste" · botão Filtros, com a
+// lista das classes (os bloquinhos saem enquanto a barra está aberta). Tocar de novo no olho (campo vazio), Esc ou clicar
+// fora (campo vazio) fecha e voltam o olho e T1 T2 T3. Escolher um trecho ou um resultado também fecha.
 // - Olho (ou o campo vazio com foco): lista suspensa com as classes T1, T2 e T3 (trechos, km e NAE no período). Tocar na
 //   classe abre os trechos dela (maior NAE primeiro); tocar num trecho escolhe ele no mapa. O olho de cada classe mostra ou
 //   esconde a classe no mapa. Embaixo, as camadas do Menu (Faixa, Inspeção, Insp→manut, Manutenção).
-//   Classes e camadas usam os próprios botões de alimentador.js e extras.js (que ficam escondidos): a lógica é a mesma.
+//   Classes e camadas usam os próprios botões de alimentador.js e extras.js (os T1 T2 T3 são os bloquinhos ao lado do
+//   olho; os do Menu ficam escondidos): a lógica é a mesma.
 // - Filtros: menu suspenso com o município e os meses do NAE (os mesmos controles de extras.js e alimentador.js, só mudam de
 //   lugar); o número no botão diz quantos filtros estão ligados.
 // - Ao digitar: outra lista suspensa, com os resultados em grupos (como a busca da página inicial): trechos (nome ou
 //   chave de início, fim ou passagem), chaves e ativos do alimentador, postes e OS das camadas. Marcar (setas ou mouse)
 //   acende no mapa sem mudar a seleção; escolher (clique ou Enter) seleciona e enquadra. Esc fecha. O filtro da lista do
 //   painel (alimentador.js) continua por trás.
-// - Tela cheia: igual (pedido do usuário): a barra fica dentro do mapa, só o olho, e os botões antigos T1 T2 T3 / Menu
-//   não voltam. O painel lateral (a gaveta de telacheia.js, que abria pelo item "Painel" do Menu) abre pelo item
-//   "Painel" no alto da lista do olho.
+// - Tela cheia: igual (pedido do usuário): a barra fica dentro do mapa, o olho com T1 T2 T3 à direita, e o Menu antigo
+//   não volta. O painel lateral (a gaveta de telacheia.js) não passa pelo olho: no PC já vem aberto e, fechado, abre
+//   pela aba na borda direita do mapa.
 (function () {
   const barra = document.querySelector('.barra-busca'), linha = barra && barra.querySelector('.barra-linha'), q = document.getElementById('busca');
   if (!barra || !linha || !q || barra.querySelector('.lp-lupa')) return;   // sem a barra (mapa não carregou): fica como antes
@@ -106,19 +108,13 @@
   }
   // com a classe à vista, uma linha escondida na lista é filtro de município: o trecho sai daqui também
   const OLHO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="o" d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle class="o" cx="12" cy="12" r="2.8"/><path class="x" d="M4 4l16 16"/></svg>';
-  // painel lateral da tela cheia (telacheia.js): o item "Painel" que ele põe no Menu do mapa (escondido) ou o "☰ Painel"
-  const botaoPainel = () => document.querySelector('.tc-painel-m') || document.querySelector('.tc-ctl .tc-painel');
-  const ICO_PN = '<svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M14.5 4.5v15M17 9h1M17 12h1"/></svg>';
   const pill = n => n == null ? '' : `<i class="lp-n${n ? '' : ' zero'}">${mil(n)}<span class="vh"> NAE</span></i>`;
   function desenha() {
     const { nae, escondida } = leLista(), cor = c => { const b = btCls(c); return b ? b.style.getPropertyValue('--c') : ''; };
     const doCls = c => D.trechos.filter(t => classe(t.nome) === c && (!visivel(c) || !escondida.has(t.nome)));
     let html = '';
     if (!aberta) {
-      if (document.body.classList.contains('tela-cheia') && botaoPainel()) html +=
-        `<button type="button" class="lp-op lp-pn" aria-pressed="${document.body.classList.contains('tc-gaveta')}"><span class="lp-pi" aria-hidden="true">${ICO_PN}</span>` +
-        '<span class="lp-x"><b>Painel</b><small>Resumo, lista dos trechos e detalhe</small></span><span class="lp-seta" aria-hidden="true">›</span></button>';
-      html += '<p class="lp-t">Classes</p>' + CLS.filter(btCls).map(c => {
+      html += '<p class="lp-t">Classes</p>' + CLS.filter(c => { const b = btCls(c); return b && !b.hidden; }).map(c => {   // só as que o alimentador tem
         const ts = doCls(c), m = ts.reduce((s, t) => s + t.ext, 0), n = nae ? ts.reduce((s, t) => s + (nae[t.nome] || 0), 0) : null, v = visivel(c);
         return `<div class="lp-cls${v ? '' : ' off'}" style="--c:${esc(cor(c))}">` +
           `<button type="button" class="lp-op lp-abre" data-c="${c}"><span class="lp-bar" aria-hidden="true"></span>` +
@@ -126,7 +122,7 @@
           '<span class="lp-seta" aria-hidden="true">›</span></button>' +
           `<button type="button" class="lp-olho" data-c="${c}" aria-pressed="${v}" title="${v ? 'Esconder' : 'Mostrar'} ${c} no mapa" aria-label="Mostrar ${c} no mapa">${OLHO}</button></div>`;
       }).join('');
-      const cams = [...document.querySelectorAll('#ctl-camadas .ctl-card > button:not(.tc-painel-m)')];
+      const cams = [...document.querySelectorAll('#ctl-camadas .ctl-card > button')];
       if (cams.length) html += '<p class="lp-t">Camadas</p>' + cams.map((b, i) =>
         `<button type="button" class="lp-op lp-cam" data-i="${i}" aria-pressed="${b.getAttribute('aria-pressed') === 'true'}"><span class="lp-chk" aria-hidden="true"></span>` +
         `<span class="lp-x"><b>${esc(b.textContent.trim())}</b></span></button>`).join('');
@@ -176,13 +172,6 @@
     const b = e.target.closest('button');
     if (!b) return;
     e.stopPropagation();
-    if (b.classList.contains('lp-pn')) {                 // tela cheia: abre (ou fecha) o painel lateral
-      abreDrop(false);
-      if (noMapa()) abreBarra(false);
-      const o = botaoPainel();
-      if (o) o.click();
-      return;
-    }
     if (b.classList.contains('lp-olho')) { const o = btCls(b.dataset.c); if (o) o.click(); desenha(); drop.querySelector(`.lp-olho[data-c="${b.dataset.c}"]`).focus(); return; }
     if (b.classList.contains('lp-mais')) {
       const y = drop.scrollTop, i = limite;
@@ -196,7 +185,7 @@
     if (b.classList.contains('lp-abre')) { aberta = b.dataset.c; limite = LOTE; desenha(); drop.scrollTop = 0; const f = drop.querySelector('.lp-tr, .lp-volta'); if (f && e.detail === 0) f.focus(); return; }
     if (b.classList.contains('lp-volta')) { const era = aberta; aberta = null; desenha(); if (e.detail === 0) drop.querySelector(`.lp-abre[data-c="${era}"]`).focus(); return; }
     if (b.classList.contains('lp-cam')) {
-      const o = document.querySelectorAll('#ctl-camadas .ctl-card > button:not(.tc-painel-m)')[+b.dataset.i];
+      const o = document.querySelectorAll('#ctl-camadas .ctl-card > button')[+b.dataset.i];
       if (o) o.click();
       desenha();
       const n = drop.querySelector(`.lp-cam[data-i="${b.dataset.i}"]`);
@@ -811,7 +800,7 @@
     }
   }
 
-  // ---------- a barra dentro do mapa: de primeira só o olho (também na tela cheia) ----------
+  // ---------- a barra dentro do mapa: de primeira o olho e T1 T2 T3 (também na tela cheia) ----------
   function noMapa() { const p = barra.parentElement; return !!p && p.classList.contains('mapbox'); }
   function fechada() { return barra.classList.contains('lp-fechada'); }
   function rotuloOlho() {
@@ -846,7 +835,7 @@
     const w = q.clientWidth;
     if (w) q.placeholder = w >= 330 ? 'Trecho, ativo, poste ou OS' : w >= 215 ? 'Trecho, ativo ou poste' : 'Trecho ou ativo';
   }
-  // abre (só o olho → olho · campo · Filtros) ou fecha; limpa: fecha também a busca digitada; foco: o foco volta ao olho
+  // abre (olho e T1 T2 T3 → olho · campo · Filtros) ou fecha; limpa: fecha também a busca digitada; foco: o foco volta ao olho
   function abreBarra(sim, limpa, foco) {
     if (!noMapa()) return;
     if (sim) { barra.classList.remove('lp-fechada'); rotuloOlho(); medeMax(); ajustaDica(); return; }
@@ -865,10 +854,17 @@
     caixaMapa.append(barra);                             // a barra de extras.js sai de cima do mapa e entra nele
     barra.classList.add('lp-fechada');
   }
+  // T1 T2 T3 de volta ao mapa (pedido do usuário): os bloquinhos de sempre (os próprios botões de alimentador.js, #classes,
+  // com o mesmo ouvinte) à direita do olho, na mesma linha, também na tela cheia; só as classes que o alimentador tem.
+  // Saem com a barra aberta e voltam ao fechar (CSS, embaixo); o Menu continua fora (as camadas estão na lista do olho)
+  if (caixaMapa && cls) {
+    let algum = false;
+    cls.querySelectorAll('button[data-c]').forEach(b => { b.hidden = !D.trechos.some(t => classe(t.nome) === b.dataset.c); algum = algum || !b.hidden; });
+    if (algum) lupa.after(cls);
+  }
   rotuloOlho();
   // tela cheia: telacheia.js leva a barra para a gaveta e, ao sair, para cima do mapa; aqui ela volta para dentro do mapa
   // na mesma hora (antes de pintar), como estava, e quem digitava continua no campo
-  let gavetaAntes = false;
   if (caixaMapa) new MutationObserver(() => {
     if (barra.parentElement !== caixaMapa) {
       const f = barra.contains(document.activeElement) ? document.activeElement : null;
@@ -876,11 +872,6 @@
       if (f) f.focus({ preventScroll: true });
     }
     rotuloOlho(); ajustaDica();
-    if (!drop.hidden) desenha();                         // o item "Painel" entra e sai com a tela cheia e marca a gaveta
-    // gaveta fechada (✕ ou Esc) com o foco perdido: volta ao olho (telacheia.js o mandaria para o Menu, que fica escondido)
-    const gav = document.body.classList.contains('tc-gaveta');
-    if (gavetaAntes && !gav && (!document.activeElement || document.activeElement === document.body)) lupa.focus({ preventScroll: true });
-    gavetaAntes = gav;
   }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   // balão do mapa: abre abaixo da barra (o olho ou a barra aberta), como já fazia abaixo do T1 T2 T3 / Menu
   const folga0 = window.__folgaBalao;
@@ -894,10 +885,8 @@
 
   const s = document.createElement('style');
   s.textContent =
-    // T1 T2 T3 e o Menu saem do mapa (estão na lupa), também na tela cheia
+    // o Menu sai do mapa (as camadas estão na lupa), também na tela cheia; T1 T2 T3 ficam ao lado do olho (barra, embaixo)
     '.ctl-dir>.ctl-topo{display:none}' +
-    '.lp-pi{flex:none;display:grid;place-items:center;width:22px}.lp-pi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
-    '.lp-pn .lp-x b{font-family:var(--f-body)}.lp-pn[aria-pressed=true] .lp-x b{color:var(--accent)}' +
     '.barra-busca .barra-linha.lp-linha,body.tela-cheia .panel .barra-linha.lp-linha{display:flex;flex-wrap:nowrap;align-items:center;gap:var(--s2)}' +
     '.barra-busca .lp-linha>.busca{flex:1 1 auto;width:auto;min-width:0;min-height:44px}' +
     '@media (min-width:861px){.barra-busca .lp-linha>.busca{min-height:40px}}' +
@@ -961,10 +950,18 @@
     // nome do trecho na prévia do mapa (o visual do .lb de alimentador.css, sem a classe: a Faixa esconde os .lb de longe)
     '.lp-lb{font:700 13px/1 var(--f-display);color:#fff;background:rgba(0,0,0,.72);border-left:4px solid var(--c);padding:4px 7px;border-radius:3px;' +
     'white-space:nowrap;pointer-events:none;outline:2px solid var(--accent)}' +
-    // barra dentro do mapa: flutua no canto de cima, à esquerda (onde ficavam T1 T2 T3 e o Menu); fechada, só o olho
+    // barra dentro do mapa: flutua no canto de cima, à esquerda (onde ficava o Menu); fechada, o olho e T1 T2 T3
     '.mapbox>.barra-busca{position:absolute;top:12px;left:12px;z-index:1001;display:block;width:min(560px,calc(100% - 24px));margin:0}' +
     '.mapbox>.barra-busca.lp-fechada{width:auto}' +
-    '.mapbox>.barra-busca.lp-fechada>.lp-linha>:not(.lp-lupa),.mapbox>.barra-busca.lp-fechada>:not(.lp-linha){display:none!important}' +
+    '.mapbox>.barra-busca.lp-fechada>.lp-linha>:not(.lp-lupa):not(.classes),.mapbox>.barra-busca.lp-fechada>:not(.lp-linha){display:none!important}' +
+    // T1 T2 T3 à direita do olho, só com a barra fechada: o vidro dos controles do mapa, na altura do olho (44 px no
+    // celular, com o toque de 40 px; 40 px no computador). No modo Limpeza de faixa (rascunho) saem: a pílula do alto
+    // (centro, a 12 px) cairia em cima deles no celular, e a escolha dos trechos ali não segue a classe escondida
+    '.lp-linha>.classes{position:static;flex:none;display:none;gap:2px;height:44px;padding:1px}.lp-linha>.classes button{border-radius:8px}' +
+    '@media (min-width:861px){.lp-linha>.classes{height:40px}.lp-linha>.classes button{min-height:0}}' +
+    '.mapbox:not(.fx-modo)>.barra-busca.lp-fechada>.lp-linha>.classes{display:flex}' +
+    // celular estreito: a legenda do canto de cima à direita (ativos de perto) desce, para não ficar embaixo de T1 T2 T3
+    '@media (max-width:400px){.mapbox .leaflet-top.leaflet-right{top:56px}}' +
     '.mapbox>.barra-busca>.ativo-hit{display:none}' +   // os achados do índice de ativos já vêm na lista dos resultados
     '.mapbox>.barra-busca .lp-lupa,.mapbox>.barra-busca .lp-fbt,.mapbox>.barra-busca .lp-linha>.busca{box-shadow:var(--sh-vidro)}' +
     // sobre o mapa o fundo do hover não pode ser transparente (no tema claro o olho preto sumia no mapa escuro)
