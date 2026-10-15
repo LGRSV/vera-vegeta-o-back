@@ -1394,7 +1394,7 @@ def interface(saida, malha=None):
     indice_ativos(saida, dados)
     indice_os(saida, dados)
     corpo = ('<header class="cab"><h1><b>ARGOS</b> <span>MANUTENÇÃO</span></h1>'
-             '<a class="cab-link" href="polos/#eto">Ranking</a></header>\n'
+             '<a class="cab-link" href="priorizacao/">Ranking</a></header>\n'   # Ranking da tela inicial abre a Priorização
              # casca do mapa já no HTML (estilo em assets/site.css; o svg com viewBox reserva a altura do mapa):
              # os scripts só preenchem, e a página não pula ao carregar. Busca única atrás da lupa (busca-ativo.js):
              # ativo, município ou alimentador, com a lista aparecendo enquanto se digita.
