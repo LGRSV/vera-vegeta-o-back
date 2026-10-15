@@ -12,8 +12,9 @@
 //   chave de início, fim ou passagem), chaves e ativos do alimentador, postes e OS das camadas. Marcar (setas ou mouse)
 //   acende no mapa sem mudar a seleção; escolher (clique ou Enter) seleciona e enquadra. Esc fecha. O filtro da lista do
 //   painel (alimentador.js) continua por trás.
-// - Tela cheia: a barra vai para a gaveta (telacheia.js), aberta, e os botões T1 T2 T3 / Menu voltam ao mapa (é por eles
-//   que a gaveta abre); ao sair, ela volta para dentro do mapa, fechada.
+// - Tela cheia: igual (pedido do usuário): a barra fica dentro do mapa, só o olho, e os botões antigos T1 T2 T3 / Menu
+//   não voltam. O painel lateral (a gaveta de telacheia.js, que abria pelo item "Painel" do Menu) abre pelo item
+//   "Painel" no alto da lista do olho.
 (function () {
   const barra = document.querySelector('.barra-busca'), linha = barra && barra.querySelector('.barra-linha'), q = document.getElementById('busca');
   if (!barra || !linha || !q || barra.querySelector('.lp-lupa')) return;   // sem a barra (mapa não carregou): fica como antes
@@ -105,12 +106,18 @@
   }
   // com a classe à vista, uma linha escondida na lista é filtro de município: o trecho sai daqui também
   const OLHO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="o" d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle class="o" cx="12" cy="12" r="2.8"/><path class="x" d="M4 4l16 16"/></svg>';
+  // painel lateral da tela cheia (telacheia.js): o item "Painel" que ele põe no Menu do mapa (escondido) ou o "☰ Painel"
+  const botaoPainel = () => document.querySelector('.tc-painel-m') || document.querySelector('.tc-ctl .tc-painel');
+  const ICO_PN = '<svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M14.5 4.5v15M17 9h1M17 12h1"/></svg>';
   const pill = n => n == null ? '' : `<i class="lp-n${n ? '' : ' zero'}">${mil(n)}<span class="vh"> NAE</span></i>`;
   function desenha() {
     const { nae, escondida } = leLista(), cor = c => { const b = btCls(c); return b ? b.style.getPropertyValue('--c') : ''; };
     const doCls = c => D.trechos.filter(t => classe(t.nome) === c && (!visivel(c) || !escondida.has(t.nome)));
     let html = '';
     if (!aberta) {
+      if (document.body.classList.contains('tela-cheia') && botaoPainel()) html +=
+        `<button type="button" class="lp-op lp-pn" aria-pressed="${document.body.classList.contains('tc-gaveta')}"><span class="lp-pi" aria-hidden="true">${ICO_PN}</span>` +
+        '<span class="lp-x"><b>Painel</b><small>Resumo, lista dos trechos e detalhe</small></span><span class="lp-seta" aria-hidden="true">›</span></button>';
       html += '<p class="lp-t">Classes</p>' + CLS.filter(btCls).map(c => {
         const ts = doCls(c), m = ts.reduce((s, t) => s + t.ext, 0), n = nae ? ts.reduce((s, t) => s + (nae[t.nome] || 0), 0) : null, v = visivel(c);
         return `<div class="lp-cls${v ? '' : ' off'}" style="--c:${esc(cor(c))}">` +
@@ -169,6 +176,13 @@
     const b = e.target.closest('button');
     if (!b) return;
     e.stopPropagation();
+    if (b.classList.contains('lp-pn')) {                 // tela cheia: abre (ou fecha) o painel lateral
+      abreDrop(false);
+      if (noMapa()) abreBarra(false);
+      const o = botaoPainel();
+      if (o) o.click();
+      return;
+    }
     if (b.classList.contains('lp-olho')) { const o = btCls(b.dataset.c); if (o) o.click(); desenha(); drop.querySelector(`.lp-olho[data-c="${b.dataset.c}"]`).focus(); return; }
     if (b.classList.contains('lp-mais')) {
       const y = drop.scrollTop, i = limite;
@@ -797,8 +811,7 @@
     }
   }
 
-  // ---------- a barra dentro do mapa: de primeira só o olho ----------
-  // (fora da tela cheia; na tela cheia ela fica aberta na gaveta, como antes)
+  // ---------- a barra dentro do mapa: de primeira só o olho (também na tela cheia) ----------
   function noMapa() { const p = barra.parentElement; return !!p && p.classList.contains('mapbox'); }
   function fechada() { return barra.classList.contains('lp-fechada'); }
   function rotuloOlho() {
@@ -848,15 +861,26 @@
     rotuloOlho();
   }
   const caixaMapa = document.querySelector('.stage .mapbox') || document.querySelector('.mapbox');
-  if (caixaMapa && !document.body.classList.contains('tela-cheia')) {
+  if (caixaMapa) {
     caixaMapa.append(barra);                             // a barra de extras.js sai de cima do mapa e entra nele
     barra.classList.add('lp-fechada');
   }
   rotuloOlho();
-  // tela cheia: telacheia.js leva a barra para a gaveta e, ao sair, de volta para cima do mapa; aqui ela volta para dentro, fechada
+  // tela cheia: telacheia.js leva a barra para a gaveta e, ao sair, para cima do mapa; aqui ela volta para dentro do mapa
+  // na mesma hora (antes de pintar), como estava, e quem digitava continua no campo
+  let gavetaAntes = false;
   if (caixaMapa) new MutationObserver(() => {
-    if (!document.body.classList.contains('tela-cheia') && barra.parentElement !== caixaMapa) { caixaMapa.append(barra); abreBarra(false, true); }
-    else { rotuloOlho(); ajustaDica(); }
+    if (barra.parentElement !== caixaMapa) {
+      const f = barra.contains(document.activeElement) ? document.activeElement : null;
+      caixaMapa.append(barra);
+      if (f) f.focus({ preventScroll: true });
+    }
+    rotuloOlho(); ajustaDica();
+    if (!drop.hidden) desenha();                         // o item "Painel" entra e sai com a tela cheia e marca a gaveta
+    // gaveta fechada (✕ ou Esc) com o foco perdido: volta ao olho (telacheia.js o mandaria para o Menu, que fica escondido)
+    const gav = document.body.classList.contains('tc-gaveta');
+    if (gavetaAntes && !gav && (!document.activeElement || document.activeElement === document.body)) lupa.focus({ preventScroll: true });
+    gavetaAntes = gav;
   }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   // balão do mapa: abre abaixo da barra (o olho ou a barra aberta), como já fazia abaixo do T1 T2 T3 / Menu
   const folga0 = window.__folgaBalao;
@@ -870,8 +894,10 @@
 
   const s = document.createElement('style');
   s.textContent =
-    // fora da tela cheia, T1 T2 T3 e o Menu saem do mapa (estão na lupa); em tela cheia voltam, porque a barra vai para a gaveta
-    'body:not(.tela-cheia) .ctl-dir>.ctl-topo{display:none}' +
+    // T1 T2 T3 e o Menu saem do mapa (estão na lupa), também na tela cheia
+    '.ctl-dir>.ctl-topo{display:none}' +
+    '.lp-pi{flex:none;display:grid;place-items:center;width:22px}.lp-pi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
+    '.lp-pn .lp-x b{font-family:var(--f-body)}.lp-pn[aria-pressed=true] .lp-x b{color:var(--accent)}' +
     '.barra-busca .barra-linha.lp-linha,body.tela-cheia .panel .barra-linha.lp-linha{display:flex;flex-wrap:nowrap;align-items:center;gap:var(--s2)}' +
     '.barra-busca .lp-linha>.busca{flex:1 1 auto;width:auto;min-width:0;min-height:44px}' +
     '@media (min-width:861px){.barra-busca .lp-linha>.busca{min-height:40px}}' +
