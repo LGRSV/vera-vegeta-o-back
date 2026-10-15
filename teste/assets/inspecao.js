@@ -20,7 +20,8 @@
   const celular = () => matchMedia('(max-width:980px)').matches;
   const telaCheia = () => document.body.classList.contains('tela-cheia');
   const classeDe = nome => nome.split('-')[0];
-  const vis = v => !window.__visivel || window.__visivel[classeDe(D.trechos[v[4]].nome)];
+  // classe à vista (T1/T2/T3) e, com o filtro de município (lupa-painel.js: __munFora), só os trechos do município
+  const vis = v => (!window.__visivel || window.__visivel[classeDe(D.trechos[v[4]].nome)]) && !(window.__munFora && window.__munFora(D.trechos[v[4]].nome));
 
   // cores por ano, diferentes das da limpeza (para não confundir as duas camadas)
   const COR_ANO = { 2024: '#c084fc', 2025: '#818cf8', 2026: '#2dd4bf', 2027: '#a3e635' };
@@ -121,7 +122,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       L.polyline(vs.map(seg), Object.assign({ color: cor, weight: peso, opacity: opacidade, interactive: false, lineCap: 'round' }, extra))];
   }
   function fundo() {
-    const chave = JSON.stringify(window.__visivel || {});
+    const chave = JSON.stringify(window.__visivel || {}) + (window.__munSel || '');
     if (!fundoCache || fundoCache.chave !== chave) {
       const vs = D.vaos.filter(vis);
       fundoCache = { chave, ls: clicavel(linhaDupla(vs, SEMCOR, 2.5, .9), vs) };

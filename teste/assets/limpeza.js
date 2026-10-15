@@ -230,14 +230,15 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   const map = window.__map;
   const seg = v => [[v[0], v[1]], [v[2], v[3]]];
   let camada = null, realce = null, selL = null, fundoCache = null;
-  const vis = v => !window.__visivel || window.__visivel[classeDe(D.trechos[v[4]].nome)];
+  // classe à vista (T1/T2/T3) e, com o filtro de município (lupa-painel.js: __munFora), só os trechos do município
+  const vis = v => (!window.__visivel || window.__visivel[classeDe(D.trechos[v[4]].nome)]) && !(window.__munFora && window.__munFora(D.trechos[v[4]].nome));
   function linhaDupla(vs, cor, peso, opacidade, extra) {
     // contorno escuro por baixo: a cor aparece igual sobre mata escura ou solo claro
     return [L.polyline(vs.map(seg), { color: '#0b0f14', weight: peso + 4, opacity: .75 * opacidade, interactive: false, lineCap: 'round' }),
       L.polyline(vs.map(seg), Object.assign({ color: cor, weight: peso, opacity: opacidade, interactive: false, lineCap: 'round' }, extra))];
   }
   function fundo() {
-    const chave = JSON.stringify(window.__visivel || {});
+    const chave = JSON.stringify(window.__visivel || {}) + (window.__munSel || '');
     if (!fundoCache || fundoCache.chave !== chave) {
       const vs = D.vaos.filter(vis);
       fundoCache = { chave, ls: linhaDupla(vs, SEMCOR, 2.5, .9) };
