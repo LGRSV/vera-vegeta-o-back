@@ -230,13 +230,20 @@ header.cab h1 span{font-weight:400;font-size:.55em;letter-spacing:.14em;margin-t
 /* cores dos polos (--polo-a…d): azul e laranja no estilo Energisa */
 /* regional aberta (mapa-municipios.js): os polos se afastam (transform no grupo), as outras regionais somem e o contorno
    passa a ser o dos polos; no estado inteiro, passar o mouse numa regional apaga as outras */
-.mt-polo{transition:transform .65s cubic-bezier(.45,0,.55,1),opacity .4s}
+.mt-polo{transition:transform .65s cubic-bezier(.45,0,.55,1),opacity .4s,visibility 0s}
 .mt-polo.apaga{opacity:.45}
-.mt-polo.fora{opacity:0;pointer-events:none}
-.mt-poloc{fill:none;stroke:var(--pc,var(--mt-lim));stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none;opacity:0;transition:opacity .4s}
-.aberta.pronta .mt-poloc{opacity:1}
+/* a curva cubic-bezier(.45,0,.55,1) é a mesma do voo da câmera (mapa-municipios.js: curva). O que esmaece até 0 fica
+   visibility:hidden no fim do esmaecer: deixa de ser pintado (antes era redesenhado transparente em todo quadro) */
+.mt-polo.fora{opacity:0;pointer-events:none;visibility:hidden;transition:transform .65s cubic-bezier(.45,0,.55,1),opacity .4s,visibility 0s .4s}
+.mt-poloc{fill:none;stroke:var(--pc,var(--mt-lim));stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;pointer-events:none;opacity:0;
+  visibility:hidden;transition:opacity .4s,visibility 0s .4s}
+.aberta.pronta .mt-poloc{opacity:1;visibility:visible;transition:opacity .4s,visibility 0s}
+/* o polo que saiu (.fora) leva o contorno junto: sem isto o visible acima furaria o hidden do grupo */
+.mt-polo.fora .mt-poloc{visibility:hidden;transition:opacity .4s,visibility 0s .4s}
+/* o contorno do polo e o das regionais são grupos de pedaços (mapa-municipios.js: emPedacos); vector-effect não é herdado */
+.mt-poloc path{vector-effect:non-scaling-stroke}
 .mt-poloc.fundo{stroke:var(--paper);stroke-width:7}
-.mt-regc{transition:opacity .3s}.aberta .mt-regc{opacity:0}
+.mt-regc{transition:opacity .3s,visibility 0s}.aberta .mt-regc{opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
 .aberta .mt-nomes{display:none}
 /* regionais no estado inteiro: cartãozinho com o nome e a NAE, todos no mesmo eixo (meio do mapa); clicar abre a regional */
 .mt-regcards button{position:absolute;z-index:2;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:2px;padding:5px 12px 6px;
@@ -266,17 +273,24 @@ header.cab h1 span{font-weight:400;font-size:.55em;letter-spacing:.14em;margin-t
 .mt-pchip:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .mt-polo.desliga{opacity:.15}
 /* município aberto: só ele no mapa, claro, com a rede dos alimentadores numa cor só (--rede); fora dele a rede fica apagada */
-.mun.fora-m{opacity:0;pointer-events:none;transition:opacity .4s}
+.mun.fora-m{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s}
 .mun.aberto-m{fill:var(--mun-aberto)!important;stroke:var(--mt-lim)!important;stroke-width:3!important;transition:fill .4s}
+/* transparência da rede com stroke-opacity, não opacity: num path só com traço o desenho é o mesmo, mas opacity
+   abre uma camada à parte para cada path (e são centenas de pedaços) a cada quadro */
 .mt-redes path{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-.mt-redes-f path{stroke:var(--muted);stroke-width:1;opacity:.28;pointer-events:none}
-.mt-redes-d path{stroke:var(--rede);stroke-width:1.7;pointer-events:stroke;cursor:pointer;transition:opacity .15s}
-.mt-redes.realce .mt-redes-d path{opacity:.15}
-.mt-redes.realce .mt-redes-d path.on{opacity:1;stroke-width:2.8}
+.mt-redes-f path{stroke:var(--muted);stroke-width:1;stroke-opacity:.28;pointer-events:none}
+.mt-redes-d path{stroke:var(--rede);stroke-width:1.7;pointer-events:stroke;cursor:pointer;transition:stroke-opacity .15s}
+.mt-redes.realce .mt-redes-d path{stroke-opacity:.15}
+.mt-redes.realce .mt-redes-d path.on{stroke-opacity:1;stroke-width:2.8}
 /* alimentador em foco: a rede inteira dele forte e sem corte; as outras quase somem */
-.mt-redes.foco .mt-redes-d path{opacity:.12}.mt-redes.foco .mt-redes-f path{opacity:.12}
+.mt-redes.foco .mt-redes-d path{stroke-opacity:.12}.mt-redes.foco .mt-redes-f path{stroke-opacity:.12}
 .mt-redes-a path{stroke:var(--rede);stroke-width:2.6;pointer-events:stroke;cursor:pointer}
-.mt-redes path{animation:mt-surge .35s ease-out}
+/* a rede entra em lotes (mapa-municipios.js: despeja) e cada lote esmaece inteiro, não path por path */
+.mt-redes .lote{animation:mt-surge .35s ease-out}
+/* em voo a ponta do traço fica reta (butt): a redonda custa o dobro para desenhar e a diferença (menos de 1 px na
+   ponta de cada trecho) não se vê com o mapa andando; no pouso volta a redonda. Em voo a rede também não responde
+   ao mouse: o navegador testava o traço de cada pedaço sob o cursor parado a cada quadro (alvo andando, sem uso) */
+.voando .mt-redes path{stroke-linecap:butt;pointer-events:none}
 /* lista dos alimentadores do município aberto (na caixinha dos polos): miniatura da rede, código, NAE e km no município */
 .nivel-mun .mt-lado{max-width:290px}
 .nivel-mun .mt-polos-c{max-height:min(calc(100svh - 340px),620px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:2px}
@@ -294,7 +308,7 @@ header.cab h1 span{font-weight:400;font-size:.55em;letter-spacing:.14em;margin-t
 .mt-al>span:last-child{font-size:var(--t-xs);color:var(--muted)}
 /* polo aberto: os municípios se afastam (transform no path), o contorno do polo some e entram os nomes dos municípios */
 .mt-polo .mun{transition:transform .65s cubic-bezier(.45,0,.55,1)}
-.aberta.polo .mt-poloc{opacity:0}
+.aberta.polo .mt-poloc{opacity:0;visibility:hidden;transition:opacity .4s,visibility 0s .4s}
 .mt-nomes2 .mt-rot{animation:mt-surge .3s ease-out}
 span.mt-pchip{cursor:default}
 .aberta .lim-s{display:none}
@@ -324,7 +338,8 @@ span.mt-pchip{cursor:default}
 .mt-selos span.off{opacity:.35}
 /* com a regional aberta (e enquanto anima) o que está fora do recorte não cria rolagem lateral */
 .aberta svg,.voando svg{overflow:hidden}
-@media (prefers-reduced-motion:reduce){.mt-polo,.mt-polo .mun,.mt-poloc,.mt-regc,.mun.fora-m,.mun.aberto-m{transition:none}.mt-pchip,.mt-nomes2 .mt-rot,.mt-selos span,.mt-redes path{animation:none}}
+@media (prefers-reduced-motion:reduce){.mt-polo,.mt-polo.fora,.mt-polo .mun,.mt-poloc,.aberta.pronta .mt-poloc,.mt-polo.fora .mt-poloc,.aberta.polo .mt-poloc,.mt-regc,.aberta .mt-regc,
+  .mun.fora-m,.mun.aberto-m{transition:none}.mt-pchip,.mt-nomes2 .mt-rot,.mt-selos span,.mt-redes .lote{animation:none}}
 .mun.tem:hover,.mun.acende{stroke:var(--fg);stroke-opacity:1;stroke-width:2.5}
 .mun.sem:hover{fill:var(--mt-vazio-h)}
 .mun.achou{stroke:var(--fg);stroke-opacity:1;stroke-width:2}
@@ -427,6 +442,11 @@ header.cab>.cab-link:hover{background:var(--hover);text-decoration:none}
 
 /* 3) municípios do polo aberto: mini cartão com o nome e, EMBAIXO, a NAE em selo vermelho (substitui .mt-nomes2 .mt-rot) */
 .mt-nomes2{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+/* em voo os nomes (presos na tela) somem rápido; no pouso voltam já no lugar novo (antes, voltando do polo para a
+   regional, ficavam parados na tela com o mapa andando por baixo) */
+.mt-nomes2,.mt-selos{transition:opacity .2s ease-out}
+.voando .mt-nomes2,.voando .mt-selos{opacity:0;transition-duration:.12s}
+@media (prefers-reduced-motion:reduce){.mt-nomes2,.mt-selos,.voando .mt-nomes2,.voando .mt-selos{transition:none}}
 .mt-mn{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:3px;padding:4px 8px 5px;border-radius:8px;white-space:nowrap;
   background:color-mix(in srgb,var(--cartao) 94%,transparent);border:1px solid var(--cartao-borda);box-shadow:0 4px 12px -4px rgb(0 0 0 / .6);animation:mt-surge .3s ease-out}
 .mt-mn b{font:600 12.5px/1.1 var(--f-body);color:var(--cartao-fg);letter-spacing:.005em}
