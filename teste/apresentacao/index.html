@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>ARGOS Apresentação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Palco 16:9 fixo (1600×900) escalado para caber na tela, como um slide de PowerPoint: texto à esquerda, print do
+   site num quadro de navegador à direita. Transição "empurra" com o quadro em paralaxe; tópicos entram em sequência.
+   Aparência única escura (a mesma do ARGOS): o cartão preto e o selo vermelho são da própria marca. */
+:root{
+  --fundo:#07090a; --palco:#0e1213; --papel:#161b1d; --linha:#283034; --fg:#eef1ee; --mudo:#97a3a8;
+  --selo:#b8431f; --acento:#ec7b4f;
+  --f-titulo:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-texto:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --esc:.5; --ease:cubic-bezier(.2,.75,.2,1);
+  color-scheme:dark;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;background:var(--fundo);color:var(--fg);font:16px/1.45 var(--f-texto);overflow:hidden;-webkit-font-smoothing:antialiased}
+.deck{position:relative;height:100%;display:grid;place-items:center;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 64px;box-sizing:border-box}
+.palco{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%) scale(var(--esc));transform-origin:center;
+  background:radial-gradient(1200px 700px at 78% 48%,#132022 0%,var(--palco) 60%);border-radius:18px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px var(--linha)}
+.wrap-palco{position:relative;overflow:hidden;width:calc(1600px * var(--esc));height:calc(900px * var(--esc));border-radius:calc(18px * var(--esc))}
+/* cabeçalho fixo do palco */
+.topo{position:absolute;inset:34px 56px auto 56px;display:flex;justify-content:space-between;align-items:center;z-index:3;
+  font:600 15px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mudo)}
+.na-capa .topo .wm{opacity:0}
+.topo .wm{transition:opacity .5s;display:flex;align-items:center;gap:14px}
+.topo .wm b{font:700 22px/1 var(--f-titulo);letter-spacing:.32em;color:var(--fg)}
+.topo .wm span::before{content:"";display:inline-block;width:22px;height:2px;background:var(--selo);vertical-align:middle;margin-right:12px}
+.topo .dir{display:flex;gap:18px;align-items:center}
+.topo .chip{border:1px solid var(--linha);border-radius:999px;padding:6px 14px;color:var(--fg);transition:opacity .4s}
+.topo .cont{font-variant-numeric:tabular-nums;color:var(--fg)}
+.progresso{position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--linha);z-index:3}
+.progresso i{display:block;height:100%;width:0;background:var(--selo);transition:width .7s var(--ease)}
+/* slides */
+.slide{position:absolute;inset:0;display:grid;grid-template-columns:540px 1fr;gap:56px;align-items:center;padding:110px 64px 70px 88px;
+  opacity:0;visibility:hidden;transform:translateX(90px);transition:opacity .6s var(--ease),transform .8s var(--ease),visibility 0s .8s}
+.slide.antes{transform:translateX(-90px)}
+.slide.ativo{opacity:1;visibility:visible;transform:none;transition:opacity .6s var(--ease) .08s,transform .8s var(--ease),visibility 0s}
+.txt{min-width:0;display:grid;gap:22px;align-content:center}
+.sobre{margin:0;display:flex;gap:14px;align-items:center;font:600 17px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--acento)}
+.opc{font:600 13px var(--f-mono);letter-spacing:.08em;color:var(--mudo);border:1px dashed var(--linha);border-radius:6px;padding:3px 9px}
+h2{margin:0;font:700 54px/1.04 var(--f-titulo);letter-spacing:-.005em;text-wrap:balance}
+ul{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:16px}
+li{position:relative;padding-left:30px;font-size:23px;line-height:1.38;color:#d9dedb}
+li::before{content:"";position:absolute;left:2px;top:.55em;width:10px;height:10px;background:var(--selo);border-radius:2px}
+li strong{color:var(--fg)}
+code{font:500 .86em var(--f-mono);background:var(--papel);border:1px solid var(--linha);border-radius:5px;padding:1px 6px}
+.denso h2{font-size:46px}
+.denso ul{gap:12px}
+.denso li{font-size:20px}
+.ativo li{animation:sobe .7s var(--ease) both;animation-delay:calc(.35s + var(--k) * .14s)}
+.ativo h2{animation:sobe .7s var(--ease) both .15s}
+@keyframes sobe{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+/* quadro de navegador com o print */
+.quadro{margin:0;position:relative;min-width:0;background:var(--papel);border:1px solid var(--linha);border-radius:16px;overflow:hidden;
+  box-shadow:0 24px 60px rgba(0,0,0,.5);transform:translateX(160px);transition:transform 1s var(--ease)}
+.slide.antes .quadro{transform:translateX(-160px)}
+.slide.ativo .quadro{transform:none}
+.barra-nav{display:flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-bottom:1px solid var(--linha);background:#111517}
+.barra-nav i{width:11px;height:11px;border-radius:50%;background:var(--linha)}
+.barra-nav i:first-child{background:var(--selo)}
+.barra-nav span{margin-left:14px;font:400 14px var(--f-mono);color:var(--mudo);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tela{position:relative;aspect-ratio:16/10;overflow:hidden;background:#000}
+.tela img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;opacity:0;transition:opacity .9s var(--ease)}
+.tela img.vis{opacity:1}
+.ativo .tela img.vis{animation:kb 11s ease-out both}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.045)}}
+.pontos{position:absolute;right:14px;bottom:12px;display:flex;gap:7px}
+.pontos i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.35);transition:background .4s}
+.pontos i.vis{background:var(--acento)}
+/* capa */
+.capa{grid-template-columns:600px 1fr}
+.capa .marca{margin:0;display:grid;gap:14px}
+.capa .marca b{font:700 124px/.9 var(--f-titulo);letter-spacing:.14em}
+.capa .marca span{display:flex;align-items:center;gap:16px;font:600 22px var(--f-mono);letter-spacing:.5em;text-transform:uppercase;color:var(--mudo)}
+.capa .marca span::before{content:"";width:46px;height:2px;background:var(--selo)}
+.capa h2{font-size:40px;font-weight:600;color:var(--fg);max-width:16em}
+.capa li{font-size:21px}
+.capa .quadro{transform:perspective(1800px) rotateY(-14deg) translateX(200px);transform-origin:left center}
+.capa.ativo .quadro{transform:perspective(1800px) rotateY(-9deg)}
+.capa.ativo .marca b{animation:letras 1.2s var(--ease) both}
+@keyframes letras{from{letter-spacing:.4em;opacity:0}to{letter-spacing:.14em;opacity:1}}
+/* notas do apresentador */
+.notas{position:absolute;left:56px;right:56px;bottom:28px;z-index:4;background:rgba(14,18,19,.94);border:1px solid var(--linha);border-radius:12px;
+  padding:16px 22px;display:grid;gap:6px;font-size:20px;backdrop-filter:blur(6px)}
+.notas small{font:600 14px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--acento)}
+/* controles */
+.ctl{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:10;display:flex;gap:4px;align-items:center;
+  background:rgba(22,27,29,.92);border:1px solid var(--linha);border-radius:12px;padding:5px;transition:opacity .5s}
+.ctl.some{opacity:0}
+.ctl button{white-space:nowrap;font:600 14px var(--f-texto);color:var(--fg);background:none;border:0;border-radius:8px;min-width:40px;height:38px;padding:0 12px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.ctl button:hover{background:var(--papel)}
+.ctl button[aria-pressed="true"]{background:var(--fg);color:var(--fundo)}
+.ctl .n{white-space:nowrap;font:600 14px var(--f-mono);color:var(--mudo);padding:0 8px;font-variant-numeric:tabular-nums}
+.ctl kbd{font:500 11px var(--f-mono);color:var(--mudo);border:1px solid var(--linha);border-radius:4px;padding:0 4px}
+button:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
+@media (max-width:700px){.ctl kbd,.ctl .rot,.dica{display:none}}
+/* visão geral */
+.geral{position:fixed;inset:0;z-index:20;background:rgba(7,9,10,.97);overflow:auto;
+  padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.geral h1{font:700 26px var(--f-titulo);letter-spacing:.1em;text-transform:uppercase;margin:0 auto 18px;max-width:1400px}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:16px;max-width:1400px;margin:0 auto}
+.mini{display:grid;gap:8px;text-align:left;background:var(--papel);border:1px solid var(--linha);border-radius:10px;padding:8px;color:var(--fg);cursor:pointer;font:500 14px/1.3 var(--f-texto)}
+.mini img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:6px}
+.mini b{font:600 13px var(--f-mono);color:var(--acento);margin-right:4px}
+.mini.atual{outline:2px solid var(--selo)}
+.dica{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:10;font:500 13px var(--f-texto);color:var(--mudo);
+  background:var(--papel);border:1px solid var(--linha);border-radius:8px;padding:6px 12px;transition:opacity .6s}
+:fullscreen .deck{padding-block:0}
+@media (prefers-reduced-motion:reduce){
+  .slide,.slide.ativo,.quadro,.tela img,.progresso i{transition:opacity .2s linear!important}
+  .slide,.slide.antes,.quadro,.slide.antes .quadro{transform:none}
+  .capa .quadro,.capa.ativo .quadro{transform:none}
+  .ativo li,.ativo h2,.ativo .tela img.vis,.capa.ativo .marca b{animation:none}
+}
+/* edição dos textos: todo texto com data-campo vira editável; a barra de edição fica no alto */
+.editando [data-campo]{outline:1px dashed rgba(236,123,79,.55);outline-offset:4px;border-radius:4px;cursor:text}
+.editando [data-campo]:hover{outline-color:var(--acento)}
+.editando [data-campo]:focus{outline:2px solid var(--acento);background:rgba(236,123,79,.08)}
+.editando .ativo li,.editando .ativo h2,.editando .capa.ativo .marca b{animation:none}
+.editando .topo .wm{opacity:1}
+[data-campo]:empty::before{content:attr(data-vazio);color:var(--mudo);font-style:italic}
+.barra-ed{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:12;display:flex;flex-wrap:wrap;gap:6px 10px;
+  align-items:center;justify-content:center;max-width:calc(100% - 24px);background:#1d1410;border:1px solid var(--selo);border-radius:12px;padding:6px 8px 6px 14px;
+  font:500 13px/1.3 var(--f-texto);color:#f3d9cd}
+.barra-ed button{font:600 13px var(--f-texto);border-radius:8px;border:1px solid var(--linha);background:var(--papel);color:var(--fg);padding:7px 12px;cursor:pointer}
+.barra-ed button.prim{background:var(--selo);border-color:var(--selo);color:#fff}
+.barra-ed button.perigo{color:#ffb4a0}
+.toast{position:fixed;left:50%;bottom:calc(66px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:13;max-width:calc(100% - 32px);
+  background:var(--papel);border:1px solid var(--linha);border-radius:10px;padding:8px 14px;font:500 14px/1.35 var(--f-texto);color:var(--fg);text-align:center}
+.editando .dica{display:none}
+.editando .deck{padding-block:96px 64px}   /* a barra de edição fica acima do palco, sem cobrir o cabeçalho */
+@media (max-width:700px){.editando .deck{padding-block:150px 64px}}
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+  <div class="wrap-palco">
+    <div class="palco" id="palco" role="region" aria-roledescription="apresentação">
+      <div class="topo"><div class="wm"><b data-campo="marca.nome"></b><span data-campo="marca.sub"></span></div>
+        <div class="dir"><span class="chip" id="chip"></span><span class="cont" id="cont"></span></div></div>
+      <div id="slides"></div>
+      <div class="notas" id="notas" hidden><small id="notas-t"></small><div id="notas-f"></div></div>
+      <div class="progresso"><i id="prog"></i></div>
+    </div>
+  </div>
+</div>
+
+<div class="ctl" id="ctl" role="toolbar" aria-label="Controles da apresentação">
+  <button id="b-ant" aria-label="Slide anterior">◀</button>
+  <span class="n" id="b-n" aria-live="polite"></span>
+  <button id="b-prox" aria-label="Próximo slide">▶</button>
+  <button id="b-play" aria-pressed="false"><span aria-hidden="true">▶︎▶︎</span><span class="rot" data-rot="reproduzir"></span> <kbd>P</kbd></button>
+  <button id="b-notas" aria-pressed="false"><span class="rot" data-rot="notas"></span><span aria-hidden="true">✎</span> <kbd>N</kbd></button>
+  <button id="b-geral"><span class="rot" data-rot="todos"></span><span aria-hidden="true">▦</span> <kbd>G</kbd></button>
+  <button id="b-tela"><span class="rot" data-rot="tela"></span><span aria-hidden="true">⛶</span> <kbd>F</kbd></button>
+  <button id="b-editar" aria-pressed="false"><span class="rot" data-rot="editar"></span><span aria-hidden="true">✍</span> <kbd>E</kbd></button>
+</div>
+<div class="dica" id="dica" data-campo="rotulos.dica"></div>
+<div class="barra-ed" id="barra-ed" hidden role="toolbar" aria-label="Edição dos textos">
+  <span id="ed-msg"></span>
+  <button id="ed-salvar" class="prim">Salvar</button>
+  <button id="ed-descartar">Descartar</button>
+  <button id="ed-baixar" hidden>Baixar textos.js</button>
+  <button id="ed-original" class="perigo">Voltar ao texto original</button>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<div class="geral" id="geral" hidden role="dialog">
+  <h1 data-campo="rotulos.grade_titulo"></h1>
+  <div class="grade" id="grade"></div>
+</div>
+
+<script src="textos.js"></script>
+<script>
+// Apresentação do ARGOS. Todos os textos vêm de textos.js (window.ARGOS_TEXTOS) e podem ser mudados aqui mesmo:
+// botão "Editar textos" (ou E) deixa cada texto editável; Enter num tópico cria outro, tópico vazio some ao salvar.
+// Salvar: no Artifact vale para todos que abrem (banco do Artifact, documento deck/textos); no arquivo do repositório
+// fica neste navegador e baixa um textos.js novo para trocar o da pasta. "Voltar ao texto original" usa o textos.js.
+(function () {
+  const BASE = window.ARGOS_TEXTOS;
+  if (!BASE) { document.body.insertAdjacentHTML('beforeend', '<p style="padding:24px">textos.js não carregou.</p>'); return; }
+  const $ = id => document.getElementById(id);
+  const copia = o => JSON.parse(JSON.stringify(o));
+  const LS = 'argos-deck-textos', noArtifact = !!(window.claude && window.claude.use);
+  let T = copia(BASE), salvo = copia(BASE), DB = null, editando = false;
+  if (!noArtifact) { try { const s = localStorage.getItem(LS); if (s) { T = JSON.parse(s); salvo = copia(T); } } catch (e) {} }
+  const palco = $('palco'), deck = $('deck'), ctl = $('ctl');
+  let slides = [], atual = 0, ciclo = null, auto = null;
+
+  // texto com marcação simples: só negrito, itálico e código passam
+  function limpa(html) {
+    const t = document.createElement('template'); t.innerHTML = html;
+    const ok = { B: 'strong', STRONG: 'strong', I: 'em', EM: 'em', CODE: 'code' };
+    const anda = n => [...n.childNodes].map(c => {
+      if (c.nodeType === 3) return c.textContent.replace(/[&<>]/g, x => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[x]));
+      if (c.nodeType !== 1) return '';
+      if (c.tagName === 'BR') return ' ';
+      const tag = ok[c.tagName], dentro = anda(c);
+      return tag && dentro.trim() ? `<${tag}>${dentro}</${tag}>` : dentro;
+    }).join('');
+    return anda(t.content).replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  const pega = (o, campo) => campo.split('.').reduce((a, k) => a == null ? a : a[k], o);
+  const poe = (o, campo, v) => { const ks = campo.split('.'), u = ks.pop(); ks.reduce((a, k) => a[k], o)[u] = v; };
+  const rot = k => (T.rotulos && T.rotulos[k]) || '';
+
+  function htmlSlide(s, i, total) {
+    const c = `slides.${i}`, capa = i === 0;
+    const lazy = i <= 1 ? '' : ' loading="lazy"';
+    const figs = (s.imgs || []).map((im, k) => `<img class="${k ? '' : 'vis'}" src="${im.src}" alt="${(im.alt || '').replace(/"/g, '&quot;')}" width="1440" height="900"${lazy} decoding="async">`).join('');
+    const pts = (s.imgs || []).length > 1 ? `<div class="pontos">${s.imgs.map((_, k) => `<i class="${k ? '' : 'vis'}"></i>`).join('')}</div>` : '';
+    const lis = (s.topicos || []).map((b, k) => `<li style="--k:${k}">${b}</li>`).join('');
+    const tam = (s.topicos || []).join('').replace(/<[^>]+>/g, '').length + 2 * (s.titulo || '').replace(/<[^>]+>/g, '').length;
+    const txt = capa
+      ? `<div class="txt"><p class="marca"><b data-campo="marca.nome">${T.marca.nome}</b><span data-campo="marca.sub">${T.marca.sub}</span></p>` +
+        `<h2 data-campo="${c}.subtitulo" data-vazio="Subtítulo">${s.subtitulo || ''}</h2><ul data-campo="${c}.topicos" data-vazio="Tópicos">${lis}</ul></div>`
+      : `<div class="txt"><p class="sobre"><span data-campo="${c}.bloco" data-vazio="Bloco">${s.bloco || ''}</span>` +
+        `${s.opcional ? `<span class="opc" data-campo="rotulos.opcional">${rot('opcional')}</span>` : ''}</p>` +
+        `<h2 data-campo="${c}.titulo" data-vazio="Título">${s.titulo || ''}</h2><ul data-campo="${c}.topicos" data-vazio="Tópicos">${lis}</ul></div>`;
+    return `<section class="slide${capa ? ' capa' : ''}${tam > 520 ? ' denso' : ''}" data-i="${i}" aria-roledescription="slide">` +
+      `${txt}<figure class="quadro"><div class="barra-nav"><i></i><i></i><i></i><span data-campo="url">${T.url || ''}</span></div>` +
+      `<div class="tela">${figs}</div>${pts}</figure></section>`;
+  }
+
+  function render() {
+    document.title = (T.titulo || 'ARGOS Apresentação').replace(/<[^>]+>/g, '');
+    palco.setAttribute('aria-label', `${T.marca.nome} ${T.marca.sub}`.replace(/<[^>]+>/g, ''));
+    const total = T.slides.length;
+    $('slides').innerHTML = T.slides.map((s, i) => htmlSlide(s, i, total)).join('');
+    slides = [...document.querySelectorAll('.slide')];
+    document.querySelectorAll('.topo [data-campo], #dica, #geral h1').forEach(e => { e.innerHTML = pega(T, e.dataset.campo) || ''; });
+    document.querySelectorAll('[data-rot]').forEach(e => { e.textContent = rot(e.dataset.rot); });
+    $('grade').innerHTML = T.slides.map((s, i) => `<button class="mini" data-ir="${i}"><img src="${(s.imgs[0] || {}).src || ''}" alt="" loading="lazy">` +
+      `<span><b>${String(i + 1).padStart(2, '0')}</b> ${s.titulo}</span></button>`).join('');
+    document.querySelectorAll('.mini').forEach(m => m.onclick = () => { vai(+m.dataset.ir); geral(false); });
+    if (editando) marcaEditavel(true);
+    vai(Math.min(atual, total - 1), true);
+  }
+
+  function escala() {
+    const cs = getComputedStyle(deck);
+    const w = deck.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const h = deck.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    document.documentElement.style.setProperty('--esc', Math.max(.1, Math.min(w / 1600, h / 900)));
+  }
+  const carrega = i => { const s = slides[i]; if (s) s.querySelectorAll('img[loading="lazy"]').forEach(im => { im.loading = 'eager'; }); };
+  function giraImagens(s) {
+    clearInterval(ciclo);
+    const imgs = [...s.querySelectorAll('.tela img')], pts = [...s.querySelectorAll('.pontos i')];
+    imgs.forEach((im, k) => im.classList.toggle('vis', k === 0));
+    pts.forEach((p, k) => p.classList.toggle('vis', k === 0));
+    if (imgs.length < 2) return;
+    let k = 0;
+    ciclo = setInterval(() => {
+      imgs[k].classList.remove('vis'); pts[k] && pts[k].classList.remove('vis');
+      k = (k + 1) % imgs.length;
+      imgs[k].classList.add('vis'); pts[k] && pts[k].classList.add('vis');
+    }, 4200);
+  }
+  function vai(i, deHash) {
+    const total = slides.length;
+    i = Math.max(0, Math.min(total - 1, i));
+    slides.forEach((s, k) => { s.classList.toggle('ativo', k === i); s.classList.toggle('antes', k < i); s.setAttribute('aria-hidden', k === i ? 'false' : 'true'); });
+    atual = i;
+    palco.classList.toggle('na-capa', i === 0);
+    const s = T.slides[i], c = `slides.${i}`;
+    $('chip').innerHTML = `<span data-campo="${c}.bloco" data-vazio="Bloco">${s.bloco || ''}</span> · <span data-campo="${c}.tempo" data-vazio="Tempo">${s.tempo || ''}</span>`;
+    $('cont').textContent = String(i + 1).padStart(2, '0') + ' / ' + total;
+    $('b-n').textContent = (i + 1) + ' / ' + total;
+    $('prog').style.width = ((i + 1) / total * 100) + '%';
+    $('notas-t').innerHTML = $('chip').innerHTML + (s.opcional ? ' · ' + rot('pode_pular') : '');
+    $('notas-f').innerHTML = `<span data-campo="${c}.frase" data-vazio="Frase para dizer neste slide">${s.frase || ''}</span>`;
+    if (editando) marcaEditavel(true);
+    document.querySelectorAll('.mini').forEach(m => m.classList.toggle('atual', +m.dataset.ir === i));
+    giraImagens(slides[i]); carrega(i + 1); carrega(i + 2);
+    if (!deHash) { try { history.replaceState(null, '', '#s' + (i + 1)); } catch (e) {} }
+  }
+  const prox = () => vai(atual + 1), ant = () => vai(atual - 1);
+  function tela() {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else (document.documentElement.requestFullscreen || function () {}).call(document.documentElement).catch(() => {});
+    } catch (e) {}
+  }
+  function geral(abre) { const g = $('geral'); g.hidden = abre === undefined ? !g.hidden : !abre; if (!g.hidden) { const m = g.querySelector('.mini.atual'); m && m.focus(); } }
+  function notas(abre) { const n = $('notas'); n.hidden = abre === undefined ? !n.hidden : !abre; $('b-notas').setAttribute('aria-pressed', !n.hidden); }
+  function play() {
+    if (auto) { clearInterval(auto); auto = null; }
+    else auto = setInterval(() => { if (atual >= slides.length - 1) play(); else prox(); }, 11000);
+    $('b-play').setAttribute('aria-pressed', !!auto);
+  }
+
+  // ---------- edição ----------
+  let toastT;
+  const toast = msg => { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 5000); };
+  function marcaEditavel(sim) {
+    document.querySelectorAll('[data-campo]').forEach(e => {
+      if (sim) { e.setAttribute('contenteditable', 'true'); e.setAttribute('spellcheck', 'true'); e.setAttribute('lang', 'pt-BR'); }
+      else { e.removeAttribute('contenteditable'); }
+    });
+  }
+  function edita(sim) {
+    if (sim && auto) play();
+    editando = sim;
+    document.documentElement.classList.toggle('editando', sim);
+    $('b-editar').setAttribute('aria-pressed', sim);
+    $('barra-ed').hidden = !sim;
+    $('ed-baixar').hidden = noArtifact;
+    $('ed-msg').textContent = sim ? rot('editando') : '';
+    marcaEditavel(sim);
+    escala();
+    notas(sim ? true : undefined);
+    if (!sim) notas(false);
+  }
+  document.addEventListener('input', e => {
+    const el = e.target.closest && e.target.closest('[data-campo]');
+    if (!el || !editando) return;
+    const campo = el.dataset.campo;
+    if (el.tagName === 'UL') {
+      if (!el.querySelector('li')) { el.innerHTML = '<li style="--k:0"><br></li>'; }
+      poe(T, campo, [...el.querySelectorAll('li')].map(li => limpa(li.innerHTML)).filter(x => x.replace(/<[^>]+>/g, '').trim()));
+    } else {
+      const v = limpa(el.innerHTML);
+      poe(T, campo, v);
+      document.querySelectorAll(`[data-campo="${campo}"]`).forEach(o => { if (o !== el) o.innerHTML = v; });
+    }
+  });
+  document.addEventListener('paste', e => {           // cola só o texto
+    const el = e.target.closest && e.target.closest('[data-campo]');
+    if (!el || !editando) return;
+    e.preventDefault();
+    document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text/plain'));
+  });
+  const arquivo = () => '// Textos da apresentação do ARGOS. Pode editar aqui (mantendo as aspas) ou pelo botão "Editar textos" da página.\n' +
+    'window.ARGOS_TEXTOS = ' + JSON.stringify(T, null, 1) + ';\n';
+  function baixa() {
+    try {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([arquivo()], { type: 'text/javascript' }));
+      a.download = 'textos.js';
+      document.body.append(a); a.click(); a.remove();
+    } catch (e) {}
+  }
+  async function salva() {
+    if (DB) {
+      try { await DB.doc('deck/textos').set({ json: JSON.stringify(T), em: new Date().toISOString() }); }
+      catch (e) { toast(e && e.code === 'invalid_argument' ? 'Você só pode ver: peça acesso de edição para salvar.' : 'Não salvou agora. Tente de novo em instantes.'); return; }
+      salvo = copia(T); edita(false); render(); toast('Salvo. Todos que abrirem a apresentação veem o texto novo.');
+    } else if (noArtifact) {
+      toast('Ainda conectando para salvar. Tente de novo em instantes.');
+    } else {
+      try { localStorage.setItem(LS, JSON.stringify(T)); } catch (e) {}
+      salvo = copia(T); edita(false); render(); baixa();
+      toast('Salvo neste navegador e baixei o textos.js novo: troque o da pasta para valer em qualquer lugar.');
+    }
+  }
+  function descarta() { T = copia(salvo); edita(false); render(); toast('Mudanças descartadas.'); }
+  let confirma = 0;
+  async function original() {
+    const b = $('ed-original');
+    if (Date.now() - confirma > 4000) { confirma = Date.now(); b.textContent = 'Confirmar: voltar ao original'; setTimeout(() => { b.textContent = 'Voltar ao texto original'; }, 4000); return; }
+    confirma = 0; b.textContent = 'Voltar ao texto original';
+    if (DB) { try { await DB.doc('deck/textos').delete(); } catch (e) { toast('Não consegui voltar ao original agora.'); return; } }
+    else { try { localStorage.removeItem(LS); } catch (e) {} }
+    T = copia(BASE); salvo = copia(BASE); edita(false); render(); toast('Texto original de volta.');
+  }
+  $('b-editar').onclick = () => (editando ? descarta() : edita(true));
+  $('ed-salvar').onclick = salva; $('ed-descartar').onclick = descarta; $('ed-original').onclick = original; $('ed-baixar').onclick = baixa;
+
+  // ---------- navegação ----------
+  $('b-ant').onclick = ant; $('b-prox').onclick = prox; $('b-tela').onclick = tela;
+  $('b-geral').onclick = () => geral(); $('b-notas').onclick = () => notas(); $('b-play').onclick = play;
+  document.addEventListener('keydown', e => {
+    const k = e.key;
+    if (editando && (e.ctrlKey || e.metaKey) && (k === 's' || k === 'S')) { e.preventDefault(); salva(); return; }
+    if (e.target && e.target.isContentEditable) { if (k === 'Escape') e.target.blur(); return; }
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (!$('geral').hidden) { if (k === 'Escape' || k === 'g' || k === 'G') { geral(false); e.preventDefault(); } return; }
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(k)) { if (k === 'Enter' && e.target.tagName === 'BUTTON') return; prox(); e.preventDefault(); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(k)) { ant(); e.preventDefault(); }
+    else if (k === 'Home') vai(0); else if (k === 'End') vai(slides.length - 1);
+    else if (k === 'f' || k === 'F') tela();
+    else if (k === 'g' || k === 'G') geral();
+    else if (k === 'Escape') { if (editando) descarta(); else geral(false); }
+    else if (k === 'n' || k === 'N') notas();
+    else if (k === 'p' || k === 'P') play();
+    else if (k === 'e' || k === 'E') { edita(!editando); }
+  });
+  palco.addEventListener('click', e => {
+    if (editando || e.target.closest('a,button')) return;
+    const r = palco.getBoundingClientRect();
+    (e.clientX - r.left < r.width / 3) ? ant() : prox();
+  });
+  let x0 = null;
+  palco.addEventListener('touchstart', e => { x0 = editando ? null : e.touches[0].clientX; }, { passive: true });
+  palco.addEventListener('touchend', e => {
+    if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 40) { dx < 0 ? prox() : ant(); }
+  });
+  let parado;
+  const mexeu = () => { ctl.classList.remove('some'); clearTimeout(parado); parado = setTimeout(() => { if (document.fullscreenElement && !editando) ctl.classList.add('some'); }, 2500); };
+  document.addEventListener('mousemove', mexeu); document.addEventListener('fullscreenchange', () => { escala(); mexeu(); });
+  setTimeout(() => { $('dica').style.opacity = 0; }, 6000);
+  addEventListener('resize', escala);
+  addEventListener('hashchange', () => { const m = /^#s(\d+)$/.exec(location.hash); if (m) vai(+m[1] - 1, true); });
+  escala();
+  const m = /^#s(\d+)$/.exec(location.hash);
+  atual = m ? +m[1] - 1 : 0;
+  render();
+  // no Artifact: o texto salvo fica no banco do próprio Artifact (vale para todos)
+  if (noArtifact) window.claude.use('db').then(db => {
+    if (!db) return;
+    DB = db;
+    return db.doc('deck/textos').get().then(s => {
+      const d = s.exists && s.data();
+      if (d && typeof d.json === 'string' && !editando) { try { T = JSON.parse(d.json); salvo = copia(T); render(); } catch (e) {} }
+    });
+  }).catch(() => {});
+})();
+</script>
+
+</body>
+</html>
