@@ -51,7 +51,17 @@
   });
   const ordemReg = Object.keys(MUN.regs || REG).filter(r => REG[r]);
   const regs = ordemReg.map(r => REG[r]), polos = Object.values(POL), als = Object.values(AL);
-  const porNae = (a, b) => (b.nae || 0) - (a.nae || 0);
+  // visão do mapa (mapa-municipios.js: NAE, Manutenção, Inspeção…): os números e a ordem da lista seguem a métrica escolhida;
+  // na NAE (visao() = null) ficam os de antes. Regional, polo e alimentador: soma dos municípios (como nos cartões do mapa)
+  const vis = () => (mapa() && mapa().visao ? mapa().visao() : null);
+  const valor = x => {
+    const v = vis();
+    if (!v) return x.nae || 0;
+    const ms = x.slug !== undefined ? [x] : x.polos ? muns.filter(m => m.reg === x.nome) : x.se !== undefined ? null : x.muns;
+    return ms ? ms.reduce((s, m) => s + v.mun(m.cod), 0) : x.muns.reduce((s, m) => s + v.al(x.cod, m.cod), 0);
+  };
+  const porNae = (a, b) => valor(b) - valor(a);
+  const mais = () => (vis() ? vis().mais : 'NAE');
 
   // o que está aberto no mapa (regional, polo, município) vem primeiro na lista
   const nivel = () => (mapa() ? mapa().nivel() : {});
@@ -77,13 +87,13 @@
     return esc(txt.slice(0, i)) + '<mark>' + esc(txt.slice(i, i + n.length)) + '</mark>' + esc(txt.slice(i + n.length));
   };
   const item = {
-    reg: (r, n) => ({ s: { reg: r.nome }, tipo: 'reg', t: realce(r.nome, n), c: `${plural(r.polos.size, 'polo', 'polos')} · ${r.n} municípios`, nae: r.nae }),
-    polo: (p, n) => ({ s: { polo: p.nome }, tipo: 'polo', t: realce(p.nome, n), c: `Regional ${esc(p.reg)} · ${plural(p.muns.length, 'município', 'municípios')}`, nae: p.nae }),
-    mun: (m, n) => ({ s: { cod: m.cod }, tipo: 'mun', t: realce(m.nome, n), c: `Polo ${esc(m.polo)} · ${esc(m.reg)} · ${plural(m.als.length, 'alimentador', 'alimentadores')}`, nae: m.nae }),
-    al: (a, n, k) => ({ s: { al: a.cod }, tipo: 'al', t: realce(a.cod, k), c: `${realce(a.se, n)} · ${plural(a.muns.length, 'município', 'municípios')} · ${kmTxt(a.m)}`, nae: a.nae }),
+    reg: (r, n) => ({ s: { reg: r.nome }, tipo: 'reg', t: realce(r.nome, n), c: `${plural(r.polos.size, 'polo', 'polos')} · ${r.n} municípios`, nae: valor(r) }),
+    polo: (p, n) => ({ s: { polo: p.nome }, tipo: 'polo', t: realce(p.nome, n), c: `Regional ${esc(p.reg)} · ${plural(p.muns.length, 'município', 'municípios')}`, nae: valor(p) }),
+    mun: (m, n) => ({ s: { cod: m.cod }, tipo: 'mun', t: realce(m.nome, n), c: `Polo ${esc(m.polo)} · ${esc(m.reg)} · ${plural(m.als.length, 'alimentador', 'alimentadores')}`, nae: valor(m) }),
+    al: (a, n, k) => ({ s: { al: a.cod }, tipo: 'al', t: realce(a.cod, k), c: `${realce(a.se, n)} · ${plural(a.muns.length, 'município', 'municípios')} · ${kmTxt(a.m)}`, nae: valor(a) }),
     // alimentador do município aberto (a lista que ficava ao lado do mapa): miniatura da rede, código e NAE (sem km e SE,
     // pedido do usuário); o que está em foco no mapa fica marcado
-    almun: (a, m, foco) => ({ s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: a.n || 0, c: foco ? 'Em foco no mapa' : '' }),
+    almun: (a, m, foco) => ({ s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: vis() ? vis().al(a.cod, m.cod) : a.n || 0, c: foco ? 'Em foco no mapa' : '' }),
     ativo: ([c, tipo], k) => ({ s: { ativo: c }, tipo: 'ativo', t: realce(c, k), c: esc(TIPO[tipo] || 'Chave ' + tipo) }),
     os: txt => ({ s: { os: txt }, tipo: 'os', t: `OS ${esc(txt)}`, c: 'buscar nas bases de faixa, inspeção, manutenção e executadas' })
   };
@@ -98,7 +108,7 @@
           (it.mini ? `<span class="so-mini" data-al="${esc(it.mini)}" aria-hidden="true"></span>` :
             `<svg class="so-i" viewBox="0 0 24 24" aria-hidden="true">${ICO[it.tipo]}</svg>`) +
           `<span class="so-x"><b>${it.t}</b>${it.c ? `<small>${it.c}</small>` : ''}</span>` +
-          (it.nae != null ? `<i class="so-n">${nf(it.nae)}<span class="vh"> NAE</span></i>` : '') + '</li>';
+          (it.nae != null ? `<i class="so-n">${vis() ? vis().num(it.nae) : nf(it.nae)}<span class="vh"> ${vis() ? vis().un : 'NAE'}</span></i>` : '') + '</li>';
       }).join('')).join('');
     res.className = classe;
     res.innerHTML = `<ul class="sug" role="listbox" aria-label="Resultados">${html}</ul>${rodape}`;
@@ -143,10 +153,10 @@
     if (m) mostra([[`Alimentadores de ${m.nome} · ${m.als.length}`, m.als.slice().sort((a, b) => b.m - a.m)
       .map(a => item.almun({ ...a, se: (AL[a.cod] || {}).se || a.se }, m, a.cod === nv.al))]], '', 'lista-mun');
     else if (nv.pol && POL[nv.pol]) mostra([[`Municípios do polo ${nv.pol}`, POL[nv.pol].muns.slice().sort(porNae).map(x => item.mun(x))],
-      [`Alimentadores com mais NAE no polo ${nv.pol}`, topAls(x => x.polo === nv.pol)]]);
+      [`Alimentadores com mais ${mais()} no polo ${nv.pol}`, topAls(x => x.polo === nv.pol)]]);
     else if (nv.reg && REG[nv.reg]) mostra([[`Polos da Regional ${nv.reg}`, polos.filter(p => p.reg === nv.reg).sort(porNae).map(p => item.polo(p))],
-      [`Alimentadores com mais NAE na Regional ${nv.reg}`, topAls(x => x.reg === nv.reg)]]);
-    else mostra([['Regionais', regs.map(r => item.reg(r))], ['Alimentadores com mais NAE', topAls(() => true)]]);
+      [`Alimentadores com mais ${mais()} na Regional ${nv.reg}`, topAls(x => x.reg === nv.reg)]]);
+    else mostra([['Regionais', regs.map(r => item.reg(r))], [`Alimentadores com mais ${mais()}`, topAls(() => true)]]);
   }
 
   // ---------- ao digitar ----------
@@ -326,6 +336,8 @@
     if (usando && sug.length) atalhos();
     else if (res.classList.contains('lista-mun') && (d.al || !d.mun)) fecha();
   });
+  // visão do mapa trocada: a lista aberta (sem resultado de ativo ou OS) refaz os números
+  document.addEventListener('argos-visao', () => { if (!sug.length || sug.some(s => s.os || s.ativo)) return; if (q.value.trim()) sugere(); else atalhos(); });
   // fecha a lista: Esc (no campo ou na lista; o foco volta ao campo), clique fora do formulário ou o foco saindo dele
   form.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;

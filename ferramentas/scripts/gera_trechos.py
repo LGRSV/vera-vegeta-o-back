@@ -1393,8 +1393,13 @@ def interface(saida, malha=None):
     manutencao_polos(saida, dados)
     indice_ativos(saida, dados)
     indice_os(saida, dados)
+    # páginas que outras etapas fazem: a Priorização (priorizacao/, #20) e as visões do mapa (gera_visoes.js, que roda
+    # depois desta interface na atualização automática). Só entram no HTML quando existem, para nunca virar link quebrado.
+    ranking = 'priorizacao/' if (saida / 'priorizacao' / 'index.html').exists() else 'polos/#eto'
+    visoes = ('<script src="assets/mapa-municipios-visoes.js"></script>\n'
+              if (saida / 'assets' / 'mapa-municipios-visoes.js').exists() else '')
     corpo = ('<header class="cab"><h1><b>ARGOS</b> <span>MANUTENÇÃO</span></h1>'
-             '<a class="cab-link" href="polos/#eto">Ranking</a></header>\n'
+             f'<a class="cab-link" href="{ranking}">Ranking</a></header>\n'   # Ranking da tela inicial abre a Priorização (#20)
              # casca do mapa já no HTML (estilo em assets/site.css; o svg com viewBox reserva a altura do mapa):
              # os scripts só preenchem, e a página não pula ao carregar. Busca única atrás da lupa (busca-ativo.js):
              # ativo, município ou alimentador, com a lista aparecendo enquanto se digita.
@@ -1411,6 +1416,7 @@ def interface(saida, malha=None):
              f'<div class="mt-mapa"><svg role="group" aria-label="Mapa dos municípios do Tocantins" tabindex="-1" viewBox="{vb}"></svg>'
              '<div class="mt-dica" aria-hidden="true"></div></div></div>\n'
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
+             + visoes +                                                # outras visões do mapa (atualiza_bases.py → gera_visoes.js)
              '<script src="assets/mapa-municipios.js"></script>\n'
              '<script src="assets/busca-ativo.js"></script>\n'
              '<script src="assets/mapa-raiox.js"></script>')        # zoom → tela cheia e raio-X (Ctrl+X) no mapa

@@ -42,7 +42,7 @@ MES = re.compile(r'(?<!\d)(0[1-9]|1[0-2])[-_.](20\d\d)(?!\d)')
 # o que a automação precisa (pasta ferramentas/ do gh-pages): os scripts e a parte do pacote alimentador que eles usam
 FERRAMENTAS = {
     'scripts': ['gera_trechos.py', 'atualiza_critica.py', 'ativos_gis.py', 'inspecao.py', 'limpeza_faixa.py',
-                'manutencao.py', 'executadas.py', 'atualiza_bases.py', 'ativos_js.py', 'divisas.py'],
+                'manutencao.py', 'executadas.py', 'atualiza_bases.py', 'ativos_js.py', 'divisas.py', 'gera_visoes.js'],
     'alimentador': ['__init__.py', 'critica.py', 'daimon.py', 'gerar_trechos.py', 'regras.py', 'trechos.py',
                     'mapa_trechos.html', 'site_indice.html', 'leaflet/leaflet.css', 'leaflet/leaflet.js',
                     'leaflet/LICENSE', 'site/*'],
@@ -206,12 +206,29 @@ def atualiza(site, arquivos, hoje=None):
     roda('Páginas e rankings', gt.main, ['--saida', str(site), '--so-interface'])
     print('\n== NAE/100 km da mesma rede', flush=True)
     nae_rede(site)
+    print('\n== Visões do mapa inicial (Manutenção, Inspeção, Insp→manut, Limpeza)', flush=True)
+    visoes(site)
     roda('Validação', gt.main, ['--saida', str(site), '--validar'])
     est = estado(site, feitos, hoje)
     print('\n== Bases no site')
     for t in TIPOS:
         print(f"  {NOMES[t]}: {json.dumps({k: v for k, v in est[t].items() if k != 'nome'}, ensure_ascii=False)}")
     return feitos
+
+
+def visoes(site):
+    """Outras visões do mapa da página inicial: assets/mapa-municipios-visoes.js, por município e alimentador, a partir
+    de alimentadores/<AL>/{executadas,inspecao,manutencao,limpeza,dados,divisas}.js (gera_visoes.js, em Node; o
+    ubuntu-latest da automação já tem). Sem o arquivo a página inicial fica só com a NAE."""
+    import subprocess
+    subprocess.run(['node', str(AQUI / 'gera_visoes.js'), str(site), str(Path(site) / 'assets' / 'mapa-municipios-visoes.js')], check=True)
+    # na 1ª vez o arquivo ainda não existia quando a interface escreveu o index.html (ela só põe a tag se ele existe)
+    idx = Path(site) / 'index.html'
+    h = idx.read_text(encoding='utf-8')
+    if 'mapa-municipios-visoes.js' not in h and '<script src="assets/mapa-municipios.js">' in h:
+        idx.write_text(h.replace('<script src="assets/mapa-municipios.js">',
+                                 '<script src="assets/mapa-municipios-visoes.js"></script>\n<script src="assets/mapa-municipios.js">', 1),
+                       encoding='utf-8')
 
 
 def main(argv=None):
