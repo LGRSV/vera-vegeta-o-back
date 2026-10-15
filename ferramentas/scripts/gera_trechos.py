@@ -862,6 +862,7 @@ def mapa_e_ranking(saida, dados, man):
     cfg = json.loads((PKG / 'site' / 'polos.json').read_text(encoding='utf-8'))
     polo_de = {cod: p for p in cfg['polos'] for cod in p['municipios']}
     nae_mun = nae_por_municipio(dados)
+    nae_al = {c['alimentador']: len((c.get('nae') or {}).get('oc', [])) for c in dados if c['validacao']['status'] != 'falha'}
     muns = []
     for g in geo['muns']:
         m = por_cod.get(g['cod'])
@@ -869,8 +870,8 @@ def mapa_e_ranking(saida, dados, man):
         if g['cod'] in polo_de:
             g = dict(g, reg=polo_de[g['cod']]['regional'], polo=polo_de[g['cod']]['nome'])
         if m:
-            g = dict(g, nome=m['nome'], slug=m['slug'], als=[dict(cod=a['cod'], se=a['se_nome'], m=a['m_no_municipio'])
-                                             for a in m['alimentadores']])
+            g = dict(g, nome=m['nome'], slug=m['slug'], als=[dict(cod=a['cod'], se=a['se_nome'], m=a['m_no_municipio'],
+                                                                  n=nae_al.get(a['cod'], 0)) for a in m['alimentadores']])
         muns.append(g)
     (saida / 'assets' / 'mapa-municipios-dados.js').write_text(
         'window.MUN=' + json.dumps(dict(w=geo['w'], h=geo['h'], muns=muns,
@@ -901,6 +902,57 @@ def mapa_e_ranking(saida, dados, man):
                                          als=als), ensure_ascii=False, separators=(',', ':')) + ';\n',
         encoding='utf-8')
     return vb
+
+
+# lon/lat → coordenadas do mapa de municípios da página inicial (mapa-municipios-geo.json, já projetado).
+# Ajuste por regressão + refino com a rede dos alimentadores que ficam quase todos num município só: 96,7% dos pontos
+# dos vãos caem dentro do município certo (o resto fica na divisa, onde a malha simplificada do mapa perde detalhe).
+PROJ_MUN = (112.8878, 5722.7136, -111.6377, -574.6836)     # x = a·lon + b, y = c·lat + d
+REDE_TOL = 25                                              # m do Douglas–Peucker na rede da prévia
+
+
+def redes_mapa(saida, dados):
+    """dados/redes/<AL>.json: a rede de cada alimentador já nas coordenadas do mapa de municípios, para a prévia do
+    município aberto na página inicial (mapa-municipios.js). {d: path SVG (linhas encadeadas e simplificadas),
+    b: [x0, y0, x1, y1]}. Só a forma: as contas (NAE, km) continuam saindo dos dados de cada alimentador."""
+    a, b, c_, d = PROJ_MUN
+    pasta = saida / 'dados' / 'redes'
+    pasta.mkdir(parents=True, exist_ok=True)
+    for c in dados:
+        if c['validacao']['status'] == 'falha':
+            continue
+        viz = {}
+        for v in c['vaos']:
+            p, q = (v[0], v[1]), (v[2], v[3])
+            if p != q:
+                viz.setdefault(p, []).append(q)
+                viz.setdefault(q, []).append(p)
+        usados, linhas = set(), []
+        # encadeia: começa nas pontas e nos pontos de derivação (grau ≠ 2) e anda até o próximo deles
+        inicios = [p for p, ns in viz.items() if len(ns) != 2] or list(viz)[:1]
+        for p0 in inicios + list(viz):
+            for q in viz[p0]:
+                if (p0, q) in usados:
+                    continue
+                linha, prev, cur = [p0], p0, q
+                usados |= {(p0, q), (q, p0)}
+                while True:
+                    linha.append(cur)
+                    if len(viz[cur]) != 2:
+                        break
+                    nxt = viz[cur][0] if viz[cur][1] == prev else viz[cur][1]
+                    if (cur, nxt) in usados:
+                        break
+                    usados |= {(cur, nxt), (nxt, cur)}
+                    prev, cur = cur, nxt
+                linhas.append(_dp(linha, REDE_TOL))
+        xy = [[(round(a * lon + b, 2), round(c_ * lat + d, 2)) for lon, lat in ln] for ln in linhas]
+        xs = [x for ln in xy for x, _ in ln]
+        ys = [y for ln in xy for _, y in ln]
+        f = lambda v: f'{v:g}'
+        grava_json(pasta / f'{c["alimentador"]}.json', dict(
+            d=''.join('M' + 'L'.join(f'{f(x)},{f(y)}' for x, y in ln) for ln in xy),
+            b=[min(xs), min(ys), max(xs), max(ys)]))
 
 
 def polo_principal(c, polo_de):
@@ -1245,6 +1297,7 @@ def interface(saida, malha=None):
         p.write_text(casca(f'{m["nome"]} · alimentadores', corpo, '../../',
                            rodape=f'<p>Malha do IBGE, amostra a cada {PASSO_M}&nbsp;m; mínimo de {MIN_M}&nbsp;m.</p>'), encoding='utf-8')
     vb = mapa_e_ranking(saida, dados, man)
+    redes_mapa(saida, dados)
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
     indice_ativos(saida, dados)
