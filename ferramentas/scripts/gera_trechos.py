@@ -148,11 +148,11 @@ def carregar_malha(arquivo, cache):
 
 def malha_salva(arquivo, cache, saida):
     """--so-interface: a malha de --malha ou a do cache. Baixa do IBGE só se alguma página medida com a malha do IBGE
-    ainda está sem as divisas (municipios.js); sem internet, segue sem elas (as já gravadas ficam como estão)."""
+    ainda está sem as divisas (divisas.js); sem internet, segue sem elas (as já gravadas ficam como estão)."""
     if arquivo or all((Path(cache) / f).exists() for f in ('malha-TO.geojson', 'municipios-TO.json')):
         return carregar_malha(arquivo, cache)
-    sem = lambda al: not (saida / 'alimentadores' / al / 'municipios.js').exists() or \
-        (saida / 'alimentadores' / al / 'municipios.js').read_text(encoding='utf-8') == 'window.MUNICIPIOS = null;\n'
+    sem = lambda al: not (saida / 'alimentadores' / al / 'divisas.js').exists() or \
+        (saida / 'alimentadores' / al / 'divisas.js').read_text(encoding='utf-8') == 'window.MUNICIPIOS = null;\n'
     if not any(c['validacao']['status'] != 'falha' and c['origem'].get('malha') == IBGE_ORIGEM and sem(c['alimentador'])
                for c in carregar_dados(saida)):
         return None
@@ -665,7 +665,8 @@ def ativos_interface(saida):
     (a / 'alimentador.css').write_text(css, encoding='utf-8')
     (a / 'alimentador.js').write_text('const D = window.D;\n' + js, encoding='utf-8')
     for f in ('extras.js', 'municipios.js', 'chaves.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
-              'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js', 'argos.png'):
+              'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js', 'lupa-painel.js', 'ativos-zoom.js', 'mapa-raiox.js',
+              'argos.png'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
     return modelo
@@ -731,7 +732,9 @@ def pagina_alimentador(modelo, c):
                '<script src="dados.js"></script>\n<script src="../../assets/alimentador.js"></script>\n'
                '<script src="../../assets/extras.js"></script>\n'
                # divisas dos municípios em tracejado: municipios.js do alimentador sai da interface, com a malha
-               '<script src="municipios.js"></script>\n<script src="../../assets/municipios.js"></script>\n'
+               # divisas.js do alimentador e dados/tocantins.js (contorno do estado) saem de scripts/divisas.py
+               '<script src="divisas.js"></script>\n<script src="../../dados/tocantins.js"></script>\n'
+               '<script src="../../assets/municipios.js"></script>\n'
                # chaves que não dividem trecho (88, faca…): chaves.js do alimentador sai da interface, dos dados do site
                '<script src="chaves.js"></script>\n<script src="../../assets/chaves.js"></script>\n'
                # limpeza de faixa: limpeza.js do alimentador vem de scripts/limpeza_faixa.py (sem ele, a camada não aparece)
@@ -745,7 +748,9 @@ def pagina_alimentador(modelo, c):
                '<script src="executadas.js"></script>\n<script src="../../assets/executadas.js"></script>\n'
                '<script src="../../assets/telacheia.js"></script>\n'
                # croqui de limpeza de faixa (o modelo, assets/croqui-modelo.js, só carrega quando pedido)
-               '<script src="../../assets/croqui.js"></script>\n<script src="../../assets/menu.js"></script>', h, count=1, flags=re.S)
+               '<script src="../../assets/croqui.js"></script>\n<script src="../../assets/menu.js"></script>\n'
+               '<script src="../../assets/lupa-painel.js"></script>\n'
+               '<script src="../../assets/ativos-zoom.js"></script>', h, count=1, flags=re.S)   # ativos de perto (ativos.js do alimentador, scripts/ativos_js.py)   # lupa do ARGOS no painel (depois do menu)
     assert '%%' not in h
     return h
 
@@ -1315,12 +1320,29 @@ def chaves_js(c):
 
 
 def grava_divisas(arq, c, malha):
-    """municipios.js do alimentador (divisas no mapa). Só com a mesma malha que mediu os municípios dele; sem ela, fica o
-    arquivo que já existe (ou null: a página fica sem as divisas)."""
+    """divisas.js do alimentador (divisas no mapa, como scripts/divisas.py). Só com a mesma malha que mediu os municípios
+    dele; sem ela, fica o arquivo que já existe (ou null: a página fica sem as divisas)."""
     if malha and c['origem'].get('malha') == malha.origem:
         arq.write_text(divisas_js(malha, c), encoding='utf-8')
     elif not arq.exists():
         arq.write_text('window.MUNICIPIOS = null;\n', encoding='utf-8')
+
+
+def grava_tocantins(saida, cache):
+    """dados/tocantins.js: window.TOCANTINS = [[[lat, lon], ...], ...], o contorno do estado (uf-TO.geojson do cache, malha
+    do IBGE do estado em qualidade intermediária), que o mapa do alimentador desenha com o traço-ponto da divisa do TO.
+    Sem o arquivo no cache, fica o que já existe (ou null)."""
+    arq, fonte = saida / 'dados' / 'tocantins.js', Path(cache) / 'uf-TO.geojson'
+    arq.parent.mkdir(parents=True, exist_ok=True)
+    if fonte.exists():
+        aneis = []
+        for f in json.loads(fonte.read_text(encoding='utf-8'))['features']:
+            geom = f['geometry']
+            for pol in (geom['coordinates'] if geom['type'] == 'MultiPolygon' else [geom['coordinates']]):
+                aneis += [[[round(y, 4), round(x, 4)] for x, y, *_ in anel] for anel in pol[:1]]   # só o anel de fora
+        arq.write_text('window.TOCANTINS = ' + json.dumps(aneis, separators=(',', ':')) + ';\n', encoding='utf-8')
+    elif not arq.exists():
+        arq.write_text('window.TOCANTINS = null;\n', encoding='utf-8')
 
 
 def interface(saida, malha=None):
@@ -1344,7 +1366,7 @@ def interface(saida, malha=None):
             exe = saida / 'alimentadores' / c['alimentador'] / 'executadas.js'
             if not exe.exists():                       # até rodar scripts/executadas.py: página sem o card Manutenção
                 exe.write_text('window.EXECUTADAS = null;\n', encoding='utf-8')
-            grava_divisas(saida / 'alimentadores' / c['alimentador'] / 'municipios.js', c, malha)
+            grava_divisas(saida / 'alimentadores' / c['alimentador'] / 'divisas.js', c, malha)
             (saida / 'alimentadores' / c['alimentador'] / 'chaves.js').write_text(chaves_js(c), encoding='utf-8')
     for m in man['municipios']:
         linhas = []
@@ -1390,7 +1412,8 @@ def interface(saida, malha=None):
              '<div class="mt-dica" aria-hidden="true"></div></div></div>\n'
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
              '<script src="assets/mapa-municipios.js"></script>\n'
-             '<script src="assets/busca-ativo.js"></script>')
+             '<script src="assets/busca-ativo.js"></script>\n'
+             '<script src="assets/mapa-raiox.js"></script>')        # zoom → tela cheia e raio-X (Ctrl+X) no mapa
     (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True),   # página inicial sem rodapé (pedido do usuário)
                                       encoding='utf-8')
     (saida / '.nojekyll').touch()
@@ -1550,6 +1573,7 @@ def main(argv=None):
         return 0 if validar_saida(saida) else 1
     if a.so_interface:
         interface(saida, malha_salva(a.malha, a.cache, saida))
+        grava_tocantins(saida, a.cache)
         return 0 if validar_saida(saida) else 1
     if a.comparar:
         comparar(saida, a.comparar)
@@ -1574,6 +1598,7 @@ def main(argv=None):
         print(f'{al}: {c["validacao"]["status"]}' + (f' · {r["trechos"]} trechos · {km(r["extensao_m"])} km · '
               + ', '.join(f'{m["nome"]} {km(m["m"])} km' for m in c['municipios']) if r else f' · {c.get("erro")}'))
     dados, man = interface(saida, malha)
+    grava_tocantins(saida, a.cache)
     relatorio(saida, dados, man, sem_kml)
     ok = validar_saida(saida)
     print(f'{len(man["municipios"])} município(s) · {sum(c["validacao"]["status"] != "falha" for c in dados)} alimentador(es) '
