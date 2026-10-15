@@ -8,6 +8,7 @@
 // Marca em pedaços de PASSO m (não o vão inteiro): o pincel pinta só o que passa por baixo dele; Leve não cobre Pesada
 // nem o contrário (para trocar: Apagar, ou segurar Shift enquanto pinta). O Ctrl+Z desfaz a última alteração (o último
 // traço, ou o último trecho escolhido/tirado); Ctrl+Shift+Z ou Ctrl+Y refaz.
+// Com Leve/Pesada ligado, apertar fora da linha arrasta o mapa (em qualquer direção); em cima dela, pinta.
 // Atalhos: Ctrl+M liga/desliga · L leve · P pesada · B apagar · Espaço (segurar) move o mapa · Ctrl+Z desfaz ·
 // Esc solta a ferramenta (de novo: sai). Celular: abre em tela cheia; 1 dedo pinta, 2 dedos andam/dão zoom.
 // Roda depois de alimentador.js (window.__map, window.D). Os km são a soma dos vãos (D.vaos[i][8], metros).
@@ -223,7 +224,7 @@
     dash.querySelectorAll('.fx-t').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === ferr)));
     $('fx-apagar').setAttribute('aria-pressed', String(ferr === 'apagar'));
     if (tAviso) return;
-    $('fx-dica-p').textContent = ferr ? (toque() ? 'Arraste com 1 dedo sobre o trecho. 2 dedos movem o mapa.' : 'Arraste sobre o trecho. Segure Espaço para mover o mapa.') +
+    $('fx-dica-p').textContent = ferr ? 'Arraste sobre o trecho para pintar; fora dele, arrasta o mapa.' +
       (map.getZoom() < 13 ? ' Aproxime para mais precisão.' : '') : `${toque() ? 'Toque' : 'Clique'} em outro trecho para somar, ou ligue Leve ou Pesada.`;
   }
   function aviso(t) {
@@ -242,25 +243,49 @@
   }
   const setFerr = f => { ferr = ferr === f ? null : f; temp = false; aplicaFerr(); };   // tocar de novo solta: volta a escolher trechos
 
+  // com Leve/Pesada/Apagar ligado: apertar em cima de um trecho escolhido pinta; apertar fora dele arrasta o mapa (em
+  // qualquer direção), sem precisar trocar de ferramenta. O cursor mostra o que vai acontecer: o pincel perto da linha,
+  // a mãozinha fora dela.
+  const FOLGA = 6;                                                // px além do pincel que ainda contam como "em cima"
+  function perto(px, py, tol) {
+    const a = selP || (selP = projeta(selV)), t2 = tol * tol;
+    for (let k = 0; k < selV.length; k++) if (!fora(a, k, px, py, tol) && d2(px, py, a, k) <= t2) return true;
+    return false;
+  }
   const ativos = new Set();
+  let arrasto = null;                                             // { x, y }: arrastando o mapa
   capa.addEventListener('pointerdown', e => {
     if (!ativo || e.button > 0) return;
     ativos.add(e.pointerId);
     if (ativos.size > 1) {                                        // 2 dedos: pinça/andar; o pontinho do 1º dedo sai
       if (stroke) { stroke.rec.forEach((antes, q) => { marca[q] = antes; }); stroke = null; agenda(); }
+      if (arrasto) { arrasto = null; map.fire('moveend'); }
       return;
     }
     const alvo = ALVO[ferr]; if (alvo === undefined) return;
     pincel = toque(e) ? 14 : 8;
     capa.setPointerCapture(e.pointerId);
     const [x, y] = abs(e);
+    if (!perto(x, y, pincel + FOLGA)) {                           // fora da linha: arrasta o mapa
+      arrasto = { x: e.clientX, y: e.clientY };
+      bPincel.style.display = 'none'; capa.style.cursor = 'grabbing';
+      map.fire('movestart');
+      return;
+    }
     stroke = { rec: new Map(), x, y, alvo, cobre: e.shiftKey, tocou: 0 };
     stroke.tocou = pinta(x, y, alvo, stroke.cobre);
     mostraPincel(e); agenda();
   });
   capa.addEventListener('pointermove', e => {
+    if (arrasto) {
+      if (ativos.size > 1) return;
+      map._rawPanBy(L.point(arrasto.x - e.clientX, arrasto.y - e.clientY)); map.fire('move');
+      arrasto.x = e.clientX; arrasto.y = e.clientY;
+      return;
+    }
+    if (!stroke) { cursor(e); return; }
     mostraPincel(e);
-    if (!stroke || ativos.size > 1) return;
+    if (ativos.size > 1) return;
     const [x, y] = abs(e), s = stroke, n = Math.max(1, Math.ceil(Math.hypot(x - s.x, y - s.y) / (pincel / 2)));
     s.cobre = s.cobre || e.shiftKey;
     for (let k = 1; k <= n; k++) s.tocou += pinta(s.x + (x - s.x) * k / n, s.y + (y - s.y) * k / n, s.alvo, s.cobre);
@@ -268,14 +293,28 @@
   });
   const solta = e => {
     ativos.delete(e.pointerId);
+    if (arrasto) { arrasto = null; map.fire('moveend'); cursor(e); return; }
     if (!stroke) return;
     const s = stroke; stroke = null;
     if (s.rec.size) guarda({ m: s.rec });
     agenda();
-    if (!s.tocou) aviso('Aí não tem trecho escolhido: arraste sobre os de contorno branco.');
   };
   capa.addEventListener('pointerup', solta); capa.addEventListener('pointercancel', solta);
   capa.addEventListener('pointerleave', () => { if (!stroke) bPincel.style.display = 'none'; });
+  // sem botão apertado (mouse): pincel perto de um trecho escolhido, mãozinha fora
+  let cq = 0;
+  function cursor(e) {
+    if (toque(e)) { bPincel.style.display = 'none'; return; }
+    if (cq) return;
+    const ev = { clientX: e.clientX, clientY: e.clientY };
+    cq = requestAnimationFrame(() => {
+      cq = 0;
+      if (!ativo || !pintando()) return;
+      const [x, y] = abs(ev);
+      if (perto(x, y, pincel + FOLGA)) { capa.style.cursor = 'none'; mostraPincel(ev); }
+      else { capa.style.cursor = 'grab'; bPincel.style.display = 'none'; }
+    });
+  }
   function mostraPincel(e) {
     if (toque(e) && !stroke) { bPincel.style.display = 'none'; return; }
     const r = mc.getBoundingClientRect(), d = pincel * 2;
