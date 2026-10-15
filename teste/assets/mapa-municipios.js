@@ -145,23 +145,74 @@
   // regionais no estado inteiro: um cartãozinho com o nome e a NAE de cada uma, todos alinhados no meio do mapa, cada um
   // na altura do meio dos municípios da sua regional; clicar abre a regional (e eles somem até voltar ao Tocantins).
   // Os cartões dos polos só aparecem na barra da lupa depois de abrir uma regional.
-  // Bandeirinhas (pedido do usuário): os cartões das regionais, e na regional os dos polos, ficam à direita do mapa, cada
-  // um ligado por um fio a um ponto dentro da sua regional/polo (o município mais perto do meio dela), e não cobrem o mapa.
+  // Bandeirinhas (pedido do usuário): o cartão de cada regional, e na regional o de cada polo, fica fora do desenho, logo
+  // acima do contorno dela, preso por um fio curto que sobe de um ponto do contorno. O lugar é procurado ao longo do
+  // contorno: o que não cobre o mapa nem outro cartão, com o fio mais curto.
   const fios = document.createElement('div');
   fios.className = 'mt-bandeiras';
   fios.setAttribute('aria-hidden', 'true');
   caixa.append(fios);
-  let fiosR = '';                                          // fios das regionais (estado inteiro), refeitos a cada redimensionamento
   const fio = (ax, ay, bx, by, cor) => `<i class="mt-fio" style="left:${ax.toFixed(1)}px;top:${ay.toFixed(1)}px;width:${Math.hypot(bx - ax, by - ay).toFixed(1)}px;` +
     `transform:rotate(${Math.atan2(by - ay, bx - ax).toFixed(4)}rad)${cor ? ';--c:' + cor : ''}"></i><i class="mt-pino" style="left:${ax.toFixed(1)}px;top:${ay.toFixed(1)}px${cor ? ';--c:' + cor : ''}"></i>`;
-  // empilha na coluna da direita, de cima para baixo na ordem dos pontos, sem um cartão encostar no outro
-  const empilha = (its, alto) => {
-    its.sort((a, b) => a.ay - b.ay);
-    let fim = -Infinity;
-    its.forEach(t => { t.y = Math.max(t.ay, fim + t.h / 2 + 8); fim = t.y + t.h / 2; });
-    const sobra = fim - (alto - 4);
-    if (sobra > 0) its.forEach(t => { t.y -= sobra; });
-  };
+  const rel = r => { const c = caixa.getBoundingClientRect(); return { left: r.left - c.left, right: r.right - c.left, top: r.top - c.top, bottom: r.bottom - c.top }; };
+  const p2d = {};
+  function mascara(ms) {                                   // o que está desenhado na tela (px da caixa, de 2 em 2 px)
+    const c = caixa.getBoundingClientRect(), E = 2, W = Math.max(1, Math.ceil(c.width / E)), H = Math.max(1, Math.ceil(c.height / E));
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const g2 = cv.getContext('2d');
+    ms.forEach(m => {
+      const t = el[m.cod].getScreenCTM();
+      if (!t) return;
+      g2.setTransform(t.a / E, t.b / E, t.c / E, t.d / E, (t.e - c.left) / E, (t.f - c.top) / E);
+      g2.fill(p2d[m.cod] || (p2d[m.cod] = new Path2D(m.d)));
+    });
+    const px = g2.getImageData(0, 0, W, H).data;
+    return (x, y) => { const i = x / E | 0, j = y / E | 0; return i >= 0 && j >= 0 && i < W && j < H && px[(j * W + i) * 4 + 3] > 0; };
+  }
+  function contorno(path, n) {                             // n pontos ao longo do contorno, em px da caixa
+    const t = path && path.getScreenCTM(), c = caixa.getBoundingClientRect(), L = path ? path.getTotalLength() : 0, out = [];
+    if (!t || !L) return out;
+    for (let i = 0; i < n; i++) { const q = path.getPointAtLength(L * (i + .5) / n); out.push({ x: t.a * q.x + t.c * q.y + t.e - c.left, y: t.b * q.x + t.d * q.y + t.f - c.top }); }
+    return out;
+  }
+  // melhor lugar para um cartão w×h em cima de um ponto do contorno, com o fio de 14 a 40 px: o que menos cobre o mapa,
+  // depois o fio que não atravessa o desenho, depois o fio mais curto
+  function planta(pts, w, h, noMapa, obst, CW, CH) {
+    let melhor = null;
+    for (const p of pts) for (const L of [14, 24, 40]) for (const al of [.5, .15, .85]) {
+      const x = p.x - w * al, y = p.y - L - h;
+      if (x < 2 || y < 2 || x + w > CW - 2 || y + h > CH - 2) continue;
+      const R = { left: x, top: y, right: x + w, bottom: y + h };
+      if (obst.some(o => R.left < o.right + 6 && R.right + 6 > o.left && R.top < o.bottom + 6 && R.bottom + 6 > o.top)) continue;
+      let cobre = 0, corta = 0;
+      for (let i = 0; i <= 4; i++) for (let j = 0; j <= 2; j++) if (noMapa(x + w * i / 4, y + h * j / 2)) cobre++;
+      for (let k = 1; k <= 3; k++) if (noMapa(p.x, p.y - 3 - (L - 3) * k / 3)) corta++;
+      const nota = cobre * 100 + corta * 30 + L + Math.abs(al - .5) * 8;
+      if (!melhor || nota < melhor.nota) melhor = { nota, x, y, ax: p.x, ay: p.y, R };
+    }
+    return melhor;
+  }
+  // põe cada cartão (k.e) no lugar achado no contorno (k.path) e devolve os fios; sem lugar, o cartão fica no meio do grupo
+  function bandeiras(cards, ms) {
+    const c = caixa.getBoundingClientRect(), noMapa = mascara(ms), ctm = svg.getScreenCTM(), linhas = [];
+    let feitos = [];
+    try { feitos = [tc, volta].filter(o => o && o.offsetParent).map(o => rel(o.getBoundingClientRect())); } catch (e) { /* ainda montando */ }
+    cards.forEach(k => {
+      const w = k.e.offsetWidth, h = k.e.offsetHeight, b = planta(contorno(k.path, 90), w, h, noMapa, feitos, c.width, c.height);
+      if (!b) {
+        const pt = svg.createSVGPoint();
+        [pt.x, pt.y] = k.centro;
+        const s = pt.matrixTransform(ctm);
+        k.e.style.left = (s.x - c.left - w / 2).toFixed(0) + 'px'; k.e.style.top = (s.y - c.top - h / 2).toFixed(0) + 'px';
+        return;
+      }
+      k.e.style.left = b.x.toFixed(0) + 'px'; k.e.style.top = b.y.toFixed(0) + 'px';
+      feitos.push(b.R, { left: b.ax - 2, right: b.ax + 2, top: b.y + h, bottom: b.ay });   // o fio também não pode ser coberto
+      linhas.push(fio(b.ax, b.ay, b.ax, b.y + h, k.cor));
+    });
+    return linhas.join('');
+  }
   const meio = ms => {                                     // município mais perto do meio do grupo: o ponto cai dentro dele
     const mx = ms.reduce((s, m) => s + m.c[0], 0) / ms.length, my = ms.reduce((s, m) => s + m.c[1], 0) / ms.length;
     return ms.reduce((a, b) => Math.hypot(b.c[0] - mx, b.c[1] - my) < Math.hypot(a.c[0] - mx, a.c[1] - my) ? b : a);
@@ -176,18 +227,9 @@
     `<b>${esc(i.r)}</b><i>${i.nae.toLocaleString('pt-BR')} NAE</i></button>`).join('');
   caixa.append(cartoes);
   cartoes.addEventListener('click', e => { const b = e.target.closest('button'); if (b) entra(b.dataset.reg, e.detail === 0); });
-  const poeCartoes = () => {                                // posição pelo viewBox do estado inteiro (-6 -6 VW M.h+12)
-    const r = svg.getBoundingClientRect(), c = caixa.getBoundingClientRect(), H = M.h + 12;
-    if (!r.width) return;
-    const k = Math.min(r.width / VW, r.height / H), ox = (r.width - VW * k) / 2, oy = (r.height - H * k) / 2;
-    const px = x => r.left - c.left + ox + (x + 6) * k, py = y => r.top - c.top + oy + (y + 6) * k;
-    const its = [...cartoes.children].map((e, i) => ({ e, ax: px(regInfo[i].a[0]), ay: py(regInfo[i].a[1]), w: e.offsetWidth, h: e.offsetHeight }));
-    empilha(its, c.height);
-    // coluna logo à direita do estado; no celular (mapa da largura toda) encosta na borda da direita
-    const col = Math.max(4, Math.min(px(M.w) + 20, c.width - Math.max(...its.map(t => t.w)) - 4));
-    its.forEach(t => { t.e.style.left = col.toFixed(0) + 'px'; t.e.style.top = t.y.toFixed(0) + 'px'; });
-    fiosR = its.map(t => fio(t.ax, t.ay, col, t.y)).join('');
-    if (!caixa.classList.contains('aberta') && !caixa.classList.contains('voando')) fios.innerHTML = fiosR;
+  const poeCartoes = () => {                                // só no estado inteiro e parado (o contorno é lido da tela)
+    if (caixa.classList.contains('aberta') || caixa.classList.contains('voando') || !svg.getBoundingClientRect().width) return;
+    fios.innerHTML = bandeiras([...cartoes.children].map((e, i) => ({ e, path: regs.children[i], centro: regInfo[i].a })), M.muns);
   };
   const prio = t => t.dataset.cod === foco ? 2 : achou.has(t.dataset.cod) ? 1 : 0;
   const X0 = -6, X1 = M.w + 6;
@@ -287,7 +329,7 @@
     const passo = agora => {
       const t = dur ? Math.min(1, (agora - t0) / dur) : 1, e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
       svg.setAttribute('viewBox', de.map((v, i) => +(v + (alvoVb[i] - v) * e).toFixed(2)).join(' '));
-      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); if (!reg) fios.innerHTML = fiosR; poeNomes(); poeSelos(); }
+      if (t < 1) anima = requestAnimationFrame(passo); else { anima = 0; caixa.classList.remove('voando'); caixa.classList.toggle('pronta', !!reg); if (!reg) poeCartoes(); poeNomes(); poeSelos(); }
     };
     selos.innerHTML = '';
     fios.innerHTML = '';
@@ -372,11 +414,12 @@
     // a coluna da esquerda (seta e lista de alimentadores) fica livre; a legenda fica na barra, em cima do mapa
     // com a busca da barra, a lista do município aberto abre embaixo da logo (largura fixa no site.css): o lado esquerdo fica livre para ela
     const lista = window.ARGOS_BUSCA && mun && !alf ? Math.min(460, innerWidth - 32) : 0;
-    // na regional, a coluna da direita fica livre para as bandeirinhas dos polos
-    const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg && caixa.contains(leg) ? leg.offsetWidth : 0, lista) + 24, L2 = reg && !pol && !mun && !alf ? 200 : 24;
-    const k = Math.min(H / h, Math.max(1e-3, W - L1 - L2) / w);
+    // na regional sobra uma faixa em cima e um pouco à direita para as bandeirinhas dos polos
+    const T = reg && !pol && !mun && !alf ? 56 : 0;
+    const H = svg.clientHeight || 600, L1 = Math.max(lado.offsetWidth, leg && caixa.contains(leg) ? leg.offsetWidth : 0, lista) + 24, L2 = T ? 120 : 24;
+    const k = Math.min((H - T) / h, Math.max(1e-3, W - L1 - L2) / w);
     const altura = H / k;
-    return [x - L1 / k, y - (altura - h) / 2, w + (L1 + L2) / k, altura];
+    return [x - L1 / k, y - T / k - ((H - T) / k - h) / 2, w + (L1 + L2) / k, altura];
   }
   function entra(r, teclado, cod) {
     if (!r || reg === r) return;
@@ -705,31 +748,20 @@
       if (!fora(t, m, w, h)) t.remove();
     });
   }
-  // cartão de cada polo: bandeirinha à direita da regional, com o fio na cor do polo até o município do polo mais perto do
-  // meio dele (o ponto sempre cai dentro do polo)
+  // cartão de cada polo: bandeirinha logo acima do contorno do polo, com o fio na cor dele
   function poeSelos() {
     selos.innerHTML = '';
     if (!reg || pol || anima) return;
-    const ctm = svg.getScreenCTM(), cx = caixa.getBoundingClientRect();
-    let dir = -Infinity;
-    const its = psReg.map(p => {
-      const pt = svg.createSVGPoint();
-      [pt.x, pt.y] = soma(meio(p.ms).c, desl[p.polo]);
-      const s = pt.matrixTransform(ctm);
-      dir = Math.max(dir, grp[p.polo].getBoundingClientRect().right - cx.left);
+    const cards = psReg.map(p => {
       const e = document.createElement('div');
       e.className = 'mt-mn mt-pm' + (grp[p.polo].classList.contains('desliga') ? ' off' : '');
       e.dataset.polo = p.polo;
       e.style.setProperty('--c', corDe[p.polo]);
       e.innerHTML = `<b>${esc(p.polo)}</b><i>${p.nae.toLocaleString('pt-BR')} NAE</i>`;
       selos.append(e);
-      return { e, cor: corDe[p.polo], ax: s.x - cx.left, ay: s.y - cx.top, w: e.offsetWidth, h: e.offsetHeight };
+      return { e, cor: corDe[p.polo], path: grp[p.polo].querySelector('.mt-poloc:not(.fundo)'), centro: soma(meio(p.ms).c, desl[p.polo]) };
     });
-    if (!its.length) return;
-    empilha(its, cx.height);
-    const col = Math.max(4, Math.min(dir + 20, cx.width - Math.max(...its.map(t => t.w)) - 4));
-    its.forEach(t => { t.e.style.left = col.toFixed(0) + 'px'; t.e.style.top = t.y.toFixed(0) + 'px'; });
-    fios.innerHTML = its.map(t => fio(t.ax, t.ay, col, t.y, t.cor)).join('');
+    if (cards.length) fios.innerHTML = bandeiras(cards, M.muns.filter(m => m.reg === reg));
   }
   legPolos.addEventListener('click', e => {
     const bt = e.target.closest('button');

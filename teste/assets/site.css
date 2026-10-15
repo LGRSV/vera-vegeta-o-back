@@ -585,10 +585,10 @@ html.mt-cheia-trava,html.mt-cheia-trava body{overflow:hidden}
 .mt-fios line{stroke:var(--cartao-fg);stroke-opacity:.55;stroke-width:1}
 .mt-fios circle{fill:var(--selo);stroke:var(--cartao);stroke-width:1}
 :root[data-theme="light"] .mt-fios line{stroke:#1b2024;stroke-opacity:.6}
-/* bandeirinhas (mapa-municipios.js): os cartões das regionais e, na regional, os dos polos ficam à direita do mapa,
-   ligados por um fio a um ponto dentro da regional/polo (o fio do polo na cor dele) */
-.mt-regcards button{transform:translate(0,-50%)}
-.mt-selos .mt-mn.mt-pm{transform:translate(0,-50%)}
+/* bandeirinhas (mapa-municipios.js): os cartões das regionais e, na regional, os dos polos ficam logo acima do contorno,
+   presos por um fio curto que sobe de um ponto do contorno (o fio do polo na cor dele) */
+.mt-regcards button{transform:none}
+.mt-selos .mt-mn.mt-pm{transform:none}
 .mt-bandeiras{position:absolute;inset:0;z-index:1;pointer-events:none}
 .mt-fio{position:absolute;height:2px;margin-top:-1px;transform-origin:0 50%;border-radius:1px;background:var(--c,var(--cartao-fg));
   box-shadow:0 0 0 1px rgb(0 0 0 / .45);animation:mt-surge .3s ease-out}
