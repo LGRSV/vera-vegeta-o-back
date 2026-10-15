@@ -181,11 +181,17 @@
   volta.type = 'button';
   volta.className = 'mt-volta';
   volta.hidden = true;
-  volta.textContent = '← Tocantins';
+  volta.textContent = '←';
   const legPolos = document.createElement('span');
   legPolos.className = 'mt-polos';
   legPolos.setAttribute('role', 'group');
   legPolos.hidden = true;
+  // a caixinha dos polos: no computador fica na coluna da esquerda; no celular fica presa embaixo do mapa, fechada,
+  // e uma seta discreta puxa ela para cima (site.css)
+  let puxada = false;
+  const caixaPolos = (titulo, chips) => `<button type="button" class="mt-puxa" aria-expanded="${puxada}" aria-label="${puxada ? 'Esconder' : 'Mostrar'} os polos">` +
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>' +
+    `<span class="mt-polos-c"><b class="mt-polos-t">${titulo}</b>${chips}</span>`;
   // coluna da esquerda do mapa (regional ou polo aberto): "← volta" e a legenda dos polos; no celular a legenda dos polos
   // vai para baixo do mapa e o "← volta" fica no canto do mapa (site.css)
   const lado = document.createElement('div');
@@ -205,7 +211,8 @@
     if (pol) M.muns.forEach(m => { if (m.polo === pol) bb = une(bb, move(caixaDe(el[m.cod]), soma(desl[pol], mdesl[m.cod]))); });
     else polosDe(reg).forEach(([polo, gp]) => { bb = une(bb, move(caixaDe(gp), desl[polo])); });
     const x = bb.x - 12, y = bb.y - 12, w = bb.x2 - bb.x + 24, h = bb.y2 - bb.y + 24, W = caixa.clientWidth;
-    if (getComputedStyle(lado).position !== 'absolute') { const t = 52 * w / W; return [x, y - t, w, h + t]; }
+    // celular (mesmo corte do site.css): sobra o topo para a seta de voltar e o pé para a seta dos polos
+    if (matchMedia('(max-width:860px)').matches) { const t = 52 * w / W, f = 32 * w / W; return [x, y - t, w, h + t + f]; }
     const H = svg.clientHeight || 600, L = Math.max(lado.offsetWidth, leg ? leg.offsetWidth : 0) + 24;
     const k = Math.min(H / h, Math.max(1e-3, W - 2 * L) / w);
     const altura = H / k;
@@ -249,11 +256,12 @@
   function legendaRegional(ps) {
     if (ps) psReg = ps;
     legPolos.setAttribute('aria-label', `Polos da Regional ${reg}`);
-    legPolos.innerHTML = `<b class="mt-polos-t">Regional ${esc(reg)}</b>` + psReg.map(p =>
-      `<button type="button" class="mt-pchip" aria-pressed="true" data-polo="${esc(p.polo)}" style="--c:${corDe[p.polo]}">` +
-      `<b>${esc(p.polo)}</b><span>${numeros(p.ms, p.nae)}</span></button>`).join('');
-    volta.textContent = '← Tocantins';
+    legPolos.innerHTML = caixaPolos(`Regional ${esc(reg)}`, psReg.map(p =>
+      `<button type="button" class="mt-pchip" aria-pressed="true" data-polo="${esc(p.polo)}" style="--c:${corDe[p.polo]}" ` +
+      `aria-label="${esc(p.polo)}, ${numeros(p.ms, p.nae)}"><b>${esc(p.polo)}</b></button>`).join(''));
+    legPolos.classList.toggle('aberta', puxada);
     volta.setAttribute('aria-label', `Regional ${reg}. Voltar ao Tocantins`);
+    volta.title = 'Voltar ao Tocantins';
   }
   // polo aberto: os municípios do polo se afastam do centro do polo; os outros polos da regional somem
   function entraPolo(polo, teclado, cod) {
@@ -273,10 +281,11 @@
     caixa.classList.add('polo');
     const nae = ms.reduce((s, m) => s + (m.nae || 0), 0);
     legPolos.setAttribute('aria-label', `Polo ${polo}`);
-    legPolos.innerHTML = `<b class="mt-polos-t">Regional ${esc(reg)} › ${esc(polo)}</b>` +
-      `<span class="mt-pchip" style="--c:${corDe[polo]}"><b>${esc(polo)}</b><span>${numeros(ms, nae)}</span></span>`;
-    volta.textContent = `← Regional ${reg}`;
+    legPolos.innerHTML = caixaPolos(`Regional ${esc(reg)} › ${esc(polo)}`,
+      `<span class="mt-pchip" style="--c:${corDe[polo]}" aria-label="${esc(polo)}, ${numeros(ms, nae)}"><b>${esc(polo)}</b></span>`);
+    legPolos.classList.toggle('aberta', puxada);
     volta.setAttribute('aria-label', `${polo}. Voltar à Regional ${reg}`);
+    volta.title = `Voltar à Regional ${reg}`;
     voa(enquadra());
     const prim = porCod[cod] && porCod[cod].slug ? porCod[cod] : ms.filter(m => m.slug).sort((a, b) => kmTot(b) - kmTot(a))[0];
     if (prim) { roda(prim.cod); if (teclado) el[prim.cod].focus({ preventScroll: true }); }
@@ -334,6 +343,14 @@
     }).join('');
   }
   legPolos.addEventListener('click', e => {
+    const px = e.target.closest('.mt-puxa');
+    if (px) {
+      puxada = !puxada;
+      legPolos.classList.toggle('aberta', puxada);
+      px.setAttribute('aria-expanded', String(puxada));
+      px.setAttribute('aria-label', `${puxada ? 'Esconder' : 'Mostrar'} os polos`);
+      return;
+    }
     const bt = e.target.closest('.mt-pchip');
     if (!bt || bt.tagName !== 'BUTTON') return;
     const liga = bt.getAttribute('aria-pressed') !== 'true';

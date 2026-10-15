@@ -222,6 +222,9 @@ header.cab>.cab-link{justify-self:center}
 @media (max-width:860px){.mt-volta{position:absolute;z-index:2;top:0;left:0;margin:0;box-shadow:var(--sh1,0 1px 3px rgba(0,0,0,.15))}}
 .mt-lado{position:absolute;left:0;top:0;z-index:3;display:grid;gap:var(--s3);justify-items:start;max-width:240px}
 .mt-polos{display:grid;gap:var(--s1)}.mt-polos[hidden]{display:none}
+.mt-polos-c{display:grid;gap:var(--s1)}
+.mt-puxa{display:none}
+.mt-volta{min-width:var(--alvo);font-size:var(--t-lg)!important;padding:0 var(--s3)!important}
 .mt-polos-t{font:700 var(--t-sm) var(--f-body)}
 /* polos da regional aberta: como os botões T1/T2/T3 do painel (barra na cor do polo; desligado fica riscado) */
 .mt-pchip{display:grid;gap:2px;justify-items:start;min-height:var(--alvo);padding:6px 10px 8px;border:1px solid var(--line);border-radius:var(--r1);
@@ -238,7 +241,19 @@ header.cab>.cab-link{justify-self:center}
 span.mt-pchip{cursor:default}
 .aberta .lim-s{display:none}
 @keyframes mt-surge{from{opacity:0}to{opacity:1}}
-@media (max-width:860px){.mt-lado{position:static;max-width:none;margin-top:var(--s3)}.mt-lado .mt-polos{width:100%;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}.mt-polos-t{grid-column:1/-1}}
+@media (max-width:860px){
+  .mt-lado{display:contents}
+  /* celular: a caixinha dos polos fica presa embaixo do mapa; a seta puxa ela para cima */
+  .mt-lado .mt-polos{position:absolute;left:50%;bottom:0;z-index:3;transform:translateX(-50%);display:grid;justify-items:center;gap:0;width:max-content;max-width:calc(100% - 16px)}
+  .mt-puxa{display:grid;place-items:center;width:48px;height:24px;padding:0;border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;
+    background:var(--paper);color:var(--muted);cursor:pointer}
+  .mt-puxa svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+  .mt-polos.aberta .mt-puxa svg{transform:rotate(180deg)}
+  .mt-polos:not(.aberta) .mt-polos-c{display:none}
+  .mt-polos-c{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--s1);padding:var(--s2);background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--r2);box-shadow:var(--sh2)}
+  .mt-polos-t{flex:1 1 100%;text-align:center}
+}
 /* selo vermelho com a NAE de cada polo, no meio dele */
 .mt-selos span{position:absolute;z-index:2;transform:translate(-50%,-50%);padding:3px 8px;border-radius:6px;background:#b8431f;color:#fff;
   font:700 var(--t-sm)/1.2 var(--f-mono);font-variant-numeric:tabular-nums;box-shadow:0 1px 3px rgb(0 0 0 / .35);pointer-events:none;animation:mt-surge .3s ease-out}
