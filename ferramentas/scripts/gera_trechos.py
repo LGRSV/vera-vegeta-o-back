@@ -577,10 +577,11 @@ def meta_interface(c):
 
 # ---------------------------------------------------------------- validação
 
-# Exceção aprovada pelo usuário (16/10/2026): alimentadores sem chaves fechadas no GIS e sem rede no Daimon. A camada
-# Equipamentos_de_isolacao deles só tem as chaves de divisa (todas NA) e o KML do Daimon não existe ou vem vazio, então a
-# regra não tem onde cortar e sai um trecho só. Em vez de bloquear a página, a "classificação colapsada" vira aviso:
-# a rede inteira fica num trecho só, com página, municípios, NAE e OS. Quando a fonte trouxer as chaves, a divisão volta.
+# Exceção aprovada pelo usuário (16/10/2026): alimentadores cujo GIS veio sem o Fechado.kmz (erro na exportação) e sem rede
+# no Daimon. Só as chaves NA vieram, e elas são os by-pass dos religadores (80/88/31 com o mesmo número do 79). As chaves
+# desses 3 vêm de scripts/sem_chaves.json (religador no ponto do by-pass; fusíveis e religadores das OS no poste), aplicado
+# pelo scripts/sem_chaves.py. São alimentadores longos com poucas chaves conhecidas, então a média de km por trecho passa do
+# limite da "classificação colapsada": aqui isso é aviso, não crítica.
 SEM_CHAVES = {'LD02424015', 'LD01414015', 'AL01102271'}
 
 
@@ -642,8 +643,8 @@ def validar(c):
     n = c['resumo']['trechos'] or 1
     if km > 5 and km / n > 50:
         if c['alimentador'] in SEM_CHAVES:
-            av.append(f'sem chaves fechadas no GIS nem rede no Daimon: rede inteira num trecho só ({km:.1f} km); '
-                      'a divisão em trechos volta quando a fonte trouxer as chaves')
+            av.append(f'GIS sem as chaves fechadas: divisão pelos religadores dos by-pass NA e pelas chaves das OS '
+                      f'({km / n:.0f} km por trecho, {n} trechos para {km:.1f} km)')
         else:
             cri.append(f'classificação colapsada: {km / n:.0f} km por trecho ({n} trecho(s) para {km:.1f} km)')
     # (um alimentador pequeno de verdade é legítimo; o que denuncia os casos
@@ -1281,7 +1282,7 @@ def indice_os(saida, dados):
         ex = le_js(pasta / 'executadas.js') or {}
         ats = ex.get('ativos') or []
         for o in ex.get('os') or []:
-            a = ats[o[1]] if isinstance(o[1], int) and o[1] < len(ats) else None
+            a = ats[o[4]] if isinstance(o[4], int) and 0 <= o[4] < len(ats) else None   # o[4]: ativo (-1 = sem posição)
             poe(o[0], 'e', o[2] or '', (a[3], a[4]) if a else None)
     fatias = {}
     for k, v in idx.items():
@@ -1386,7 +1387,7 @@ def interface(saida, malha=None):
             trechos = f'{n:,}'.replace(',', '.') + '&nbsp;trecho' + ('' if n == 1 else 's')
             linhas.append(f'<a class="card" data-busca="{a["cod"].lower()} {html.escape(slug(a["se_nome"]).replace("-", " "))}" '
                           f'href="../../alimentadores/{a["cod"]}/?m={m["slug"]}"><b class="cod">{a["cod"]}</b>'
-                          f'<span>{html.escape(a["se"])} {html.escape(a["se_nome"])} · polo {html.escape(a["polo"])}</span>'
+                          f'<span>{html.escape(a["se"])} {html.escape(a["se_nome"])}{" · polo " + html.escape(a["polo"]) if a["polo"] else ""}</span>'
                           f'<span>{km(a["m_no_municipio"])}&nbsp;km no município de {km(a["m_total"])}&nbsp;km · '
                           f'{trechos}</span></a>')   # avisos: só na página do alimentador ('Dados e procedência')
         corpo = (migalhas('../../', m['nome']) +
