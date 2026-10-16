@@ -577,6 +577,13 @@ def meta_interface(c):
 
 # ---------------------------------------------------------------- validação
 
+# Exceção aprovada pelo usuário (16/10/2026): alimentadores sem chaves fechadas no GIS e sem rede no Daimon. A camada
+# Equipamentos_de_isolacao deles só tem as chaves de divisa (todas NA) e o KML do Daimon não existe ou vem vazio, então a
+# regra não tem onde cortar e sai um trecho só. Em vez de bloquear a página, a "classificação colapsada" vira aviso:
+# a rede inteira fica num trecho só, com página, municípios, NAE e OS. Quando a fonte trouxer as chaves, a divisão volta.
+SEM_CHAVES = {'LD02424015', 'LD01414015', 'AL01102271'}
+
+
 def validar(c):
     """Falha crítica tira o alimentador das páginas; aviso aparece na página e no relatório."""
     cri, av = [], []
@@ -634,7 +641,11 @@ def validar(c):
     km = c['resumo']['extensao_m'] / 1000
     n = c['resumo']['trechos'] or 1
     if km > 5 and km / n > 50:
-        cri.append(f'classificação colapsada: {km / n:.0f} km por trecho ({n} trecho(s) para {km:.1f} km)')
+        if c['alimentador'] in SEM_CHAVES:
+            av.append(f'sem chaves fechadas no GIS nem rede no Daimon: rede inteira num trecho só ({km:.1f} km); '
+                      'a divisão em trechos volta quando a fonte trouxer as chaves')
+        else:
+            cri.append(f'classificação colapsada: {km / n:.0f} km por trecho ({n} trecho(s) para {km:.1f} km)')
     # (um alimentador pequeno de verdade é legítimo; o que denuncia os casos
     # de 7 m publicados é a perda de rede acima, não o tamanho absoluto)
     n_rl = sum(1 for a in c['chaves'] if a['tipo'] == '79')
