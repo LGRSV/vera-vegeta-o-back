@@ -97,7 +97,9 @@
     ativo: ([c, tipo], k) => ({ s: { ativo: c }, tipo: 'ativo', t: realce(c, k), c: esc(TIPO[tipo] || 'Chave ' + tipo) }),
     os: txt => ({ s: { os: txt }, tipo: 'os', t: `OS ${esc(txt)}`, c: 'buscar nas bases de faixa, inspeção, manutenção e executadas' })
   };
-  let sug = [], marcado = -1, pedido = 0;
+  // sugDe: o texto que gerou a lista aberta; enterDepois: Enter dado antes da lista desse texto ficar pronta (colar ou
+  // leitor de código e Enter em menos de 120 ms): a escolha espera a lista nova, em vez de usar a do texto anterior
+  let sug = [], marcado = -1, pedido = 0, sugDe = null, enterDepois = null;
   function mostra(blocos, rodape = '', classe = '') {
     let i = 0;
     sug = [];
@@ -157,6 +159,7 @@
     else if (nv.reg && REG[nv.reg]) mostra([[`Polos da Regional ${nv.reg}`, polos.filter(p => p.reg === nv.reg).sort(porNae).map(p => item.polo(p))],
       [`Alimentadores com mais ${mais()} na Regional ${nv.reg}`, topAls(x => x.reg === nv.reg)]]);
     else mostra([['Regionais', regs.map(r => item.reg(r))], [`Alimentadores com mais ${mais()}`, topAls(() => true)]]);
+    sugDe = '';
   }
 
   // ---------- ao digitar ----------
@@ -197,22 +200,35 @@
     if (!kOS && !rs.length && !ps.length && !ms.length && !as.length && !at.length) {
       fechaSug();
       res.innerHTML = n.length < 2 ? '' : `<p>Nada encontrado para <b>${esc(txt)}</b>.</p>`;
+      sugDe = txt;
+      if (enterDepois === txt) { enterDepois = null; envia(); }   // sem lista: o Enter busca o código digitado
       return;
     }
     mostra([['OS', kOS ? [item.os(txt)] : []], ['Regionais', rs.map(r => item.reg(r, n))], ['Polos', ps.map(p => item.polo(p, n))],
       ['Municípios', ms.map(m => item.mun(m, n))], ['Alimentadores', as.map(a => item.al(a, n, kl))], ['Ativos', at.map(a => item.ativo(a, kl))]],
     achados.length > at.length ? `<p class="sug-mais">e mais ${(achados.length - at.length).toLocaleString('pt-BR')} ativos: continue digitando</p>` : '');
+    sugDe = txt;
+    if (enterDepois === txt) { enterDepois = null; if (!enter()) envia(); }   // ativo na lista: busca o código digitado
+  }
+  const envia = () => form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+  // Enter sem escolher: OS, ou o primeiro da lista se não vier ativo; senão busca o ativo digitado. true: o Enter foi usado
+  function enter() {
+    const i = marcado >= 0 ? marcado : sug[0] && sug[0].os ? 0 : sug.some(o => o.ativo) ? -1 : 0;
+    if (i >= 0) { escolhe(i); return true; }
+    return false;
   }
   let espera = 0;
-  q.addEventListener('input', () => { res.classList.remove('lista-mun'); clearTimeout(espera); espera = setTimeout(sugere, 120); });
+  q.addEventListener('input', () => { res.classList.remove('lista-mun'); enterDepois = null; clearTimeout(espera); espera = setTimeout(sugere, 120); });
   q.addEventListener('focus', () => { if (!q.value.trim() && !res.innerHTML) atalhos(); });
   q.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && q.value.trim() && q.value.trim() !== sugDe) {   // a lista aberta é de outro texto: espera a deste
+      e.preventDefault(); clearTimeout(espera); enterDepois = q.value.trim(); sugere();
+      return;
+    }
     if (!sug.length || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter')) return;
     if (e.key === 'Enter') {
       if (!q.value.trim() && marcado < 0) { e.preventDefault(); return; }   // campo vazio: Enter não abre nada sozinho
-      // Enter sem escolher: OS, ou o primeiro da lista se não vier ativo; senão busca o ativo digitado
-      const i = marcado >= 0 ? marcado : sug[0] && sug[0].os ? 0 : sug.some(o => o.ativo) ? -1 : 0;
-      if (i >= 0) { e.preventDefault(); escolhe(i); }
+      if (enter()) e.preventDefault();
       return;
     }
     e.preventDefault();
@@ -244,7 +260,7 @@
     if (s.ativo) {
       q.value = s.ativo;
       fechaSug();
-      form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+      envia();
       return;
     }
     const alvo = alvoMapa(s);

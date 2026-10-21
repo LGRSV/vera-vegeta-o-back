@@ -46,11 +46,12 @@
   // ---------- 2. raio-X ----------
   const VB0 = `-6 -6 ${M.w + 12} ${M.h + 12}`;
   const noEstado = () => (svg.getAttribute('viewBox') || '').trim() === VB0 && !alvo.classList.contains('voando');
-  // alimentadores do mapa: polo (para o pacote da cópia reduzida), km e NAE somados nos municípios
+  // alimentadores do mapa: polo (para o pacote da cópia reduzida), km somados nos municípios e a NAE do alimentador
+  // (window.MUN repete a NAE do alimentador inteiro em cada município dele: somar multiplicava pelo nº de municípios)
   const als = new Map();
   M.muns.forEach(m => m.als.forEach(a => {
     const x = als.get(a.cod) || { polo: m.polo, m: 0, n: 0, se: a.se };
-    x.m += a.m || 0; x.n += a.n || 0;
+    x.m += a.m || 0; x.n = Math.max(x.n, a.n || 0);
     als.set(a.cod, x);
   }));
   const semAcento = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -243,7 +244,11 @@
     olho.addEventListener('pointerdown', e => {
       if (e.button) return;
       segurou = false;
-      seg = setTimeout(() => { segurou = true; alterna(); if (navigator.vibrate) try { navigator.vibrate(15); } catch (_) {} }, 550);
+      seg = setTimeout(() => {
+        segurou = true; alterna();
+        // vibrar só depois de algum toque na página (antes disso o navegador bloqueia e reclama no console)
+        if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) try { navigator.vibrate(15); } catch (_) {}
+      }, 550);
     });
     ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => olho.addEventListener(ev, solta));
     olho.addEventListener('click', e => { if (segurou) { e.preventDefault(); e.stopImmediatePropagation(); segurou = false; } }, true);

@@ -723,7 +723,9 @@
       return;
     }
     const pede = alvo.requestFullscreen || alvo.webkitRequestFullscreen;
-    if (!pede || !(document.fullscreenEnabled || document.webkitFullscreenEnabled)) { cobre(true); return; }
+    // sem gesto do usuário (Ctrl+roda, pinça já terminada) o navegador recusa a tela cheia nativa: cobre a janela direto
+    const semGesto = navigator.userActivation && !navigator.userActivation.isActive;
+    if (!pede || semGesto || !(document.fullscreenEnabled || document.webkitFullscreenEnabled)) { cobre(true); return; }
     try { const p = pede.call(alvo); if (p && p.catch) p.catch(() => cobre(true)); } catch (e) { cobre(true); }
   }
   tc.addEventListener('click', () => telaCheia(!cheia()));
