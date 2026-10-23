@@ -37,6 +37,7 @@
     dados: '<path d="M8 4c-2 0-2 1.5-2 3v2c0 1.5-1 3-2 3 1 0 2 1.5 2 3v2c0 1.5 0 3 2 3"/><path d="M16 4c2 0 2 1.5 2 3v2c0 1.5 1 3 2 3-1 0-2 1.5-2 3v2c0 1.5 0 3-2 3"/>',
     slides: '<path d="M3 4h18"/><path d="M5 4v11h14V4"/><path d="m10.5 7.5 3.5 2-3.5 2z"/><path d="M12 15v3"/><path d="m8 21 4-3 4 3"/>',
     ranking: '<path d="M5 20V11M12 20V4M19 20v-6"/>',
+    faixa: '<path d="M4 20l3-1 11-11-2-2L5 17zM14 6l2 2"/>',
   };
   // relatórios (antes no rodapé da página inicial): o relatório e o manifesto só existem no site publicado; fora dele
   // (a cópia do Artifact) abrem lá, em outra aba
@@ -118,7 +119,18 @@
     '.mnu-bases b{font-weight:600}.mnu-bases span{font-variant-numeric:tabular-nums}' +
     '.mnu-bases small{grid-column:1/-1}.mnu-bases small:empty{display:none}' +
     '.mnu-esq{justify-self:start;padding:0 4px;border:0;background:none;color:var(--muted,#5a636a);' +
-    'font-size:var(--t-xs,12px)!important;text-decoration:underline;cursor:pointer}';
+    'font-size:var(--t-xs,12px)!important;text-decoration:underline;cursor:pointer}' +
+    // croqui de limpeza de faixa: escolher o alimentador
+    '.mnu-lista button.mnu-rel{align-items:flex-start}.mnu-lista svg{flex:none}' +
+    '.mnu-fx-txt{margin:0;color:var(--muted,#5a636a)}' +
+    '.mnu-dlg input.mnu-fx-q{width:100%;box-sizing:border-box}' +
+    '.mnu-fx-lista{display:grid;grid-auto-rows:max-content;align-content:start;gap:2px;max-height:min(46dvh,380px);overflow-y:auto;overscroll-behavior:contain;margin:0;padding:0;list-style:none}' +
+    '.mnu-fx-lista li[role="option"]{display:grid;gap:1px;min-height:40px;padding:7px 10px;border-radius:calc(var(--r2,10px) - 2px);cursor:pointer;align-content:center}' +
+    '.mnu-fx-lista li[role="option"] b{font:600 var(--t-md,14px)/1.25 var(--f-mono,monospace)}' +
+    '.mnu-fx-lista li[role="option"] span{font-size:var(--t-xs,12px);line-height:1.3;color:var(--muted,#5a636a)}' +
+    '.mnu-fx-lista li[role="option"]:hover{background:var(--hover,rgb(0 0 0 / .05))}' +
+    '.mnu-fx-lista li[aria-selected="true"]{background:var(--hover,rgb(0 0 0 / .05));box-shadow:inset 0 0 0 2px var(--accent,#b8431f)}' +
+    '.mnu-fx-lista .mnu-gt{padding:6px 10px 2px}';
   document.head.append(css);
 
   const box = document.createElement('nav');
@@ -130,6 +142,8 @@
     `<li><button type="button" class="mnu-tema" aria-pressed="true">${svg(ICONE.lua, '')}<span>Night shift</span><kbd>Shift K</kbd><i class="mnu-sw" aria-hidden="true"></i></button></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
     `<li><a class="mnu-rel" href="${raiz}priorizacao/">${svg(ICONE.ranking, '')}<span>Priorização de faixa<small>Alimentadores com mais NAE e trechos P1 a P4</small></span></a></li>` +
+    // modo Limpeza de faixa (modo-faixa-rascunho.js): escolhe o alimentador e abre o mapa dele já no modo
+    `<li><button type="button" class="mnu-rel mnu-fx-abre" aria-haspopup="dialog">${svg(ICONE.faixa, '')}<span>Croqui de limpeza de faixa<small>Escolher os trechos, marcar leve e pesada e baixar o croqui</small></span></button></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
     `<li role="presentation"><span class="mnu-gt" id="mnu-rel-t">Relatórios</span></li>` +
     `<li><div class="mnu-tr" role="list" aria-labelledby="mnu-rel-t">` + TRECHOS.map(([t, c, txt, ex]) =>
@@ -299,7 +313,9 @@
   dlg.addEventListener('dragover', e => { e.preventDefault(); zona.classList.add('sobre'); });
   dlg.addEventListener('dragleave', e => { if (!dlg.contains(e.relatedTarget)) zona.classList.remove('sobre'); });
   dlg.addEventListener('drop', e => { e.preventDefault(); zona.classList.remove('sobre'); escolhe(e.dataTransfer.files[0], e.dataTransfer.files.length); });
-  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });     // toque fora da caixa
+  // toque fora da caixa (o fundo); o padding e os vãos do <dialog> também caem nele: confere pela posição
+  const fora = (d, e) => { const r = d.getBoundingClientRect(); return e.target === d && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom); };
+  dlg.addEventListener('click', e => { if (fora(dlg, e)) dlg.close(); });
   $('.mnu-x').addEventListener('click', () => dlg.close());
   dlg.addEventListener('close', () => btn.focus());
 
@@ -319,6 +335,95 @@
     (form && !form.hidden ? inChave : zona).focus();
   });
   lista.querySelectorAll('a').forEach(a => a.addEventListener('click', () => abre(false)));
+
+  // ---------- Croqui de limpeza de faixa: escolher o alimentador ----------
+  // A lista vem do manifesto.json (só alimentadores com página). Escolhido, abre alimentadores/<AL>/faixa-rascunho.html
+  // ?modo=faixa, que já entra no modo Limpeza de faixa (clicar nos trechos, Leve/Pesada, Baixar croqui). Na página de um
+  // alimentador, ele vem primeiro. Fora do site (cópia do Artifact) abre o site publicado, em outra aba.
+  const dfx = document.createElement('dialog');
+  dfx.className = 'mnu-dlg mnu-fx';
+  dfx.setAttribute('aria-labelledby', 'mnu-fx-tit');
+  dfx.innerHTML = `<div class="mnu-cab"><h2 id="mnu-fx-tit">Croqui de limpeza de faixa</h2>` +
+    `<button type="button" class="mnu-x" aria-label="Fechar">${svg(ICONE.fechar, '')}</button></div>` +
+    `<p class="mnu-fx-txt">Escolha o alimentador. O mapa dele abre no modo Limpeza de faixa: clique nos trechos, marque ` +
+    `<b>Leve</b> e <b>Pesada</b> (poste inicial e final) e baixe o croqui.</p>` +
+    `<input type="search" class="mnu-fx-q" placeholder="Código, SE ou município" aria-label="Buscar alimentador por código, SE ou município" ` +
+    `role="combobox" aria-expanded="true" aria-controls="mnu-fx-lista" aria-autocomplete="list" autocomplete="off" spellcheck="false">` +
+    `<ul class="mnu-fx-lista" id="mnu-fx-lista" role="listbox" aria-label="Alimentadores"></ul>` +
+    `<p class="mnu-st" role="status" aria-live="polite"></p>`;
+  document.body.append(dfx);
+  const fxQ = dfx.querySelector('.mnu-fx-q'), fxL = dfx.querySelector('.mnu-fx-lista'), fxSt = dfx.querySelector('.mnu-st');
+  const aqui = (decodeURIComponent(location.pathname).match(/\/alimentadores\/([^/]+)\//) || [])[1];
+  const faixaDe = al => doSite(`alimentadores/${encodeURIComponent(al)}/faixa-rascunho.html?modo=faixa`);
+  let fxAls = null, fxMostrados = [], fxMarcado = -1;
+  const carregaAls = () => fxAls ? Promise.resolve(fxAls) : fetch(doSite('manifesto.json')).then(r => {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(m => {
+    const nomeMun = Object.fromEntries((m.municipios || []).map(x => [x.cod, x.nome]));
+    fxAls = Object.entries(m.alimentadores || {}).filter(([, a]) => a.pagina).map(([cod, a]) => {
+      const muns = (a.municipios || []).map(c => nomeMun[c]).filter(Boolean);
+      const se = [a.se, a.se_nome].filter(Boolean).join(' ');
+      return { cod, se, muns, busca: sem([cod, se, ...muns].join(' ')) };
+    }).sort((x, y) => x.cod.localeCompare(y.cod));
+    return fxAls;
+  });
+  const opcao = (a, i) => `<li role="option" id="mnu-fx-o${i}" data-i="${i}" aria-selected="false"><b>${esc(a.cod)}</b>` +
+    `<span>${esc(a.se || '—')}${a.muns.length ? ' · ' + esc(a.muns.slice(0, 3).join(', ')) + (a.muns.length > 3 ? ` e mais ${a.muns.length - 3}` : '') : ''}</span></li>`;
+  function fxMarca(i) {
+    fxMarcado = i;
+    fxL.querySelectorAll('li[role="option"]').forEach(o => o.setAttribute('aria-selected', String(+o.dataset.i === i)));
+    const o = fxL.querySelector(`#mnu-fx-o${i}`);
+    if (o) { fxQ.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } else fxQ.removeAttribute('aria-activedescendant');
+  }
+  function fxLista() {
+    if (!fxAls) return;
+    const q = sem(fxQ.value.trim()), termos = q.split(/\s+/).filter(Boolean);
+    const acha = a => termos.every(t => a.busca.includes(t));
+    const este = aqui && fxAls.find(a => a.cod === aqui);
+    const resto = fxAls.filter(a => a !== este && acha(a));
+    fxMostrados = (este && acha(este) ? [este] : []).concat(resto);
+    let i = 0, h = '';
+    if (este && acha(este)) h += `<li class="mnu-gt" role="presentation">Este alimentador</li>` + opcao(este, i++);
+    if (resto.length) h += (este && acha(este) ? `<li class="mnu-gt" role="presentation">Outros</li>` : '') + resto.map(a => opcao(a, i++)).join('');
+    fxL.innerHTML = h;
+    fxSt.textContent = fxMostrados.length ? (q ? `${fxMostrados.length} alimentador${fxMostrados.length > 1 ? 'es' : ''}` : '') :
+      `Nenhum alimentador com “${fxQ.value.trim()}”.`;
+    fxMarca(q && fxMostrados.length ? 0 : -1);
+  }
+  function fxVai(i) {
+    const a = fxMostrados[i];
+    if (!a) return;
+    if (noSite) { location.href = faixaDe(a.cod); return; }
+    window.open(faixaDe(a.cod), '_blank', 'noopener');
+    dfx.close();
+  }
+  fxQ.addEventListener('input', fxLista);
+  fxQ.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (fxMostrados.length) fxMarca(e.key === 'ArrowDown' ? Math.min(fxMostrados.length - 1, fxMarcado + 1) : Math.max(0, fxMarcado - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      fxVai(fxMarcado >= 0 ? fxMarcado : fxMostrados.length === 1 || (aqui && fxMostrados[0] && fxMostrados[0].cod === aqui) ? 0 : -1);
+    }
+  });
+  fxL.addEventListener('mousedown', e => { if (e.target.closest('li[role="option"]')) e.preventDefault(); });   // o campo não perde o foco
+  fxL.addEventListener('click', e => { const o = e.target.closest('li[role="option"]'); if (o) fxVai(+o.dataset.i); });
+  dfx.addEventListener('click', e => { if (fora(dfx, e)) dfx.close(); });
+  dfx.querySelector('.mnu-x').addEventListener('click', () => dfx.close());
+  dfx.addEventListener('close', () => btn.focus());
+  lista.querySelector('.mnu-fx-abre').addEventListener('click', () => {
+    abre(false);
+    fxQ.value = '';
+    dfx.showModal();
+    fxQ.focus();
+    if (fxAls) { fxLista(); return; }
+    fxSt.removeAttribute('data-erro'); fxSt.textContent = 'Carregando os alimentadores…';
+    carregaAls().then(() => { fxSt.textContent = ''; fxLista(); }).catch(() => {
+      fxSt.setAttribute('data-erro', ''); fxSt.textContent = 'Não foi possível carregar a lista de alimentadores. Confira a conexão e tente de novo.';
+    });
+  });
   // Night shift: ligado = tema escuro (fundo preto, o padrão); desligado = claro. Guarda a escolha neste navegador e vale
   // para todas as páginas (o <head> de cada página lê "tema" antes do CSS). Atalho: Shift+K fora dos campos de texto.
   const btTema = lista.querySelector('.mnu-tema');

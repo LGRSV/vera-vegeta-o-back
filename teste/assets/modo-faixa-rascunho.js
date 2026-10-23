@@ -464,7 +464,10 @@
   // ---------- teclado ----------
   const editavel = t => t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
   window.addEventListener('keydown', e => {
-    if (e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && (e.key === 'm' || e.key === 'M')) { e.preventDefault(); e.stopPropagation(); ativo ? desliga() : liga(); return; }
+    if (e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && (e.key === 'm' || e.key === 'M')) {
+      if (document.querySelector('dialog[open]')) return;          // com uma caixa aberta (menu, croqui) o modo não liga por baixo dela
+      e.preventDefault(); e.stopPropagation(); ativo ? desliga() : liga(); return;
+    }
     if (!ativo || document.querySelector('dialog[open]')) return;
     if (e.key === 'Escape') {
       if (e.repeat) { e.preventDefault(); e.stopImmediatePropagation(); return; }   // segurar o Esc não corre a fila toda
@@ -485,6 +488,15 @@
     const f = { l: 'leve', p: 'pesada', b: 'apagar' }[e.key.toLowerCase()];
     if (f && sel.size) { e.preventDefault(); setFerr(f); }
   }, true);
+
+  // entrada pelo menu ☰ (Croqui de limpeza de faixa, menu.js): a página faixa-rascunho.html?modo=faixa já abre no modo;
+  // o botão do aviso no alto da página ([data-faixa-abre]) também liga. Sem gesto do usuário a tela cheia do navegador é
+  // recusada e o mapa cobre a janela (telacheia.js), com o mesmo modo.
+  document.querySelectorAll('[data-faixa-abre]').forEach(b => b.addEventListener('click', () => liga()));
+  if (/[?&]modo=faixa(&|$)/.test(location.search)) {
+    const vai = () => setTimeout(() => { if (!ativo) liga(); }, 0);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', vai); else vai();
+  }
 
   window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length, inicio: () => ini };
 })();

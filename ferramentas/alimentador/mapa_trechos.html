@@ -779,6 +779,7 @@ if (typeof L === 'undefined') {
   // Satélite da Esri: onde não há foto num zoom, o servidor manda o quadro cinza "Map data not yet available".
   // Com blankTile=false ele responde 404 e o quadro vira a foto do nível de cima ampliada (até 6 níveis acima).
   const SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
+  const ATR_SAT = 'Imagem © Esri — Esri, Maxar, Earthstar Geographics';
   const Satelite = L.TileLayer.extend({
     getTileUrl: c => `${SAT}${c.z}/${c.y}/${c.x}?blankTile=false`,
     createTile(c, done) { const t = L.TileLayer.prototype.createTile.call(this, c, done); t._xyz = c; t._k = 0; return t; },
@@ -793,8 +794,54 @@ if (typeof L === 'undefined') {
     }
   });
   new Satelite(SAT + '{z}/{y}/{x}', {
-    maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagem © Esri — Esri, Maxar, Earthstar Geographics'
+    maxZoom: 19, maxNativeZoom: 18, attribution: ATR_SAT
   }).on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; }).addTo(map);
+  // Datas das fotos de satélite na legenda, com o que está na tela (pedido do usuário): o próprio World_Imagery tem, por
+  // escala, de quando é cada pedaço da foto (camadas "… Resolution Metadata": SRC_DATE e o fornecedor, NICE_DESC). A cada
+  // parada do mapa consulta a camada do nível dos quadros mostrados e põe na legenda a data (ou de qual a qual, se a tela
+  // junta fotos de datas diferentes); passar o mouse mostra todas. Longe, a foto da Esri não tem data: a legenda pede para
+  // aproximar. Sem internet, fica só com a Esri, como antes.
+  const META_SAT = 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/';
+  // camada de metadados de cada nível de quadro (escala do quadro = 591657527,59 / 2^z; faixas de escala do serviço)
+  const camadaSat = z => { const e = 591657527.591555 / 2 ** z;
+    const f = [[106,5],[212,6],[425,7],[850,8],[1700,9],[3400,10],[6800,11],[13500,12],[27000,13],[54000,14],[108000,15],[216000,16],[432000,17]].find(([m]) => e <= m);
+    return f ? f[1] : 18; };
+  const dataSat = s => `${s.slice(6, 8)}/${s.slice(4, 6)}/${s.slice(0, 4)}`;
+  const escSat = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // a data entra no mesmo texto da Esri, depois de " · " (o Leaflet separaria com vírgula, como se fosse outro crédito)
+  let legSat = ATR_SAT, pedSat = 0, tSat = 0;
+  function legendaSat(html) {
+    const a = map.attributionControl, nova = html ? `${ATR_SAT} · ${html}` : ATR_SAT;
+    if (!a || nova === legSat) return;
+    a.removeAttribution(legSat); a.addAttribution(nova); legSat = nova;
+  }
+  function datasSat() {
+    clearTimeout(tSat);
+    tSat = setTimeout(async () => {
+      const meu = ++pedSat, z = Math.min(18, Math.round(map.getZoom())), b = map.getBounds();
+      const ext = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].map(v => v.toFixed(5)).join(',');
+      let fs = [];
+      try {
+        // sem foto neste nível o quadro vem ampliado do nível de cima (blankTile=false): procura até 2 níveis acima
+        for (let c = camadaSat(z), fim = Math.min(18, c + 2); c <= fim && !fs.length; c++) {
+          const r = await fetch(`${META_SAT}${c}/query?f=json&geometry=${ext}&geometryType=esriGeometryEnvelope&inSR=4326` +
+            '&spatialRel=esriSpatialRelIntersects&outFields=SRC_DATE,NICE_DESC,NICE_NAME&returnGeometry=false&returnDistinctValues=true');
+          const d = await r.json();
+          if (meu !== pedSat) return;
+          fs = (d.features || []).map(f => f.attributes || {});
+        }
+      } catch (e) { return; }                              // sem internet: a legenda fica como estava
+      if (meu !== pedSat) return;
+      const ds = [...new Set(fs.map(f => String(f.SRC_DATE)).filter(x => /^(19|20)\d{6}$/.test(x)))].sort();
+      const de = [...new Set(fs.filter(f => /^(19|20)\d{6}$/.test(String(f.SRC_DATE))).map(f => f.NICE_DESC || f.NICE_NAME).filter(Boolean))];
+      // longe (zoom até ~11) a Esri mostra um mosaico de baixa resolução, sem data de captura: avisa que de perto tem
+      if (!ds.length) { legendaSat(fs.length ? '<span class="sat-data">aproxime para ver a data da foto</span>' : ''); return; }
+      const txt = (ds.length === 1 ? `foto de ${dataSat(ds[0])}` : `fotos de ${dataSat(ds[0])} a ${dataSat(ds[ds.length - 1])}`) +
+        (de.length ? ` (${de.slice(0, 2).join(', ')})` : '');
+      legendaSat(`<span class="sat-data" title="${escSat('Datas das fotos de satélite na tela: ' + ds.map(dataSat).join(', '))}">${escSat(txt)}</span>`);
+    }, 400);
+  }
+  map.on('moveend', datasSat);
   // v = [lat1, lon1, lat2, lon2, idx_trecho, id, poste_ini, poste_fim, ext]
   const vaosDe = {};
   D.vaos.forEach(v => (vaosDe[v[4]] = vaosDe[v[4]] || []).push(v));
