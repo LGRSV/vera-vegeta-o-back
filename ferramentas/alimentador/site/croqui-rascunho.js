@@ -452,7 +452,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
         <label>Obra<input name="obra" autocomplete="off"></label>
         <label>Deslocamento até o ponto inicial (km)<input name="desloc" type="number" step="1" min="0" inputmode="numeric"></label>
       </div>
-      ${misto ? `<p class="misto">Marcado no mapa: <b>Leve (Expedita) ${nf(misto.leve, 2)} km</b> · <b>Pesada (Convencional) ${nf(misto.pesada, 2)} km</b>. Vão juntos neste croqui.</p>` : ''}
+      ${misto ? `<p class="misto">Marcado no mapa: <b>Leve (Expedita) ${nf(misto.leve, 3)} km</b> · <b>Pesada (Convencional) ${nf(misto.pesada, 3)} km</b>. Vão juntos neste croqui.</p>` : ''}
       <div class="acoes"><button type="button" class="cancela">Cancelar</button><button value="baixar">Baixar croqui (Excel)</button></div>
     </form>`;
     document.body.append(dlg);
@@ -483,17 +483,22 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       if (escolheuBase === true) kmDigitado = false;
       const { ini, fim } = escolha();
       entre = caminho(nomes, ini, fim);
-      f.base.options[0].textContent = `Trecho inteiro (${nf(d.ext / 1000, 2)} km)`;
-      f.base.options[1].textContent = entre === null ? 'Só entre as chaves (sem ligação)' : `Só entre as chaves (${nf(entre / 1000, 2)} km)`;
-      f.base.options[1].disabled = entre === null;
-      if (entre === null && f.base.value === 'caminho') f.base.value = 'total';
-      if (!kmDigitado) f.km.value = km2(f.base.value === 'caminho' ? entre : d.ext);   // o que a pessoa digitou fica
+      if (misto) f.base.options[0].textContent = 'Marcado no mapa (leve + pesada)';   // os km vêm do mapa, não do trecho
+      else {
+        f.base.options[0].textContent = `Trecho inteiro (${nf(d.ext / 1000, 2)} km)`;
+        f.base.options[1].textContent = entre === null ? 'Só entre as chaves (sem ligação)' : `Só entre as chaves (${nf(entre / 1000, 2)} km)`;
+        f.base.options[1].disabled = entre === null;
+        if (entre === null && f.base.value === 'caminho') f.base.value = 'total';
+        if (!kmDigitado) f.km.value = km2(f.base.value === 'caminho' ? entre : d.ext);   // o que a pessoa digitou fica
+      }
       dlg.querySelector('.u-ext').textContent = `${nf(d.ext / 1000, 2)} km` + (entre !== null ? ` · entre as chaves ${nf(entre / 1000, 2)} km` : '');
     };
     coords(); tamanho(); desenha();
     if (misto) {                                           // os km e o tipo vêm do que foi marcado no mapa
-      const tot = (Math.round((misto.leve + misto.pesada) * 100) / 100).toFixed(2);
-      f.km.value = tot; f.km.readOnly = true; kmDigitado = true;
+      // 3 casas, como X26 (leve) e X23 (pesada) no croqui: o total bate com a soma das duas
+      const r3 = x => Math.round(x * 1000) / 1000, tot = (r3(misto.leve) + r3(misto.pesada)).toFixed(3);
+      f.km.step = '0.001'; f.km.value = tot; f.km.readOnly = true; kmDigitado = true;
+      f.base.value = 'total'; f.base.options[0].textContent = 'Marcado no mapa (leve + pesada)';
       f.base.disabled = true;
       f.tipo.innerHTML = `<option>${misto.pesada ? 'Convencional' : 'Expedita'}</option>`;
       f.tipo.options[0].textContent = misto.leve && misto.pesada ? 'Expedita (leve) + Convencional (pesada)' : misto.pesada ? 'Convencional (pesada)' : 'Expedita (leve)';

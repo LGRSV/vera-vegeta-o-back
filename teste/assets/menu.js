@@ -394,6 +394,8 @@
   function fxVai(i) {
     const a = fxMostrados[i];
     if (!a) return;
+    // já na página do modo deste alimentador: liga aqui mesmo, sem recarregar (o escolhido e o marcado ficam)
+    if (a.cod === aqui && window.__faixa) { dfx.close(); window.__faixa.liga(); return; }
     if (noSite) { location.href = faixaDe(a.cod); return; }
     window.open(faixaDe(a.cod), '_blank', 'noopener');
     dfx.close();
