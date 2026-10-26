@@ -724,13 +724,22 @@
     if (f && sel.size) { e.preventDefault(); setFerr(f); }
   }, true);
 
-  // entrada pelo menu ☰ (Croqui de limpeza de faixa, menu.js): a página faixa-rascunho.html?modo=faixa já abre no modo;
-  // o botão do aviso no alto da página ([data-faixa-abre]) também liga. Sem gesto do usuário a tela cheia do navegador é
+  // entrada pelo menu ☰ (Croqui de limpeza de faixa, menu.js): a página do alimentador com ?modo=faixa (ou a faixa-rascunho.html
+  // de antes, com o aviso no alto) já abre no modo; o botão do aviso ([data-faixa-abre]) também liga. Sem gesto do usuário a tela cheia do navegador é
   // recusada e o mapa cobre a janela (telacheia.js), com o mesmo modo.
   document.querySelectorAll('[data-faixa-abre]').forEach(b => b.addEventListener('click', () => liga()));
   if (/[?&]modo=faixa(&|$)/.test(location.search)) {
     const vai = () => setTimeout(() => { if (!ativo) liga(); }, 0);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', vai); else vai();
+  }
+
+  // "Dados" › Downloads › Faixa (extras.js): botão visível que liga o modo, antes do "Croqui da faixa" (o modo termina nele)
+  if (window.__baixar && window.__baixar.botao) {
+    const b = window.__baixar.botao('faixa', 'Limpeza de faixa · marcar no mapa', () => liga(),
+      'Escolher os trechos e marcar a faixa leve e pesada no mapa, depois baixar o croqui (atalho: Ctrl+M)');
+    const ic = b.querySelector('svg');
+    if (ic) { ic.setAttribute('viewBox', '0 0 24 24'); ic.innerHTML = '<path d="M4 20l3-1 11-11-2-2L5 17zM14 6l2 2"/>'; }
+    b.parentNode.prepend(b);
   }
 
   window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length, inicio: () => ini };

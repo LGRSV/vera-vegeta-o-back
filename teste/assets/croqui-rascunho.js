@@ -389,6 +389,14 @@
   }
   const multi = segs => '<MultiGeometry>' + cadeias(segs).map(l =>
     `<LineString><tessellate>1</tessellate><coordinates>${l.map(kpt).join(' ')}</coordinates></LineString>`).join('') + '</MultiGeometry>';
+  const arqKmz = s => String(s ?? '').replace(/[^\w.-]+/g, '_');
+  const nomeKmz = nomes => nomes.length > 3 ? nomes.length + '_trechos' : nomes.join('-');
+  function salvaKmz(nomes, todos, misto, nome) {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(kmz(nomes, todos, misto)); link.download = nome;
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 30000);
+  }
   function kmz(nomes, todos, misto) {
     const marcas = misto && misto.marcas;
     const sel = new Set(nomes.map(n => TR[n].i)), vs = D.vaos.filter(v => sel.has(v[4]));
@@ -544,13 +552,8 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
     dlg.querySelectorAll('.fecha, .cancela').forEach(b => b.addEventListener('click', () => dlg.close()));
     // KMZ dos trechos do croqui (com o marcado no mapa, no modo Limpeza de faixa), nome como o do Excel
     dlg.querySelector('.kmz').addEventListener('click', () => {
-      try {
-        const arq = s => String(s ?? '').replace(/[^\w.-]+/g, '_'), qual = todos ? 'alimentador' : nomes.length > 3 ? nomes.length + '_trechos' : nomes.join('-');
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(kmz(nomes, todos, misto)); link.download = `CROQUI_${arq(M.al)}_${arq(qual)}.kmz`;
-        document.body.append(link); link.click(); link.remove();
-        setTimeout(() => URL.revokeObjectURL(link.href), 30000);
-      } catch (err) { alert('Não foi possível gerar o KMZ: ' + err.message); }
+      try { salvaKmz(nomes, todos, misto, `CROQUI_${arqKmz(M.al)}_${arqKmz(todos ? 'alimentador' : nomeKmz(nomes))}.kmz`); }
+      catch (err) { alert('Não foi possível gerar o KMZ: ' + err.message); }
     });
     const escolha = () => ({ ini: d.inicios[+f.ini.value], fim: d.fins[+f.fim.value] });
     const coords = () => {
@@ -636,11 +639,27 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
     const b = window.__baixar.botao('faixa', 'Croqui da faixa', () => abre());
     b.classList.add('croqui-dl');
     const alvo = b.querySelector('.dl-t'), rot = alvo.textContent;
+    // Downloads › Rede › "KMZ (Google Earth)" (extras.js) é o arquivo do alimentador inteiro; com trecho(s) selecionado(s) baixa
+    // só eles (kmz(): linha, chaves de início e fim e postes), com o nome deles no botão. Sem seleção, o arquivo de sempre.
+    const k = document.querySelector('.dl-b[data-b="rede"] a.dl-btn[href$="-trechos.kmz"]');
+    const kAlvo = k && k.querySelector('.dl-t'), kRot = kAlvo && kAlvo.textContent, kTit = k && k.title;
+    if (k) k.addEventListener('click', e => {
+      const n = selecionados();
+      if (!n.length) return;
+      e.preventDefault();
+      try { salvaKmz(n, false, null, `${arqKmz(M.al)}-${arqKmz(nomeKmz(n))}.kmz`); }
+      catch (err) { alert('Não foi possível gerar o KMZ: ' + err.message); }
+    });
     const atualiza = () => {
       const n = selecionados();
       const txt = `${rot} · ${n.length === 1 ? n[0] : n.length ? n.length + ' trechos' : 'alimentador'}`;
       if (alvo.textContent !== txt) alvo.textContent = txt;
       b.title = `Croqui de limpeza de faixa (Excel), já preenchido: ${n.length ? (n.length === 1 ? 'trecho ' : 'trechos ') + n.join(', ') : 'alimentador inteiro (nenhum trecho selecionado)'}`;
+      if (k) {
+        const t = `${kRot} · ${n.length === 1 ? n[0] : n.length ? n.length + ' trechos' : 'alimentador'}`;
+        if (kAlvo.textContent !== t) kAlvo.textContent = t;
+        k.title = n.length ? `KMZ só d${n.length === 1 ? 'o trecho ' : 'os trechos '}${n.join(', ')}, para o Google Earth` : kTit;
+      }
     };
     new MutationObserver(atualiza).observe(det, { childList: true });
     if (lista) new MutationObserver(atualiza).observe(lista, { attributes: true, subtree: true, attributeFilter: ['aria-current'] });

@@ -337,7 +337,7 @@
   lista.querySelectorAll('a').forEach(a => a.addEventListener('click', () => abre(false)));
 
   // ---------- Croqui de limpeza de faixa: escolher o alimentador ----------
-  // A lista vem do manifesto.json (só alimentadores com página). Escolhido, abre alimentadores/<AL>/faixa-rascunho.html
+  // A lista vem do manifesto.json (só alimentadores com página). Escolhido, abre alimentadores/<AL>/?modo=faixa
   // ?modo=faixa, que já entra no modo Limpeza de faixa (clicar nos trechos, Leve/Pesada, Baixar croqui). Na página de um
   // alimentador, ele vem primeiro. Fora do site (cópia do Artifact) abre o site publicado, em outra aba.
   const dfx = document.createElement('dialog');
@@ -354,7 +354,7 @@
   document.body.append(dfx);
   const fxQ = dfx.querySelector('.mnu-fx-q'), fxL = dfx.querySelector('.mnu-fx-lista'), fxSt = dfx.querySelector('.mnu-st');
   const aqui = (decodeURIComponent(location.pathname).match(/\/alimentadores\/([^/]+)\//) || [])[1];
-  const faixaDe = al => doSite(`alimentadores/${encodeURIComponent(al)}/faixa-rascunho.html?modo=faixa`);
+  const faixaDe = al => doSite(`alimentadores/${encodeURIComponent(al)}/?modo=faixa`);
   let fxAls = null, fxMostrados = [], fxMarcado = -1;
   const carregaAls = () => fxAls ? Promise.resolve(fxAls) : fetch(doSite('manifesto.json')).then(r => {
     if (!r.ok) throw new Error(r.status);

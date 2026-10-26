@@ -767,9 +767,19 @@ def pagina_alimentador(modelo, c):
     return h
 
 
-# Página do modo Limpeza de faixa (rascunho, modo-faixa-rascunho.js): a mesma do alimentador, com o croqui misto
-# (croqui-rascunho.js: Leve = Expedita, Pesada = Convencional) e o modo por cima. O menu ☰ (Croqui de limpeza de faixa)
-# abre faixa-rascunho.html?modo=faixa, que já entra no modo; o botão do aviso também liga.
+# Modo Limpeza de faixa (modo-faixa-rascunho.js) na página do alimentador, com o croqui misto (croqui-rascunho.js: Leve =
+# Expedita, Pesada = Convencional): liga pelo botão em Dados › Downloads › Faixa, por Ctrl+M, pelo lápis no celular e pelo
+# menu ☰ (Croqui de limpeza de faixa, que abre alimentadores/<AL>/?modo=faixa). A faixa-rascunho.html (a mesma página, com
+# o aviso no alto) continua para os endereços de antes.
+def com_modo_faixa(h):
+    for x, y in [('<script src="../../assets/croqui.js"></script>', '<script src="../../assets/croqui-rascunho.js"></script>'),
+                 ('<script src="../../assets/ativos-zoom.js"></script>',
+                  '<script src="../../assets/ativos-zoom.js"></script>\n<script src="../../assets/modo-faixa-rascunho.js"></script>')]:
+        assert h.count(x) == 1, x[:50]
+        h = h.replace(x, y)
+    return h
+
+
 AVISO_FAIXA = ('<p class="fx-aviso" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 12px;'
                'padding:8px 12px;border-radius:8px;background:#f59e0b;color:#111;font:600 13px/1.4 sans-serif">'
                '<span><b>Limpeza de faixa</b> (rascunho): clique nos trechos → <b>Leve</b> ou <b>Pesada</b> → início e fim '
@@ -781,13 +791,10 @@ AVISO_FAIXA = ('<p class="fx-aviso" style="display:flex;flex-wrap:wrap;align-ite
 
 
 def pagina_faixa(h, c):
-    """faixa-rascunho.html do alimentador a partir da página dele (pagina_alimentador)."""
+    """faixa-rascunho.html do alimentador a partir da página dele já com o modo (com_modo_faixa), com o aviso no alto."""
     for x, y in [(f'<title>{html.escape(c["alimentador"])} · trechos</title>',
                   f'<title>Limpeza de faixa · {html.escape(c["alimentador"])}</title>'),
-                 ('<div class="wrap">\n', '<div class="wrap">\n' + AVISO_FAIXA),
-                 ('<script src="../../assets/croqui.js"></script>', '<script src="../../assets/croqui-rascunho.js"></script>'),
-                 ('<script src="../../assets/ativos-zoom.js"></script>',
-                  '<script src="../../assets/ativos-zoom.js"></script>\n<script src="../../assets/modo-faixa-rascunho.js"></script>')]:
+                 ('<div class="wrap">\n', '<div class="wrap">\n' + AVISO_FAIXA)]:
         assert h.count(x) == 1, x[:50]
         h = h.replace(x, y)
     return h
@@ -1444,7 +1451,7 @@ def interface(saida, malha=None):
     grava_json(saida / 'manifesto.json', man)
     for c in dados:
         if c['validacao']['status'] != 'falha':
-            h = pagina_alimentador(modelo, c)
+            h = com_modo_faixa(pagina_alimentador(modelo, c))
             (saida / 'alimentadores' / c['alimentador'] / 'index.html').write_text(h, encoding='utf-8')
             (saida / 'alimentadores' / c['alimentador'] / 'faixa-rascunho.html').write_text(pagina_faixa(h, c), encoding='utf-8')
             limpeza = saida / 'alimentadores' / c['alimentador'] / 'limpeza.js'
