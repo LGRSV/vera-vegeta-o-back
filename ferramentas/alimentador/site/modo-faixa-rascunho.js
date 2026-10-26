@@ -626,7 +626,23 @@
     const bt = $('fx-croqui'); bt.disabled = true;
     // soma dos pedaços arredondada uma vez só, no metro (o 1e-6 só absorve o erro de ponto flutuante de um x,5 m exato)
     const km3 = m => Math.round(m + 1e-6) / 1000;
-    try { await window.__croqui(nomes, { leve: km3(t.leve), pesada: km3(t.pesada) }); } finally { bt.disabled = false; }
+    try { await window.__croqui(nomes, { leve: km3(t.leve), pesada: km3(t.pesada), marcas: marcados() }); } finally { bt.disabled = false; }
+  }
+  // o marcado nos trechos escolhidos, para o KMZ do croqui: por cor, [[lat, lon] do começo, [lat, lon] do fim] de cada
+  // sequência de pedaços da mesma cor num vão
+  function marcados() {
+    const r = { leve: [], pesada: [] };
+    for (const i of selV) {
+      const n = np[i], o = off[i];
+      for (let j = 0; j < n;) {
+        const m = marca[o + j];
+        let k = j + 1;
+        while (k < n && marca[o + k] === m) k++;
+        if (m) r[m === 1 ? 'leve' : 'pesada'].push([llPt({ i, q: j }), llPt({ i, q: k })]);
+        j = k;
+      }
+    }
+    return r;
   }
 
   // ---------- ligar e desligar ----------

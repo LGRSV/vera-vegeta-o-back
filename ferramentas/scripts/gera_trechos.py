@@ -1261,7 +1261,61 @@ def indice_ativos(saida, dados):
     for f, d in por.items():
         grava_json(pasta / f'{f}.json', d)
     sugestoes_ativos(saida, nomes)
-    return len(idx)
+    return idx
+
+
+TRAFOS = ('TR', 'ET', 'EP')      # tipos de transformador no índice de ativos
+
+
+def indice_uc(saida, idx, com_pagina=()):
+    """dados/uc/<fatia>.json: número da UC (como chave_ativo) → [[alimentador, transformador, trecho, papel, lat, lon,
+    interrupções, 1º mês, último mês, 1 se o alimentador tem página], ...], do mais recente para o mais antigo.
+
+    Vem das interrupções individuais da Crítica guardadas mês a mês em dados/uc/meses/<AAAA-MM>.json
+    (scripts/atualiza_critica.py: UC → [[transformador, alimentador da Crítica, ocorrências], ...]). Cada transformador
+    aparece uma vez na UC, somando os meses, com o alimentador da Crítica do mês mais recente (ele muda com transferência
+    de carga ou vem vazio); sem transformador, uma linha por alimentador. O lugar é o do transformador no índice de
+    ativos (alimentador de hoje, trecho e ponto); fora dele, o ponto e o alimentador do acervo do GIS
+    (dados/trafos_gis.json), sem trecho; sem ele também, só o alimentador da Crítica. dados/uc/indice.json: os meses que
+    o índice cobre (a busca diz o período quando não acha a UC). O número da UC é publicado por decisão do usuário
+    (26/10/2026): o repositório é público."""
+    pasta = saida / 'dados' / 'uc'
+    if not pasta.exists():
+        return 0
+    meses = sorted((pasta / 'meses').glob('*.json'))
+    junta = {}              # UC → {transformador, ou ('', alimentador) sem ele: [n, 1º mês, último mês, alimentador]}
+    for f in meses:         # em ordem de mês: o alimentador que fica é o do mês mais recente que o informa
+        for uc, lista in json.loads(f.read_text(encoding='utf-8')).items():
+            for tr, al, n in lista:
+                x = junta.setdefault(uc, {}).setdefault(tr or ('', al), [0, f.stem, f.stem, al])
+                x[0] += n
+                x[1], x[2] = min(x[1], f.stem), max(x[2], f.stem)
+                if al:
+                    x[3] = al
+    for f in pasta.glob('*.json'):                   # fatias e indice.json de antes (meses/ fica)
+        f.unlink()
+    gis = saida / 'dados' / 'trafos_gis.json'
+    gis = json.loads(gis.read_text(encoding='utf-8')) if junta and gis.exists() else {}
+    por = {}
+    for uc, quais in sorted(junta.items()):
+        linhas = []
+        for k, (n, m0, m1, al) in sorted(quais.items(), key=lambda x: (x[1][2], x[1][0]), reverse=True):
+            tr = k if isinstance(k, str) else ''
+            hits = [h for h in idx.get(chave_ativo(tr), []) if h[1] in TRAFOS] if tr else []
+            h = next((h for h in hits if h[0] == al), hits[0] if hits else None)
+            if h:
+                lin = [h[0], tr, h[2], h[3], h[4], h[5]]
+            elif tr in gis:
+                lon, lat, al_gis = gis[tr]
+                lin = [al_gis or al, tr, '', 'fora da rede do site', round(lat, 6), round(lon, 6)]
+            else:
+                lin = [al, tr, '', '', None, None]
+            linhas.append(lin + [n, m0, m1, int(lin[0] in com_pagina)])
+        por.setdefault(fatia(uc), {})[uc] = linhas
+    for f, d in por.items():
+        grava_json(pasta / f'{f}.json', d)
+    grava_json(pasta / 'indice.json', dict(meses=[f.stem for f in meses], ucs=len(junta)))
+    return len(junta)
 
 
 FATIAS_OS = 64        # poucas fatias: a cópia da página no Artifact tem limite de arquivos
@@ -1430,7 +1484,7 @@ def interface(saida, malha=None):
     redes_mapa(saida, dados)
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
-    indice_ativos(saida, dados)
+    indice_uc(saida, indice_ativos(saida, dados), {c['alimentador'] for c in dados if c['validacao']['status'] != 'falha'})
     indice_os(saida, dados)
     # páginas que outras etapas fazem: a Priorização (priorizacao/, #20) e as visões do mapa (gera_visoes.js, que roda
     # depois desta interface na atualização automática). Só entram no HTML quando existem, para nunca virar link quebrado.
@@ -1444,12 +1498,12 @@ def interface(saida, malha=None):
              # ativo, município ou alimentador, com a lista aparecendo enquanto se digita.
              '<div id="mapa-to" class="mapa-to"><div class="mt-barra">'
              '<form class="ativo" id="ativo" role="search"><div class="campo">'
-             '<button type="button" class="lupa" id="lupa" aria-label="Buscar ativo, município, alimentador ou OS" '
+             '<button type="button" class="lupa" id="lupa" aria-label="Buscar ativo, município, alimentador, OS ou UC" '
              'aria-expanded="false" aria-controls="ativo-q">'
              '<img class="argos-img" src="assets/argos.png" alt="" width="34" height="23"></button>'   # o olho do ARGOS (logo)
-             '<label for="ativo-q" class="vh">Buscar regional, polo, município, alimentador, ativo ou OS</label>'
+             '<label for="ativo-q" class="vh">Buscar regional, polo, município, alimentador, ativo, OS ou UC</label>'
              '<input class="busca" id="ativo-q" type="search" inputmode="search" autocomplete="off" '
-             'placeholder="Município, alimentador, ativo, OS" enterkeyhint="search" hidden>'   # fechada, só o olho; tocar nele abre
+             'placeholder="Município, alimentador, ativo, OS, UC" enterkeyhint="search" hidden>'   # fechada, só o olho; tocar nele abre
              '<div id="ativo-res" aria-live="polite"></div></div></form>'
              '<details class="mt-regs" open><summary>NAE-Vegetação</summary></details></div>\n'   # legenda na barra, ao lado do olho (mapa-municipios.js)
              f'<div class="mt-mapa"><svg role="group" aria-label="Mapa dos municípios do Tocantins" tabindex="-1" viewBox="{vb}"></svg>'

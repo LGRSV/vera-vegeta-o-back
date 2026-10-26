@@ -14,7 +14,8 @@ Onde cai cada ocorrência:
       Individual (UC) cai pelo trafo que atende o consumidor.
     - Ativo que não está no cadastro atual: fora dos trechos ("hoje no <outro alimentador>" quando achado
       no KML de outro alimentador passado em `outros`).
-O número da UC (consumidor) não é guardado.
+O número da UC (consumidor) não entra nas ocorrências; a busca por UC do site guarda à parte só UC → transformador
+(scripts/atualiza_critica.py, dados/uc/).
 """
 import csv
 import re
@@ -128,7 +129,7 @@ def ocorrencias(linhas):
         o['fec'] += _num(d['QTD_IFEC_ALIM'])
         o['dec'] += _num(d['QTD_IDEC_ALIM'])
     for o in oc.values():
-        if o['prob_tipo'] == 'UC':                  # não guarda o número do consumidor
+        if o['prob_tipo'] == 'UC':                  # não guarda o número do consumidor (a busca por UC tem o dela)
             o['prob'] = ''
     return list(oc.values())
 

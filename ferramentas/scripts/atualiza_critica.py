@@ -19,6 +19,11 @@ competência que só aparece de passagem (linha do mês seguinte no arquivo de u
 esse mês. Passar todos os arquivos refaz tudo. Alimentadores bloqueados (status falha) ficam como estão.
 Trechos, vãos, municípios e KMZ não mudam. Depois: páginas, índice, ranking, polos e relatório refeitos.
 
+UC: as interrupções individuais (de todas as causas, não só as de vegetação) ficam também por mês em
+dados/uc/meses/<AAAA-MM>.json (número da UC → transformador e alimentador), trocadas junto com os meses da NAE; a
+interface monta com elas o índice da busca por UC da página inicial (gera_trechos.indice_uc). O número da UC fica
+publicado por decisão do usuário (26/10/2026); nas NAE ele continua fora.
+
 --conferir: refaz a associação das NAE que já estão no site com os dados guardados e compara; nada é gravado.
 --semear: site gerado antes de 'chaves_sem_topologia' (sem os KMLs à mão): monta a lista com as chaves fora da
 topologia que as NAE do site já localizaram (trecho e distância, sem o ponto). Rodar uma vez; a próxima geração com
@@ -175,6 +180,39 @@ def conferir(site):
     return 0 if not dif else 1
 
 
+def ucs_por_mes(linhas):
+    """Interrupções individuais da Crítica (elemento do problema = UC), de todas as causas, por mês de competência:
+    mês → número da UC (como a busca compara: gera_trechos.chave_ativo) → [[transformador, alimentador, ocorrências], ...].
+    O transformador é o elemento interrompido quando é um TR (é por ele que a individual cai no trecho)."""
+    por = {}
+    for al, ls in linhas.items():
+        for d in ls:
+            if d['COD_ELE_REDE_PROBLEMA'].strip() != 'UC':
+                continue
+            uc = gt.chave_ativo(d['COD_ELE_PROBLEMA'])
+            if uc in ('', '0'):
+                continue
+            cmpt = d['DTA_CMPT_HDE'].strip()                         # dd/mm/aa
+            tr = d['COD_ELE_INTERROMPIDO'].strip() if d['COD_ELE_REDE_INTERROMPIDO'].strip().startswith('TR') else ''
+            por.setdefault(f'20{cmpt[6:8]}-{cmpt[3:5]}', {}).setdefault(uc, {}).setdefault((tr, al), set()).add(
+                d['NUM_SEQ_OPER_INIC_HDE'].strip())
+    return {mes: {uc: [[tr, al, len(oc)] for (tr, al), oc in sorted(q.items())] for uc, q in sorted(ucs.items())}
+            for mes, ucs in por.items()}
+
+
+def grava_ucs(site, linhas, trocar):
+    """dados/uc/meses/<AAAA-MM>.json de cada mês trocado (o mês inteiro, como a NAE; mês sem individual fica vazio).
+    O índice da busca (dados/uc/<fatia>.json) sai de todos os meses guardados, na interface (gera_trechos.indice_uc)."""
+    por = ucs_por_mes(linhas)
+    for mes in sorted(trocar):
+        gt.grava_json(site / 'dados' / 'uc' / 'meses' / f'{mes}.json', por.get(mes, {}))
+    sem_tr = sum(1 for ls in linhas.values() for d in ls if d['COD_ELE_REDE_PROBLEMA'].strip() == 'UC'
+                 and not d['COD_ELE_REDE_INTERROMPIDO'].strip().startswith('TR'))
+    if sem_tr:
+        print(f'aviso: {sem_tr} linha(s) de UC com o elemento interrompido que não é TR (ficam sem transformador)')
+    return len({uc for mes in trocar for uc in por.get(mes, {})})
+
+
 def atualizar(site, arqs, filtro, planilha=None):
     cad = Cadastro(site)
     linhas = critica.ler(arqs)
@@ -219,6 +257,7 @@ def atualizar(site, arqs, filtro, planilha=None):
             if not o['trecho']:
                 k = (o.get('fora') or '')[:7] if (o.get('fora') or '').startswith('hoje no') else o.get('fora') or '?'
                 sem[k] = sem.get(k, 0) + 1
+    n_uc = grava_ucs(site, linhas, trocar)              # busca por UC: todas as causas, índice refeito na interface
     tot.update(ag.outros(site, pts=cad.trafos))       # 'hoje no X': também no trecho do X (nae.ext)
     tot.update(ag.posicoes(site, pts=cad.trafos))     # ponto do ativo de cada NAE com trecho (mapa)
     dados, man = gt.interface(site)
@@ -228,6 +267,7 @@ def atualizar(site, arqs, filtro, planilha=None):
     ok = gt.validar_saida(site)
     print(f'{tot["alimentadores"]} alimentador(es) · {tot["nae"]} NAE · {tot["com_trecho"]} com trecho · '
           f'{tot["no_trecho_do_outro"]} também no trecho de outro alimentador')
+    print(f'UC: {n_uc} UC(s) com interrupção individual nos meses trocados (busca por UC)')
     print('sem trecho: ' + (', '.join(f'{k} {n}' for k, n in sorted(sem.items(), key=lambda x: -x[1])) or 'nenhuma'))
     if planilha:
         import planilha_trechos

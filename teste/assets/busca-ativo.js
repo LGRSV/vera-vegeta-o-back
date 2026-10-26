@@ -8,7 +8,9 @@
 // abrem como no clique, município abre com a rede dos alimentadores, alimentador dá zoom na rede dele.
 // Ativo (ou Enter) busca no índice dados/ativos/<fatia>.json (gerados por scripts/gera_trechos.py), que diz o alimentador
 // e o trecho. OS: com número/ano (ex.: 002507/2026, com ou sem a equipe na frente) aparece "Buscar a OS…", que procura em
-// dados/os/<fatia>.json. Cada resultado abre a página do alimentador ou mostra o alimentador no mapa.
+// dados/os/<fatia>.json. UC (número com ou sem "UC" na frente): dados/uc/<fatia>.json, das interrupções individuais da
+// Crítica, diz o transformador, o alimentador e o trecho (só UC que já teve interrupção individual). Cada resultado abre a
+// página do alimentador ou mostra o alimentador no mapa.
 // Fechada, só o olho do ARGOS aparece; tocar nele abre o campo. A lista e o resultado abrem presos ao olho (não empurram
 // o mapa); fecham com Esc ou clicando fora. "/" abre a busca.
 (function () {
@@ -79,7 +81,8 @@
     mun: '<path d="M3 20h18M5 20V9.5L12 5l7 4.5V20"/><path d="M10 20v-5h4v5"/>',
     al: '<path d="M2.5 17.5 7 9l4 6.5 4.5-10 6 12"/><circle cx="7" cy="9" r="1.3"/><circle cx="15.5" cy="5.5" r="1.3"/>',
     ativo: '<path d="M13 2.5 5 13.5h6l-1 8 8-11h-6z"/>',
-    os: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h5"/>'
+    os: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h5"/>',
+    uc: '<path d="M4 20V10.5L12 4l8 6.5V20z"/><path d="M12 9.5 10 13.5h4l-2 4"/>'
   };
   const realce = (txt, n) => {                    // destaca o que se digitou (sem acento e sem caixa)
     const s = semAcento(txt), i = n ? s.indexOf(n) : -1;
@@ -95,7 +98,10 @@
     // pedido do usuário); o que está em foco no mapa fica marcado
     almun: (a, m, foco) => ({ s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: vis() ? vis().al(a.cod, m.cod) : a.n || 0, c: foco ? 'Em foco no mapa' : '' }),
     ativo: ([c, tipo], k) => ({ s: { ativo: c }, tipo: 'ativo', t: realce(c, k), c: esc(TIPO[tipo] || 'Chave ' + tipo) }),
-    os: txt => ({ s: { os: txt }, tipo: 'os', t: `OS ${esc(txt)}`, c: 'buscar nas bases de faixa, inspeção, manutenção e executadas' })
+    os: txt => ({ s: { os: txt }, tipo: 'os', t: `OS ${esc(txt)}`, c: 'buscar nas bases de faixa, inspeção, manutenção e executadas' }),
+    uc: (k, hits) => ({ s: { uc: k }, tipo: 'uc', t: `UC ${esc(k)}`,
+      c: [trUC(hits[0]), hits[0][0] ? esc(hits[0][0]) : 'sem alimentador na Crítica', esc(hits[0][2])].filter(Boolean).join(' · ') +
+        (hits.length > 1 ? ` (e mais ${hits.length - 1})` : '') })
   };
   // sugDe: o texto que gerou a lista aberta; enterDepois: Enter dado antes da lista desse texto ficar pronta (colar ou
   // leitor de código e Enter em menos de 120 ms): a escolha espera a lista nova, em vez de usar a do texto anterior
@@ -169,6 +175,21 @@
   const fatiaOS = k => (hash(k) % 64).toString(16).padStart(2, '0');      // FATIAS_OS de scripts/gera_trechos.py
   const chaveOS = s => { const m = String(s).match(/(\d{1,7})\s*\/\s*(\d{4})(?!\d)/); return m ? `${+m[1]}/${m[2]}` : null; };
   const BASE_OS = { f: 'Limpeza de faixa', i: 'Inspeção', m: 'Manutenção (gerada pela inspeção)', e: 'Executada' };
+  // UC: o número (pontos, traços e espaços não contam; sem zeros à esquerda, como chave_ativo de scripts/gera_trechos.py),
+  // com ou sem "UC" (ou "U.C.") na frente, junto ou separado; a partir de 4 dígitos. A busca do ativo de mesmo código
+  // continua junto (há transformador com código "UC…"); "UC" na frente só muda o aviso quando nada é achado
+  const chaveUC = s => { const m = String(s).trim().match(/^(?:u\.?\s?c\.?)?[\s:#nº°.-]*(\d[\d.\s-]*)$/i); if (!m) return null; const k = m[1].replace(/\D/g, '').replace(/^0+/, ''); return k.length >= 4 ? k : null; };
+  const soUC = s => /^\s*u\.?\s?c\.?(?=[\s:#nº°.-]*\d)/i.test(s);
+  const trUC = h => h[1] ? 'Transformador ' + esc(h[1]) : 'Sem transformador na Crítica';
+  const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const mesTxt = m => `${MES[+m.slice(5, 7) - 1]}/${m.slice(2, 4)}`;
+  const proxMes = m => { let [a, b] = m.split('-').map(Number); if (++b > 12) { a++; b = 1; } return `${a}-${String(b).padStart(2, '0')}`; };
+  // meses que o índice de UC cobre (dados/uc/indice.json), em faixas: "jan/26 a jun/26, set/26"; '' sem índice
+  async function periodoUC() {
+    const d = await baixa('uc/indice'), fs = [];
+    ((d && d.meses) || []).forEach(m => { const f = fs[fs.length - 1]; if (f && proxMes(f[1]) === m) f[1] = m; else fs.push([m, m]); });
+    return fs.map(([a, b]) => a === b ? mesTxt(a) : `${mesTxt(a)} a ${mesTxt(b)}`).join(', ');
+  }
   const cache = {};
   const baixa = f => cache[f] || (cache[f] = fetch(`dados/${f}.json`).then(r => r.ok ? r.json() : {}).catch(() => { delete cache[f]; return null; }));
   const ORDEM = ['DJ', '79', '03', '33', '02', '40', '41', 'SEC', 'FTR', '88', 'TR', 'ET', 'EP', 'poste'];
@@ -187,24 +208,28 @@
     const pos = a => { const i = K.length >= 2 ? a.cod.indexOf(K) : -1; return i < 0 ? 99 : i; };
     const as = als.filter(a => (K.length >= 2 && a.cod.includes(K)) || (n.length >= 3 && semAcento(a.se).includes(n)))
       .sort((a, b) => fora.al(a, nv) - fora.al(b, nv) || pos(a) - pos(b) || porNae(a, b) || a.cod.localeCompare(b.cod)).slice(0, 5);
-    let achados = [];
-    if (k.length >= 3) {
-      const d = await baixa('ativos-pref/' + k.slice(0, 2));
+    let achados = [], ucs = [];
+    const kUC = chaveUC(txt);
+    if (k.length >= 3 || kUC) {
+      const [d, du] = await Promise.all([k.length >= 3 ? baixa('ativos-pref/' + k.slice(0, 2)) : null, kUC ? baixa('uc/' + fatia(kUC)) : null]);
       if (meu !== pedido) return;                   // já digitaram outra coisa
+      if (du && du[kUC]) ucs = [item.uc(kUC, du[kUC])];
       if (d) Object.entries(d).forEach(([tipo, lista]) => lista.split(' ').forEach(c => { if (chave(c).startsWith(k)) achados.push([c, tipo]); }));
       achados.sort((a, b) => (chave(b[0]) === k) - (chave(a[0]) === k) || peso(a[1]) - peso(b[1]) || a[0].length - b[0].length || a[0].localeCompare(b[0]));
     }
     if (meu !== pedido) return;
     const kOS = chaveOS(txt);
     const at = achados.slice(0, rs.length || ps.length || ms.length || as.length ? 6 : 12);
-    if (!kOS && !rs.length && !ps.length && !ms.length && !as.length && !at.length) {
+    if (!kOS && !ucs.length && !rs.length && !ps.length && !ms.length && !as.length && !at.length) {
+      const per = soUC(txt) && kUC ? await periodoUC() : null;
+      if (meu !== pedido) return;
       fechaSug();
-      res.innerHTML = n.length < 2 ? '' : `<p>Nada encontrado para <b>${esc(txt)}</b>.</p>`;
+      res.innerHTML = n.length < 2 ? '' : per !== null ? ucNao(kUC, per) : `<p>Nada encontrado para <b>${esc(txt)}</b>.</p>`;
       sugDe = txt;
       if (enterDepois === txt) { enterDepois = null; envia(); }   // sem lista: o Enter busca o código digitado
       return;
     }
-    mostra([['OS', kOS ? [item.os(txt)] : []], ['Regionais', rs.map(r => item.reg(r, n))], ['Polos', ps.map(p => item.polo(p, n))],
+    mostra([['OS', kOS ? [item.os(txt)] : []], ['UC', ucs], ['Regionais', rs.map(r => item.reg(r, n))], ['Polos', ps.map(p => item.polo(p, n))],
       ['Municípios', ms.map(m => item.mun(m, n))], ['Alimentadores', as.map(a => item.al(a, n, kl))], ['Ativos', at.map(a => item.ativo(a, kl))]],
     achados.length > at.length ? `<p class="sug-mais">e mais ${(achados.length - at.length).toLocaleString('pt-BR')} ativos: continue digitando</p>` : '');
     sugDe = txt;
@@ -255,6 +280,7 @@
     const s = sug[i];
     if (!s) return;
     if (s.os) { buscaOS(s.os); return; }
+    if (s.uc) { buscaUC(s.uc); return; }
     // alimentador do município aberto: 1 toque abre o painel dele (passar o mouse ou marcar com as setas acende a rede)
     if (s.almun) { fecha(); P.abre(`alimentadores/${encodeURIComponent(s.almun)}/`); return; }
     if (s.ativo) {
@@ -293,22 +319,56 @@
       (hits.length > lista.length ? `<p class="sug-mais">e mais ${hits.length - lista.length}: digite a equipe junto (ex.: ETO-RD-PO ${esc(k)})</p>` : '');
   }
 
+  // UC: transformador (alimentador, trecho e ponto de hoje) das interrupções individuais da Crítica, do mais recente
+  const ucNao = (k, per) => per ? `<p>A UC <b>${esc(k)}</b> não aparece nas interrupções individuais da Crítica de ${per}. ` +
+    'A busca por UC só acha unidade consumidora que teve interrupção individual nesses meses.</p>' :
+    '<p>A busca por UC ainda não tem a Crítica: ela entra quando a Crítica é enviada pelo menu "Atualizar bases".</p>';
+  function ucLista(k, hits) {
+    return hits.map(([al, tr, t, papel, lat, lon, n, m0, m1, temPag]) => {
+      const pag = !!al && (temPag === 1 || !!AL[al]);
+      const url = P.url(`alimentadores/${encodeURIComponent(al)}/${lat != null ? `?${t ? 't=' + encodeURIComponent(t) + '&' : ''}a=${encodeURIComponent(tr)}&ll=${lat},${lon}` : ''}`);
+      return `<li class="res-li"><a${pag ? ` href="${esc(url)}"${P.alvo}` : ''}><b>${[`UC ${esc(k)}`, esc(t), esc(al)].filter(Boolean).join(' · ')}</b>` +
+        `<span>${[trUC([al, tr]), AL[al] ? esc(AL[al].se) : '', esc(papel)].filter(Boolean).join(' · ')}</span>` +
+        `<span>${plural(n, 'interrupção individual', 'interrupções individuais')} · ${m0 === m1 ? mesTxt(m0) : mesTxt(m0) + ' a ' + mesTxt(m1)}</span>` +
+        `<span class="ir">${pag ? 'Abrir no mapa do alimentador →' : al ? 'Alimentador sem página no site' : 'Sem alimentador na Crítica'}</span></a>` +
+        botaoMapa(al) + '</li>';
+    }).join('');
+  }
+  const ucBloco = (k, hits) => `<p>UC <b>${esc(k)}</b>${hits.length > 1 ? ` · ${hits.length} transformadores` : ''}:</p><ul>${ucLista(k, hits)}</ul>`;
+  async function buscaUC(k) {
+    clearTimeout(espera); const meu = ++pedido; fechaSug();
+    res.innerHTML = '<p>Buscando a UC…</p>';
+    const d = await baixa('uc/' + fatia(k));
+    if (meu !== pedido) return;
+    if (d === null) { res.innerHTML = '<p>Não foi possível carregar o índice de UC. Confira a internet e tente de novo.</p>'; return; }
+    const hits = d[k] || [], per = hits.length ? '' : await periodoUC();
+    if (meu !== pedido) return;
+    res.innerHTML = hits.length ? ucBloco(k, hits) : ucNao(k, per);
+  }
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    clearTimeout(espera); pedido++; fechaSug();
+    clearTimeout(espera); const meu = ++pedido; fechaSug();
     const txt = q.value.trim(), k = chave(txt);
     if (chaveOS(txt)) { buscaOS(txt); return; }
     if (!k) { res.innerHTML = ''; return; }
+    const kUC = chaveUC(txt);
     res.innerHTML = '<p>Buscando…</p>';
-    const d = await baixa('ativos/' + fatia(k));
+    const [d, du] = await Promise.all([baixa('ativos/' + fatia(k)), kUC ? baixa('uc/' + fatia(kUC)) : null]);
+    if (meu !== pedido) return;
     if (d === null) { res.innerHTML = '<p>Não foi possível carregar o índice. Confira a internet e tente de novo.</p>'; return; }
-    const hits = d[k] || [];
-    if (!hits.length) {
-      res.innerHTML = `<p><b>${esc(txt)}</b> não foi encontrado. Confira o código: a busca é pelo código completo da chave, do transformador ` +
-        'ou pelo número do poste. Postes sem número no cadastro não entram.</p>';
+    const hits = d[k] || [], ucHits = (du && du[kUC]) || [];
+    if (!hits.length && !ucHits.length) {
+      const per = soUC(txt) && kUC ? await periodoUC() : null;
+      if (meu !== pedido) return;
+      res.innerHTML = per !== null ? ucNao(kUC, per) : `<p><b>${esc(txt)}</b> não foi encontrado. Confira o código: a busca é pelo código ` +
+        'completo da chave, do transformador ou pelo número do poste (postes sem número no cadastro não entram) ou da UC ' +
+        '(só UC que teve interrupção individual na Crítica).</p>';
       return;
     }
-    res.innerHTML = `<p>${hits.length === 1 ? '1 resultado' : hits.length + ' resultados'} para <b>${esc(txt)}</b>:</p><ul>` +
+    const uc = ucHits.length ? ucBloco(kUC, ucHits) : '';
+    if (!hits.length) { res.innerHTML = uc; return; }
+    res.innerHTML = uc + `<p>${hits.length === 1 ? '1 resultado' : hits.length + ' resultados'} para <b>${esc(txt)}</b>${uc ? ' (ativos)' : ''}:</p><ul>` +
       hits.map(([al, tipo, t, papel, lat, lon]) => {
         const onde = tipo === 'poste' ? (papel ? 'Trechos ' + esc(papel) : 'Trecho ' + esc(t)) : esc(papel[0] ? papel[0].toUpperCase() + papel.slice(1) : '');
         return `<li class="res-li"><a href="${esc(P.url(`alimentadores/${encodeURIComponent(al)}/?${t ? 't=' + encodeURIComponent(t) + '&' : ''}a=${encodeURIComponent(txt)}&ll=${lat},${lon}`))}"${P.alvo}>` +
@@ -327,7 +387,7 @@
   };
   if (lupa) {
     lupa.setAttribute('aria-expanded', String(!q.hidden));
-    lupa.setAttribute('aria-label', 'Abrir a busca: regional, polo, município, alimentador, ativo ou OS');
+    lupa.setAttribute('aria-label', 'Abrir a busca: regional, polo, município, alimentador, ativo, OS ou UC');
     lupa.addEventListener('click', () => { if (q.hidden) abreCampo(true); else if (!q.value.trim()) abreCampo(false); else q.focus(); });
     // saiu do campo vazio, sem lista aberta: fecha e fica só o olho
     q.addEventListener('blur', () => setTimeout(() => {
@@ -353,7 +413,7 @@
     else if (res.classList.contains('lista-mun') && (d.al || !d.mun)) fecha();
   });
   // visão do mapa trocada: a lista aberta (sem resultado de ativo ou OS) refaz os números
-  document.addEventListener('argos-visao', () => { if (!sug.length || sug.some(s => s.os || s.ativo)) return; if (q.value.trim()) sugere(); else atalhos(); });
+  document.addEventListener('argos-visao', () => { if (!sug.length || sug.some(s => s.os || s.ativo || s.uc)) return; if (q.value.trim()) sugere(); else atalhos(); });
   // fecha a lista: Esc (no campo ou na lista; o foco volta ao campo), clique fora do formulário ou o foco saindo dele
   form.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;

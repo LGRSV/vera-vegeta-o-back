@@ -2,6 +2,7 @@
 // sai o Excel do modelo da Energisa
 // já preenchido — chave inicial e final, coordenadas UTM (SIRGAS 2000, fuso do ponto), alimentador, extensão,
 // município — e as duas figuras do trecho (satélite e esquema da rede) desenhadas aqui.
+// "Baixar KMZ", na mesma janela: os mesmos trechos para o Google Earth (kmz() abaixo).
 // O modelo vem de assets/croqui-modelo.js (scripts/croqui_modelo.py), carregado só quando o croqui é pedido.
 // O botão "Croqui da faixa" fica em "Dados" › Downloads › Faixa (extras.js), não no detalhe do trecho.
 (function () {
@@ -312,7 +313,7 @@
   // zip sem compressão (o Excel abre normalmente)
   const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
   const crc32 = u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
-  function zip(arqs) {
+  function zip(arqs, tipo = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
     const enc = new TextEncoder(), partes = [], central = [];
     let pos = 0;
     const d = new Date(), hora = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
@@ -331,7 +332,90 @@
     const tam = central.reduce((s, u) => s + u.length, 0), fimz = new DataView(new ArrayBuffer(22));
     [[0, 0x06054b50, 4], [4, 0, 2], [6, 0, 2], [8, arqs.length, 2], [10, arqs.length, 2], [12, tam, 4], [16, pos, 4], [20, 0, 2]]
       .forEach(([o, v, t]) => t === 4 ? fimz.setUint32(o, v, true) : fimz.setUint16(o, v, true));
-    return new Blob([...partes, ...central, new Uint8Array(fimz.buffer)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    return new Blob([...partes, ...central, new Uint8Array(fimz.buffer)], { type: tipo });
+  }
+  // ---------- KMZ (Google Earth) só dos trechos do croqui (pedido do usuário): a linha de cada trecho na cor da classe,
+  // os pedaços marcados Leve e Pesada no modo Limpeza de faixa (misto.marcas: { leve, pesada } com [[lat, lon], [lat, lon]]
+  // de cada pedaço; os km no nome são os do croqui, misto.leve e misto.pesada), as chaves de início e fim e os postes ----------
+  const COR_KMZ = { 1: '3b82f6', 2: '22c55e', 3: 'facc15', leve: '22d3ee', pesada: 'f43f5e' };   // trechos.py e modo faixa
+  const kcor = h => 'ff' + h.slice(4, 6) + h.slice(2, 4) + h.slice(0, 2);     // KML: aabbggrr
+  const kpt = ll => `${(+ll[1]).toFixed(7)},${(+ll[0]).toFixed(7)},0`;
+  const kmTxt = m => m < 1000 ? `${Math.round(m)} m` : `${nf(m / 1000, 2)} km`;
+  // segmentos → linhas contínuas (menos pontos no KML): segue de ponta em ponta enquanto o ponto liga só dois segmentos
+  function cadeias(segs) {
+    const viz = new Map(), usado = new Uint8Array(segs.length), linhas = [];
+    segs.forEach((s, j) => s.forEach(ll => { const c = kpt(ll); if (viz.has(c)) viz.get(c).push(j); else viz.set(c, [j]); }));
+    const anda = (c, j) => {
+      const l = [];
+      while (j !== null && !usado[j]) {
+        usado[j] = 1;
+        const s = segs[j], o = kpt(s[0]) === c ? 1 : 0;        // entra pela ponta c, sai pela outra
+        if (!l.length) l.push(s[1 - o]);
+        l.push(s[o]); c = kpt(s[o]);
+        const prox = viz.get(c).filter(x => !usado[x]);
+        j = viz.get(c).length === 2 && prox.length === 1 ? prox[0] : null;
+      }
+      return l;
+    };
+    viz.forEach((js, c) => { if (js.length !== 2) js.forEach(j => { if (!usado[j]) linhas.push(anda(c, j)); }); });
+    segs.forEach((s, j) => { if (!usado[j]) linhas.push(anda(kpt(s[0]), j)); });   // voltas fechadas
+    return linhas;
+  }
+  const multi = segs => '<MultiGeometry>' + cadeias(segs).map(l =>
+    `<LineString><tessellate>1</tessellate><coordinates>${l.map(kpt).join(' ')}</coordinates></LineString>`).join('') + '</MultiGeometry>';
+  function kmz(nomes, todos, misto) {
+    const marcas = misto && misto.marcas;
+    const sel = new Set(nomes.map(n => TR[n].i)), vs = D.vaos.filter(v => sel.has(v[4]));
+    let a0 = 90, a1 = -90, o0 = 180, o1 = -180;
+    vs.forEach(v => { a0 = Math.min(a0, v[0], v[2]); a1 = Math.max(a1, v[0], v[2]); o0 = Math.min(o0, v[1], v[3]); o1 = Math.max(o1, v[1], v[3]); });
+    const diag = vs.length ? dist([a0, o0], [a1, o1]) : 0, quais = todos ? 'alimentador inteiro' : nomes.join(', ');
+    const k = ['<?xml version="1.0" encoding="UTF-8"?>', '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>',
+      `<name>${xml(M.al)} · ${xml(quais)}</name><open>1</open>`,
+      `<description>${xml(`Croqui de limpeza de faixa · ${M.al}${M.se_nome || M.se ? ' · ' + (M.se_nome || M.se) : ''} · ${quais}`)}</description>`,
+      `<LookAt><longitude>${((o0 + o1) / 2).toFixed(6)}</longitude><latitude>${((a0 + a1) / 2).toFixed(6)}</latitude><altitude>0</altitude>` +
+      `<heading>0</heading><tilt>0</tilt><range>${Math.round(Math.max(diag * 1.6, 800))}</range></LookAt>`];
+    [1, 2, 3].forEach(z => k.push(`<Style id="t${z}"><LineStyle><color>${kcor(COR_KMZ[z])}</color><width>4</width></LineStyle></Style>`));
+    ['leve', 'pesada'].forEach(f => k.push(`<Style id="${f}"><LineStyle><color>${kcor(COR_KMZ[f])}</color><width>8</width></LineStyle></Style>`));
+    k.push('<Style id="ch"><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_square.png</href></Icon></IconStyle><LabelStyle><scale>0.9</scale></LabelStyle></Style>',
+      '<Style id="po"><IconStyle><scale>0.45</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png</href></Icon></IconStyle><LabelStyle><scale>0</scale></LabelStyle></Style>');
+    k.push('<Folder><name>Trechos</name><open>1</open>');
+    nomes.forEach(n => {
+      const t = TR[n], segs = vs.filter(v => v[4] === t.i).map(v => [[v[0], v[1]], [v[2], v[3]]]);
+      if (!segs.length) return;
+      const balao = `<![CDATA[<b>Início:</b> ${xml(t.inicio)}<br><b>Fim:</b> ${xml((t.fim || []).join(' / ') || '—')}<br><b>Extensão:</b> ${kmTxt(t.ext)}]]>`;
+      k.push(`<Placemark><name>${xml(t.nome)} · ${xml(t.inicio)} → ${xml((t.fim || []).join(' / ') || 'fim')} · ${kmTxt(t.ext)}</name>` +
+        `<description>${balao}</description><styleUrl>#t${t.zona || +String(t.nome)[1] || 3}</styleUrl>${multi(segs)}</Placemark>`);
+    });
+    k.push('</Folder>');
+    if (marcas && ((marcas.leve || []).length || (marcas.pesada || []).length)) {
+      k.push('<Folder><name>Faixa marcada</name><open>1</open>');
+      [['leve', 'Leve (expedita)'], ['pesada', 'Pesada (convencional)']].forEach(([f, rot]) => {
+        const segs = marcas[f] || [];
+        if (segs.length) k.push(`<Placemark><name>${rot} · ${nf(misto[f] || 0, 3)} km</name><styleUrl>#${f}</styleUrl>${multi(segs)}</Placemark>`);
+      });
+      k.push('</Folder>');
+    }
+    const ch = new Map(), poe = (cod, ll, papel) => {
+      if (!cod || !ll || ll[0] == null) return;
+      const c = ch.get(cod) || ch.set(cod, { ll, papel: [] }).get(cod);
+      if (!c.papel.includes(papel)) c.papel.push(papel);
+    };
+    nomes.forEach(n => {
+      const t = TR[n];
+      poe(t.inicio, [t.inicio_lat, t.inicio_lon], `início do ${t.nome}`);
+      (t.fim || []).forEach((f, j) => poe(f, (t.fim_pts || [])[j], `fim do ${t.nome}`));
+    });
+    k.push('<Folder><name>Chaves de início e fim</name>');
+    ch.forEach((c, cod) => k.push(`<Placemark><name>${xml(textoFim(cod))}</name><description>${xml(c.papel.join(' · '))}</description>` +
+      `<styleUrl>#ch</styleUrl><Point><coordinates>${kpt(c.ll)}</coordinates></Point></Placemark>`));
+    k.push('</Folder>');
+    const postes = new Map();
+    vs.forEach(v => { if (v[6]) postes.set(v[6], [v[0], v[1]]); if (v[7]) postes.set(v[7], [v[2], v[3]]); });
+    k.push('<Folder><name>Postes</name><open>0</open>');
+    postes.forEach((ll, p) => k.push(`<Placemark><name>${/^N\d+$/.test(p) ? 'poste sem número' : 'poste ' + xml(p)}</name>` +
+      `<styleUrl>#po</styleUrl><Point><coordinates>${kpt(ll)}</coordinates></Point></Placemark>`));
+    k.push('</Folder></Document></kml>');
+    return zip([['doc.kml', new TextEncoder().encode(k.join('\n'))]], 'application/vnd.google-earth.kmz');
   }
   async function excel(c, figSat, figGis) {
     const enc = new TextEncoder(), arqs = [];
@@ -425,11 +509,21 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
         <label>Obra<input name="obra" autocomplete="off"></label>
         <label>Deslocamento até o ponto inicial (km)<input name="desloc" type="number" step="1" min="0" inputmode="numeric"></label>
       </div>
-      <div class="acoes"><button type="button" class="cancela">Cancelar</button><button value="baixar">Baixar croqui (Excel)</button></div>
+      <div class="acoes"><button type="button" class="cancela">Cancelar</button><button type="button" class="kmz">Baixar KMZ</button><button value="baixar">Baixar croqui (Excel)</button></div>
     </form>`;
     document.body.append(dlg);
     const f = dlg.querySelector('form'), fig = dlg.querySelector('.fig');
     dlg.querySelectorAll('.fecha, .cancela').forEach(b => b.addEventListener('click', () => dlg.close()));
+    // KMZ dos trechos do croqui (com o marcado no mapa, no modo Limpeza de faixa), nome como o do Excel
+    dlg.querySelector('.kmz').addEventListener('click', () => {
+      try {
+        const arq = s => String(s ?? '').replace(/[^\w.-]+/g, '_'), qual = todos ? 'alimentador' : nomes.length > 3 ? nomes.length + '_trechos' : nomes.join('-');
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(kmz(nomes, todos, null)); link.download = `CROQUI_${arq(M.al)}_${arq(qual)}.kmz`;
+        document.body.append(link); link.click(); link.remove();
+        setTimeout(() => URL.revokeObjectURL(link.href), 30000);
+      } catch (err) { alert('Não foi possível gerar o KMZ: ' + err.message); }
+    });
     const escolha = () => ({ ini: d.inicios[+f.ini.value], fim: d.fins[+f.fim.value] });
     const coords = () => {
       const { ini, fim } = escolha(), a = utm(ini.ll[0], ini.ll[1]), b = utm(fim.ll[0], fim.ll[1], a.z);
