@@ -38,6 +38,7 @@
     slides: '<path d="M3 4h18"/><path d="M5 4v11h14V4"/><path d="m10.5 7.5 3.5 2-3.5 2z"/><path d="M12 15v3"/><path d="m8 21 4-3 4 3"/>',
     ranking: '<path d="M5 20V11M12 20V4M19 20v-6"/>',
     faixa: '<path d="M4 20l3-1 11-11-2-2L5 17zM14 6l2 2"/>',
+    painel: '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/>',
   };
   // relatórios (antes no rodapé da página inicial): o relatório e o manifesto só existem no site publicado; fora dele
   // (a cópia do Artifact) abrem lá, em outra aba
@@ -141,6 +142,8 @@
     `<li><button type="button" aria-haspopup="dialog">${svg(ICONE.enviar, '')}Atualização de dados</button></li>` +
     `<li><button type="button" class="mnu-tema" aria-pressed="true">${svg(ICONE.lua, '')}<span>Night shift</span><kbd>Shift K</kbd><i class="mnu-sw" aria-hidden="true"></i></button></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
+    // painel gerencial (Argos Briefing, do BI Manutenção): metas x realizado por ano, regional e polo; página em painel/
+    `<li><a class="mnu-rel" href="${doSite('painel/')}"${outraAba}>${svg(ICONE.painel, '')}<span>Painel gerencial<small>Argos Briefing: metas x realizado de inspeção, estruturas, para-raio e melhoria</small></span></a></li>` +
     `<li><a class="mnu-rel" href="${raiz}priorizacao/">${svg(ICONE.ranking, '')}<span>Priorização de faixa<small>Alimentadores com mais NAE e trechos P1 a P4</small></span></a></li>` +
     // modo Limpeza de faixa (modo-faixa-rascunho.js): escolhe o alimentador e abre o mapa dele já no modo
     `<li><button type="button" class="mnu-rel mnu-fx-abre" aria-haspopup="dialog">${svg(ICONE.faixa, '')}<span>Croqui de limpeza de faixa<small>Escolher os trechos, marcar leve e pesada e baixar o croqui</small></span></button></li>` +
