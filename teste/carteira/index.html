@@ -58,7 +58,19 @@ svg.ch .hit{fill:transparent;cursor:pointer}
 .argos h3{font:700 var(--t-md)/1.2 var(--f-display);margin:0 0 6px}
 .argos p{margin:0;color:var(--muted)}
 .fonte{color:var(--muted);font-size:var(--t-xs);margin:var(--s5) 0}
-@media(max-width:900px){.argos{grid-template-columns:1fr}.tab{font-size:var(--t-xs)}.oc{display:none}}
+#det{margin-top:var(--s4)}
+.det{border-top:2px solid var(--accent);padding-top:var(--s3)}
+.det h3{font:700 var(--t-xl)/1.2 var(--f-display);margin:0 0 var(--s2)}
+.det .kp{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s5);margin:0 0 var(--s3);font-size:var(--t-sm);color:var(--muted)}
+.det .kp b{color:var(--fg);font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+#det .tab tr{cursor:default}
+#det .tab th.l,#det .tab td.l{text-align:left}
+#det .tab tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:0}
+#det .tab td.m{font-family:var(--f-mono);white-space:nowrap}
+.tg{display:inline-block;font:600 var(--t-xs) var(--f-mono);border:1px solid var(--line);border-radius:var(--rp);padding:2px 8px;white-space:nowrap;color:var(--muted)}
+.tg.ok{color:var(--ok);border-color:currentColor}.tg.nok{color:var(--nok);border-color:currentColor}
+.vazio{color:var(--muted);font-size:var(--t-sm);margin:0}
+@media(max-width:900px){.argos{grid-template-columns:1fr}.tab{font-size:var(--t-xs)}.oc{display:none}#det .tab td,#det .tab th{padding:8px 3px}.tg{padding:1px 6px}.det .tab th{white-space:normal}}
 </style>
 </head><body><div class="wrap w">
 <header class="cab"><h1><b>ARGOS</b> <span>MANUTENÇÃO · LIMPEZA DE FAIXA</span></h1><a class="cab-link" href="../priorizacao/">Ranking</a></header>
@@ -74,7 +86,8 @@ svg.ch .hit{fill:transparent;cursor:pointer}
 <div class="linha"><div class="gr"><h2>Km de faixa medidos · mensal 2026</h2><div class="tot" id="t-km"></div><div id="g-km"></div></div>
 <div class="gr"><h2>Valor medido · mensal 2026</h2><div class="tot" id="t-val"></div><div id="g-val"></div></div></div>
 
-<div class="sec"><h2>Por empreiteira · clique numa linha para filtrar</h2><div style="overflow-x:auto"><table class="tab" id="tab"></table></div>
+<div class="sec"><h2>Por empreiteira · clique numa linha para filtrar e ver as obras</h2><div style="overflow-x:auto"><table class="tab" id="tab"></table></div>
+<div id="det" aria-live="polite"></div>
 <p class="nota">Contratado = aba CONTRATAÇÃO 2026 (km contratado e orçamento estimado por OS). Medido = medições aprovadas no SIAGO (Base medição). OS = aba de OS de limpeza de faixa.</p></div>
 
 <div class="linha"><div class="gr"><h2>Km contratado por regional</h2><div class="tot" id="t-reg"></div><div id="g-reg"></div></div>
@@ -112,6 +125,38 @@ function barras(vals, rot, cor = '--accent', fmtv = v => fmt(v)) {
     s += `<text x="${i * bw + bw / 2}" y="${H - 6}" text-anchor="middle">${rot[i]}</text>`;
   });
   return s + '</svg>';
+}
+
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const ORD = {'EXECUTADA': 1, 'Pendente': 2};
+// obras (OS da aba CONTRATAÇÃO 2026) da empreiteira escolhida: aparece abaixo da tabela ao clicar na linha
+function detalhe() {
+  const el = $('det');
+  if (!F.emp) { el.innerHTML = '<p class="vazio">Clique numa empreiteira para ver as obras dela aqui.</p>'; return; }
+  const e = D.emp.find(x => x.emp === F.emp) || {};
+  const cx = D.contr.filter(x => x.emp === F.emp && (!F.reg || x.reg === F.reg)).slice()
+    .sort((a, b) => (b.st === 'EXECUTADA' && !b.medida) - (a.st === 'EXECUTADA' && !a.medida) || (ORD[a.st] || 3) - (ORD[b.st] || 3) ||
+      a.reg.localeCompare(b.reg) || a.polo.localeCompare(b.polo) || a.obra.localeCompare(b.obra));
+  const kmMed = e.km_mes ? e.km_mes.reduce((a, b) => a + b, 0) : 0;
+  const exe = cx.filter(x => x.st === 'EXECUTADA'), pend = cx.filter(x => x.st === 'Pendente'), semMed = exe.filter(x => !x.medida);
+  const kp = `<div class="kp"><span><b>${fmt(cx.length)}</b> OS na contratação${F.reg ? ' (regional ' + F.reg.toLowerCase() + ')' : ''}</span>` +
+    `<span><b>${fmt(exe.length)}</b> executadas · <b>${fmt(pend.length)}</b> pendentes${cx.length - exe.length - pend.length ? ' · <b>' + (cx.length - exe.length - pend.length) + '</b> outras' : ''}</span>` +
+    (semMed.length ? `<span class="nok"><b>${semMed.length}</b> executadas sem medição</span>` : '') +
+    `<span>medido no ano: <b>${kmMed ? fmt(kmMed, 1) + ' km' : '—'}</b> · <b>${e.valor ? brl(e.valor) : '—'}</b> · <b>${fmt(e.obras_med || 0)}</b> obras medidas</span>` +
+    `<span>OS de faixa (acompanhamento): <b>${e.os_tot ? fmt(e.os_exec) + ' exec. / ' + fmt(e.os_pend) + ' pend.' : '—'}</b></span></div>`;
+  if (!cx.length) {
+    el.innerHTML = `<div class="det"><h3>Obras · ${esc(F.emp)}</h3>${kp}<p class="vazio">Nenhuma OS desta empreiteira na aba CONTRATAÇÃO 2026${F.reg ? ' na regional ' + F.reg.toLowerCase() : ''}. As OS de faixa dela vêm só da planilha de acompanhamento.</p></div>`;
+    return;
+  }
+  const tg = x => x.st === 'EXECUTADA' ? `<span class="tg ok">executada</span>` : x.st === 'Pendente' ? `<span class="tg">pendente</span>` : `<span class="tg nok">${esc(x.st.toLowerCase())}</span>`;
+  const med = x => x.medida ? '<span class="tg ok">medida</span>' : x.st === 'EXECUTADA' ? '<span class="tg nok">sem medição</span>' : '<span class="tg">—</span>';
+  const linhas = cx.map(x => `<tr><td class="l m">${esc(x.obra)}</td><td class="l m oc">${esc(x.os.replace(/\s+/g, ' '))}</td><td class="l oc">${esc(x.reg[0] + x.reg.slice(1).toLowerCase())}</td>` +
+    `<td class="l oc">${esc(x.polo)}</td><td class="l oc">${esc(x.fase)}</td><td class="l">${tg(x)}</td><td>${fmt(x.km, 1)}</td><td class="oc">${fmt(x.km_prev, 1)}</td>` +
+    `<td>${brl(x.orc)}</td><td class="l">${med(x)}</td></tr>`).join('');
+  el.innerHTML = `<div class="det"><h3>Obras · ${esc(F.emp)}</h3>${kp}<div style="overflow-x:auto"><table class="tab"><thead><tr><th class="l">Obra</th><th class="l oc">OS</th><th class="l oc">Regional</th>` +
+    `<th class="l oc">Polo</th><th class="l oc">Fase</th><th class="l">Status</th><th>Km contratado</th><th class="oc">Km dos trechos</th><th>Orçamento</th><th class="l">Medição</th></tr></thead><tbody>${linhas}</tbody>` +
+    `<tfoot><tr><td class="l">Total</td><td class="oc"></td><td class="oc"></td><td class="oc"></td><td class="oc"></td><td></td><td>${fmt(soma(cx, 'km'), 1)}</td><td class="oc">${fmt(soma(cx, 'km_prev'), 1)}</td><td>${brl(soma(cx, 'orc'))}</td><td></td></tr></tfoot></table></div>` +
+    `<p class="nota">Cada linha é uma OS da aba CONTRATAÇÃO 2026 (obra = nº da obra). Km contratado = roçada contratada; Km dos trechos = previsão (TOTAL KM). Medição = a obra aparece na Base medição (SIAGO). O valor medido é por empreiteira: a base não traz o valor por obra.</p></div>`;
 }
 
 function desenha() {
@@ -182,16 +227,19 @@ function desenha() {
   if (semEmp && semEmp.os_tot && !F.emp) at.push(['inf', `<b>${fmt(semEmp.os_tot)}</b> OS de faixa sem empreiteira informada na planilha de acompanhamento.`]);
   at.push(['inf', 'Meta anual de km por regional: a coluna META (KM) da aba CONTRATAÇÃO 2026 está vazia.']);
   at.push(['inf', 'DB Norte, DB Sul e DB Centro (contratação) foram tratadas como D. B. Machado Ltda (medição). Conferir.']);
+  detalhe();
   $('aten').innerHTML = at.map(([c, t]) => `<li class="${c}">${t}</li>`).join('');
   $('fonte').innerHTML = `Dados gerados em ${D.gerado} a partir de: ${D.fontes.medicao}; ${D.fontes.acomp}. Valores medidos = vlr_total_real das medições aprovadas (jan–out/2026).`;
 }
 document.addEventListener('click', ev => {
   const b = ev.target.closest('button,[data-c],tr[data-e]');
   if (!b) return;
+  let linha = false;
   if (b.dataset.r !== undefined) F.reg = b.dataset.r;
-  else if (b.dataset.e !== undefined) F.emp = F.emp === b.dataset.e ? '' : b.dataset.e;
+  else if (b.dataset.e !== undefined) { F.emp = F.emp === b.dataset.e ? '' : b.dataset.e; linha = b.tagName === 'TR'; }
   else if (b.dataset.c) F[b.dataset.c] = '';
   desenha();
+  if (linha && F.emp) $('det').scrollIntoView({behavior: 'smooth', block: 'nearest'});
 });
 desenha();
 </script>
