@@ -24,12 +24,11 @@
 .pz-app :where(p){margin:0;color:inherit;max-width:none}
 .pz-app :where(a){color:var(--accent-ink)}
 .pz-app :where(button,select,input){font:inherit;color:inherit}
-.pz{display:grid;grid-template-columns:300px minmax(0,1fr) 360px;grid-template-areas:'barra barra barra' 'prem prem prem' 'rank centro ficha';
+.pz{display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-areas:'barra barra' 'prem prem' 'centro ficha';
   gap:var(--s4) var(--s5);align-items:start}
-.pz-barra{grid-area:barra}.pz-prem{grid-area:prem}.pz-rank{grid-area:rank}.pz-centro{grid-area:centro}.pz-ficha{grid-area:ficha}
-/* abaixo de 1340 px a tabela do centro não cabe entre as duas colunas: o ranking desce para baixo dela */
-@media (max-width:1339px){.pz{grid-template-columns:minmax(0,1fr) 340px;grid-template-areas:'barra barra' 'prem prem' 'centro ficha' 'rank ficha'}}
-@media (max-width:860px){.pz{grid-template-columns:minmax(0,1fr);grid-template-areas:'barra' 'prem' 'centro' 'rank'}}
+.pz-barra{grid-area:barra}.pz-prem{grid-area:prem}.pz-centro{grid-area:centro}.pz-ficha{grid-area:ficha}
+@media (max-width:1339px){.pz{grid-template-columns:minmax(0,1fr) 340px}}
+@media (max-width:860px){.pz{grid-template-columns:minmax(0,1fr);grid-template-areas:'barra' 'prem' 'centro'}}
 .pz-h2{margin:0;font:700 var(--t-lg)/1.2 var(--f-display)}
 .pz-h2 small{display:block;margin-top:2px;font:400 var(--t-xs)/1.4 var(--f-body);color:var(--muted)}
 
@@ -42,15 +41,8 @@
 .pz-barra select{min-height:44px;padding:0 var(--s3);border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--paper);color:var(--fg)}
 .pz-barra .chk label{min-height:44px;padding:0 var(--s3);background:var(--paper)}
 @media (min-width:861px){.pz-barra select,.pz-barra .chk label{min-height:40px}}
-.pz-al{display:flex;align-items:center;gap:var(--s2);min-height:40px;padding:0 4px 0 var(--s3);border:1px solid var(--accent);border-radius:var(--rp);
-  background:var(--sel);font-size:var(--t-sm)}
-.pz-al b{font:600 var(--t-sm) var(--f-mono)}
-.pz-al a{font-weight:600;text-decoration:none;white-space:nowrap}
-.pz-al a:hover{text-decoration:underline}
-.pz-al button{width:32px;height:32px;border:0;border-radius:50%;background:none;cursor:pointer;font-size:18px;line-height:1}
-.pz-al button:hover{background:var(--hover)}
 
-/* premissas: recolhidas numa faixa; abrem para ajustar os pesos */
+/* premissas: recolhidas numa faixa; abrem para ajustar os pontos */
 .pz-prem{border:1px solid var(--line);border-radius:var(--r3);background:var(--paper)}
 .pz-prem>summary{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);min-height:var(--alvo);padding:var(--s2) var(--s4);cursor:pointer;list-style:none}
 .pz-prem>summary::-webkit-details-marker{display:none}
@@ -260,49 +252,9 @@ td.r, th.r { text-align: right }
 .tip { position: absolute; pointer-events: none; background: var(--fg); color: var(--paper); font: 12px var(--f-mono); padding: 6px 8px; border-radius: 4px; white-space: nowrap }
 .valores { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 12px var(--f-mono); color: var(--muted); margin-top: 8px }
 
-/* ====== ranking de alimentadores (as regras que estavam em site.css quando ele ficava na página inicial) ====== */
-.mt-rank{display:grid;gap:var(--s3);align-content:start;border:0;background:transparent;padding:0}
-.mt-rank h2{margin:0;font:700 var(--t-lg)/1.2 var(--f-display)}
-.mt-rank h2 small{display:block;margin-top:2px;font:400 var(--t-xs)/1.4 var(--f-body);color:var(--muted)}
-.mt-ord{display:flex;gap:2px;padding:3px;border:0;border-radius:var(--r2);background:var(--hover)}
-.mt-ord button{flex:1;min-height:var(--alvo);padding:0 var(--s3);border:0;border-radius:7px;background:transparent;color:var(--muted);
-  font:600 var(--t-sm) var(--f-body);white-space:nowrap;cursor:pointer}
-.mt-ord button:hover{color:var(--fg)}
-.mt-ord button[aria-pressed=true]{background:var(--seg-on,var(--paper));color:var(--fg);box-shadow:var(--sh1)}
-.mt-rl{list-style:none;margin:0;padding:0;display:grid;gap:0}
-.mt-ra{width:100%;font:inherit;text-align:left;cursor:pointer;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:2px var(--s2);align-items:baseline;padding:var(--s3) var(--s1);
-  border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--fg);text-decoration:none}
-.mt-ra:hover{background:var(--hover)}
-.mt-ra:focus-visible{outline-offset:-2px}
-.mt-ra .p{grid-row:span 4;align-self:start;padding-top:3px;font:600 var(--t-xs) var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
-.mt-ra b{font:600 var(--t-md) var(--f-mono)}
-.mt-ra:hover b{color:var(--accent)}
-.mt-ra .v{font:600 var(--t-lg) var(--f-mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
-.mt-ra .v small{font:500 var(--t-xs) var(--f-body);color:var(--muted);margin-left:3px}
-.mt-ra .se,.mt-ra .ex{grid-column:2/4;font-size:var(--t-xs);color:var(--muted)}
-.mt-ra .bar{grid-column:2/4;height:3px;margin:var(--s1) 0 2px;border-radius:2px;background:var(--line);overflow:hidden}
-.mt-ra .bar i{display:block;height:100%;background:var(--accent)}
-.mt-ra .ex .lp{white-space:nowrap}
-.mt-ra .ex em{font-style:normal;font-weight:600}
-.mt-ra .ex em.velha{color:var(--alerta)}
-.mt-ra.zero b,.mt-ra.zero .v{color:var(--muted)}
-.mt-mais{justify-self:center;min-height:var(--alvo);padding:0 var(--s4);border:0;border-radius:var(--rp);background:var(--hover);
-  color:var(--fg);font:600 var(--t-sm) var(--f-body);cursor:pointer}
-.mt-mais:hover{color:var(--accent)}
-.mt-ra[aria-pressed=true]{background:var(--sel);box-shadow:inset 3px 0 0 var(--accent)}
-.mt-ra[aria-pressed=true] b{color:var(--accent)}
-/* coluna da esquerda (3 colunas): o ranking fica da altura da tela e rola por dentro */
-@media (min-width:1340px){
-  .pz-rank{position:sticky;top:var(--s4);height:calc(100svh - 2 * var(--s4));grid-template-rows:auto auto minmax(0,1fr);align-content:stretch}
-  .mt-rl{overflow-y:auto;min-height:0;overscroll-behavior:contain;scrollbar-width:thin;padding-bottom:var(--s5);
-    -webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent);mask-image:linear-gradient(#000 calc(100% - 28px),transparent)}
-}
-@media (prefers-reduced-motion:no-preference){.mt-ra,.mt-ord button,.mt-mais{transition:background-color var(--dur) var(--ease),color var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}}
-
 /* ====== versão enxuta: só o essencial à vista; o resto abre sob demanda (title, botões e seções recolhidas) ====== */
-.pz{grid-template-areas:'barra barra barra' 'rank centro ficha'}
-@media (max-width:1339px){.pz{grid-template-areas:'barra barra' 'centro ficha' 'rank ficha'}}
-@media (max-width:860px){.pz{grid-template-areas:'barra' 'centro' 'rank'}}
+.pz{grid-template-areas:'barra barra' 'centro ficha'}
+@media (max-width:860px){.pz{grid-template-areas:'barra' 'centro'}}
 .pz-topo{grid-area:barra;display:grid;gap:var(--s3);min-width:0}
 .pz-topo>*{grid-area:auto}   /* barra e painel empilhados dentro do topo (as áreas 'barra'/'prem' eram da grade de fora) */
 .pz-barra{align-items:center}
@@ -310,12 +262,8 @@ td.r, th.r { text-align: right }
 .pz-prem-btn{margin-left:auto;min-height:40px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);background:var(--paper);color:var(--fg);
   font:600 var(--t-xs)/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .pz-prem-btn:hover,.pz-prem-btn[aria-expanded=true]{border-color:var(--accent);color:var(--accent)}
-.pz-al{padding:0 4px 0 var(--s3)}
-.pz-al a{font-size:16px;line-height:1}
 .pz-prem .distrib{max-width:none}
-.mt-ra .p{grid-row:span 2}
 @media (max-width:860px){.pz-centro .score{grid-template-columns:48px 28px}}   /* celular: a tabela cabe sem rolar */
-.mt-ra .v{font-size:var(--t-md)}
 .crit-lista{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
 .crit-lista li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:var(--t-sm)}
 .crit-lista b{font:600 var(--t-sm) var(--f-mono);font-variant-numeric:tabular-nums}
@@ -331,3 +279,61 @@ td.r, th.r { text-align: right }
 .rodape-pagina details.secao[open]{flex-basis:100%}
 .rodape-pagina details.secao[open]>summary{border-bottom:0;color:var(--accent)}
 .rodape-pagina details.secao>:not(summary){margin:var(--s3) 0}
+
+/* ====== nota de 0 a 10 ====== */
+.peso{grid-template-columns:minmax(0,1fr) 96px 54px}
+.peso .classes{padding-left:16px}
+.prem-corpo>.dica{font-size:var(--t-sm);color:var(--muted);max-width:78ch}
+.prem-corpo>.dica b{color:var(--fg)}
+.score{grid-template-columns:96px 40px}
+@media (max-width:860px){.pz-centro .score{grid-template-columns:48px 36px}}
+
+/* ====== tabela de pontos (Premissas): uma linha por critério, pontos de cada faixa de valor editáveis ====== */
+.pontos{display:grid;border-top:1px solid var(--line)}
+.pt-crit{display:grid;grid-template-columns:minmax(240px,360px) minmax(0,1fr);gap:var(--s2) var(--s5);align-items:start;padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+@media (max-width:860px){.pt-crit{grid-template-columns:minmax(0,1fr)}}
+.pt-nome{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:2px 8px;align-items:center}
+.pt-nome b{font-weight:600;font-size:var(--t-md)}
+.pt-max{font:500 var(--t-xs)/1 var(--f-mono);color:var(--muted);white-space:nowrap}
+.pt-regra{grid-column:2/-1;font-size:var(--t-xs);line-height:1.45;color:var(--muted)}
+.pt-faixas{display:flex;flex-wrap:wrap;gap:6px;align-content:start}
+.fx{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:3px 3px 3px 10px;border:1px solid var(--line);border-radius:var(--r2);background:var(--bg);font-size:var(--t-sm);white-space:nowrap}
+.fx input{width:60px;padding:5px 6px;border:1px solid var(--line-forte);border-radius:var(--r1);background:var(--paper);color:var(--fg);font:500 var(--t-sm) var(--f-mono);text-align:right}
+.fx.zero{padding-right:10px;border-style:dashed;background:none;color:var(--muted)}
+.fx.zero b{font:500 var(--t-sm) var(--f-mono)}
+@media (max-width:860px){.fx input{font-size:16px;width:64px}}   /* 16px: o iPhone não dá zoom ao tocar no campo */
+.pt-rodape{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center}
+.pt-total{display:inline-flex;align-items:baseline;gap:8px;padding:6px 12px;border-radius:var(--r2);background:var(--sunk);font-size:var(--t-sm);font-weight:600}
+.pt-total b{font:600 var(--t-lg) var(--f-mono)}
+.pt-total.alerta b{color:var(--accent-ink)}
+.aviso-pontos{flex:1 1 240px;font-size:var(--t-sm);color:var(--accent-ink)}
+.pt-rodape .botao{margin-left:auto}
+
+/* ====== ficha: nota grande e extrato de onde vem cada ponto ====== */
+.g-nota{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.g-nota .rot{font:500 12px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.g-nota b{font:700 40px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.g-nota .de{font-size:var(--t-md);color:var(--muted);margin-right:4px}
+.g-nota .faixa{align-self:center}
+.g-nota .por{flex-basis:100%;font-size:var(--t-sm);color:var(--muted)}
+.extrato{table-layout:auto}
+.extrato td{vertical-align:top}
+.extrato td:first-child{white-space:nowrap}
+.extrato td .sub{white-space:normal;margin-top:2px}
+.extrato b{font:600 var(--t-md) var(--f-mono)}
+.extrato tbody tr{cursor:default}
+.extrato tbody tr:hover td{background:none}
+.extrato tr.zero td{color:var(--muted)}
+.extrato tr.zero b{font-weight:400}
+.extrato tr.total td{border-top:2px solid var(--line-forte);border-bottom:0;font-weight:600}
+.extrato tr.total b{font-size:var(--t-lg)}
+
+/* celular estreito: a tabela do ranking cabe na caixa, com a nota inteira à vista (colunas mais justas) */
+@media (max-width:560px){
+  .pz-centro th,.pz-centro td{padding:8px 5px}
+  .pz-centro .trecho-id{font-size:var(--t-sm)}
+  .pz-centro .faixa{padding:4px 5px}
+  .pz-centro .score{grid-template-columns:40px 34px;gap:6px}
+}
+@media (max-width:380px){.pz-centro th,.pz-centro td{padding:8px 4px}.pz-centro .trecho-id{font-size:12px}}
+@media (max-width:340px){.pz-centro .trecho-id{font-size:11px}.pz-centro .faixa{padding:3px 4px;gap:3px}.pz-centro .score{grid-template-columns:30px 32px;gap:4px}.pz-centro .score b{font-size:13px}}
