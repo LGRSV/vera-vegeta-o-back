@@ -115,12 +115,14 @@
     <input id="q" class="busca" type="search" placeholder="Código da quadra ou nome do setor" autocomplete="off" spellcheck="false"
       role="combobox" aria-expanded="false" aria-controls="sug" aria-autocomplete="list">
     <ul id="sug" role="listbox" aria-label="Áreas encontradas" hidden></ul></div>
+  <div class="f"><span id="ver-l">Mostrar</span><div class="seg" id="ver" role="group" aria-labelledby="ver-l">
+    <button type="button" data-v="pontos" aria-pressed="true">Pontos das OS</button><button type="button" data-v="areas" aria-pressed="false">Áreas</button></div></div>
   <div class="f"><span id="fun-l">Fundo do mapa</span><div class="seg" id="fundo" role="group" aria-labelledby="fun-l">
     <button type="button" data-f="sat" aria-pressed="true">Satélite</button><button type="button" data-f="liso" aria-pressed="false">Liso</button></div></div>
 </section>
 
 <div class="pd-leg" id="leg" role="group" aria-label="Situação da poda: clique para ligar ou desligar"></div>
-<p class="pd-dica">Clique numa cor para ligar ou desligar essas áreas no mapa. As contagens são da cidade escolhida.</p>
+<p class="pd-dica" id="dica"></p>
 
 <div class="pd-stage">
   <div class="mapbox">
@@ -158,7 +160,8 @@ const dataGer = P && P.gerado ? br(P.gerado) : '';
 
 // ---- nota -----------------------------------------------------------------------------------------------
 $('nota').textContent = 'Quadra = setor censitário do IBGE 2022 (inclusive na região dos Aurenys, até chegar o limite oficial dos bairros). ' +
-  'Cada OS de poda é localizada pelo trafo/chave/poste em que foi aberta. Dados do OS status de ' + dataGer + '. ' +
+  'Cada OS de poda fica no poste da estrutura; sem esse poste no mapa, no trafo, na chave ou em outro ativo da OS. ' +
+  'Pontos: OS executadas nos últimos 6 meses e OS pendentes. Dados do OS status de ' + dataGer + '. ' +
   'Crítico: OS emergencial/urgente pendente, ou alimentador com NAE alto (quinto mais alto da cidade) e sem poda nos últimos 6 meses. ' +
   'Imagem de satélite: Esri World Imagery, carregada ao vivo.';
 
@@ -177,6 +180,8 @@ let cidade = CIDADES[0];
 const ativos = new Set(ORDEM);
 let sel = null;                 // {a, c, lay}
 let fundo = 'sat';
+let ver = 'pontos';             // pontos das OS ou áreas (quadras)
+let selPt = null;               // ponto escolhido
 const cache = {};               // cidade -> {por:{st:FeatureGroup}, lays:[], bounds, cont}
 const mobile = () => matchMedia('(max-width:980px)').matches;
 
@@ -234,6 +239,25 @@ function construir(c) {
   return (cache[c] = {grupo, lays, bounds: lays.length ? grupo.getBounds() : null});
 }
 
+// ---- pontos das OS ---------------------------------------------------------------------------------------
+const TIPO = t => t === 'poste' ? 'Poste' : t === 'TR' ? 'Trafo' : 'Chave/equipamento (' + t + ')';
+const pcache = {};
+function pontos(c) {
+  if (pcache[c]) return pcache[c];
+  const marks = (P.pontos && P.pontos[c] || []).map(pt => {
+    const m = L.circleMarker([pt[0], pt[1]], {radius: 5, color: '#111827', weight: 1, opacity: .9, fillColor: COR[pt[2]], fillOpacity: .95});
+    m._pt = pt;
+    m.on('click', e => { L.DomEvent.stopPropagation(e); escolherPt(pt); });
+    if (!L.Browser.mobile) m.bindTooltip(`<b>${esc(pt[3])}</b><small>${esc(ROT[pt[2]])} · ${esc(TIPO(pt[8]))} ${esc(pt[7])}</small>`, {direction: 'top', className: 'pd-tip', opacity: 1});
+    return m;
+  });
+  return (pcache[c] = {grupo: L.featureGroup(marks), marks});
+}
+function aplicarPts(c) {
+  const k = pontos(c);
+  k.marks.forEach(m => { const on = ativos.has(m._pt[2]); if (on && !k.grupo.hasLayer(m)) k.grupo.addLayer(m); else if (!on && k.grupo.hasLayer(m)) k.grupo.removeLayer(m); });
+}
+
 // liga/desliga a área no mapa (filtro da legenda) sem mudar a ordem de desenho
 function exibir(lay, on) {
   lay._pv = on;
@@ -246,11 +270,14 @@ function traz() { selecao.eachLayer(l => l.bringToFront()); }
 
 function mostrar(c, ajustar) {
   if (cache[cidade]) cache[cidade].grupo.remove();
+  if (pcache[cidade]) pcache[cidade].grupo.remove();
   cidade = c;
   const k = construir(c);
   aplicar(c);
-  k.grupo.addTo(map);
-  if (ajustar && k.bounds) map.fitBounds(k.bounds, {padding: [16, 16]});
+  if (ver === 'areas') k.grupo.addTo(map);
+  else { aplicarPts(c); pontos(c).grupo.addTo(map); }
+  const pg = ver === 'pontos' && pontos(c).marks.length ? L.featureGroup(pontos(c).marks).getBounds() : null;
+  if (ajustar && (pg || k.bounds)) map.fitBounds(pg || k.bounds, {padding: [16, 16]});
   traz();
 }
 
@@ -267,21 +294,35 @@ $('cids').addEventListener('click', e => {
 // ---- legenda e filtro -----------------------------------------------------------------------------------
 function contagem(c) {
   const n = {executado: 0, pendente: 0, critico: 0, sem: 0};
-  P.cidades[c].forEach(a => { n[a.st in n ? a.st : 'sem']++; });
+  if (ver === 'pontos') (P.pontos && P.pontos[c] || []).forEach(pt => { n[pt[2]]++; });
+  else P.cidades[c].forEach(a => { n[a.st in n ? a.st : 'sem']++; });
   return n;
 }
+const ROTP = {executado: 'Executada (6 meses)', pendente: 'Pendente', critico: 'Pendente emergencial/urgente'};
 function legenda() {
   const n = contagem(cidade);
-  $('leg').innerHTML = ORDEM.map(st =>
-    `<button type="button" data-st="${st}" aria-pressed="${ativos.has(st)}" style="--c:${COR[st]}"><i></i><span class="n">${esc(ROT[st])}</span><span class="c">${nf(n[st])}</span></button>`).join('');
+  $('dica').textContent = ver === 'pontos'
+    ? 'Cada ponto é uma OS de poda no ativo em que foi aberta. Clique numa cor para ligar ou desligar esses pontos. As contagens são da cidade escolhida.'
+    : 'Clique numa cor para ligar ou desligar essas áreas no mapa. As contagens são da cidade escolhida.';
+  $('leg').innerHTML = ORDEM.filter(st => ver === 'areas' || st !== 'sem').map(st =>
+    `<button type="button" data-st="${st}" aria-pressed="${ativos.has(st)}" style="--c:${COR[st]}"><i></i><span class="n">${esc(ver === 'pontos' ? ROTP[st] : ROT[st])}</span><span class="c">${nf(n[st])}</span></button>`).join('');
 }
 $('leg').addEventListener('click', e => {
   const b = e.target.closest('button[data-st]'); if (!b) return;
   const st = b.dataset.st;
-  if (ativos.has(st)) { ativos.delete(st); if (sel && sel.a.st === st) fechar(); }
+  if (ativos.has(st)) { ativos.delete(st); if ((sel && sel.a.st === st && ver === 'areas') || (selPt && selPt[2] === st)) fechar(); }
   else ativos.add(st);
-  aplicar(cidade);
+  aplicar(cidade); aplicarPts(cidade);
   b.setAttribute('aria-pressed', ativos.has(st));
+});
+
+// ---- pontos ou áreas ------------------------------------------------------------------------------------
+$('ver').addEventListener('click', e => {
+  const b = e.target.closest('button[data-v]'); if (!b || b.dataset.v === ver) return;
+  fechar();
+  ver = b.dataset.v;
+  $('ver').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  mostrar(cidade, false); legenda();
 });
 
 // ---- fundo ----------------------------------------------------------------------------------------------
@@ -297,7 +338,9 @@ const painel = $('painel');
 const X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 function vazio() {
   painel.classList.remove('aberto'); document.body.classList.remove('gaveta');
-  painel.innerHTML = '<p class="pd-vazio">Clique numa área do mapa, ou use a busca, para ver a situação da poda, as OS recentes e os alimentadores.</p>';
+  painel.innerHTML = ver === 'pontos'
+    ? '<p class="pd-vazio">Clique num ponto para ver a OS de poda e o ativo. Use a busca para achar uma quadra.</p>'
+    : '<p class="pd-vazio">Clique numa área do mapa, ou use a busca, para ver a situação da poda, as OS recentes e os alimentadores.</p>';
 }
 function dias(ult) {
   const d = Math.round((Date.parse(P.gerado) - Date.parse(ult)) / 864e5);
@@ -338,6 +381,7 @@ function marcar(a, lay) {
 }
 function escolher(a, c, lay, foco) {
   if (sel && sel.lay !== lay) sel.lay.setStyle(estilo(sel.a, false));
+  selPt = null;
   sel = {a, c, lay};
   marcar(a, lay);
   painel.innerHTML = detalhe(a, c);
@@ -353,13 +397,29 @@ function livre(lay) {
   const p = map.latLngToContainerPoint(lay.getBounds().getCenter());
   if (p.y > vis - 24 || p.y < 24 || p.x < 0 || p.x > mr.width) map.panBy([p.x - mr.width / 2, p.y - vis / 2], {animate: false});
 }
+function escolherPt(pt) {
+  if (sel) { sel.lay.setStyle(estilo(sel.a, false)); sel = null; }
+  selPt = pt;
+  selecao.clearLayers();
+  selecao.addLayer(L.circleMarker([pt[0], pt[1]], {radius: 10, color: '#ffffff', weight: 3, fill: false, interactive: false}));
+  const exec = pt[4] === 'EXECUTADA';
+  painel.innerHTML = `<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
+    `<div><h2 id="pd-tit" tabindex="-1">${esc(pt[3])}</h2><p class="pd-tipo">OS de poda · ${esc(cidade)}</p></div>` +
+    `<div class="pd-sit" style="--c:${COR[pt[2]]}"><b>${esc(ROTP[pt[2]])}</b><span>${esc(cap(pt[4]))} · criticidade ${esc((pt[5] || '—').toLowerCase())}</span></div>` +
+    `<dl class="pd-kp">` +
+    `<div><dt>${exec ? 'Executada em' : 'Criada em'}</dt><dd>${esc(br(pt[6]) || '—')}${exec ? `<small>${esc(dias(pt[6]))}</small>` : ''}</dd></div>` +
+    `<div><dt>Ativo</dt><dd>${esc(pt[7])}<small>${esc(TIPO(pt[8]))}</small></dd></div>` +
+    `<div><dt>Alimentador</dt><dd>${esc(pt[9] || '—')}</dd></div></dl></div>`;
+  painel.scrollTop = 0;
+  painel.classList.add('aberto'); document.body.classList.add('gaveta');
+}
 function fechar() {
   if (sel) sel.lay.setStyle(estilo(sel.a, false));
-  sel = null; selecao.clearLayers(); vazio();
+  sel = null; selPt = null; selecao.clearLayers(); vazio();
 }
 painel.addEventListener('click', e => { if (e.target.closest('.pd-x')) fechar(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && sel && $('sug').hidden) fechar(); });
-map.on('click', () => { if (mobile() && sel) fechar(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && (sel || selPt) && $('sug').hidden) fechar(); });
+map.on('click', () => { if (mobile() && (sel || selPt)) fechar(); });
 
 // ---- busca ----------------------------------------------------------------------------------------------
 const q = $('q'), sug = $('sug');
@@ -392,7 +452,7 @@ function destacar(i) {
 function irPara(r) {
   sug.hidden = true; q.setAttribute('aria-expanded', 'false'); q.value = titulo(r.a);
   if (r.c !== cidade) { fechar(); mostrar(r.c, false); botoesCidade(); }
-  if (!ativos.has(r.a.st)) { ativos.add(r.a.st); aplicar(r.c); }
+  if (ver === 'areas' && !ativos.has(r.a.st)) { ativos.add(r.a.st); aplicar(r.c); }
   legenda();
   const lay = construir(r.c).lays.find(l => l._pa === r.a);
   if (!lay) return;
@@ -418,7 +478,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.pd-busca')) { 
 // ---- início ---------------------------------------------------------------------------------------------
 botoesCidade(); legenda(); vazio();
 mostrar(cidade, true);
-window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, fundo}), camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
+window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, ver}), pontos: () => pontos(cidade).grupo.getLayers().length, camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
 })();
 </script>
 <script src="../assets/menu.js"></script>
