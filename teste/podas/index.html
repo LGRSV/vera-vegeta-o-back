@@ -87,6 +87,9 @@
 .pd-os li{display:grid;gap:1px;border-left:3px solid var(--line-forte);border-radius:0 var(--r1) var(--r1) 0;padding:4px var(--s3);background:color-mix(in srgb,var(--fg) 4%,transparent);font-size:var(--t-sm)}
 .pd-os li.ex{border-left-color:var(--pd-ok)}
 .pd-os li.pe{border-left-color:var(--pd-pend)}
+.pd-os li.nae{border-left-color:#8a0303}
+.pd-nae-t{display:flex;align-items:center;gap:var(--s2)}
+.pd-nae-t i{width:12px;height:12px;border-radius:50%;background:#8a0303;border:1.5px solid #fff;flex:none}
 .pd-os b{font:600 var(--t-sm) var(--f-mono);overflow-wrap:anywhere}
 .pd-os span{color:var(--muted);font-size:var(--t-xs)}
 .nota{color:var(--muted);font-size:var(--t-xs);margin:0;max-width:110ch}
@@ -163,6 +166,7 @@ $('nota').textContent = 'Quadra = setor censitário do IBGE 2022 (inclusive na r
   'Cada OS de poda fica no poste da estrutura; sem esse poste no mapa, no trafo, na chave ou em outro ativo da OS. ' +
   'Pontos: OS executadas nos últimos 6 meses e OS pendentes. Dados do OS status de ' + dataGer + '. ' +
   'Crítico: OS emergencial/urgente pendente, ou alimentador com NAE alto (quinto mais alto da cidade) e sem poda nos últimos 6 meses. ' +
+  'Ao clicar numa área ou OS crítica, as ocorrências NAE (Crítica) dos alimentadores dela aparecem em vermelho-sangue, no ativo onde foram registradas. ' +
   'Imagem de satélite: Esri World Imagery, carregada ao vivo.';
 
 if (!P || !CIDADES.length) {
@@ -210,6 +214,38 @@ const sat = new Satelite(SAT + '{z}/{y}/{x}', {maxZoom: 19, maxNativeZoom: 18, a
 map.attributionControl.setPrefix(false);
 
 const selecao = L.layerGroup().addTo(map);
+// ocorrências NAE (vermelho-sangue) dos alimentadores da área ou OS crítica escolhida
+const SANGUE = '#8a0303';
+const naeLay = L.layerGroup().addTo(map);
+const mesTxt = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1] + '/' + m.slice(0, 4);
+const dataNae = d => br(d.slice(0, 10)) + (d.length > 10 ? ' ' + d.slice(11) : '');
+function mostraNae(als) {
+  naeLay.clearLayers();
+  const set = new Set(als), lst = (P.nae && P.nae[cidade] || []).filter(o => set.has(o[2]));
+  lst.forEach(o => {
+    const m = L.circleMarker([o[0], o[1]], {radius: 6, color: '#ffffff', weight: 1.5, fillColor: SANGUE, fillOpacity: 1});
+    const txt = `<b>NAE · ${esc(dataNae(o[3]))}</b><small>${esc(o[5])} ${esc(o[4])} · ${esc(o[2])} ${esc(o[9])}</small>` +
+      `<small>${esc(nf(o[7]))} consumidor${o[7] === 1 ? '' : 'es'} · ${esc(nf(o[8]))} min</small><small>${esc(o[6])}</small>`;
+    m.bindTooltip(txt, {direction: 'top', className: 'pd-tip', opacity: 1});
+    m.on('click', e => { L.DomEvent.stopPropagation(e); m.openTooltip(); });
+    naeLay.addLayer(m);
+  });
+  return lst;
+}
+function naeSec(als, lst) {
+  const mm = P.nae_meses || [];
+  const per = mm.length ? ` (${mesTxt(mm[0])} a ${mesTxt(mm[mm.length - 1])})` : '';
+  if (!als.length) return '';
+  if (!lst.length) return `<div><h3>Ocorrências NAE${esc(per)}</h3><p class="pd-peq">Nenhuma ocorrência NAE com ativo no mapa em ${esc(als.join(', '))}.</p></div>`;
+  const por = new Map();
+  lst.forEach(o => { const k = o[5] + ' ' + o[4]; const v = por.get(k) || {n: 0, al: o[2], t: o[9], ult: ''}; v.n++; if (o[3] > v.ult) v.ult = o[3]; por.set(k, v); });
+  const top = [...por.entries()].sort((x, y) => y[1].n - x[1].n || (y[1].ult > x[1].ult ? 1 : -1)).slice(0, 12);
+  return `<div><h3 class="pd-nae-t"><i></i>Ocorrências NAE${esc(per)}</h3>` +
+    `<p class="pd-peq" style="margin:0 0 var(--s2)">${esc(nf(lst.length))} ocorrência${lst.length === 1 ? '' : 's'} em ${esc(nf(por.size))} ativo${por.size === 1 ? '' : 's'} de ${esc(als.join(', '))}, em vermelho-sangue no mapa.</p>` +
+    `<ul class="pd-os">${top.map(([k, v]) => `<li class="nae"><b>${esc(k)}</b><span>${esc(nf(v.n))} NAE · ${esc(v.al)} ${esc(v.t)} · última em ${esc(dataNae(v.ult))}</span></li>`).join('')}</ul>` +
+    (por.size > top.length ? `<p class="pd-peq">e mais ${esc(nf(por.size - top.length))} ativos no mapa.</p>` : '') + '</div>';
+}
+const comNae = (html, sec) => sec ? html.replace(/<\/div>$/, sec + '</div>') : html;
 
 function estilo(a, hover) {
   return {color: '#ffffff', weight: hover ? 2.5 : 1, opacity: hover ? 1 : .85,
@@ -384,7 +420,9 @@ function escolher(a, c, lay, foco) {
   selPt = null;
   sel = {a, c, lay};
   marcar(a, lay);
-  painel.innerHTML = detalhe(a, c);
+  const alsN = a.st === 'critico' ? ((a.nae_alto || []).length ? a.nae_alto : (a.als || [])) : [];
+  painel.innerHTML = comNae(detalhe(a, c), alsN.length ? naeSec(alsN, mostraNae(alsN)) : '');
+  if (!alsN.length) naeLay.clearLayers();
   painel.scrollTop = 0;
   painel.classList.add('aberto'); document.body.classList.add('gaveta');
   if (mobile()) livre(lay);
@@ -410,12 +448,14 @@ function escolherPt(pt) {
     `<div><dt>${exec ? 'Executada em' : 'Criada em'}</dt><dd>${esc(br(pt[6]) || '—')}${exec ? `<small>${esc(dias(pt[6]))}</small>` : ''}</dd></div>` +
     `<div><dt>Ativo</dt><dd>${esc(pt[7])}<small>${esc(TIPO(pt[8]))}</small></dd></div>` +
     `<div><dt>Alimentador</dt><dd>${esc(pt[9] || '—')}</dd></div></dl></div>`;
+  if (pt[2] === 'critico' && pt[9]) painel.innerHTML = comNae(painel.innerHTML, naeSec([pt[9]], mostraNae([pt[9]])));
+  else naeLay.clearLayers();
   painel.scrollTop = 0;
   painel.classList.add('aberto'); document.body.classList.add('gaveta');
 }
 function fechar() {
   if (sel) sel.lay.setStyle(estilo(sel.a, false));
-  sel = null; selPt = null; selecao.clearLayers(); vazio();
+  sel = null; selPt = null; selecao.clearLayers(); naeLay.clearLayers(); vazio();
 }
 painel.addEventListener('click', e => { if (e.target.closest('.pd-x')) fechar(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && (sel || selPt) && $('sug').hidden) fechar(); });
@@ -478,7 +518,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.pd-busca')) { 
 // ---- início ---------------------------------------------------------------------------------------------
 botoesCidade(); legenda(); vazio();
 mostrar(cidade, true);
-window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, ver}), pontos: () => pontos(cidade).grupo.getLayers().length, camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
+window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, ver}), pontos: () => pontos(cidade).grupo.getLayers().length, nae: () => naeLay.getLayers().length, camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
 })();
 </script>
 <script src="../assets/menu.js"></script>
