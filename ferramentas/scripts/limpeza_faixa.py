@@ -57,9 +57,9 @@ EQUIPES = ("ETO-RD-PA", "ETO-RD-PS", "ETO-RD-PO", "ETO-RD-GR", "ETO-RD-AR", "ETO
 
 
 def conta(sit, numero_os):
-    """OS que entra no mapa: pendente de qualquer equipe; executada só das EQUIPES."""
+    """OS que entra no mapa: pendente de qualquer equipe; executada só das EQUIPES; cancelada nunca."""
     eq = str(numero_os).split()[0] if str(numero_os).split() else ""
-    return sit != "EXECUTADA" or eq in EQUIPES
+    return sit != "CANCELADA" and (sit != "EXECUTADA" or eq in EQUIPES)
 
 
 def carrega_dados_js(al):
@@ -247,6 +247,26 @@ def indice_kmz(pastas):
     return idx
 
 
+ESQUEMAS = ("MC - LIMPEZA DE FAIXA RD", "MC - LIMPEZA DE FAIXA LD")
+
+
+def le_os(arq):
+    """Planilha de OS de limpeza de faixa (xlsx, aba Dados) ou o OS status inteiro (.parquet, todas as OS): fica só a
+    limpeza de faixa de RD e de LD. NUM_OBRA vira texto sem casas decimais (o parquet guarda como número)."""
+    if str(arq).lower().endswith(".parquet"):
+        df = pd.read_parquet(arq)
+        df = df[df["DESCESQUEMA"].isin(ESQUEMAS)].copy()
+        for c in ("ELEMENTO", "ABRANGENCIA", "MONT_ABRANGENCIA", "DESCRICAO_OS", "ESTRUTURA", "ALIMENTADOR", "NUMERO_OS", "SITUACAO"):
+            df[c] = df[c].astype(object).where(df[c].notna(), None)
+        for c in ("DATA_CRIACAO", "INICIO_EXEC", "FIM_EXEC"):
+            df[c] = pd.to_datetime(df[c], errors="coerce")
+    else:
+        df = pd.read_excel(arq, sheet_name="Dados", dtype={"ELEMENTO": str, "ABRANGENCIA": str, "MONT_ABRANGENCIA": str})
+    if "NUM_OBRA" in df:
+        df["NUM_OBRA"] = df["NUM_OBRA"].map(lambda v: "" if pd.isna(v) else str(int(float(v))) if str(v).replace(".", "", 1).isdigit() else str(v).strip())
+    return df.reset_index(drop=True)
+
+
 class Rede:
     def __init__(self, al):
         self.D = carrega_dados_js(al)
@@ -346,7 +366,7 @@ class Rede:
 
 
 def main(xlsx, pastas_kmz=()):
-    df = pd.read_excel(xlsx, sheet_name="Dados", dtype={"ELEMENTO": str, "ABRANGENCIA": str, "MONT_ABRANGENCIA": str})
+    df = le_os(xlsx)
     als = sorted(os.path.basename(p)[:-5] for p in glob.glob(os.path.join(RAIZ, "dados", "alimentadores", "*.json"))
                  if os.path.exists(os.path.join(RAIZ, "alimentadores", os.path.basename(p)[:-5], "dados.js")))
     redes = {a: Rede(a) for a in als}
