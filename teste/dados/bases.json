@@ -7,11 +7,11 @@
   "nome": "Crítica (NAE)"
  },
  "executadas": {
-  "arquivo": "OS_STATUS_Executadas_2021-2026.zip",
-  "ate": "2026-10-15",
+  "arquivo": "1 - OS_STATUS.parquet",
+  "ate": "2026-10-29",
   "nome": "OS de manutenção executadas",
-  "os": 215325,
-  "processado": "2026-10-14"
+  "os": 239529,
+  "processado": "2026-10-29"
  },
  "inspecao": {
   "arquivo": "BASE INSPEÇÃO.xlsx",
@@ -30,8 +30,8 @@
  "manutencao": {
   "arquivo": "OS GERADAS PELA INSPEÇÃO.xlsx",
   "ate": "2026-10-10",
-  "nome": "OS de manutenção da inspeção",
-  "os": 5323,
-  "processado": "2026-10-13"
+  "nome": "OS de manutenção da inspeção (situação pelo OS status de 29/10)",
+  "os": 4882,
+  "processado": "2026-10-29"
  }
 }

@@ -34,7 +34,7 @@ const VERA = (() => {
 
   function parametrosPadrao() {
     return {
-      ref: '2026-10-07', janela: 12, cobEfetiva: 0.5, cobBloqueio: 0.8,
+      ref: '2026-10-29', janela: 12, cobEfetiva: 0.5, cobBloqueio: 0.8,
       carencia: { 1: 6, 2: 9, 3: 12 }, ciclo: { 1: 3, 2: 4, 3: 5 }, aVencer: 3,
       lim: { p1: 70, p2: 50, p3: 30 }, planoPolos: [], bonus: 8, pisoKm: 5,
     };
@@ -674,7 +674,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
   $('#tab-fontes').innerHTML = [
     ['Rede (GIS processado no protótipo /teste/)', fmtN(D.alims.length) + ' alimentadores, ' + fmtN(E.T1) + ' T1, ' + fmtN(E.T2) + ' T2, ' + fmtN(E.T3) + ' T3, ' + fmtN(kmTot) + ' km', 'Classe, extensão, município, polo, centro do trecho'],
     ['Crítica (causa árvore)', fmtN(Object.values(D.saz).reduce((a, b) => a + b, 0)) + ' ocorrências de jan a ago/2026; ' + fmtN(D.nae_fora) + ' sem trecho associado', 'NAE, DEC (consumidor·hora), FEC (consumidores interrompidos)'],
-    ['OS de limpeza de faixa', 'Planilha de OS desde ' + D.os_inicio.split('-').reverse().join('/') + ', cobertura por vão estimada pela descrição', 'Última limpeza, carência, OS abertas'],
+    ['OS de limpeza de faixa', (D.os_fonte || 'Planilha de OS') + ' desde ' + D.os_inicio.split('-').reverse().join('/') + (D.os_fonte ? ', cobertura pelos vãos do mapa' : ', cobertura por vão estimada pela descrição'), 'Última limpeza, carência, OS abertas'],
     ['Inspeções do app de campo', fmtN(D.insp_total) + ' registros (jul–ago/2026), ' + fmtN(D.insp_casadas) + ' ligados a um poste da rede MT', 'Fora do score: não há medição de distância confiável'],
     ['Sem fonte na base', 'Grupo A e essenciais, classe de vegetação, produtividade por tipo de equipe, disponibilidade de equipes, plano climático, emergências do centro de operação', 'Marcação manual no teste ou parâmetro'],
   ].map((l) => '<tr><td>' + l[0] + '</td><td>' + l[1] + '</td><td>' + l[2] + '</td></tr>').join('');
