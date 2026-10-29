@@ -137,6 +137,19 @@ svg.km-svg .hit{fill:transparent}svg.km-svg .vz{opacity:.55}
 #dica .r{display:flex;justify-content:space-between;gap:var(--s3)}
 #dica i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
 @media(max-width:560px){.km-leg{grid-template-columns:minmax(0,1fr)}}
+/* ===== Avanço das obras (prefixo av-) ===== */
+.av-bar{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s5);align-items:end;margin:var(--s2) 0 var(--s3)}
+.av-sel{min-width:min(220px,100%);max-width:100%}
+.av-wrap{overflow-x:auto}
+table.av-tab td,table.av-tab th{vertical-align:top}
+table.av-tab td.g{font-weight:600;white-space:normal;overflow-wrap:anywhere}
+table.av-tab tr.tot td{font-weight:700;border-top:2px solid var(--line);border-bottom:0;cursor:default}
+table.av-tab tr.tot:hover td{background:none}
+table.av-tab tr.nc{cursor:default}
+.av-n{display:block;white-space:nowrap}.av-n small{color:var(--muted);font:var(--t-xs) var(--f-mono);margin-left:4px}
+.av-pb{display:block;height:5px;border-radius:3px;background:var(--sem);margin-top:4px;overflow:hidden;min-width:48px}
+.av-pb i{display:block;height:100%;background:var(--ok);border-radius:3px}
+@media(max-width:560px){table.av-tab{font-size:var(--t-xs)}table.av-tab td,table.av-tab th{padding:8px 3px}table.av-tab th{white-space:normal}.av-n small{display:block;margin:0}.av-de{display:block}.av-w{display:none}.av-pb{min-width:0}table.av-tab td.g{overflow-wrap:normal;word-break:normal}}
 </style>
 </head><body><div class="wrap w">
 <header class="cab"><h1><b>ARGOS</b> <span>MANUTENÇÃO · LIMPEZA DE FAIXA</span></h1><a class="cab-link" href="../priorizacao/">Ranking</a></header>
@@ -154,6 +167,11 @@ svg.km-svg .hit{fill:transparent}svg.km-svg .vz{opacity:.55}
   <div class="km-kp" id="km-kp"></div>
   <div class="km-tot" id="km-tot"></div><div id="km-g"></div><ul class="km-leg" id="km-leg"></ul>
   <p class="nota" id="km-nota"></p></div>
+
+<div class="sec" id="av-sec"><h2>Avanço das obras</h2>
+  <div class="av-bar"><div class="f"><span id="av-lbl">Agrupar por</span><select id="av-sel" class="busca av-sel" aria-labelledby="av-lbl"><option value="emp">Empreiteira</option><option value="polo">Polo</option><option value="reg">Regional</option></select></div></div>
+  <div class="av-wrap"><table class="tab av-tab" id="av-tab"></table></div>
+  <p class="nota" id="av-nota"></p></div>
 
 <div class="linha"><div class="gr"><h2>Km de faixa medidos · mensal 2026</h2><div class="tot" id="t-km"></div><div id="g-km"></div></div>
 <div class="gr"><h2>Valor medido · mensal 2026</h2><div class="tot" id="t-val"></div><div id="g-val"></div></div></div>
@@ -394,6 +412,7 @@ function desenha() {
   at.push(['inf', 'DB Norte, DB Sul e DB Centro (contratação) foram tratadas como D. B. Machado Ltda (medição). Conferir.']);
   detalhe();
   kmRender();
+  avRender();
   $('aten').innerHTML = at.map(([c, t]) => `<li class="${c}">${t}</li>`).join('');
   $('fonte').innerHTML = `Dados gerados em ${D.gerado} a partir de: ${D.fontes.medicao}; ${D.fontes.acomp}. Valores medidos = vlr_total_real das medições aprovadas (jan–out/2026).` +
     (Object.keys(ST_NOVO).length ? ` Situação de ${Object.keys(ST_NOVO).length} OS atualizada pelo OS status de ${PARC.hoje.split('-').reverse().join('/')}: ${Object.keys(ST_NOVO).map(esc).join(', ')}.` : '');
@@ -510,6 +529,51 @@ function kmRender() {
   kmGrafico();
 }
 kmInit();
+// ---- Avanço das obras: resumo da carteira inteira (CTR) por empreiteira, polo ou regional; não usa os filtros F, só os destaca ----
+const AV = {g: 'emp', polo: ''};
+const avChave = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();   // "Paraiso" e "Paraíso" são o mesmo polo
+const avPct = (a, b) => b > 0 ? Math.round(100 * a / b) : 0;
+function avGrupos() {
+  const campo = AV.g, mp = new Map();
+  CTR.forEach(x => {
+    const rot = String(x[campo] || '').trim(), k = avChave(rot);
+    if (!mp.has(k)) mp.set(k, {k, nomes: {}, n: 0, ex: 0, km: 0, kmEx: 0, pc: 0, pn: 0, pe: 0});
+    const g = mp.get(k); g.nomes[rot] = (g.nomes[rot] || 0) + 1;
+    g.n++; g.km += +x.km || 0;
+    if (x.st === 'EXECUTADA') { g.ex++; g.kmEx += +x.km || 0; }
+    const o = PARC.obras[nOS(x.os)];
+    if (o) { g.pc++; g.pn += o.par.length; g.pe += o.par.filter(p => p.data).length; }
+  });
+  const gs = [...mp.values()];
+  gs.forEach(g => { g.nome = Object.keys(g.nomes).sort((a, b) => g.nomes[b] - g.nomes[a])[0]; });   // grafia mais comum
+  return gs.sort((a, b) => b.km - a.km || b.n - a.n);
+}
+function avRender() {
+  const gs = avGrupos(), T = gs.reduce((t, g) => { ['n', 'ex', 'km', 'kmEx', 'pc', 'pn', 'pe'].forEach(c => t[c] += g[c]); return t; }, {n: 0, ex: 0, km: 0, kmEx: 0, pc: 0, pn: 0, pe: 0});
+  const cel = (g, tot) => {
+    return `<td><span class="av-n">${fmt(g.n)}</span></td>` +
+      `<td><span class="av-n">${fmt(g.ex)} de ${fmt(g.n)}<small>${avPct(g.ex, g.n)}%</small></span><span class="av-pb"><i style="width:${avPct(g.ex, g.n)}%"></i></span></td>` +
+      `<td><span class="av-n">${fmt(g.kmEx, 1)}<span class="av-de"> / ${fmt(g.km, 1)}</span><small>${avPct(g.kmEx, g.km)}%</small></span><span class="av-pb"><i style="width:${avPct(g.kmEx, g.km)}%"></i></span></td>` +
+      `<td><span class="av-n">${g.pc ? fmt(g.pc) + (g.pc > 1 ? ' obras' : ' obra') : '—'}</span>${g.pc ? `<span class="av-n">${fmt(g.pe)}/${fmt(g.pn)} parc.<span class="av-w"> exec.</span></span>` : ''}</td>`;
+  };
+  const nomeCol = {emp: 'Empreiteira', polo: 'Polo', reg: 'Regional'}[AV.g];
+  const sel = g => AV.g === 'emp' ? g.nome && g.nome === F.emp : AV.g === 'reg' ? g.nome && g.nome === F.reg : g.k && g.k === AV.polo;
+  const rot = g => !g.nome ? '—' : AV.g === 'reg' ? g.nome[0] + g.nome.slice(1).toLowerCase() : g.nome;
+  $('av-tab').innerHTML = `<thead><tr><th>${nomeCol}</th><th>Obras</th><th>Executadas</th><th>Km exec. / contr.</th><th>Com parciais</th></tr></thead><tbody>` +
+    gs.map(g => `<tr data-av="${esc(g.k)}" class="${sel(g) ? 'sel' : ''}${AV.g === 'reg' && !g.nome ? ' nc' : ''}"><td class="g">${esc(rot(g))}</td>${cel(g)}</tr>`).join('') +
+    `</tbody><tfoot><tr class="tot"><td class="g">Total</td>${cel(T)}</tr></tfoot>`;
+  $('av-tab').querySelectorAll('tfoot tr').forEach(r => r.classList.add('tot'));
+  $('av-nota').innerHTML = `Conta por obra: OS parcial agrupada na mãe não conta; km executado = km das OS executadas da CONTRATAÇÃO 2026; situação atualizada pelo OS status de ${esc(dmy(PARC.hoje))}. Resumo da carteira inteira: não segue os filtros de regional e empreiteira (só destaca a linha escolhida). Clique numa linha para filtrar${AV.g === 'polo' ? ' (por polo, só destaca)' : ''}.`;
+  $('av-tab').dataset.tot = JSON.stringify(T);
+}
+$('av-sel').onchange = ev => { AV.g = ev.target.value; AV.polo = ''; avRender(); };
+$('av-tab').addEventListener('click', ev => {
+  const tr = ev.target.closest('tbody tr[data-av]'); if (!tr) return;
+  const g = avGrupos().find(x => x.k === tr.dataset.av); if (!g || !g.nome) return;
+  if (AV.g === 'emp') { F.emp = F.emp === g.nome ? '' : g.nome; desenha(); }
+  else if (AV.g === 'reg') { F.reg = F.reg === g.nome ? '' : g.nome; desenha(); }
+  else { AV.polo = AV.polo === g.k ? '' : g.k; avRender(); }
+});
 desenha();
 </script>
 <script src="../assets/menu.js"></script>
