@@ -6,6 +6,9 @@
 // OS não executadas em dois grupos, cada um com liga/desliga e traço próprio no mapa: Criadas (CRIADA, tracejado) e
 // Pendentes (A REPROGRAMAR / REPROGRAMADA, pontilhado).
 // A posição vem das chaves/ativos citados na OS e dos km da descrição: é aproximada.
+// OS parcial (espelho, pagamento parcial, medição): a OS mãe é a primeira criada da obra e descreve o trecho todo; as
+// parciais (campo "mae") não pintam vãos, não somam km e não contam como OS: aparecem dentro da mãe. Mãe criada ou
+// pendente com parcial executada = obra em andamento.
 (function () {
   const LP = window.LIMPEZA;
   if (!LP || !window.D) return;
@@ -56,6 +59,13 @@
   const vaoPorId = Object.fromEntries(D.vaos.map(v => [v[5], v]));
   const vaosDaOs = LP.os.map(() => []);
   Object.entries(LP.vaos).forEach(([id, ks]) => ks.forEach(k => vaoPorId[id] && vaosDaOs[k].push(vaoPorId[id])));
+  // parciais por mãe; mãe não executada com parcial executada = em andamento
+  const FILHAS = {};
+  LP.os.forEach((o, k) => { if (o.mae) (FILHAS[o.mae] = FILHAS[o.mae] || []).push(k); });
+  const filhasDe = o => FILHAS[o.os_completa] || [];
+  const parcs = (n, pre = '') => n === 1 ? `1 ${pre}parcial` : `${n} ${pre}parciais`;
+  const andamento = o => o.sit !== 'EXECUTADA' && filhasDe(o).some(k => LP.os[k].sit === 'EXECUTADA');
+  const PRIN = LP.os.map((o, k) => k).filter(k => !LP.os[k].mae);   // as OS que contam (sem as parciais)
   const porVao = {};
   D.vaos.forEach(v => {
     const ks = LP.vaos[v[5]] || [];
@@ -63,8 +73,8 @@
     porVao[v[5]] = { ks, ult: datas[datas.length - 1] || null };
   });
   const anoDe = o => o.data ? +o.data.slice(0, 4) : null;
-  const ANOS = [...new Set(LP.os.map(anoDe).filter(Boolean))].sort((a, b) => b - a);
-  const OS_ANO = Object.fromEntries(ANOS.map(a => [a, LP.os.map((o, k) => k).filter(k => anoDe(LP.os[k]) === a)
+  const ANOS = [...new Set(PRIN.map(k => anoDe(LP.os[k])).filter(Boolean))].sort((a, b) => b - a);
+  const OS_ANO = Object.fromEntries(ANOS.map(a => [a, PRIN.filter(k => anoDe(LP.os[k]) === a)
     .sort((x, y) => LP.os[y].data.localeCompare(LP.os[x].data))]));
   const uniao = ks => { const s = new Set(); ks.forEach(k => vaosDaOs[k].forEach(v => s.add(v))); return [...s]; };
   const somaM = vs => vs.reduce((m, v) => m + v[8], 0);
@@ -78,7 +88,7 @@
     pend: { rot: 'Pendentes', um: 'pendente', cls: 'pont', nota: 'a reprogramar / reprogramada' },
   };
   Object.entries(NEXE).forEach(([g, x]) => {
-    x.ks = LP.os.map((o, k) => k).filter(k => grupoDe(LP.os[k]) === g);
+    x.ks = PRIN.filter(k => grupoDe(LP.os[k]) === g);
     x.vaos = uniao(x.ks); x.km = somaM(x.vaos);
   });
   const GRUPOS_NEXE = Object.entries(NEXE).filter(([, x]) => x.ks.length);
@@ -473,16 +483,18 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   function focoHtml(k) {
     const o = LP.os[k];
     const ts = [...new Set(vaosDaOs[k].map(v => D.trechos[v[4]].nome))];
-    return `<div class="limp-foco"><span class="q">OS ${esc(o.os_completa)} · ${o.data ? 'executada ' + br(o.data) : grupoDe(o) === 'cri' ? 'criada ' + br(o.criada) : 'pendente (' + esc(o.sit.toLowerCase()) + ') · criada ' + br(o.criada)}</span>
+    return `<div class="limp-foco"><span class="q">OS ${esc(o.os_completa)} · ${o.data ? 'executada ' + br(o.data) : grupoDe(o) === 'cri' ? 'criada ' + br(o.criada) : 'pendente (' + esc(o.sit.toLowerCase()) + ') · criada ' + br(o.criada)}${andamento(o) ? ' · <b>em andamento</b>' : ''}</span>
       <span>${esc(o.desc)}</span>
       <span class="limp-nota">No mapa: ${vaosDaOs[k].length ? km(o.m) : 'sem localização'}${o.km_desc ? ` · descrição: ${String(o.km_desc).replace('.', ',')} km` : ''} · ${esc(o.metodo)}${o.al_os && o.al_os !== (D.meta || {}).al ? ` · OS lançada no ${esc(o.al_os)}` : ''}</span>
+      ${filhasDe(o).length ? `<span class="limp-nota">${parcs(filhasDe(o).length, 'OS ')} (o km conta só o da mãe): ${filhasDe(o).map(k => { const f = LP.os[k]; return `${esc(f.os_completa)} ${f.data ? 'executada ' + br(f.data) : esc(f.sit.toLowerCase()) + ' · criada ' + br(f.criada)}`; }).join('; ')}</span>` : ''}
       ${o.ativos.length ? `<span class="limp-nota">Ativos: ${o.ativos.map(esc).join('; ')}</span>` : ''}
       ${ts.length ? `<span class="limp-nota">Trechos: ${ts.slice(0, 30).map(esc).join(', ')}${ts.length > 30 ? ` e mais ${ts.length - 30}` : ''}</span>` : ''}</div>`;
   }
   const osBtn = (k, comFoco) => {
     const o = LP.os[k], g = grupoDe(o);
     const cor = g ? CINZA : corAno(anoDe(o));
-    const quando = !g ? br(o.data) : g === 'cri' ? 'criada ' + br(o.criada) : esc(o.sit.toLowerCase()) + ' · criada ' + br(o.criada);
+    const quando = (!g ? br(o.data) : g === 'cri' ? 'criada ' + br(o.criada) : esc(o.sit.toLowerCase()) + ' · criada ' + br(o.criada)) +
+      (andamento(o) ? ' · em andamento' : '') + (filhasDe(o).length ? ` · +${parcs(filhasDe(o).length)}` : '');
     return `<button type="button" class="limp-os-b${g ? ' ' + g : ''}" data-k="${k}" style="--c:${cor}" aria-pressed="${st.foco === k}">` +
       `<span class="q">${quando} · OS ${esc(o.os)} · ${vaosDaOs[k].length ? km(o.m) : 'sem localização'}</span>` +
       `<span class="s">${esc(o.desc.slice(0, 110))}${o.desc.length > 110 ? '…' : ''}</span></button>` +
@@ -506,7 +518,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const f = document.activeElement;
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
 
-    const exec = LP.os.filter(o => o.sit === 'EXECUTADA').length;
+    const exec = PRIN.filter(k => LP.os[k].sit === 'EXECUTADA').length;
     const sub = `${exec} OS executada${exec === 1 ? '' : 's'} · ${km(KM_LIMPO)} de ${km(KM_REDE)}` +
       GRUPOS_NEXE.map(([, x]) => ' · ' + plural(x.ks.length, x.um)).join('');
     const porAno = st.ligado && st.vista === 'ano';
@@ -615,12 +627,12 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       const ks = LP.os.map((o, k) => k).sort((a, b) => (LP.os[b].data || LP.os[b].criada || '').localeCompare(LP.os[a].data || LP.os[a].criada || ''));
       C(`OS_faixa_${C.al}.csv`,
         ['Alimentador', 'OS', 'Situação', 'Execução', 'Criada', 'Equipe', 'Trechos', 'Extensão no mapa (km)', 'Km na descrição',
-          'Ativos citados', 'Posição no mapa', 'Alimentador da OS', 'Descrição'],
+          'Ativos citados', 'Posição no mapa', 'Alimentador da OS', 'Obra', 'OS mãe', 'Parciais', 'Descrição'],
         ks.map(k => {
           const o = LP.os[k], eq = (o.os_completa || '').replace(o.os, '').trim();
           return [D.meta.al, o.os_completa || o.os, o.sit, C.data(o.data), C.data(o.criada), eq, C.trechos(vaosDaOs[k].map(v => v[5])),
             vaosDaOs[k].length ? C.num(o.m / 1000, 2) : '', C.num(o.km_desc), (o.ativos || []).join(' · '), o.metodo,
-            o.al_os && o.al_os !== D.meta.al ? o.al_os : '', o.desc];
+            o.al_os && o.al_os !== D.meta.al ? o.al_os : '', o.obra || '', o.mae || '', filhasDe(o).length || '', o.desc];
         }));
     }, `Planilha (CSV para o Excel) com as ${LP.os.length} OS de limpeza de faixa`);
   }

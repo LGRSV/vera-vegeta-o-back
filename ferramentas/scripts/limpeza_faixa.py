@@ -16,6 +16,12 @@ Data da limpeza: FIM_EXEC; se o FIM vier mais de 60 dias depois do INICIO (fecha
 Só OS EXECUTADA conta como limpeza, e só das equipes de EQUIPES (prefixo do NUMERO_OS, ex.: "ETO-RD-GU 004972/2022");
 CRIADA / A REPROGRAMAR / REPROGRAMADA aparecem como pendentes, de qualquer equipe.
 
+OS parcial: cada obra tem uma OS mãe (a primeira criada, que descreve o trecho todo) e pode ter OS parciais criadas
+depois (espelho, pagamento parcial, medição) que só detalham a execução da mãe. As parciais não pintam vãos, não somam
+km e não contam como OS no mapa: ficam ligadas à mãe ("mae" na parcial, "parciais" na mãe). A obra vem do NUM_OBRA, do
+número da obra no texto (041-25-00827), da OS citada no texto de uma parcial ("OS ETO-RD-GU 5455/2025") ou, sem nada
+disso, de uma OS com o mesmo km na descrição que cobre os mesmos vãos (90% ou mais) e foi criada até 1 ano depois da mãe.
+
 Atualização automática (sem o acervo de KMZ, scripts/atualiza_bases.py): OS que já está no limpeza.js publicado
 mantém a posição de lá (os vãos, o método e os ativos) e só troca situação, datas e descrição; OS nova é localizada
 pelas chaves do mapa e pelo índice de ativos do site (dados/ativos: transformadores, chaves e postes com coordenada),
@@ -36,6 +42,7 @@ import re
 import sys
 import zipfile
 from collections import defaultdict, deque
+from datetime import date
 
 try:
     import pandas as pd
@@ -79,6 +86,97 @@ def fatia(k):
     return f"{h % 256:02x}"
 
 
+PARCIAL = re.compile(r"parcial|parciais|medi[cç][aã]o|pagamento|espelho|final da obra|prim[aá]ria|principal|referente|o\.?s\.? (criada|gerada|aberta)", re.I)
+REF_OS = re.compile(r"ETO-RD-([A-Z]{2})\s*0*(\d{1,6})\s*[/.\-]\s*(20\d\d)")
+OBRA_TXT = (re.compile(r"(\d{3})-(\d{2})-(\d{5})"), re.compile(r"OBRA:?\s*0?(\d{9})\b", re.I))
+
+
+def obra_de(o):
+    """Número da obra (9 dígitos, sem zero à esquerda): NUM_OBRA da planilha ou o que a descrição cita."""
+    ob = str(o.get("obra") or "").strip().lstrip("0")
+    if ob.isdigit():
+        return ob
+    d = o.get("desc") or ""
+    m = OBRA_TXT[0].search(d)
+    if m:
+        return ("".join(m.groups())).lstrip("0")
+    m = OBRA_TXT[1].search(d)
+    return m.group(1).lstrip("0") if m else None
+
+
+def marca_parciais(d):
+    """Liga cada OS parcial à OS mãe da obra no limpeza.js (dict d) e tira as parciais do mapa: mãe = primeira OS
+    criada da obra; as outras ganham "mae", guardam seus vãos em "vaos_orig" e saem de d["vaos"] e d["sem_local"].
+    Pode rodar de novo: os vãos de "vaos_orig" voltam antes de refazer os grupos."""
+    os_ = d["os"]
+    por_os = {o["os_completa"]: k for k, o in enumerate(os_)}
+    ids = defaultdict(list)
+    for v, ks in d["vaos"].items():
+        for k in ks:
+            ids[k].append(v)
+    for k, o in enumerate(os_):                   # volta os vãos das parciais de uma rodada anterior
+        for v in o.pop("vaos_orig", []):
+            ids[k].append(v)
+        o.pop("mae", None)
+        o.pop("parciais", None)
+    pai = {k: k for k in range(len(os_))}
+
+    def raiz(k):
+        while pai[k] != k:
+            pai[k] = pai[pai[k]]
+            k = pai[k]
+        return k
+    por_obra = defaultdict(list)
+    for k, o in enumerate(os_):
+        ob = obra_de(o)
+        if ob:
+            por_obra[ob].append(k)
+        desc = o.get("desc") or ""
+        if PARCIAL.search(desc):
+            for m in REF_OS.finditer(desc):
+                r = f"ETO-RD-{m.group(1)} {int(m.group(2)):06d}/{m.group(3)}"
+                if r in por_os and por_os[r] != k:
+                    pai[raiz(k)] = raiz(por_os[r])
+                    break
+    for ks in por_obra.values():
+        for k in ks[1:]:
+            pai[raiz(k)] = raiz(ks[0])
+    # cópia da mãe sem número de obra nem palavra de parcial: mesmo km na descrição, mesmos vãos (90% ou mais) e criada até 1 ano depois
+    cj = {k: set(v) for k, v in ids.items() if v}
+    ordem = sorted(cj, key=lambda k: os_[k].get("criada") or "9999")
+    for i, k in enumerate(ordem):
+        for j in ordem[i + 1:]:
+            a, b = os_[k].get("criada"), os_[j].get("criada")
+            if not a or not b or (date.fromisoformat(b) - date.fromisoformat(a)).days > 365:
+                continue
+            if (os_[k].get("km_desc") and os_[k].get("km_desc") == os_[j].get("km_desc")
+                    and len(cj[k] & cj[j]) >= 0.9 * max(len(cj[k]), len(cj[j]))):
+                pai[raiz(j)] = raiz(k)
+    grupos = defaultdict(list)
+    for k in range(len(os_)):
+        grupos[raiz(k)].append(k)
+    parcial = set()
+    for ks in grupos.values():
+        if len(ks) < 2:
+            continue
+        mae = min(ks, key=lambda k: (os_[k].get("criada") or "9999", os_[k]["os_completa"]))
+        os_[mae]["parciais"] = len(ks) - 1
+        for k in ks:
+            if k != mae:
+                os_[k]["mae"] = os_[mae]["os_completa"]
+                os_[k]["vaos_orig"] = sorted(ids.get(k, []))
+                os_[k]["m"] = 0
+                parcial.add(k)
+    d["vaos"] = {}
+    for k, vs in ids.items():
+        if k not in parcial:
+            for v in vs:
+                d["vaos"].setdefault(v, []).append(k)
+    d["vaos"] = {v: sorted(ks) for v, ks in d["vaos"].items()}
+    d["sem_local"] = [k for k in range(len(os_)) if k not in parcial and not ids.get(k)]
+    return d
+
+
 class IndiceSite:
     """dados/ativos do site no lugar do KMZ: código -> [(lon, lat, tipo, alimentador), ...] (lido por pedaço)."""
     def __init__(self, raiz):
@@ -106,7 +204,7 @@ def publicado(al):
     for v, ks in d["vaos"].items():
         for k in ks:
             ids[k].append(v)
-    return {o["os_completa"]: (o, ids.get(k, [])) for k, o in enumerate(d["os"])}
+    return {o["os_completa"]: (o, ids.get(k, []) or o.get("vaos_orig", [])) for k, o in enumerate(d["os"])}
 
 
 def data_exec(r):
@@ -316,7 +414,7 @@ def main(xlsx, pastas_kmz=()):
             if num in antes.get(a, {}):                # já publicada: mantém a posição, atualiza o resto
                 o, ids = antes[a][num]
                 vs = sorted(id_vao[a][v] for v in ids if v in id_vao[a])
-                reg = dict(o, sit=r.SITUACAO, data=data_exec(r) if r.SITUACAO == "EXECUTADA" else None,
+                reg = dict(o, obra=str(r.get("NUM_OBRA") or "").strip() if not pd.isna(r.get("NUM_OBRA")) else o.get("obra", ""), sit=r.SITUACAO, data=data_exec(r) if r.SITUACAO == "EXECUTADA" else None,
                            criada=r.DATA_CRIACAO.date().isoformat() if not pd.isna(r.DATA_CRIACAO) else None,
                            al_os=r.ALIMENTADOR, desc=re.sub(r"\s+", " ", desc.replace("�", "?")).strip()[:400],
                            m=round(sum(rede.D["vaos"][i][8] for i in vs), 1))
@@ -355,6 +453,7 @@ def main(xlsx, pastas_kmz=()):
                 "data": data_exec(r) if r.SITUACAO == "EXECUTADA" else None,
                 "criada": r.DATA_CRIACAO.date().isoformat() if not pd.isna(r.DATA_CRIACAO) else None,
                 "al_os": r.ALIMENTADOR,
+                "obra": str(r.get("NUM_OBRA") or "").strip() if not pd.isna(r.get("NUM_OBRA")) else "",
                 "desc": re.sub(r"\s+", " ", desc.replace("�", "?")).strip()[:400],
                 "ativos": [f"{c} ({como})" for c, (_, como) in pts.items()],
                 "metodo": metodo,
@@ -378,6 +477,16 @@ def main(xlsx, pastas_kmz=()):
                 out["vaos"].setdefault(rede.D["vaos"][i][5], []).append(k)
                 if o["data"]:
                     ult[i] = max(ult.get(i, ""), o["data"])
+        marca_parciais(out)                         # parciais saem do mapa: a mãe vale pela obra toda
+        idx = {v[5]: i for i, v in enumerate(rede.D["vaos"])}
+        por_k = defaultdict(list)
+        ult = {}
+        for v, ks in out["vaos"].items():
+            for k in ks:
+                por_k[k].append(idx[v])
+                if out["os"][k]["data"]:
+                    ult[idx[v]] = max(ult.get(idx[v], ""), out["os"][k]["data"])
+        lst = [(o, por_k[k]) for k, o in enumerate(out["os"])]
         open(os.path.join(RAIZ, "alimentadores", a, "limpeza.js"), "w", encoding="utf8").write(
             "window.LIMPEZA = " + json.dumps(out, ensure_ascii=False, separators=(",", ":")) + ";\n")
 
@@ -430,7 +539,27 @@ def so_equipes(raiz=RAIZ):
     return antes, depois
 
 
+def so_parciais(raiz=RAIZ):
+    """Aplica marca_parciais nos limpeza.js já gerados, sem a planilha de OS."""
+    n = mae = parc = 0
+    for f in sorted(glob.glob(os.path.join(raiz, "alimentadores", "*", "limpeza.js"))):
+        s = open(f, encoding="utf8").read()
+        d = json.loads(s[s.index("=") + 1:].strip().rstrip(";"))
+        if not d:
+            continue
+        marca_parciais(d)
+        n += len(d["os"])
+        mae += sum(1 for o in d["os"] if o.get("parciais"))
+        parc += sum(1 for o in d["os"] if o.get("mae"))
+        open(f, "w", encoding="utf8").write("window.LIMPEZA = " + json.dumps(d, ensure_ascii=False, separators=(",", ":")) + ";\n")
+    return n, mae, parc
+
+
 if __name__ == "__main__":
+    if sys.argv[1] == "--parciais":
+        n, mae, parc = so_parciais(*sys.argv[2:3])
+        print(f"{n} OS: {mae} obras com parciais, {parc} OS parciais fora das contagens")
+        sys.exit(0)
     if sys.argv[1] == "--so-equipes":
         antes, depois = so_equipes(*sys.argv[2:3])
         print(f"{antes} OS antes, {depois} depois (executadas só de {', '.join(EQUIPES)})")
