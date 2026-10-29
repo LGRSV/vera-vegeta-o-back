@@ -475,6 +475,16 @@
     });
   }
 
+  // base dos polos (assets/polo-rota.js, scripts de CIDADES.kml), só quando o croqui é pedido; sem ele o deslocamento fica manual
+  function carregaPolo() {
+    if (window.POLO_ROTA) return Promise.resolve();
+    return new Promise(ok => {
+      const s = document.createElement('script'); s.src = '../../assets/polo-rota.js';
+      s.onload = s.onerror = () => ok();
+      document.head.append(s);
+    });
+  }
+
   // ---------- janela ----------
   const css = document.createElement('style');
   css.textContent = `dialog.croqui{border:1px solid var(--line);border-radius:var(--r3,14px);padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--paper);color:var(--fg);box-shadow:var(--sh2,0 20px 60px rgba(0,0,0,.35))}
@@ -486,6 +496,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
 .croqui .fecha{flex:none;width:var(--alvo,40px);height:var(--alvo,40px);border:0;border-radius:var(--r2,10px);background:transparent;color:var(--muted);font-size:18px;cursor:pointer}
 .croqui .fecha:hover{background:var(--hover,transparent);color:var(--fg)}.croqui .fecha:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.croqui h2{margin:0;font:600 var(--t-xl,20px)/1.2 var(--f-display,var(--f-body,system-ui))}
 .croqui p{margin:0;font-size:var(--t-sm,13px);color:var(--muted)}
+.croqui .rota{grid-column:1/-1;margin-top:calc(-1 * var(--s1,4px));font-size:var(--t-xs,12px);line-height:1.4;color:var(--muted)}.croqui .rota a{color:var(--accent);margin-left:var(--s1,4px)}
 .croqui p.misto{padding:var(--s2,8px) var(--s3,12px);border-radius:var(--r2,10px);background:var(--hover);color:var(--fg)}
 .croqui dl{display:grid;grid-template-columns:auto 1fr;gap:var(--s1,4px) var(--s3,12px);margin:0;font-size:var(--t-sm,13px)}.croqui dt{color:var(--muted)}
 .croqui dd{margin:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
@@ -518,16 +529,19 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
     let prop = {};
     try { await carregaModelo(); prop = proporcoes(); } catch (e) { /* sem o modelo, a janela abre e o erro aparece ao baixar */ }
     const mt = await rede(), soma = {};
+    let codTop = null;                                       // município com mais rede no trecho: define o polo da base
     nomes.forEach(n => Object.entries(mt[n] || {}).forEach(([cod, m]) => { if (cod !== 'None') soma[cod] = (soma[cod] || 0) + m; }));
     if (Object.keys(soma).length) {                          // município onde o trecho tem mais rede primeiro
       const nomeMun = Object.fromEntries((M.municipios || []).map(m => [m.cod, m.nome]));
-      d.muns = Object.keys(soma).sort((a, b) => soma[b] - soma[a]).map(c => nomeMun[c] || c);
+      const ordem = Object.keys(soma).sort((a, b) => soma[b] - soma[a]);
+      codTop = ordem[0];
+      d.muns = ordem.map(c => nomeMun[c] || c);
     }
     const dlg = document.createElement('dialog'); dlg.className = 'croqui';
     const opt = (l, f) => l.map((x, i) => `<option value="${i}">${esc(f(x))}</option>`).join('');
     dlg.innerHTML = `<form method="dialog">
       <div class="topo"><h2>Croqui de limpeza de faixa</h2><button type="button" class="fecha" aria-label="Fechar">✕</button></div>
-      <p>Preenchido a partir do mapa. Confira e complete OS, obra e deslocamento se quiser (dá para completar depois no Excel).</p>
+      <p>Preenchido a partir do mapa. Confira e complete OS e obra (dá para completar depois no Excel). O deslocamento vem da rota de carro até a base do polo e pode ser corrigido.</p>
       <div class="fig" role="img" aria-label="Figura do trecho no croqui"></div>
       <dl><dt>Alimentador</dt><dd>${esc(M.al)} · ${esc(M.se_nome || M.se || '')}</dd>
         <dt>Trecho${nomes.length > 1 ? 's' : ''}</dt><dd>${todos ? `alimentador inteiro (${nomes.length} trechos)` : esc(nomes.join(', '))}</dd>
@@ -543,6 +557,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
         <label>OS<input name="os" autocomplete="off" placeholder="ETO-RD-.. 00000/2026"></label>
         <label>Obra<input name="obra" autocomplete="off"></label>
         <label>Deslocamento até o ponto inicial (km)<input name="desloc" type="number" step="1" min="0" inputmode="numeric"></label>
+        <small class="rota" aria-live="polite"></small>
       </div>
       ${misto ? `<p class="misto">Marcado no mapa: <b>Leve (Expedita) ${nf(misto.leve, 3)} km</b> · <b>Pesada (Convencional) ${nf(misto.pesada, 3)} km</b>. Vão juntos neste croqui.</p>` : ''}
       <div class="acoes"><button type="button" class="cancela">Cancelar</button><button type="button" class="kmz">Baixar KMZ</button><button value="baixar">Baixar croqui (Excel)</button></div>
@@ -590,7 +605,49 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       }
       dlg.querySelector('.u-ext').textContent = `${nf(d.ext / 1000, 2)} km` + (entre !== null ? ` · entre as chaves ${nf(entre / 1000, 2)} km` : '');
     };
-    coords(); tamanho(); desenha();
+    // deslocamento até o ponto inicial: km de carro da base do polo até a chave inicial (OSRM público, sem chave);
+    // se a rota falhar, linha reta × 1,35. O que a pessoa digitou fica (dataset.manual); campo apagado volta ao automático.
+    const nota = dlg.querySelector('.rota');
+    let reqRota = 0, ctlRota = null, rotaP = Promise.resolve();
+    const aMao = 'Deslocamento informado à mão (apague o campo para voltar ao cálculo automático).';
+    // município com mais rede no trecho da chave inicial (a base do polo muda se a chave estiver em outro polo)
+    const munDaChave = ini => {
+      const m = Object.entries(mt[ini.t] || {}).filter(([c]) => c !== 'None').sort((a, b) => b[1] - a[1])[0];
+      return m ? m[0] : codTop;
+    };
+    const rota = async atraso => {
+      const n = ++reqRota, { ini } = escolha(), [lat, lon] = ini.ll;
+      if (ctlRota) ctlRota.abort();                          // a rota anterior já não interessa
+      if (f.desloc.dataset.manual && f.desloc.value === '') delete f.desloc.dataset.manual;
+      if (f.desloc.dataset.manual) { nota.textContent = aMao; return; }
+      await carregaPolo();
+      if (atraso) await new Promise(r => setTimeout(r, atraso));   // trocar de chave seguidas vezes não vira rajada no OSRM
+      if (n !== reqRota) return;
+      const polo = window.POLO_ROTA, cod = munDaChave(ini), b = polo && cod ? polo.bases[polo.mun[cod]] : null;
+      if (!b) { nota.textContent = 'Não achei a base do polo deste município: informe o deslocamento à mão.'; return; }
+      nota.textContent = 'Calculando a rota…';
+      let km, estima = false;
+      const ctl = ctlRota = new AbortController(), tempo = setTimeout(() => ctl.abort(), 8000);
+      try {
+        const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${b.lon},${b.lat};${lon},${lat}?overview=false`, { signal: ctl.signal });
+        const j = await r.json();
+        if (!r.ok || j.code !== 'Ok' || !j.routes || !j.routes[0]) throw new Error('rota');
+        km = Math.round(j.routes[0].distance / 1000);
+      } catch (e) { km = Math.round(dist([b.lat, b.lon], [lat, lon]) * 1.35 / 1000); estima = true; }
+      finally { clearTimeout(tempo); }
+      if (n !== reqRota) return;                             // resposta atrasada: já mudou a chave
+      if (f.desloc.dataset.manual && f.desloc.value !== '') { nota.textContent = aMao; return; }   // digitou durante o cálculo
+      f.desloc.value = km;
+      const mapa = `https://www.google.com/maps/dir/?api=1&origin=${b.lat},${b.lon}&destination=${lat},${lon}&travelmode=driving`;
+      nota.innerHTML = `Base do polo ${esc(b.nome)} → ponto inicial: ${km} km ` +
+        (estima ? 'de carro (estimativa em linha reta × 1,35)' : 'de carro (rota OSRM/OpenStreetMap)') +
+        `<a href="${esc(mapa)}" target="_blank" rel="noopener">Conferir no Google Maps</a>`;
+    };
+    const pedeRota = atraso => { rotaP = rota(atraso); return rotaP; };
+    f.desloc.addEventListener('input', () => {
+      if (f.desloc.value === '') { delete f.desloc.dataset.manual; pedeRota(400); } else { f.desloc.dataset.manual = '1'; nota.textContent = aMao; }
+    });
+    coords(); tamanho(); desenha(); pedeRota(0);
     if (misto) {                                           // os km e o tipo vêm do que foi marcado no mapa
       // 3 casas, como X26 (leve) e X23 (pesada) no croqui: o total bate com a soma das duas
       const r3 = x => Math.round(x * 1000) / 1000, tot = (r3(misto.leve) + r3(misto.pesada)).toFixed(3);
@@ -603,7 +660,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       f.tipo.disabled = true;
       f.km.closest('label').firstChild.textContent = 'Tamanho da faixa (km) · leve + pesada';
     }
-    f.ini.addEventListener('change', () => { coords(); tamanho(); desenha(); });
+    f.ini.addEventListener('change', () => { coords(); tamanho(); desenha(); pedeRota(400); });
     f.fim.addEventListener('change', () => { coords(); tamanho(); desenha(); });
     f.base.addEventListener('change', () => tamanho(true));
     dlg.addEventListener('close', () => dlg.remove());
@@ -612,6 +669,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       const bt = f.querySelector('button[value=baixar]'); bt.disabled = true; bt.textContent = 'Gerando…';
       try {
         await carregaModelo();
+        await rotaP.catch(() => {});                         // espera a rota em andamento: o deslocamento entra no Excel
         if (!prop.sat) { prop = proporcoes(); desenha(); }   // o modelo não tinha carregado ao abrir
         const [sat, gis] = await gerando;
         const { ini, fim } = escolha(), { a, b } = coords();
