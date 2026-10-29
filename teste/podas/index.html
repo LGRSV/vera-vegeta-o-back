@@ -33,6 +33,7 @@
 .pd-leg i{grid-area:i;width:18px;height:18px;border-radius:4px;background:var(--c);border:1px solid color-mix(in srgb,var(--fg) 35%,transparent)}
 .pd-leg .n{grid-area:n;font-weight:600;line-height:1.2}
 .pd-leg .c{grid-area:c;font:700 var(--t-xl)/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.pd-leg .c small{font:500 var(--t-xs) var(--f-body);color:var(--muted)}
 .pd-leg button[aria-pressed=false]{opacity:.55}
 .pd-leg button[aria-pressed=false] .n{text-decoration:line-through}
 .pd-leg button[aria-pressed=false] i{background:transparent;border-style:dashed}
@@ -118,8 +119,6 @@
     <input id="q" class="busca" type="search" placeholder="Código da quadra ou nome do setor" autocomplete="off" spellcheck="false"
       role="combobox" aria-expanded="false" aria-controls="sug" aria-autocomplete="list">
     <ul id="sug" role="listbox" aria-label="Áreas encontradas" hidden></ul></div>
-  <div class="f"><span id="ver-l">Mostrar</span><div class="seg" id="ver" role="group" aria-labelledby="ver-l">
-    <button type="button" data-v="pontos" aria-pressed="true">Pontos das OS</button><button type="button" data-v="areas" aria-pressed="false">Áreas</button></div></div>
   <div class="f"><span id="fun-l">Fundo do mapa</span><div class="seg" id="fundo" role="group" aria-labelledby="fun-l">
     <button type="button" data-f="sat" aria-pressed="true">Satélite</button><button type="button" data-f="liso" aria-pressed="false">Liso</button></div></div>
 </section>
@@ -184,7 +183,6 @@ let cidade = CIDADES[0];
 const ativos = new Set(ORDEM);
 let sel = null;                 // {a, c, lay}
 let fundo = 'sat';
-let ver = 'pontos';             // pontos das OS ou áreas (quadras)
 let selPt = null;               // ponto escolhido
 const cache = {};               // cidade -> {por:{st:FeatureGroup}, lays:[], bounds, cont}
 const mobile = () => matchMedia('(max-width:980px)').matches;
@@ -310,10 +308,9 @@ function mostrar(c, ajustar) {
   cidade = c;
   const k = construir(c);
   aplicar(c);
-  if (ver === 'areas') k.grupo.addTo(map);
-  else { aplicarPts(c); pontos(c).grupo.addTo(map); }
-  const pg = ver === 'pontos' && pontos(c).marks.length ? L.featureGroup(pontos(c).marks).getBounds() : null;
-  if (ajustar && (pg || k.bounds)) map.fitBounds(pg || k.bounds, {padding: [16, 16]});
+  k.grupo.addTo(map);                                     // quadras coloridas e, por cima, o ponto de cada OS
+  aplicarPts(c); pontos(c).grupo.addTo(map);
+  if (ajustar && k.bounds) map.fitBounds(k.bounds, {padding: [16, 16]});
   traz();
 }
 
@@ -329,36 +326,27 @@ $('cids').addEventListener('click', e => {
 
 // ---- legenda e filtro -----------------------------------------------------------------------------------
 function contagem(c) {
-  const n = {executado: 0, pendente: 0, critico: 0, sem: 0};
-  if (ver === 'pontos') (P.pontos && P.pontos[c] || []).forEach(pt => { n[pt[2]]++; });
-  else P.cidades[c].forEach(a => { n[a.st in n ? a.st : 'sem']++; });
-  return n;
+  const n = {executado: 0, pendente: 0, critico: 0, sem: 0}, o = {executado: 0, pendente: 0, critico: 0};
+  P.cidades[c].forEach(a => { n[a.st in n ? a.st : 'sem']++; });
+  (P.pontos && P.pontos[c] || []).forEach(pt => { o[pt[2]]++; });
+  return {n, o};
 }
 const ROTP = {executado: 'Executada (6 meses)', pendente: 'Pendente', critico: 'Pendente emergencial/urgente'};
 function legenda() {
-  const n = contagem(cidade);
-  $('dica').textContent = ver === 'pontos'
-    ? 'Cada ponto é uma OS de poda no ativo em que foi aberta. Clique numa cor para ligar ou desligar esses pontos. As contagens são da cidade escolhida.'
-    : 'Clique numa cor para ligar ou desligar essas áreas no mapa. As contagens são da cidade escolhida.';
-  $('leg').innerHTML = ORDEM.filter(st => ver === 'areas' || st !== 'sem').map(st =>
-    `<button type="button" data-st="${st}" aria-pressed="${ativos.has(st)}" style="--c:${COR[st]}"><i></i><span class="n">${esc(ver === 'pontos' ? ROTP[st] : ROT[st])}</span><span class="c">${nf(n[st])}</span></button>`).join('');
+  const {n, o} = contagem(cidade);
+  $('dica').textContent = 'Quadras coloridas pela situação da poda; cada ponto é uma OS de poda no ativo em que foi aberta ' +
+    '(verde: executada nos últimos 6 meses; amarelo: pendente; vermelho: pendente emergencial/urgente). ' +
+    'Clique numa cor para ligar ou desligar essas quadras e pontos. As contagens são da cidade escolhida.';
+  $('leg').innerHTML = ORDEM.map(st =>
+    `<button type="button" data-st="${st}" aria-pressed="${ativos.has(st)}" style="--c:${COR[st]}"><i></i><span class="n">${esc(ROT[st])}</span><span class="c">${nf(n[st])}<small>${st in o ? ' quadras · ' + nf(o[st]) + ' OS' : ' quadras'}</small></span></button>`).join('');
 }
 $('leg').addEventListener('click', e => {
   const b = e.target.closest('button[data-st]'); if (!b) return;
   const st = b.dataset.st;
-  if (ativos.has(st)) { ativos.delete(st); if ((sel && sel.a.st === st && ver === 'areas') || (selPt && selPt[2] === st)) fechar(); }
+  if (ativos.has(st)) { ativos.delete(st); if ((sel && sel.a.st === st) || (selPt && selPt[2] === st)) fechar(); }
   else ativos.add(st);
   aplicar(cidade); aplicarPts(cidade);
   b.setAttribute('aria-pressed', ativos.has(st));
-});
-
-// ---- pontos ou áreas ------------------------------------------------------------------------------------
-$('ver').addEventListener('click', e => {
-  const b = e.target.closest('button[data-v]'); if (!b || b.dataset.v === ver) return;
-  fechar();
-  ver = b.dataset.v;
-  $('ver').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
-  mostrar(cidade, false); legenda();
 });
 
 // ---- fundo ----------------------------------------------------------------------------------------------
@@ -374,9 +362,7 @@ const painel = $('painel');
 const X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 function vazio() {
   painel.classList.remove('aberto'); document.body.classList.remove('gaveta');
-  painel.innerHTML = ver === 'pontos'
-    ? '<p class="pd-vazio">Clique num ponto para ver a OS de poda e o ativo. Use a busca para achar uma quadra.</p>'
-    : '<p class="pd-vazio">Clique numa área do mapa, ou use a busca, para ver a situação da poda, as OS recentes e os alimentadores.</p>';
+  painel.innerHTML = '<p class="pd-vazio">Clique numa quadra, ou use a busca, para ver a situação da poda, as OS recentes e os alimentadores. Clique num ponto para ver a OS de poda e o ativo.</p>';
 }
 function dias(ult) {
   const d = Math.round((Date.parse(P.gerado) - Date.parse(ult)) / 864e5);
@@ -492,7 +478,7 @@ function destacar(i) {
 function irPara(r) {
   sug.hidden = true; q.setAttribute('aria-expanded', 'false'); q.value = titulo(r.a);
   if (r.c !== cidade) { fechar(); mostrar(r.c, false); botoesCidade(); }
-  if (ver === 'areas' && !ativos.has(r.a.st)) { ativos.add(r.a.st); aplicar(r.c); }
+  if (!ativos.has(r.a.st)) { ativos.add(r.a.st); aplicar(r.c); aplicarPts(r.c); }
   legenda();
   const lay = construir(r.c).lays.find(l => l._pa === r.a);
   if (!lay) return;
@@ -518,7 +504,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.pd-busca')) { 
 // ---- início ---------------------------------------------------------------------------------------------
 botoesCidade(); legenda(); vazio();
 mostrar(cidade, true);
-window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, ver}), pontos: () => pontos(cidade).grupo.getLayers().length, nae: () => naeLay.getLayers().length, camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
+window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo}), pontos: () => pontos(cidade).grupo.getLayers().length, nae: () => naeLay.getLayers().length, camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
 })();
 </script>
 <script src="../assets/menu.js"></script>
