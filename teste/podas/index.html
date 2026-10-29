@@ -119,6 +119,8 @@
     <input id="q" class="busca" type="search" placeholder="Código da quadra ou nome do setor" autocomplete="off" spellcheck="false"
       role="combobox" aria-expanded="false" aria-controls="sug" aria-autocomplete="list">
     <ul id="sug" role="listbox" aria-label="Áreas encontradas" hidden></ul></div>
+  <div class="f"><span id="cam-l">Ver no mapa</span><div class="seg" id="cam" role="group" aria-labelledby="cam-l">
+    <button type="button" data-k="areas" aria-pressed="true">Áreas</button><button type="button" data-k="os" aria-pressed="true">OS</button><button type="button" data-k="nae" aria-pressed="true">NAE</button></div></div>
   <div class="f"><span id="fun-l">Fundo do mapa</span><div class="seg" id="fundo" role="group" aria-labelledby="fun-l">
     <button type="button" data-f="sat" aria-pressed="true">Satélite</button><button type="button" data-f="liso" aria-pressed="false">Liso</button></div></div>
 </section>
@@ -165,7 +167,7 @@ $('nota').textContent = 'Quadra = setor censitário do IBGE 2022 (inclusive na r
   'Cada OS de poda fica no poste da estrutura; sem esse poste no mapa, no trafo, na chave ou em outro ativo da OS. ' +
   'Pontos: OS executadas nos últimos 6 meses e OS pendentes. Dados do OS status de ' + dataGer + '. ' +
   'Crítico: OS emergencial/urgente pendente, ou alimentador com NAE alto (quinto mais alto da cidade) e sem poda nos últimos 6 meses. ' +
-  'Ao clicar numa área ou OS crítica, as ocorrências NAE (Crítica) dos alimentadores dela aparecem em vermelho-sangue, no ativo onde foram registradas. ' +
+  'NAE: ocorrências da Crítica (vegetação) em vermelho-sangue, no ativo onde foram registradas; ao clicar numa área ou OS crítica, as dos alimentadores dela ficam destacadas. ' +
   'Imagem de satélite: Esri World Imagery, carregada ao vivo.';
 
 if (!P || !CIDADES.length) {
@@ -183,6 +185,7 @@ let cidade = CIDADES[0];
 const ativos = new Set(ORDEM);
 let sel = null;                 // {a, c, lay}
 let fundo = 'sat';
+const camadas = {areas: true, os: true, nae: true};   // o que aparece junto no mapa (botões "Ver no mapa")
 let selPt = null;               // ponto escolhido
 const cache = {};               // cidade -> {por:{st:FeatureGroup}, lays:[], bounds, cont}
 const mobile = () => matchMedia('(max-width:980px)').matches;
@@ -217,17 +220,22 @@ const SANGUE = '#8a0303';
 const naeLay = L.layerGroup().addTo(map);
 const mesTxt = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1] + '/' + m.slice(0, 4);
 const dataNae = d => br(d.slice(0, 10)) + (d.length > 10 ? ' ' + d.slice(11) : '');
+function naeMarca(o, destaque) {
+  const m = L.circleMarker([o[0], o[1]], destaque ? {radius: 8, color: '#ffffff', weight: 3, fillColor: SANGUE, fillOpacity: 1}
+    : {radius: 5.5, color: '#ffffff', weight: 1.2, fillColor: SANGUE, fillOpacity: 1});
+  const txt = `<b>NAE · ${esc(dataNae(o[3]))}</b><small>${esc(o[5])} ${esc(o[4])} · ${esc(o[2])} ${esc(o[9])}</small>` +
+      `<small>${esc(nf(o[7]))} consumidor${o[7] === 1 ? '' : 'es'} · ${esc(nf(o[8]))} min</small><small>${esc(o[6])}</small>`;
+  m.bindTooltip(txt, {direction: 'top', className: 'pd-tip', opacity: 1});
+  m.on('click', e => { L.DomEvent.stopPropagation(e); m.openTooltip(); });
+  return m;
+}
+const ncache = {};
+const naeTodos = c => ncache[c] || (ncache[c] = L.featureGroup((P.nae && P.nae[c] || []).map(o => naeMarca(o, false))));
+// área ou OS crítica escolhida: os NAE dos alimentadores dela, destacados (aparecem mesmo com a camada NAE desligada)
 function mostraNae(als) {
   naeLay.clearLayers();
   const set = new Set(als), lst = (P.nae && P.nae[cidade] || []).filter(o => set.has(o[2]));
-  lst.forEach(o => {
-    const m = L.circleMarker([o[0], o[1]], {radius: 6, color: '#ffffff', weight: 1.5, fillColor: SANGUE, fillOpacity: 1});
-    const txt = `<b>NAE · ${esc(dataNae(o[3]))}</b><small>${esc(o[5])} ${esc(o[4])} · ${esc(o[2])} ${esc(o[9])}</small>` +
-      `<small>${esc(nf(o[7]))} consumidor${o[7] === 1 ? '' : 'es'} · ${esc(nf(o[8]))} min</small><small>${esc(o[6])}</small>`;
-    m.bindTooltip(txt, {direction: 'top', className: 'pd-tip', opacity: 1});
-    m.on('click', e => { L.DomEvent.stopPropagation(e); m.openTooltip(); });
-    naeLay.addLayer(m);
-  });
+  lst.forEach(o => naeLay.addLayer(naeMarca(o, true)));
   return lst;
 }
 function naeSec(als, lst) {
@@ -303,16 +311,31 @@ function aplicar(c) { construir(c).lays.forEach(l => exibir(l, ativos.has(l._pa.
 function traz() { selecao.eachLayer(l => l.bringToFront()); }
 
 function mostrar(c, ajustar) {
-  if (cache[cidade]) cache[cidade].grupo.remove();
-  if (pcache[cidade]) pcache[cidade].grupo.remove();
+  [cache, pcache, ncache].forEach(x => { if (x[cidade]) x[cidade].grupo ? x[cidade].grupo.remove() : x[cidade].remove(); });
+  naeLay.remove(); selecao.remove();
   cidade = c;
   const k = construir(c);
   aplicar(c);
-  k.grupo.addTo(map);                                     // quadras coloridas e, por cima, o ponto de cada OS
-  aplicarPts(c); pontos(c).grupo.addTo(map);
+  // ordem de desenho: quadras, pontos das OS, NAE e, por cima, a seleção
+  if (camadas.areas) k.grupo.addTo(map);
+  if (camadas.os) { aplicarPts(c); pontos(c).grupo.addTo(map); }
+  if (camadas.nae) naeTodos(c).addTo(map);
+  naeLay.addTo(map); selecao.addTo(map);
   if (ajustar && k.bounds) map.fitBounds(k.bounds, {padding: [16, 16]});
   traz();
 }
+function botoesCamada() {
+  const n = (P.nae && P.nae[cidade] || []).length;
+  $('cam').querySelector('[data-k=nae]').textContent = 'NAE (' + nf(n) + ')';
+  $('cam').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', camadas[b.dataset.k]));
+}
+$('cam').addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]'); if (!b) return;
+  camadas[b.dataset.k] = !camadas[b.dataset.k];
+  if (b.dataset.k === 'areas' && !camadas.areas && sel) fechar();
+  if (b.dataset.k === 'os' && !camadas.os && selPt) fechar();
+  mostrar(cidade, false); botoesCamada();
+});
 
 // ---- cidade ---------------------------------------------------------------------------------------------
 function botoesCidade() {
@@ -321,7 +344,7 @@ function botoesCidade() {
 $('cids').addEventListener('click', e => {
   const b = e.target.closest('button[data-c]'); if (!b || b.dataset.c === cidade) { if (b) mostrar(cidade, true); return; }
   fechar();
-  mostrar(b.dataset.c, true); botoesCidade(); legenda();
+  mostrar(b.dataset.c, true); botoesCidade(); legenda(); botoesCamada();
 });
 
 // ---- legenda e filtro -----------------------------------------------------------------------------------
@@ -477,7 +500,8 @@ function destacar(i) {
 }
 function irPara(r) {
   sug.hidden = true; q.setAttribute('aria-expanded', 'false'); q.value = titulo(r.a);
-  if (r.c !== cidade) { fechar(); mostrar(r.c, false); botoesCidade(); }
+  if (!camadas.areas) { camadas.areas = true; mostrar(cidade, false); botoesCamada(); }
+  if (r.c !== cidade) { fechar(); mostrar(r.c, false); botoesCidade(); botoesCamada(); }
   if (!ativos.has(r.a.st)) { ativos.add(r.a.st); aplicar(r.c); aplicarPts(r.c); }
   legenda();
   const lay = construir(r.c).lays.find(l => l._pa === r.a);
@@ -503,8 +527,9 @@ document.addEventListener('click', e => { if (!e.target.closest('.pd-busca')) { 
 
 // ---- início ---------------------------------------------------------------------------------------------
 botoesCidade(); legenda(); vazio();
-mostrar(cidade, true);
-window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo}), pontos: () => pontos(cidade).grupo.getLayers().length, nae: () => naeLay.getLayers().length, camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
+mostrar(cidade, true); botoesCamada();
+window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo}), pontos: () => map.hasLayer(pontos(cidade).grupo) ? pontos(cidade).grupo.getLayers().length : 0, nae: () => naeLay.getLayers().length,
+  naeTodos: () => map.hasLayer(naeTodos(cidade)) ? naeTodos(cidade).getLayers().length : 0, camadas: () => ({...camadas}), camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
 })();
 </script>
 <script src="../assets/menu.js"></script>
