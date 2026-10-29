@@ -226,6 +226,19 @@ function naLista(nome) {
   else if (det < v.top) rolaPara(null, scrollY + det - v.top - 8);   // página (celular): só desce o detalhe que ficou escondido sob o mapa
 }
 
+// UCs ligadas por trecho (planilha UC por trafo): dados/ucs/<AL>.json, lido uma vez; sem o arquivo a linha "Clientes" não aparece
+const UCS_P = fetch(`../../dados/ucs/${encodeURIComponent((D.meta || {}).al || '')}.json`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+function poeUc(u, nomes) {
+  const dd = $('uc-dd'), dt = $('uc-dt');
+  if (!dd || dd.dataset.t !== nomes.join('|') || !Object.keys(u).length) return;      // outro trecho já foi aberto, ou sem arquivo
+  const e = nomes.map(n => u[n] || [0, 0, 0]), dir = e.reduce((s, x) => s + x[0], 0), tr = e.reduce((s, x) => s + x[2], 0);
+  const fmt = n => n.toLocaleString('pt-BR'), trafos = ` · ${tr} trafo${tr === 1 ? '' : 's'}`;
+  dd.innerHTML = nomes.length === 1
+    ? `<b>${fmt(e[0][1])}</b> UC${e[0][1] === 1 ? '' : 's'} ligada${e[0][1] === 1 ? '' : 's'} (trecho e a jusante)${e[0][1] !== dir ? ` · ${fmt(dir)} nos trafos do próprio trecho` : ''}${trafos}`
+    : `<b>${fmt(dir)}</b> UC${dir === 1 ? '' : 's'} ligada${dir === 1 ? '' : 's'} nos trafos dos trechos${trafos}`;
+  dt.style.display = dd.style.display = '';
+}
+const LINHA_UC = nomes => `<dt id="uc-dt" style="display:none">Clientes</dt><dd id="uc-dd" style="display:none" data-t="${nomes.map(esc).join('|')}"></dd>`;
 // detalhe
 function detalhe(t, vao) {
   const chip = n => `<button class="chip" data-t="${esc(n)}">${esc(n)}</button>`;
@@ -240,9 +253,11 @@ function detalhe(t, vao) {
     ${t.fase ? `<dt>Fases</dt><dd>${esc(t.fase)}${t.fases && Object.keys(t.fases).length > 1 ? ' · ' + Object.entries(t.fases).map(([f, m]) => `${esc(f)} ${km(m)}`).join(' · ') : ''}</dd>` : ''}
     <dt>Vem de</dt><dd>${t.pai ? chips([t.pai]) : '—'}</dd>
     <dt>Derivações</dt><dd>${chips(t.derivacoes)}</dd>
+    ${LINHA_UC([t.nome])}
     ${NAE ? blocoNae(t.nome) : ''}
     ${vao ? `<dt>Vão</dt><dd class="mono">${esc(vao[5])} · poste ${esc(vao[6])} → ${esc(vao[7])} · ${Math.round(vao[8])} m</dd>` : ''}
   </dl>`;
+  UCS_P.then(u => poeUc(u, [t.nome]));
 }
 // vários trechos (Ctrl ou ⌘ + clique): soma de extensão e NAE, e cada trecho com o seu
 function detalheVarios(l) {
@@ -252,8 +267,10 @@ function detalheVarios(l) {
     <div class="varios">${ts.map(t => `<div><button class="chip" data-t="${esc(t.nome)}">${esc(t.nome)}</button><span>${km(t.ext)}</span>` +
       `${NAE ? `<span><b>${c[t.nome] || 0}</b> NAE</span>` : ''}<small class="mono">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</small></div>`).join('')}</div><dl>
     <dt>Extensão</dt><dd>${km(ext)} somados</dd>
+    ${LINHA_UC(l)}
     ${nae}
   </dl><p class="lede so-mouse">Ctrl (⌘ no Mac) + clique põe ou tira um trecho. Clique sem Ctrl volta a um trecho só.</p>`;
+  UCS_P.then(u => poeUc(u, l));
 }
 function resumoNae() {
   return `<dt class="nae">${ROT_NAE}</dt><dd class="nae"><b>${doMes().length}</b> no alimentador</dd>`;

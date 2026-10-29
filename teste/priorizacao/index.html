@@ -117,7 +117,7 @@
       <tbody>
         <tr><td>Identificação e topologia</td><td>id estável, alimentador, SE, classe T1/T2/T3, zona de proteção (DJ, religador, fusível), fase predominante, extensão, vãos, trecho pai e derivações, versão do cadastro, confiança da segmentação</td><td>Existe (GIS processado no protótipo)</td></tr>
         <tr><td>Território e operação</td><td>polo, regional, município, base e equipe responsável, centro e geometria, rural ou urbano, acesso, restrição ambiental ou autorização pendente</td><td>Parcial: polo, município e equipe (pelas OS); falta acesso e restrição</td></tr>
-        <tr><td>Impacto</td><td>consumidores a jusante, clientes Grupo A e essenciais (hospital, captação de água, posto de saúde) a jusante, carga</td><td>Proxy: consumidores interrompidos por evento. Falta cadastro comercial</td></tr>
+        <tr><td>Impacto</td><td>consumidores a jusante, clientes Grupo A e essenciais (hospital, captação de água, posto de saúde) a jusante, carga</td><td>UCs ligadas por trafo (planilha UC por trafo). Falta Grupo A e essenciais</td></tr>
         <tr><td>Continuidade</td><td>ocorrências associadas (regra e confiança da associação), CI, CHI, duração, contribuição DEC/FEC</td><td>Existe (Crítica jan–ago/2026)</td></tr>
         <tr><td>Manutenção</td><td>OS por tipo (emergencial, corretiva, preventiva, programada), status, datas, cobertura por vão, método e confiança da cobertura</td><td>Existe (cobertura estimada pela descrição da OS)</td></tr>
         <tr><td>Vegetação</td><td>inspeções: distância à MT e à BT, espécie, altura, DAP, pontos críticos, data, fotos, validade; <b>classe de vegetação predominante</b>, que define o tipo de equipe e a produtividade</td><td>Não disponível hoje; fora do score. Classe de vegetação não existe</td></tr>
@@ -156,7 +156,7 @@
         <tr><td><span class="amostra" style="background:var(--c-his)"></span> NAE por 100 km</td><td>ocorrências por vegetação dos últimos 12 meses, depois da última limpeza, por 100 km do trecho</td><td>menos de 20: 5 · 20 a 39,9: 10 · 40 a 59,9: 15 · 60 ou mais: 20</td><td class="r num">20</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-his)"></span> DEC por 100 km</td><td>consumidor·hora interrompido nessas ocorrências, por 100 km</td><td>menos de 1.000: 5 · 1.000 a 9.999: 10 · 10.000 ou mais: 15</td><td class="r num">15</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-his)"></span> FEC por 100 km</td><td>consumidores interrompidos nessas ocorrências, por 100 km</td><td>menos de 100: 3 · 100 a 999: 5 · 1.000 a 9.999: 8 · 10.000 ou mais: 10</td><td class="r num">10</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Clientes por evento</td><td>clientes desligados no maior evento (aproxima os clientes a jusante)</td><td>1 a 9: 5 · 10 a 99: 10 · 100 a 999: 15 · 1.000 ou mais: 20</td><td class="r num">20</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Clientes (UCs ligadas)</td><td>UCs ligadas nos transformadores do trecho e dos que saem dele (planilha UC por trafo)</td><td>1 a 9: 5 · 10 a 99: 10 · 100 a 999: 15 · 1.000 ou mais: 20</td><td class="r num">20</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Hierarquia do trecho</td><td>classe do trecho: o tronco (T1) desliga mais clientes quando falha</td><td>T1: 10 · T2: 5 · T3: 3</td><td class="r num">10</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Cliente Grupo A</td><td>cliente de média tensão no trecho</td><td>tem: 5</td><td class="r num">5</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-man)"></span> Limpeza de faixa</td><td>última limpeza efetiva + ciclo (T1 3 anos, T2 4 anos, T3 5 anos)</td><td>vencida: 20 · vence em até 3 meses: 10</td><td class="r num">20</td></tr>
@@ -171,7 +171,7 @@
     <ul>
       <li><b>Últimos 12 meses, depois da última limpeza.</b> NAE, DEC e FEC contam as ocorrências por vegetação dos últimos 12 meses que aconteceram depois da última limpeza efetiva (OS executada cobrindo pelo menos 50% do trecho). As anteriores já foram tratadas pela limpeza e não contam; continuam valendo para as regras de recorrência F1 e F4.</li>
       <li><b>Por 100 km.</b> As três medidas são contadas no próprio trecho (a unidade que a equipe executa), divididas pela extensão dele e multiplicadas por 100, para comparar trechos de tamanhos diferentes. Trecho com menos de 5 km (editável em Opções) conta como 5 km: a mediana dos trechos tem 0,21 km e, sem esse mínimo, um trecho curtinho com uma só ocorrência passaria o tronco. Com 5 km, cada ocorrência vale 20 por 100 km: 1, 2 e 3 ocorrências dão 20, 40 e 60, o começo das faixas de 10, 15 e 20 pontos. Trecho curto com evento atribuído pela abrangência do DJ recebe o alerta Q4.</li>
-      <li><b>Clientes por evento.</b> O maior número de clientes desligados num mesmo evento dos últimos 12 meses, inclusive antes da limpeza (a limpeza não muda quantos clientes o trecho alimenta). Trecho sem evento, ou só com eventos sem clientes registrados, usa o típico da classe (mediana na data padrão: T1 499, T2 187, T3 3).</li>
+      <li><b>Clientes (UCs ligadas).</b> Soma das UCs ligadas nos transformadores do trecho e dos trechos que saem dele, pela planilha de UC por trafo: o que um evento no trecho pode deixar sem energia. A limpeza não muda quantos clientes o trecho alimenta. Alimentador fora da planilha usa o maior número de clientes desligados num evento dos últimos 12 meses, e trecho sem evento, o típico da classe.</li>
       <li><b>Ordem de grandeza.</b> Clientes, DEC e FEC sobem de faixa a cada 10 vezes: clientes 1 a 9, 10 a 99, 100 a 999 e 1.000 ou mais; DEC por 100 km menos de 1.000, 1.000 a 9.999 e 10.000 ou mais; FEC por 100 km menos de 100, 100 a 999, 1.000 a 9.999 e 10.000 ou mais. Um valor extremo ganha só o máximo do critério e não domina a nota.</li>
       <li><b>Grupo A.</b> Ainda não há cadastro na base: o critério dá 0 até ser marcado (no teste, pela ficha do trecho), e a regra F2 garante mínimo P2.</li>
       <li><b>Empate.</b> Entre notas iguais vem antes o trecho com mais ocorrências por 100 km, depois o de mais consumidor·hora por 100 km, depois o mais longo.</li>
@@ -327,6 +327,7 @@
 </footer>
 </div>
 <script src="../assets/priorizacao-dados.js"></script>
+<script src="../dados/ucs-trechos.js"></script>
 <script src="../assets/priorizacao.js"></script>
 </div>
 <script src="../assets/menu.js"></script>

@@ -15,7 +15,7 @@ const VERA = (() => {
     { k: 'nae', b: 'his', nome: 'NAE por 100 km', curto: 'NAE', lim: [20, 40, 60], passo: 0.1, zero: 'nenhuma' },
     { k: 'dec', b: 'his', nome: 'DEC por 100 km', curto: 'DEC', lim: [1000, 10000], passo: 1, zero: 'nenhum' },
     { k: 'fec', b: 'his', nome: 'FEC por 100 km', curto: 'FEC', lim: [100, 1000, 10000], passo: 1, zero: 'nenhum' },
-    { k: 'cli', b: 'imp', nome: 'Clientes por evento', curto: 'Clientes', lim: [10, 100, 1000], passo: 1, inteiro: true },
+    { k: 'cli', b: 'imp', nome: 'Clientes (UCs ligadas)', curto: 'Clientes', lim: [10, 100, 1000], passo: 1, inteiro: true },
     { k: 'hier', b: 'imp', nome: 'Hierarquia do trecho', curto: 'Hierarquia', rot: ['T1', 'T2', 'T3'] },
     { k: 'ga', b: 'imp', nome: 'Cliente Grupo A', curto: 'Grupo A', rot: ['tem'], zero: 'não tem ou sem dado' },
     { k: 'limp', b: 'man', nome: 'Limpeza de faixa', curto: 'Limpeza', rot: ['vencida', 'vence em breve'], zero: 'em dia' },
@@ -88,7 +88,7 @@ const VERA = (() => {
 
   function preparar(D) {
     const d0 = Date.parse(D.d0 + 'T00:00:00Z');
-    const ctx = { D, d0, alims: D.alims, muns: D.muns };
+    const ctx = { D, d0, alims: D.alims, muns: D.muns, ucs: (typeof window !== 'undefined' && window.UCS_TRECHOS && window.UCS_TRECHOS.al) || (typeof UCS_TRECHOS !== 'undefined' && UCS_TRECHOS.al) || null };
     ctx.osInicio = Math.round((Date.parse(D.os_inicio + 'T00:00:00Z') - d0) / DIA);
     ctx.kmClasse = { 1: D.estat.km_T1, 2: D.estat.km_T2, 3: D.estat.km_T3 };
     ctx.trechos = D.trechos.map((t, i) => {
@@ -164,6 +164,8 @@ const VERA = (() => {
     // 3. pontos, regras e faixa
     const res = ctx.trechos.map((t, i) => {
       const f = F[i], eGA = ga.has(t.i), ePlano = plano.has(t.polo) || noPlano.has(t.i);
+      // UCs ligadas dos trafos do trecho e dos que saem dele (planilha UC por trafo); alimentador sem a planilha usa os clientes por evento da Crítica
+      const uc = ctx.ucs && ctx.ucs[t.al] ? (ctx.ucs[t.al][t.n] || [0, 0, 0]) : null;
       // situação da limpeza de faixa: vence na última limpeza efetiva + ciclo da classe (T1 3, T2 4, T3 5 anos)
       const base = f.ult !== null ? f.ult : ctx.osInicio, stL = f.ult !== null ? 'real' : 'est';
       const vence = Math.round(base + P.ciclo[t.c] * 365.25), faltam = vence - ref;
@@ -184,7 +186,8 @@ const VERA = (() => {
           obs: antes ? qtd(antes, 'ocorrência anterior', 'ocorrências anteriores') + ' à última limpeza não ' + (antes === 1 ? 'conta' : 'contam') : '' },
         dec: { x: f.chi100, st: 'real', dado: f.chi > 0 ? bruto(f.chi) + ' consumidor·hora = ' + mostra(f.chi100) + ' por 100 km' : 'nenhum consumidor·hora' },
         fec: { x: f.ci100, st: 'real', dado: f.ci > 0 ? qtd(f.ci, 'consumidor', 'consumidores') + ' = ' + mostra(f.ci100) + ' por 100 km' : 'nenhum consumidor interrompido' },
-        cli: f.cliMax > 0 ? { x: f.cliMax, st: 'real', dado: qtd(f.cliMax, 'cliente', 'clientes') + ' no maior evento' }
+        cli: uc ? { x: uc[1], st: 'real', dado: qtd(uc[1], 'UC ligada', 'UCs ligadas') + ' nos trafos do trecho e a jusante' + (uc[1] !== uc[0] ? ' (' + fmtN(uc[0]) + ' nos do próprio trecho)' : '') }
+          : f.cliMax > 0 ? { x: f.cliMax, st: 'real', dado: qtd(f.cliMax, 'cliente', 'clientes') + ' no maior evento' }
           : { x: med.cli[t.c], st: 'est', dado: (f.nJan > 1 ? 'eventos sem clientes registrados' : f.nJan ? 'evento sem clientes registrados' : 'sem evento') + ': típico de T' + t.c + ', ' + qtd(med.cli[t.c], 'cliente', 'clientes') },
         hier: { j: t.c - 1, st: 'real', dado: 'T' + t.c + (t.c === 1 ? ' (tronco)' : ' (ramal)') },
         ga: eGA ? { j: 0, st: 'real', dado: 'tem (marcado neste teste)' } : { j: -1, st: 'falta', dado: 'sem dado na base' },
@@ -259,7 +262,9 @@ const VERA = (() => {
     partes.push(lin.length ? 'Pontos: ' + lin.join('; ') + '.' : 'Nenhum critério pontuou.');
     if (f.nJan) partes.push('Histórico: ' + qtd(f.nJan, 'ocorrência', 'ocorrências') + ' por vegetação nos últimos ' + P.janela + ' meses, em ' + qtd(f.meses, 'mês', 'meses diferentes') + (f.nJan > f.n ? '; ' + qtd(f.nJan - f.n, 'anterior', 'anteriores') + ' à última limpeza, fora do NAE, DEC e FEC' : '') + '.');
     else partes.push('Histórico: nenhuma ocorrência por vegetação nos últimos ' + P.janela + ' meses.');
-    if (f.cliMax) partes.push('Impacto: até ' + qtd(f.cliMax, 'cliente desligado', 'clientes desligados') + ' por evento.');
+    const uc = ctx.ucs && ctx.ucs[t.al] ? (ctx.ucs[t.al][t.n] || [0, 0, 0]) : null;
+    if (uc) partes.push('Impacto: ' + qtd(uc[1], 'UC ligada', 'UCs ligadas') + ' nos trafos do trecho e a jusante' + (f.cliMax ? '; maior evento da Crítica: ' + qtd(f.cliMax, 'cliente', 'clientes') : '') + '.');
+    else if (f.cliMax) partes.push('Impacto: até ' + qtd(f.cliMax, 'cliente desligado', 'clientes desligados') + ' por evento.');
     const L = r.limpeza;
     partes.push('Limpeza de faixa ' + L.situacao + ' (' + (L.vencida ? 'venceu' : 'vence') + ' em ' + L.vence + '; ' + L.origem + ').');
     for (const g of r.regras) partes.push('[' + g.id + '] ' + g.txt + '.');
@@ -348,7 +353,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
 
 'use strict';
 (() => {
-  const V = VERA, D = window.DADOS, ctx = V.preparar(D);
+  const V = VERA, D = window.DADOS, ctx = V.preparar(D);   // window.UCS_TRECHOS (dados/ucs-trechos.js) alimenta os clientes por trecho
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const { fmtN, fmt1, fmtP, fmtD, fmtKm, pct, qtd } = V;
@@ -399,6 +404,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
     fec: () => 'Consumidores interrompidos nessas ocorrências, por 100 km do trecho.',
     cli: () => {
       const m = S.out && S.out.med.cli;
+      if (ctx.ucs) return 'UCs ligadas nos transformadores do trecho e dos trechos que saem dele (planilha UC por trafo): quem um evento no trecho pode deixar sem energia. Alimentador fora da planilha usa os clientes do maior evento dos últimos ' + S.P.janela + ' meses, e trecho sem evento, o típico da classe.';
       return 'Clientes desligados no maior evento dos últimos ' + S.P.janela + ' meses. Trecho sem evento, ou só com eventos sem clientes registrados, usa o típico da classe' + (m ? ' (T1 ' + fmtN(m[1]) + ', T2 ' + fmtN(m[2]) + ', T3 ' + fmtN(m[3]) + ')' : '') + '.';
     },
     hier: () => 'Classe do trecho: tronco (T1) ou ramal (T2, T3).',
