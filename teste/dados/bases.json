@@ -21,10 +21,11 @@
   "processado": "2026-10-13"
  },
  "limpeza": {
-  "arquivo": "OS LIMPEZA DE FAIXA.xlsx",
-  "nome": "OS de limpeza de faixa",
-  "os": 2615,
-  "processado": "2026-10-03"
+  "arquivo": "1 - OS_STATUS.parquet",
+  "ate": "2026-10-29",
+  "nome": "OS de limpeza de faixa (RD e LD)",
+  "os": 3735,
+  "processado": "2026-10-29"
  },
  "manutencao": {
   "arquivo": "OS GERADAS PELA INSPEÇÃO.xlsx",
