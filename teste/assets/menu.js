@@ -40,6 +40,7 @@
     faixa: '<path d="M4 20l3-1 11-11-2-2L5 17zM14 6l2 2"/>',
     painel: '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/>',
     carteira: '<path d="M4 7h16v12H4z"/><path d="M9 7V5h6v2"/><path d="M4 12h16"/>',
+    podas: '<path d="M12 21v-8"/><path d="M12 13c-4 0-7-2.5-7-6.5C5 4 8 2.5 12 2.5S19 4 19 6.5C19 10.5 16 13 12 13Z"/><path d="m12 17 3-3"/>',
   };
   // relatórios (antes no rodapé da página inicial): o relatório e o manifesto só existem no site publicado; fora dele
   // (a cópia do Artifact) abrem lá, em outra aba
@@ -147,6 +148,8 @@
     `<li><a class="mnu-rel" href="${doSite('painel/')}"${outraAba}>${svg(ICONE.painel, '')}<span>Painel gerencial<small>Argos Briefing: metas x realizado de inspeção, estruturas, para-raio e melhoria</small></span></a></li>` +
     // carteira de limpeza de faixa por empreiteira: contratado, medido (SIAGO) e OS de faixa executadas e pendentes; página em carteira/
     `<li><a class="mnu-rel" href="${doSite('carteira/')}"${outraAba}>${svg(ICONE.carteira, '')}<span>Carteira de faixa<small>Por empreiteira: km e valor contratado e medido, OS executadas e pendentes</small></span></a></li>` +
+    // mapa de podas por quadra (setor censitário) em Palmas, Araguaína e Gurupi; página em podas/
+    `<li><a class="mnu-rel" href="${doSite('podas/')}"${outraAba}>${svg(ICONE.podas, '')}<span>Mapa de podas<small>Palmas, Araguaína e Gurupi: poda por quadra executada, pendente ou crítica</small></span></a></li>` +
     `<li><a class="mnu-rel" href="${raiz}priorizacao/">${svg(ICONE.ranking, '')}<span>Priorização de faixa<small>Trechos P1 a P4 pela nota de 0 a 100</small></span></a></li>` +
     // modo Limpeza de faixa (modo-faixa-rascunho.js): escolhe o alimentador e abre o mapa dele já no modo
     `<li><button type="button" class="mnu-rel mnu-fx-abre" aria-haspopup="dialog">${svg(ICONE.faixa, '')}<span>Croqui de limpeza de faixa<small>Escolher os trechos, marcar leve e pesada e baixar o croqui</small></span></button></li>` +
