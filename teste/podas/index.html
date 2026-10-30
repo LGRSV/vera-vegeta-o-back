@@ -364,8 +364,13 @@ function mostrar(c, ajustar) {
   if (camadas.os) { aplicarPts(c); pontos(c).grupo.addTo(map); }
   if (camadas.nae) naeTodos(c).addTo(map);
   naeLay.addTo(map); selecao.addTo(map);
-  if (ajustar) {                                        // enquadra as OS (a mancha urbana); sem OS, as quadras
-    const pm = pontos(c).marks, b = pm.length ? L.featureGroup(pm).getBounds() : k.bounds;
+  if (ajustar) {                                        // enquadra a mancha urbana: as OS sem os 2% mais afastados de
+    const pts = (P.pontos && P.pontos[c] || []);      // cada lado (distritos longe da sede deixariam a cidade pequena)
+    let b = k.bounds;
+    if (pts.length > 20) {
+      const q = (i, f) => { const v = pts.map(x => x[i]).sort((u, w) => u - w); return v[Math.min(v.length - 1, Math.floor(v.length * f))]; };
+      b = L.latLngBounds([q(0, .02), q(1, .02)], [q(0, .98), q(1, .98)]);
+    }
     if (b) map.fitBounds(b, {padding: [24, 24]});
   }
 }
