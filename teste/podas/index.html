@@ -237,7 +237,7 @@ $('nota').textContent = (Q ? 'Quadras e bairros de Palmas com o contorno do GeoP
 // ---- estado ---------------------------------------------------------------------------------------------
 let cidade = CIDADES[0];
 const ativos = new Set(ORDEM);                          // situações ligadas
-const camadas = {areas: true, os: true, nae: true};     // o que aparece junto no mapa
+const camadas = {areas: true, os: false, nae: false};   // o que aparece junto no mapa (abre só com as áreas; OS e NAE o usuário liga)
 let sel = null, selPt = null, fundo = 'sat';
 const cache = {}, pcache = {}, ncache = {};
 const mobile = () => matchMedia('(max-width:700px)').matches;
@@ -430,7 +430,7 @@ function mostrar(c, ajustar) {
       const q = (i, f) => { const v = pts.map(x => x[i]).sort((u, w) => u - w); return v[Math.min(v.length - 1, Math.floor(v.length * f))]; };
       b = L.latLngBounds([q(0, .02), q(1, .02)], [q(0, .98), q(1, .98)]);
     }
-    if (b) map.fitBounds(b, {padding: [24, 24]});
+    if (b) map.fitBounds(b, {paddingTopLeft: [!mobile() && !drop.hidden ? 392 : 24, 24], paddingBottomRight: [24, 24]});   // com a lista do olho aberta, enquadra só a parte livre
   }
 }
 
@@ -667,6 +667,7 @@ document.addEventListener('webkitfullscreenchange', ajustaTc);
 
 // ---- início ---------------------------------------------------------------------------------------------
 botoesCidade(); opcoes(); legenda();
+if (!mobile()) { drop.hidden = false; olho.setAttribute('aria-expanded', 'true'); }   // no computador a lista do olho já abre (no celular cobriria o mapa)
 mostrar(cidade, true);
 window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, google: !!gSess}),
   camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id || (l._pa.setores || []).includes(id)) : null),
