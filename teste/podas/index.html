@@ -62,6 +62,9 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 .pd-res li:hover,.pd-res li[aria-selected=true]{background:var(--vidro-hover);box-shadow:inset 0 0 0 1px var(--accent)}
 .pd-res .nada{cursor:default;color:#aab3b9;font-size:var(--t-sm)}
 /* legenda (canto de baixo, à esquerda) */
+.pd-rot{width:0!important;height:0!important;pointer-events:none}
+.pd-rot span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font:600 12px/1.1 var(--f-body);color:#fff;text-shadow:0 0 3px #000,0 0 2px #000,0 1px 2px #000}
+.pd-rot.q span{font:700 13px/1.1 var(--f-display);letter-spacing:.02em}
 .pd-leg{position:absolute;left:12px;bottom:24px;z-index:900;display:grid;gap:4px;padding:var(--s2) var(--s3);font:600 var(--t-xs)/1.2 var(--f-body)}
 .pd-leg[hidden]{display:none}
 .pd-leg div{display:flex;align-items:center;gap:var(--s2)}
@@ -158,6 +161,7 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 <script src="../assets/leaflet/leaflet.js"></script>
 <script src="../assets/mapa-satelite.js"></script>
 <script src="../dados/podas.js"></script>
+<script src="../dados/quadras.js"></script>
 <script>
 (function () {
 'use strict';
@@ -179,7 +183,8 @@ const OPAC = {executado: .5, pendente: .55, critico: .6, sem: .25};
 const SANGUE = '#8a0303';
 const P = window.PODAS;
 const CIDADES = P && P.cidades ? ['Palmas', 'Araguaína', 'Gurupi'].filter(c => Array.isArray(P.cidades[c])) : [];
-const titulo = a => a.nome ? a.nome : (a.tipo === 'bairro' ? a.id : 'Quadra ' + a.id);
+const titulo = a => a.tipo === 'quadra' && a.setores ? 'Quadra ' + a.nome : a.nome || 'Setor IBGE ' + a.id;
+const TIPOA = {quadra: 'Quadra', bairro: 'Bairro', area: 'Área verde ou de equipamento', setor: 'Setor censitário'};
 const TIPO = t => t === 'poste' ? 'Poste' : t === 'TR' ? 'Trafo' : 'Chave/equipamento (' + t + ')';
 const mesTxt = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1] + '/' + m.slice(0, 4);
 const dataNae = d => br(d.slice(0, 10)) + (d.length > 10 ? ' ' + d.slice(11) : '');
@@ -187,9 +192,46 @@ const dataNae = d => br(d.slice(0, 10)) + (d.length > 10 ? ' ' + d.slice(11) : '
 if (!P || !CIDADES.length) { $('nolib').innerHTML = '<b>Os dados de poda não carregaram.</b> Recarregue a página.'; $('nolib').hidden = false; return; }
 if (typeof L === 'undefined') { $('nolib').hidden = false; return; }
 
+// ---- quadras com nome: os setores do IBGE juntados na quadra/bairro (dados/quadras.js) -------------------------
+// Palmas: contorno oficial do GeoPalmas ("405 Sul" = ARSO 42); Araguaína e Gurupi: o bairro dos endereços (CNEFE 2022).
+// Situação refeita com a mesma regra do setor.
+const Q = window.PODAS_QUADRAS;
+function juntar(c) {
+  const grupos = Q && Q.cidades && Q.cidades[c]; if (!grupos) return;
+  const por = new Map(P.cidades[c].map(a => [a.id, a])), usados = new Set(), out = [];
+  grupos.forEach(g => {
+    const ss = g.s.map(id => por.get(id)).filter(Boolean); if (!ss.length) return;
+    ss.forEach(x => usados.add(x.id));
+    const soma = k => ss.reduce((t, x) => t + (x[k] || 0), 0);
+    const uniao = k => [...new Set(ss.flatMap(x => x[k] || []))].sort();
+    const a = {id: g.n || ss[0].id, tipo: g.t, nome: g.n, cod: g.c || '', setores: ss.map(x => x.id), rot: g.r, geo: g.geo,
+      exec6m: soma('exec6m'), pend: soma('pend'), crit: soma('crit'), total: soma('total'),
+      ult: ss.map(x => x.ult || '').sort().pop(), als: uniao('als'), nae_alto: uniao('nae_alto'),
+      apelidos: [...new Set(ss.map(x => x.nome).filter(Boolean))]};          // nome antigo do setor, para a busca
+    const vistas = new Set(), quando = o => o[4] || o[3] || '';
+    const ex = o => /^exec/i.test(o[1] || '');
+    a.os = ss.flatMap(x => x.os || []).filter(o => !vistas.has(o[0]) && vistas.add(o[0]))   // todas as pendentes, depois as 12 executadas mais novas
+      .sort((x, y) => (ex(x) - ex(y)) || (quando(y) > quando(x) ? 1 : quando(y) < quando(x) ? -1 : 0));
+    a.os = a.os.filter(o => !ex(o)).concat(a.os.filter(ex).slice(0, 12));
+    a.motivo = '';
+    const naeSem = [...new Set(ss.filter(x => !x.exec6m).flatMap(x => x.nae_alto || []))].sort();
+    if (a.crit) { a.st = 'critico'; a.motivo = `${a.crit} OS de poda pendente emergencial/urgente`; }
+    else if (naeSem.length) {                           // um setor crítico (NAE alto sem poda) deixa a área crítica
+      a.st = 'critico';
+      a.motivo = `alimentador${naeSem.length > 1 ? 'es' : ''} ${naeSem.join(', ')} com NAE alto e ${a.exec6m ? 'parte da área' : 'a área'} sem poda nos últimos 6 meses`;
+    }
+    else a.st = a.pend ? 'pendente' : a.exec6m ? 'executado' : 'sem';
+    out.push(a);
+  });
+  P.cidades[c].forEach(a => { if (!usados.has(a.id)) out.push(Object.assign({}, a, {tipo: 'setor'})); });
+  P.cidades[c] = out;
+}
+CIDADES.forEach(juntar);
+
 const mm = P.nae_meses || [];
 $('fonte').textContent = 'Palmas, Araguaína e Gurupi · OS status de ' + br(P.gerado) + (mm.length ? ' · NAE de ' + mesTxt(mm[0]) + ' a ' + mesTxt(mm[mm.length - 1]) : '');
-$('nota').textContent = 'Quadra = setor censitário do IBGE 2022. OS no poste da estrutura; sem ele no mapa, no trafo, na chave ou em outro ativo da OS. ' +
+$('nota').textContent = (Q ? 'Quadras e bairros de Palmas com o contorno do GeoPalmas (Prefeitura); em Araguaína e Gurupi, o bairro dos endereços do IBGE (CNEFE 2022). ' +
+  'Os números de cada um somam os setores censitários do IBGE 2022 que caem nele. ' : 'Quadra = setor censitário do IBGE 2022. ') + 'OS no poste da estrutura; sem ele no mapa, no trafo, na chave ou em outro ativo da OS. ' +
   'Crítico: OS emergencial/urgente pendente, ou alimentador com NAE alto (quinto mais alto da cidade) sem poda em 6 meses. NAE só do perímetro urbano.';
 
 // ---- estado ---------------------------------------------------------------------------------------------
@@ -291,7 +333,23 @@ function construir(c) {
   return (cache[c] = {grupo, lays, bounds: lays.length ? grupo.getBounds() : null});
 }
 function exibir(lay, on) { lay._pv = on; lay.options.interactive = on; lay.setStyle(on ? estilo(lay._pa, false) : {stroke: false, fill: false}); }
-function aplicar(c) { construir(c).lays.forEach(l => exibir(l, ativos.has(l._pa.st in COR ? l._pa.st : 'sem'))); }
+function aplicar(c) { construir(c).lays.forEach(l => exibir(l, ativos.has(l._pa.st in COR ? l._pa.st : 'sem'))); nomes(); }
+// nome da quadra/bairro escrito no mapa, de perto (zoom 15+), só nas áreas à mostra
+const rotulos = {}, ZROT = 15;
+function rotulosDe(c) {
+  return rotulos[c] || (rotulos[c] = P.cidades[c].filter(a => a.rot && a.nome).map(a => {
+    const m = L.marker(a.rot, {icon: L.divIcon({className: 'pd-rot' + (a.tipo === 'quadra' ? ' q' : ''), html: `<span>${esc(a.nome)}</span>`, iconSize: [0, 0]}),
+      interactive: false, keyboard: false});
+    m._pa = a; return m;
+  }));
+}
+const nomesLay = L.layerGroup();
+function nomes() {
+  const ver = camadas.areas && map.getZoom() >= ZROT;
+  rotulosDe(cidade).forEach(m => { const on = ver && ativos.has(m._pa.st in COR ? m._pa.st : 'sem');
+    if (on && !nomesLay.hasLayer(m)) nomesLay.addLayer(m); else if (!on && nomesLay.hasLayer(m)) nomesLay.removeLayer(m); });
+}
+map.on('zoomend', nomes);
 
 // ---- pontos das OS --------------------------------------------------------------------------------------
 function pontos(c) {
@@ -364,6 +422,7 @@ function mostrar(c, ajustar) {
   if (camadas.os) { aplicarPts(c); pontos(c).grupo.addTo(map); }
   if (camadas.nae) naeTodos(c).addTo(map);
   naeLay.addTo(map); selecao.addTo(map);
+  nomesLay.clearLayers(); nomesLay.addTo(map); nomes();
   if (ajustar) {                                        // enquadra a mancha urbana: as OS sem os 2% mais afastados de
     const pts = (P.pontos && P.pontos[c] || []);      // cada lado (distritos longe da sede deixariam a cidade pequena)
     let b = k.bounds;
@@ -395,7 +454,7 @@ function contagem(c) {
 function opcoes() {
   const {n, o} = contagem(cidade);
   const tot = x => Object.values(x).reduce((s, v) => s + v, 0);
-  const cam = [['areas', 'Áreas', nf(P.cidades[cidade].length) + ' quadras', '<i style="--c:#22c55e"></i>'],
+  const cam = [['areas', 'Áreas', nf(P.cidades[cidade].length) + (Q ? ' quadras e bairros' : ' quadras'), '<i style="--c:#22c55e"></i>'],
     ['os', 'OS de poda', nf(tot(o)), '<i class="pt" style="--c:#facc15"></i>'],
     ['nae', 'NAE', nf((P.nae && P.nae[cidade] || []).length), `<i class="pt" style="--c:${SANGUE}"></i>`]];
   $('cam').innerHTML = cam.map(([k, t, c, ic]) => `<button type="button" class="pd-op" data-k="${k}" aria-pressed="${camadas[k]}">${ic}<span class="n">${t}</span><span class="c">${c}</span>${OLHO}</button>`).join('');
@@ -461,8 +520,10 @@ function detalhe(a, c) {
     return `<li class="${/^exec/i.test(sit || '') ? 'ex' : 'pe'}"><b>${esc(num)}</b><span>${esc(cap(sit))} · ${esc((crit || '—').toString().toLowerCase())}</span>` +
       `<span>Criada em ${esc(br(cri) || '—')}${exe ? ' · executada em ' + esc(br(exe)) : ''}</span></li>`;
   }).join('');
+  const pendL = (a.os || []).filter(o => !/^exec/i.test(o[1] || '')).length;   // a base traz só as 12 OS mais novas de cada setor
+  const falta = a.pend > pendL ? `<p class="pd-peq">Na lista, ${esc(nf(pendL))} das ${esc(nf(a.pend))} pendentes: a base traz só as 12 OS mais recentes de cada setor.</p>` : '';
   return `<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
-    `<div><h2 id="pd-tit" tabindex="-1">${esc(titulo(a))}</h2><p class="pd-tipo">${a.tipo === 'bairro' ? 'Bairro' : 'Quadra · ' + esc(a.id)} · ${esc(c)}</p></div>` +
+    `<div><h2 id="pd-tit" tabindex="-1">${esc(titulo(a))}</h2><p class="pd-tipo">${esc(TIPOA[a.tipo] || 'Quadra')} · ${a.cod ? esc(a.cod) + ' · ' : ''}${a.setores && a.tipo !== 'setor' ? esc(nf(a.setores.length)) + (a.setores.length === 1 ? ' setor' : ' setores') + ' IBGE' : esc(a.id)} · ${esc(c)}</p></div>` +
     `<div class="pd-sit" style="--c:${COR[a.st] || COR.sem}"><b>${esc(ROT[a.st] || a.st)}</b>${a.motivo ? `<span>${esc(a.motivo)}</span>` : ''}</div>` +
     (a._c ? links(a._c.lat, a._c.lng) : '') +
     `<dl class="pd-kp">` +
@@ -471,7 +532,7 @@ function detalhe(a, c) {
     `<div><dt>Pendentes</dt><dd>${esc(nf(a.pend || 0))}<small>${a.crit ? esc(nf(a.crit)) + ' emergencial/urgente' : ''}</small></dd></div>` +
     `<div><dt>OS no total</dt><dd>${esc(nf(a.total || 0))}</dd></div></dl>` +
     `<div><h3>Alimentadores</h3>${als}</div>` +
-    `<div><h3>OS recentes</h3>${os ? `<ul class="pd-os">${os}</ul>` : '<p class="pd-peq">Nenhuma OS de poda.</p>'}</div></div>`;
+    `<div><h3>OS recentes</h3>${os ? `<ul class="pd-os">${os}</ul>` : '<p class="pd-peq">Nenhuma OS de poda.</p>'}${falta}</div></div>`;
 }
 function marcar(a, lay) {
   selecao.clearLayers();
@@ -534,7 +595,8 @@ function achar(txt) {
   const n = sem(txt).trim(); if (!n) return [];
   const out = [];
   CIDADES.forEach((c, ci) => {
-    P.cidades[c].forEach(a => { const i = sem(titulo(a) + ' ' + a.id).indexOf(n); if (i >= 0) out.push({k: 'a', c, a, o: (i === 0 ? 0 : 1) + (c === cidade ? 0 : 2 + ci)}); });
+    const ids = /^\d{6,}$/.test(n);                       // código IBGE do setor só com 6+ dígitos (senão "405" acha tudo)
+    P.cidades[c].forEach(a => { const i = sem([titulo(a), a.id, a.cod, ...(a.apelidos || []), ...(ids ? a.setores || [] : [])].filter(Boolean).join(' ')).indexOf(n); if (i >= 0) out.push({k: 'a', c, a, o: (i === 0 ? 0 : 1) + (c === cidade ? 0 : 2 + ci)}); });
     (P.pontos && P.pontos[c] || []).forEach(pt => {
       if (sem(pt[3]).includes(n)) out.push({k: 'o', c, pt, o: 4 + (c === cidade ? 0 : 2)});
       else if (n.length >= 4 && sem(pt[7]).startsWith(n)) out.push({k: 'p', c, pt, o: 5 + (c === cidade ? 0 : 2)});
@@ -549,7 +611,7 @@ function lista() {
   $('opcoes').hidden = !vazio; res.hidden = vazio;
   if (vazio) return;
   res.innerHTML = achados.length ? achados.map((r, i) => `<li role="option" id="op${i}" data-i="${i}" aria-selected="false">` +
-    (r.k === 'a' ? `<b>${esc(titulo(r.a))}</b><small>${esc(r.c)} · quadra · ${esc(ROT[r.a.st] || r.a.st)}</small>`
+    (r.k === 'a' ? `<b>${esc(titulo(r.a))}</b><small>${esc(r.c)} · ${esc((TIPOA[r.a.tipo] || 'quadra').toLowerCase())} · ${esc(ROT[r.a.st] || r.a.st)}</small>`
       : `<b>${esc(r.k === 'o' ? r.pt[3] : TIPO(r.pt[8]) + ' ' + r.pt[7])}</b><small>${esc(r.c)} · ${r.k === 'o' ? esc(TIPO(r.pt[8]) + ' ' + r.pt[7]) : 'OS ' + esc(r.pt[3])} · ${esc(ROTP[r.pt[2]])}</small>`) +
     '</li>').join('') : '<li class="nada" role="option" aria-disabled="true">Nada encontrado.</li>';
 }
@@ -607,7 +669,7 @@ document.addEventListener('webkitfullscreenchange', ajustaTc);
 botoesCidade(); opcoes(); legenda();
 mostrar(cidade, true);
 window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, google: !!gSess}),
-  camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null),
+  camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id || (l._pa.setores || []).includes(id)) : null),
   visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); },
   pontos: () => map.hasLayer(pontos(cidade).grupo) ? pontos(cidade).grupo.getLayers().length : 0, nae: () => naeLay.getLayers().length,
   naeTodos: () => map.hasLayer(naeTodos(cidade)) ? naeTodos(cidade).getLayers().length : 0, camadas: () => ({...camadas})};
