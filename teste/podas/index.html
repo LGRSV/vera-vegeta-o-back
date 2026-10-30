@@ -109,6 +109,10 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 .pd-nae-t i{width:12px;height:12px;border-radius:50%;background:var(--pd-nae);border:1.5px solid #fff;flex:none}
 .pd-os b{font:600 var(--t-sm) var(--f-mono);overflow-wrap:anywhere}
 .pd-os span{color:var(--muted);font-size:var(--t-xs)}
+.pd-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s2)}
+.pd-links a{display:grid;justify-items:center;gap:2px;padding:var(--s2) 4px;min-height:52px;border:1px solid var(--line-forte);border-radius:var(--r2);color:var(--fg);text-decoration:none;font:600 var(--t-xs)/1.2 var(--f-body);text-align:center}
+.pd-links a:hover{border-color:var(--accent);color:var(--accent)}
+.pd-links svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .nota{color:var(--muted);font-size:var(--t-xs);margin:0;max-width:110ch}
 @media(max-width:700px){
   #map{height:clamp(420px,72svh,700px)}
@@ -274,6 +278,7 @@ function construir(c) {
     const lay = L.GeoJSON.geometryToLayer({type: 'Feature', properties: {}, geometry: a.geo}, estilo(a, false));
     if (!lay) return;
     lay._pa = a;
+    a._c = lay.getBounds().getCenter();
     lay.on('click', e => { L.DomEvent.stopPropagation(e); escolher(a, c, lay); });
     lay.on('mouseover', () => { if (!sel || sel.lay !== lay) lay.setStyle(estilo(a, true)); });
     lay.on('mouseout', () => lay.setStyle(estilo(a, false)));
@@ -311,7 +316,7 @@ function naeMarca(o, destaque) {
     : {radius: 5.5, color: '#ffffff', weight: 1.2, fillColor: SANGUE, fillOpacity: 1});
   m.bindTooltip(`<b>NAE · ${esc(dataNae(o[3]))}</b><small>${esc(o[5])} ${esc(o[4])} · ${esc(o[2])} ${esc(o[9])}</small>` +
     `<small>${esc(nf(o[7]))} consumidor${o[7] === 1 ? '' : 'es'} · ${esc(nf(o[8]))} min</small><small>${esc(o[6])}</small>`, {direction: 'top', className: 'pd-tip', opacity: 1});
-  m.on('click', e => { L.DomEvent.stopPropagation(e); m.openTooltip(); });
+  m.on('click', e => { L.DomEvent.stopPropagation(e); escolherNae(o); });
   return m;
 }
 const naeTodos = c => ncache[c] || (ncache[c] = L.featureGroup((P.nae && P.nae[c] || []).map(o => naeMarca(o, false))));
@@ -332,6 +337,18 @@ function naeSec(als, lst) {
     `<p class="pd-peq" style="margin:0 0 var(--s2)">${esc(nf(lst.length))} em ${esc(nf(por.size))} ativo${por.size === 1 ? '' : 's'} de ${esc(als.join(', '))}</p>` +
     `<ul class="pd-os">${top.map(([k, v]) => `<li class="nae"><b>${esc(k)}</b><span>${esc(nf(v.n))} NAE · ${esc(v.al)} ${esc(v.t)} · última em ${esc(dataNae(v.ult))}</span></li>`).join('')}</ul>` +
     (por.size > top.length ? `<p class="pd-peq">e mais ${esc(nf(por.size - top.length))} ativos.</p>` : '') + '</div>';
+}
+// abrir o local no Google: Street View (panorama mais recente perto do ponto), Google Earth e Maps em satélite
+const IC = {sv: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><path d="M9.5 21v-6.5H8V10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4.5h-1.5V21"/></svg>',
+  ge: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
+  gm: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>'};
+function links(lat, lon) {
+  const ll = lat.toFixed(6) + ',' + lon.toFixed(6);
+  const a = (h, ic, t) => `<a href="${h}" target="_blank" rel="noopener" title="${t} (abre em outra aba)">${ic}${t}</a>`;
+  return '<div class="pd-links">' +
+    a('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + ll, IC.sv, 'Street View') +
+    a(`https://earth.google.com/web/@${ll},600a,250d,35y,0h,45t,0r`, IC.ge, 'Google Earth') +
+    a(`https://www.google.com/maps/@${ll},120m/data=!3m1!1e3`, IC.gm, 'Maps satélite') + '</div>';
 }
 const comNae = (html, sec) => sec ? html.replace(/<\/div>$/, sec + '</div>') : html;
 
@@ -442,6 +459,7 @@ function detalhe(a, c) {
   return `<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
     `<div><h2 id="pd-tit" tabindex="-1">${esc(titulo(a))}</h2><p class="pd-tipo">${a.tipo === 'bairro' ? 'Bairro' : 'Quadra · ' + esc(a.id)} · ${esc(c)}</p></div>` +
     `<div class="pd-sit" style="--c:${COR[a.st] || COR.sem}"><b>${esc(ROT[a.st] || a.st)}</b>${a.motivo ? `<span>${esc(a.motivo)}</span>` : ''}</div>` +
+    (a._c ? links(a._c.lat, a._c.lng) : '') +
     `<dl class="pd-kp">` +
     `<div><dt>Última poda</dt><dd>${a.ult ? esc(br(a.ult)) : 'Nenhuma'}${a.ult ? `<small>${esc(dias(a.ult))}</small>` : ''}</dd></div>` +
     `<div><dt>Podas em 6 meses</dt><dd>${esc(nf(a.exec6m || 0))}</dd></div>` +
@@ -477,10 +495,21 @@ function escolherPt(pt, foco) {
     `<div class="pd-sit" style="--c:${COR[pt[2]]}"><b>${esc(ROTP[pt[2]])}</b><span>${esc(cap(pt[4]))} · ${esc((pt[5] || '—').toLowerCase())}</span></div>` +
     `<dl class="pd-kp"><div><dt>${exec ? 'Executada em' : 'Criada em'}</dt><dd>${esc(br(pt[6]) || '—')}${exec ? `<small>${esc(dias(pt[6]))}</small>` : ''}</dd></div>` +
     `<div><dt>Ativo</dt><dd>${esc(pt[7])}<small>${esc(TIPO(pt[8]))}</small></dd></div>` +
-    `<div><dt>Alimentador</dt><dd>${esc(pt[9] || '—')}</dd></div></dl></div>`;
+    `<div><dt>Alimentador</dt><dd>${esc(pt[9] || '—')}</dd></div></dl>${links(pt[0], pt[1])}</div>`;
   if (pt[2] === 'critico' && pt[9]) html = comNae(html, naeSec([pt[9]], mostraNae([pt[9]]))); else naeLay.clearLayers();
   abrePainel(html);
   if (foco) { const h = $('pd-tit'); if (h) h.focus({preventScroll: true}); }
+}
+function escolherNae(o) {
+  if (sel) { sel.lay.setStyle(estilo(sel.a, false)); sel = null; }
+  selPt = null;
+  selecao.clearLayers();
+  selecao.addLayer(L.circleMarker([o[0], o[1]], {radius: 11, color: '#ffffff', weight: 3, fill: false, interactive: false}));
+  abrePainel(`<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
+    `<div><h2 id="pd-tit" tabindex="-1">${esc(o[5])} ${esc(o[4])}</h2><p class="pd-tipo">NAE · ${esc(cidade)}</p></div>` +
+    `<div class="pd-sit" style="--c:${SANGUE}"><b>${esc(dataNae(o[3]))}</b><span>${esc(o[6])}</span></div>` +
+    `<dl class="pd-kp"><div><dt>Alimentador</dt><dd>${esc(o[2])}<small>${esc(o[9])}</small></dd></div>` +
+    `<div><dt>Consumidores</dt><dd>${esc(nf(o[7]))}<small>${esc(nf(o[8]))} min</small></dd></div></dl>${links(o[0], o[1])}</div>`);
 }
 function fechar() {
   if (sel) sel.lay.setStyle(estilo(sel.a, false));
