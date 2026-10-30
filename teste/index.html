@@ -1,5 +1,30 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
+<script>/* tela inicial nova (central/): aberta direto, esta página vai para lá, a menos que a escolha salva seja a versão anterior
+   (Shift sozinho alterna e lembra; ?classico=1 força esta versão). Dentro do quadro da tela nova, fica como está. */
+(function () {
+  var W = window, L = location;
+  function pref() { try { return localStorage.getItem('visao'); } catch (e) { return null; } }
+  function quer() { return W.top === W && pref() !== 'classico' && !/[?&]classico=1(&|$)/.test(L.search); }
+  function paraCasca() { L.replace('central/' + L.search.replace(/([?&])classico=1&?/, '$1').replace(/[?&]$/, '') + L.hash); }
+  if (quer()) { document.documentElement.style.display = 'none'; paraCasca(); return; }
+  if (/[?&]classico=1(&|$)/.test(L.search)) { try { localStorage.setItem('visao', 'classico'); } catch (e) {} }
+  W.addEventListener('pageshow', function (e) { if (e.persisted && quer()) paraCasca(); });
+  if (W.top !== W) return;
+  var t = 0;
+  function ocupado(el) {
+    if (el && (el.isContentEditable || (el.closest && el.closest('input,textarea,select')))) return true;
+    return !!document.querySelector('dialog[open]');
+  }
+  W.addEventListener('keydown', function (e) {
+    t = e.key === 'Shift' && !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey && !e.isComposing && !ocupado(e.target) ? Date.now() : 0;
+  }, true);
+  W.addEventListener('keyup', function (e) {
+    var ok = e.key === 'Shift' && t && Date.now() - t < 600; t = 0;
+    if (ok && !ocupado(e.target)) { try { localStorage.setItem('visao', 'casca'); } catch (er) {} paraCasca(); }
+  }, true);
+  ['pointerdown', 'mousedown', 'wheel', 'contextmenu', 'blur'].forEach(function (n) { W.addEventListener(n, function () { t = 0; }, true); });
+})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>ARGOS Manutenção</title>

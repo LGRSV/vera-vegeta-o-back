@@ -1,0 +1,259 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>ARGOS</title>
+<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}document.documentElement.dataset.theme=t==='claro'?'light':'dark'})()</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+/* Tela inicial nova do ARGOS: módulos em cartões, cada módulo abre num quadro (iframe) e o dock embaixo troca entre eles.
+   Shift sozinho volta à versão anterior (../index.html) e lembra a escolha. */
+html,body{height:100%;overscroll-behavior-y:contain}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+button,a{-webkit-tap-highlight-color:transparent}
+button{cursor:pointer;color:inherit;font:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{flex:none;width:100%;max-width:none;height:76px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);position:relative;background:var(--bg)}
+.logo{background:none;border:0;font:700 28px var(--f-mono);letter-spacing:.25em;padding:8px 10px;color:var(--fg)}
+.logo span{display:block;font-size:9px;letter-spacing:.5em;color:var(--muted);margin-top:3px}
+.logo span:before,.logo span:after{content:'';display:inline-block;width:20px;height:1px;vertical-align:middle;background:var(--accent);margin:0 9px}
+.current{position:absolute;right:24px;color:var(--muted);font:600 var(--t-xs) var(--f-body);letter-spacing:.06em;text-transform:uppercase}
+main{flex:1;min-height:0;position:relative;overflow:auto}
+.home{max-width:1120px;margin:auto;padding:48px 24px 40px}
+.hero{text-align:center;padding:0 0 36px}
+.hero p{max-width:none;font:var(--t-xs) var(--f-mono);letter-spacing:.3em;color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.module{display:block;background:var(--paper);border:1px solid var(--line);border-radius:var(--r3);text-align:left;padding:22px;min-height:130px;color:var(--fg);text-decoration:none;transition:border-color var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.module:hover{border-color:var(--accent);transform:translateY(-3px)}
+.module b{display:block;font-size:18px;font-weight:600;margin:6px 0}
+.module small{color:var(--muted);font-size:var(--t-sm)}
+.module-icon{display:block;width:30px;height:30px;fill:none;stroke:var(--accent);stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;margin-bottom:12px;transition:transform var(--dur)}
+.module:hover .module-icon{transform:translateY(-2px)}
+.secondary{margin-top:22px;padding-top:22px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.secondary .module{min-height:100px}
+.dica{max-width:none;margin:22px 0 0;text-align:center;color:var(--muted);font-size:var(--t-xs)}
+.dica kbd{font:600 var(--t-xs) var(--f-mono);border:1px solid var(--line-forte);border-radius:4px;padding:1px 6px}
+.screen{position:absolute;inset:0;display:none}
+.screen iframe{border:0;width:100%;height:100%;display:block;background:var(--bg)}
+.tools{max-width:950px;margin:auto;padding:24px 24px 40px}
+.tools h2{font:700 var(--t-xl) var(--f-display)}
+.tools .module{margin:12px 0}
+.dock{flex:none;display:flex;justify-content:center;gap:4px;padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg);overflow-x:auto}
+.dock button{border:0;background:transparent;color:var(--muted);border-radius:var(--r2);padding:0 15px;min-height:var(--alvo,44px);white-space:nowrap;font-size:var(--t-sm);font-weight:600}
+.dock button:hover{color:var(--fg)}
+.dock button[aria-current=page]{background:var(--seg-on);color:var(--fg);box-shadow:inset 0 -2px var(--accent)}
+.anim{animation:up .35s var(--ease) both}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.anim{animation:none}.module,.module-icon{transition:none}}
+@media(max-width:700px){
+  .home{padding:28px 14px 28px}
+  .grid{grid-template-columns:1fr 1fr;gap:10px}
+  .module{padding:16px;min-height:128px}
+  .module b{font-size:16px}
+  .hero p{letter-spacing:.15em}
+  .secondary{grid-template-columns:1fr}
+  .current{right:12px;max-width:34%;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top{height:64px}
+  .logo{font-size:23px}
+  .dock{justify-content:flex-start}
+  .dock button{padding:0 11px}
+}
+@media(max-height:480px){.top{display:none}}
+</style></head><body>
+<header class="top"><button class="logo" id="logo" aria-label="Voltar ao início">ARGOS<span>MANUTENÇÃO</span></button><span class="current" id="current" aria-live="polite"></span></header>
+<main id="main">
+  <section class="home" id="inicio">
+    <h1 class="vh">ARGOS Manutenção</h1>
+    <div class="hero"><p>MANUTENÇÃO · VEGETAÇÃO · PLANEJAMENTO</p></div>
+    <div class="grid" id="modules"></div>
+    <div class="secondary" id="secundarios"></div>
+    <p class="dica"><kbd>Shift</kbd> volta à versão anterior · <a href="../index.html?classico=1" id="classico">abrir a versão anterior</a></p>
+  </section>
+  <section class="screen" id="screen"><iframe id="frame" title="Módulo ARGOS" allow="fullscreen; clipboard-write"></iframe></section>
+  <section class="tools" id="scripts" hidden>
+    <h2>Scripts e atualização de dados</h2>
+    <button type="button" class="module" id="atualiza"><b>Atualizar bases</b><small id="bases-txt">Enviar arquivos e acompanhar a rotina de atualização</small></button>
+    <a class="module" href="../assets/scripts/trechos-kml.zip" download><b>Script KML → trechos</b><small>Baixar pacote ZIP</small></a>
+    <a class="module" id="ln-ferr" target="_blank" rel="noopener"><b>Scripts de processamento</b><small>Ferramentas da atualização automática no repositório</small></a>
+    <a class="module" id="ln-hist" target="_blank" rel="noopener"><b>Histórico de atualizações</b><small>Execuções e registros do processamento de bases</small></a>
+  </section>
+</main>
+<nav class="dock" id="dock" aria-label="Módulos"></nav>
+<script src="../assets/modulos.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const MOD = (window.ARGOS_MODULOS || []).map(m => Object.assign({}, m, {url: new URL('../' + m.href, location.href).href}));
+const ICON_SCRIPTS = '<rect x="2" y="4" width="20" height="16" rx="3"/><path d="m6 9 3 3-3 3m7 0h5"/>';
+const icone = p => `<svg class="module-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${p}</svg>`;
+const frame = $('frame');
+const PAGINAS = ['inicio', 'scripts'].concat(MOD.map(m => m.id));
+const ORDEM = ['inicio'].concat(MOD.filter(m => m.dock).map(m => m.id), ['scripts']);
+let ativo = null, pendente = false, ultimo = 0;
+
+// ---- repositório do site (links de ferramentas e histórico): do endereço do github.io, com reserva
+const gh = /\.github\.io$/.test(location.hostname) ? {dono: location.hostname.split('.')[0], repo: location.pathname.split('/')[1]} : {dono: 'LGRSV', repo: 'vera-vegeta-o-back'};
+$('ln-ferr').href = `https://github.com/${gh.dono}/${gh.repo}/tree/gh-pages/ferramentas`;
+$('ln-hist').href = `https://github.com/${gh.dono}/${gh.repo}/actions/workflows/atualiza-bases.yml`;
+
+// ---- tela inicial, dock
+$('modules').innerHTML = MOD.filter(m => m.grade).map(m =>
+  `<a class="module" href="#${m.id}" data-ir="${m.id}">${icone(m.icone)}<b>${esc(m.titulo)}</b><small>${esc(m.desc)}</small></a>`).join('');
+const rel = MOD.find(m => m.id === 'relatorio');
+$('secundarios').innerHTML = `<a class="module" href="#scripts" data-ir="scripts">${icone(ICON_SCRIPTS)}<b>Scripts e atualização de dados</b><small>Enviar bases, acompanhar processamento e baixar scripts</small></a>` +
+  (rel ? `<a class="module" href="#relatorio" data-ir="relatorio">${icone(rel.icone)}<b>${esc(rel.titulo)}</b><small>${esc(rel.desc)}</small></a>` : '');
+$('dock').innerHTML = [['inicio', 'Início']].concat(MOD.filter(m => m.dock).map(m => [m.id, m.dock]), [['scripts', 'Scripts']])
+  .map(([id, t]) => `<button type="button" data-ir="${id}">${esc(t)}</button>`).join('');
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-ir]'); if (!a) return;
+  if (a.tagName === 'A' && (e.ctrlKey || e.metaKey || e.shiftKey || e.button)) return;   // abrir em outra aba
+  e.preventDefault(); go(a.dataset.ir);
+});
+$('logo').addEventListener('click', () => go('inicio'));
+
+// data da última atualização das bases (dados/bases.json, o mesmo do menu)
+fetch('../dados/bases.json', {cache: 'no-cache'}).then(r => r.ok ? r.json() : null).then(b => {
+  if (!b) return;
+  const d = Object.values(b).map(x => [x.enviado, x.processado].filter(Boolean).sort().pop()).filter(Boolean).sort().pop();
+  if (d) $('bases-txt').textContent = 'Enviar arquivos e acompanhar a rotina · última atualização em ' + d.slice(0, 10).split('-').reverse().join('/');
+}).catch(() => {});
+
+// ---- navegação: #id no endereço; Voltar/Avançar do navegador trocam o módulo
+function go(id, pop, sohTroca) {
+  if (!PAGINAS.includes(id)) id = 'inicio';
+  if (id !== 'mapa') pendente = false;
+  const m = MOD.find(x => x.id === id);
+  const mudou = id !== ativo;
+  ativo = id;
+  $('inicio').hidden = id !== 'inicio';
+  $('scripts').hidden = id !== 'scripts';
+  $('screen').style.display = m ? 'block' : 'none';
+  if (m && frame.dataset.page !== id) {
+    frame.dataset.page = id;
+    frame.title = m.titulo;
+    const url = m.url + (id === 'mapa' ? location.search.replace(/[?&]classico=1/, '') : '');
+    try { if (frame.contentWindow && frame.contentWindow.location.href !== 'about:blank') frame.contentWindow.location.replace(url); else frame.src = url; }
+    catch (e) { frame.src = url; }
+  }
+  $('current').textContent = m ? m.titulo : id === 'scripts' ? 'Scripts' : '';
+  document.querySelectorAll('#dock [data-ir]').forEach(b => {
+    if (b.dataset.ir !== id) { b.removeAttribute('aria-current'); return; }
+    b.setAttribute('aria-current', 'page');
+    b.scrollIntoView({inline: 'nearest', block: 'nearest', behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth'});
+  });
+  document.title = m ? m.titulo + ' · ARGOS' : id === 'scripts' ? 'Scripts · ARGOS' : 'ARGOS';
+  const el = m ? $('screen') : $(id);
+  if (mudou) { el.classList.remove('anim'); void el.offsetWidth; el.classList.add('anim'); $('main').scrollTop = 0; }
+  if (location.hash.slice(1) !== id) { if (sohTroca) history.replaceState(null, '', '#' + id); else if (!pop) history.pushState(null, '', '#' + id); }
+}
+addEventListener('popstate', () => go(location.hash.slice(1) || 'inicio', true));
+
+// ---- rolagem/gesto na borda troca de módulo (fora de mapas, campos e diálogos)
+const FORA = '.leaflet-container,.mt-mapa,dialog,input,select,textarea,[contenteditable],.pd-painel,.pd-drop,.dock,.top';
+function passo(d) {
+  if (Date.now() - ultimo < 1100) return;
+  const i = ORDEM.indexOf(ativo);
+  if (i < 0 || i + d < 0 || i + d >= ORDEM.length) return;
+  ultimo = Date.now(); go(ORDEM[i + d]);
+}
+function rolaveis(el, d, w) {                          // algum contêiner acima do alvo ainda rola nesse sentido?
+  for (; el && el !== w.document.documentElement; el = el.parentElement) {
+    const s = w.getComputedStyle(el);
+    if (/(auto|scroll)/.test(s.overflowY) && el.scrollHeight > el.clientHeight + 2) {
+      if (d > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 2 : el.scrollTop > 0) return true;
+    }
+  }
+  return false;
+}
+function liga(w, raiz) {
+  let soma = 0, zera = 0, x0 = 0, y0 = 0, ok = false, ini = 0, bordaIni = false, quieto = 0;
+  const borda = d => { const el = raiz ? raiz() : w.document.scrollingElement; return d > 0 ? el.scrollTop + el.clientHeight >= el.scrollHeight - 8 : el.scrollTop <= 0; };
+  w.addEventListener('wheel', e => {
+    if (e.ctrlKey || (e.target.closest && e.target.closest(FORA))) return;
+    if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+    const d = Math.sign(e.deltaY), agora = Date.now();
+    // uma sequência de roda começa depois de 400 ms parada; só troca se já começou na borda (a inércia que chega ao fim não troca)
+    if (agora - quieto > 400) bordaIni = borda(d) && !rolaveis(e.target, d, w);
+    quieto = agora;
+    if (!bordaIni || !borda(d) || rolaveis(e.target, d, w)) { soma = 0; return; }
+    soma += e.deltaY; clearTimeout(zera); zera = setTimeout(() => { soma = 0; }, 300);
+    if (Math.abs(soma) > 220) { soma = 0; passo(d); }
+  }, {passive: true});
+  w.addEventListener('touchstart', e => {
+    ok = e.touches.length === 1 && !(e.target.closest && e.target.closest(FORA));
+    if (ok) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; ini = {up: borda(-1), down: borda(1)}; }
+  }, {passive: true});
+  w.addEventListener('touchend', e => {
+    if (!ok) return;
+    const t = e.changedTouches[0], dy = y0 - t.clientY, dx = x0 - t.clientX;
+    const d = Math.sign(dy);                           // só troca se o gesto começou já na borda (rolagem que chega ao fim não troca)
+    if (Math.abs(dy) > 95 && Math.abs(dy) > 2 * Math.abs(dx) && (d > 0 ? ini.down : ini.up) && !rolaveis(e.target, d, w)) passo(d);
+  }, {passive: true});
+}
+liga(window, () => $('main'));
+
+// ---- Shift sozinho: volta à versão anterior (também com o foco dentro do módulo)
+function shiftSolo(w, aoSolo, ocupado) {
+  let t = 0; const zera = () => { t = 0; };
+  w.addEventListener('keydown', e => {
+    t = e.key === 'Shift' && !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey && !e.isComposing && !ocupado(e.target) ? Date.now() : 0;
+  }, true);
+  w.addEventListener('keyup', e => {
+    const ok = e.key === 'Shift' && t && Date.now() - t < 600;
+    t = 0;
+    if (ok && !ocupado(e.target)) aoSolo();
+  }, true);
+  ['pointerdown', 'mousedown', 'wheel', 'contextmenu', 'blur'].forEach(n => w.addEventListener(n, zera, true));
+}
+const docFrame = () => { try { return frame.contentDocument; } catch (e) { return null; } };
+function ocupado(el) {
+  if (el && (el.isContentEditable || (el.closest && el.closest('input,textarea,select')))) return true;
+  return [document, docFrame()].some(d => d && d.querySelector('dialog[open]'));
+}
+function paraClassico() {
+  let u = '../index.html' + location.search.replace(/[?&]classico=1/, '');
+  try { localStorage.setItem('visao', 'classico'); } catch (e) { u += (u.indexOf('?') < 0 ? '?' : '&') + 'classico=1'; }
+  location.replace(u);
+}
+shiftSolo(window, paraClassico, ocupado);
+$('classico').addEventListener('click', e => { e.preventDefault(); paraClassico(); });
+
+// ---- módulo carregado: gestos, Shift, título oculto (o módulo atual aparece no topo), tema e "Atualizar bases"
+frame.addEventListener('load', () => {
+  let w, d;
+  try { w = frame.contentWindow; d = frame.contentDocument; if (!d) return; } catch (e) { console.warn('ARGOS: módulo fora da mesma origem'); return; }
+  liga(w); shiftSolo(w, paraClassico, ocupado);
+  const st = d.createElement('style');
+  st.textContent = 'header.cab h1,.pd-cab h1{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}';
+  d.head.appendChild(st);
+  // o módulo que o quadro mostra de fato (links internos do módulo podem levar a outra página)
+  const p = w.location.pathname;
+  const raizSite = new URL('../', location.href).pathname;
+  const m = MOD.slice().sort((a, b) => b.url.length - a.url.length).find(x => {
+    const u = new URL(x.url).pathname;
+    return p === u || (x.href.endsWith('/') && p.startsWith(u)) || (x.href === 'index.html' && p === raizSite);
+  });
+  if (!m) frame.dataset.page = '';                    // página fora dos módulos (ex.: alimentador): o dock recarrega o módulo
+  else if (m.id !== ativo && ativo !== 'inicio' && ativo !== 'scripts') { frame.dataset.page = m.id; go(m.id, false, true); }
+  // tema: o Night shift do módulo vale também para a casca
+  const tema = () => { document.documentElement.dataset.theme = d.documentElement.dataset.theme || document.documentElement.dataset.theme; };
+  tema(); new MutationObserver(tema).observe(d.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  if (pendente) {
+    pendente = false;
+    const abre = () => {
+      const bs = [...d.querySelectorAll('.mnu-lista button[aria-haspopup="dialog"]')];
+      const b = bs.find(x => /Atualiza/.test(x.textContent)) || bs[0];
+      if (b) b.click(); return !!b;
+    };
+    if (!abre()) setTimeout(abre, 600);                // o menu ☰ é montado pelo menu.js depois do load em algumas páginas
+  }
+});
+$('atualiza').addEventListener('click', () => { pendente = true; frame.dataset.page = ''; go('mapa'); });
+
+go(location.hash.slice(1) || 'inicio', true);
+if (!location.hash) history.replaceState(null, '', '#inicio');
+})();
+</script>
+</body></html>
