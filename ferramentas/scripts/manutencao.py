@@ -10,6 +10,9 @@ Todo alimentador com página ganha o manutencao.js (sem OS quando não tem): a p
 
 Uso:
   python scripts/manutencao.py "OS GERADAS PELA INSPECAO.xlsx" <pasta do site>
+  python scripts/manutencao.py --os-status OS_STATUS.parquet <pasta do site>
+    (só atualiza a situação e a execução das OS já publicadas pelo OS status, pelo número da OS; as que ficaram
+     CANCELADAS saem; prazo, criação e a inspeção de origem continuam os da base da inspeção)
 Depois, rodar gera_trechos.py --so-interface (a página do alimentador carrega o manutencao.js).
 """
 import datetime as dt
@@ -100,7 +103,43 @@ def main(xlsx, site):
                 paginas=len(pags), sem_pagina=dict(sem_pagina.most_common()), base_ate=max(criadas) if criadas else None)
 
 
+def atualiza_status(parquet, site):
+    import pandas as pd
+    d = pd.read_parquet(parquet, columns=['NUMERO_OS', 'SITUACAO', 'FIM_EXEC', 'CODEQUIPE', 'EQUIPE_EXECUTORA'])
+    d['k'] = d['NUMERO_OS'].astype(str).str.split().str.join(' ')    # o OS status separa o prefixo com 2 espaços
+    st = d.drop_duplicates('k', keep='last').set_index('k')
+    cont, ate = Counter(), d['FIM_EXEC'].max()
+    for js in sorted(Path(site).glob('alimentadores/*/manutencao.js')):
+        out = le_js(js)
+        lst = []
+        for o in out['os']:
+            r = st.loc[o['os_completa']] if o['os_completa'] in st.index else None
+            if r is None:
+                cont['fora do OS status (mantida)'] += 1
+                lst.append(o)
+                continue
+            sit = texto(r['SITUACAO']).upper()
+            if sit == 'CANCELADA':
+                cont['cancelada (sai)'] += 1
+                continue
+            cont['mudou de situação' if sit != o['sit'] else 'mesma situação'] += 1
+            o['sit'] = sit
+            o['exec'] = r['FIM_EXEC'].date().isoformat() if sit == 'EXECUTADA' and pd.notna(r['FIM_EXEC']) else None
+            if sit == 'EXECUTADA':
+                o['eq'] = texto(r['CODEQUIPE']) or o['eq']
+                o['executora'] = texto(r['EQUIPE_EXECUTORA']) or o['executora']
+            lst.append(o)
+        out.update(os=lst, situacao_de=Path(parquet).name, situacao_ate=ate.date().isoformat() if pd.notna(ate) else None,
+                   gerado=dt.date.today().isoformat())
+        js.write_text('window.MANUTENCAO = ' + json.dumps(out, ensure_ascii=False, separators=(',', ':')) + ';\n',
+                      encoding='utf-8')
+    return cont
+
+
 if __name__ == '__main__':
+    if len(sys.argv) == 4 and sys.argv[1] == '--os-status':
+        print(dict(atualiza_status(sys.argv[2], sys.argv[3])))
+        sys.exit()
     if len(sys.argv) != 3:
         sys.exit(__doc__)
     r = main(sys.argv[1], sys.argv[2])

@@ -13,7 +13,7 @@ alimentador da OS anotado), como no NAE/100 km. Sem posição, a OS fica só na 
 Todo alimentador com página ganha o executadas.js (sem OS quando não tem): a página não pede arquivo que não existe.
 
 Uso:
-  python scripts/executadas.py OS_STATUS_Executadas_2021-2026.zip <pasta do site>
+  python scripts/executadas.py OS_STATUS_Executadas_2021-2026.zip <pasta do site>   (ou o OS_STATUS.parquet)
 Depois, rodar gera_trechos.py --so-interface (a página do alimentador carrega o executadas.js).
 """
 import csv
@@ -45,8 +45,16 @@ def dia(v):
 
 
 def linhas(arq):
-    """Linhas da base (dicionários), do .txt ou do 1º .txt dentro do .zip."""
+    """Linhas da base (dicionários), do .txt, do 1º .txt dentro do .zip ou do .parquet do OS status."""
     arq = Path(arq)
+    if arq.suffix.lower() == '.parquet':
+        import pandas as pd
+        d = pd.read_parquet(arq)
+        for c in d.columns:                             # datas no formato do .txt ('05/03/2024 14:10:00'), como dia() espera
+            if pd.api.types.is_datetime64_any_dtype(d[c]):
+                d[c] = d[c].dt.strftime('%d/%m/%Y %H:%M:%S')
+        yield from d.astype(object).where(d.notna(), None).to_dict('records')
+        return
     if arq.suffix.lower() != '.zip':
         with open(arq, encoding='utf-8-sig', newline='') as f:
             yield from csv.DictReader(f, delimiter=';')
