@@ -6,63 +6,79 @@
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="stylesheet" href="../assets/leaflet/leaflet.css">
 <style>
-:root{--pd-ok:#22c55e;--pd-pend:#facc15;--pd-crit:#ef4444;--pd-sem:#d1d5db}
+:root{--pd-ok:#22c55e;--pd-pend:#facc15;--pd-crit:#ef4444;--pd-sem:#d1d5db;--pd-nae:#8a0303}
 .w{max-width:1320px;margin:0 auto}
-/* barra: cidade, busca, fundo */
-.pd-barra{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s5);align-items:end}
-.f{display:grid;gap:6px;min-width:0}
-.f>span,.f>label{font:600 var(--t-xs)/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r2);padding:3px;gap:2px}
-.seg button{font:600 var(--t-sm) var(--f-body);color:var(--muted);background:none;border:0;border-radius:var(--r1);padding:6px 12px;min-height:40px;cursor:pointer}
-.seg button:hover{color:var(--fg)}
-.seg button[aria-pressed=true]{background:var(--seg-on);color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
-.pd-busca{flex:1 1 260px;max-width:420px;position:relative}
-.pd-busca .busca{max-width:none}
-#sug{position:absolute;z-index:1500;top:calc(100% + 4px);left:0;right:0;margin:0;padding:var(--s1);list-style:none;background:var(--paper);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);max-height:340px;overflow:auto}
-#sug[hidden]{display:none}
-#sug li{display:grid;gap:1px;padding:8px var(--s3);border-radius:var(--r1);cursor:pointer;min-height:44px;align-content:center}
-#sug li b{font:600 var(--t-md)/1.25 var(--f-body);overflow-wrap:anywhere}
-#sug li small{font:var(--t-xs)/1.3 var(--f-mono);color:var(--muted)}
-#sug li:hover,#sug li[aria-selected=true]{background:var(--hover);box-shadow:inset 0 0 0 2px var(--accent)}
-#sug .nada{cursor:default;color:var(--muted);font-size:var(--t-sm)}
-#sug .nada:hover{background:none;box-shadow:none}
-/* legenda + filtro */
-.pd-leg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3)}
-.pd-leg button{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:'i n' 'i c';column-gap:var(--s3);align-items:center;text-align:left;min-height:56px;padding:var(--s2) var(--s3);background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r2);cursor:pointer;font:var(--t-sm) var(--f-body)}
-.pd-leg button:hover{border-color:var(--accent)}
-.pd-leg i{grid-area:i;width:18px;height:18px;border-radius:4px;background:var(--c);border:1px solid color-mix(in srgb,var(--fg) 35%,transparent)}
-.pd-leg .n{grid-area:n;font-weight:600;line-height:1.2}
-.pd-leg .c{grid-area:c;font:700 var(--t-xl)/1.1 var(--f-display);font-variant-numeric:tabular-nums}
-.pd-leg .c small{font:500 var(--t-xs) var(--f-body);color:var(--muted)}
-.pd-leg button[aria-pressed=false]{opacity:.55}
-.pd-leg button[aria-pressed=false] .n{text-decoration:line-through}
-.pd-leg button[aria-pressed=false] i{background:transparent;border-style:dashed}
-.pd-dica{color:var(--muted);font-size:var(--t-xs);margin:calc(var(--s2) * -1) 0 0}
-/* mapa + painel */
-.pd-stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:var(--s5);align-items:start}
+.pd-cab{display:grid;gap:4px}
+.pd-cab h1{font:700 var(--t-2xl,30px)/1.1 var(--f-display);margin:0}
+.pd-cab p{margin:0;color:var(--muted);font-size:var(--t-sm)}
+/* mapa */
 .mapbox{position:relative;z-index:0;isolation:isolate;border-radius:var(--r3);overflow:hidden;background:var(--mapbg);box-shadow:var(--sh2)}
-#map{height:min(76vh,760px);min-height:420px;background:var(--mapbg)}
-.mapbox :focus-visible{outline-color:var(--foco-mapa)}
+#map{height:min(80vh,820px);min-height:460px;background:var(--mapbg)}
+.mapbox:fullscreen{border-radius:0}
+.mapbox:fullscreen #map,body.tela-cheia #map{height:100vh;height:100dvh;min-height:0}
+body.tela-cheia{overflow:hidden}
+body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
+.mapbox :focus-visible{outline:2px solid var(--foco-mapa);outline-offset:2px}
 .leaflet-container{font-family:var(--f-body)}
-.leaflet-top .leaflet-control{margin-top:12px}
-.leaflet-left .leaflet-control{margin-left:12px}
-.leaflet-container .leaflet-bar{border:0;border-radius:var(--r2);overflow:hidden;box-shadow:var(--sh-vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.leaflet-container .leaflet-bar a{width:40px;height:40px;line-height:40px;border-radius:0;background:var(--vidro);color:var(--vidro-fg);border-bottom:1px solid var(--vidro-borda)}
-.leaflet-container .leaflet-bar a:last-child{border-bottom:0}
-.leaflet-container .leaflet-bar a:hover,.leaflet-container .leaflet-bar a:focus{background:#262d33;color:var(--vidro-fg)}
-.leaflet-container .leaflet-bar a.leaflet-disabled{background:var(--vidro);color:rgb(243 244 244 / .35)}
-.leaflet-container .leaflet-bar a:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-3px}
-.leaflet-container .leaflet-control-attribution{background:rgba(15,20,23,.55);color:#cfd5d8;font-size:10.5px;border-radius:var(--r1) 0 0 0;padding:1px 6px}
+.leaflet-container .leaflet-control-attribution{background:rgba(15,20,23,.6);color:#cfd5d8;font-size:10.5px;border-radius:var(--r1) 0 0 0;padding:1px 6px}
 .leaflet-container .leaflet-control-attribution a{color:#e7eaeb}
+.g-logo{height:16px;vertical-align:-4px;margin-right:4px}
 .leaflet-tooltip.pd-tip{background:var(--vidro);color:var(--vidro-fg);border:1px solid var(--vidro-borda);border-radius:var(--r2);box-shadow:var(--sh-vidro);padding:6px 10px;font:500 var(--t-sm)/1.35 var(--f-body)}
 .leaflet-tooltip.pd-tip::before{display:none}
 .leaflet-tooltip.pd-tip small{display:block;color:#cfd5d8}
-.banner{position:absolute;left:64px;right:12px;top:12px;z-index:800;background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);border:1px solid var(--vidro-borda);border-radius:var(--r2);box-shadow:var(--sh-vidro);padding:var(--s2) var(--s3);font-size:var(--t-sm)}
+.vidro{background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);border:1px solid var(--vidro-borda);border-radius:var(--r2);box-shadow:var(--sh-vidro)}
+/* canto de cima: olho + cidades */
+.pd-topo{position:absolute;left:12px;top:12px;z-index:900;display:flex;gap:var(--s2);align-items:center;max-width:calc(100% - 24px)}
+.pd-olho{flex:none;width:48px;height:44px;display:grid;place-items:center;padding:0;border-radius:999px;cursor:pointer}
+.pd-olho img{width:34px;height:auto;pointer-events:none}
+.pd-olho[aria-expanded=true]{border-color:var(--accent)}
+.pd-cids{display:flex;gap:2px;padding:3px}
+.pd-cids button{font:600 var(--t-sm) var(--f-body);color:#cfd5d8;background:none;border:0;border-radius:var(--r1);padding:0 12px;min-height:36px;cursor:pointer}
+.pd-cids button:hover{color:#fff;background:var(--vidro-hover)}
+.pd-cids button[aria-pressed=true]{background:#323a41;color:#fff;box-shadow:inset 0 -2px 0 var(--accent)}
+/* lista do olho */
+.pd-drop{position:absolute;left:12px;top:64px;z-index:950;width:min(360px,calc(100% - 24px));max-height:calc(100% - 140px);overflow:auto;overscroll-behavior:contain;padding:var(--s2);display:grid;gap:var(--s2)}
+.pd-drop[hidden],#opcoes[hidden],.pd-res[hidden]{display:none}
+.pd-drop .busca{max-width:none;min-height:42px;background:rgba(0,0,0,.35);color:#fff;border-color:var(--vidro-borda)}
+.pd-drop .busca::placeholder{color:#aab3b9}
+.pd-t{margin:var(--s1) var(--s2) 0;font:700 var(--t-xs)/1.4 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:#aab3b9}
+.pd-op{display:flex;align-items:center;gap:var(--s3);width:100%;min-height:44px;padding:6px var(--s2);border:0;border-radius:var(--r1);background:none;color:#fff;font:600 var(--t-sm) var(--f-body);text-align:left;cursor:pointer}
+.pd-op:hover{background:var(--vidro-hover)}
+.pd-op .n{flex:1;min-width:0}
+.pd-op .c{font:600 var(--t-xs) var(--f-mono);color:#cfd5d8;white-space:nowrap}
+.pd-op i{flex:none;width:14px;height:14px;border-radius:3px;background:var(--c)}
+.pd-op i.pt{border-radius:50%;border:1.5px solid #fff}
+.pd-op svg{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pd-op[aria-pressed=false]{color:#8b959c}
+.pd-op[aria-pressed=false] i{opacity:.35}
+.pd-op .on,.pd-op[aria-pressed=false] .off{display:block}.pd-op .off,.pd-op[aria-pressed=false] .on{display:none}
+.pd-seg{display:flex;gap:2px;padding:0 var(--s2) var(--s1)}
+.pd-seg button{flex:1;font:600 var(--t-sm) var(--f-body);color:#cfd5d8;background:rgba(255,255,255,.06);border:0;border-radius:var(--r1);min-height:36px;cursor:pointer}
+.pd-seg button[aria-pressed=true]{background:#323a41;color:#fff;box-shadow:inset 0 -2px 0 var(--accent)}
+.pd-res{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.pd-res li{display:grid;gap:1px;padding:6px var(--s2);border-radius:var(--r1);cursor:pointer}
+.pd-res li b{font:600 var(--t-sm)/1.25 var(--f-body);overflow-wrap:anywhere}
+.pd-res li small{font:var(--t-xs)/1.3 var(--f-mono);color:#aab3b9}
+.pd-res li:hover,.pd-res li[aria-selected=true]{background:var(--vidro-hover);box-shadow:inset 0 0 0 1px var(--accent)}
+.pd-res .nada{cursor:default;color:#aab3b9;font-size:var(--t-sm)}
+/* legenda (canto de baixo, à esquerda) */
+.pd-leg{position:absolute;left:12px;bottom:24px;z-index:900;display:grid;gap:4px;padding:var(--s2) var(--s3);font:600 var(--t-xs)/1.2 var(--f-body)}
+.pd-leg[hidden]{display:none}
+.pd-leg div{display:flex;align-items:center;gap:var(--s2)}
+.pd-leg i{width:12px;height:12px;border-radius:3px;background:var(--c);flex:none}
+.pd-leg i.pt{border-radius:50%;border:1.5px solid #fff;width:11px;height:11px}
+.pd-leg hr{border:0;border-top:1px solid var(--vidro-borda);margin:2px 0}
+/* tela cheia (canto de baixo, à direita) */
+.pd-tc{position:absolute;right:12px;bottom:28px;z-index:900;width:44px;height:44px;display:grid;place-items:center;padding:0;cursor:pointer}
+.pd-tc:hover{background:#262d33}
+.pd-tc svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.pd-tc .sai,.pd-tc[aria-pressed=true] .abre{display:none}.pd-tc[aria-pressed=true] .sai{display:block}
+.banner{position:absolute;left:72px;right:72px;top:12px;z-index:960;padding:var(--s2) var(--s3);font-size:var(--t-sm)}
 .banner[hidden]{display:none}
 .banner b{color:#fde68a}
-/* painel de detalhes */
-.pd-painel{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:var(--r3);padding:var(--s4);max-height:min(76vh,760px);overflow:auto;overscroll-behavior:contain;min-width:0}
-.pd-vazio{margin:0;color:var(--muted);font-size:var(--t-md)}
+/* painel de detalhes, dentro do mapa */
+.pd-painel{position:absolute;top:12px;right:12px;bottom:84px;z-index:940;width:min(360px,calc(100% - 24px));background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);padding:var(--s4);overflow:auto;overscroll-behavior:contain}
+.pd-painel[hidden]{display:none}
 .pd-x{position:absolute;top:var(--s2);right:var(--s2);width:40px;height:40px;display:grid;place-items:center;padding:0;border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--paper);color:var(--fg);cursor:pointer}
 .pd-x:hover{border-color:var(--accent)}
 .pd-x svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
@@ -76,7 +92,7 @@
 .pd-kp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3) var(--s4);margin:0}
 .pd-kp div{border-top:2px solid var(--line);padding-top:var(--s2);min-width:0}
 .pd-kp dt{font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.pd-kp dd{margin:2px 0 0;font:700 var(--t-lg)/1.25 var(--f-display);font-variant-numeric:tabular-nums}
+.pd-kp dd{margin:2px 0 0;font:700 var(--t-lg)/1.25 var(--f-display);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .pd-kp dd small{display:block;font:var(--t-xs)/1.3 var(--f-body);color:var(--muted)}
 .pd-det h3{font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s2)}
 .pd-als{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
@@ -88,59 +104,55 @@
 .pd-os li{display:grid;gap:1px;border-left:3px solid var(--line-forte);border-radius:0 var(--r1) var(--r1) 0;padding:4px var(--s3);background:color-mix(in srgb,var(--fg) 4%,transparent);font-size:var(--t-sm)}
 .pd-os li.ex{border-left-color:var(--pd-ok)}
 .pd-os li.pe{border-left-color:var(--pd-pend)}
-.pd-os li.nae{border-left-color:#8a0303}
+.pd-os li.nae{border-left-color:var(--pd-nae)}
 .pd-nae-t{display:flex;align-items:center;gap:var(--s2)}
-.pd-nae-t i{width:12px;height:12px;border-radius:50%;background:#8a0303;border:1.5px solid #fff;flex:none}
+.pd-nae-t i{width:12px;height:12px;border-radius:50%;background:var(--pd-nae);border:1.5px solid #fff;flex:none}
 .pd-os b{font:600 var(--t-sm) var(--f-mono);overflow-wrap:anywhere}
 .pd-os span{color:var(--muted);font-size:var(--t-xs)}
 .nota{color:var(--muted);font-size:var(--t-xs);margin:0;max-width:110ch}
-@media(max-width:980px){
-  .pd-stage{grid-template-columns:minmax(0,1fr)}
-  #map{height:clamp(340px,58svh,640px);min-height:0}
-  .mapbox{border-radius:var(--r2)}
-  .pd-painel{position:fixed;left:0;right:0;bottom:0;z-index:2500;max-height:56dvh;border-radius:var(--r3) var(--r3) 0 0;border-bottom:0;box-shadow:0 -12px 32px -12px rgb(0 0 0 / .5);transform:translateY(105%);visibility:hidden;transition:transform var(--dur-l) var(--ease),visibility 0s var(--dur-l)}
-  .pd-painel.aberto{transform:none;visibility:visible;transition:transform var(--dur-l) var(--ease)}
-  .pd-leg{grid-template-columns:repeat(2,minmax(0,1fr))}
-  body.gaveta .wrap{padding-bottom:56dvh}   /* a página ganha folga embaixo: dá para rolar o mapa para o alto, acima da gaveta */
-}
-@media(max-width:560px){
-  .pd-barra{gap:var(--s3)}
-  .pd-barra .f:first-child,.pd-busca{flex:1 1 100%;max-width:none}
-  .seg button{padding:6px 10px}
-  .banner{left:64px}
+@media(max-width:700px){
+  #map{height:clamp(420px,72svh,700px)}
+  .pd-painel{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:58%;border-radius:var(--r3)}
+  .pd-leg{bottom:20px}
+  body.pd-aberto .pd-leg,body.pd-aberto .pd-tc{display:none}
+  .pd-cids button{padding:0 9px}
+  .banner{left:12px;right:12px;top:64px}
 }
 </style>
 </head><body><div class="wrap w">
-<header class="cab"><h1><b>ARGOS</b> <span>MANUTENÇÃO · MAPA DE PODAS</span></h1><a class="cab-link" href="../priorizacao/">Ranking</a></header>
+<header class="pd-cab"><span class="eyebrow">Manutenção · poda de árvore</span><h1>Mapa de podas</h1><p id="fonte"></p></header>
 
-<section class="pd-barra" aria-label="Cidade, busca e fundo do mapa">
-  <div class="f"><span id="cid-l">Cidade</span><div class="seg" id="cids" role="group" aria-labelledby="cid-l"></div></div>
-  <div class="f pd-busca"><label for="q">Buscar área</label>
-    <input id="q" class="busca" type="search" placeholder="Código da quadra ou nome do setor" autocomplete="off" spellcheck="false"
-      role="combobox" aria-expanded="false" aria-controls="sug" aria-autocomplete="list">
-    <ul id="sug" role="listbox" aria-label="Áreas encontradas" hidden></ul></div>
-  <div class="f"><span id="cam-l">Ver no mapa</span><div class="seg" id="cam" role="group" aria-labelledby="cam-l">
-    <button type="button" data-k="areas" aria-pressed="true">Áreas</button><button type="button" data-k="os" aria-pressed="true">OS</button><button type="button" data-k="nae" aria-pressed="true">NAE</button></div></div>
-  <div class="f"><span id="fun-l">Fundo do mapa</span><div class="seg" id="fundo" role="group" aria-labelledby="fun-l">
-    <button type="button" data-f="sat" aria-pressed="true">Satélite</button><button type="button" data-f="liso" aria-pressed="false">Liso</button></div></div>
-</section>
-
-<div class="pd-leg" id="leg" role="group" aria-label="Situação da poda: clique para ligar ou desligar"></div>
-<p class="pd-dica" id="dica"></p>
-
-<div class="pd-stage">
-  <div class="mapbox">
-    <div id="map" role="application" aria-label="Mapa de podas por área"></div>
-    <div class="banner" id="nosat" hidden><b>A imagem de satélite não carregou.</b> Confira a internet. As áreas aparecem igual.</div>
-    <div class="banner" id="nolib" hidden><b>O mapa não carregou.</b> Confira a internet e recarregue a página.</div>
+<div class="mapbox" id="box">
+  <div id="map" role="application" aria-label="Mapa de podas"></div>
+  <div class="pd-topo">
+    <button type="button" class="pd-olho vidro" id="olho" aria-expanded="false" aria-controls="drop" aria-label="Buscar e escolher o que ver no mapa" title="Buscar e camadas">
+      <img src="../assets/argos.png" alt="" width="34" height="23"></button>
+    <div class="pd-cids vidro" id="cids" role="group" aria-label="Cidade"></div>
   </div>
-  <aside class="pd-painel" id="painel" aria-label="Detalhes da área" aria-live="polite"></aside>
+  <div class="pd-drop vidro" id="drop" hidden>
+    <input id="q" class="busca" type="search" placeholder="Quadra, OS ou ativo" autocomplete="off" spellcheck="false" aria-label="Buscar quadra, OS ou ativo" aria-controls="res">
+    <ul class="pd-res" id="res" role="listbox" aria-label="Resultados" hidden></ul>
+    <div id="opcoes">
+      <p class="pd-t">Camadas</p><div id="cam"></div>
+      <p class="pd-t">Situação</p><div id="sit"></div>
+      <p class="pd-t">Fundo</p>
+      <div class="pd-seg" id="fundo"><button type="button" data-f="sat" aria-pressed="true">Satélite</button><button type="button" data-f="liso" aria-pressed="false">Liso</button></div>
+    </div>
+  </div>
+  <div class="pd-leg vidro" id="leg" aria-label="Legenda"></div>
+  <button type="button" class="pd-tc vidro" id="tc" aria-pressed="false" aria-label="Tela cheia" title="Tela cheia">
+    <svg class="abre" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    <svg class="sai" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
+  <aside class="pd-painel" id="painel" aria-label="Detalhes" aria-live="polite" hidden></aside>
+  <div class="banner vidro" id="nosat" hidden><b>A imagem de satélite não carregou.</b> Confira a internet.</div>
+  <div class="banner vidro" id="nolib" hidden><b>O mapa não carregou.</b> Recarregue a página.</div>
 </div>
 
 <p class="nota" id="nota"></p>
 </div>
 
 <script src="../assets/leaflet/leaflet.js"></script>
+<script src="../assets/mapa-satelite.js"></script>
 <script src="../dados/podas.js"></script>
 <script>
 (function () {
@@ -151,54 +163,50 @@ const nf = n => Number(n).toLocaleString('pt-BR');
 const br = d => d ? String(d).slice(0, 10).split('-').reverse().join('/') : '';
 const sem = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const cap = s => { s = String(s ?? '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); };
+const X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+const OLHO = '<svg class="on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>' +
+  '<svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A16.6 16.6 0 0 0 2 12s3.6 7 10 7a9.9 9.9 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
 
 const ORDEM = ['executado', 'pendente', 'critico', 'sem'];
 const ROT = {executado: 'Executado', pendente: 'Pendente', critico: 'Crítico', sem: 'Sem poda recente'};
+const ROTP = {executado: 'Executada (6 meses)', pendente: 'Pendente', critico: 'Pendente emergencial/urgente'};
 const COR = {executado: '#22c55e', pendente: '#facc15', critico: '#ef4444', sem: '#d1d5db'};
-const OPAC = {executado: .55, pendente: .6, critico: .65, sem: .3};
+const OPAC = {executado: .5, pendente: .55, critico: .6, sem: .25};
+const SANGUE = '#8a0303';
 const P = window.PODAS;
 const CIDADES = P && P.cidades ? ['Palmas', 'Araguaína', 'Gurupi'].filter(c => Array.isArray(P.cidades[c])) : [];
-
 const titulo = a => a.nome ? a.nome : (a.tipo === 'bairro' ? a.id : 'Quadra ' + a.id);
-const dataGer = P && P.gerado ? br(P.gerado) : '';
+const TIPO = t => t === 'poste' ? 'Poste' : t === 'TR' ? 'Trafo' : 'Chave/equipamento (' + t + ')';
+const mesTxt = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1] + '/' + m.slice(0, 4);
+const dataNae = d => br(d.slice(0, 10)) + (d.length > 10 ? ' ' + d.slice(11) : '');
 
-// ---- nota -----------------------------------------------------------------------------------------------
-$('nota').textContent = 'Quadra = setor censitário do IBGE 2022 (inclusive na região dos Aurenys, até chegar o limite oficial dos bairros). ' +
-  'Cada OS de poda fica no poste da estrutura; sem esse poste no mapa, no trafo, na chave ou em outro ativo da OS. ' +
-  'Pontos: OS executadas nos últimos 6 meses e OS pendentes. Dados do OS status de ' + dataGer + '. ' +
-  'Crítico: OS emergencial/urgente pendente, ou alimentador com NAE alto (quinto mais alto da cidade) e sem poda nos últimos 6 meses. ' +
-  'NAE: ocorrências da Crítica (vegetação) em vermelho-sangue, no ativo onde foram registradas; ao clicar numa área ou OS crítica, as dos alimentadores dela ficam destacadas. ' +
-  'Imagem de satélite: Esri World Imagery, carregada ao vivo.';
-
-if (!P || !CIDADES.length) {
-  $('nolib').innerHTML = '<b>Os dados de poda não carregaram.</b> Recarregue a página.';
-  $('nolib').hidden = false;
-  return;
-}
+if (!P || !CIDADES.length) { $('nolib').innerHTML = '<b>Os dados de poda não carregaram.</b> Recarregue a página.'; $('nolib').hidden = false; return; }
 if (typeof L === 'undefined') { $('nolib').hidden = false; return; }
 
-// pré-cálculo: texto de busca de cada área
-CIDADES.forEach(c => P.cidades[c].forEach(a => { a._t = sem(titulo(a) + ' ' + a.id + ' ' + (a.tipo === 'quadra' ? 'quadra' : 'bairro')); }));
+const mm = P.nae_meses || [];
+$('fonte').textContent = 'Palmas, Araguaína e Gurupi · OS status de ' + br(P.gerado) + (mm.length ? ' · NAE de ' + mesTxt(mm[0]) + ' a ' + mesTxt(mm[mm.length - 1]) : '');
+$('nota').textContent = 'Quadra = setor censitário do IBGE 2022. OS no poste da estrutura; sem ele no mapa, no trafo, na chave ou em outro ativo da OS. ' +
+  'Crítico: OS emergencial/urgente pendente, ou alimentador com NAE alto (quinto mais alto da cidade) sem poda em 6 meses. NAE só do perímetro urbano.';
 
 // ---- estado ---------------------------------------------------------------------------------------------
 let cidade = CIDADES[0];
-const ativos = new Set(ORDEM);
-let sel = null;                 // {a, c, lay}
-let fundo = 'sat';
-const camadas = {areas: true, os: true, nae: true};   // o que aparece junto no mapa (botões "Ver no mapa")
-let selPt = null;               // ponto escolhido
-const cache = {};               // cidade -> {por:{st:FeatureGroup}, lays:[], bounds, cont}
-const mobile = () => matchMedia('(max-width:980px)').matches;
+const ativos = new Set(ORDEM);                          // situações ligadas
+const camadas = {areas: true, os: true, nae: true};     // o que aparece junto no mapa
+let sel = null, selPt = null, fundo = 'sat';
+const cache = {}, pcache = {}, ncache = {};
+const mobile = () => matchMedia('(max-width:700px)').matches;
 
-// ---- mapa -----------------------------------------------------------------------------------------------
-const map = L.map('map', {preferCanvas: true, renderer: L.canvas({tolerance: L.Browser.mobile ? 8 : 3}), zoomSnap: 0.25, zoomDelta: 0.5});
+// ---- mapa (sem os botões + e −: roda do mouse, pinça e teclado) ------------------------------------------
+const map = L.map('map', {zoomControl: false, preferCanvas: true, renderer: L.canvas({tolerance: L.Browser.mobile ? 8 : 3}), zoomSnap: 0.25, zoomDelta: 0.5, maxZoom: 21});
 window.__map = map;
-let falhas = 0;
-// Satélite da Esri (igual às páginas de alimentador): onde não há foto num zoom, o servidor manda o quadro cinza
-// "Map data not yet available"; com blankTile=false ele responde 404 e o quadro vira a foto do nível de cima ampliada.
+map.attributionControl.setPrefix(false);
+
+// Satélite: Google (Map Tiles API, com a chave de assets/mapa-satelite.js) ou Esri World Imagery.
+const GKEY = (window.ARGOS_SAT && window.ARGOS_SAT.google) || '';
+let falhas = 0, sat = null;
 const SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
-const ATR_SAT = 'Imagem © Esri — Esri, Maxar, Earthstar Geographics';
-const Satelite = L.TileLayer.extend({
+// Esri: onde não há foto num zoom o servidor responde 404 (blankTile=false) e o quadro vira a foto do nível de cima ampliada
+const Esri = L.TileLayer.extend({
   getTileUrl: c => `${SAT}${c.z}/${c.y}/${c.x}?blankTile=false`,
   createTile(c, done) { const t = L.TileLayer.prototype.createTile.call(this, c, done); t._xyz = c; t._k = 0; return t; },
   _tileOnError(done, t, e) {
@@ -210,54 +218,54 @@ const Satelite = L.TileLayer.extend({
     t.src = `${SAT}${c.z - k}/${c.y >> k}/${c.x >> k}?blankTile=false`;
   }
 });
-const sat = new Satelite(SAT + '{z}/{y}/{x}', {maxZoom: 19, maxNativeZoom: 18, attribution: ATR_SAT})
-  .on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; }).addTo(map);
-map.attributionControl.setPrefix(false);
+const esri = () => new Esri(SAT + '{z}/{y}/{x}', {maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagem © Esri — Esri, Maxar, Earthstar Geographics'})
+  .on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; });
+async function sessaoGoogle() {
+  const K = 'argos-gtiles';
+  try { const s = JSON.parse(localStorage.getItem(K) || 'null'); if (s && s.key === GKEY && s.expiry * 1000 > Date.now() + 36e5) return s.session; } catch (e) {}
+  const r = await fetch('https://tile.googleapis.com/v1/createSession?key=' + encodeURIComponent(GKEY), {method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({mapType: 'satellite', language: 'pt-BR', region: 'BR'})});
+  if (!r.ok) throw new Error('sessão ' + r.status);
+  const j = await r.json();
+  try { localStorage.setItem(K, JSON.stringify({key: GKEY, session: j.session, expiry: +j.expiry})); } catch (e) {}
+  return j.session;
+}
+let gSess = null, gCopy = '', gT = 0;
+const LOGO = '<img class="g-logo" src="https://maps.gstatic.com/mapfiles/api-3/images/google_white5.png" alt="Google Maps">';
+function creditoGoogle() {                              // o crédito da Google muda com a área vista (viewport)
+  clearTimeout(gT);
+  gT = setTimeout(async () => {
+    if (!gSess || !sat || !map.hasLayer(sat)) return;
+    const b = map.getBounds(), z = Math.round(map.getZoom());
+    try {
+      const r = await fetch(`https://tile.googleapis.com/tile/v1/viewport?session=${gSess}&key=${encodeURIComponent(GKEY)}&zoom=${z}` +
+        `&north=${b.getNorth().toFixed(5)}&south=${b.getSouth().toFixed(5)}&east=${b.getEast().toFixed(5)}&west=${b.getWest().toFixed(5)}`);
+      const j = await r.json();
+      const novo = LOGO + esc(j.copyright || 'Google');
+      if (novo !== gCopy) { if (gCopy) map.attributionControl.removeAttribution(gCopy); gCopy = novo; map.attributionControl.addAttribution(gCopy); }
+    } catch (e) {}
+  }, 500);
+}
+async function poeSatelite() {
+  if (GKEY) {
+    try {
+      gSess = await sessaoGoogle();
+      sat = L.tileLayer(`https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${gSess}&key=${encodeURIComponent(GKEY)}`, {maxZoom: 21, maxNativeZoom: 20})
+        .on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; });
+      map.on('moveend', creditoGoogle);
+    } catch (e) { gSess = null; sat = esri(); }
+  } else sat = esri();
+  if (fundo === 'sat') { sat.addTo(map); sat.bringToBack(); creditoGoogle(); }
+}
+poeSatelite();
 
-const selecao = L.layerGroup().addTo(map);
-// ocorrências NAE (vermelho-sangue) dos alimentadores da área ou OS crítica escolhida
-const SANGUE = '#8a0303';
-const naeLay = L.layerGroup().addTo(map);
-const mesTxt = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1] + '/' + m.slice(0, 4);
-const dataNae = d => br(d.slice(0, 10)) + (d.length > 10 ? ' ' + d.slice(11) : '');
-function naeMarca(o, destaque) {
-  const m = L.circleMarker([o[0], o[1]], destaque ? {radius: 8, color: '#ffffff', weight: 3, fillColor: SANGUE, fillOpacity: 1}
-    : {radius: 5.5, color: '#ffffff', weight: 1.2, fillColor: SANGUE, fillOpacity: 1});
-  const txt = `<b>NAE · ${esc(dataNae(o[3]))}</b><small>${esc(o[5])} ${esc(o[4])} · ${esc(o[2])} ${esc(o[9])}</small>` +
-      `<small>${esc(nf(o[7]))} consumidor${o[7] === 1 ? '' : 'es'} · ${esc(nf(o[8]))} min</small><small>${esc(o[6])}</small>`;
-  m.bindTooltip(txt, {direction: 'top', className: 'pd-tip', opacity: 1});
-  m.on('click', e => { L.DomEvent.stopPropagation(e); m.openTooltip(); });
-  return m;
-}
-const ncache = {};
-const naeTodos = c => ncache[c] || (ncache[c] = L.featureGroup((P.nae && P.nae[c] || []).map(o => naeMarca(o, false))));
-// área ou OS crítica escolhida: os NAE dos alimentadores dela, destacados (aparecem mesmo com a camada NAE desligada)
-function mostraNae(als) {
-  naeLay.clearLayers();
-  const set = new Set(als), lst = (P.nae && P.nae[cidade] || []).filter(o => set.has(o[2]));
-  lst.forEach(o => naeLay.addLayer(naeMarca(o, true)));
-  return lst;
-}
-function naeSec(als, lst) {
-  const mm = P.nae_meses || [];
-  const per = mm.length ? ` (${mesTxt(mm[0])} a ${mesTxt(mm[mm.length - 1])})` : '';
-  if (!als.length) return '';
-  if (!lst.length) return `<div><h3>Ocorrências NAE${esc(per)}</h3><p class="pd-peq">Nenhuma ocorrência NAE com ativo no mapa em ${esc(als.join(', '))}.</p></div>`;
-  const por = new Map();
-  lst.forEach(o => { const k = o[5] + ' ' + o[4]; const v = por.get(k) || {n: 0, al: o[2], t: o[9], ult: ''}; v.n++; if (o[3] > v.ult) v.ult = o[3]; por.set(k, v); });
-  const top = [...por.entries()].sort((x, y) => y[1].n - x[1].n || (y[1].ult > x[1].ult ? 1 : -1)).slice(0, 12);
-  return `<div><h3 class="pd-nae-t"><i></i>Ocorrências NAE${esc(per)}</h3>` +
-    `<p class="pd-peq" style="margin:0 0 var(--s2)">${esc(nf(lst.length))} ocorrência${lst.length === 1 ? '' : 's'} em ${esc(nf(por.size))} ativo${por.size === 1 ? '' : 's'} de ${esc(als.join(', '))}, em vermelho-sangue no mapa.</p>` +
-    `<ul class="pd-os">${top.map(([k, v]) => `<li class="nae"><b>${esc(k)}</b><span>${esc(nf(v.n))} NAE · ${esc(v.al)} ${esc(v.t)} · última em ${esc(dataNae(v.ult))}</span></li>`).join('')}</ul>` +
-    (por.size > top.length ? `<p class="pd-peq">e mais ${esc(nf(por.size - top.length))} ativos no mapa.</p>` : '') + '</div>';
-}
-const comNae = (html, sec) => sec ? html.replace(/<\/div>$/, sec + '</div>') : html;
+const selecao = L.layerGroup();
+const naeLay = L.layerGroup();
 
+// ---- quadras --------------------------------------------------------------------------------------------
 function estilo(a, hover) {
-  return {color: '#ffffff', weight: hover ? 2.5 : 1, opacity: hover ? 1 : .85,
-    fillColor: COR[a.st], fillOpacity: Math.min(.9, OPAC[a.st] + (hover ? .2 : 0))};
+  return {color: '#ffffff', weight: hover ? 2.5 : 1, opacity: hover ? 1 : .85, fillColor: COR[a.st], fillOpacity: Math.min(.9, OPAC[a.st] + (hover ? .2 : 0))};
 }
-
 function construir(c) {
   if (cache[c]) return cache[c];
   const lays = [];
@@ -269,28 +277,25 @@ function construir(c) {
     lay.on('click', e => { L.DomEvent.stopPropagation(e); escolher(a, c, lay); });
     lay.on('mouseover', () => { if (!sel || sel.lay !== lay) lay.setStyle(estilo(a, true)); });
     lay.on('mouseout', () => lay.setStyle(estilo(a, false)));
-    if (!L.Browser.mobile) {
-      lay.bindTooltip(`<b>${esc(titulo(a))}</b><small>${esc(ROT[a.st] || a.st)}</small>`, {sticky: true, direction: 'top', className: 'pd-tip', opacity: 1});
-    }
+    if (!L.Browser.mobile) lay.bindTooltip(`<b>${esc(titulo(a))}</b><small>${esc(ROT[a.st] || a.st)}</small>`, {sticky: true, direction: 'top', className: 'pd-tip', opacity: 1});
     lay._pz = lay.getBounds().getNorthEast().distanceTo(lay.getBounds().getSouthWest());
     lays.push(lay);
   });
-  // as maiores primeiro: setor que contém outros (ex.: zona rural) fica por baixo e não tapa o clique nos menores
-  lays.sort((x, y) => y._pz - x._pz);
+  lays.sort((x, y) => y._pz - x._pz);                  // as maiores por baixo: não tapam o clique nas menores
   const grupo = L.featureGroup(lays);
   return (cache[c] = {grupo, lays, bounds: lays.length ? grupo.getBounds() : null});
 }
+function exibir(lay, on) { lay._pv = on; lay.options.interactive = on; lay.setStyle(on ? estilo(lay._pa, false) : {stroke: false, fill: false}); }
+function aplicar(c) { construir(c).lays.forEach(l => exibir(l, ativos.has(l._pa.st in COR ? l._pa.st : 'sem'))); }
 
-// ---- pontos das OS ---------------------------------------------------------------------------------------
-const TIPO = t => t === 'poste' ? 'Poste' : t === 'TR' ? 'Trafo' : 'Chave/equipamento (' + t + ')';
-const pcache = {};
+// ---- pontos das OS --------------------------------------------------------------------------------------
 function pontos(c) {
   if (pcache[c]) return pcache[c];
   const marks = (P.pontos && P.pontos[c] || []).map(pt => {
     const m = L.circleMarker([pt[0], pt[1]], {radius: 5, color: '#111827', weight: 1, opacity: .9, fillColor: COR[pt[2]], fillOpacity: .95});
     m._pt = pt;
     m.on('click', e => { L.DomEvent.stopPropagation(e); escolherPt(pt); });
-    if (!L.Browser.mobile) m.bindTooltip(`<b>${esc(pt[3])}</b><small>${esc(ROT[pt[2]])} · ${esc(TIPO(pt[8]))} ${esc(pt[7])}</small>`, {direction: 'top', className: 'pd-tip', opacity: 1});
+    if (!L.Browser.mobile) m.bindTooltip(`<b>${esc(pt[3])}</b><small>${esc(ROTP[pt[2]])} · ${esc(TIPO(pt[8]))} ${esc(pt[7])}</small>`, {direction: 'top', className: 'pd-tip', opacity: 1});
     return m;
   });
   return (pcache[c] = {grupo: L.featureGroup(marks), marks});
@@ -300,93 +305,124 @@ function aplicarPts(c) {
   k.marks.forEach(m => { const on = ativos.has(m._pt[2]); if (on && !k.grupo.hasLayer(m)) k.grupo.addLayer(m); else if (!on && k.grupo.hasLayer(m)) k.grupo.removeLayer(m); });
 }
 
-// liga/desliga a área no mapa (filtro da legenda) sem mudar a ordem de desenho
-function exibir(lay, on) {
-  lay._pv = on;
-  lay.options.interactive = on;
-  lay.setStyle(on ? estilo(lay._pa, false) : {stroke: false, fill: false});
+// ---- NAE (vermelho-sangue) ------------------------------------------------------------------------------
+function naeMarca(o, destaque) {
+  const m = L.circleMarker([o[0], o[1]], destaque ? {radius: 8, color: '#ffffff', weight: 3, fillColor: SANGUE, fillOpacity: 1}
+    : {radius: 5.5, color: '#ffffff', weight: 1.2, fillColor: SANGUE, fillOpacity: 1});
+  m.bindTooltip(`<b>NAE · ${esc(dataNae(o[3]))}</b><small>${esc(o[5])} ${esc(o[4])} · ${esc(o[2])} ${esc(o[9])}</small>` +
+    `<small>${esc(nf(o[7]))} consumidor${o[7] === 1 ? '' : 'es'} · ${esc(nf(o[8]))} min</small><small>${esc(o[6])}</small>`, {direction: 'top', className: 'pd-tip', opacity: 1});
+  m.on('click', e => { L.DomEvent.stopPropagation(e); m.openTooltip(); });
+  return m;
 }
-function aplicar(c) { construir(c).lays.forEach(l => exibir(l, ativos.has(l._pa.st in COR ? l._pa.st : 'sem'))); }
+const naeTodos = c => ncache[c] || (ncache[c] = L.featureGroup((P.nae && P.nae[c] || []).map(o => naeMarca(o, false))));
+function mostraNae(als) {                               // os NAE dos alimentadores da área/OS crítica, destacados
+  naeLay.clearLayers();
+  const set = new Set(als), lst = (P.nae && P.nae[cidade] || []).filter(o => set.has(o[2]));
+  lst.forEach(o => naeLay.addLayer(naeMarca(o, true)));
+  return lst;
+}
+function naeSec(als, lst) {
+  const per = mm.length ? ` (${mesTxt(mm[0])} a ${mesTxt(mm[mm.length - 1])})` : '';
+  if (!als.length) return '';
+  if (!lst.length) return `<div><h3>NAE${esc(per)}</h3><p class="pd-peq">Nenhum NAE no perímetro urbano em ${esc(als.join(', '))}.</p></div>`;
+  const por = new Map();
+  lst.forEach(o => { const k = o[5] + ' ' + o[4]; const v = por.get(k) || {n: 0, al: o[2], t: o[9], ult: ''}; v.n++; if (o[3] > v.ult) v.ult = o[3]; por.set(k, v); });
+  const top = [...por.entries()].sort((x, y) => y[1].n - x[1].n || (y[1].ult > x[1].ult ? 1 : -1)).slice(0, 12);
+  return `<div><h3 class="pd-nae-t"><i></i>NAE${esc(per)}</h3>` +
+    `<p class="pd-peq" style="margin:0 0 var(--s2)">${esc(nf(lst.length))} em ${esc(nf(por.size))} ativo${por.size === 1 ? '' : 's'} de ${esc(als.join(', '))}</p>` +
+    `<ul class="pd-os">${top.map(([k, v]) => `<li class="nae"><b>${esc(k)}</b><span>${esc(nf(v.n))} NAE · ${esc(v.al)} ${esc(v.t)} · última em ${esc(dataNae(v.ult))}</span></li>`).join('')}</ul>` +
+    (por.size > top.length ? `<p class="pd-peq">e mais ${esc(nf(por.size - top.length))} ativos.</p>` : '') + '</div>';
+}
+const comNae = (html, sec) => sec ? html.replace(/<\/div>$/, sec + '</div>') : html;
 
-function traz() { selecao.eachLayer(l => l.bringToFront()); }
-
+// ---- desenho (ordem: quadras, OS, NAE, seleção) ---------------------------------------------------------
 function mostrar(c, ajustar) {
-  [cache, pcache, ncache].forEach(x => { if (x[cidade]) x[cidade].grupo ? x[cidade].grupo.remove() : x[cidade].remove(); });
+  [cache, pcache].forEach(x => { if (x[cidade]) x[cidade].grupo.remove(); });
+  if (ncache[cidade]) ncache[cidade].remove();
   naeLay.remove(); selecao.remove();
   cidade = c;
   const k = construir(c);
   aplicar(c);
-  // ordem de desenho: quadras, pontos das OS, NAE e, por cima, a seleção
   if (camadas.areas) k.grupo.addTo(map);
   if (camadas.os) { aplicarPts(c); pontos(c).grupo.addTo(map); }
   if (camadas.nae) naeTodos(c).addTo(map);
   naeLay.addTo(map); selecao.addTo(map);
-  if (ajustar && k.bounds) map.fitBounds(k.bounds, {padding: [16, 16]});
-  traz();
+  if (ajustar) {                                        // enquadra as OS (a mancha urbana); sem OS, as quadras
+    const pm = pontos(c).marks, b = pm.length ? L.featureGroup(pm).getBounds() : k.bounds;
+    if (b) map.fitBounds(b, {padding: [24, 24]});
+  }
 }
-function botoesCamada() {
-  const n = (P.nae && P.nae[cidade] || []).length;
-  $('cam').querySelector('[data-k=nae]').textContent = 'NAE (' + nf(n) + ')';
-  $('cam').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', camadas[b.dataset.k]));
-}
-$('cam').addEventListener('click', e => {
-  const b = e.target.closest('button[data-k]'); if (!b) return;
-  camadas[b.dataset.k] = !camadas[b.dataset.k];
-  if (b.dataset.k === 'areas' && !camadas.areas && sel) fechar();
-  if (b.dataset.k === 'os' && !camadas.os && selPt) fechar();
-  mostrar(cidade, false); botoesCamada();
-});
 
-// ---- cidade ---------------------------------------------------------------------------------------------
+// ---- cidades --------------------------------------------------------------------------------------------
 function botoesCidade() {
   $('cids').innerHTML = CIDADES.map(c => `<button type="button" data-c="${esc(c)}" aria-pressed="${c === cidade}">${esc(c)}</button>`).join('');
 }
 $('cids').addEventListener('click', e => {
-  const b = e.target.closest('button[data-c]'); if (!b || b.dataset.c === cidade) { if (b) mostrar(cidade, true); return; }
-  fechar();
-  mostrar(b.dataset.c, true); botoesCidade(); legenda(); botoesCamada();
+  const b = e.target.closest('button[data-c]'); if (!b) return;
+  if (b.dataset.c !== cidade) fechar();
+  mostrar(b.dataset.c, true); botoesCidade(); opcoes(); legenda();
 });
 
-// ---- legenda e filtro -----------------------------------------------------------------------------------
+// ---- olho: camadas, situação e fundo --------------------------------------------------------------------
 function contagem(c) {
   const n = {executado: 0, pendente: 0, critico: 0, sem: 0}, o = {executado: 0, pendente: 0, critico: 0};
   P.cidades[c].forEach(a => { n[a.st in n ? a.st : 'sem']++; });
   (P.pontos && P.pontos[c] || []).forEach(pt => { o[pt[2]]++; });
   return {n, o};
 }
-const ROTP = {executado: 'Executada (6 meses)', pendente: 'Pendente', critico: 'Pendente emergencial/urgente'};
-function legenda() {
+function opcoes() {
   const {n, o} = contagem(cidade);
-  $('dica').textContent = 'Quadras coloridas pela situação da poda; cada ponto é uma OS de poda no ativo em que foi aberta ' +
-    '(verde: executada nos últimos 6 meses; amarelo: pendente; vermelho: pendente emergencial/urgente). ' +
-    'Clique numa cor para ligar ou desligar essas quadras e pontos. As contagens são da cidade escolhida.';
-  $('leg').innerHTML = ORDEM.map(st =>
-    `<button type="button" data-st="${st}" aria-pressed="${ativos.has(st)}" style="--c:${COR[st]}"><i></i><span class="n">${esc(ROT[st])}</span><span class="c">${nf(n[st])}<small>${st in o ? ' quadras · ' + nf(o[st]) + ' OS' : ' quadras'}</small></span></button>`).join('');
+  const tot = x => Object.values(x).reduce((s, v) => s + v, 0);
+  const cam = [['areas', 'Áreas', nf(P.cidades[cidade].length) + ' quadras', '<i style="--c:#22c55e"></i>'],
+    ['os', 'OS de poda', nf(tot(o)), '<i class="pt" style="--c:#facc15"></i>'],
+    ['nae', 'NAE', nf((P.nae && P.nae[cidade] || []).length), `<i class="pt" style="--c:${SANGUE}"></i>`]];
+  $('cam').innerHTML = cam.map(([k, t, c, ic]) => `<button type="button" class="pd-op" data-k="${k}" aria-pressed="${camadas[k]}">${ic}<span class="n">${t}</span><span class="c">${c}</span>${OLHO}</button>`).join('');
+  $('sit').innerHTML = ORDEM.map(st => `<button type="button" class="pd-op" data-st="${st}" aria-pressed="${ativos.has(st)}"><i style="--c:${COR[st]}"></i>` +
+    `<span class="n">${ROT[st]}</span><span class="c">${nf(n[st])}${st in o ? ' · ' + nf(o[st]) + ' OS' : ''}</span>${OLHO}</button>`).join('');
 }
-$('leg').addEventListener('click', e => {
+$('cam').addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]'); if (!b) return;
+  const k = b.dataset.k; camadas[k] = !camadas[k];
+  if (k === 'areas' && !camadas.areas && sel) fechar();
+  if (k === 'os' && !camadas.os && selPt) fechar();
+  mostrar(cidade, false); opcoes(); legenda();
+});
+$('sit').addEventListener('click', e => {
   const b = e.target.closest('button[data-st]'); if (!b) return;
   const st = b.dataset.st;
-  if (ativos.has(st)) { ativos.delete(st); if ((sel && sel.a.st === st) || (selPt && selPt[2] === st)) fechar(); }
-  else ativos.add(st);
-  aplicar(cidade); aplicarPts(cidade);
-  b.setAttribute('aria-pressed', ativos.has(st));
+  if (ativos.has(st)) { ativos.delete(st); if ((sel && sel.a.st === st) || (selPt && selPt[2] === st)) fechar(); } else ativos.add(st);
+  aplicar(cidade); aplicarPts(cidade); opcoes(); legenda();
 });
-
-// ---- fundo ----------------------------------------------------------------------------------------------
 $('fundo').addEventListener('click', e => {
-  const b = e.target.closest('button[data-f]'); if (!b) return;
+  const b = e.target.closest('button[data-f]'); if (!b || !sat) return;
   fundo = b.dataset.f;
-  if (fundo === 'sat') { sat.addTo(map); } else { sat.remove(); $('nosat').hidden = true; }
-  $('fundo').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  if (fundo === 'sat') { sat.addTo(map); sat.bringToBack(); creditoGoogle(); }
+  else { sat.remove(); $('nosat').hidden = true; if (gCopy) { map.attributionControl.removeAttribution(gCopy); gCopy = ''; } }
+  $('fundo').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
 });
-
-// ---- painel ---------------------------------------------------------------------------------------------
-const painel = $('painel');
-const X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
-function vazio() {
-  painel.classList.remove('aberto'); document.body.classList.remove('gaveta');
-  painel.innerHTML = '<p class="pd-vazio">Clique numa quadra, ou use a busca, para ver a situação da poda, as OS recentes e os alimentadores. Clique num ponto para ver a OS de poda e o ativo.</p>';
+function legenda() {
+  const l = [];
+  if (camadas.areas) ORDEM.filter(st => ativos.has(st)).forEach(st => l.push(`<div><i style="--c:${COR[st]}"></i>${ROT[st]}</div>`));
+  const pts = [];
+  if (camadas.os) pts.push('<div><i class="pt" style="--c:#9ca3af"></i>OS de poda</div>');
+  if (camadas.nae) pts.push(`<div><i class="pt" style="--c:${SANGUE}"></i>NAE</div>`);
+  if (l.length && pts.length) l.push('<hr>');
+  $('leg').innerHTML = l.concat(pts).join('');
+  $('leg').hidden = !l.length && !pts.length;
 }
+const drop = $('drop'), olho = $('olho');
+function abreOlho(sim) {
+  drop.hidden = !sim; olho.setAttribute('aria-expanded', String(sim));
+  if (sim && !mobile()) setTimeout(() => $('q').focus(), 0);
+}
+olho.addEventListener('click', e => { e.stopPropagation(); abreOlho(drop.hidden); });
+// fora do olho e da lista, fecha (composedPath: o botão clicado pode ter sido redesenhado pelo próprio clique)
+document.addEventListener('click', e => { if (!drop.hidden && !e.composedPath().some(n => n === drop || n === olho)) abreOlho(false); });
+[drop, $('cids'), olho, $('tc'), $('leg'), $('painel')].forEach(el => { L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el); });
+
+// ---- painel (dentro do mapa) ----------------------------------------------------------------------------
+const painel = $('painel');
+function abrePainel(html) { painel.innerHTML = html; painel.hidden = false; painel.scrollTop = 0; document.body.classList.add('pd-aberto'); }
 function dias(ult) {
   const d = Math.round((Date.parse(P.gerado) - Date.parse(ult)) / 864e5);
   return isNaN(d) ? '' : d <= 0 ? 'na data dos dados' : d === 1 ? 'há 1 dia' : `há ${nf(d)} dias`;
@@ -396,26 +432,23 @@ function detalhe(a, c) {
   const corte = P.corte_nae100km && P.corte_nae100km[c];
   const als = (a.als || []).length
     ? `<ul class="pd-als">${a.als.map(x => `<li class="${alto.has(x) ? 'alto' : ''}">${esc(x)}${alto.has(x) ? '<em>NAE alto</em>' : ''}</li>`).join('')}</ul>` +
-      (alto.size && corte != null ? `<p class="pd-peq">NAE alto: acima do corte de ${esc(c)} (${esc(nf(corte))} NAE por 100 km).</p>` : '')
+      (alto.size && corte != null ? `<p class="pd-peq">Corte de ${esc(c)}: ${esc(nf(corte))} NAE por 100 km.</p>` : '')
     : '<p class="pd-peq">Nenhum alimentador ligado a esta área.</p>';
   const os = (a.os || []).map(o => {
     const [num, sit, crit, cri, exe] = o;
-    const k = /^exec/i.test(sit || '') ? 'ex' : 'pe';
-    return `<li class="${k}"><b>${esc(num)}</b><span>${esc(cap(sit))} · criticidade ${esc((crit || '—').toString().toLowerCase())}</span>` +
+    return `<li class="${/^exec/i.test(sit || '') ? 'ex' : 'pe'}"><b>${esc(num)}</b><span>${esc(cap(sit))} · ${esc((crit || '—').toString().toLowerCase())}</span>` +
       `<span>Criada em ${esc(br(cri) || '—')}${exe ? ' · executada em ' + esc(br(exe)) : ''}</span></li>`;
   }).join('');
-  const tipo = a.tipo === 'bairro' ? 'Bairro' : 'Quadra (setor censitário do IBGE)';
-  const cod = a.tipo === 'bairro' ? '' : ' · ' + esc(a.id);
   return `<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
-    `<div><h2 id="pd-tit" tabindex="-1">${esc(titulo(a))}</h2><p class="pd-tipo">${esc(tipo)}${cod} · ${esc(c)}</p></div>` +
+    `<div><h2 id="pd-tit" tabindex="-1">${esc(titulo(a))}</h2><p class="pd-tipo">${a.tipo === 'bairro' ? 'Bairro' : 'Quadra · ' + esc(a.id)} · ${esc(c)}</p></div>` +
     `<div class="pd-sit" style="--c:${COR[a.st] || COR.sem}"><b>${esc(ROT[a.st] || a.st)}</b>${a.motivo ? `<span>${esc(a.motivo)}</span>` : ''}</div>` +
     `<dl class="pd-kp">` +
-    `<div><dt>Última poda</dt><dd>${a.ult ? esc(br(a.ult)) : 'Nenhuma'}${a.ult ? `<small>${esc(dias(a.ult))}</small>` : '<small>nos dados</small>'}</dd></div>` +
-    `<div><dt>Podas em 6 meses</dt><dd>${esc(nf(a.exec6m || 0))}<small>OS executadas</small></dd></div>` +
-    `<div><dt>Pendentes</dt><dd>${esc(nf(a.pend || 0))}<small>${a.crit ? esc(nf(a.crit)) + (a.crit === 1 ? ' crítica (emergencial/urgente)' : ' críticas (emergenciais/urgentes)') : 'nenhuma crítica'}</small></dd></div>` +
-    `<div><dt>OS de poda no total</dt><dd>${esc(nf(a.total || 0))}</dd></div></dl>` +
+    `<div><dt>Última poda</dt><dd>${a.ult ? esc(br(a.ult)) : 'Nenhuma'}${a.ult ? `<small>${esc(dias(a.ult))}</small>` : ''}</dd></div>` +
+    `<div><dt>Podas em 6 meses</dt><dd>${esc(nf(a.exec6m || 0))}</dd></div>` +
+    `<div><dt>Pendentes</dt><dd>${esc(nf(a.pend || 0))}<small>${a.crit ? esc(nf(a.crit)) + ' emergencial/urgente' : ''}</small></dd></div>` +
+    `<div><dt>OS no total</dt><dd>${esc(nf(a.total || 0))}</dd></div></dl>` +
     `<div><h3>Alimentadores</h3>${als}</div>` +
-    `<div><h3>OS recentes</h3>${os ? `<ul class="pd-os">${os}</ul>` : '<p class="pd-peq">Nenhuma OS de poda nesta área.</p>'}</div></div>`;
+    `<div><h3>OS recentes</h3>${os ? `<ul class="pd-os">${os}</ul>` : '<p class="pd-peq">Nenhuma OS de poda.</p>'}</div></div>`;
 }
 function marcar(a, lay) {
   selecao.clearLayers();
@@ -426,110 +459,124 @@ function marcar(a, lay) {
 }
 function escolher(a, c, lay, foco) {
   if (sel && sel.lay !== lay) sel.lay.setStyle(estilo(sel.a, false));
-  selPt = null;
-  sel = {a, c, lay};
+  selPt = null; sel = {a, c, lay};
   marcar(a, lay);
   const alsN = a.st === 'critico' ? ((a.nae_alto || []).length ? a.nae_alto : (a.als || [])) : [];
-  painel.innerHTML = comNae(detalhe(a, c), alsN.length ? naeSec(alsN, mostraNae(alsN)) : '');
+  abrePainel(comNae(detalhe(a, c), alsN.length ? naeSec(alsN, mostraNae(alsN)) : ''));
   if (!alsN.length) naeLay.clearLayers();
-  painel.scrollTop = 0;
-  painel.classList.add('aberto'); document.body.classList.add('gaveta');
-  if (mobile()) livre(lay);
   if (foco) { const h = $('pd-tit'); if (h) h.focus({preventScroll: true}); }
 }
-// celular: a gaveta cobre o pé do mapa; se a área ficou escondida (ou fora do mapa), desloca o mapa para ela aparecer
-function livre(lay) {
-  const mr = $('map').getBoundingClientRect(), topo = Math.max(mr.top, innerHeight - painel.offsetHeight);
-  const vis = Math.max(120, Math.min(mr.bottom, topo) - mr.top);          // altura do mapa que fica à vista
-  const p = map.latLngToContainerPoint(lay.getBounds().getCenter());
-  if (p.y > vis - 24 || p.y < 24 || p.x < 0 || p.x > mr.width) map.panBy([p.x - mr.width / 2, p.y - vis / 2], {animate: false});
-}
-function escolherPt(pt) {
+function escolherPt(pt, foco) {
   if (sel) { sel.lay.setStyle(estilo(sel.a, false)); sel = null; }
   selPt = pt;
   selecao.clearLayers();
   selecao.addLayer(L.circleMarker([pt[0], pt[1]], {radius: 10, color: '#ffffff', weight: 3, fill: false, interactive: false}));
   const exec = pt[4] === 'EXECUTADA';
-  painel.innerHTML = `<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
+  let html = `<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
     `<div><h2 id="pd-tit" tabindex="-1">${esc(pt[3])}</h2><p class="pd-tipo">OS de poda · ${esc(cidade)}</p></div>` +
-    `<div class="pd-sit" style="--c:${COR[pt[2]]}"><b>${esc(ROTP[pt[2]])}</b><span>${esc(cap(pt[4]))} · criticidade ${esc((pt[5] || '—').toLowerCase())}</span></div>` +
-    `<dl class="pd-kp">` +
-    `<div><dt>${exec ? 'Executada em' : 'Criada em'}</dt><dd>${esc(br(pt[6]) || '—')}${exec ? `<small>${esc(dias(pt[6]))}</small>` : ''}</dd></div>` +
+    `<div class="pd-sit" style="--c:${COR[pt[2]]}"><b>${esc(ROTP[pt[2]])}</b><span>${esc(cap(pt[4]))} · ${esc((pt[5] || '—').toLowerCase())}</span></div>` +
+    `<dl class="pd-kp"><div><dt>${exec ? 'Executada em' : 'Criada em'}</dt><dd>${esc(br(pt[6]) || '—')}${exec ? `<small>${esc(dias(pt[6]))}</small>` : ''}</dd></div>` +
     `<div><dt>Ativo</dt><dd>${esc(pt[7])}<small>${esc(TIPO(pt[8]))}</small></dd></div>` +
     `<div><dt>Alimentador</dt><dd>${esc(pt[9] || '—')}</dd></div></dl></div>`;
-  if (pt[2] === 'critico' && pt[9]) painel.innerHTML = comNae(painel.innerHTML, naeSec([pt[9]], mostraNae([pt[9]])));
-  else naeLay.clearLayers();
-  painel.scrollTop = 0;
-  painel.classList.add('aberto'); document.body.classList.add('gaveta');
+  if (pt[2] === 'critico' && pt[9]) html = comNae(html, naeSec([pt[9]], mostraNae([pt[9]]))); else naeLay.clearLayers();
+  abrePainel(html);
+  if (foco) { const h = $('pd-tit'); if (h) h.focus({preventScroll: true}); }
 }
 function fechar() {
   if (sel) sel.lay.setStyle(estilo(sel.a, false));
-  sel = null; selPt = null; selecao.clearLayers(); naeLay.clearLayers(); vazio();
+  sel = null; selPt = null; selecao.clearLayers(); naeLay.clearLayers();
+  painel.hidden = true; painel.innerHTML = ''; document.body.classList.remove('pd-aberto');
 }
 painel.addEventListener('click', e => { if (e.target.closest('.pd-x')) fechar(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && (sel || selPt) && $('sug').hidden) fechar(); });
-map.on('click', () => { if (mobile() && (sel || selPt)) fechar(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!drop.hidden) { abreOlho(false); olho.focus(); } else if (sel || selPt) fechar();
+});
 
-// ---- busca ----------------------------------------------------------------------------------------------
-const q = $('q'), sug = $('sug');
-let achados = [], ativo = -1;
+// ---- busca: quadra, OS ou ativo -------------------------------------------------------------------------
+const q = $('q'), res = $('res');
+let achados = [], marc = -1;
 function achar(txt) {
   const n = sem(txt).trim(); if (!n) return [];
   const out = [];
-  CIDADES.forEach((c, ci) => P.cidades[c].forEach(a => {
-    const i = a._t.indexOf(n); if (i < 0) return;
-    out.push({i: i === 0 ? 0 : i <= a.id.length ? 1 : 2, c, a, k: c === cidade ? 0 : 1 + ci});
-  }));
-  out.sort((x, y) => x.i - y.i || x.k - y.k || titulo(x.a).localeCompare(titulo(y.a), 'pt-BR'));
-  return out.slice(0, 8);
+  CIDADES.forEach((c, ci) => {
+    P.cidades[c].forEach(a => { const i = sem(titulo(a) + ' ' + a.id).indexOf(n); if (i >= 0) out.push({k: 'a', c, a, o: (i === 0 ? 0 : 1) + (c === cidade ? 0 : 2 + ci)}); });
+    (P.pontos && P.pontos[c] || []).forEach(pt => {
+      if (sem(pt[3]).includes(n)) out.push({k: 'o', c, pt, o: 4 + (c === cidade ? 0 : 2)});
+      else if (n.length >= 4 && sem(pt[7]).startsWith(n)) out.push({k: 'p', c, pt, o: 5 + (c === cidade ? 0 : 2)});
+    });
+  });
+  out.sort((x, y) => x.o - y.o);
+  return out.slice(0, 10);
 }
 function lista() {
-  achados = achar(q.value); ativo = -1;
-  if (!q.value.trim()) { sug.hidden = true; q.setAttribute('aria-expanded', 'false'); return; }
-  sug.innerHTML = achados.length ? achados.map((r, i) =>
-    `<li role="option" id="op${i}" data-i="${i}" aria-selected="false"><b>${esc(titulo(r.a))}</b>` +
-    `<small>${esc(r.c)} · ${esc(r.a.tipo === 'bairro' ? 'bairro' : 'quadra ' + r.a.id)} · ${esc(ROT[r.a.st] || r.a.st)}</small></li>`).join('')
-    : '<li class="nada" role="option" aria-disabled="true">Nenhuma área encontrada.</li>';
-  sug.hidden = false; q.setAttribute('aria-expanded', 'true'); q.removeAttribute('aria-activedescendant');
+  achados = achar(q.value); marc = -1;
+  const vazio = !q.value.trim();
+  $('opcoes').hidden = !vazio; res.hidden = vazio;
+  if (vazio) return;
+  res.innerHTML = achados.length ? achados.map((r, i) => `<li role="option" id="op${i}" data-i="${i}" aria-selected="false">` +
+    (r.k === 'a' ? `<b>${esc(titulo(r.a))}</b><small>${esc(r.c)} · quadra · ${esc(ROT[r.a.st] || r.a.st)}</small>`
+      : `<b>${esc(r.k === 'o' ? r.pt[3] : TIPO(r.pt[8]) + ' ' + r.pt[7])}</b><small>${esc(r.c)} · ${r.k === 'o' ? esc(TIPO(r.pt[8]) + ' ' + r.pt[7]) : 'OS ' + esc(r.pt[3])} · ${esc(ROTP[r.pt[2]])}</small>`) +
+    '</li>').join('') : '<li class="nada" role="option" aria-disabled="true">Nada encontrado.</li>';
 }
-function destacar(i) {
-  ativo = i;
-  sug.querySelectorAll('[role=option]').forEach((li, k) => li.setAttribute('aria-selected', k === i));
-  if (i >= 0) { q.setAttribute('aria-activedescendant', 'op' + i); const li = $('op' + i); if (li) li.scrollIntoView({block: 'nearest'}); }
-  else q.removeAttribute('aria-activedescendant');
+function marca(i) {
+  marc = i;
+  res.querySelectorAll('[role=option]').forEach((li, k) => li.setAttribute('aria-selected', String(k === i)));
+  if (i >= 0) { const li = $('op' + i); if (li) li.scrollIntoView({block: 'nearest'}); }
 }
 function irPara(r) {
-  sug.hidden = true; q.setAttribute('aria-expanded', 'false'); q.value = titulo(r.a);
-  if (!camadas.areas) { camadas.areas = true; mostrar(cidade, false); botoesCamada(); }
-  if (r.c !== cidade) { fechar(); mostrar(r.c, false); botoesCidade(); botoesCamada(); }
-  if (!ativos.has(r.a.st)) { ativos.add(r.a.st); aplicar(r.c); aplicarPts(r.c); }
-  legenda();
-  const lay = construir(r.c).lays.find(l => l._pa === r.a);
-  if (!lay) return;
-  escolher(r.a, r.c, lay, true);
-  if (mobile()) $('map').scrollIntoView({block: 'start'});   // celular: o mapa aparece acima da gaveta
-  const m = mobile(), h = map.getSize().y;
-  map.fitBounds(lay.getBounds(), {maxZoom: 17, paddingTopLeft: [24, 24], paddingBottomRight: [24, m ? Math.round(h * .45) : 24]});
+  abreOlho(false);
+  if (r.c !== cidade) { fechar(); mostrar(r.c, false); botoesCidade(); opcoes(); legenda(); }
+  if (r.k === 'a') {
+    if (!camadas.areas) { camadas.areas = true; mostrar(cidade, false); opcoes(); legenda(); }
+    if (!ativos.has(r.a.st)) { ativos.add(r.a.st); aplicar(r.c); aplicarPts(r.c); opcoes(); legenda(); }
+    const lay = construir(r.c).lays.find(l => l._pa === r.a); if (!lay) return;
+    escolher(r.a, r.c, lay, true);
+    map.fitBounds(lay.getBounds(), {maxZoom: 18, paddingTopLeft: [24, 72], paddingBottomRight: [mobile() ? 24 : 390, mobile() ? Math.round(map.getSize().y * .5) : 24]});
+  } else {
+    if (!camadas.os) { camadas.os = true; mostrar(cidade, false); opcoes(); legenda(); }
+    if (!ativos.has(r.pt[2])) { ativos.add(r.pt[2]); aplicar(r.c); aplicarPts(r.c); opcoes(); legenda(); }
+    escolherPt(r.pt, true);
+    map.setView([r.pt[0], r.pt[1]], Math.max(map.getZoom(), 18));
+  }
 }
 q.addEventListener('input', lista);
-q.addEventListener('focus', () => { if (q.value.trim()) lista(); });
 q.addEventListener('keydown', e => {
-  if (e.key === 'ArrowDown' && !sug.hidden) { e.preventDefault(); destacar(Math.min(achados.length - 1, ativo + 1)); }
-  else if (e.key === 'ArrowUp' && !sug.hidden) { e.preventDefault(); destacar(Math.max(0, ativo - 1)); }
-  else if (e.key === 'Enter') { e.preventDefault(); if (!sug.hidden && achados.length) irPara(achados[ativo >= 0 ? ativo : 0]); }
-  else if (e.key === 'Escape' && !sug.hidden) { sug.hidden = true; q.setAttribute('aria-expanded', 'false'); }
+  if (e.key === 'ArrowDown' && !res.hidden) { e.preventDefault(); marca(Math.min(achados.length - 1, marc + 1)); }
+  else if (e.key === 'ArrowUp' && !res.hidden) { e.preventDefault(); marca(Math.max(0, marc - 1)); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (achados.length) irPara(achados[marc >= 0 ? marc : 0]); }
 });
-sug.addEventListener('mousedown', e => {
-  const li = e.target.closest('li[data-i]'); if (!li) return;
-  e.preventDefault(); irPara(achados[+li.dataset.i]);
+res.addEventListener('mousedown', e => { const li = e.target.closest('li[data-i]'); if (!li) return; e.preventDefault(); irPara(achados[+li.dataset.i]); });
+
+// ---- tela cheia -----------------------------------------------------------------------------------------
+const box = $('box'), tc = $('tc');
+const nativa = !!(box.requestFullscreen || box.webkitRequestFullscreen);
+const emTela = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || document.body.classList.contains('tela-cheia');
+function ajustaTc() {
+  const on = emTela();
+  tc.setAttribute('aria-pressed', String(on)); tc.setAttribute('aria-label', on ? 'Sair da tela cheia' : 'Tela cheia'); tc.title = tc.getAttribute('aria-label');
+  setTimeout(() => map.invalidateSize(), 60);
+}
+tc.addEventListener('click', () => {
+  if (emTela()) {
+    if (document.fullscreenElement) document.exitFullscreen(); else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+    document.body.classList.remove('tela-cheia'); ajustaTc();
+  } else if (nativa) {
+    const p = (box.requestFullscreen || box.webkitRequestFullscreen).call(box);
+    if (p && p.catch) p.catch(() => { document.body.classList.add('tela-cheia'); ajustaTc(); });
+  } else { document.body.classList.add('tela-cheia'); ajustaTc(); }
 });
-document.addEventListener('click', e => { if (!e.target.closest('.pd-busca')) { sug.hidden = true; q.setAttribute('aria-expanded', 'false'); } });
+document.addEventListener('fullscreenchange', ajustaTc);
+document.addEventListener('webkitfullscreenchange', ajustaTc);
 
 // ---- início ---------------------------------------------------------------------------------------------
-botoesCidade(); legenda(); vazio();
-mostrar(cidade, true); botoesCamada();
-window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo}), pontos: () => map.hasLayer(pontos(cidade).grupo) ? pontos(cidade).grupo.getLayers().length : 0, nae: () => naeLay.getLayers().length,
-  naeTodos: () => map.hasLayer(naeTodos(cidade)) ? naeTodos(cidade).getLayers().length : 0, camadas: () => ({...camadas}), camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null), visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); }};
+botoesCidade(); opcoes(); legenda();
+mostrar(cidade, true);
+window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, google: !!gSess}),
+  camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id) : null),
+  visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); },
+  pontos: () => map.hasLayer(pontos(cidade).grupo) ? pontos(cidade).grupo.getLayers().length : 0, nae: () => naeLay.getLayers().length,
+  naeTodos: () => map.hasLayer(naeTodos(cidade)) ? naeTodos(cidade).getLayers().length : 0, camadas: () => ({...camadas})};
 })();
 </script>
 <script src="../assets/menu.js"></script>
