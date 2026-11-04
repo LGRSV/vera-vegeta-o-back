@@ -420,14 +420,14 @@ function rotulosDe(c) {
 const nomesLay = L.layerGroup();
 // ---- card dentro da quadra, de perto: nome, linha viva, OS executadas/total e histórico de NAE, DEC e FEC -------------
 const cardsLay = L.layerGroup(), comCard = new Set();
-const fn = v => !v ? '–' : v >= 1000 ? (v / 1000).toFixed(1).replace('.', ',') + 'k' : v >= 100 ? String(Math.round(v)) : v >= 10 ? v.toFixed(1).replace('.', ',') : v.toFixed(1).replace('.', ',').replace(/,0$/, '');
+const fn = v => !v ? '0' : v >= 1000 ? (v / 1000).toFixed(1).replace('.', ',') + 'k' : v >= 100 ? String(Math.round(v)) : v >= 10 ? v.toFixed(1).replace('.', ',') : v.toFixed(1).replace('.', ',').replace(/,0$/, '');
 const mes3 = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1];
 function tabelaHist(a) {
   const h = a.k.h, ms = MESES6; if (!ms.length) return '';
-  const max = Math.max(1, ...ms.map(m => h[m].n));
+  const max = Math.max(1, ...ms.map(m => h[m].n)), nenhum = ms.every(m => !h[m].n);
   const lin = (rot, f, fmt) => `<tr><th>${rot}</th>` + ms.map(m => { const v = f(h[m]); return `<td class="${v ? '' : 'z'}"${rot === 'NAE' && v ? ` style="background:rgba(138,3,3,${(.35 + .65 * v / max).toFixed(2)});color:#fff"` : ''}>${fmt(v)}</td>`; }).join('') + '</tr>';
-  return `<table class="qt"><caption>NAE · DEC · FEC · últimos ${ms.length} meses</caption><thead><tr><th></th>${ms.map(m => `<th>${mes3(m)}</th>`).join('')}</tr></thead><tbody>` +
-    lin('NAE', x => x.n, v => v || '–') + lin('DEC', x => x.dec, fn) + lin('FEC', x => x.fec, fn) + '</tbody></table>';
+  return `<table class="qt"><caption>NAE · DEC · FEC · ${ms.length} meses${nenhum ? ' · sem NAE aqui' : ''}</caption><thead><tr><th></th>${ms.map(m => `<th>${mes3(m)}</th>`).join('')}</tr></thead><tbody>` +
+    lin('NAE', x => x.n, v => v || '0') + lin('DEC', x => x.dec, fn) + lin('FEC', x => x.fec, fn) + '</tbody></table>';
 }
 function linhaOS(a) {
   const k = a.k;
