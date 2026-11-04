@@ -293,7 +293,7 @@ svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stro
     <div class="f"><span id="l-sigco">Projeto (SIGCO)</span><select id="sigco" class="busca" aria-labelledby="l-sigco"></select></div>
     <div class="f"><span id="l-obj">Objetivo</span><select id="obj" class="busca" aria-labelledby="l-obj"></select></div>
     <div class="f"><span id="l-base">Curva 2027</span>
-      <div class="seg" id="base" role="group" aria-labelledby="l-base"><button type="button" data-v="b2426" aria-pressed="true">Real. 2024–26</button><button type="button" data-v="b2326" aria-pressed="false">Real. 2023–26</button><button type="button" data-v="planilha" aria-pressed="false">Planilha</button></div></div>
+      <div class="seg" id="base" role="group" aria-labelledby="l-base"><button type="button" data-v="b2326" aria-pressed="true">Real. 2023–26</button><button type="button" data-v="b2426" aria-pressed="false">Real. 2024–26</button><button type="button" data-v="planilha" aria-pressed="false">Planilha</button></div></div>
     <div class="f"><span id="l-vis">Visão</span>
       <div class="seg" id="vis" role="group" aria-labelledby="l-vis"><button type="button" data-v="mensal" aria-pressed="true">Mensal</button><button type="button" data-v="acum" aria-pressed="false">Acumulado</button></div></div>
   </div>
@@ -459,7 +459,7 @@ function curva(g) {
   let c;
   if (st.base === 'planilha' && g.c && soma(g.c) > 0) { const pos = g.c.map(v => Math.max(0, v)), t = soma(pos); c = pos.map(v => v / t); }
   else {
-    const med = mediaMes(g.m, BASES[st.base === 'planilha' ? 'b2426' : st.base]).map(v => Math.max(0, v));
+    const med = mediaMes(g.m, BASES[st.base === 'planilha' ? 'b2326' : st.base]).map(v => Math.max(0, v));
     const t = soma(med);
     c = t > 0 ? med.map(v => v / t) : PLANA.slice();
   }
@@ -494,7 +494,7 @@ function recupera() {
 
 /* ===================== Dados e estado ===================== */
 let D = null, IDX = null;
-const st = { sel: null, obj: 'Todos', base: 'b2426', vis: 'mensal', soOrc: false, ajuste: {}, mensal: {}, ind: null, visao: 'hist', aba: 'resumo', ord: { col: 'orc', dir: -1 }, anos: { 2023: true, 2024: true, 2025: true, 2026: true, 2027: true }, logSel: null };
+const st = { sel: null, obj: 'Todos', base: 'b2326', vis: 'mensal', soOrc: false, ajuste: {}, mensal: {}, ind: null, visao: 'hist', aba: 'resumo', ord: { col: 'orc', dir: -1 }, anos: { 2023: true, 2024: true, 2025: true, 2026: true, 2027: true }, logSel: null };
 
 function prepara(d) {
   const grupos = d.grupos.map(g => ({ ...g, tem: true }));
@@ -707,7 +707,7 @@ function tabela() {
 const variacao = (o, b) => (b > 0 ? o / b - 1 : null);
 const fVar = v => v == null ? '<span class="neutro">—</span>' : `<span class="${Math.abs(v) < 0.0005 ? 'neutro' : v > 0 ? 'sobe' : 'desce'}">${v > 0 ? '+' : v < 0 ? '−' : ''}${pct(Math.abs(v))}</span>`;
 function ovDados() {
-  const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base];
+  const anosB = BASES[st.base === 'planilha' ? 'b2326' : st.base];
   const g = st.sel ? IDX.porId.get(st.sel) : null;
   if (g) {
     const R = Object.fromEntries(ANOS_L.map(a => [a, realAno(g.m, a)])), P = projecao(g.m);
@@ -725,7 +725,7 @@ function ovDados() {
   tot.vr = variacao(tot.orc, tot.med);
   return { modo: 'proj', anosB, linhas, tot };
 }
-const baseAnos = () => BASES[st.base === 'planilha' ? 'b2426' : st.base];
+const baseAnos = () => BASES[st.base === 'planilha' ? 'b2326' : st.base];
 const pctTxt = v => v == null ? '' : (v > 0 ? '+' : '') + fDec(v * 100, 1);
 const numPct = t => numero(String(t ?? '').replace(/%/g, '').replace(/^\s*\+/, '').replace('−', '-')) / 100;
 function tabelaOV() {
@@ -899,7 +899,7 @@ function quantGraf(q) {
 function insights() {
   const L = [], u = D.ultimoMes[2026] || 12, mu = MESES[u - 1].toLowerCase(), nums = Object.keys(D.real);
   const tot = a => soma(realAno(nums, a)), ate = (a, n) => soma(realAno(nums, a).slice(0, n));
-  const base = BASES[st.base === 'planilha' ? 'b2426' : st.base];
+  const base = BASES[st.base === 'planilha' ? 'b2326' : st.base];
   const O = soma(IDX.grupos.map(valor27)), r25 = tot(2025);
   const sinal = v => (v > 0 ? '+' : v < 0 ? '−' : '') + pct(Math.abs(v), Math.abs(v) >= 0.995 ? 0 : 1);
   if (r25 > 0) L.push({ k: 'orc25', num: O / r25 - 1, t: 'Orçado 2027 × realizado 2025', v: sinal(O / r25 - 1), c: O >= r25 ? 'sobe' : 'desce', d: `${curto(O)} orçados para 2027 contra ${curto(r25)} realizados pelo DCMD em 2025.` });
@@ -939,7 +939,7 @@ function insightsRender() {
 
 /* ----- visões: orçado × histórico, sazonalidade 2027, por objetivo ----- */
 function visoes() {
-  const base = BASES[st.base === 'planilha' ? 'b2426' : st.base], rotB = `${base[0]}–2026`;
+  const base = BASES[st.base === 'planilha' ? 'b2326' : st.base], rotB = `${base[0]}–2026`;
   const gs = IDX.grupos.filter(g => st.obj === 'Todos' || g.o === st.obj);
   const el = $('#vz'), filtro = st.obj === 'Todos' ? '' : ` · objetivo ${st.obj}`;
   if (st.visao === 'hist') {
@@ -981,7 +981,7 @@ function logica() {
   const g = IDX.porId.get(sel.value);
   if (!g) { $('#passos').innerHTML = ''; $('#log-tab').innerHTML = ''; return; }
   $('#log-tit').textContent = `Exemplo com o SIGCO ${g.id}`;
-  const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base];
+  const anosB = BASES[st.base === 'planilha' ? 'b2326' : st.base];
   const med = mediaMes(g.m, anosB), c = curva(g), d = distrib(g), v = valor27(g);
   const plan = st.base === 'planilha' && g.c && soma(g.c) > 0;
   const somaPos = soma(med.map(x => Math.max(0, x)));
@@ -1116,7 +1116,7 @@ function exporta() {
 
 /* Excel com todos os projetos: orçado 2027 mês a mês (com alterações), orçado × realizado por mês e parâmetros. */
 function dadosExcel() {
-  const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base], rotMed = `Média ${anosB[0]}–2026`;
+  const anosB = BASES[st.base === 'planilha' ? 'b2326' : st.base], rotMed = `Média ${anosB[0]}–2026`;
   const aba1 = [['SIGCO', 'Projeto', 'Objetivo', 'Orçado 2027 (planilha)', 'Orçado 2027 (usado)', 'Alterado', ...MESES.map(m => m + '/2027')]];
   const aba2 = [['SIGCO', 'Projeto', 'Objetivo', 'Mês', 'Realizado 2023', 'Realizado 2024', 'Realizado 2025', 'Realizado 2026', rotMed, 'Orçado 2027', 'Variação % (orçado ÷ média − 1)', 'Mês alterado']];
   IDX.grupos.forEach(g => {
