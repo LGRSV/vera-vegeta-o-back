@@ -214,7 +214,7 @@ function ocupado(el) {
 }
 function paraClassico() {
   let u = '../index.html' + location.search.replace(/[?&]classico=1/, '');
-  try { localStorage.setItem('visao', 'classico'); } catch (e) { u += (u.indexOf('?') < 0 ? '?' : '&') + 'classico=1'; }
+  try { sessionStorage.setItem('visao', 'classico'); } catch (e) { u += (u.indexOf('?') < 0 ? '?' : '&') + 'classico=1'; }
   location.replace(u);
 }
 shiftSolo(window, paraClassico, ocupado);
