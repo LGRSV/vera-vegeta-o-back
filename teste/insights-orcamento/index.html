@@ -366,10 +366,11 @@ const MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'O
 const MESES_L = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const ANOS_R = [2024, 2025, 2026];
 const ANOS_L = [2023, 2024, 2025, 2026];   // linhas de realizado do gráfico
-/* Projeção dos meses de 2026 ainda sem realizado (nov–dez). Calculada sobre a série do recorte (todos, objetivo ou SIGCO).
-   O método foi escolhido por backtest (2024 e 2025, fingindo que o ano acabava em outubro). */
+/* Projeção dos meses de 2026 ainda sem realizado (nov–dez), em R$.
+   DESLIGADA (metodo: null): a página mostra só o que veio das planilhas; o realizado de 2026 termina no último mês delas.
+   Se um dia houver regra aprovada, os métodos abaixo já estão implementados e testados (backtest em 2024 e 2025). */
 const PROJ = {
-  metodo: 'mediaAno',   // vencedor do backtest: menor erro no total, não dispara por SIGCO e soma igual ao total
+  metodo: null,
   rotulo: {
     mediaRitmo: 'média de nov–dez dos anos anteriores × ritmo de 2026 (jan–out de 2026 ÷ média jan–out dos anos anteriores)',
     ritmo1: 'nov–dez de 2025 × ritmo de 2026 (jan–out de 2026 ÷ jan–out de 2025)',
@@ -379,7 +380,7 @@ const PROJ = {
 };
 function projecao(nums, metodo = PROJ.metodo) {
   const A = 2026, u = D.ultimoMes[A] || 12;
-  if (u >= 12) return null;
+  if (!metodo || u >= 12) return null;
   const y = realAno(nums, A).map(v => v || 0), ate = soma(y.slice(0, u));
   const ant = ANOS_L.filter(a => a < A && (D.ultimoMes[a] || 0) >= 12).map(a => realAno(nums, a).map(v => v || 0));
   const out = Array(12).fill(null), meses = [];
@@ -1117,14 +1118,14 @@ function exporta() {
 function dadosExcel() {
   const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base], rotMed = `Média ${anosB[0]}–2026`;
   const aba1 = [['SIGCO', 'Projeto', 'Objetivo', 'Orçado 2027 (planilha)', 'Orçado 2027 (usado)', 'Alterado', ...MESES.map(m => m + '/2027')]];
-  const aba2 = [['SIGCO', 'Projeto', 'Objetivo', 'Mês', 'Realizado 2023', 'Realizado 2024', 'Realizado 2025', 'Realizado 2026', 'Projeção 2026', rotMed, 'Orçado 2027', 'Variação % (orçado ÷ média − 1)', 'Mês alterado']];
+  const aba2 = [['SIGCO', 'Projeto', 'Objetivo', 'Mês', 'Realizado 2023', 'Realizado 2024', 'Realizado 2025', 'Realizado 2026', rotMed, 'Orçado 2027', 'Variação % (orçado ÷ média − 1)', 'Mês alterado']];
   IDX.grupos.forEach(g => {
-    const d = distrib(g), auto = rateia(g.orc, curva(g)), med = mediaMes(g.m, anosB), R = ANOS_L.map(a => realAno(g.m, a)), P = projecao(g.m), nome = g.itens.map(i => i.n).join(' + ');
+    const d = distrib(g), auto = rateia(g.orc, curva(g)), med = mediaMes(g.m, anosB), R = ANOS_L.map(a => realAno(g.m, a)), nome = g.itens.map(i => i.n).join(' + ');
     aba1.push([g.id, nome, g.o, g.orc, valor27(g), alterado(g) ? 'sim' : 'não', ...d]);
-    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], R[3][m], P && P[m] != null ? r2(P[m]) : null, r2(med[m]), d[m], variacao(d[m], med[m]), st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
+    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], R[3][m], r2(med[m]), d[m], variacao(d[m], med[m]), st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
   });
   const aba3 = [['Parâmetro', 'Valor'], ['Fonte', D.fonte], ['Dados de', D.gerado], ['Curva de 2027', st.base === 'planilha' ? 'aba Curva da planilha' : `realizado ${anosB[0]}–2026`],
-    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Projeção de 2026', PROJ.rotulo[PROJ.metodo]], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
+    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Realizado de 2026', 'só até o último mês da planilha, sem projeção'], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
   return { aba1, aba2, aba3 };
 }
 async function baixaExcel() {
@@ -1138,7 +1139,7 @@ async function baixaExcel() {
       return ws;
     };
     X.utils.book_append_sheet(wb, folha(A.aba1, -1), 'Orçado 2027 mensal');
-    X.utils.book_append_sheet(wb, folha(A.aba2, 11), 'Orçado x realizado');
+    X.utils.book_append_sheet(wb, folha(A.aba2, 10), 'Orçado x realizado');
     X.utils.book_append_sheet(wb, folha(A.aba3, -1), 'Parâmetros');
     X.writeFile(wb, 'orcamento-sigco-2027.xlsx');
   } catch (e) {
