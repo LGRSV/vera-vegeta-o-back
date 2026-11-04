@@ -105,7 +105,7 @@ header.cab>.bt{position:absolute;top:0;right:0}
 .seg button:hover{color:var(--fg)}.seg button[aria-pressed=true]{background:var(--seg-on);color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
 .ck{display:flex;align-items:center;gap:8px;font-size:var(--t-sm);color:var(--fg);cursor:pointer;min-height:32px}
 .ck input{accent-color:var(--accent);width:16px;height:16px}
-.resumo{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s3) var(--s4);margin-top:var(--s5)}
+.resumo{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s3) var(--s4);margin-top:var(--s4)}
 .r{border-top:2px solid var(--line);padding-top:var(--s2);min-width:0}
 .r small{display:flex;align-items:center;gap:6px;font:600 var(--t-xs) var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .r small i{width:10px;height:3px;border-radius:2px;flex:none}
@@ -163,6 +163,23 @@ svg.lin .hit{fill:transparent;cursor:crosshair}
 .tab tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:0}
 .tab tfoot td.mm{color:var(--fg)}
 .vazio{color:var(--muted);font-size:var(--t-sm);padding:var(--s3) 0}
+.ed-sec{border-top:2px solid var(--accent)}
+.ed-sec>h2{color:var(--fg)}
+.g-pe{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2) var(--s4);margin-top:var(--s3)}
+.g-pe .leg{margin:0}
+details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;min-height:var(--alvo);font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";flex:none;width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(-45deg);transition:transform var(--dur)}
+details[open]>summary{margin-bottom:var(--s3)}details[open]>summary::before{transform:rotate(45deg)}
+details>summary:hover{color:var(--fg)}
+.abas{margin-bottom:var(--s4)}
+.ptit{font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s2)}
+.tab input.cel.pc{width:86px}
+.tab .abre{font:600 var(--t-xs) var(--f-mono);border:1px solid var(--line);border-radius:var(--rp);padding:4px 10px;background:var(--paper);color:var(--fg);cursor:pointer;white-space:nowrap}
+.tab .abre:hover{border-color:var(--accent)}
+.tab .abre::after{content:" ›";color:var(--accent)}
+#ov tbody tr{cursor:default}#ov tbody tr:hover td{background:none}
+#ov-dica .chip{margin-right:8px}
 .tab-bar .f select{min-width:min(360px,100%)}
 .tab-bar .acoes{display:flex;flex-wrap:wrap;gap:var(--s2);align-self:end}
 .tab td.var{font-family:var(--f-mono);font-size:var(--t-xs)}
@@ -270,20 +287,14 @@ svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stro
   <button type="button" class="bt acc" data-abrir>Carregar planilhas</button><p class="nota" id="arq-info0" aria-live="polite"></p></div>
 
 <main id="pagina" hidden>
-<div class="sec" id="ctl"><h2>Filtros e valor de 2027 · realizado só DCMD</h2>
+<div class="sec" id="ctl">
   <div class="filtros">
-    <div class="f"><span id="l-sigco">SIGCO</span><select id="sigco" class="busca" aria-labelledby="l-sigco"></select></div>
+    <div class="f"><span id="l-sigco">Projeto (SIGCO)</span><select id="sigco" class="busca" aria-labelledby="l-sigco"></select></div>
     <div class="f"><span id="l-obj">Objetivo</span><select id="obj" class="busca" aria-labelledby="l-obj"></select></div>
-    <div class="f"><span id="l-valor">Valor 2027 do recorte (R$)</span>
-      <input id="valor" class="busca num" inputmode="decimal" autocomplete="off" aria-labelledby="l-valor">
-      <div class="atalhos"><button type="button" class="chip" id="reset" hidden>Voltar ao orçado</button><small id="valor-nota"></small></div></div>
-  </div>
-  <div class="filtros" style="margin-top:var(--s4)">
-    <div class="f"><span id="l-base">Curva de 2027 (como o dinheiro se espalha nos meses)</span>
-      <div class="seg" id="base" role="group" aria-labelledby="l-base"><button type="button" data-v="b2426" aria-pressed="true">Realizado 2024–2026</button><button type="button" data-v="b2326" aria-pressed="false">Realizado 2023–2026</button><button type="button" data-v="planilha" aria-pressed="false">Curva da planilha</button></div></div>
+    <div class="f"><span id="l-base">Curva 2027</span>
+      <div class="seg" id="base" role="group" aria-labelledby="l-base"><button type="button" data-v="b2426" aria-pressed="true">Real. 2024–26</button><button type="button" data-v="b2326" aria-pressed="false">Real. 2023–26</button><button type="button" data-v="planilha" aria-pressed="false">Planilha</button></div></div>
     <div class="f"><span id="l-vis">Visão</span>
       <div class="seg" id="vis" role="group" aria-labelledby="l-vis"><button type="button" data-v="mensal" aria-pressed="true">Mensal</button><button type="button" data-v="acum" aria-pressed="false">Acumulado</button></div></div>
-    <div class="f"><span>Realizado</span><label class="ck"><input type="checkbox" id="so-orc"> Só SIGCOs com orçado 2027</label></div>
   </div>
   <div class="resumo" id="resumo"></div>
 </div>
@@ -292,58 +303,51 @@ svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stro
   <div class="g-cab"><h2 id="g-tit"></h2><button type="button" class="chip" id="g-total" hidden>Ver todos ×</button></div>
   <div class="g-tot" id="g-tot"></div>
   <div id="g"></div>
-  <ul class="leg" id="g-leg"></ul>
+  <div class="g-pe"><ul class="leg" id="g-leg"></ul><label class="ck"><input type="checkbox" id="so-orc"> Realizado só dos SIGCOs com orçado 2027</label></div>
   <p class="nota" id="g-nota"></p>
 </div>
 
-<div class="sec" id="ins-sec"><h2>Insights · DCMD</h2>
-  <div class="ins" id="ins"></div>
-  <p class="nota">Calculados com os dados da página, já com as alterações feitas na tela. Os cartões com seta abrem o projeto, o indicador ou o objetivo.</p>
-</div>
-
-<div class="sec" id="vis-sec">
-  <div class="g-cab"><h2 id="vis-tit">Visões</h2>
-    <div class="seg" id="visao" role="group" aria-label="Visão"><button type="button" data-v="hist" aria-pressed="true">Orçado × histórico</button><button type="button" data-v="saz" aria-pressed="false">Sazonalidade 2027</button><button type="button" data-v="obj" aria-pressed="false">Por objetivo</button></div></div>
-  <p class="nota" id="vis-nota"></p>
-  <div id="vz" style="margin-top:var(--s3)"></div>
-</div>
-
-<div class="sec"><h2>Orçado 2027 redistribuído por mês · valores em R$ mil · clique numa linha para ver o SIGCO no gráfico</h2>
-  <div class="tab-bar"><div class="f"><span id="l-proj1">Projeto</span><select id="proj1" class="busca" aria-labelledby="l-proj1"></select></div><div class="acoes"><button type="button" class="bt" id="exportar">Baixar redistribuição (.csv)</button></div></div>
-  <div class="tab-w"><table class="tab" id="tab"></table></div>
-  <p class="nota" id="tab-nota"></p>
-</div>
-
-<div class="sec" id="ov-sec"><h2 id="ov-tit">Orçado × realizado por projeto</h2>
-  <div class="tab-bar"><div class="f"><span id="l-proj2">Projeto</span><select id="proj2" class="busca" aria-labelledby="l-proj2"></select></div>
-    <div class="acoes"><button type="button" class="bt" id="desfaz-proj" hidden>Desfazer alterações deste projeto</button><button type="button" class="bt acc" id="excel">Baixar Excel (.xlsx)</button></div></div>
+<div class="sec ed-sec" id="ov-sec"><h2 id="ov-tit">Editar orçado 2027</h2>
+  <div class="tab-bar">
+    <div class="f"><span id="l-proj2">Projeto</span><select id="proj2" class="busca" aria-labelledby="l-proj2"></select></div>
+    <div class="f"><span id="l-valor">Total 2027 do filtro (R$)</span><input id="valor" class="busca num" inputmode="decimal" autocomplete="off" aria-labelledby="l-valor"><small id="valor-nota"></small></div>
+    <div class="acoes"><button type="button" class="bt" id="desfaz-proj" hidden>Desfazer este projeto</button><button type="button" class="bt" id="reset" hidden>Voltar tudo ao orçado</button><button type="button" class="bt acc" id="excel">Baixar Excel</button></div>
+  </div>
   <p class="nota" id="ov-dica"></p>
   <div class="tab-w"><table class="tab" id="ov"></table></div>
   <p class="nota" id="salvo" aria-live="polite"></p>
 </div>
 
-<div class="sec" id="qt-sec"><h2 id="qt-tit">Quantidades · DCMD</h2>
-  <div class="tab-bar"><div class="f"><span id="l-ind">Indicador</span><select id="ind" class="busca" aria-labelledby="l-ind"></select></div></div>
-  <p class="nota" id="qt-dica"></p>
-  <div id="qt-g" style="margin:var(--s3) 0"></div>
-  <div class="tab-w"><table class="tab" id="qt"></table></div>
-  <p class="nota" id="qt-nota"></p>
-</div>
+<div class="sec" id="mes-sec"><details id="det-tab"><summary>Orçado 2027 de todos os SIGCOs, mês a mês (R$ mil)</summary>
+  <div class="tab-bar"><div class="f"><span id="l-proj1">Projeto</span><select id="proj1" class="busca" aria-labelledby="l-proj1"></select></div><div class="acoes"><button type="button" class="bt" id="exportar">Baixar (.csv)</button></div></div>
+  <div class="tab-w"><table class="tab" id="tab"></table></div>
+  <p class="nota" id="tab-nota"></p>
+</details></div>
 
-<div class="sec" id="logica-sec"><h2>Como a redistribuição é calculada</h2>
-  <div class="log-cab"><h3 id="log-tit"></h3><select id="log-sel" class="busca" aria-label="SIGCO do exemplo"></select></div>
-  <ol class="passos" id="passos"></ol>
-  <div class="tab-w"><table class="tab lg" id="log-tab"></table></div>
-  <div class="regras">
-    <div><h3>Orçado de cada SIGCO</h3><p>O valor de 2027 de cada SIGCO é o da aba <b>Orçado Futuro</b>. Ele não passa de um SIGCO para outro; só é espalhado pelos 12 meses. Projetos com mais de um número (ex.: 8364/8405) usam o realizado de todos os números da chave da aba <b>Curva</b>.</p></div>
-    <div><h3>Curva pelo realizado</h3><p>Para cada mês, a média do realizado desse mês nos anos da base (2026 só até o último mês com dado). Mês com média negativa (estornos) conta como zero. SIGCO sem realizado recebe 1/12 por mês, como na planilha.</p></div>
-    <div><h3>Fecha no centavo</h3><p>Os 12 meses de cada SIGCO somam exatamente o valor dele; as frações de centavo vão para os meses com maior resto. Ao mudar o valor do recorte, o novo valor é repartido entre os SIGCOs na proporção do orçado.</p></div>
-  </div>
+<div class="sec" id="ins-sec"><h2>Insights · DCMD</h2>
+  <div class="seg abas" id="ins-aba" role="group" aria-label="Insights"><button type="button" data-v="resumo" aria-pressed="true">Resumo</button><button type="button" data-v="hist" aria-pressed="false">Orçado × histórico</button><button type="button" data-v="saz" aria-pressed="false">Sazonalidade</button><button type="button" data-v="obj" aria-pressed="false">Por objetivo</button><button type="button" data-v="qt" aria-pressed="false">Quantidades</button><button type="button" data-v="log" aria-pressed="false">Como é calculado</button></div>
+  <div class="painel" id="p-resumo"><div class="ins" id="ins"></div></div>
+  <div class="painel" id="p-vis" hidden><h3 class="ptit" id="vis-tit"></h3><p class="nota" id="vis-nota"></p><div id="vz"></div></div>
+  <div class="painel" id="p-qt" hidden><h3 class="ptit" id="qt-tit"></h3>
+    <div class="tab-bar"><div class="f"><span id="l-ind">Indicador</span><select id="ind" class="busca" aria-labelledby="l-ind"></select></div></div>
+    <p class="nota" id="qt-dica"></p>
+    <div id="qt-g" style="margin:var(--s3) 0"></div>
+    <div class="tab-w"><table class="tab" id="qt"></table></div>
+    <p class="nota" id="qt-nota"></p></div>
+  <div class="painel" id="p-log" hidden>
+    <div class="log-cab"><h3 id="log-tit"></h3><select id="log-sel" class="busca" aria-label="SIGCO do exemplo"></select></div>
+    <ol class="passos" id="passos"></ol>
+    <div class="tab-w"><table class="tab lg" id="log-tab"></table></div>
+    <div class="regras">
+      <div><h3>Orçado de cada SIGCO</h3><p>Vem da aba <b>Orçado Futuro</b> e só é espalhado pelos 12 meses. Chaves com mais de um número (ex.: 8364/8405) usam o realizado de todos eles.</p></div>
+      <div><h3>Curva pelo realizado</h3><p>Peso do mês = média do realizado do mês nos anos da base (2026 até o último mês com dado); negativo conta como zero; sem realizado, 1/12 por mês.</p></div>
+      <div><h3>Fecha no centavo</h3><p>Os 12 meses somam exatamente o valor do SIGCO. Mudar o total do filtro reparte o novo valor na proporção do orçado.</p></div>
+    </div></div>
 </div>
 
 <div class="sec"><h2>Dados</h2>
   <div class="dados"><button type="button" class="bt" data-abrir>Atualizar planilhas (.xlsx)</button></div>
-  <p class="nota">Pode escolher a Curva orçamento.xlsx, a planilha de quantidades (Qtd_2026.xlsx) ou as duas de uma vez. Realizado e quantidades entram só do DCMD.</p>
+  <p class="nota">Curva orçamento.xlsx e/ou Qtd_2026.xlsx. Realizado e quantidades só do DCMD.</p>
   <p class="nota" id="arq-info" aria-live="polite"></p>
 </div>
 </main>
@@ -455,7 +459,7 @@ function recupera() {
 
 /* ===================== Dados e estado ===================== */
 let D = null, IDX = null;
-const st = { sel: null, obj: 'Todos', base: 'b2426', vis: 'mensal', soOrc: false, ajuste: {}, mensal: {}, ind: null, visao: 'hist', ord: { col: 'orc', dir: -1 }, anos: { 2024: true, 2025: true, 2026: true, 2027: true }, logSel: null };
+const st = { sel: null, obj: 'Todos', base: 'b2426', vis: 'mensal', soOrc: false, ajuste: {}, mensal: {}, ind: null, visao: 'hist', aba: 'resumo', ord: { col: 'orc', dir: -1 }, anos: { 2024: true, 2025: true, 2026: true, 2027: true }, logSel: null };
 
 function prepara(d) {
   const grupos = d.grupos.map(g => ({ ...g, tem: true }));
@@ -487,7 +491,14 @@ const acumula = arr => { let t = 0; return arr.map(v => v == null ? null : (t +=
 function tudo() {
   if (st.sel && !IDX.porId.has(st.sel)) st.sel = null;
   const E = escopo(), S = series(E);
-  controles(E); resumo(E, S); grafico(E, S); insightsRender(); visoes(); tabela(); tabelaOV(); quantidades(); logica();
+  controles(E); resumo(E, S); grafico(E, S); tabelaOV(); tabela(); abas(); insightsRender(); visoes(); quantidades(); logica();
+}
+/* Abas dos insights: Resumo, as três visões, Quantidades e Como é calculado. */
+function abas() {
+  const vis = ['hist', 'saz', 'obj'].includes(st.aba);
+  if (vis) st.visao = st.aba;
+  $('#p-resumo').hidden = st.aba !== 'resumo'; $('#p-vis').hidden = !vis; $('#p-qt').hidden = st.aba !== 'qt'; $('#p-log').hidden = st.aba !== 'log';
+  document.querySelectorAll('#ins-aba button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === st.aba)));
 }
 function controles(E) {
   const v = soma(E.comOrc.map(valor27)), o = soma(E.comOrc.map(g => g.orc));
@@ -577,11 +588,9 @@ function grafico(E, S) {
   });
   $('#g-leg').innerHTML = anos.map(a => `<li><button type="button" data-ano="${a}" aria-pressed="${st.anos[a]}"><svg width="22" height="8" aria-hidden="true"><line x1="1" x2="21" y1="4" y2="4" style="stroke:var(--a${a});stroke-width:3${a === 2027 ? ';stroke-dasharray:5 3' : ''}"/></svg>${a}${a === 2027 ? ' orçado' : ''} <span>${curto(soma(S[a]))}</span></button></li>`).join('');
   const u26 = D.ultimoMes[2026] || 12, notas = [];
-  if (u26 < 12) notas.push(`2026 com realizado até ${MESES_L[u26 - 1]}.`);
-  notas.push(`2027 = orçado de cada SIGCO espalhado pela curva ${st.base === 'planilha' ? 'da aba Curva da planilha' : 'do realizado ' + BASES[st.base][0] + '–2026'}.`);
-  if (!st.sel && !st.soOrc) notas.push(`2024–2026 inclui SIGCOs com realizado e sem orçado 2027 (marque "Só SIGCOs com orçado 2027" para tirar).`);
-  if (nAlterados()) notas.push(`2027 com valores alterados na tela em ${nAlterados()} projeto(s) (salvos neste navegador).`);
-  notas.push('Clique nos anos da legenda para esconder ou mostrar a linha.');
+  if (u26 < 12) notas.push(`2026 até ${MESES_L[u26 - 1]}.`);
+  notas.push(`2027 = orçado espalhado pela curva ${st.base === 'planilha' ? 'da planilha' : 'do realizado ' + BASES[st.base][0] + '–2026'}.`);
+  if (nAlterados()) notas.push(`${nAlterados()} projeto(s) alterado(s) na tela.`);
   $('#g-nota').textContent = notas.join(' ');
 }
 function dica(ev, html) {
@@ -637,7 +646,7 @@ function tabela() {
     <td class="oc">${mil(tot(x => x.r[2024]))}</td><td class="oc">${mil(tot(x => x.r[2025]))}</td><td>${mil(tot(x => x.r[2026]))}</td>
     <td>${mil(tot(x => x.v))}</td>${MESES.map((_, i) => `<td class="mm">${mil(tot(x => x.d[i]))}</td>`).join('')}</tr></tfoot>`;
   $('#tab').innerHTML = h;
-  $('#tab-nota').textContent = `Valores em R$ mil. Total exato do orçado no recorte: ${fBRL2.format(tot(x => x.v))}. Realizado do SIGCO = soma dos números da chave (ex.: 8364/8405). O mês sublinhado é o de maior valor em 2027. Clique no cabeçalho para ordenar.`;
+  $('#tab-nota').textContent = `R$ mil · total exato ${fBRL2.format(tot(x => x.v))} · mês sublinhado = maior valor de 2027 · clique no cabeçalho para ordenar.`;
 }
 
 /* ----- orçado × realizado por projeto (variação % = orçado 2027 ÷ média realizada − 1) ----- */
@@ -662,48 +671,79 @@ function ovDados() {
   tot.vr = variacao(tot.orc, tot.med);
   return { modo: 'proj', anosB, linhas, tot };
 }
+const baseAnos = () => BASES[st.base === 'planilha' ? 'b2426' : st.base];
+const pctTxt = v => v == null ? '' : (v > 0 ? '+' : '') + fDec(v * 100, 1);
+const numPct = t => numero(String(t ?? '').replace(/%/g, '').replace(/^\s*\+/, '').replace('−', '-')) / 100;
 function tabelaOV() {
-  const O = ovDados(), u26 = D.ultimoMes[2026] || 12, rotMed = `Média ${O.anosB[0]}–2026`;
-  $('#ov-tit').textContent = `Orçado × realizado por projeto · variação % = orçado 2027 ÷ média realizada ${O.anosB[0]}–2026 − 1`;
-  const cab = `<th class="oc">Real. 2024</th><th class="oc">Real. 2025</th><th>Real. 2026${u26 < 12 ? ` <small>(até ${MESES[u26 - 1].toLowerCase()})</small>` : ''}</th><th>${rotMed}</th><th>Orçado 2027</th><th>Variação %</th>`;
+  const O = ovDados(), u26 = D.ultimoMes[2026] || 12, rotMed = `Média ${O.anosB[0]}–26`;
+  const inR = (attr, v, ed, rot, tit) => `<input class="cel${ed ? ' ed' : ''}" ${attr} value="${fDec(v, 2)}" inputmode="decimal" autocomplete="off" aria-label="${esc(rot)}"${tit ? ` title="${esc(tit)}"` : ''}>`;
+  const inP = (attr, v, rot) => v == null ? '<span class="neutro">—</span>' : `<input class="cel pc" ${attr} value="${pctTxt(v)}" inputmode="decimal" autocomplete="off" aria-label="${esc(rot)}">`;
   let h;
   if (O.modo === 'mes') {
     const g = O.g;
-    h = `<thead><tr><th class="l">Mês</th>${cab}</tr></thead><tbody>`;
+    h = `<thead><tr><th class="l">Mês</th><th class="oc">Real. 2024</th><th class="oc">Real. 2025</th><th>Real. 2026</th><th>${rotMed}</th><th>Orçado 2027 (R$)</th><th>Variação %</th></tr></thead><tbody>`;
     O.linhas.forEach(l => {
-      const orc = g.tem ? `<input class="cel${l.ed ? ' ed' : ''}" data-m="${l.m}" value="${fDec(l.orc, 2)}" inputmode="decimal" autocomplete="off" aria-label="Orçado 2027 de ${MESES_L[l.m]}" title="Pela curva: ${fBRL2.format(l.auto)}">` : '—';
-      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td>${l.r[2] == null ? '—' : brl(l.r[2])}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${fVar(l.vr)}</td></tr>`;
+      const orc = g.tem ? inR(`data-m="${l.m}"`, l.orc, l.ed, `Orçado 2027 de ${MESES_L[l.m]}`, `Pela curva: ${fBRL2.format(l.auto)}`) : '—';
+      const vp = g.tem ? inP(`data-mp="${l.m}"`, l.vr, `Variação % de ${MESES_L[l.m]}`) : fVar(l.vr);
+      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td>${l.r[2] == null ? '—' : brl(l.r[2])}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${vp}</td></tr>`;
     });
-    h += `</tbody><tfoot><tr><td class="l">Total</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td>${brl(O.tot.r[2])}</td><td>${brl(O.tot.med)}</td><td>${fBRL2.format(O.tot.orc)}</td><td class="var">${fVar(O.tot.vr)}</td></tr></tfoot>`;
-    $('#ov-dica').textContent = !g.tem ? `O SIGCO ${g.id} não tem orçado 2027; só o realizado aparece.`
-      : `Projeto ${g.id} · ${g.itens.map(i => i.n).join(' + ')}. Digite o orçado 2027 de cada mês e tecle Enter ou Tab: o total do projeto vira a soma dos meses e o gráfico acompanha. Mês alterado fica marcado; passe o mouse para ver o valor pela curva.${st.base !== 'planilha' && !st.mensal[g.id] ? ' Com a curva pelo realizado, a variação % é a mesma em todos os meses (cada mês recebe a mesma proporção da média); ela muda quando você altera um mês.' : ''}`;
+    h += `</tbody><tfoot><tr><td class="l">Total</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td>${brl(O.tot.r[2])}</td><td>${brl(O.tot.med)}</td>` +
+      `<td>${g.tem ? inR('data-tot="1"', O.tot.orc, alterado(g), 'Total 2027 do projeto') : '—'}</td><td class="var">${g.tem ? inP('data-totp="1"', O.tot.vr, 'Variação % do total') : fVar(O.tot.vr)}</td></tr></tfoot>`;
+    $('#ov-dica').innerHTML = `<button type="button" class="chip" id="ov-voltar">‹ Todos os projetos</button>` + (!g.tem ? `O SIGCO ${esc(g.id)} não tem orçado 2027.`
+      : `<b>${esc(g.id)}</b> · ${esc(g.itens.map(i => i.n).join(' + '))}. Digite o valor em R$ ou a variação % de cada mês (ou do total, na última linha) e tecle Enter.${u26 < 12 ? ` Real. 2026 até ${MESES[u26 - 1].toLowerCase()}.` : ''}`);
     $('#desfaz-proj').hidden = !alterado(g);
   } else {
-    h = `<thead><tr><th class="l">SIGCO</th><th class="l">Projeto</th>${cab}</tr></thead><tbody>`;
+    h = `<thead><tr><th class="l">SIGCO · projeto</th><th class="oc">Real. 2026${u26 < 12 ? ` (até ${MESES[u26 - 1].toLowerCase()})` : ''}</th><th>${rotMed}</th><th>Orçado 2027 (R$)</th><th>Variação %</th><th></th></tr></thead><tbody>`;
     O.linhas.forEach(l => {
-      h += `<tr data-s="${esc(l.g.id)}" tabindex="0"><td class="l m">${esc(l.g.id).replace(/\//g, '/<wbr>')}</td><td class="l d">${esc(nomeG(l.g))}<small class="ob">${esc(l.g.o)}</small></td><td class="oc">${brl(l.r[0])}</td><td class="oc">${brl(l.r[1])}</td><td>${brl(l.r[2])}</td><td>${brl(l.med)}</td><td class="orc">${brl(l.orc)}${alterado(l.g) ? ' <span class="tag">alterado</span>' : ''}</td><td class="var">${fVar(l.vr)}</td></tr>`;
+      h += `<tr><td class="l d"><b class="m">${esc(l.g.id)}</b> · ${esc(nomeG(l.g))}<small class="ob">${esc(l.g.o)}</small></td><td class="oc">${brl(l.r[2])}</td><td>${brl(l.med)}</td>` +
+        `<td>${inR(`data-g="${esc(l.g.id)}"`, l.orc, alterado(l.g), `Orçado 2027 do SIGCO ${l.g.id}`)}</td><td class="var">${inP(`data-gp="${esc(l.g.id)}"`, l.vr, `Variação % do SIGCO ${l.g.id}`)}</td>` +
+        `<td><button type="button" class="abre" data-s="${esc(l.g.id)}">Meses</button></td></tr>`;
     });
-    h += `</tbody><tfoot><tr><td class="l" colspan="2">Total · ${O.linhas.length} projetos</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td>${brl(O.tot.r[2])}</td><td>${brl(O.tot.med)}</td><td>${fBRL2.format(O.tot.orc)}</td><td class="var">${fVar(O.tot.vr)}</td></tr></tfoot>`;
-    $('#ov-dica').textContent = `Escolha um projeto na lista (ou clique na linha) para ver mês a mês e alterar o orçado de 2027. ${rotMed} = soma das médias de cada mês (nov e dez sem 2026).`;
+    h += `</tbody><tfoot><tr><td class="l">Total · ${O.linhas.length} projetos</td><td class="oc">${brl(O.tot.r[2])}</td><td>${brl(O.tot.med)}</td><td>${fBRL2.format(O.tot.orc)}</td><td class="var">${fVar(O.tot.vr)}</td><td></td></tr></tfoot>`;
+    $('#ov-dica').textContent = `Digite o valor em R$ ou a variação % de cada SIGCO e tecle Enter. "Meses" abre o projeto mês a mês. Variação % = orçado 2027 ÷ média ${O.anosB[0]}–2026 − 1.`;
     $('#desfaz-proj').hidden = true;
   }
   $('#ov').innerHTML = h;
   const sv = $('#salvo');
   sv.className = salvoErro ? 'nota erro' : 'nota';
-  sv.textContent = salvoErro ? 'Não consegui salvar neste navegador (armazenamento bloqueado). Use "Baixar Excel" para guardar as alterações.'
-    : nAlterados() ? `${nAlterados()} projeto(s) com alteração · salvo neste navegador${salvoEm ? ' em ' + salvoEm.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : ''}. Para guardar em arquivo, use "Baixar Excel".`
-      : 'Sem alterações. O que você mudar nesta tabela fica salvo neste navegador; "Baixar Excel" gera o arquivo com tudo.';
+  sv.textContent = salvoErro ? 'Não consegui salvar neste navegador; use "Baixar Excel".'
+    : nAlterados() ? `${nAlterados()} projeto(s) alterado(s) · salvo neste navegador${salvoEm ? ' em ' + salvoEm.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : ''}.`
+      : 'Sem alterações. O que você mudar aqui fica salvo neste navegador.';
 }
-function editaMes(inp) {
-  const g = IDX.porId.get(st.sel); if (!g || !g.tem) return false;
-  const v = numero(inp.value);
-  if (!(v >= 0)) { inp.setAttribute('aria-invalid', 'true'); return false; }
-  const m = +inp.dataset.m, d = distrib(g);
-  if (Math.abs(d[m] - r2(v)) < 0.005) { inp.value = fDec(d[m], 2); return false; }
+/* Total de 2027 de um SIGCO: com meses digitados, reparte o novo total na proporção deles; senão, a curva espalha. */
+function defineTotal(g, novo) {
+  novo = r2(novo);
+  if (st.mensal[g.id]) st.mensal[g.id] = soma(st.mensal[g.id]) > 0 ? rateia(novo, st.mensal[g.id]) : rateia(novo, curva(g));
+  else if (Math.abs(novo - g.orc) < 0.005) delete st.ajuste[g.id]; else st.ajuste[g.id] = novo;
+}
+function gravaMes(g, m, v) {
+  const d = distrib(g);
+  if (Math.abs(d[m] - r2(v)) < 0.005) return false;
   d[m] = r2(v);
   const auto = rateia(g.orc, curva(g));
   if (d.every((x, i) => Math.abs(x - auto[i]) < 0.005)) delete st.mensal[g.id]; else st.mensal[g.id] = d;
   delete st.ajuste[g.id];
+  return true;
+}
+const TIPOS = ['m', 'mp', 'g', 'gp', 'tot', 'totp'];
+function editaOV(inp) {
+  const k = TIPOS.find(t => inp.dataset[t] != null); if (!k) return false;
+  const pctual = k === 'mp' || k === 'gp' || k === 'totp';
+  const g = IDX.porId.get(k === 'g' || k === 'gp' ? inp.dataset[k] : st.sel); if (!g || !g.tem) return false;
+  const anos = baseAnos();
+  let v;
+  if (k === 'm' || k === 'mp') {
+    const m = +inp.dataset[k], med = mediaMes(g.m, anos)[m];
+    v = k === 'm' ? numero(inp.value) : (med > 0 ? med * (1 + numPct(inp.value)) : NaN);
+    if (!(v >= 0)) { inp.setAttribute('aria-invalid', 'true'); return false; }
+    if (!gravaMes(g, m, v)) { tabelaOV(); return false; }
+  } else {
+    const med = soma(mediaMes(g.m, anos));
+    v = pctual ? (med > 0 ? med * (1 + numPct(inp.value)) : NaN) : numero(inp.value);
+    if (!(v >= 0)) { inp.setAttribute('aria-invalid', 'true'); return false; }
+    if (Math.abs(r2(v) - valor27(g)) < 0.005) { tabelaOV(); return false; }
+    defineTotal(g, v);
+  }
   salva();
   return true;
 }
@@ -737,7 +777,7 @@ function qtdIndicadores() {
   });
 }
 function quantidades() {
-  const sec = $('#qt-sec');
+  const sec = $('#p-qt');
   if (!D.qtd) {
     $('#ind').innerHTML = '<option value="">—</option>'; $('#qt-g').innerHTML = ''; $('#qt').innerHTML = '';
     $('#qt-dica').innerHTML = 'Carregue a planilha de quantidades (Qtd_2026.xlsx) para ver previsto × realizado e a quantidade de 2027. <button type="button" class="chip" data-abrir2>Carregar</button>';
@@ -748,7 +788,7 @@ function quantidades() {
   if (st.ind && !Q.some(q => q.id === st.ind)) st.ind = null;
   $('#ind').innerHTML = `<option value="">Todos os indicadores</option>` + Q.map(q => `<option value="${esc(q.id)}">${esc(q.id)} · ${esc(q.n)}</option>`).join('');
   $('#ind').value = st.ind || '';
-  $('#qt-tit').textContent = `Quantidades · DCMD · previsto × realizado ${ano} e quantidade ${D.alvo}`;
+  $('#qt-tit').textContent = `Previsto × realizado ${ano} e quantidade ${D.alvo} · DCMD`;
   const fv = v => fVar(v);
   if (!st.ind) {
     const lim = Math.max(2, ...Q.map(q => q.at || 0));
@@ -939,10 +979,7 @@ function liga() {
     e.target.removeAttribute('aria-invalid');
     const atuais = E.comOrc.map(valor27);
     const novos = soma(atuais) > 0 ? rateia(novo, atuais) : rateia(novo, E.comOrc.map(() => 1));
-    E.comOrc.forEach((g, i) => {
-      if (st.mensal[g.id]) st.mensal[g.id] = soma(st.mensal[g.id]) > 0 ? rateia(novos[i], st.mensal[g.id]) : rateia(novos[i], curva(g));
-      else if (Math.abs(novos[i] - g.orc) < 0.005) delete st.ajuste[g.id]; else st.ajuste[g.id] = novos[i];
-    });
+    E.comOrc.forEach((g, i) => defineTotal(g, novos[i]));
     salva(); e.target.blur(); tudo();
   });
   $('#valor').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.dispatchEvent(new Event('change')); });
@@ -952,32 +989,32 @@ function liga() {
   });
   $('#desfaz-proj').addEventListener('click', () => { if (!st.sel) return; delete st.mensal[st.sel]; delete st.ajuste[st.sel]; salva(); tudo(); });
   $('#excel').addEventListener('click', baixaExcel);
-  segs('#visao', v => { st.visao = v; });
+  segs('#ins-aba', v => { st.aba = v; });
   $('#ind').addEventListener('change', e => { st.ind = e.target.value || null; quantidades(); });
-  const abreInd = id => { st.ind = id; quantidades(); $('#qt-sec').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' }); };
-  $('#qt-sec').addEventListener('click', e => { const b = e.target.closest('[data-ind]'); if (b) abreInd(b.dataset.ind); });
+  const abreInd = (id, rolar) => { st.ind = id; st.aba = 'qt'; abas(); quantidades(); if (rolar) $('#ins-sec').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' }); };
+  $('#p-qt').addEventListener('click', e => { const b = e.target.closest('[data-ind]'); if (b) abreInd(b.dataset.ind); });
   $('#qt').addEventListener('keydown', e => { const tr = e.target.closest('tr[data-ind]'); if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); abreInd(tr.dataset.ind); } });
-  $('#ins').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.s) seleciona(b.dataset.s, true); else if (b.dataset.ind) abreInd(b.dataset.ind); });
+  $('#ins').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.s) seleciona(b.dataset.s, true); else if (b.dataset.ind) abreInd(b.dataset.ind, true); });
   $('#vz').addEventListener('click', e => {
     const b = e.target.closest('[data-s],[data-obj]'); if (!b) return;
     if (b.dataset.obj) { st.sel = null; st.obj = st.obj === b.dataset.obj ? 'Todos' : b.dataset.obj; tudo(); } else seleciona(b.dataset.s, true);
   });
   $('#ov').addEventListener('change', e => {
-    const inp = e.target.closest('input[data-m]'); if (!inp) return;
-    if (!editaMes(inp)) return;
+    const inp = e.target.closest('input.cel'); if (!inp) return;
+    if (!editaOV(inp)) return;
     setTimeout(() => {   // redesenha mantendo o foco no campo para onde o Tab/Enter levou
-      const ae = document.activeElement, alvo = ae && ae.closest && ae.closest('#ov') && ae.dataset.m != null ? ae.dataset.m : null;
+      const ae = document.activeElement, k = ae && ae.closest && ae.closest('#ov') ? TIPOS.find(t => ae.dataset[t] != null) : null, val = k ? ae.dataset[k] : null;
       tudo();
-      if (alvo != null) { const ni = $(`#ov input[data-m="${alvo}"]`); if (ni) { ni.focus(); ni.select(); } }
+      if (k) { const ni = $('#ov').querySelector(`input[data-${k}="${CSS.escape(val)}"]`); if (ni) { ni.focus(); ni.select(); } }
     }, 0);
   });
   $('#ov').addEventListener('keydown', e => {
-    const inp = e.target.closest('input[data-m]');
-    if (inp && e.key === 'Enter') { e.preventDefault(); const nx = $(`#ov input[data-m="${+inp.dataset.m + 1}"]`); if (nx) nx.focus(); else inp.blur(); return; }
-    if (inp && e.key === 'Escape') { inp.value = fDec(distrib(IDX.porId.get(st.sel))[+inp.dataset.m], 2); inp.removeAttribute('aria-invalid'); return; }
-    const tr = e.target.closest('tr[data-s]'); if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); seleciona(tr.dataset.s); }
+    const inp = e.target.closest('input.cel'); if (!inp) return;
+    if (e.key === 'Enter') { e.preventDefault(); const k = TIPOS.find(t => inp.dataset[t] != null), todos = [...$('#ov').querySelectorAll(`input[data-${k}]`)], nx = todos[todos.indexOf(inp) + 1]; if (nx) nx.focus(); else inp.blur(); return; }
+    if (e.key === 'Escape') { tabelaOV(); }
   });
-  $('#ov').addEventListener('click', e => { const tr = e.target.closest('tr[data-s]'); if (tr) seleciona(tr.dataset.s); });
+  $('#ov').addEventListener('click', e => { const b = e.target.closest('button.abre[data-s]'); if (b) seleciona(b.dataset.s); });
+  $('#ov-dica').addEventListener('click', e => { if (e.target.closest('#ov-voltar')) seleciona(null); });
   $('#tab').addEventListener('click', e => {
     const o = e.target.closest('[data-ord]');
     if (o) { const k = o.dataset.ord; st.ord = st.ord.col === k ? { col: k, dir: -st.ord.dir } : { col: k, dir: ['id', 'n'].includes(k) ? 1 : -1 }; tabela(); return; }
