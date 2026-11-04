@@ -1,0 +1,1212 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ARGOS · Insights orçamento</title>
+<script>(function(){var t;try{t=localStorage.getItem("tema")}catch(e){}document.documentElement.dataset.theme=t==="claro"?"light":"dark"})()</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+/* ====== Tokens do ARGOS (copiados de assets/site.css do /teste/, para a página abrir sozinha no computador) ====== */
+:root{
+  color-scheme:light;
+  --bg:#f2f3f0; --paper:#fbfbf9; --fg:#1b2024; --muted:#5a636a;
+  --line:#d6dad6; --line-forte:#8c948f;
+  --accent:#b8431f; --on-accent:#ffffff;
+  --sel:#f4e6df; --hover:rgb(27 32 36 / .05); --seg-on:var(--paper);
+  --alerta:#b91c1c; --aviso:#b45309; --sem:#dfe3df; --ok:#2f9e5b;
+  --vidro:rgba(15,20,23,.82); --vidro-borda:rgba(255,255,255,.12); --vidro-fg:#f3f4f4;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --t-xs:12px; --t-sm:13px; --t-md:14px; --t-base:15px; --t-lg:17px; --t-xl:20px; --t-2xl:24px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --r1:6px; --r2:10px; --r3:14px; --rp:999px;
+  --sh1:0 1px 2px rgb(0 0 0 / .12); --sh-vidro:0 2px 8px rgb(0 0 0 / .35);
+  --wrap:1360px; --alvo:40px; --mt-lim:#b8431f;
+  /* uma cor por ano (paleta do "Km medido acumulado") */
+  --a2024:#6b7378; --a2025:#0057a8; --a2026:#15803d; --a2027:var(--accent);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#000; --paper:#111314; --fg:#e7eaeb; --muted:#9aa4ab;
+  --line:#2a2f33; --line-forte:#5f6b73;
+  --accent:#f08a5d; --on-accent:#14181b;
+  --sel:#352b27; --hover:rgb(231 234 235 / .06); --seg-on:#323a41;
+  --alerta:#ef4444; --aviso:#f59e0b; --sem:#343c42; --ok:#4cc38a;
+  --sh1:0 1px 2px rgb(0 0 0 / .45);
+  --a2024:#9aa4ab; --a2025:#5aa6ec; --a2026:#4cc38a;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#000; --paper:#111314; --fg:#e7eaeb; --muted:#9aa4ab;
+  --line:#2a2f33; --line-forte:#5f6b73;
+  --accent:#f08a5d; --on-accent:#14181b;
+  --sel:#352b27; --hover:rgb(231 234 235 / .06); --seg-on:#323a41;
+  --alerta:#ef4444; --aviso:#f59e0b; --sem:#343c42; --ok:#4cc38a;
+  --sh1:0 1px 2px rgb(0 0 0 / .45);
+  --a2024:#9aa4ab; --a2025:#5aa6ec; --a2026:#4cc38a;
+}
+
+/* ====== Base (site.css) ====== */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0s!important;animation:none!important}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--t-base)/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:var(--s5) var(--s4) var(--s7);display:grid;gap:var(--s5)}
+@media (min-width:861px){.wrap{gap:var(--s6);padding-top:var(--s6)}}
+.wrap>*{min-width:0}
+p{margin:0;color:var(--muted);max-width:80ch}
+a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:1px}
+.busca{width:100%;max-width:420px;min-height:44px;padding:0 var(--s3);border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--paper);color:var(--fg);font:16px var(--f-body)}
+@media (min-width:861px){.busca{min-height:40px;font-size:var(--t-base)}}
+.busca::placeholder{color:var(--muted);opacity:1}
+.busca:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.w{max-width:1320px;margin:0 auto}
+#pagina{display:grid;gap:var(--s5)}
+@media (min-width:861px){#pagina{gap:var(--s6)}}
+#pagina>*{min-width:0}
+
+/* ====== Cabeçalho em wordmark (igual às páginas do /teste/) ====== */
+header.cab{position:relative;display:grid;justify-items:center;text-align:center}
+header.cab h1{display:flex;flex-direction:column;align-items:center;line-height:1;margin:0}
+header.cab h1 b{font:700 clamp(28px,3.4vw,36px)/1 var(--f-display);letter-spacing:.22em;margin-right:-.22em}
+header.cab h1 span{display:flex;align-items:center;gap:10px;margin:9px 0 0;font:600 10.5px/1 var(--f-body);letter-spacing:.46em;color:var(--muted)}
+header.cab h1 span::before,header.cab h1 span::after{content:"";width:22px;height:1px;background:var(--mt-lim)}
+header.cab h1 span::after{margin-left:-.46em}
+.bt{display:inline-flex;align-items:center;gap:6px;min-height:var(--alvo);padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--paper);color:var(--fg);font:600 var(--t-xs)/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:var(--sh1);cursor:pointer}
+.bt:hover{background:var(--hover)}
+.bt.acc{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.bt.acc:hover{filter:brightness(1.08)}
+header.cab>.bt{position:absolute;top:0;right:0}
+.bt kbd{font:600 10px/1 var(--f-mono);padding:3px 5px;border:1px solid var(--line);border-radius:5px;color:var(--muted);letter-spacing:0}
+@media (max-width:640px){
+  header.cab h1 span{letter-spacing:.2em;gap:8px}header.cab h1 span::after{margin-left:-.2em}
+  header.cab>.bt{position:static;margin-top:var(--s3)}.bt kbd{display:none}
+}
+
+/* ====== Componentes (mesma linguagem da Carteira / Limpeza de faixa) ====== */
+.vazio-p{border-left:3px solid var(--aviso);background:var(--paper);border-radius:0 var(--r2) var(--r2) 0;padding:var(--s4);display:grid;gap:var(--s3);justify-items:start}
+.vazio-p p{color:var(--fg)}
+.sec{border-top:1px solid var(--line);padding:var(--s4) 0 var(--s2)}
+.sec>h2,.g-cab h2{font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s3)}
+.filtros{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s5);align-items:start}
+.f{display:grid;gap:6px;min-width:0}.f>span{font:600 var(--t-xs)/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.f small{color:var(--muted);font-size:var(--t-xs)}
+.f select.busca{min-width:min(340px,100%)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+#valor{max-width:230px;font-size:var(--t-lg);font-weight:600}
+.atalhos{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font:600 var(--t-xs) var(--f-mono);border:1px solid var(--line);border-radius:var(--rp);padding:5px 10px;color:var(--fg);background:var(--paper);cursor:pointer;min-height:30px}
+.chip:hover{border-color:var(--accent)}
+.tag{display:inline-block;font:600 10px/1.4 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor;border-radius:var(--rp);padding:0 6px;color:var(--aviso);vertical-align:1px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r2);padding:3px;gap:2px}
+.seg button{font:600 var(--t-sm) var(--f-body);color:var(--muted);background:none;border:0;border-radius:var(--r1);padding:7px 10px;cursor:pointer}
+.seg button:hover{color:var(--fg)}.seg button[aria-pressed=true]{background:var(--seg-on);color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
+.ck{display:flex;align-items:center;gap:8px;font-size:var(--t-sm);color:var(--fg);cursor:pointer;min-height:32px}
+.ck input{accent-color:var(--accent);width:16px;height:16px}
+.resumo{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s3) var(--s4);margin-top:var(--s5)}
+.r{border-top:2px solid var(--line);padding-top:var(--s2);min-width:0}
+.r small{display:flex;align-items:center;gap:6px;font:600 var(--t-xs) var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.r small i{width:10px;height:3px;border-radius:2px;flex:none}
+.r b{display:block;font:700 var(--t-2xl)/1.15 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.r em{font-style:normal;font-size:var(--t-xs);font-family:var(--f-mono)}
+.sobe{color:var(--ok)}.desce{color:var(--alerta)}.neutro{color:var(--muted)}
+.nota{color:var(--muted);font-size:var(--t-xs);margin:var(--s3) 0 0}
+
+/* gráfico de linhas por ano */
+.g-cab{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2) var(--s4)}
+.g-cab h2{margin:0}
+.g-tot{font:700 var(--t-xl)/1.2 var(--f-display);font-variant-numeric:tabular-nums;margin-top:var(--s2)}
+.g-tot small{font:500 var(--t-sm) var(--f-body);color:var(--muted);margin-left:6px}
+#g{margin-top:var(--s3);min-height:280px}
+svg.lin{display:block;width:100%;overflow:visible}
+svg.lin text{font:500 11px var(--f-body);fill:var(--muted)}
+svg.lin .ax{stroke:var(--line);stroke-width:1}
+svg.lin .mes{font:600 11px var(--f-mono);fill:var(--fg)}
+svg.lin .ln{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+svg.lin .ln.y2027{stroke-width:3;stroke-dasharray:7 5}
+svg.lin .lab{font:600 11px var(--f-mono);paint-order:stroke;stroke:var(--bg);stroke-width:3px}
+svg.lin .guia{stroke:var(--fg);stroke-opacity:.35;stroke-width:1}
+svg.lin .hit{fill:transparent;cursor:crosshair}
+.leg{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);margin:var(--s3) 0 0;padding:0;list-style:none}
+.leg button{display:flex;align-items:center;gap:8px;font:600 var(--t-xs) var(--f-mono);color:var(--fg);background:var(--paper);border:1px solid var(--line);border-radius:var(--rp);padding:5px 12px;cursor:pointer;min-height:32px}
+.leg button[aria-pressed=false]{opacity:.45}
+.leg button span{color:var(--muted);font-weight:400}
+#dica{position:fixed;pointer-events:none;background:var(--vidro);color:var(--vidro-fg);border:1px solid var(--vidro-borda);border-radius:var(--r2);padding:8px 10px;font:500 var(--t-sm)/1.45 var(--f-body);box-shadow:var(--sh-vidro);display:none;z-index:9;min-width:210px}
+#dica .t{font:700 var(--t-md) var(--f-display);margin-bottom:2px}
+#dica .l{display:flex;justify-content:space-between;gap:var(--s4)}
+#dica .l b{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+#dica i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+
+/* tabela */
+.tab-bar{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;margin-bottom:var(--s3)}
+.tab-w{overflow-x:auto}
+.tab{width:100%;border-collapse:collapse;font-size:var(--t-sm);font-variant-numeric:tabular-nums}
+.tab th{font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right;padding:8px 5px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:bottom}
+.tab th button{all:unset;cursor:pointer;display:inline-block}
+.tab th button:hover{color:var(--fg)}.tab th button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tab th[aria-sort] button{color:var(--fg)}
+.tab th[aria-sort=descending] button::after{content:" ↓";color:var(--accent)}
+.tab th[aria-sort=ascending] button::after{content:" ↑";color:var(--accent)}
+.tab th.l,.tab td.l{text-align:left}
+.tab th.grp{border-bottom:0;padding-bottom:0;text-align:center;color:var(--fg)}
+.tab td{text-align:right;padding:7px 5px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tab td.m{font-family:var(--f-mono);white-space:normal;max-width:96px}
+.tab td.d{white-space:normal;min-width:170px;max-width:240px;font-size:var(--t-xs);line-height:1.35}
+.tab td.d .ob{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.tab td.mm{font-family:var(--f-mono);font-size:var(--t-xs);color:var(--muted)}
+.tab td.mm.pico{color:var(--fg);font-weight:600;box-shadow:inset 0 -2px 0 var(--accent)}
+.tab tbody tr{cursor:pointer}.tab tbody tr:hover td{background:var(--hover)}
+.tab tbody tr.sel td{background:var(--sel)}
+.tab td.orc{font-weight:700}
+.tab tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:0}
+.tab tfoot td.mm{color:var(--fg)}
+.vazio{color:var(--muted);font-size:var(--t-sm);padding:var(--s3) 0}
+.tab-bar .f select{min-width:min(360px,100%)}
+.tab-bar .acoes{display:flex;flex-wrap:wrap;gap:var(--s2);align-self:end}
+.tab td.var{font-family:var(--f-mono);font-size:var(--t-xs)}
+.tab input.cel{width:130px;min-height:32px;padding:0 8px;border:1px solid var(--line-forte);border-radius:var(--r1);background:var(--paper);color:var(--fg);font:var(--t-sm) var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.tab input.cel:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.tab input.cel.ed{border-color:var(--aviso);box-shadow:inset 3px 0 0 var(--aviso)}
+.tab input.cel[aria-invalid=true]{border-color:var(--alerta)}
+#ov tbody tr.mes{cursor:default}#ov tbody tr.mes:hover td{background:none}
+#salvo{font-size:var(--t-sm);color:var(--fg)}#salvo.erro{color:var(--alerta)}
+@media(max-width:560px){.tab input.cel{width:104px}}
+
+/* lógica */
+.log-cab{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center;margin-bottom:var(--s3)}
+.log-cab h3{font:700 var(--t-xl)/1.2 var(--f-display);margin:0}
+.log-cab select{max-width:420px}
+.passos{display:grid;gap:var(--s2);margin:0 0 var(--s4);padding:0;list-style:none;counter-reset:p}
+.passos li{counter-increment:p;display:grid;grid-template-columns:28px 1fr;gap:var(--s3);align-items:start;border-left:3px solid var(--line);padding:6px 10px;background:var(--paper);border-radius:0 var(--r1) var(--r1) 0;font-size:var(--t-sm)}
+.passos li::before{content:counter(p);font:700 var(--t-md)/1.4 var(--f-display);color:var(--accent)}
+.passos li.fim{border-left-color:var(--accent)}
+.passos .fx{display:block;font:var(--t-sm)/1.6 var(--f-mono);color:var(--fg);overflow-wrap:anywhere}
+.passos .fx b{color:var(--accent)}
+.passos .ds{color:var(--muted)}
+.tab.lg td,.tab.lg th{padding:6px 8px}
+.tab.lg tbody tr{cursor:default}.tab.lg tbody tr:hover td{background:none}
+.regras{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+.regras div{border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3);font-size:var(--t-sm)}
+.regras h3{font:700 var(--t-md)/1.2 var(--f-display);margin:0 0 6px}
+.regras p{font-size:var(--t-sm)}
+#arq-info{font-size:var(--t-sm);color:var(--fg)}
+#arq-info.erro,#arq-info0.erro{color:var(--alerta)}
+.dados{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center}
+.solte{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgb(0 0 0 / .55);color:#fff;font:700 var(--t-xl) var(--f-display);border:3px dashed var(--accent)}
+
+/* insights */
+.ins{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3)}
+.ins button{all:unset;box-sizing:border-box;display:grid;gap:4px;align-content:start;border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3);background:var(--paper);min-width:0}
+.ins button.lk{cursor:pointer}.ins button.lk:hover{border-color:var(--accent)}
+.ins button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ins small{font:600 var(--t-xs)/1.25 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ins b{font:700 var(--t-2xl)/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.ins span{font-size:var(--t-sm);color:var(--muted);line-height:1.4}
+.ins .lk span::after{content:" →";color:var(--accent)}
+/* visões */
+.vb{display:grid;gap:2px}
+.vb button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr) 64px 180px;gap:var(--s3);align-items:center;padding:5px 6px;border-radius:var(--r1);cursor:pointer;font-size:var(--t-sm)}
+.vb button:hover,.vb button.sel{background:var(--hover)}.vb button.sel{box-shadow:inset 3px 0 0 var(--accent)}
+.vb button:focus-visible{outline:2px solid var(--accent)}
+.vb .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.vb .n b{font-family:var(--f-mono);font-weight:600;margin-right:6px}
+.vb .tr{position:relative;height:14px;background:linear-gradient(var(--line-forte),var(--line-forte)) center/1px 100% no-repeat}
+.vb .tr i{position:absolute;top:2px;height:10px;border-radius:2px}
+.vb .tr i.p{background:var(--ok)}.vb .tr i.q{background:var(--alerta)}
+.vb .v{font:600 var(--t-xs) var(--f-mono);text-align:right}
+.vb .x{font:var(--t-xs) var(--f-mono);color:var(--muted);text-align:right;white-space:nowrap}
+.vb-eixo{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr) 64px 180px;gap:var(--s3);padding:0 6px;font:var(--t-xs) var(--f-mono);color:var(--muted)}
+.vb-eixo span:nth-child(2){display:flex;justify-content:space-between}
+.hm{border-collapse:separate;border-spacing:2px;width:100%;font-size:var(--t-xs)}
+.hm th{font:600 var(--t-xs) var(--f-mono);color:var(--muted);padding:4px;text-align:center}
+.hm th.l{text-align:left}
+.hm td{text-align:center;font-family:var(--f-mono);padding:7px 2px;border-radius:4px;min-width:36px}
+.hm td.l{text-align:left;font-family:var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;padding-right:8px;border-radius:0}
+.hm td.l b{font-family:var(--f-mono);font-weight:600;margin-right:6px}
+.hm td.t{text-align:right;color:var(--muted);white-space:nowrap}
+.hm tbody tr{cursor:pointer}.hm tbody tr:hover td.l,.hm tbody tr.sel td.l{color:var(--accent)}
+.hm tfoot td{font-weight:700}
+.ob2{display:grid;gap:2px}
+.ob2 button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr) 230px;gap:var(--s3);align-items:center;padding:6px;border-radius:var(--r1);cursor:pointer;font-size:var(--t-sm)}
+.ob2 button:hover,.ob2 button.sel{background:var(--hover)}.ob2 button.sel{box-shadow:inset 3px 0 0 var(--accent)}
+.ob2 .bars{display:grid;gap:3px}.ob2 .bars i{display:block;height:9px;border-radius:2px;min-width:1px}
+.ob2 .bars i.o{background:var(--a2027)}.ob2 .bars i.m{background:var(--a2025)}
+.ob2 .val{font:var(--t-xs) var(--f-mono);text-align:right;white-space:nowrap;line-height:1.5}
+.leg2{display:flex;flex-wrap:wrap;gap:var(--s4);font-size:var(--t-xs);color:var(--muted);margin:0 0 var(--s3)}
+.leg2 i{display:inline-block;width:12px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+/* quantidades */
+.qb{display:grid;gap:2px}
+.qb button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr) 64px 150px;gap:var(--s3);align-items:center;padding:5px 6px;border-radius:var(--r1);cursor:pointer;font-size:var(--t-sm)}
+.qb button:hover,.qb button.sel{background:var(--hover)}.qb button.sel{box-shadow:inset 3px 0 0 var(--accent)}
+.qb .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qb .tr{position:relative;height:14px;background:var(--sem);border-radius:3px}
+.qb .tr i{position:absolute;top:0;bottom:0;border-radius:3px 0 0 3px;background:var(--a2026)}
+.qb .tr i.pj{border-radius:0;background:repeating-linear-gradient(45deg,var(--a2026) 0 3px,transparent 3px 6px)}
+.qb .tr u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg)}
+.qb .v{font:600 var(--t-xs) var(--f-mono);text-align:right}
+.qb .x{font:var(--t-xs) var(--f-mono);color:var(--muted);text-align:right;white-space:nowrap}
+svg.qg{display:block;width:100%;overflow:visible}
+svg.qg text{font:500 11px var(--f-body);fill:var(--muted)}
+svg.qg .ax{stroke:var(--line);stroke-width:1}
+svg.qg .mes{font:600 11px var(--f-mono);fill:var(--fg)}
+svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stroke-width:3px}
+.tab td.pj{color:var(--muted);font-style:italic}
+.tab td.pj::after{content:" proj.";font:10px var(--f-mono);font-style:normal}
+@media(max-width:900px){.ins{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.vb button,.vb-eixo{grid-template-columns:minmax(0,1fr) 90px 56px}.vb .x,.vb-eixo span:nth-child(4){display:none}
+  .ob2 button{grid-template-columns:minmax(0,1fr) 90px}.ob2 .val{grid-column:1/-1;text-align:left}
+  .qb button{grid-template-columns:minmax(0,1fr) 90px 52px}.qb .x{display:none}.hm td.l{max-width:130px}}
+@media(max-width:560px){.ins{grid-template-columns:1fr}}
+@media(max-width:1100px){.resumo{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.regras{grid-template-columns:1fr}}
+@media(max-width:560px){.resumo{grid-template-columns:repeat(2,minmax(0,1fr))}.r b{font-size:var(--t-xl)}.tab{font-size:var(--t-xs)}.tab td,.tab th{padding:7px 4px}.oc{display:none}}
+</style>
+</head><body><div class="wrap w">
+<header class="cab"><h1><b>ARGOS</b> <span>MANUTENÇÃO · INSIGHTS ORÇAMENTO</span></h1>
+  <a class="cab-link" href="../">Mapa</a></header>
+
+<div class="vazio-p" id="sem-dados" hidden><p>Esta página ainda não tem dados. Carregue a planilha <b>Curva orçamento.xlsx</b> (abas Realizado, Orçado Futuro, Curva, objetivo e Ligações projetos) e, se quiser as quantidades, a <b>Qtd_2026.xlsx</b> junto (pode escolher as duas de uma vez).</p>
+  <button type="button" class="bt acc" data-abrir>Carregar planilhas</button><p class="nota" id="arq-info0" aria-live="polite"></p></div>
+
+<main id="pagina" hidden>
+<div class="sec" id="ctl"><h2>Filtros e valor de 2027 · realizado só DCMD</h2>
+  <div class="filtros">
+    <div class="f"><span id="l-sigco">SIGCO</span><select id="sigco" class="busca" aria-labelledby="l-sigco"></select></div>
+    <div class="f"><span id="l-obj">Objetivo</span><select id="obj" class="busca" aria-labelledby="l-obj"></select></div>
+    <div class="f"><span id="l-valor">Valor 2027 do recorte (R$)</span>
+      <input id="valor" class="busca num" inputmode="decimal" autocomplete="off" aria-labelledby="l-valor">
+      <div class="atalhos"><button type="button" class="chip" id="reset" hidden>Voltar ao orçado</button><small id="valor-nota"></small></div></div>
+  </div>
+  <div class="filtros" style="margin-top:var(--s4)">
+    <div class="f"><span id="l-base">Curva de 2027 (como o dinheiro se espalha nos meses)</span>
+      <div class="seg" id="base" role="group" aria-labelledby="l-base"><button type="button" data-v="b2426" aria-pressed="true">Realizado 2024–2026</button><button type="button" data-v="b2326" aria-pressed="false">Realizado 2023–2026</button><button type="button" data-v="planilha" aria-pressed="false">Curva da planilha</button></div></div>
+    <div class="f"><span id="l-vis">Visão</span>
+      <div class="seg" id="vis" role="group" aria-labelledby="l-vis"><button type="button" data-v="mensal" aria-pressed="true">Mensal</button><button type="button" data-v="acum" aria-pressed="false">Acumulado</button></div></div>
+    <div class="f"><span>Realizado</span><label class="ck"><input type="checkbox" id="so-orc"> Só SIGCOs com orçado 2027</label></div>
+  </div>
+  <div class="resumo" id="resumo"></div>
+</div>
+
+<div class="sec" id="g-sec">
+  <div class="g-cab"><h2 id="g-tit"></h2><button type="button" class="chip" id="g-total" hidden>Ver todos ×</button></div>
+  <div class="g-tot" id="g-tot"></div>
+  <div id="g"></div>
+  <ul class="leg" id="g-leg"></ul>
+  <p class="nota" id="g-nota"></p>
+</div>
+
+<div class="sec" id="ins-sec"><h2>Insights · DCMD</h2>
+  <div class="ins" id="ins"></div>
+  <p class="nota">Calculados com os dados da página, já com as alterações feitas na tela. Os cartões com seta abrem o projeto, o indicador ou o objetivo.</p>
+</div>
+
+<div class="sec" id="vis-sec">
+  <div class="g-cab"><h2 id="vis-tit">Visões</h2>
+    <div class="seg" id="visao" role="group" aria-label="Visão"><button type="button" data-v="hist" aria-pressed="true">Orçado × histórico</button><button type="button" data-v="saz" aria-pressed="false">Sazonalidade 2027</button><button type="button" data-v="obj" aria-pressed="false">Por objetivo</button></div></div>
+  <p class="nota" id="vis-nota"></p>
+  <div id="vz" style="margin-top:var(--s3)"></div>
+</div>
+
+<div class="sec"><h2>Orçado 2027 redistribuído por mês · valores em R$ mil · clique numa linha para ver o SIGCO no gráfico</h2>
+  <div class="tab-bar"><div class="f"><span id="l-proj1">Projeto</span><select id="proj1" class="busca" aria-labelledby="l-proj1"></select></div><div class="acoes"><button type="button" class="bt" id="exportar">Baixar redistribuição (.csv)</button></div></div>
+  <div class="tab-w"><table class="tab" id="tab"></table></div>
+  <p class="nota" id="tab-nota"></p>
+</div>
+
+<div class="sec" id="ov-sec"><h2 id="ov-tit">Orçado × realizado por projeto</h2>
+  <div class="tab-bar"><div class="f"><span id="l-proj2">Projeto</span><select id="proj2" class="busca" aria-labelledby="l-proj2"></select></div>
+    <div class="acoes"><button type="button" class="bt" id="desfaz-proj" hidden>Desfazer alterações deste projeto</button><button type="button" class="bt acc" id="excel">Baixar Excel (.xlsx)</button></div></div>
+  <p class="nota" id="ov-dica"></p>
+  <div class="tab-w"><table class="tab" id="ov"></table></div>
+  <p class="nota" id="salvo" aria-live="polite"></p>
+</div>
+
+<div class="sec" id="qt-sec"><h2 id="qt-tit">Quantidades · DCMD</h2>
+  <div class="tab-bar"><div class="f"><span id="l-ind">Indicador</span><select id="ind" class="busca" aria-labelledby="l-ind"></select></div></div>
+  <p class="nota" id="qt-dica"></p>
+  <div id="qt-g" style="margin:var(--s3) 0"></div>
+  <div class="tab-w"><table class="tab" id="qt"></table></div>
+  <p class="nota" id="qt-nota"></p>
+</div>
+
+<div class="sec" id="logica-sec"><h2>Como a redistribuição é calculada</h2>
+  <div class="log-cab"><h3 id="log-tit"></h3><select id="log-sel" class="busca" aria-label="SIGCO do exemplo"></select></div>
+  <ol class="passos" id="passos"></ol>
+  <div class="tab-w"><table class="tab lg" id="log-tab"></table></div>
+  <div class="regras">
+    <div><h3>Orçado de cada SIGCO</h3><p>O valor de 2027 de cada SIGCO é o da aba <b>Orçado Futuro</b>. Ele não passa de um SIGCO para outro; só é espalhado pelos 12 meses. Projetos com mais de um número (ex.: 8364/8405) usam o realizado de todos os números da chave da aba <b>Curva</b>.</p></div>
+    <div><h3>Curva pelo realizado</h3><p>Para cada mês, a média do realizado desse mês nos anos da base (2026 só até o último mês com dado). Mês com média negativa (estornos) conta como zero. SIGCO sem realizado recebe 1/12 por mês, como na planilha.</p></div>
+    <div><h3>Fecha no centavo</h3><p>Os 12 meses de cada SIGCO somam exatamente o valor dele; as frações de centavo vão para os meses com maior resto. Ao mudar o valor do recorte, o novo valor é repartido entre os SIGCOs na proporção do orçado.</p></div>
+  </div>
+</div>
+
+<div class="sec"><h2>Dados</h2>
+  <div class="dados"><button type="button" class="bt" data-abrir>Atualizar planilhas (.xlsx)</button></div>
+  <p class="nota">Pode escolher a Curva orçamento.xlsx, a planilha de quantidades (Qtd_2026.xlsx) ou as duas de uma vez. Realizado e quantidades entram só do DCMD.</p>
+  <p class="nota" id="arq-info" aria-live="polite"></p>
+</div>
+</main>
+<input type="file" id="arq" accept=".xlsx,.xlsm,.xls" multiple hidden>
+</div>
+<div id="dica" role="tooltip"></div>
+<div class="solte" id="solte" hidden>Solte a planilha aqui</div>
+
+<script>
+'use strict';
+/* Dados embutidos pelo gera_pagina.py (null = página sem dados; carregue a planilha). */
+const DADOS_EMBUTIDOS = {"fonte":"Curva orçamento.xlsx","gerado":"2026-11-04","alvo":2027,"resp":"DCMD","ultimoMes":{"2023":12,"2024":12,"2025":12,"2026":10},"grupos":[{"id":"69032/69033","n":"PLT 7ª tranche – Recurso próprio","o":"Novas Cargas","orc":92494753.11,"itens":[{"p":"69032","n":"PLT 7ª tranche – Recurso próprio","v":18499007.08},{"p":"69033","n":"PLT 7ª tranche – Recurso CDE","v":73995746.03}],"m":["69032","69033"],"c":[0.07743849915406639,0.06161603650624398,0.06924664068824464,0.06837666750698797,0.09540476040344877,0.09791035731204872,0.1097644148349731,0.09134905452952358,0.1237725002767719,0.08963374903860032,0.05670128792981019,0.05878603181928042]},{"id":"11341/20496/20495","n":"Ligação de UC em BT RURAL c/ Extensão de Rede","o":"Novas Cargas","orc":50454370.09,"itens":[{"p":"11341","n":"Ligação de UC em BT RURAL c/ Extensão de Rede","v":48338158.12},{"p":"20495","n":"Ligação e aumento de carga de clientes - Participação Cliente","v":2116211.98}],"m":["11341","20496","20495"],"c":[0.1236048318327187,0.1011065196474388,0.120862383950105,0.08697991084380378,0.07219132773633648,0.08133416751843142,0.09475112155105626,0.0688272753107673,0.07722030050080324,0.06946567820132725,0.05257959683844619,0.05107688606876567]},{"id":"8364/8405","n":"Ligação de UC em BT URB c/ Extensão de Rede","o":"Novas Cargas","orc":29147104.46,"itens":[{"p":"8364","n":"Ligação de UC em BT URB c/ Extensão de Rede","v":29147104.46}],"m":["8364","8405"],"c":[0.1109830287105924,0.09854468208104396,0.09341136344291753,0.08377499692755336,0.08547493238174829,0.08249184856069537,0.09272255726784434,0.07353036034255059,0.08105285389099555,0.07689957286790562,0.06432434326301117,0.05678946026314188]},{"id":"20497","n":"Obras financiadas 100% pelo Cliente","o":"Sem objetivo","orc":24506807.53,"itens":[{"p":"20497","n":"Obras financiadas 100% pelo Cliente","v":24506807.53}],"m":["20497"],"c":[0.09191653631017428,0.07396017170371497,0.05847940552542707,0.1149383732374041,0.1162251419665458,0.0771446306200413,0.0655412902516306,0.08072754945719325,0.05835267930342891,0.1029852561161046,0.07902838789027983,0.08070057761805528]},{"id":"8812","n":"Substituição de Trafos de Distribuição Queimados","o":"Compulsório","orc":22322603.56,"itens":[{"p":"8812","n":"Substituição de Trafos de Distribuição Queimados","v":22322603.56}],"m":["8812"],"c":[0.1412541446316348,0.1259736293748165,0.1337417878710182,0.1043580899595157,0.07101832938854187,0.03455898349101019,0.03425090778568875,0.0294614003990441,0.04694179318345161,0.06627292400015387,0.08895578834876643,0.1232122215663579]},{"id":"8923","n":"Ligação de UC - Incorporação de Redes Vegetativo - Parcela Empresa","o":"Novas Cargas","orc":16422741.78,"itens":[{"p":"8923","n":"Ligação de UC - Incorporação de Redes Vegetativo - Parcela Empresa","v":16422741.78}],"m":["8923"],"c":[0.08290128017805347,0.07882350114117914,0.04597411621028304,0.1340658866680942,0.04768384709959946,0.1186788495741323,0.07285542038350519,0.05659603607148514,0.1138743516516004,0.06800608432836802,0.0648993870215716,0.1156412396721281]},{"id":"8932","n":"Incorporação de redes - Universalização","o":"Novas Cargas","orc":13945567.59,"itens":[{"p":"8932","n":"Incorporação de redes - Universalização","v":13945567.59}],"m":["8932"],"c":[0.04289894106375555,0.05654018113418744,0.08088462835849858,0.1066346403337649,0.1009503776752428,0.109142271797957,0.1110077790537945,0.1064736131362397,0.1275200156127481,0.0385151484259741,0.03212993108028802,0.0873024723275493]},{"id":"8805","n":"Substituição de Postes de Distribuição em Manutenção","o":"Compulsório","orc":12479536.6,"itens":[{"p":"8805","n":"Substituição de Postes de Distribuição em Manutenção","v":12479536.6}],"m":["8805"],"c":[0.1127262015832615,0.09181138015128405,0.09053861349405579,0.06607939940266164,0.07449017684888147,0.06625464316057554,0.06602302496114966,0.05784358905510707,0.07036522298770877,0.1134580564448989,0.09844961664834685,0.0919600752620688]},{"id":"8385","n":"Melhoria de rede para sobrecarga","o":"Limites de Capacidade e Vida Útil","orc":11373924.1,"itens":[{"p":"8385","n":"Melhoria de rede para sobrecarga","v":11373924.1}],"m":["8385"],"c":[0.1357789550550735,0.09656188649053755,0.0689391201691973,0.05750975511953868,0.0569981447017809,0.06006023496176625,0.07676379910018459,0.05842209716949203,0.1192311800103817,0.1259827046899853,0.07303440714029588,0.07071771539176626]},{"id":"70678","n":"Construção da SE Palmas V - 138/13,8 kV","o":"Limites de Capacidade e Vida Útil","orc":11369014.26,"itens":[{"p":"70678","n":"Construção da SE Palmas V - 138/13,8 kV","v":11369014.26}],"m":["70678"],"c":[0.01997270741824571,0.05770741612341575,0.04881315807767282,0.1008754829988608,0.08337072433964064,0.08241664769440023,0.219709357104951,0.1116461041131884,0.08779133598858697,0.169781786899452,0.01276786554586902,0.005147413695716594]},{"id":"54554","n":"Ligação de UC em MT RURAL c/ Extensão de Rede - Outliers","o":"Novas Cargas","orc":10526286.72,"itens":[{"p":"54554","n":"Ligação de UC em MT RURAL c/ Extensão de Rede - Outliers","v":10526286.72}],"m":["54554"],"c":[0.1140535509592162,0.1284374154307769,0.05211798533828106,0.05714847217728356,0.05289904462138172,0.07344486344029233,0.1016381489479447,0.07874533256943174,0.09901060208111624,0.1130054222688731,0.0787297771330992,0.05076938503230331]},{"id":"25983","n":"Redução de queima de transformadores","o":"Limites de Capacidade e Vida Útil","orc":9293973.51,"itens":[{"p":"25983","n":"Redução de queima de transformadores","v":9293973.51}],"m":["25983"],"c":[0.1165168066843921,0.0592750241876117,0.06954047002950188,0.08546574391210754,0.08044672402437225,0.07478844069006163,0.1073733518929048,0.08822613257947022,0.09103750970344052,0.07803486564797459,0.04573064686926711,0.1035642837788958]},{"id":"15323","n":"Ligação de UC em MT RURAL c/ Extensão de Rede","o":"Novas Cargas","orc":8879023.08,"itens":[{"p":"15323","n":"Ligação de UC em MT RURAL c/ Extensão de Rede","v":8879023.08}],"m":["15323"],"c":[0.1348369997958476,0.1380002857775904,0.1081664758852618,0.1179686835044564,0.07956928051103163,0.07997399659567778,0.06294972976756585,0.0481236253475899,0.0668480336512023,0.07687367603987873,0.04958155799669178,0.03710765512720598]},{"id":"68733/68312","n":"Ligação de UC GD em BT URB c/ Extensão de Rede","o":"Novas Cargas","orc":8792680.52,"itens":[{"p":"68312","n":"Ligação de UC GD em BT URB c/ Extensão de Rede","v":8792680.52}],"m":["68733","68312"],"c":[0.08282772323678593,0.0920778644737533,0.1098033183767881,0.09450309059140234,0.0970166630314923,0.1263772427072436,0.08577125802758005,0.06881749261364196,0.09843615704639663,0.05293111277053936,0.04399224077841205,0.04744583634596446]},{"id":"8444","n":"Obras de melhoria de nível de tensão com ou sem reclamação","o":"Qualidade do Produto","orc":7685773.33,"itens":[{"p":"8444","n":"Obras de melhoria de nível de tensão com ou sem reclamação","v":7685773.33}],"m":["8444"],"c":[0.09619421383603649,0.09655162027701844,0.1546786388692544,0.1360670424608167,0.09885844702659884,0.07206556738515929,0.05556417849839065,0.08886733680443366,0.07003075505168846,0.05311160019354123,0.04103105843747229,0.03697954115958945]},{"id":"83938","n":"Construção de Bay e SDMT - PS Suprimento Cemar a Campos Lindos - 3CMA - LC","o":"Sem objetivo","orc":5043147.73,"itens":[{"p":"83938","n":"Construção de Bay e SDMT - PS Suprimento Cemar a Campos Lindos - 3CMA - LC","v":5043147.73}],"m":["83938"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"8495","n":"Substituição de Religadores de distribuição","o":"Compulsório","orc":4660483.88,"itens":[{"p":"8495","n":"Substituição de Religadores de distribuição","v":4660483.88}],"m":["8495"],"c":[0.06140932315448528,0.0806844920113814,0.08744456028834914,0.1313190984347431,0.05474456331488184,0.03200119610618903,0.049786525685377,0.04509984064707261,0.05230333856749111,0.05634372418230318,0.2438923671372813,0.1049709704704451]},{"id":"25962","n":"SUBSTITUIÇÃO DE TRAFOS AVARIADOS","o":"Compulsório","orc":4237991.11,"itens":[{"p":"25962","n":"SUBSTITUIÇÃO DE TRAFOS AVARIADOS","v":4237991.11}],"m":["25962"],"c":[0.08403922530372511,0.06860802453487758,0.07435554780071882,0.07108406614973506,0.07403512971278171,0.06349142971166713,0.07440960080257267,0.07743724715389956,0.1251170743309015,0.1472894608913356,0.08823704942533371,0.05189614418245159]},{"id":"54553","n":"Ligação de UC em MT URB c/ Extensão de Rede - Outliers","o":"Novas Cargas","orc":3870478.29,"itens":[{"p":"54553","n":"Ligação de UC em MT URB c/ Extensão de Rede - Outliers","v":3870478.29}],"m":["54553"],"c":[0.1373745739031697,0.06445779182835419,0.1436854735300206,0.1140930841856765,0.094032162327858,0.1009328113707979,0.117152329091888,0.04401536523547754,0.05618976548389953,0.04456375940511673,0.03434806239517446,0.04915482124256697]},{"id":"68733","n":"Ligação de UC GD em BT RURAL c/ Extensão de Rede","o":"Novas Cargas","orc":3721659.45,"itens":[{"p":"68733","n":"Ligação de UC GD em BT RURAL c/ Extensão de Rede","v":3721659.45}],"m":["68733"],"c":[0.1165902985870973,0.06868473106725595,0.05247133673460559,0.07118499660710527,0.07263859264291873,0.1101356605803313,0.112520283412803,0.07453279612843312,0.07028386189290978,0.08483532862461894,0.09119094766619518,0.07493116605572588]},{"id":"8481","n":"Substituição de Reguladores de Tensão","o":"Compulsório","orc":3577252.62,"itens":[{"p":"8481","n":"Substituição de Reguladores de Tensão","v":3577252.62}],"m":["8481"],"c":[0.06123917592118187,0.05307799883161782,0.06991420757002567,0.07333792272729164,0.06242748750611179,0.02006832979146457,0.1405530144179419,0.1219117676174927,0.1535766083079473,0.07075961968040081,0.1287036802247742,0.04443018740374974]},{"id":"8389","n":"Obra para regularização de situações de risco a segurança - Recurso Próprio","o":"Segurança","orc":3453123.29,"itens":[{"p":"8389","n":"Obra para regularização de situações de risco a segurança - Recurso Próprio","v":3453123.29}],"m":["8389"],"c":[0.0847108843444501,0.1137984611210422,0.09336985590126003,0.06612799168474631,0.1090443040460814,0.07603545190947195,0.07291562440901121,0.116921111430731,0.07736344104698471,0.07379205614896017,0.04659835298657752,0.06932246497068344]},{"id":"8412","n":"Ligação de UC em MT URB c/ Extensão de Rede","o":"Novas Cargas","orc":3248506.05,"itens":[{"p":"8412","n":"Ligação de UC em MT URB c/ Extensão de Rede","v":3248506.05}],"m":["8412"],"c":[0.09111441376615377,0.1092276339876403,0.08873437961333813,0.05013918146556522,0.11172000332361,0.05581326518877479,0.08043306021738614,0.06285489625921795,0.1123985928195648,0.09264801162150658,0.1005955111811556,0.04432105055608668]},{"id":"48428","n":"Ligação de UC - Incorporação de Redes Vegetativo - Parcela Cliente","o":"Novas Cargas","orc":2580856.88,"itens":[{"p":"48428","n":"Ligação de UC - Incorporação de Redes Vegetativo - Parcela Cliente","v":2580856.88}],"m":["48428"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89667","n":"Recapacitação SDMT - 2 de GuaraÍ - 2GU1","o":"Sem objetivo","orc":2520536.52,"itens":[{"p":"89667","n":"Recapacitação SDMT - 2 de GuaraÍ - 2GU1","v":2520536.52}],"m":["89667"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"81159","n":"Recapacitação SDMT - LD Palmas - Taquaralto - 2PA2 - QP","o":"Sem objetivo","orc":2406525.23,"itens":[{"p":"81159","n":"Recapacitação SDMT - LD Palmas - Taquaralto - 2PA2 - QP","v":2406525.23}],"m":["81159"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89310","n":"Recapacitação SDMT - 3 de Porto Nacional - 2PNA - QP","o":"Sem objetivo","orc":2077623.78,"itens":[{"p":"89310","n":"Recapacitação SDMT - 3 de Porto Nacional - 2PNA - QP","v":2077623.78}],"m":["89310"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"28165","n":"Ligação de UC em BT URB c/ Extensão de Rede - Regularização de Clandestinos","o":"Novas Cargas","orc":1928842.98,"itens":[{"p":"28165","n":"Ligação de UC em BT URB c/ Extensão de Rede - Regularização de Clandestinos","v":1928842.98}],"m":["28165"],"c":[0.01444527503238951,0.01126471462039997,0.1367854957271265,0.09267921665277286,0.0800130289556883,0.1381756156280881,0.108386826206819,0.05573527343377899,0.1961735297727215,0.07237814258685175,0.04627300164764689,0.04768987973571665]},{"id":"89306","n":"Construção SDMT - 1 de Cobrape - 2COB - QP","o":"Sem objetivo","orc":1756625.07,"itens":[{"p":"89306","n":"Construção SDMT - 1 de Cobrape - 2COB - QP","v":1756625.07}],"m":["89306"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"90811","n":"Instalação de RL e RT - LD UHE Isamu - Ponte Alta - 1UI1 - QP","o":"Sem objetivo","orc":1630168.7,"itens":[{"p":"90811","n":"Instalação de RL e RT - LD UHE Isamu - Ponte Alta - 1UI1 - QP","v":1630168.7}],"m":["90811"],"c":[0,0,0,0,0,0,0,0,0,1.0,0,0]},{"id":"89253","n":"Recapacitação SDMT - 1 de Araguatins - 2ATN - QP","o":"Sem objetivo","orc":1425691.24,"itens":[{"p":"89253","n":"Recapacitação SDMT - 1 de Araguatins - 2ATN - QP","v":1425691.24}],"m":["89253"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89292","n":"Construção de Bay e SDMT - 4 de Luzimangues Industrial - 2LUI - QP","o":"Sem objetivo","orc":1377931.01,"itens":[{"p":"89292","n":"Construção de Bay e SDMT - 4 de Luzimangues Industrial - 2LUI - QP","v":1377931.01}],"m":["89292"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"24752","n":"Recondutoramento de Rede de BT para cabo 70mm²","o":"Limites de Capacidade e Vida Útil","orc":1366905.7,"itens":[{"p":"24752","n":"Recondutoramento de Rede de BT para cabo 70mm²","v":1366905.7}],"m":["24752"],"c":[0.0951884332540222,0.08549201473435153,0.09217837883485581,0.06956182819338755,0.07642760261200607,0.07303566614576072,0.08384153049388066,0.07992704881608259,0.102035697521484,0.08719200345875394,0.07281291927526451,0.08230687666015037]},{"id":"44989","n":"Recapacitação SDMT - 2 de Porto Nacional - 2PNA - LC","o":"Sem objetivo","orc":1266871.61,"itens":[{"p":"44989","n":"Recapacitação SDMT - 2 de Porto Nacional - 2PNA - LC","v":1266871.61}],"m":["44989"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89293","n":"Recapacitação SDMT - 8 de Taquaralto II - 2TQ2 - LC","o":"Sem objetivo","orc":1252925.61,"itens":[{"p":"89293","n":"Recapacitação SDMT - 8 de Taquaralto II - 2TQ2 - LC","v":1252925.61}],"m":["89293"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"52052","n":"Construção SDMT - 4 de Porto Nacional - 2PNA - QP","o":"Sem objetivo","orc":1176975.34,"itens":[{"p":"52052","n":"Construção SDMT - 4 de Porto Nacional - 2PNA - QP","v":1176975.34}],"m":["52052"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"8889","n":"Substituição de Chaves de Distribuição em Manutenção","o":"Compulsório","orc":1172391.95,"itens":[{"p":"8889","n":"Substituição de Chaves de Distribuição em Manutenção","v":1172391.95}],"m":["8889"],"c":[0.08025177978794043,0.1740563766736315,0.1931984331950385,0.08887941824536007,0.05544951106704394,0.06943109425354924,0.09643690879862028,0.07442623485410987,0.03790334674554369,0.05086530993143552,0.04267181999490161,0.03642976645282533]},{"id":"81181","n":"Recapacitação SDMT - 1 de Guaraí I - 2GU1 - LC","o":"Sem objetivo","orc":1112280.54,"itens":[{"p":"81181","n":"Recapacitação SDMT - 1 de Guaraí I - 2GU1 - LC","v":1112280.54}],"m":["81181"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89267","n":"Instalação de RT - LD Xambioá II - Araguanã - 2XB2 - QP","o":"Sem objetivo","orc":1083084.59,"itens":[{"p":"89267","n":"Instalação de RT - LD Xambioá II - Araguanã - 2XB2 - QP","v":1083084.59}],"m":["89267"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"61993","n":"Reposição de Ativos Elétricos Furtados","o":"Compulsório","orc":823570.28,"itens":[{"p":"61993","n":"Reposição de Ativos Elétricos Furtados","v":823570.28}],"m":["61993"],"c":[0.09167593901662045,0.06181804664590024,0.07584866835522928,0.09617684132641574,0.1089381783390405,0.1029182302961147,0.1137947817641556,0.1269160517506514,0.1042107758533406,0.04383890942132829,0.03748900566499373,0.03637457156620941]},{"id":"68734/68735/74098","n":"Ligação de UC GD em MT URB c/ Extensão de Rede","o":"Novas Cargas","orc":750092.89,"itens":[{"p":"68734","n":"Ligação de UC GD em MT URB c/ Extensão de Rede","v":289488.62},{"p":"68735","n":"Ligação de UC GD em MT Rural c/ Extensão de Rede","v":460604.27}],"m":["68734","68735","74098"],"c":[0.107349956729171,0.3092789204892138,0.1129087355920799,0,0,0.05807236546402029,0.0006355473654914703,0,4.417829247928512e-05,0.3501743589319626,0.01226073563186616,0.0492752015037154]},{"id":"81180","n":"Construção de Bay e SDMT - 1 de Xambioá I - 2XMB - LC","o":"Sem objetivo","orc":719650.28,"itens":[{"p":"81180","n":"Construção de Bay e SDMT - 1 de Xambioá I - 2XMB - LC","v":719650.28}],"m":["81180"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"28615","n":"FERRAMENTAL PARA EQUIPES DE CAMPO","o":"Infraestrutura de Apoio","orc":675979.99,"itens":[{"p":"28615","n":"FERRAMENTAL PARA EQUIPES DE CAMPO","v":675979.99}],"m":["28615"],"c":[0.0246643285925778,0.08500190199906135,0.1152635624687368,0.1332582961851967,0.1663709742832783,0.05633040732677942,0.06639834665214903,0.03496348171665934,0.1096010177078639,0.07799653790030549,0.09404113212569189,0.03611001304169998]},{"id":"89311","n":"Construção SDMT - LD Porto Nacional - Silvanópolis - 2PNA - QP","o":"Sem objetivo","orc":648583.24,"itens":[{"p":"89311","n":"Construção SDMT - LD Porto Nacional - Silvanópolis - 2PNA - QP","v":648583.24}],"m":["89311"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"73640","n":"Recapacitação SDMT 1 de Arraias - 2ARR - SG","o":"Segurança","orc":620365.49,"itens":[{"p":"73640","n":"Recapacitação SDMT 1 de Arraias - 2ARR - SG","v":620365.49}],"m":["73640"],"c":[0,0,0,0.2500044770730279,0.1987478458763428,0.0465595696797647,0.01521153575755025,0.4176050837714511,0.01630621312963077,0.0555652747122325,0,0]},{"id":"70978","n":"Instalação de RT e Balanceamento de Fase - LD Paraíso I - Caseara - 2PR0 - QP","o":"Sem objetivo","orc":540294.9,"itens":[{"p":"70978","n":"Instalação de RT e Balanceamento de Fase - LD Paraíso I - Caseara - 2PR0 - QP","v":540294.9}],"m":["70978"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"70838","n":"Instalação de RT - LD Cristalândia - Lagoa da Confusão","o":"Sem objetivo","orc":539995.52,"itens":[{"p":"70838","n":"Instalação de RT - LD Cristalândia - Lagoa da Confusão","v":539995.52}],"m":["70838"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89249","n":"Instalação de RT - LD Araguaína - Babaçulândia - 2AR0 - QP","o":"Sem objetivo","orc":539995.52,"itens":[{"p":"89249","n":"Instalação de RT - LD Araguaína - Babaçulândia - 2AR0 - QP","v":539995.52}],"m":["89249"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89288","n":"Instalação de RT - LD Miranorte - Araguacema - 2MRN - QP","o":"Sem objetivo","orc":539995.52,"itens":[{"p":"89288","n":"Instalação de RT - LD Miranorte - Araguacema - 2MRN - QP","v":539995.52}],"m":["89288"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89312","n":"Recapacitação SDMT - 2 de Lagoa da Confusão - SLC - LC","o":"Sem objetivo","orc":487901.46,"itens":[{"p":"89312","n":"Recapacitação SDMT - 2 de Lagoa da Confusão - SLC - LC","v":487901.46}],"m":["89312"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89307","n":"Instalação de RT - 1 de Figueirópolis - 2FGR - QP","o":"Sem objetivo","orc":373175.86,"itens":[{"p":"89307","n":"Instalação de RT - 1 de Figueirópolis - 2FGR - QP","v":373175.86}],"m":["89307"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89291","n":"Instalação de RT - 2 de Luzimangues - 2LUZ - QP","o":"Sem objetivo","orc":330935.1,"itens":[{"p":"89291","n":"Instalação de RT - 2 de Luzimangues - 2LUZ - QP","v":330935.1}],"m":["89291"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"89266","n":"Construção SDMT - 7 de Araguaína III - 2AR3 - QP","o":"Sem objetivo","orc":288897.9,"itens":[{"p":"89266","n":"Construção SDMT - 7 de Araguaína III - 2AR3 - QP","v":288897.9}],"m":["89266"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"91349","n":"Substituição de Banco capacitores de Distribuição","o":"Sem objetivo","orc":280213.65,"itens":[{"p":"91349","n":"Substituição de Banco capacitores de Distribuição","v":280213.65}],"m":["91349"],"c":[0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333,0.08333333333333333]},{"id":"78718","n":"Substituição Equipamentos MLpA","o":"Compulsório","orc":262165.5,"itens":[{"p":"78718","n":"Substituição Equipamentos MLpA","v":262165.5}],"m":["78718"],"c":[0,0,0,0,0.0912409081941191,0.01797493773963904,0.4419965781191587,0.4031147530657084,0.04567282288137485,0,0,0]},{"id":"75842","n":"SISDRONES - Expansão da frota","o":"Infraestrutura de Apoio","orc":48378.19,"itens":[{"p":"75842","n":"SISDRONES - Expansão da frota","v":48378.19}],"m":["75842"],"c":[0.5797950743225425,0,0,0,0,0,0,0,0.3573180850447993,0.06288684063265818,0,0]}],"real":{"11341":{"o":"Novas Cargas","r":{"2023":[8669893.01,7306571.68,7476700.34,6535867.73,3867823.27,4940885.17,4639877.96,3954850.86,4240985.07,5271776.71,5889613.71,3628167.35],"2024":[7802175.82,7285510.67,7320386.67,5869697.02,3913334.65,5411765.04,6357548.3,3063720.79,3458251.52,1536876.44,2799357.15,1966285.01],"2025":[4148093.87,3490266.25,2942173.11,1613862.71,2067720.68,1970225.57,3111656.13,1840525.67,2746554.41,3329664.33,2760574.41,3259211.77],"2026":[4907224.09,3203769.14,5140691.04,4058561.65,3880256.51,5263605.14,4725347.27,4912888.04,4641922.28,3743078.43,0.0,0.0]}},"12321":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,95984.16,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"13785":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,0.0,11908.18,96255.73,961.01,60868.6,5651.18,35291.02,38881.03,0.0,0.0]}},"14530":{"o":"Sem objetivo","r":{"2023":[118934.93,3642.87,9766.68,0.0,0.0,0.0,0.0,728.91,0.0,0.0,229.98,0.0],"2024":[0.0,5471.41,7305.52,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"15323":{"o":"Novas Cargas","r":{"2023":[768900.16,2310670.49,275450.74,2339659.73,350883.89,353802.7,1442383.01,288296.59,1640272.52,1908256.01,1636616.73,865466.89],"2024":[3214885.17,3578966.55,605773.66,2179836.47,1456595.86,1563212.4,154122.62,473568.53,456039.19,1731720.8,826670.46,437304.57],"2025":[428008.07,950681.34,1344804.34,268378.56,1346480.41,370240.78,177159.19,657414.75,752469.17,520439.15,302763.45,-207595.25],"2026":[682212.67,477517.02,718450.69,632393.21,1033260.47,1032654.36,1041632.1,746355.73,105767.57,368995.82,0.0,0.0]}},"15821":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-6323.64],"2026":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"15822":{"o":"Sem objetivo","r":{"2023":[1365.78,-11694.63,-381.4,-37.41,-218.02,0.0,0.0,-61.35,189.76,0.0,0.0,0.0],"2024":[0.0,-170.83,0.0,0.0,7044.46,0.0,0.0,-6612.61,-574.85,0.0,0.0,-14162.59],"2026":[-0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"15883":{"o":"Sem objetivo","r":{"2023":[10951.75,-10967.39,10516.49,80940.15,96411.0,575303.26,104257.25,84513.99,203026.28,4113.24,1749.12,7071.1],"2024":[0.0,459.2,1574.84,0.0,9472.65,409591.6,504011.24,125763.96,147914.41,60810.27,24593.07,-1777.29],"2025":[21916.9,31666.97,0.0,-10678.71,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-18653.13]}},"15962":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,52045.7,25841.63,1938785.58,396656.97,43721.74,-18498.21,-59560.1,-106747.97,300195.17,-1099.38],"2024":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-5813.71]}},"17641":{"o":"Sem objetivo","r":{"2024":[0.0,-0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"20496":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,15851.22,-163.61,37.04,32852.46,17563.68,22558.84],"2024":[51152.66,33038.9,21021.22,13963.03,1267.97,21270.24,31773.59,25679.75,0.0,0.0,0.0,0.0]}},"20497":{"o":"Sem objetivo","r":{"2023":[195486.11,2638637.05,569936.97,796978.89,792371.65,511048.55,526170.85,1328294.71,358559.55,503578.87,1856951.4,2376154.31],"2024":[600369.1,1985876.52,816855.92,1052654.74,2320275.28,1577325.64,1743837.13,748627.07,1712114.09,4264549.19,2011177.36,4687511.96],"2025":[-2965278.75,1553565.91,2865493.23,2788506.99,3251388.15,4193980.46,2418215.7,3553331.9,2561172.07,4645538.68,429816.89,813706.93],"2026":[4817880.7,432674.9,1248318.09,6832787.56,4889488.05,1226741.8,1710263.21,2382358.4,1003107.86,1050212.09,0.0,0.0]}},"20508":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,55000.0,0.0,0.0,-871.25]}},"24562":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,-51650.66,0.0,0.0,0.0,0.0,0.0]}},"24751":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-73593.05]}},"24752":{"o":"Limites de Capacidade e Vida Útil","r":{"2023":[59384.56,73102.27,134648.94,72564.5,97028.9,35027.09,-8031.97,63087.74,124609.32,70797.5,116966.55,197149.38],"2024":[102691.13,114921.22,88511.35,83513.05,121233.89,52276.25,146020.72,95302.9,92129.73,86607.5,70129.06,79228.48],"2025":[145889.0,137130.51,98312.99,101425.21,99782.61,164246.79,112021.64,62043.11,81738.95,85382.14,136896.87,92462.26],"2026":[105642.97,77423.7,86695.05,58855.6,32175.85,72623.72,90383.91,101340.23,165614.42,151961.01,0.0,0.0]}},"25122":{"o":"Sem objetivo","r":{"2023":[22347.04,35231.76,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"25962":{"o":"Compulsório","r":{"2023":[640664.94,374529.54,587411.3,259163.84,518182.66,309559.3,332259.2,529211.12,636998.89,934658.06,778924.92,317284.94],"2024":[249002.12,246037.73,158442.12,272115.11,129241.78,228497.69,276665.96,267517.24,448709.08,177520.94,264033.4,177209.83],"2025":[200982.8,212943.5,209482.32,279641.75,173747.09,177020.22,168367.37,66709.49,304977.13,379372.63,249050.27,272602.18],"2026":[154608.71,176358.64,98785.63,253904.3,280993.6,227080.02,282102.87,236887.54,449237.0,635589.49,0.0,0.0]}},"25983":{"o":"Limites de Capacidade e Vida Útil","r":{"2023":[475077.29,179008.36,337125.46,161695.98,319799.93,260270.41,463987.59,239065.74,438565.62,433086.35,787506.05,2477151.51],"2024":[1877656.34,409290.81,677639.01,476819.89,557385.56,247826.1,457333.86,44984.66,229366.39,189149.3,253135.32,804882.93],"2025":[0.0,661075.88,671227.02,961885.06,976613.82,942317.9,1378506.79,1202964.72,955146.12,978487.62,486380.67,193394.06],"2026":[1737834.85,789438.89,653139.45,1186756.2,855707.34,1181589.15,1282599.83,1407956.41,1314715.32,923133.2,0.0,0.0]}},"27513":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,1239.32,240367.0,41433.86,14496.72,254.81,0.0,0.0]}},"27531":{"o":"Sem objetivo","r":{"2023":[50147.66,0.0,485.94,26.26,238701.99,331803.4,259863.14,38544.96,57032.5,71161.88,217105.93,11396.42]}},"27533":{"o":"Sem objetivo","r":{"2023":[103235.95,0.0,-1193.63,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"27537":{"o":"Sem objetivo","r":{"2023":[94.88,960.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"27541":{"o":"Sem objetivo","r":{"2023":[0.0,47.44,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"27544":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,1315.3,0.0,0.0,249188.58,119102.8,9944.89,53599.41,0.0,0.0,0.0]}},"27545":{"o":"Sem objetivo","r":{"2023":[10792.04,6231.93,0.0,0.0,58.23,284.64,0.0,0.0,0.0,0.0,9.72,0.0]}},"27549":{"o":"Sem objetivo","r":{"2023":[379.52,2960.52,0.0,-1398.05,0.0,0.0,0.0,0.0,0.0,0.0,7.49,0.0],"2024":[0.0,0.0,0.0,1954.84,7146.42,6373.13,217512.7,55059.74,74028.11,7727.21,0.0,0.0]}},"27559":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,47.44,0.0,0.0,0.0,0.0,0.0],"2024":[0.0,0.0,0.0,2519.56,1467.93,169209.85,912.0,36935.31,-74354.24,60131.05,81291.02,25473.28],"2025":[0.0,0.0,6981.4,-9571.17,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"27574":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,2120.62,311765.7,2542.7,31031.29,82869.34,0.0,0.0],"2024":[0.0,0.0,0.0,0.0,1992.56,239953.01,115046.48,9060.28,-36757.77,16248.44,67060.12,0.0]}},"27581":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,717.75,0.0,0.0,0.0,0.0,0.0],"2024":[0.0,0.0,0.0,36520.78,2329.24,167505.12,292012.97,-143475.88,82647.1,560713.64,198097.34,182208.2]}},"27592":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,485.72,81998.18,81431.36,61477.14,39233.28,91.0,0.0]}},"27594":{"o":"Sem objetivo","r":{"2023":[4767.15,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"2024":[0.0,0.0,0.0,0.0,2480.64,338932.35,34920.42,91933.91,32613.94,9815.18,10775.38,52176.62]}},"27596":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,896.92,0.0,85041.82,12225.51,-523.52,6643.56,23468.67,0.0]}},"27597":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,402.27,83062.84,0.0,25456.93,4811.27,23639.81,387.89,0.0]}},"27605":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,983.96,0.0,0.0,83062.86,26661.04,27611.01,46324.33,7.25,0.0,0.0]}},"27606":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,20022.4,182700.8,543942.28,112888.57,39209.38,14622.5,6646.52,0.0,0.0,0.0]}},"27608":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,17457.5,0.0,157466.05,-70976.49,331323.7,49001.46,116493.2,0.0,0.0]}},"27629":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,6041.49,0.0,146401.98,81954.72,135535.35,3631.77,0.0,0.0]}},"27637":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,47670.58,2582.41,245.38,3567.73,-2727.99,8.43,0.0],"2024":[24905.12,137681.24,0.0,9493.23,32004.02,214230.68,170698.66,-53075.15,243.18,4148.55,3657.57,0.0]}},"27832":{"o":"Sem objetivo","r":{"2023":[0.0,38629.58,0.0,0.0,204282.73,16493.41,157871.5,32417.64,108810.95,151.62,3397.65,401929.71],"2024":[0.0,0.0,31597.75,0.0,8971.83,8202.49,228991.21,113863.96,127305.93,201037.79,560619.37,338187.73]}},"27834":{"o":"Sem objetivo","r":{"2023":[0.0,33435.39,0.0,44323.8,272928.55,1012.46,-130.6,291969.32,13005.34,266051.86,27582.22,0.0]}},"27841":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,7220.81,0.0,0.0,0.0,0.0,0.0,189.76,0.0,160766.87],"2024":[86776.19,4006.76,7384.41,2859.71,59252.62,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"27845":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,402.27,0.0,83630.66,26425.36,10907.1,29769.32,44188.12,64369.82,8408.53,597073.05],"2024":[0.0,4161.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"27852":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,-140.56,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"27867":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,1910.6,0.0,9903.12,32248.07,101357.93,55410.27,76231.81,58262.52]}},"28165":{"o":"Novas Cargas","r":{"2023":[2869.26,0.0,2106.94,83039.67,30397.23,152774.89,141513.37,-87898.68,3753.59,86911.11,63474.86,152110.42],"2024":[72442.24,28658.83,450679.69,457476.05,33558.57,442922.24,38940.93,310247.31,1273594.63,-635212.44,112477.84,113726.01],"2025":[0.0,58182.64,600441.88,154297.05,314559.4,256776.27,-1392.78,77875.78,24165.33,118914.48,9638.5,0.0],"2026":[0.0,0.0,0.0,3635.71,200404.84,211184.06,304034.53,2674.1,0.0,0.0,0.0,0.0]}},"28615":{"o":"Infraestrutura de Apoio","r":{"2023":[0.0,0.0,35084.84,0.0,0.0,0.0,0.0,0.0,14850.0,17186.0,5799.9,519.9],"2024":[0.0,4196.73,8419.52,1007.24,0.0,13095.32,-80986.08,17050.4,9028.08,1399.0,0.0,-3472.55],"2025":[0.0,0.0,15209.53,368315.56,0.0,0.0,0.0,0.0,4500.0,15998.0,1738.0,0.0],"2026":[0.0,0.0,3399.0,1300.0,32623.69,9192.75,14948.96,-3557.24,0.0,0.0,0.0,0.0]}},"30558":{"o":"Sem objetivo","r":{"2024":[1522.22,3832.15,0.0,111555.51,0.0,440420.98,-433534.16,59437.51,137347.78,8024.79,118046.22,88982.77]}},"30559":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,6017.83,0.0,0.0,283037.65,-405.85,94847.21,59058.0,63128.27,3971.59,0.0]}},"30563":{"o":"Sem objetivo","r":{"2023":[0.0,-8948.02,41714.69,0.0,0.0,0.0,0.0,-73074.57,7141.03,390.69,384.89,0.0]}},"30597":{"o":"Sem objetivo","r":{"2026":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,37023.82,2634.0,0.0,0.0]}},"30642":{"o":"Sem objetivo","r":{"2023":[0.0,21721.25,0.0,0.0,0.0,-0.0,517496.27,-251473.48,0.0,-11363.26,230295.43,634440.92],"2024":[-7950.82,11516.02,12895.4,-224164.73,166031.01,204514.57,0.0,0.0,0.0,0.0,0.0,0.0]}},"30654":{"o":"Sem objetivo","r":{"2023":[8467.1,0.0,0.0,2280.87,0.0,0.0,325758.4,31701.61,17782.0,-356521.9,428670.6,81887.5],"2024":[55335.04,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"35086":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,1597.34,18992.06,36555.03,-55328.45,43753.3,22369.17,375385.3,-4585.73,0.0,0.0]}},"35106":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,2522.89,0.0,0.0,244318.8,6248.84,13336.5,-249975.96,315282.17,29864.72],"2024":[90729.5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"35107":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,736.07,0.0,0.0,81439.6,5630.44,4445.5,-86834.13,115247.64,-1700.32],"2024":[25915.29,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"35108":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,569.17,81378.25,36671.61,13649.31,477.75,0.0],"2024":[0.0,0.0,0.0,1333.34,278291.03,1349.23,0.0,0.0,0.0,0.0,0.0,0.0]}},"35109":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,1463.81,76023.2,39750.15,69204.97,5605.08,0.0,0.0,0.0,0.0,0.0]}},"35110":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,498.24,-0.0,88640.15,41559.78,0.0,0.0,0.0,0.0,0.0,0.0]}},"35111":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,10993.08,0.0,0.0,0.0,0.0,189.76,191543.39,128010.6],"2024":[213003.02,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"35112":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,498.24,3496.43,79039.0,18007.07,3217.09,6135.22,21324.67,0.0,0.0,0.0]}},"35113":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,690.18,-0.0,79022.26,21475.02,0.0,4397.42,0.0,0.0,0.0,0.0]}},"35115":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,910.02,0.0,85041.83,22281.5,-35967.65,6315.33,73733.67,0.0]}},"35119":{"o":"Sem objetivo","r":{"2023":[0.0,64.91,369031.12,27334.86,208026.16,72665.37,111724.73,28062.06,49837.42,1492.51,0.0,0.0]}},"35120":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,15294.33,0.0,72976.38,-71612.24,144847.16,115833.57,14041.81,75650.23,-8016.54,0.0]}},"35121":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,7016.59,444324.89,89017.61,12889.3,-999.04,0.0,0.0,0.0,0.0]}},"35144":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,1130.01,8355.64,-0.0,14007.97,74402.74,36022.23,123148.02,757.62,0.0,323201.8],"2024":[32848.23,15921.97,1592.46,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"35145":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,18348.26,110514.05,84092.97,68261.23,409295.44,241607.96,46600.71,242190.67,1740.45,0.0]}},"35163":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,2294.73,0.0,0.0,765.76,35724.24,18138.06,145142.68,115124.61,104272.59]}},"35165":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,2249.09,0.0,0.0,16846.53,52018.69,892.08,17271.65,-2262.18,0.0]}},"35166":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,498.24,30942.95,0.0,164226.01,361343.29,340106.79,94466.06,126521.1,457245.19,0.0]}},"35837":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"36246":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,36546.18,0.0,0.0,29204.11,-582.21,22327.85,189.76,7017.34,6385.46],"2024":[0.0,3697.3,43889.78,98716.65,682759.89,946977.46,573189.77,585588.85,1150199.56,213.3,334928.78,812827.76],"2025":[64434.89,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"39382":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,8291.84,2869.48],"2024":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-11161.32]}},"40223":{"o":"Sem objetivo","r":{"2023":[0.0,160.0,761.65,35913.41,-10574.49,0.0,47.44,0.0,0.0,0.0,0.0,219230.79],"2024":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,3696.58,0.0,0.13,-3397.66,4513.24]}},"42762":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,17760.6,0.0,405149.88,12644.71,150257.58,13701.38,-1280.51]}},"44990":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,375157.7,149381.17,65940.33,37846.52,67596.42,0.0]}},"45008":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,420.69,25653.51,34524.47,880705.18,4992.35,126973.35,414511.64,-124172.32,304363.99]}},"45249":{"o":"Sem objetivo","r":{"2023":[0.0,17670.61,0.0,17691.18,0.0,-14364.65,181895.49,70825.89,126838.6,60656.54,-642.6,0.0]}},"45268":{"o":"Sem objetivo","r":{"2024":[19012.12,5037.3,26039.86,47570.16,63464.42,129153.75,27573.87,375178.61,73932.12,55189.44,186365.02,179434.07],"2025":[-11203.13,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"45272":{"o":"Sem objetivo","r":{"2024":[15302.76,204165.95,64850.33,62555.12,71478.99,74643.35,242375.52,234210.77,2628.87,0.0,0.0,0.0]}},"45289":{"o":"Sem objetivo","r":{"2023":[0.0,15241.45,22143.96,36331.63,-8068.46,-29193.86,338644.65,101575.25,62943.34,89389.69,48020.24,90.9]}},"45292":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,485.95,35314.43,138545.64,568959.72,-73923.41,-22353.11,154776.27,2397.02,12970.63,0.0]}},"45295":{"o":"Sem objetivo","r":{"2024":[21141.9,68766.33,1302.54,172524.64,146039.99,-1699.27,365616.17,19418.95,4745.46,0.0,0.0,0.0]}},"45296":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,37721.4,28342.78,154849.26,-99272.91,106908.17,804238.26,163482.7,146736.97,1880.65]}},"45298":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3212.22,0.0,0.0],"2024":[139624.94,8667.95,2217.24,297516.93,7271.15,50913.15,889.39,0.0,0.0,0.0,0.0,0.0]}},"45299":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,3846.85,289999.43,33927.28,71563.86,37062.31,70363.02,0.0,0.0,0.0,0.0]}},"45328":{"o":"Sem objetivo","r":{"2024":[0.0,13549.15,0.0,0.0,0.0,0.0,0.0,5305.06,106989.89,142580.33,260086.38,-224.68]}},"45388":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,2472.21,0.0,46958.53,32748.48,22056.18,0.0,0.0,0.0]}},"45468":{"o":"Sem objetivo","r":{"2024":[19133.41,78923.33,100198.4,221266.27,78145.39,4655.4,489950.63,223477.58,64681.29,88138.33,3394.67,0.0]}},"45469":{"o":"Sem objetivo","r":{"2024":[594.21,21152.03,0.0,0.0,0.0,161177.69,4087.1,-727.3,347997.96,234946.71,168069.95,24456.11]}},"45470":{"o":"Sem objetivo","r":{"2024":[0.0,10675.25,5097.68,1345401.74,-1324134.02,219052.47,173984.65,18774.06,45349.01,185296.54,190969.84,20463.84]}},"45709":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,606.73,932.2,206675.78,19097.3,30177.51,87945.21,4635.26,0.0,7294.14,39902.9]}},"45828":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,1985.2,167532.76,70810.12,40051.97,0.0,0.0,0.0,0.0]}},"45830":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,13998.44,0.0,0.0,154058.79,-149937.62,186080.96,291689.77,159925.88,9513.15]}},"45848":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,13182.08,0.0,3530.95,251312.8,168875.19,120381.77,12388.05,-45128.16,273850.18,292758.66]}},"45868":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,1870.24,0.0,158359.91,-140266.44,193554.74,85485.59,13954.27,0.0]}},"45888":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,485.72,82299.76,12562.37,0.0,0.0,189.76,9341.75,0.0,508.32,0.0]}},"45908":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,1305.43,4454.07,0.0,390631.15,-304742.04,272754.89,130501.47,222205.85,29667.22]}},"45928":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,11899.9,261977.89,-3102.98,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"45968":{"o":"Sem objetivo","r":{"2023":[215807.18,-13662.46,32635.91,55485.41,3341.21,22575.36,-13223.13,-3525.06,2675.93,0.0,445.23,3304.73],"2024":[14576.5,51624.08,14632.36,-10483.93,44848.41,16568.61,12005.9,20119.03,7963.12,0.0,197.0,651.03],"2025":[10956.04,14027.81,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"46008":{"o":"Sem objetivo","r":{"2024":[0.0,473.2,0.0,171.12,3786.58,47725.04,116516.89,14361.36,33106.88,93895.43,-9736.9,-10032.26],"2026":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"46009":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,2821.71,0.0,0.0,0.0,105986.33,589735.24,-521139.59,17996.54]}},"46010":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,1568.03,0.0,191660.87,19417.5,3208.67,26130.4,71520.0,0.0]}},"46048":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,949.43,67786.33,25907.92,7955.63,19580.34,13739.41,0.0,0.0]}},"46049":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,5221.56,0.0,0.0,0.0,20735.36,61034.99,62996.52,0.0]}},"46068":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,14274.25,0.0,12152.75,0.0,0.0,968.08,374956.8,219175.71]}},"46069":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,4503.94,0.0,0.0,0.0,0.0,131931.67,2076.0,8834.56,111691.84,4729.12]}},"46088":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,6832.3,0.0,20021.69,79342.36,114024.12,71801.0,55032.05,35876.96]}},"46168":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,6498.8,0.0]}},"46989":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,0.0,0.0,3817.06,2828.06,0.0,0.0,0.0,0.0]}},"47689":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,12886.55,23245.37,172682.79,116624.08,-1242.6,73161.96,208.41,0.0]}},"49372":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"52053":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,11796.49,221382.25,36684.75,46546.68,197546.0,154006.03,77637.29,162930.74,123309.31,199557.61]}},"52132":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,6523.5,0.0,0.0,0.0,0.0,333367.6,68048.65,-82671.09,-171.84]}},"52245":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,1655.75,0.0,0.0,348968.97,17060.12,28014.63,2333.84,0.0,14226.16]}},"52260":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,886.06,197035.65,31970.88,32553.96,0.0,0.0,0.0,0.0,0.0,0.0]}},"52264":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2995.79,0.0],"2024":[23302.24,2853.23,157082.3,622501.13,273899.02,1154538.67,11340.63,156796.5,490868.54,46093.39,1020.92,0.0]}},"52293":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,420.97,162850.9,143954.35,-285804.33,268084.68,18144.09,74554.9,0.0]}},"52303":{"o":"Qualidade do Produto","r":{"2024":[0.0,0.0,33359.89,12056.24,-89.76,404615.06,817463.75,24411.57,424519.3,98912.9,499369.23,800513.23],"2025":[-4391.74,43073.76,43754.49,1633.12,-4102.85,9013.99,-2699.76,9728.85,34414.85,1508.36,2995.32,192777.33],"2026":[10899.25,45081.92,1368.69,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"52352":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,30864.19,929.27,24958.34,691880.09,413511.3,114258.95,30305.97,-14622.79,54090.17,9527.84],"2025":[17359.85,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"52354":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,521.4,0.0,0.0,119970.58,-30875.53,206167.11,20470.89,0.0,0.0,0.0]}},"52355":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,1567.56,12289.38,13647.51,3079.65,1257.33,46463.46,19240.59,0.0,72244.08,11496.16]}},"52356":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,1123.32,290094.16,7880.27,63939.17,0.0,0.0,0.0,0.0,0.0,0.0]}},"52412":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,3827.63,0.0,8579.36,973.7,268048.45,-32174.88,258139.15,65102.1,215621.74,56478.8]}},"52413":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,79643.92,57223.44],"2024":[428575.54,44787.08,11304.43,-11527.88,5640.12,348299.52,70572.33,-89715.73,52935.73,105525.76,98089.74,138.92]}},"52433":{"o":"Sem objetivo","r":{"2023":[1565.52,6425.19,0.0,324.07,657.65,193.24,0.0,0.0,0.0,390.69,0.0,4080.87],"2024":[23564.46,54987.76,32269.09,31021.87,217840.47,4997.83,200896.44,317504.97,313808.82,233571.88,396129.04,199201.04],"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"52434":{"o":"Sem objetivo","r":{"2024":[7462.35,63339.2,123756.9,24395.34,6310.22,270450.57,1022.88,0.0,0.0,0.0,0.0,0.0]}},"52437":{"o":"Sem objetivo","r":{"2024":[0.0,8179.19,52143.13,78312.57,1559.04,125235.28,-13901.95,231376.36,23459.26,17746.21,54277.9,23508.78]}},"52453":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,1305.43,0.0,0.0,236.52,23074.95,94752.49,28164.13,0.0,0.0]}},"52454":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,1920.62,15227.7,0.0,709.56,134088.35,38766.66,84790.86,253014.75,167966.98]}},"52455":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,668.1,0.0,0.0,833.98,69673.91,-36560.24,60462.19,32989.96]}},"52456":{"o":"Sem objetivo","r":{"2024":[0.0,29579.42,0.0,236075.0,604466.8,430911.7,76739.71,10032.56,180133.77,46571.43,0.0,0.0]}},"53973":{"o":"Novas Cargas","r":{"2025":[0.0,0.0,0.0,0.0,0.0,0.0,6187.26,203.72,116500.0,0.0,0.0,0.0],"2026":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,16.8,5763.29,7216.65,0.0,0.0]}},"53988":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,78434.99]}},"54553":{"o":"Novas Cargas","r":{"2024":[10024.31,17739.47,1255613.28,123987.67,69970.87,634030.01,-602685.44,421.67,51668.72,20681.69,85902.5,669349.02],"2025":[920984.32,624123.35,597434.91,1061728.31,975360.86,669700.25,504518.72,291709.02,870150.1,498418.9,505304.83,-405570.43],"2026":[792697.32,305468.17,672694.88,604137.96,443073.44,424635.22,1456986.68,450533.59,-47883.49,16541.75,0.0,0.0]}},"54554":{"o":"Novas Cargas","r":{"2023":[18903.63,0.0,0.0,0.0,0.0,0.0,19523.53,-19523.53,0.0,0.0,0.0,0.0],"2024":[0.0,10070.25,3451.32,8272.72,22090.21,100684.63,90151.24,38283.25,479118.59,654992.1,1954677.0,2407253.35],"2025":[1949032.73,2605563.45,926250.0,885392.29,1516266.11,3758044.08,5332057.59,3581133.8,5685613.8,5767374.41,4727498.52,-2832664.09],"2026":[5825684.28,7104564.81,3675575.55,3973550.92,2267042.29,2221894.51,3317194.68,3867038.66,1046099.66,1888999.41,0.0,0.0]}},"60995":{"o":"Sem objetivo","r":{"2024":[0.0,213182.48,1415577.31,3593238.86,3770174.12,4418472.95,1285191.87,1367493.89,1379069.83,1827044.24,2916793.93,1428789.61],"2025":[6005.22,989.6,0.0,0.0,0.0,0.0,55507.84,0.0,0.0,0.0,0.0,0.0]}},"61052":{"o":"Sem objetivo","r":{"2024":[10859.26,914.3,29395.65,1772.82,1367.83,1620.18,54903.16,209649.69,64274.23,166334.28,71264.21,6981.4]}},"61072":{"o":"Sem objetivo","r":{"2024":[26691.4,28029.63,433598.21,9657.03,22480.47,103772.95,505670.98,270643.0,230682.0,6474.5,-1432.08,0.0]}},"61074":{"o":"Sem objetivo","r":{"2024":[20804.18,321687.78,396074.22,504496.92,208928.26,143187.55,447132.04,332498.04,239855.49,267924.74,310658.24,-68187.88],"2025":[135.86,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"61092":{"o":"Sem objetivo","r":{"2024":[26244.97,52353.14,212594.43,-1470.22,11034.47,314624.34,258066.61,524714.98,-5436.97,174505.0,255706.27,600525.85]}},"61093":{"o":"Sem objetivo","r":{"2024":[23581.12,54960.32,5876.54,318703.17,590935.12,129261.54,152062.28,9081.13,186154.19,15017.61,-721.24,0.0]}},"61112":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,621.83,289999.46,8250.35,63854.63,0.0,0.0,0.0,0.0,0.0,0.0]}},"61612":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,3449.21,1206.47,11949.49,27430.56,13890.9,57657.01,429579.48,61461.34,99253.86,0.0]}},"61993":{"o":"Compulsório","r":{"2024":[0.0,7697.39,5599.12,48648.96,123097.68,116628.52,59767.64,37042.67,41188.68,1531.75,19318.74,33269.99],"2025":[62859.83,37722.25,68728.07,93867.42,55433.36,56876.97,45930.13,67703.5,120973.36,58865.82,58992.67,42713.46],"2026":[128643.57,83713.11,84114.36,58389.03,49025.71,41476.09,132010.05,160165.69,50331.85,31178.26,0.0,0.0]}},"63438":{"o":"Sem objetivo","r":{"2024":[402.27,17526.1,0.0,0.0,117560.12,176064.27,341160.15,70824.71,116339.76,82774.6,0.0,0.0]}},"64392":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,835.64,82446.67,859.46,11422.21,0.0,0.0,0.0,0.0]}},"64873":{"o":"Sem objetivo","r":{"2024":[21489.93,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"65532":{"o":"Redução de OPEX","r":{"2024":[0.0,0.0,0.0,0.0,0.0,48865.72,106561.67,-17050.4,0.0,8110.0,58610.0,0.0],"2025":[0.0,0.0,0.0,0.0,0.0,41619.71,0.0,0.0,0.0,0.0,0.0,0.0]}},"66015":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,0.0,643.66,0.0,3387.86,792.75,8836.26,0.0,0.0]}},"68312":{"o":"Novas Cargas","r":{"2023":[26919.68,384925.53,99082.33,184584.38,74247.75,989300.58,-316759.53,34.18,89937.22,162168.76,-229259.26,209270.53],"2024":[522767.26,786884.28,1102032.5,790430.66,1323886.08,1045712.43,525295.31,558925.31,700361.33,324810.58,153396.65,299202.44],"2025":[444993.78,474953.94,523552.31,655557.86,457276.84,334717.69,594867.68,497606.67,760116.12,241708.85,430113.05,236770.95],"2026":[559862.61,330633.53,558530.73,40897.27,235103.42,295088.71,279559.21,348346.25,272055.59,276130.24,0.0,0.0]}},"68732":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,0.0,0.0,0.0,1115.77,36504.35,23125.1,-444.19,0.0,0.0,0.0]}},"68733":{"o":"Novas Cargas","r":{"2023":[0.0,812.87,1777.58,12802.57,-6782.55,0.0,512.1,-80.0,0.0,16350.93,-16773.62,0.0],"2024":[0.0,0.0,0.0,498.87,38629.31,174.6,9660.01,5353.45,47183.14,72981.4,134184.32,118637.46],"2025":[153027.84,175822.4,162381.37,236030.62,183387.35,224964.6,313320.99,312535.46,186724.37,196571.54,177080.42,269419.49],"2026":[513255.61,196544.62,100181.09,120116.13,199476.12,270100.69,279798.42,96576.44,153287.11,187961.18,0.0,0.0]}},"68734":{"o":"Novas Cargas","r":{"2024":[0.0,450.4,0.0,0.0,0.0,17762.4,196.8,0.0,0.0,0.0,0.0,0.0],"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,13.68,75590.44,3796.59,15258.28],"2026":[28153.58,-6149.71,33805.12,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"68735":{"o":"Novas Cargas","r":{"2023":[7871.15,168771.77,302082.44,154763.9,0.0,9847.34,-276840.82,189770.39,0.0,0.0,79808.42,0.0],"2024":[-69926.1,0.0,0.0,7463.57,453384.78,457605.2,108198.25,-43305.01,288544.12,238850.74,1030361.54,-125116.62],"2025":[232703.12,96654.82,31175.2,160983.28,-64066.98,673319.39,1482940.81,1956097.88,2192250.23,1599854.37,73845.94,100188.12],"2026":[393053.9,562087.11,605504.36,32764.0,145912.11,120347.34,-66093.81,45899.6,-18421.61,-241025.94,0.0,0.0]}},"69032":{"o":"Novas Cargas","r":{"2023":[-36088.81,20838.64,252501.11,29943.0,29210.34,1245.26,15894.89,10409.4,34716.03,-9568.33,125627.67,72559.88],"2024":[140739.75,338603.19,144427.48,146702.09,2374469.95,-1515738.79,583677.04,5075069.76,7022754.75,1961384.17,5976135.64,6302854.8],"2025":[5341677.76,7574351.49,8694674.94,8596973.13,15475456.6,13642942.45,14003526.09,7426829.02,9174985.36,5277216.92,5005987.03,2671615.07],"2026":[7120661.88,4305719.46,4790217.56,3034681.64,2674952.15,5674168.63,6598348.24,5045527.22,3803270.82,4116254.89,0.0,0.0]}},"70578":{"o":"Sem objetivo","r":{"2025":[0.0,14585.9,0.0,31558.27,264663.39,136819.14,52538.54,77448.26,141909.58,30297.84,0.0,0.0]}},"70678":{"o":"Limites de Capacidade e Vida Útil","r":{"2025":[0.0,99528.87,15317.22,211511.53,469517.24,202372.61,57400.12,269875.66,117601.86,61178.9,107875.81,50084.52],"2026":[194335.16,457113.36,424824.4,756936.13,333011.61,582158.23,1878075.93,725557.24,580585.05,1049533.32,0.0,0.0]}},"70718":{"o":"Limites de Capacidade e Vida Útil","r":{"2025":[0.0,0.0,0.0,9872.27,136346.97,42922.78,-633.95,19815.22,0.0,0.0,0.0,0.0],"2026":[0.0,0.0,0.0,30268.26,19355.28,-437.82,0.0,0.0,0.0,0.0,0.0,0.0]}},"70818":{"o":"Sem objetivo","r":{"2025":[27308.71,211030.79,511449.84,136754.77,137119.11,111298.75,304394.69,109564.72,23277.58,151739.9,0.0,0.0]}},"70878":{"o":"Qualidade do Produto","r":{"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1042.42],"2026":[167270.26,1431616.91,52582.13,-1773.29,97823.0,35475.97,162609.29,298420.87,13944.68,100648.93,0.0,0.0]}},"71018":{"o":"Qualidade do Produto","r":{"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,24436.6],"2026":[515927.18,350608.57,507876.9,573855.33,86225.11,217075.87,474792.27,476375.01,284809.01,383862.9,0.0,0.0]}},"71139":{"o":"Qualidade do Produto","r":{"2024":[0.0,0.0,0.0,443.72,25111.28,6483.27,0.0,273203.19,43746.63,41873.95,0.0,0.0],"2025":[0.0,0.0,0.0,220871.4,499987.64,829477.66,307890.86,345120.69,295260.1,157191.64,0.0,3664.81],"2026":[702364.69,596294.9,888305.75,698024.05,414934.12,620916.17,260863.97,123623.76,176657.35,264437.21,0.0,0.0]}},"71579":{"o":"Qualidade do Produto","r":{"2026":[0.0,17111.78,0.0,0.0,0.0,360613.98,24159.18,-858.41,49837.84,19381.93,0.0,0.0]}},"72240":{"o":"Qualidade do Produto","r":{"2026":[0.0,17237.74,0.0,0.0,0.0,363345.53,15274.68,8055.2,91690.22,671.22,0.0,0.0]}},"72718":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,116046.51,276451.08,296330.15,125209.81,35787.57,0.0,0.0,0.0,0.0,0.0]}},"72719":{"o":"Qualidade do Produto","r":{"2025":[0.0,46631.11,1114105.42,296973.78,106698.02,131411.57,104258.94,382642.22,-5279.85,136192.03,0.0,440.1],"2026":[1399.98,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"72938":{"o":"Qualidade do Produto","r":{"2026":[0.0,2536.38,90.24,0.0,575.64,352.51,0.0,88237.75,0.0,0.0,0.0,0.0]}},"72978":{"o":"Sem objetivo","r":{"2025":[0.0,1245.22,0.0,35206.24,52493.41,153.51,0.0,0.0,0.0,0.0,0.0,0.0]}},"73520":{"o":"Sem objetivo","r":{"2025":[0.0,2526.05,22760.07,78067.92,177798.22,330023.17,203839.06,192662.14,196919.47,22959.81,0.0,0.0]}},"73521":{"o":"Limites de Capacidade e Vida Útil","r":{"2026":[0.0,4897.85,192197.5,791809.17,366975.7,202642.79,404756.97,-236483.72,59141.08,15682.02,0.0,0.0]}},"73578":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,42345.52,45678.24,382334.85,739992.05,-56335.96,232726.75,44474.19,25689.75,0.0,0.0]}},"73640":{"o":"Segurança","r":{"2026":[0.0,0.0,0.0,141975.88,108908.61,12339.3,4933.88,233005.15,-3191.75,30312.71,0.0,0.0]}},"73641":{"o":"Sem objetivo","r":{"2025":[0.0,2755.96,4559.19,3694.31,47663.03,23416.97,42067.47,7085.04,-2938.06,0.0,0.0,0.0]}},"74098":{"o":"Novas Cargas","r":{"2024":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,42718.2],"2025":[81075.16,167029.2,222551.44,4780.99,601888.14,1068853.7,659942.37,349231.35,532756.62,359529.88,282448.82,12861.31],"2026":[26076.9,151166.77,-77913.06,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"75842":{"o":"Infraestrutura de Apoio","r":{"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,13888.15,2444.27,0.0,0.0],"2026":[22535.33,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"75862":{"o":"Novas Cargas","r":{"2025":[0.0,0.0,0.0,9052.45,25912.49,0.0,699.4,1669.75,0.0,0.0,0.0,4153.8],"2026":[54296.01,82795.32,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"76118":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,42560.84,0.0,4559.45,0.0,44478.5],"2026":[73990.49,1177.55,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"77179":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,0.0,0.0,0.0,0.0,138321.57,0.0,0.0,0.0,0.0,0.0]}},"78718":{"o":"Compulsório","r":{"2026":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2333.55,0.0,0.0,0.0]}},"81078":{"o":"Limites de Capacidade e Vida Útil","r":{"2026":[0.0,0.0,0.0,0.0,0.0,0.0,126434.69,194790.5,19820.57,56507.81,0.0,0.0]}},"81118":{"o":"Novas Cargas","r":{"2025":[0.0,0.0,0.0,0.0,0.0,10554.7,120699.49,75371.61,369541.68,428491.98,77047.09,0.0],"2026":[0.0,0.0,0.0,0.0,3056.41,372849.99,362328.31,997345.96,-339037.16,242583.57,0.0,0.0]}},"81179":{"o":"Limites de Capacidade e Vida Útil","r":{"2026":[0.0,5733.31,9066.3,0.0,12151.64,427950.52,111443.26,41699.75,58648.25,116361.42,0.0,0.0]}},"81199":{"o":"Limites de Capacidade e Vida Útil","r":{"2026":[11747.8,101504.17,333348.48,13741.68,221368.76,74371.31,14933.65,19710.87,104755.86,2426.41,0.0,0.0]}},"81318":{"o":"Limites de Capacidade e Vida Útil","r":{"2026":[0.0,20144.56,157039.0,42084.47,36857.0,278141.06,9404.58,56217.77,63874.64,78278.45,0.0,0.0]}},"81319":{"o":"Limites de Capacidade e Vida Útil","r":{"2026":[0.0,1389.91,9069.58,0.0,7289.97,4254.31,34877.02,248692.78,272669.78,77282.81,0.0,0.0]}},"8360":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,2900.0,5800.0,2900.0,0.0,0.0,0.0,0.0,2000.0]}},"8364":{"o":"Novas Cargas","r":{"2023":[3334207.25,3557854.64,3520211.87,2644793.65,2793801.91,1094949.4,1470428.86,1119038.37,2127411.66,1379191.63,2295695.02,1629634.25],"2024":[2529634.12,3089697.37,1699939.73,1802454.91,2842948.05,3357333.76,3712759.39,1401278.43,3228430.75,2901321.43,2525280.01,2619536.37],"2025":[2520458.34,1767410.34,3180186.17,2212522.09,2496571.02,2298825.6,3122794.38,2290106.66,2254432.98,2132529.23,1733613.64,1361509.88],"2026":[2676961.35,2364288.31,2122764.35,1925160.63,1152851.29,2188102.94,1775016.37,2114695.42,1695675.8,1250485.52,0.0,0.0]}},"8369":{"o":"Novas Cargas","r":{"2025":[0.0,0.0,0.0,0.0,4671.86,4304.34,0.0,0.0,20789.47,0.0,38865.58,0.0],"2026":[0.0,0.0,0.0,5346.06,0.0,4049.73,1511.44,0.0,22569.15,9156.01,0.0,0.0]}},"8382":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,0.0,0.0,0.0,0.0,20499.3,0.0,0.0,0.0,0.0,0.0]}},"8385":{"o":"Limites de Capacidade e Vida Útil","r":{"2023":[141092.06,68471.3,66087.5,71883.64,296883.08,634562.52,763546.45,745968.93,888676.58,1141610.64,519291.41,523133.64],"2024":[619005.08,868507.93,339813.91,249422.96,208200.53,422417.69,576951.88,166990.9,844272.65,1187804.25,839933.94,970051.64],"2025":[1336137.87,663561.94,735927.59,847729.59,888431.87,594855.85,788681.07,626379.18,1236551.29,953615.28,963254.49,413902.5],"2026":[2300849.39,1181764.7,981466.28,550026.43,434900.93,244738.31,285415.29,348257.13,784185.23,649380.03,0.0,0.0]}},"8389":{"o":"Segurança","r":{"2023":[216498.87,331042.74,250234.13,311932.3,217644.2,372060.99,341272.92,635342.84,364318.32,672256.02,-80944.93,231010.82],"2024":[223155.59,474260.51,559371.1,366260.1,70348.76,467612.68,212756.54,481698.47,614292.27,397547.39,432174.61,246002.01],"2025":[608231.42,177536.57,374983.53,291722.18,453404.05,308572.58,333105.11,406000.8,341175.92,89828.1,160567.81,397070.55],"2026":[195002.64,267827.44,198439.89,286926.76,252415.87,248100.87,298400.6,670973.21,190219.68,165964.34,0.0,0.0]}},"8405":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,487.8,-7706.03,-632.72,19609.63,8083.74,189.76],"2024":[0.0,0.0,0.0,0.0,229.6,0.0,0.0,0.0,0.0,0.0,0.0,-2710.13]}},"8412":{"o":"Novas Cargas","r":{"2023":[373749.05,524715.47,573339.91,224663.92,99823.04,349986.45,867000.53,281653.63,964873.34,672138.32,1508698.55,282305.57],"2024":[1028708.04,1033658.44,739987.86,-49457.51,826058.68,225469.51,201479.29,129956.88,458825.12,159059.53,330363.87,129211.53],"2025":[289567.91,299297.2,171449.82,401015.75,469736.74,441990.51,248952.3,340458.11,241425.75,89061.73,169145.09,179050.9],"2026":[37007.86,115127.73,120571.97,141743.81,89875.6,128938.64,181185.55,188613.79,218859.37,701619.93,0.0,0.0]}},"8444":{"o":"Qualidade do Produto","r":{"2023":[-68691.12,372369.65,2326466.11,1222715.25,1264509.47,-457249.12,147071.24,705493.78,1085655.22,288658.1,637667.86,398061.31],"2024":[358851.19,742304.68,766955.74,542842.09,319846.33,725830.69,629683.68,782419.07,681019.29,883270.71,728158.4,527436.95],"2025":[1533269.47,1114487.49,1535779.03,1530341.05,1271293.69,427487.31,644866.01,863279.33,402829.39,412274.15,236524.43,-376411.09],"2026":[702560.07,558574.21,302463.52,602739.07,510614.84,402254.25,473071.12,617486.42,465078.22,278812.41,0.0,0.0]}},"8481":{"o":"Compulsório","r":{"2023":[268443.79,-73989.32,35803.29,442385.64,6849.82,40457.02,16089.1,-100797.85,563350.5,379611.9,395418.17,41279.13],"2024":[12426.68,168427.68,87208.71,-564066.36,463632.15,60699.89,134954.07,-166413.94,567908.15,176373.92,505340.55,57382.14],"2025":[107936.92,59.85,189857.03,19289.32,90567.6,49764.44,1210003.91,-838450.14,34842.22,-63261.43,85907.84,-42972.56],"2026":[16069.78,357047.94,58815.94,6211.75,60670.06,0.0,61098.29,386739.38,376138.99,50303.77,0.0,0.0]}},"8495":{"o":"Compulsório","r":{"2023":[178963.02,183610.05,3197.25,521226.12,20886.95,24344.38,79326.2,331820.08,87170.4,422263.27,321551.83,329959.45],"2024":[3153.77,7700.58,1406.54,-194215.25,57597.13,11085.92,66851.12,0.0,150754.51,128503.84,1689064.36,277238.71],"2025":[371859.6,803363.44,719339.29,681612.21,199698.73,79145.25,138032.97,46912.16,202413.2,124945.82,114969.24,47828.22],"2026":[9788.33,21329.92,63283.48,35849.02,8192.12,261566.24,376971.2,175551.11,172233.05,1352.74,0.0,0.0]}},"87767":{"o":"Qualidade do Serviço","r":{"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,14.41],"2026":[1407.16,33466.78,5677.36,14389.22,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}},"88026":{"o":"Qualidade do Serviço","r":{"2026":[0.0,106446.02,10971.26,48188.29,63062.59,128304.17,128953.64,96763.37,27296.34,16.6,0.0,0.0]}},"8805":{"o":"Compulsório","r":{"2023":[1431729.06,1090266.87,1162511.6,733061.52,1092142.93,942621.56,798666.53,865622.57,933786.17,1518742.44,1895190.22,1703571.61],"2024":[1064847.04,1248580.62,994009.98,854107.68,966331.51,685897.67,778433.93,528680.05,756505.05,1391024.12,1384700.97,1173981.62],"2025":[945330.25,972521.84,1165884.42,653643.29,707791.55,732505.5,612723.51,622327.26,880910.2,1645391.9,1550625.59,1585814.84],"2026":[2133814.01,1221394.32,1137949.83,1000252.04,909630.73,877410.32,1056690.22,811962.13,906476.12,1065211.62,0.0,0.0]}},"8812":{"o":"Compulsório","r":{"2023":[4322197.3,3311214.76,4040140.98,2069030.98,2201612.42,907120.13,598470.93,521165.12,1270412.89,1633227.14,3863255.83,3549586.5],"2024":[3273550.72,2645303.21,2276531.89,2441983.96,1473422.89,940687.0,700717.18,865698.72,837119.99,1094350.66,2886239.45,4969245.16],"2025":[2043874.76,3047428.29,3115353.4,2492422.24,1988157.87,479121.57,714078.47,451804.38,1056158.27,1681181.11,1807868.25,3362598.55],"2026":[3023080.74,3011029.26,3547597.45,3166518.88,1268274.95,1043858.59,1303837.43,989891.47,1349287.19,1421126.23,0.0,0.0]}},"8889":{"o":"Compulsório","r":{"2023":[147889.29,93391.91,108194.9,86976.65,100915.7,69963.45,475441.68,-328026.49,101066.76,74328.64,90962.53,112934.39],"2024":[203396.07,110694.57,124619.11,146840.16,97673.61,75718.94,95398.27,513579.13,82620.67,-338842.47,183003.37,123096.61],"2025":[193162.69,139810.54,175611.8,499831.92,-101954.55,227176.2,253972.73,92678.01,102131.46,191152.92,92935.63,85533.55],"2026":[167803.41,1205819.88,-879814.36,72814.25,70605.76,245462.2,64521.35,26153.58,55395.01,62783.51,0.0,0.0]}},"8923":{"o":"Novas Cargas","r":{"2023":[1293.5,375916.61,300949.23,989955.14,1158096.6,1233451.06,318579.52,632891.57,711403.88,215127.64,3366.67,3085225.87],"2024":[2354195.92,220196.48,-71403.92,456032.46,2089236.43,1752376.23,2116814.07,1030729.15,862830.51,2385829.34,1146608.42,2115252.59],"2025":[1923268.01,1222774.73,1800210.36,0.0,0.0,1905725.61,894356.83,1494314.68,1750133.66,2420892.4,2302021.21,1257177.35],"2026":[2879428.33,5476747.14,166977.14,887699.3,545020.56,5328696.71,852929.4,216084.1,1923592.4,806635.04,0.0,0.0]}},"8932":{"o":"Novas Cargas","r":{"2023":[202923.44,874099.69,1350142.27,768440.7,2811776.62,1636683.66,2176353.72,2552815.95,1194416.53,177601.83,28542.13,4861770.26],"2024":[1745310.21,31021.46,54425.5,1247003.66,3425091.12,258926.85,2989033.19,2182342.41,940626.93,620292.67,908286.37,1255084.8],"2025":[534973.68,543248.57,1449066.5,0.0,6766.48,1165633.12,1606895.86,1217022.79,7706.49,885241.15,423943.76,905247.55],"2026":[1413104.55,2407385.7,1955908.93,1102041.24,2505094.52,3029655.21,1707675.95,2094936.94,1981284.32,306185.07,0.0,0.0]}},"90811":{"o":"Sem objetivo","r":{"2026":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,83299.26,0.0,0.0]}},"9213":{"o":"Sem objetivo","r":{"2023":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4254.71,3471.0,0.0]}},"9430":{"o":"Sem objetivo","r":{"2024":[0.0,0.0,-7577.75,204.52,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-41125.45]}},"Sem SIGCO":{"o":"Sem objetivo","r":{"2025":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,43477.2,10042.11,1840.4],"2026":[2317.41,1910.34,3978.11,0.0,0.0,678.39,1790.54,3704.39,1719.2,77225.55,0.0,0.0]}}},"unid":{"15323":{"lig":51.0,"rs":143538.665229},"8412":{"lig":76.0,"rs":43855.728926},"19989":{"lig":82.0,"rs":17873.004805},"19988":{"lig":93.0,"rs":16661.18329},"68734/68735/74098":{"lig":2.0,"rs":374379.2286},"11341/20496/20495":{"lig":761.0,"rs":66223.183222},"8364/8405":{"lig":725.0,"rs":40830.540813},"8369":{"lig":2449.0,"rs":692.268481},"15018":{"lig":18015.0,"rs":480.931934},"68733/68312":{"lig":272.0,"rs":46398.7121},"69032/69033":{"lig":1591.0,"rs":58279.937446},"40223/40224":{"lig":0.0,"rs":0.0},"81118":{"lig":0.0,"rs":0.0},"8812/25962":{"lig":2256.0,"rs":12111.915078}},"qtd":{"ano":2026,"fonte":"Qtd_2026.xlsx","ind":[{"id":"15323","n":"Média Tensão Rural com Extensão de Rede","cap":"Novas Cargas","prev":[4.0,4.0,4.0,4.0,3.0,4.0,4.0,4.0,4.0,5.0,4.0,3.0],"real":[2.0,3.0,4.0,2.0,6.0,4.0,3.0,4.0,1.0,1.0,1.0,1.0]},{"id":"8412","n":"Média Tensão Urbano com Extensão de Rede","cap":"Novas Cargas","prev":[9.0,10.0,10.0,6.0,5.0,5.0,8.0,4.0,11.0,4.0,11.0,4.0],"real":[2.0,1.0,2.0,5.0,4.0,7.0,3.0,9.0,7.0,5.0,8.0,6.0]},{"id":"68734/68735/74098","n":"Média Tensão com Extensão de Rede - Mini GD","cap":"Novas Cargas","prev":[6.0,0.0,3.0,0.0,2.0,0.0,1.0,1.0,1.0,0.0,1.0,0.0],"real":[3.0,0.0,3.0,0.0,1.0,0.0,0.0,1.0,1.0,1.0,1.0,1.0]},{"id":"11341/20496/20495","n":"Baixa Tensão Rural com Extensão de Rede","cap":"Novas Cargas","prev":[71.0,62.0,61.0,48.0,34.0,43.0,49.0,31.0,36.0,0.0,0.0,0.0],"real":[46.0,46.0,74.0,67.0,65.0,91.0,84.0,73.0,68.0,66.0,51.0,44.0]},{"id":"8364/8405","n":"Baixa Tensão Urbano com Extensão de Rede","cap":"Novas Cargas","prev":[58.0,65.0,57.0,43.0,51.0,48.0,48.0,47.0,62.0,47.0,60.0,41.0],"real":[70.0,56.0,40.0,55.0,52.0,50.0,63.0,53.0,64.0,44.0,48.0,40.0]},{"id":"68733/68312","n":"Baixa Tensão com Extensão de Rede - Micro GD","cap":"Novas Cargas","prev":[29.0,24.0,25.0,25.0,25.0,22.0,21.0,21.0,46.0,11.0,11.0,10.0],"real":[18.0,20.0,7.0,17.0,11.0,17.0,11.0,12.0,18.0,14.0,12.0,17.0]},{"id":"69032/69033","n":"Programa Luz para Todos - LPT","cap":"Novas Cargas","prev":[136.0,136.0,145.0,145.0,153.0,153.0,153.0,147.0,153.0,142.0,134.0,134.0],"real":[76.0,71.0,65.0,52.0,75.0,51.0,130.0,206.0,16.0,8.0,21.0,11.0]},{"id":"81118","n":"Projeto Minha Casa Minha Vida - PMCMV","cap":"Novas Cargas","prev":[170.0,170.0,170.0,170.0,170.0,170.0,170.0,170.0,171.0,171.0,171.0,171.0],"real":[0.0,0.0,0.0,0.0,0.0,0.0,96.0,112.0,439.0,315.0,263.0,602.0]},{"id":"8812/25962","n":"Substituição Transformadores Queimados/Avariados","cap":"Compulsório","prev":[415.0,230.0,255.0,210.0,95.0,51.0,53.0,60.0,90.0,163.0,315.0,300.0],"real":[409.0,303.0,266.0,175.0,71.0,68.0,72.0,78.0,121.0,156.0,277.0,260.0]},{"id":"8923/8932/48428","n":"Incorporação de Redes","cap":"Novas Cargas","prev":[32.0,10.0,10.0,10.0,16.0,12.0,16.0,13.0,9.0,9.0,5.0,19.0],"real":[16.0,42.0,17.0,18.0,25.0,23.0,26.0,18.0,15.0,6.0,21.0,21.0]},{"id":"54553","n":"Média Tensão Urbano com Extensão de Rede - Outliers","cap":"Novas Cargas","prev":[1.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0,0.0,1.0,0.0,1.0],"real":[2.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,1.0,1.0,1.0]},{"id":"54554","n":"Média Tensão Rural com Extensão de Rede - Outliers","cap":"Novas Cargas","prev":[1.0,2.0,2.0,1.0,1.0,1.0,2.0,1.0,2.0,1.0,1.0,1.0],"real":[0.0,3.0,2.0,1.0,1.0,1.0,2.0,1.0,3.0,3.0,2.0,1.0]}]}};
+
+const MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+const MESES_L = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const ANOS_R = [2024, 2025, 2026];
+const BASES = { b2426: [2024, 2025, 2026], b2326: [2023, 2024, 2025, 2026] };
+
+/* ===================== Formatação ===================== */
+const fDec = (v, d) => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+const fBRL0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const fBRL2 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const brl = v => fBRL0.format(Math.round(v || 0));
+const mil = v => fDec((v || 0) / 1000, 0);
+const pct = (v, d = 1) => Number.isFinite(v) ? fDec(v * 100, d) + '%' : '—';
+function curto(v) {
+  const a = Math.abs(v || 0), s = v < 0 ? '−' : '';
+  if (a >= 1e9) return s + 'R$ ' + fDec(a / 1e9, 2) + ' bi';
+  if (a >= 1e6) return s + 'R$ ' + fDec(a / 1e6, a >= 1e8 ? 0 : 1) + ' mi';
+  if (a >= 1e3) return s + 'R$ ' + fDec(a / 1e3, 0) + ' mil';
+  return s + 'R$ ' + fDec(a, 0);
+}
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = s => document.querySelector(s);
+const soma = a => a.reduce((t, v) => t + (v || 0), 0);
+function numero(v) {
+  let s = String(v ?? '').trim().replace(/R\$|\s| /g, '');
+  if (!s) return NaN;
+  if (s.includes(',') && s.includes('.')) s = s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  else if (s.includes(',')) s = s.replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+  return /^-?\d*\.?\d+$/.test(s) ? parseFloat(s) : NaN;
+}
+
+/* ===================== Cálculo ===================== */
+/* Distribui um valor em proporção a "partes", fechando no centavo (maior resto). */
+function rateia(valor, partes) {
+  const cent = Math.round(valor * 100), tot = soma(partes);
+  if (!(tot > 0) || cent <= 0) return partes.map(() => 0);
+  const brutos = partes.map(p => p / tot * cent), base = brutos.map(Math.floor);
+  let resto = cent - soma(base);
+  brutos.map((b, i) => [b - base[i], i]).sort((x, y) => y[0] - x[0] || x[1] - y[1]).forEach(([, i]) => { if (resto > 0) { base[i]++; resto--; } });
+  return base.map(c => c / 100);
+}
+/* Realizado mensal (12) de um conjunto de números de SIGCO num ano; meses sem dado na base = null. */
+function realAno(nums, ano) {
+  const ult = D.ultimoMes[ano] || 0, out = Array(12).fill(0);
+  nums.forEach(s => { const r = D.real[s] && D.real[s].r[ano]; if (r) for (let m = 0; m < 12; m++) out[m] += r[m] || 0; });
+  return out.map((v, m) => m < ult ? v : null);
+}
+/* Média por mês do realizado dos anos da base (só anos que têm aquele mês). */
+function mediaMes(nums, anos) {
+  const R = anos.map(a => realAno(nums, a));
+  return MESES.map((_, m) => {
+    const vs = R.filter((_, k) => (D.ultimoMes[anos[k]] || 0) > m).map(r => r[m] || 0);
+    return vs.length ? soma(vs) / vs.length : 0;
+  });
+}
+const PLANA = Array(12).fill(1 / 12);
+let cacheCurva = new Map();
+function curva(g) {
+  const k = st.base + '|' + g.id;
+  if (cacheCurva.has(k)) return cacheCurva.get(k);
+  let c;
+  if (st.base === 'planilha' && g.c && soma(g.c) > 0) { const pos = g.c.map(v => Math.max(0, v)), t = soma(pos); c = pos.map(v => v / t); }
+  else {
+    const med = mediaMes(g.m, BASES[st.base === 'planilha' ? 'b2426' : st.base]).map(v => Math.max(0, v));
+    const t = soma(med);
+    c = t > 0 ? med.map(v => v / t) : PLANA.slice();
+  }
+  cacheCurva.set(k, c);
+  return c;
+}
+/* Valor de 2027 de um SIGCO: meses digitados (st.mensal) > total alterado (st.ajuste) > orçado da planilha. */
+const r2 = v => Math.round(v * 100) / 100;
+const valor27 = g => st.mensal[g.id] ? r2(soma(st.mensal[g.id])) : (st.ajuste[g.id] != null ? st.ajuste[g.id] : g.orc);
+function distrib(g) { return st.mensal[g.id] ? st.mensal[g.id].slice() : rateia(valor27(g), curva(g)); }
+const alterado = g => !!st.mensal[g.id] || (st.ajuste[g.id] != null && Math.abs(st.ajuste[g.id] - g.orc) >= 0.5);
+const nAlterados = () => new Set([...Object.keys(st.mensal), ...Object.keys(st.ajuste)]).size;
+
+/* Salvar no navegador (localStorage); vale para este computador e navegador. */
+const CHAVE = 'argos-orcamento-sigco';
+let salvoEm = null, salvoErro = false;
+function salva() {
+  salvoEm = new Date();
+  try { localStorage.setItem(CHAVE, JSON.stringify({ v: 1, alvo: D.alvo, ajuste: st.ajuste, mensal: st.mensal, em: salvoEm.toISOString() })); salvoErro = false; }
+  catch (e) { salvoErro = true; }
+}
+function recupera() {
+  try {
+    const o = JSON.parse(localStorage.getItem(CHAVE) || 'null');
+    if (!o || o.v !== 1 || o.alvo !== D.alvo) return;
+    const ok = k => { const g = IDX.porId.get(k); return g && g.tem; };
+    Object.entries(o.ajuste || {}).forEach(([k, v]) => { if (ok(k) && Number.isFinite(v) && v >= 0) st.ajuste[k] = v; });
+    Object.entries(o.mensal || {}).forEach(([k, v]) => { if (ok(k) && Array.isArray(v) && v.length === 12 && v.every(x => Number.isFinite(x) && x >= 0)) st.mensal[k] = v; });
+    salvoEm = o.em ? new Date(o.em) : null;
+  } catch (e) { /* sem armazenamento: começa sem alterações */ }
+}
+
+/* ===================== Dados e estado ===================== */
+let D = null, IDX = null;
+const st = { sel: null, obj: 'Todos', base: 'b2426', vis: 'mensal', soOrc: false, ajuste: {}, mensal: {}, ind: null, visao: 'hist', ord: { col: 'orc', dir: -1 }, anos: { 2024: true, 2025: true, 2026: true, 2027: true }, logSel: null };
+
+function prepara(d) {
+  const grupos = d.grupos.map(g => ({ ...g, tem: true }));
+  const naChave = new Set(grupos.flatMap(g => g.m));
+  const tot = s => ANOS_R.reduce((t, a) => t + soma(d.real[s].r[a] || []), 0);
+  const soltos = Object.keys(d.real).filter(s => !naChave.has(s)).sort((a, b) => tot(b) - tot(a))
+    .map(s => ({ id: s, n: '', o: d.real[s].o || 'Sem objetivo', orc: 0, itens: [], m: [s], c: null, tem: false }));
+  const todos = [...grupos, ...soltos];
+  return { grupos, soltos, todos, porId: new Map(todos.map(g => [g.id, g])), objetivos: [...new Set(todos.map(g => g.o))].sort((a, b) => a.localeCompare(b, 'pt-BR')) };
+}
+function nomeG(g) { return g.tem ? g.n + (g.itens.length > 1 ? ` (+${g.itens.length - 1})` : '') : 'sem orçado 2027'; }
+function escopo() {
+  const gs = st.sel ? [IDX.porId.get(st.sel)] : IDX.todos.filter(g => st.obj === 'Todos' || g.o === st.obj);
+  const comOrc = gs.filter(g => g.tem);
+  const base = st.soOrc && !st.sel ? comOrc : gs;
+  return { gs, comOrc, nums: [...new Set(base.flatMap(g => g.m))] };
+}
+function series(E) {
+  const s = {};
+  ANOS_R.forEach(a => { s[a] = realAno(E.nums, a); });
+  const o = Array(12).fill(0);
+  E.comOrc.forEach(g => distrib(g).forEach((v, m) => { o[m] += v; }));
+  s[2027] = o.map(v => Math.round(v * 100) / 100);
+  return s;
+}
+const acumula = arr => { let t = 0; return arr.map(v => v == null ? null : (t += v)); };
+
+/* ===================== Render ===================== */
+function tudo() {
+  if (st.sel && !IDX.porId.has(st.sel)) st.sel = null;
+  const E = escopo(), S = series(E);
+  controles(E); resumo(E, S); grafico(E, S); insightsRender(); visoes(); tabela(); tabelaOV(); quantidades(); logica();
+}
+function controles(E) {
+  const v = soma(E.comOrc.map(valor27)), o = soma(E.comOrc.map(g => g.orc));
+  if (document.activeElement !== $('#valor')) $('#valor').value = fDec(v, 2);
+  $('#valor').disabled = !E.comOrc.length;
+  $('#reset').hidden = !nAlterados();
+  $('#valor-nota').textContent = !E.comOrc.length ? 'sem orçado 2027 neste recorte' : Math.abs(v - o) >= 0.5 ? `orçado original ${brl(o)}` : 'igual ao orçado';
+  ['#sigco', '#proj1', '#proj2'].forEach(q => { $(q).value = st.sel || ''; });
+  $('#obj').value = st.obj; $('#obj').disabled = !!st.sel;
+}
+function vari(v, ant, txt) {
+  if (!(ant > 0)) return '<em class="neutro">&nbsp;</em>';
+  const d = v / ant - 1, c = Math.abs(d) < 0.0005 ? 'neutro' : d > 0 ? 'sobe' : 'desce';
+  return `<em class="${c}">${d > 0 ? '+' : d < 0 ? '−' : ''}${pct(Math.abs(d))} ${txt}</em>`;
+}
+function resumo(E, S) {
+  const u26 = D.ultimoMes[2026] || 12, t = a => soma(S[a]), mu = MESES[u26 - 1].toLowerCase();
+  const t25ate = soma(S[2025].slice(0, u26));
+  const pico = S[2027].reduce((b, v, m) => v > S[2027][b] ? m : b, 0);
+  const cartao = (a, rot, v, extra) => `<div class="r"><small><i style="background:var(--a${a})"></i>${rot}</small><b>${curto(v)}</b>${extra}</div>`;
+  $('#resumo').innerHTML = [
+    cartao(2024, 'Realizado 2024', t(2024), '<em class="neutro">jan–dez</em>'),
+    cartao(2025, 'Realizado 2025', t(2025), vari(t(2025), t(2024), 'vs 2024')),
+    cartao(2026, u26 < 12 ? `Realizado 2026 · jan–${mu}` : 'Realizado 2026', t(2026), u26 < 12 ? vari(t(2026), t25ate, `vs jan–${mu} 2025`) : vari(t(2026), t(2025), 'vs 2025')),
+    cartao(2027, 'Orçado 2027', t(2027), vari(t(2027), t(2025), 'vs realizado 2025')),
+    `<div class="r"><small>Pico de 2027</small><b>${t(2027) > 0 ? MESES[pico] : '—'}</b><em class="neutro">${t(2027) > 0 ? curto(S[2027][pico]) + ' · ' + pct(S[2027][pico] / t(2027)) + ' do ano' : 'sem orçado'}</em></div>`,
+  ].join('');
+}
+
+/* ----- gráfico ----- */
+function escala(max) {
+  if (!(max > 0)) return { max: 1, passo: 0.25 };
+  const bruto = max / 4, pot = Math.pow(10, Math.floor(Math.log10(bruto)));
+  const passo = [1, 2, 2.5, 5, 10].map(m => m * pot).find(x => x >= bruto);
+  return { max: Math.ceil(max / passo) * passo, passo };
+}
+function grafico(E, S) {
+  const g = st.sel ? IDX.porId.get(st.sel) : null, ac = st.vis === 'acum';
+  $('#g-tit').textContent = (g ? `SIGCO ${g.id}` : st.obj === 'Todos' ? 'Todos os SIGCOs' : `Objetivo: ${st.obj}`) + ` · ${ac ? 'acumulado' : 'mensal'} · 2024–2027`;
+  $('#g-total').hidden = !g;
+  const t27 = soma(S[2027]);
+  $('#g-tot').innerHTML = `${brl(t27)}<small>orçado 2027 redistribuído${g ? ' · ' + esc(nomeG(g)) : ''}</small>`;
+  const anos = [...ANOS_R, 2027];
+  const V = {}; anos.forEach(a => { V[a] = ac ? acumula(S[a]) : S[a]; });
+  const el = $('#g'), W = Math.max(300, Math.round(el.clientWidth || 600)), estreito = W < 640;
+  const H = estreito ? 280 : 360, m = { t: 18, r: estreito ? 10 : 24, b: 34, l: estreito ? 58 : 80 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b, pad = estreito ? 10 : 22;
+  const x = i => m.l + pad + (iw - 2 * pad) * i / 11;
+  const vals = anos.filter(a => st.anos[a]).flatMap(a => V[a].filter(v => v != null));
+  const E2 = escala(Math.max(0, ...vals) * 1.08), mn = Math.min(0, ...vals);
+  const y = v => m.t + ih - ((v - mn) / (E2.max - mn)) * ih;
+  let h = `<svg class="lin" viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Linhas mensais de 2024 a 2027">`;
+  for (let v = 0; v <= E2.max + 1e-6; v += E2.passo) h += `<line class="ax" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${curto(v)}</text>`;
+  if (mn < 0) h += `<line class="ax" x1="${m.l}" x2="${W - m.r}" y1="${y(mn)}" y2="${y(mn)}"/><text x="${m.l - 8}" y="${y(mn) + 4}" text-anchor="end">${curto(mn)}</text>`;
+  MESES.forEach((n, i) => { h += `<text class="mes" x="${x(i)}" y="${H - m.b + 22}" text-anchor="middle">${estreito ? n[0] : n}</text>`; });
+  anos.forEach(a => {
+    if (!st.anos[a]) return;
+    const pts = V[a].map((v, i) => v == null ? null : [x(i), y(v)]).filter(Boolean);
+    if (!pts.length) return;
+    h += `<path class="ln y${a}" style="stroke:var(--a${a})" d="M${pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join('L')}"/>`;
+    if (a === 2027) pts.forEach(p => { h += `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" style="fill:var(--bg);stroke:var(--a2027);stroke-width:2"/>`; });
+    else { const u = pts[pts.length - 1]; h += `<circle cx="${u[0]}" cy="${u[1]}" r="3" style="fill:var(--a${a})"/>`; }
+  });
+  // rótulo do ano no fim de cada linha, sem sobreposição
+  if (!estreito) {
+    const fins = anos.filter(a => st.anos[a]).map(a => { const idx = V[a].map((v, j) => v == null ? -1 : j).filter(j => j >= 0); const i = idx[idx.length - 1]; return i == null ? null : { a, i, y: y(V[a][i]) - 8 }; }).filter(Boolean);
+    fins.sort((p, q) => p.y - q.y);
+    for (let k = 1; k < fins.length; k++) if (Math.abs(fins[k].i - fins[k - 1].i) <= 1 && fins[k].y - fins[k - 1].y < 14) fins[k].y = fins[k - 1].y + 14;
+    fins.forEach(f => { h += `<text class="lab" x="${x(f.i) + (f.i === 11 ? -6 : 8)}" y="${f.y}" text-anchor="${f.i === 11 ? 'end' : 'start'}" style="fill:var(--a${f.a})">${f.a}</text>`; });
+  }
+  h += `<line class="guia" id="g-guia" x1="0" x2="0" y1="${m.t}" y2="${m.t + ih}" visibility="hidden"/>`;
+  MESES.forEach((_, i) => {
+    const x0 = i === 0 ? m.l : (x(i - 1) + x(i)) / 2, x1 = i === 11 ? W - m.r : (x(i) + x(i + 1)) / 2;
+    h += `<rect class="hit" data-i="${i}" x="${x0}" y="${m.t}" width="${x1 - x0}" height="${ih + m.b}"/>`;
+  });
+  el.innerHTML = h + '</svg>';
+  el.querySelectorAll('.hit').forEach(r => {
+    const i = +r.dataset.i;
+    r.addEventListener('pointermove', ev => {
+      const gd = $('#g-guia'); gd.setAttribute('x1', x(i)); gd.setAttribute('x2', x(i)); gd.setAttribute('visibility', 'visible');
+      let t = `<div class="t">${MESES_L[i][0].toUpperCase() + MESES_L[i].slice(1)}${ac ? ' · acumulado' : ''}</div>`;
+      anos.forEach(a => { if (st.anos[a]) t += `<div class="l"><span><i style="background:var(--a${a})"></i>${a}${a === 2027 ? ' orçado' : ''}</span><b>${V[a][i] == null ? 'sem dado' : brl(V[a][i])}</b></div>`; });
+      if (!ac && t27 > 0) t += `<div class="l"><span>% de 2027 no mês</span><b>${pct(S[2027][i] / t27)}</b></div>`;
+      dica(ev, t);
+    });
+    r.addEventListener('pointerleave', () => { $('#g-guia').setAttribute('visibility', 'hidden'); dica(null); });
+  });
+  $('#g-leg').innerHTML = anos.map(a => `<li><button type="button" data-ano="${a}" aria-pressed="${st.anos[a]}"><svg width="22" height="8" aria-hidden="true"><line x1="1" x2="21" y1="4" y2="4" style="stroke:var(--a${a});stroke-width:3${a === 2027 ? ';stroke-dasharray:5 3' : ''}"/></svg>${a}${a === 2027 ? ' orçado' : ''} <span>${curto(soma(S[a]))}</span></button></li>`).join('');
+  const u26 = D.ultimoMes[2026] || 12, notas = [];
+  if (u26 < 12) notas.push(`2026 com realizado até ${MESES_L[u26 - 1]}.`);
+  notas.push(`2027 = orçado de cada SIGCO espalhado pela curva ${st.base === 'planilha' ? 'da aba Curva da planilha' : 'do realizado ' + BASES[st.base][0] + '–2026'}.`);
+  if (!st.sel && !st.soOrc) notas.push(`2024–2026 inclui SIGCOs com realizado e sem orçado 2027 (marque "Só SIGCOs com orçado 2027" para tirar).`);
+  if (nAlterados()) notas.push(`2027 com valores alterados na tela em ${nAlterados()} projeto(s) (salvos neste navegador).`);
+  notas.push('Clique nos anos da legenda para esconder ou mostrar a linha.');
+  $('#g-nota').textContent = notas.join(' ');
+}
+function dica(ev, html) {
+  const d = $('#dica');
+  if (!ev) { d.style.display = 'none'; return; }
+  d.innerHTML = html; d.style.display = 'block';
+  const r = d.getBoundingClientRect();
+  let l = ev.clientX + 14, t = ev.clientY + 14;
+  if (l + r.width > innerWidth - 8) l = ev.clientX - r.width - 14;
+  if (t + r.height > innerHeight - 8) t = ev.clientY - r.height - 14;
+  d.style.left = Math.max(8, l) + 'px'; d.style.top = Math.max(8, t) + 'px';
+}
+
+/* ----- tabela ----- */
+const COLS = [
+  { k: 'id', t: 'SIGCO', l: true, v: x => x.g.id },
+  { k: 'n', t: 'Projeto', l: true, v: x => x.g.n },
+  { k: 'r2024', t: '2024', v: x => x.r[2024], oc: true },
+  { k: 'r2025', t: '2025', v: x => x.r[2025], oc: true },
+  { k: 'r2026', t: '2026', v: x => x.r[2026] },
+  { k: 'orc', t: 'Orçado 2027', v: x => x.v },
+  ...MESES.map((n, i) => ({ k: 'm' + i, t: n, v: x => x.d[i] })),
+];
+function linhasTab() {
+  return IDX.grupos.filter(g => st.sel ? g.id === st.sel : (st.obj === 'Todos' || g.o === st.obj))
+    .map(g => ({ g, v: valor27(g), d: distrib(g), r: Object.fromEntries(ANOS_R.map(a => [a, soma(realAno(g.m, a))])) }));
+}
+function tabela() {
+  const c = COLS.find(c => c.k === st.ord.col) || COLS.find(c => c.k === 'orc');
+  const ls = linhasTab().sort((a, b) => {
+    const va = c.v(a), vb = c.v(b);
+    const r = typeof va === 'string' ? va.localeCompare(vb, 'pt-BR', { numeric: true }) : va - vb;
+    return r * st.ord.dir || a.g.id.localeCompare(b.g.id, 'pt-BR', { numeric: true });
+  });
+  const u26 = D.ultimoMes[2026] || 12;
+  let h = `<thead><tr><th colspan="2"></th><th class="grp oc" colspan="2">Realizado</th><th class="grp">${u26 < 12 ? `até ${MESES[u26 - 1].toLowerCase()}` : ''}</th><th></th><th class="grp" colspan="12">2027 por mês</th></tr><tr>`;
+  COLS.forEach(col => {
+    const s = st.ord.col === col.k ? (st.ord.dir < 0 ? 'descending' : 'ascending') : null;
+    h += `<th class="${col.l ? 'l' : ''}${col.oc ? ' oc' : ''}"${s ? ` aria-sort="${s}"` : ''}><button type="button" data-ord="${col.k}">${col.t}</button></th>`;
+  });
+  h += '</tr></thead><tbody>';
+  if (!ls.length) h += `<tr><td colspan="${COLS.length}" class="l vazio">${st.sel ? `O SIGCO ${esc(st.sel)} não tem orçado 2027.` : 'Nenhum SIGCO com orçado 2027 neste filtro.'}</td></tr>`;
+  ls.forEach(x => {
+    const pico = x.d.reduce((b, v, i) => v > x.d[b] ? i : b, 0), plano = x.v > 0 && Math.max(...x.d) - Math.min(...x.d) > 1, aj = alterado(x.g);
+    h += `<tr data-s="${esc(x.g.id)}" class="${x.g.id === st.sel ? 'sel' : ''}" tabindex="0" aria-selected="${x.g.id === st.sel}">
+      <td class="l m">${esc(x.g.id).replace(/\//g, '/<wbr>')}</td><td class="l d">${esc(nomeG(x.g))}<small class="ob">${esc(x.g.o)}</small></td>
+      <td class="oc">${mil(x.r[2024])}</td><td class="oc">${mil(x.r[2025])}</td><td>${mil(x.r[2026])}</td>
+      <td class="orc">${mil(x.v)}${aj ? ' <span class="tag">alterado</span>' : ''}</td>
+      ${x.d.map((v, i) => `<td class="mm${i === pico && plano ? ' pico' : ''}">${mil(v)}</td>`).join('')}</tr>`;
+  });
+  const tot = k => soma(ls.map(k));
+  h += `</tbody><tfoot><tr><td class="l" colspan="2">Total · ${ls.length} SIGCOs</td>
+    <td class="oc">${mil(tot(x => x.r[2024]))}</td><td class="oc">${mil(tot(x => x.r[2025]))}</td><td>${mil(tot(x => x.r[2026]))}</td>
+    <td>${mil(tot(x => x.v))}</td>${MESES.map((_, i) => `<td class="mm">${mil(tot(x => x.d[i]))}</td>`).join('')}</tr></tfoot>`;
+  $('#tab').innerHTML = h;
+  $('#tab-nota').textContent = `Valores em R$ mil. Total exato do orçado no recorte: ${fBRL2.format(tot(x => x.v))}. Realizado do SIGCO = soma dos números da chave (ex.: 8364/8405). O mês sublinhado é o de maior valor em 2027. Clique no cabeçalho para ordenar.`;
+}
+
+/* ----- orçado × realizado por projeto (variação % = orçado 2027 ÷ média realizada − 1) ----- */
+const variacao = (o, b) => (b > 0 ? o / b - 1 : null);
+const fVar = v => v == null ? '<span class="neutro">—</span>' : `<span class="${Math.abs(v) < 0.0005 ? 'neutro' : v > 0 ? 'sobe' : 'desce'}">${v > 0 ? '+' : v < 0 ? '−' : ''}${pct(Math.abs(v))}</span>`;
+function ovDados() {
+  const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base];
+  const g = st.sel ? IDX.porId.get(st.sel) : null;
+  if (g) {
+    const R = Object.fromEntries(ANOS_R.map(a => [a, realAno(g.m, a)]));
+    const med = mediaMes(g.m, anosB), d = g.tem ? distrib(g) : Array(12).fill(0), auto = g.tem ? rateia(g.orc, curva(g)) : Array(12).fill(0);
+    const linhas = MESES.map((n, m) => ({ m, r: ANOS_R.map(a => R[a][m]), med: med[m], orc: d[m], auto: auto[m], ed: !!st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005, vr: variacao(d[m], med[m]) }));
+    const tot = { r: ANOS_R.map(a => soma(R[a])), med: soma(med), orc: soma(d) };
+    tot.vr = variacao(tot.orc, tot.med);
+    return { modo: 'mes', g, anosB, linhas, tot };
+  }
+  const linhas = IDX.grupos.filter(x => st.obj === 'Todos' || x.o === st.obj).map(x => {
+    const med = soma(mediaMes(x.m, anosB)), v = valor27(x);
+    return { g: x, r: ANOS_R.map(a => soma(realAno(x.m, a))), med, orc: v, vr: variacao(v, med) };
+  }).sort((a, b) => b.orc - a.orc);
+  const tot = { r: ANOS_R.map((_, i) => soma(linhas.map(l => l.r[i]))), med: soma(linhas.map(l => l.med)), orc: soma(linhas.map(l => l.orc)) };
+  tot.vr = variacao(tot.orc, tot.med);
+  return { modo: 'proj', anosB, linhas, tot };
+}
+function tabelaOV() {
+  const O = ovDados(), u26 = D.ultimoMes[2026] || 12, rotMed = `Média ${O.anosB[0]}–2026`;
+  $('#ov-tit').textContent = `Orçado × realizado por projeto · variação % = orçado 2027 ÷ média realizada ${O.anosB[0]}–2026 − 1`;
+  const cab = `<th class="oc">Real. 2024</th><th class="oc">Real. 2025</th><th>Real. 2026${u26 < 12 ? ` <small>(até ${MESES[u26 - 1].toLowerCase()})</small>` : ''}</th><th>${rotMed}</th><th>Orçado 2027</th><th>Variação %</th>`;
+  let h;
+  if (O.modo === 'mes') {
+    const g = O.g;
+    h = `<thead><tr><th class="l">Mês</th>${cab}</tr></thead><tbody>`;
+    O.linhas.forEach(l => {
+      const orc = g.tem ? `<input class="cel${l.ed ? ' ed' : ''}" data-m="${l.m}" value="${fDec(l.orc, 2)}" inputmode="decimal" autocomplete="off" aria-label="Orçado 2027 de ${MESES_L[l.m]}" title="Pela curva: ${fBRL2.format(l.auto)}">` : '—';
+      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td>${l.r[2] == null ? '—' : brl(l.r[2])}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${fVar(l.vr)}</td></tr>`;
+    });
+    h += `</tbody><tfoot><tr><td class="l">Total</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td>${brl(O.tot.r[2])}</td><td>${brl(O.tot.med)}</td><td>${fBRL2.format(O.tot.orc)}</td><td class="var">${fVar(O.tot.vr)}</td></tr></tfoot>`;
+    $('#ov-dica').textContent = !g.tem ? `O SIGCO ${g.id} não tem orçado 2027; só o realizado aparece.`
+      : `Projeto ${g.id} · ${g.itens.map(i => i.n).join(' + ')}. Digite o orçado 2027 de cada mês e tecle Enter ou Tab: o total do projeto vira a soma dos meses e o gráfico acompanha. Mês alterado fica marcado; passe o mouse para ver o valor pela curva.${st.base !== 'planilha' && !st.mensal[g.id] ? ' Com a curva pelo realizado, a variação % é a mesma em todos os meses (cada mês recebe a mesma proporção da média); ela muda quando você altera um mês.' : ''}`;
+    $('#desfaz-proj').hidden = !alterado(g);
+  } else {
+    h = `<thead><tr><th class="l">SIGCO</th><th class="l">Projeto</th>${cab}</tr></thead><tbody>`;
+    O.linhas.forEach(l => {
+      h += `<tr data-s="${esc(l.g.id)}" tabindex="0"><td class="l m">${esc(l.g.id).replace(/\//g, '/<wbr>')}</td><td class="l d">${esc(nomeG(l.g))}<small class="ob">${esc(l.g.o)}</small></td><td class="oc">${brl(l.r[0])}</td><td class="oc">${brl(l.r[1])}</td><td>${brl(l.r[2])}</td><td>${brl(l.med)}</td><td class="orc">${brl(l.orc)}${alterado(l.g) ? ' <span class="tag">alterado</span>' : ''}</td><td class="var">${fVar(l.vr)}</td></tr>`;
+    });
+    h += `</tbody><tfoot><tr><td class="l" colspan="2">Total · ${O.linhas.length} projetos</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td>${brl(O.tot.r[2])}</td><td>${brl(O.tot.med)}</td><td>${fBRL2.format(O.tot.orc)}</td><td class="var">${fVar(O.tot.vr)}</td></tr></tfoot>`;
+    $('#ov-dica').textContent = `Escolha um projeto na lista (ou clique na linha) para ver mês a mês e alterar o orçado de 2027. ${rotMed} = soma das médias de cada mês (nov e dez sem 2026).`;
+    $('#desfaz-proj').hidden = true;
+  }
+  $('#ov').innerHTML = h;
+  const sv = $('#salvo');
+  sv.className = salvoErro ? 'nota erro' : 'nota';
+  sv.textContent = salvoErro ? 'Não consegui salvar neste navegador (armazenamento bloqueado). Use "Baixar Excel" para guardar as alterações.'
+    : nAlterados() ? `${nAlterados()} projeto(s) com alteração · salvo neste navegador${salvoEm ? ' em ' + salvoEm.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : ''}. Para guardar em arquivo, use "Baixar Excel".`
+      : 'Sem alterações. O que você mudar nesta tabela fica salvo neste navegador; "Baixar Excel" gera o arquivo com tudo.';
+}
+function editaMes(inp) {
+  const g = IDX.porId.get(st.sel); if (!g || !g.tem) return false;
+  const v = numero(inp.value);
+  if (!(v >= 0)) { inp.setAttribute('aria-invalid', 'true'); return false; }
+  const m = +inp.dataset.m, d = distrib(g);
+  if (Math.abs(d[m] - r2(v)) < 0.005) { inp.value = fDec(d[m], 2); return false; }
+  d[m] = r2(v);
+  const auto = rateia(g.orc, curva(g));
+  if (d.every((x, i) => Math.abs(x - auto[i]) < 0.005)) delete st.mensal[g.id]; else st.mensal[g.id] = d;
+  delete st.ajuste[g.id];
+  salva();
+  return true;
+}
+
+/* ----- quantidades (DCMD): previsto × realizado do ano anterior e quantidade 2027 = orçado do mês ÷ R$ por unidade ----- */
+const qn = v => v == null ? '—' : fDec(v, 0);
+/* Reparte n unidades inteiras em proporção a "partes" (maior resto): o total do ano fecha e projeto pequeno não zera. */
+function rateiaInt(n, partes) {
+  const tot = soma(partes);
+  if (!(tot > 0) || n <= 0) return partes.map(() => 0);
+  const brutos = partes.map(p => p / tot * n), base = brutos.map(Math.floor);
+  let resto = n - soma(base);
+  brutos.map((b, i) => [b - base[i], i]).sort((x, y) => y[0] - x[0] || x[1] - y[1]).forEach(([, i]) => { if (resto > 0) { base[i]++; resto--; } });
+  return base;
+}
+function qtdIndicadores() {
+  if (!D.qtd) return [];
+  const ano = D.qtd.ano, u = D.ultimoMes[ano] || 12;
+  return D.qtd.ind.map(q => {
+    const mem = q.id.split('/');
+    const gs = IDX.grupos.filter(g => g.itens.some(i => mem.includes(i.p)));
+    const un = D.unid && D.unid[q.id], rs = un && un.rs > 0 ? un.rs : null;
+    const orc = Array(12).fill(0); gs.forEach(g => distrib(g).forEach((v, m) => { orc[m] += v; }));
+    const q27 = rs ? rateiaInt(Math.round(soma(orc) / rs), orc) : null;
+    const prev = q.prev || Array(12).fill(0), real = q.real || Array(12).fill(0);
+    const prevT = soma(prev), realT = soma(real), realAte = soma(real.slice(0, u));
+    const rsReal = soma(realAno(mem, ano).slice(0, u).map(v => v || 0));
+    return { id: q.id, n: q.n, cap: q.cap, gs, rs, lig: un ? un.lig : null, orc, q27, prev, real, u, prevT, realT, realAte, rsReal,
+      at: prevT > 0 ? realT / prevT : null, custo: realAte > 0 && rsReal > 0 ? rsReal / realAte : null,
+      q27T: q27 ? soma(q27) : null, vr: q27 && realT > 0 ? soma(q27) / realT - 1 : null };
+  });
+}
+function quantidades() {
+  const sec = $('#qt-sec');
+  if (!D.qtd) {
+    $('#ind').innerHTML = '<option value="">—</option>'; $('#qt-g').innerHTML = ''; $('#qt').innerHTML = '';
+    $('#qt-dica').innerHTML = 'Carregue a planilha de quantidades (Qtd_2026.xlsx) para ver previsto × realizado e a quantidade de 2027. <button type="button" class="chip" data-abrir2>Carregar</button>';
+    $('#qt-nota').textContent = ''; const b = sec.querySelector('[data-abrir2]'); if (b) b.onclick = () => $('#arq').click();
+    return;
+  }
+  const Q = qtdIndicadores(), ano = D.qtd.ano, u = Q.length ? Q[0].u : 12, mu = MESES[u - 1].toLowerCase();
+  if (st.ind && !Q.some(q => q.id === st.ind)) st.ind = null;
+  $('#ind').innerHTML = `<option value="">Todos os indicadores</option>` + Q.map(q => `<option value="${esc(q.id)}">${esc(q.id)} · ${esc(q.n)}</option>`).join('');
+  $('#ind').value = st.ind || '';
+  $('#qt-tit').textContent = `Quantidades · DCMD · previsto × realizado ${ano} e quantidade ${D.alvo}`;
+  const fv = v => fVar(v);
+  if (!st.ind) {
+    const lim = Math.max(2, ...Q.map(q => q.at || 0));
+    $('#qt-g').innerHTML = `<div class="leg2"><span><i style="background:var(--a2026)"></i>realizado jan–${mu}</span><span><i style="background:repeating-linear-gradient(45deg,var(--a2026) 0 3px,transparent 3px 6px)"></i>projeção nov–dez</span><span><i style="background:var(--fg);width:2px"></i>100% do previsto</span></div><div class="qb">` +
+      Q.map(q => {
+        const a1 = q.prevT > 0 ? q.realAte / q.prevT : 0, a2 = q.at || 0;
+        return `<button type="button" data-ind="${esc(q.id)}"><span class="n"><b class="m">${esc(q.id)}</b> · ${esc(q.n)}</span><span class="tr"><i style="width:${(Math.min(a1, lim) / lim * 100).toFixed(2)}%"></i><i class="pj" style="left:${(Math.min(a1, lim) / lim * 100).toFixed(2)}%;width:${(Math.max(0, Math.min(a2, lim) - Math.min(a1, lim)) / lim * 100).toFixed(2)}%"></i><u style="left:${(1 / lim * 100).toFixed(2)}%"></u></span><span class="v ${q.at == null ? 'neutro' : q.at >= 1 ? 'sobe' : 'desce'}">${q.at == null ? '—' : pct(q.at, 0)}</span><span class="x">${qn(q.realT)} de ${qn(q.prevT)}</span></button>`;
+      }).join('') + '</div>';
+    let h = `<thead><tr><th class="l">Indicador</th><th>Previsto ${ano}</th><th>Real. jan–${mu}</th><th>Real. + proj.</th><th>% do previsto</th><th class="oc">R$/unid. real ${ano}</th><th>R$/unid. ${D.alvo}</th><th>Qtd ${D.alvo}</th><th>Var. % ${D.alvo} × ${ano}</th></tr></thead><tbody>`;
+    Q.forEach(q => {
+      h += `<tr data-ind="${esc(q.id)}" tabindex="0"><td class="l d"><b class="m">${esc(q.id)}</b> · ${esc(q.n)}<small class="ob">${esc(q.cap)}</small></td><td>${qn(q.prevT)}</td><td>${qn(q.realAte)}</td><td>${qn(q.realT)}</td><td class="var">${q.at == null ? '—' : `<span class="${q.at >= 1 ? 'sobe' : 'desce'}">${pct(q.at, 0)}</span>`}</td><td class="oc">${q.custo ? brl(q.custo) : '—'}</td><td>${q.rs ? brl(q.rs) : '—'}</td><td class="orc">${qn(q.q27T)}</td><td class="var">${fv(q.vr)}</td></tr>`;
+    });
+    $('#qt').innerHTML = h + '</tbody>';
+    $('#qt-dica').textContent = `Escolha um indicador (ou clique na barra) para ver mês a mês. Realizado ${ano}: jan–${mu} real e nov–dez projeção (planilha ${D.qtd.fonte}).`;
+  } else {
+    const q = Q.find(x => x.id === st.ind);
+    quantGraf(q);
+    let h = `<thead><tr><th class="l">Mês</th><th>Previsto ${ano}</th><th>Realizado ${ano}</th><th>% do previsto</th><th class="oc">Orçado ${D.alvo} (R$)</th><th>Qtd ${D.alvo}</th><th>Var. % ${D.alvo} × ${ano}</th></tr></thead><tbody>`;
+    MESES.forEach((n, m) => {
+      const at = q.prev[m] > 0 ? q.real[m] / q.prev[m] : null, vr = q.q27 && q.real[m] > 0 ? q.q27[m] / q.real[m] - 1 : null;
+      h += `<tr class="mes"><td class="l m">${n}</td><td>${qn(q.prev[m])}</td><td class="${m >= q.u ? 'pj' : ''}">${qn(q.real[m])}</td><td class="var">${at == null ? '—' : `<span class="${at >= 1 ? 'sobe' : 'desce'}">${pct(at, 0)}</span>`}</td><td class="oc">${brl(q.orc[m])}</td><td class="orc">${q.q27 ? qn(q.q27[m]) : '—'}</td><td class="var">${fv(vr)}</td></tr>`;
+    });
+    h += `</tbody><tfoot><tr><td class="l">Total</td><td>${qn(q.prevT)}</td><td>${qn(q.realT)}</td><td class="var">${q.at == null ? '—' : pct(q.at, 0)}</td><td class="oc">${brl(soma(q.orc))}</td><td>${qn(q.q27T)}</td><td class="var">${fv(q.vr)}</td></tr></tfoot>`;
+    $('#qt').innerHTML = h;
+    $('#qt-dica').textContent = `${q.id} · ${q.n}. Orçado ${D.alvo} dos SIGCOs ${q.gs.map(g => g.id).join(', ') || '—'}${q.rs ? `; quantidade = orçado ÷ ${fBRL2.format(q.rs)} por unidade (aba Ligações projetos): o total do ano é arredondado e as unidades são repartidas nos meses na proporção do orçado` : '; sem R$ por unidade na aba Ligações projetos, então não há quantidade de ' + D.alvo}. Mudou o orçado, muda a quantidade.`;
+  }
+  $('#qt-nota').textContent = `Só Dpto = DCMD. ${D.qtd.ano}: meses depois de ${mu} são projeção. R$/unid. real = realizado em R$ do DCMD (jan–${mu}) ÷ quantidade realizada jan–${mu}. Meta de ligações ${D.alvo} da aba Ligações projetos aparece ao passar o mouse na quantidade.`;
+  $('#qt').querySelectorAll('td.orc').forEach((td, i) => { const q = st.ind ? Q.find(x => x.id === st.ind) : Q[i]; if (q && q.lig) td.title = `Meta ${D.alvo} (Ligações projetos): ${qn(q.lig)}`; });
+}
+function quantGraf(q) {
+  const el = $('#qt-g'), W = Math.max(300, Math.round(el.clientWidth || 600)), estreito = W < 640;
+  const H = estreito ? 220 : 260, m = { t: 16, r: estreito ? 8 : 20, b: 30, l: estreito ? 40 : 56 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b, bw = iw / 12;
+  const vals = [...q.prev, ...q.real, ...(q.q27 || [])];
+  const E2 = escala(Math.max(1, ...vals) * 1.1), y = v => m.t + ih - v / E2.max * ih, x = i => m.l + bw * i + bw / 2;
+  let h = `<svg class="qg" viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Quantidade por mês: previsto e realizado ${D.qtd.ano} e quantidade ${D.alvo}">`;
+  h += `<defs><pattern id="hach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="6" style="fill:var(--a2026)"/></pattern></defs>`;
+  for (let v = 0; v <= E2.max + 1e-9; v += E2.passo) h += `<line class="ax" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${fDec(v, 0)}</text>`;
+  const w = Math.min(16, bw * 0.32);
+  MESES.forEach((n, i) => {
+    h += `<rect x="${x(i) - w - 1}" y="${y(q.prev[i])}" width="${w}" height="${Math.max(0, ih + m.t - y(q.prev[i]))}" style="fill:none;stroke:var(--muted);stroke-width:1.5"/>`;
+    h += `<rect x="${x(i) + 1}" y="${y(q.real[i])}" width="${w}" height="${Math.max(0, ih + m.t - y(q.real[i]))}" style="fill:${i >= q.u ? 'url(#hach)' : 'var(--a2026)'};stroke:var(--a2026);stroke-width:1"/>`;
+    h += `<text class="mes" x="${x(i)}" y="${H - m.b + 20}" text-anchor="middle">${estreito ? n[0] : n}</text>`;
+  });
+  if (q.q27) {
+    h += `<path style="fill:none;stroke:var(--a2027);stroke-width:2.5;stroke-dasharray:6 4" d="M${q.q27.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join('L')}"/>`;
+    q.q27.forEach((v, i) => { h += `<circle cx="${x(i)}" cy="${y(v)}" r="3.5" style="fill:var(--bg);stroke:var(--a2027);stroke-width:2"/>`; if (!estreito) h += `<text class="lab" x="${x(i)}" y="${y(v) - 8}" text-anchor="middle" style="fill:var(--a2027)">${fDec(v, 0)}</text>`; });
+  }
+  el.innerHTML = h + `</svg><div class="leg2" style="margin-top:var(--s2)"><span><i style="border:1.5px solid var(--muted)"></i>previsto ${D.qtd.ano}</span><span><i style="background:var(--a2026)"></i>realizado ${D.qtd.ano}</span><span><i style="background:repeating-linear-gradient(45deg,var(--a2026) 0 3px,transparent 3px 6px)"></i>projeção</span>${q.q27 ? `<span><i style="background:var(--a2027)"></i>quantidade ${D.alvo} (orçado ÷ R$/unid.)</span>` : ''}</div>`;
+}
+
+/* ----- insights (DCMD) ----- */
+function insights() {
+  const L = [], u = D.ultimoMes[2026] || 12, mu = MESES[u - 1].toLowerCase(), nums = Object.keys(D.real);
+  const tot = a => soma(realAno(nums, a)), ate = (a, n) => soma(realAno(nums, a).slice(0, n));
+  const base = BASES[st.base === 'planilha' ? 'b2426' : st.base];
+  const O = soma(IDX.grupos.map(valor27)), r25 = tot(2025);
+  const sinal = v => (v > 0 ? '+' : v < 0 ? '−' : '') + pct(Math.abs(v), Math.abs(v) >= 0.995 ? 0 : 1);
+  if (r25 > 0) L.push({ k: 'orc25', num: O / r25 - 1, t: 'Orçado 2027 × realizado 2025', v: sinal(O / r25 - 1), c: O >= r25 ? 'sobe' : 'desce', d: `${curto(O)} orçados para 2027 contra ${curto(r25)} realizados pelo DCMD em 2025.` });
+  const a26 = ate(2026, u), a25 = ate(2025, u);
+  if (a25 > 0) L.push({ k: 'ritmo', num: a26 / a25 - 1, t: `Ritmo de 2026 (jan–${mu})`, v: sinal(a26 / a25 - 1), c: a26 >= a25 ? 'sobe' : 'desce', d: `${curto(a26)} realizados contra ${curto(a25)} no mesmo período de 2025.` });
+  const ord = IDX.grupos.map(g => ({ g, v: valor27(g) })).sort((a, b) => b.v - a.v), top = ord.slice(0, 5);
+  if (O > 0) L.push({ k: 'conc', num: soma(top.map(x => x.v)) / O, t: 'Concentração do orçado 2027', v: pct(soma(top.map(x => x.v)) / O, 0), d: `vai para 5 projetos: ${top.map(x => x.g.id).join(', ')}.` });
+  const comp = IDX.grupos.map(g => { const m = soma(mediaMes(g.m, base)), v = valor27(g); return { g, v, m, x: m > 0 ? v / m - 1 : null }; }).filter(x => x.v >= 1e6 && x.m >= 1e6);
+  const up = comp.slice().sort((a, b) => b.x - a.x)[0], dn = comp.slice().sort((a, b) => a.x - b.x)[0];
+  if (up && up.x > 0) L.push({ k: 'up', num: up.x, sel: up.g.id, t: 'Maior aumento sobre o histórico', v: sinal(up.x), c: 'sobe', d: `${up.g.id} · ${up.g.n}: ${curto(up.v)} em 2027 contra média de ${curto(up.m)} por ano.` });
+  if (dn && dn.x < 0) L.push({ k: 'dn', num: dn.x, sel: dn.g.id, t: 'Maior corte sobre o histórico', v: sinal(dn.x), c: 'desce', d: `${dn.g.id} · ${dn.g.n}: ${curto(dn.v)} em 2027 contra média de ${curto(dn.m)} por ano.` });
+  const novos = IDX.grupos.filter(g => !(soma(mediaMes(g.m, base).map(v => Math.max(0, v))) > 0) && valor27(g) > 0);
+  if (novos.length) L.push({ k: 'novos', num: novos.length, t: 'Projetos sem histórico', v: String(novos.length), d: `somam ${curto(soma(novos.map(valor27)))} em 2027 sem realizado em ${base[0]}–2026: a curva fica plana (1/12 por mês).` });
+  const so = IDX.soltos.map(g => ({ g, r: soma(realAno(g.m, 2026)) })).filter(x => x.r > 0).sort((a, b) => b.r - a.r);
+  if (so.length) L.push({ k: 'semorc', num: so.length, sel: so[0].g.id, t: 'Realizado 2026 sem orçado 2027', v: `${so.length} SIGCOs`, d: `${curto(soma(so.map(x => x.r)))} realizados em 2026 (jan–${mu}) sem orçado 2027; o maior é o ${so[0].g.id} (${curto(so[0].r)}).` });
+  const S27 = Array(12).fill(0); IDX.grupos.forEach(g => distrib(g).forEach((v, m) => { S27[m] += v; }));
+  const pico = S27.reduce((b, v, m) => v > S27[b] ? m : b, 0), s1 = soma(S27) > 0 ? soma(S27.slice(0, 6)) / soma(S27) : 0;
+  L.push({ k: 'cal', num: s1, t: 'Calendário de 2027', v: MESES[pico], d: `é o mês de maior valor (${curto(S27[pico])}); o 1º semestre concentra ${pct(s1, 0)} do ano.` });
+  if (D.qtd) {
+    const Q = qtdIndicadores().filter(q => q.at != null && q.prevT >= 20);
+    const lo = Q.slice().sort((a, b) => a.at - b.at)[0], hi = Q.slice().sort((a, b) => b.at - a.at)[0];
+    if (lo && lo.at < 1) L.push({ k: 'qlo', num: lo.at, ind: lo.id, t: `Quantidade abaixo do previsto ${D.qtd.ano}`, v: pct(lo.at, 0), c: 'desce', d: `${lo.n} (${lo.id}): ${qn(lo.realT)} de ${qn(lo.prevT)} previstas, já contando a projeção de nov–dez.` });
+    if (hi && hi.at > 1) L.push({ k: 'qhi', num: hi.at, ind: hi.id, t: `Quantidade acima do previsto ${D.qtd.ano}`, v: pct(hi.at, 0), c: 'sobe', d: `${hi.n} (${hi.id}): ${qn(hi.realT)} contra ${qn(hi.prevT)} previstas.` });
+    const cu = qtdIndicadores().filter(q => q.custo && q.rs && q.realAte >= 20).map(q => ({ q, x: q.rs / q.custo - 1 })).sort((a, b) => Math.abs(b.x) - Math.abs(a.x))[0];
+    if (cu) L.push({ k: 'custo', num: cu.x, ind: cu.q.id, t: 'R$ por unidade: 2027 × realizado 2026', v: sinal(cu.x), c: cu.x >= 0 ? 'sobe' : 'desce', d: `${cu.q.n} (${cu.q.id}): ${brl(cu.q.rs)} por unidade no orçado 2027 contra ${brl(cu.q.custo)} realizados em 2026 (jan–${mu}).` });
+  }
+  return L;
+}
+function insightsRender() {
+  $('#ins').innerHTML = insights().map(x => {
+    const alvo = x.sel ? `data-s="${esc(x.sel)}"` : x.ind ? `data-ind="${esc(x.ind)}"` : '';
+    return `<button type="button" class="${alvo ? 'lk' : ''}" ${alvo} data-k="${x.k}"${alvo ? '' : ' tabindex="-1"'}><small>${esc(x.t)}</small><b class="${x.c || ''}">${esc(x.v)}</b><span>${esc(x.d)}</span></button>`;
+  }).join('');
+}
+
+/* ----- visões: orçado × histórico, sazonalidade 2027, por objetivo ----- */
+function visoes() {
+  const base = BASES[st.base === 'planilha' ? 'b2426' : st.base], rotB = `${base[0]}–2026`;
+  const gs = IDX.grupos.filter(g => st.obj === 'Todos' || g.o === st.obj);
+  const el = $('#vz'), filtro = st.obj === 'Todos' ? '' : ` · objetivo ${st.obj}`;
+  if (st.visao === 'hist') {
+    const L = gs.map(g => { const m = soma(mediaMes(g.m, base)), v = valor27(g); return { g, v, m, x: m > 0 ? v / m - 1 : null }; }).filter(x => x.v > 0);
+    const MIN = 1e5, com = L.filter(x => x.m >= MIN).sort((a, b) => b.x - a.x), sem = L.filter(x => !(x.m >= MIN)), lim = 1.5;
+    $('#vis-tit').textContent = `Orçado 2027 × média realizada ${rotB} por projeto${filtro}`;
+    $('#vis-nota').textContent = `Barra = variação % (orçado 2027 ÷ média ${rotB} − 1); verde = mais dinheiro que o histórico, vermelho = menos. Barras cortadas em ±150% (›). ${sem.length ? `${sem.length} projeto(s) sem histórico ou com média abaixo de R$ 100 mil (${curto(soma(sem.map(x => x.v)))} em 2027) não entram. ` : ''}Clique para ver o projeto.`;
+    el.innerHTML = `<div class="vb-eixo"><span></span><span><span>−150%</span><span>0</span><span>+150%</span></span><span></span><span style="text-align:right">orçado × média</span></div><div class="vb">` + com.map(x => {
+      const w = Math.min(Math.abs(x.x), lim) / lim * 50, pos = x.x >= 0;
+      return `<button type="button" data-s="${esc(x.g.id)}" class="${x.g.id === st.sel ? 'sel' : ''}"><span class="n"><b>${esc(x.g.id)}</b>${esc(x.g.n)}</span><span class="tr"><i class="${pos ? 'p' : 'q'}" style="${pos ? 'left:50%' : `left:${(50 - w).toFixed(2)}%`};width:${w.toFixed(2)}%"></i></span><span class="v ${pos ? 'sobe' : 'desce'}">${pos ? '+' : '−'}${pct(Math.abs(x.x), 0)}${Math.abs(x.x) > lim ? ' ›' : ''}</span><span class="x">${curto(x.v)} × ${curto(x.m)}</span></button>`;
+    }).join('') + '</div>';
+  } else if (st.visao === 'saz') {
+    const L = gs.map(g => ({ g, v: valor27(g), d: distrib(g) })).filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+    const top = L.slice(0, 15), T = Array(12).fill(0); L.forEach(x => x.d.forEach((v, m) => { T[m] += v; }));
+    const tt = soma(T), mx = Math.max(...top.flatMap(x => x.d.map(v => v / x.v)), ...T.map(v => tt > 0 ? v / tt : 0), 1e-9);
+    const cel = sh => { const a = Math.round(6 + 74 * sh / mx); return `<td style="background:color-mix(in srgb,var(--accent) ${a}%,transparent);color:${a > 55 ? 'var(--on-accent)' : 'var(--fg)'}">${fDec(sh * 100, 0)}</td>`; };
+    $('#vis-tit').textContent = `Sazonalidade de 2027 · % do ano em cada mês${filtro}`;
+    $('#vis-nota').textContent = `${top.length} maiores projetos${L.length > top.length ? ` de ${L.length}` : ''}; cada linha soma 100%. Cor mais forte = mês com mais dinheiro. A linha de baixo é o conjunto todo do filtro. Clique para ver o projeto.`;
+    el.innerHTML = `<div class="tab-w"><table class="hm"><thead><tr><th class="l">Projeto</th>${MESES.map(n => `<th>${n}</th>`).join('')}<th>Ano</th></tr></thead><tbody>` +
+      top.map(x => `<tr data-s="${esc(x.g.id)}" class="${x.g.id === st.sel ? 'sel' : ''}"><td class="l"><b>${esc(x.g.id)}</b>${esc(x.g.n)}</td>${x.d.map(v => cel(v / x.v)).join('')}<td class="t">${curto(x.v)}</td></tr>`).join('') +
+      `</tbody><tfoot><tr><td class="l">Todos do filtro (${L.length})</td>${T.map(v => cel(tt > 0 ? v / tt : 0)).join('')}<td class="t">${curto(tt)}</td></tr></tfoot></table></div>`;
+  } else {
+    const objs = [...new Set(IDX.grupos.map(g => g.o))].map(o => {
+      const g2 = IDX.grupos.filter(g => g.o === o), v = soma(g2.map(valor27)), m = soma(g2.map(g => soma(mediaMes(g.m, base))));
+      return { o, v, m, x: m > 0 ? v / m - 1 : null, n: g2.length };
+    }).sort((a, b) => b.v - a.v);
+    const mx = Math.max(...objs.flatMap(x => [x.v, x.m]), 1);
+    $('#vis-tit').textContent = `Orçado 2027 × média realizada ${rotB} por objetivo`;
+    $('#vis-nota').textContent = 'Clique num objetivo para filtrar a página toda (clique de novo para tirar o filtro).';
+    el.innerHTML = `<div class="leg2"><span><i style="background:var(--a2027)"></i>orçado 2027</span><span><i style="background:var(--a2025)"></i>média realizada ${rotB}</span></div><div class="ob2">` + objs.map(x => `<button type="button" data-obj="${esc(x.o)}" class="${st.obj === x.o ? 'sel' : ''}"><span>${esc(x.o)} <small class="neutro">· ${x.n}</small></span><span class="bars"><i class="o" style="width:${(x.v / mx * 100).toFixed(2)}%"></i><i class="m" style="width:${(Math.max(0, x.m) / mx * 100).toFixed(2)}%"></i></span><span class="val">${curto(x.v)} × ${curto(x.m)} · ${x.x == null ? '—' : `<span class="${x.x >= 0 ? 'sobe' : 'desce'}">${x.x >= 0 ? '+' : '−'}${pct(Math.abs(x.x), 0)}</span>`}</span></button>`).join('') + '</div>';
+  }
+}
+
+/* ----- lógica (exemplo com números reais do SIGCO escolhido) ----- */
+function logica() {
+  const sel = $('#log-sel');
+  const atual = st.sel && IDX.porId.get(st.sel).tem ? st.sel : (st.logSel && IDX.porId.has(st.logSel) ? st.logSel : IDX.grupos[0] && IDX.grupos[0].id);
+  sel.innerHTML = IDX.grupos.map(g => `<option value="${esc(g.id)}"${g.id === atual ? ' selected' : ''}>${esc(g.id)} · ${esc(nomeG(g))}</option>`).join('');
+  const g = IDX.porId.get(sel.value);
+  if (!g) { $('#passos').innerHTML = ''; $('#log-tab').innerHTML = ''; return; }
+  $('#log-tit').textContent = `Exemplo com o SIGCO ${g.id}`;
+  const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base];
+  const med = mediaMes(g.m, anosB), c = curva(g), d = distrib(g), v = valor27(g);
+  const plan = st.base === 'planilha' && g.c && soma(g.c) > 0;
+  const somaPos = soma(med.map(x => Math.max(0, x)));
+  const semReal = !plan && somaPos <= 0;
+  const u26 = D.ultimoMes[2026] || 12, ex = c.reduce((b, x, i) => x > c[b] ? i : b, 0);
+  const anosMes = mm => anosB.filter(a => (D.ultimoMes[a] || 0) > mm);
+  const rm = (a, mm) => realAno(g.m, a)[mm] || 0;
+  $('#passos').innerHTML = `
+    <li><span><span class="ds">Orçado 2027 do SIGCO (aba Orçado Futuro${g.itens.length > 1 ? ', somando ' + g.itens.map(i => i.p).join(' + ') : ''})${alterado(g) ? ' · alterado na tela' : ''}</span><span class="fx"><b>${fBRL2.format(v)}</b></span></span></li>
+    ${plan ? `<li><span><span class="ds">Curva usada: a da aba Curva da planilha (Perc_Mes)</span><span class="fx">${MESES[ex]}: <b>${pct(c[ex], 2)}</b> do ano</span></span></li>` : semReal
+      ? `<li><span><span class="ds">Sem realizado nos anos da base: a curva fica igual em todos os meses</span><span class="fx">1 ÷ 12 = <b>${pct(1 / 12, 2)}</b> por mês</span></span></li>`
+      : `<li><span><span class="ds">Média do realizado de cada mês nos anos da base (SIGCO ${g.m.join(' + ')}); exemplo com o mês de maior peso</span><span class="fx">${MESES[ex]}: (${anosMes(ex).map(a => brl(rm(a, ex))).join(' + ')}) ÷ ${anosMes(ex).length} = <b>${brl(med[ex])}</b>${u26 < 12 ? `<br>${MESES[11]}: só ${anosMes(11).join(' e ')}, porque 2026 tem dado até ${MESES[u26 - 1].toLowerCase()} = ${brl(med[11])}` : ''}</span></span></li>
+      <li><span><span class="ds">Peso do mês = média do mês ÷ soma das 12 médias</span><span class="fx">${MESES[ex]}: ${brl(Math.max(0, med[ex]))} ÷ ${brl(somaPos)} = <b>${pct(c[ex], 2)}</b></span></span></li>`}
+    ${st.mensal[g.id] ? `<li class="fim"><span><span class="ds">Meses de 2027 digitados na tabela Orçado × realizado (alterados à mão; a curva não é mais usada neste projeto)</span><span class="fx">${MESES[ex]}: <b>${fBRL2.format(d[ex])}</b> (pela curva seria ${fBRL2.format(rateia(v, c)[ex])}) · soma dos 12 meses = ${fBRL2.format(soma(d))}</span></span></li>`
+      : `<li class="fim"><span><span class="ds">Valor do mês em 2027 = orçado × peso do mês (os 12 meses fecham no centavo)</span><span class="fx">${MESES[ex]}: ${fBRL2.format(v)} × ${pct(c[ex], 2)} = <b>${fBRL2.format(d[ex])}</b> · soma dos 12 meses = ${fBRL2.format(soma(d))}</span></span></li>`}`;
+  let h = `<thead><tr><th class="l">Mês</th>${anosB.map(a => `<th class="oc">Real. ${a}</th>`).join('')}<th>Média</th><th>Peso</th><th class="oc">Curva planilha</th><th>2027</th></tr></thead><tbody>`;
+  MESES.forEach((n, i) => {
+    h += `<tr><td class="l m">${n}</td>${anosB.map(a => `<td class="oc">${(D.ultimoMes[a] || 0) > i ? brl(rm(a, i)) : '—'}</td>`).join('')}<td>${brl(med[i])}</td><td>${pct(c[i], 2)}</td><td class="oc">${g.c ? pct(g.c[i] / (soma(g.c) || 1), 2) : '—'}</td><td>${fBRL2.format(d[i])}</td></tr>`;
+  });
+  h += `</tbody><tfoot><tr><td class="l">Total</td>${anosB.map(a => `<td class="oc">${brl(soma(realAno(g.m, a)))}</td>`).join('')}<td>${brl(soma(med))}</td><td>100%</td><td class="oc">${g.c ? '100%' : '—'}</td><td>${fBRL2.format(soma(d))}</td></tr></tfoot>`;
+  $('#log-tab').innerHTML = h;
+}
+
+/* ===================== Controles ===================== */
+function opcoes() {
+  const ops = `<option value="">Todos os projetos</option><optgroup label="Com orçado 2027">${IDX.grupos.map(g => `<option value="${esc(g.id)}">${esc(g.id)} · ${esc(nomeG(g))}</option>`).join('')}</optgroup>` +
+    (IDX.soltos.length ? `<optgroup label="Só realizado (sem orçado 2027)">${IDX.soltos.map(g => `<option value="${esc(g.id)}">${esc(g.id)}</option>`).join('')}</optgroup>` : '');
+  ['#sigco', '#proj1', '#proj2'].forEach(q => { $(q).innerHTML = ops; });
+  $('#obj').innerHTML = ['Todos', ...IDX.objetivos].map(o => `<option value="${esc(o)}">${o === 'Todos' ? 'Todos os objetivos' : esc(o)}</option>`).join('');
+}
+function seleciona(s, rolar) {
+  st.sel = s || null;
+  const q = st.sel && D.qtd ? qtdIndicadores().find(x => x.gs.some(g => g.id === st.sel) || x.id.split('/').includes(st.sel)) : null;
+  st.ind = q ? q.id : (st.sel ? null : st.ind);
+  tudo();
+  if (s && rolar) $('#g-sec').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+}
+function liga() {
+  ['#sigco', '#proj1', '#proj2'].forEach(q => $(q).addEventListener('change', e => seleciona(e.target.value)));
+  $('#obj').addEventListener('change', e => { st.obj = e.target.value; tudo(); });
+  $('#g-total').addEventListener('click', () => seleciona(null));
+  const segs = (sel, fn) => document.querySelectorAll(sel + ' button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll(sel + ' button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); fn(b.dataset.v); tudo();
+  }));
+  segs('#base', v => { st.base = v; });
+  segs('#vis', v => { st.vis = v; });
+  $('#so-orc').addEventListener('change', e => { st.soOrc = e.target.checked; tudo(); });
+  $('#g-leg').addEventListener('click', e => { const b = e.target.closest('[data-ano]'); if (!b) return; st.anos[b.dataset.ano] = !st.anos[b.dataset.ano]; tudo(); });
+  $('#valor').addEventListener('change', e => {
+    const novo = numero(e.target.value), E = escopo();
+    if (!(novo >= 0) || !E.comOrc.length) { e.target.setAttribute('aria-invalid', 'true'); return; }
+    e.target.removeAttribute('aria-invalid');
+    const atuais = E.comOrc.map(valor27);
+    const novos = soma(atuais) > 0 ? rateia(novo, atuais) : rateia(novo, E.comOrc.map(() => 1));
+    E.comOrc.forEach((g, i) => {
+      if (st.mensal[g.id]) st.mensal[g.id] = soma(st.mensal[g.id]) > 0 ? rateia(novos[i], st.mensal[g.id]) : rateia(novos[i], curva(g));
+      else if (Math.abs(novos[i] - g.orc) < 0.005) delete st.ajuste[g.id]; else st.ajuste[g.id] = novos[i];
+    });
+    salva(); e.target.blur(); tudo();
+  });
+  $('#valor').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.dispatchEvent(new Event('change')); });
+  $('#reset').addEventListener('click', () => {
+    if (!confirm(`Voltar ao orçado original e apagar as alterações salvas de ${nAlterados()} projeto(s)?`)) return;
+    st.ajuste = {}; st.mensal = {}; salva(); tudo();
+  });
+  $('#desfaz-proj').addEventListener('click', () => { if (!st.sel) return; delete st.mensal[st.sel]; delete st.ajuste[st.sel]; salva(); tudo(); });
+  $('#excel').addEventListener('click', baixaExcel);
+  segs('#visao', v => { st.visao = v; });
+  $('#ind').addEventListener('change', e => { st.ind = e.target.value || null; quantidades(); });
+  const abreInd = id => { st.ind = id; quantidades(); $('#qt-sec').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' }); };
+  $('#qt-sec').addEventListener('click', e => { const b = e.target.closest('[data-ind]'); if (b) abreInd(b.dataset.ind); });
+  $('#qt').addEventListener('keydown', e => { const tr = e.target.closest('tr[data-ind]'); if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); abreInd(tr.dataset.ind); } });
+  $('#ins').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.s) seleciona(b.dataset.s, true); else if (b.dataset.ind) abreInd(b.dataset.ind); });
+  $('#vz').addEventListener('click', e => {
+    const b = e.target.closest('[data-s],[data-obj]'); if (!b) return;
+    if (b.dataset.obj) { st.sel = null; st.obj = st.obj === b.dataset.obj ? 'Todos' : b.dataset.obj; tudo(); } else seleciona(b.dataset.s, true);
+  });
+  $('#ov').addEventListener('change', e => {
+    const inp = e.target.closest('input[data-m]'); if (!inp) return;
+    if (!editaMes(inp)) return;
+    setTimeout(() => {   // redesenha mantendo o foco no campo para onde o Tab/Enter levou
+      const ae = document.activeElement, alvo = ae && ae.closest && ae.closest('#ov') && ae.dataset.m != null ? ae.dataset.m : null;
+      tudo();
+      if (alvo != null) { const ni = $(`#ov input[data-m="${alvo}"]`); if (ni) { ni.focus(); ni.select(); } }
+    }, 0);
+  });
+  $('#ov').addEventListener('keydown', e => {
+    const inp = e.target.closest('input[data-m]');
+    if (inp && e.key === 'Enter') { e.preventDefault(); const nx = $(`#ov input[data-m="${+inp.dataset.m + 1}"]`); if (nx) nx.focus(); else inp.blur(); return; }
+    if (inp && e.key === 'Escape') { inp.value = fDec(distrib(IDX.porId.get(st.sel))[+inp.dataset.m], 2); inp.removeAttribute('aria-invalid'); return; }
+    const tr = e.target.closest('tr[data-s]'); if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); seleciona(tr.dataset.s); }
+  });
+  $('#ov').addEventListener('click', e => { const tr = e.target.closest('tr[data-s]'); if (tr) seleciona(tr.dataset.s); });
+  $('#tab').addEventListener('click', e => {
+    const o = e.target.closest('[data-ord]');
+    if (o) { const k = o.dataset.ord; st.ord = st.ord.col === k ? { col: k, dir: -st.ord.dir } : { col: k, dir: ['id', 'n'].includes(k) ? 1 : -1 }; tabela(); return; }
+    const tr = e.target.closest('tr[data-s]'); if (tr) seleciona(tr.dataset.s === st.sel ? null : tr.dataset.s, true);
+  });
+  $('#tab').addEventListener('keydown', e => { const tr = e.target.closest('tr[data-s]'); if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); seleciona(tr.dataset.s === st.sel ? null : tr.dataset.s); } });
+  $('#log-sel').addEventListener('change', e => { st.logSel = e.target.value; logica(); });
+  $('#exportar').addEventListener('click', exporta);
+  new ResizeObserver(() => { if (D) { const E = escopo(); grafico(E, series(E)); } }).observe($('#g'));
+  new ResizeObserver(() => { if (D && D.qtd && st.ind) { const q = qtdIndicadores().find(x => x.id === st.ind); if (q) quantGraf(q); } }).observe($('#qt-g'));
+}
+
+/* Night shift (mesma chave "tema" do site) */
+/* No site (/teste/) quem cuida do tema é o menu ☰ (assets/menu.js); no arquivo local, este botão. */
+function aplicaTema(escuro) {
+  document.documentElement.dataset.theme = escuro ? 'dark' : 'light';
+  $('#tema').setAttribute('aria-pressed', String(escuro));
+  try { localStorage.setItem('tema', escuro ? 'escuro' : 'claro'); } catch (e) { /* sem armazenamento */ }
+}
+if ($('#tema')) {
+  $('#tema').setAttribute('aria-pressed', String(document.documentElement.dataset.theme !== 'light'));
+  $('#tema').addEventListener('click', () => aplicaTema(document.documentElement.dataset.theme === 'light'));
+  addEventListener('keydown', e => {
+    if (!e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || e.code !== 'KeyK') return;
+    if (e.target.closest('input,textarea,select,[contenteditable]')) return;
+    e.preventDefault(); aplicaTema(document.documentElement.dataset.theme === 'light');
+  });
+}
+
+/* ===================== Exportar ===================== */
+function exporta() {
+  const csvC = v => { const s = String(v ?? ''); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const n2 = v => fDec(v, 2);
+  const cab = ['SIGCO', 'Projeto', 'Objetivo', 'Orçado 2027 (original)', 'Valor 2027 usado', ...MESES.map(m => m + '/2027'), 'Curva'];
+  const ls = linhasTab().sort((a, b) => b.v - a.v).map(x => [x.g.id, x.g.itens.map(i => i.n).join(' + '), x.g.o, n2(x.g.orc), n2(x.v), ...x.d.map(n2), st.base === 'planilha' ? 'aba Curva' : 'realizado ' + BASES[st.base][0] + '–2026']);
+  const txt = [cab, ...ls].map(r => r.map(csvC).join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + txt], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'orcado-2027-por-mes-sigco.csv'; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+/* Excel com todos os projetos: orçado 2027 mês a mês (com alterações), orçado × realizado por mês e parâmetros. */
+function dadosExcel() {
+  const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base], rotMed = `Média ${anosB[0]}–2026`;
+  const aba1 = [['SIGCO', 'Projeto', 'Objetivo', 'Orçado 2027 (planilha)', 'Orçado 2027 (usado)', 'Alterado', ...MESES.map(m => m + '/2027')]];
+  const aba2 = [['SIGCO', 'Projeto', 'Objetivo', 'Mês', 'Realizado 2024', 'Realizado 2025', 'Realizado 2026', rotMed, 'Orçado 2027', 'Variação % (orçado ÷ média − 1)', 'Mês alterado']];
+  IDX.grupos.forEach(g => {
+    const d = distrib(g), auto = rateia(g.orc, curva(g)), med = mediaMes(g.m, anosB), R = ANOS_R.map(a => realAno(g.m, a)), nome = g.itens.map(i => i.n).join(' + ');
+    aba1.push([g.id, nome, g.o, g.orc, valor27(g), alterado(g) ? 'sim' : 'não', ...d]);
+    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], r2(med[m]), d[m], variacao(d[m], med[m]), st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
+  });
+  const aba3 = [['Parâmetro', 'Valor'], ['Fonte', D.fonte], ['Dados de', D.gerado], ['Curva de 2027', st.base === 'planilha' ? 'aba Curva da planilha' : `realizado ${anosB[0]}–2026`],
+    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
+  return { aba1, aba2, aba3 };
+}
+async function baixaExcel() {
+  const sv = $('#salvo'), A = dadosExcel();
+  try {
+    const X = await carregaXLSX(), wb = X.utils.book_new();
+    const folha = (aoa, pctCol) => {
+      const ws = X.utils.aoa_to_sheet(aoa);
+      Object.keys(ws).forEach(k => { if (k[0] === '!') return; const c = ws[k]; if (c.t === 'n') c.z = X.utils.decode_cell(k).c === pctCol ? '0.0%' : '#,##0.00'; });
+      ws['!cols'] = aoa[0].map((_, i) => ({ wch: i === 1 ? 46 : i === 2 ? 22 : 15 }));
+      return ws;
+    };
+    X.utils.book_append_sheet(wb, folha(A.aba1, -1), 'Orçado 2027 mensal');
+    X.utils.book_append_sheet(wb, folha(A.aba2, 9), 'Orçado x realizado');
+    X.utils.book_append_sheet(wb, folha(A.aba3, -1), 'Parâmetros');
+    X.writeFile(wb, 'orcamento-sigco-2027.xlsx');
+  } catch (e) {
+    const csvC = v => { const s = typeof v === 'number' ? fDec(v, 2) : String(v ?? ''); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff' + A.aba2.map(r => r.map(csvC).join(';')).join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'orcamento-sigco-2027.csv'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    sv.className = 'nota erro'; sv.textContent = `Sem internet para gerar o .xlsx (${e.message}); baixei em CSV, que também abre no Excel.`;
+  }
+}
+
+/* ===================== Ler a planilha (mesmas regras do gera_pagina.py) ===================== */
+const norm = s => String(s ?? '').normalize('NFD').replace(/[^\x00-\x7f]/g, '').toLowerCase().split(/\s+/).filter(Boolean).join(' ');
+function codigo(v) {
+  if (v == null || (typeof v === 'string' && !v.trim())) return null;
+  const s = typeof v === 'number' && Number.isInteger(v) ? String(v) : String(v).trim();
+  return s.endsWith('.0') ? s.slice(0, -2) : s;
+}
+function extrai(wb, nomeArq, X) {
+  const aba = n => { const k = wb.SheetNames.find(s => norm(s) === norm(n)); if (!k) throw new Error(`aba "${n}" não encontrada`); return X.utils.sheet_to_json(wb.Sheets[k], { header: 1, raw: true, defval: null }); };
+  const lin = n => { const rows = aba(n); return [rows[0].map(norm), rows.slice(1)]; };
+  const col = (cab, nomes, pre) => { for (const n of nomes) { const i = cab.findIndex(c => c === n || (pre && c.startsWith(n))); if (i >= 0) return i; } throw new Error(`coluna ${nomes.join('/')} não encontrada`); };
+  const vazio = v => v == null || v === '';
+  const ALVO = 2027, chaveItem = (n, t) => norm(n) + '|' + Number(t || 0).toFixed(2);
+  let [cab, rs] = lin('Curva');
+  let iA = col(cab, ['ano']), iS = col(cab, ['sigco']), iN = col(cab, ['nom_projeto']), iT = col(cab, ['total']), iM = col(cab, ['mes']), iP = col(cab, ['perc_mes']);
+  const chaveDe = new Map(), curvaP = new Map();
+  rs.forEach(r => {
+    if (vazio(r[iA]) || Number(r[iA]) !== ALVO) return;
+    const k = codigo(r[iS]); if (!k || vazio(r[iM])) return;
+    const ci = chaveItem(r[iN], r[iT]); if (!chaveDe.has(ci)) chaveDe.set(ci, k);
+    if (!curvaP.has(k)) curvaP.set(k, Array(12).fill(null));
+    const c = curvaP.get(k), m = Number(r[iM]);
+    if (m >= 1 && m <= 12 && c[m - 1] == null) c[m - 1] = Number(r[iP] || 0);
+  });
+  [cab, rs] = lin('Orçado Futuro');
+  iA = col(cab, ['ano']); const iPr = col(cab, ['num_projeto']); iN = col(cab, ['nom_projeto']); iT = col(cab, ['total']); const iO = col(cab, ['objetivo'], true);
+  const grupos = new Map();
+  rs.forEach(r => {
+    const p = codigo(r[iPr]);
+    if (!p || vazio(r[iA]) || Number(r[iA]) !== ALVO) return;
+    const v = Number(r[iT] || 0), nome = String(r[iN] ?? '').trim();
+    const k = chaveDe.get(chaveItem(nome, v)) || [...curvaP.keys()].find(kk => kk.split('/').includes(p)) || p;
+    if (!grupos.has(k)) grupos.set(k, { id: k, n: '', o: '', orc: 0, itens: [], m: k.split('/'), c: curvaP.has(k) ? curvaP.get(k).map(x => x || 0) : null });
+    const g = grupos.get(k);
+    g.itens.push({ p, n: nome, v: Math.round(v * 100) / 100 }); g.orc += v;
+    if (!g.m.includes(p)) g.m.push(p);
+    g.n = g.n || nome; g.o = g.o || String(r[iO] ?? '').trim();
+  });
+  [cab, rs] = lin('objetivo');
+  const iO2 = col(cab, ['objetivo']), iS2 = col(cab, ['sigco']), objSig = new Map();
+  rs.forEach(r => { const s = codigo(r[iS2]); if (s && r[iO2] && !objSig.has(s)) objSig.set(s, String(r[iO2]).trim()); });
+  [cab, rs] = lin('Realizado');
+  const jM = col(cab, ['mesctz_lct']), jA = col(cab, ['anoctz_lct']), jS = col(cab, ['num_projeto_sigco']), jV = col(cab, ['realizado']), jO = col(cab, ['objetivo']), jR = col(cab, ['responsavel']);
+  const real = new Map(), objReal = new Map(), ult = {};
+  rs.forEach(r => {
+    if (vazio(r[jA]) || vazio(r[jM]) || vazio(r[jV]) || norm(r[jR]) !== 'dcmd') return;
+    const a = Number(r[jA]), m = Number(r[jM]); if (!(m >= 1 && m <= 12)) return;
+    const s = codigo(r[jS]) || 'Sem SIGCO';
+    if (!real.has(s)) real.set(s, new Map());
+    const ra = real.get(s); if (!ra.has(a)) ra.set(a, Array(12).fill(0));
+    ra.get(a)[m - 1] += Number(r[jV]);
+    ult[a] = Math.max(ult[a] || 0, m);
+    if (r[jO]) { if (!objReal.has(s)) objReal.set(s, new Map()); const c = objReal.get(s), o = String(r[jO]).trim(); c.set(o, (c.get(o) || 0) + 1); }
+  });
+  const maisComum = c => { let b = null, n = 0; if (c) c.forEach((v, k) => { if (v > n) { b = k; n = v; } }); return b; };
+  const objNum = s => objSig.get(s) || maisComum(objReal.get(s)) || '';
+  const r2 = v => Math.round(v * 100) / 100;
+  const gs = [...grupos.values()].map(g => ({ ...g, o: g.o || g.m.map(objNum).find(Boolean) || 'Sem objetivo', orc: r2(g.orc) }))
+    .sort((a, b) => b.orc - a.orc || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const realOut = {};
+  [...real.keys()].sort().forEach(s => { const r = {}; [...real.get(s).keys()].sort().forEach(a => { r[a] = real.get(s).get(a).map(r2); }); realOut[s] = { o: objNum(s) || 'Sem objetivo', r }; });
+  const ultOut = {}; Object.keys(ult).sort().forEach(a => { ultOut[a] = ult[a]; });
+  if (!gs.length) throw new Error('nenhum SIGCO com orçado 2027 na aba Orçado Futuro');
+  const unid = {}, ka = wb.SheetNames.find(n => norm(n) === norm('Ligações projetos'));
+  if (ka) {
+    const rows = X.utils.sheet_to_json(wb.Sheets[ka], { header: 1, raw: true, defval: null });
+    const iAno = (rows[0] || []).findIndex(v => v != null && String(v).trim() === String(ALVO)), iCab = rows.findIndex(r => r && norm(r[0]) === 'sigco');
+    const num = v => typeof v === 'number' ? v : 0;
+    if (iAno >= 0 && iCab >= 0) rows.slice(iCab + 1).forEach(r => { const k = r ? codigo(r[0]) : null; if (!k || unid[k]) return; unid[k] = { lig: num(r[iAno]), rs: Math.round(num(r[iAno + 1]) * 1e6) / 1e6 }; });
+  }
+  return { fonte: nomeArq, gerado: new Date().toISOString().slice(0, 10), alvo: ALVO, resp: 'DCMD', ultimoMes: ultOut, grupos: gs, real: realOut, unid };
+}
+/* Planilha de quantidades (ex.: Qtd_2026.xlsx): Dpto = DCMD, Previsto e Realizado por mês. Devolve null se não for ela. */
+function extraiQtd(wb, nomeArq, X, alvo) {
+  for (const n of wb.SheetNames) {
+    const rows = X.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null });
+    if (!rows.length) continue;
+    const cab = rows[0].map(norm);
+    if (!cab.includes('classificacao')) continue;
+    const ix = k => { const i = cab.indexOf(k); if (i < 0) throw new Error(`coluna ${k} não encontrada em ${n}`); return i; };
+    const iD = ix('dpto'), iC = ix('capitulo'), iP = ix('num_projeto'), iK = ix('classificacao'), iN = cab.findIndex(c => c.startsWith('projeto'));
+    const meses = []; cab.forEach((c, i) => { if (/^\d+$/.test(c) && +c >= 1 && +c <= 12) meses.push([i, +c]); });
+    const ind = new Map();
+    rows.slice(1).forEach(r => {
+      const k = codigo(r[iP]); if (!k || norm(r[iD]) !== 'dcmd') return;
+      const t = norm(r[iK]).startsWith('previst') ? 'prev' : norm(r[iK]).startsWith('realiz') ? 'real' : null; if (!t) return;
+      if (!ind.has(k)) ind.set(k, { id: k, n: String(r[iN] ?? '').trim(), cap: String(r[iC] ?? '').trim(), prev: null, real: null });
+      const v = Array(12).fill(0); meses.forEach(([i, m]) => { v[m - 1] = typeof r[i] === 'number' ? r[i] : 0; });
+      ind.get(k)[t] = v;
+    });
+    return { ano: (alvo || 2027) - 1, fonte: nomeArq, ind: [...ind.values()] };
+  }
+  return null;
+}
+let xlsxLib = null;
+function carregaXLSX() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (xlsxLib) return xlsxLib;
+  xlsxLib = new Promise((ok, falha) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = () => ok(window.XLSX); s.onerror = () => { xlsxLib = null; falha(new Error('sem internet para abrir o leitor de .xlsx')); };
+    document.head.appendChild(s);
+  });
+  return xlsxLib;
+}
+async function importa(arqs) {
+  arqs = [...arqs];
+  const info = D ? $('#arq-info') : $('#arq-info0'), nomes = arqs.map(a => a.name).join(', ');
+  info.className = 'nota'; info.textContent = `Lendo ${nomes}…`;
+  try {
+    const X = await carregaXLSX();
+    let principal = null, qtd = null;
+    for (const a of arqs) {
+      const wb = X.read(await a.arrayBuffer(), { type: 'array' });
+      if (wb.SheetNames.some(n => norm(n) === 'realizado') && wb.SheetNames.some(n => norm(n) === norm('Orçado Futuro'))) principal = extrai(wb, a.name, X);
+      else { const q = extraiQtd(wb, a.name, X, (D || {}).alvo); if (q) qtd = q; else throw new Error(`${a.name} não é a Curva orçamento nem a planilha de quantidades`); }
+    }
+    if (!principal && !D) throw new Error('carregue também a Curva orçamento.xlsx');
+    if (principal) { if (qtd) principal.qtd = { ...qtd, ano: principal.alvo - 1 }; else if (D && D.qtd) principal.qtd = D.qtd; usa(principal); }
+    else { D.qtd = { ...qtd, ano: D.alvo - 1 }; tudo(); }
+    $('#arq-info').className = 'nota'; $('#arq-info').textContent = fonteTxt() + ' · carregado agora.';
+  } catch (e) {
+    info.className = 'nota erro'; info.textContent = `Não consegui ler ${nomes}: ${e.message}.`;
+  }
+}
+function fonteTxt() {
+  const u = D.ultimoMes, anos = Object.keys(u), ua = anos[anos.length - 1];
+  return `Fonte: ${D.fonte} (dados de ${D.gerado.split('-').reverse().join('/')}) · ${IDX.grupos.length} SIGCOs com orçado ${D.alvo} · ${Object.keys(D.real).length} SIGCOs com realizado do ${D.resp || 'DCMD'} de ${anos[0]} a ${ua} (último mês: ${MESES[u[ua] - 1].toLowerCase()}/${ua})` +
+    (D.qtd ? ` · quantidades: ${D.qtd.fonte} (${D.qtd.ind.length} indicadores do DCMD)` : ' · sem planilha de quantidades');
+}
+function usa(d) {
+  D = d; IDX = prepara(d); cacheCurva = new Map(); st.ajuste = {}; st.mensal = {}; st.sel = null; st.obj = 'Todos'; st.logSel = null; st.ind = null;
+  salvoEm = null; recupera();
+  $('#sem-dados').hidden = true; $('#pagina').hidden = false;
+  opcoes(); tudo();
+  $('#arq-info').className = 'nota'; $('#arq-info').textContent = fonteTxt();
+}
+document.querySelectorAll('[data-abrir]').forEach(b => b.addEventListener('click', () => $('#arq').click()));
+$('#arq').addEventListener('change', e => { const f = [...e.target.files]; if (f.length) importa(f); e.target.value = ''; });
+let arrasto = 0;
+addEventListener('dragenter', e => { if ([...e.dataTransfer.types].includes('Files')) { arrasto++; $('#solte').hidden = false; } });
+addEventListener('dragleave', () => { if (--arrasto <= 0) { arrasto = 0; $('#solte').hidden = true; } });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => { e.preventDefault(); arrasto = 0; $('#solte').hidden = true; const f = [...e.dataTransfer.files]; if (f.length) importa(f); });
+
+/* ===================== Início ===================== */
+liga();
+if (DADOS_EMBUTIDOS) usa(DADOS_EMBUTIDOS); else $('#sem-dados').hidden = false;
+window.__sigco = { st, rateia, curva, distrib, escopo, series, extrai, extraiQtd, mediaMes, ovDados, valor27, dadosExcel, qtdIndicadores, insights, get D() { return D; }, get IDX() { return IDX; } }; // para os testes
+</script>
+<script src="../assets/menu.js"></script>
+</body></html>
