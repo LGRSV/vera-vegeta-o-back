@@ -23,7 +23,7 @@
   --sh1:0 1px 2px rgb(0 0 0 / .12); --sh-vidro:0 2px 8px rgb(0 0 0 / .35);
   --wrap:1360px; --alvo:40px; --mt-lim:#b8431f;
   /* uma cor por ano (paleta do "Km medido acumulado") */
-  --a2024:#6b7378; --a2025:#0057a8; --a2026:#15803d; --a2027:var(--accent);
+  --a2023:#7e3fa8; --a2024:#6b7378; --a2025:#0057a8; --a2026:#15803d; --a2027:var(--accent);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   color-scheme:dark;
@@ -33,7 +33,7 @@
   --sel:#352b27; --hover:rgb(231 234 235 / .06); --seg-on:#323a41;
   --alerta:#ef4444; --aviso:#f59e0b; --sem:#343c42; --ok:#4cc38a;
   --sh1:0 1px 2px rgb(0 0 0 / .45);
-  --a2024:#9aa4ab; --a2025:#5aa6ec; --a2026:#4cc38a;
+  --a2023:#b98cf0; --a2024:#9aa4ab; --a2025:#5aa6ec; --a2026:#4cc38a;
 }}
 :root[data-theme="dark"]{
   color-scheme:dark;
@@ -43,7 +43,7 @@
   --sel:#352b27; --hover:rgb(231 234 235 / .06); --seg-on:#323a41;
   --alerta:#ef4444; --aviso:#f59e0b; --sem:#343c42; --ok:#4cc38a;
   --sh1:0 1px 2px rgb(0 0 0 / .45);
-  --a2024:#9aa4ab; --a2025:#5aa6ec; --a2026:#4cc38a;
+  --a2023:#b98cf0; --a2024:#9aa4ab; --a2025:#5aa6ec; --a2026:#4cc38a;
 }
 
 /* ====== Base (site.css) ====== */
@@ -105,12 +105,12 @@ header.cab>.bt{position:absolute;top:0;right:0}
 .seg button:hover{color:var(--fg)}.seg button[aria-pressed=true]{background:var(--seg-on);color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
 .ck{display:flex;align-items:center;gap:8px;font-size:var(--t-sm);color:var(--fg);cursor:pointer;min-height:32px}
 .ck input{accent-color:var(--accent);width:16px;height:16px}
-.resumo{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s3) var(--s4);margin-top:var(--s4)}
+.resumo{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--s3) var(--s4);margin-top:var(--s4)}
 .r{border-top:2px solid var(--line);padding-top:var(--s2);min-width:0}
 .r small{display:flex;align-items:center;gap:6px;font:600 var(--t-xs) var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .r small i{width:10px;height:3px;border-radius:2px;flex:none}
 .r b{display:block;font:700 var(--t-2xl)/1.15 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap}
-.r em{font-style:normal;font-size:var(--t-xs);font-family:var(--f-mono)}
+.r em{display:block;font-style:normal;font-size:var(--t-xs);font-family:var(--f-mono)}
 .sobe{color:var(--ok)}.desce{color:var(--alerta)}.neutro{color:var(--muted)}
 .nota{color:var(--muted);font-size:var(--t-xs);margin:var(--s3) 0 0}
 
@@ -126,6 +126,7 @@ svg.lin .ax{stroke:var(--line);stroke-width:1}
 svg.lin .mes{font:600 11px var(--f-mono);fill:var(--fg)}
 svg.lin .ln{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
 svg.lin .ln.y2027{stroke-width:3;stroke-dasharray:7 5}
+svg.lin .ln.pj{stroke-width:2.2;stroke-dasharray:2 4}
 svg.lin .lab{font:600 11px var(--f-mono);paint-order:stroke;stroke:var(--bg);stroke-width:3px}
 svg.lin .guia{stroke:var(--fg);stroke-opacity:.35;stroke-width:1}
 svg.lin .hit{fill:transparent;cursor:crosshair}
@@ -364,6 +365,39 @@ const DADOS_EMBUTIDOS = {"fonte":"Curva orçamento.xlsx","gerado":"2026-11-04","
 const MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
 const MESES_L = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const ANOS_R = [2024, 2025, 2026];
+const ANOS_L = [2023, 2024, 2025, 2026];   // linhas de realizado do gráfico
+/* Projeção dos meses de 2026 ainda sem realizado (nov–dez). Calculada sobre a série do recorte (todos, objetivo ou SIGCO).
+   O método foi escolhido por backtest (2024 e 2025, fingindo que o ano acabava em outubro). */
+const PROJ = {
+  metodo: 'mediaRitmo',
+  rotulo: {
+    mediaRitmo: 'média de nov–dez dos anos anteriores × ritmo de 2026 (jan–out de 2026 ÷ média jan–out dos anos anteriores)',
+    ritmo1: 'nov–dez de 2025 × ritmo de 2026 (jan–out de 2026 ÷ jan–out de 2025)',
+    sazonal: 'participação média de nov–dez no ano, aplicada sobre jan–out de 2026',
+    mediaAno: 'média mensal de jan–out de 2026',
+  },
+};
+function projecao(nums, metodo = PROJ.metodo) {
+  const A = 2026, u = D.ultimoMes[A] || 12;
+  if (u >= 12) return null;
+  const y = realAno(nums, A).map(v => v || 0), ate = soma(y.slice(0, u));
+  const ant = ANOS_L.filter(a => a < A && (D.ultimoMes[a] || 0) >= 12).map(a => realAno(nums, a).map(v => v || 0));
+  const out = Array(12).fill(null), meses = [];
+  for (let m = u; m < 12; m++) meses.push(m);
+  const poe = f => { meses.forEach(m => { out[m] = Math.max(0, f(m)); }); return out; };
+  if (metodo === 'mediaAno') return u > 0 ? poe(() => ate / u) : null;
+  if (!ant.length) return null;
+  if (metodo === 'ritmo1') { const p = ant[ant.length - 1], b = soma(p.slice(0, u)); return b > 0 ? poe(m => p[m] * ate / b) : null; }
+  if (metodo === 'mediaRitmo') { const b = soma(ant.map(p => soma(p.slice(0, u)))) / ant.length; return b > 0 ? poe(m => soma(ant.map(p => p[m])) / ant.length * ate / b) : null; }
+  if (metodo === 'sazonal') {
+    const sh = ant.map(p => soma(p)).map((t, k) => t > 0 ? soma(meses.map(m => ant[k][m])) / t : null).filter(v => v != null);
+    if (!sh.length) return null;
+    const sm = soma(sh) / sh.length; if (!(sm < 1)) return null;
+    const resto = ate * sm / (1 - sm), pm = meses.map(m => soma(ant.map(p => p[m]))), tp = soma(pm);
+    return tp > 0 ? poe(m => resto * pm[meses.indexOf(m)] / tp) : null;
+  }
+  return null;
+}
 const BASES = { b2426: [2024, 2025, 2026], b2326: [2023, 2024, 2025, 2026] };
 
 /* ===================== Formatação ===================== */
@@ -459,7 +493,7 @@ function recupera() {
 
 /* ===================== Dados e estado ===================== */
 let D = null, IDX = null;
-const st = { sel: null, obj: 'Todos', base: 'b2426', vis: 'mensal', soOrc: false, ajuste: {}, mensal: {}, ind: null, visao: 'hist', aba: 'resumo', ord: { col: 'orc', dir: -1 }, anos: { 2024: true, 2025: true, 2026: true, 2027: true }, logSel: null };
+const st = { sel: null, obj: 'Todos', base: 'b2426', vis: 'mensal', soOrc: false, ajuste: {}, mensal: {}, ind: null, visao: 'hist', aba: 'resumo', ord: { col: 'orc', dir: -1 }, anos: { 2023: true, 2024: true, 2025: true, 2026: true, 2027: true }, logSel: null };
 
 function prepara(d) {
   const grupos = d.grupos.map(g => ({ ...g, tem: true }));
@@ -479,7 +513,8 @@ function escopo() {
 }
 function series(E) {
   const s = {};
-  ANOS_R.forEach(a => { s[a] = realAno(E.nums, a); });
+  ANOS_L.forEach(a => { s[a] = realAno(E.nums, a); });
+  s.p2026 = projecao(E.nums);
   const o = Array(12).fill(0);
   E.comOrc.forEach(g => distrib(g).forEach((v, m) => { o[m] += v; }));
   s[2027] = o.map(v => Math.round(v * 100) / 100);
@@ -520,9 +555,11 @@ function resumo(E, S) {
   const pico = S[2027].reduce((b, v, m) => v > S[2027][b] ? m : b, 0);
   const cartao = (a, rot, v, extra) => `<div class="r"><small><i style="background:var(--a${a})"></i>${rot}</small><b>${curto(v)}</b>${extra}</div>`;
   $('#resumo').innerHTML = [
-    cartao(2024, 'Realizado 2024', t(2024), '<em class="neutro">jan–dez</em>'),
+    cartao(2023, 'Realizado 2023', t(2023), '<em class="neutro">jan–dez</em>'),
+    cartao(2024, 'Realizado 2024', t(2024), vari(t(2024), t(2023), 'vs 2023')),
     cartao(2025, 'Realizado 2025', t(2025), vari(t(2025), t(2024), 'vs 2024')),
-    cartao(2026, u26 < 12 ? `Realizado 2026 · jan–${mu}` : 'Realizado 2026', t(2026), u26 < 12 ? vari(t(2026), t25ate, `vs jan–${mu} 2025`) : vari(t(2026), t(2025), 'vs 2025')),
+    cartao(2026, u26 < 12 ? `Realizado 2026 · jan–${mu}` : 'Realizado 2026', t(2026), (u26 < 12 ? vari(t(2026), t25ate, `vs jan–${mu} 2025`) : vari(t(2026), t(2025), 'vs 2025')) +
+      (S.p2026 ? `<em class="neutro">proj. ano ${curto(t(2026) + soma(S.p2026))}</em>` : '')),
     cartao(2027, 'Orçado 2027', t(2027), vari(t(2027), t(2025), 'vs realizado 2025')),
     `<div class="r"><small>Pico de 2027</small><b>${t(2027) > 0 ? MESES[pico] : '—'}</b><em class="neutro">${t(2027) > 0 ? curto(S[2027][pico]) + ' · ' + pct(S[2027][pico] / t(2027)) + ' do ano' : 'sem orçado'}</em></div>`,
   ].join('');
@@ -537,20 +574,27 @@ function escala(max) {
 }
 function grafico(E, S) {
   const g = st.sel ? IDX.porId.get(st.sel) : null, ac = st.vis === 'acum';
-  $('#g-tit').textContent = (g ? `SIGCO ${g.id}` : st.obj === 'Todos' ? 'Todos os SIGCOs' : `Objetivo: ${st.obj}`) + ` · ${ac ? 'acumulado' : 'mensal'} · 2024–2027`;
+  $('#g-tit').textContent = (g ? `SIGCO ${g.id}` : st.obj === 'Todos' ? 'Todos os SIGCOs' : `Objetivo: ${st.obj}`) + ` · ${ac ? 'acumulado' : 'mensal'} · 2023–2027`;
   $('#g-total').hidden = !g;
   const t27 = soma(S[2027]);
   $('#g-tot').innerHTML = `${brl(t27)}<small>orçado 2027 redistribuído${g ? ' · ' + esc(nomeG(g)) : ''}</small>`;
-  const anos = [...ANOS_R, 2027];
+  const anos = [...ANOS_L, 2027];
   const V = {}; anos.forEach(a => { V[a] = ac ? acumula(S[a]) : S[a]; });
+  const u26 = D.ultimoMes[2026] || 12, P = S.p2026;
+  let VP = null;   // projeção de 2026, ligada ao último mês real
+  if (P && u26 > 0) {
+    VP = Array(12).fill(null); VP[u26 - 1] = V[2026][u26 - 1];
+    let acum = V[2026][u26 - 1];
+    for (let i = u26; i < 12; i++) { acum += P[i] || 0; VP[i] = ac ? acum : P[i]; }
+  }
   const el = $('#g'), W = Math.max(300, Math.round(el.clientWidth || 600)), estreito = W < 640;
   const H = estreito ? 280 : 360, m = { t: 18, r: estreito ? 10 : 24, b: 34, l: estreito ? 58 : 80 };
   const iw = W - m.l - m.r, ih = H - m.t - m.b, pad = estreito ? 10 : 22;
   const x = i => m.l + pad + (iw - 2 * pad) * i / 11;
-  const vals = anos.filter(a => st.anos[a]).flatMap(a => V[a].filter(v => v != null));
+  const vals = anos.filter(a => st.anos[a]).flatMap(a => V[a].filter(v => v != null)).concat(VP && st.anos[2026] ? VP.filter(v => v != null) : []);
   const E2 = escala(Math.max(0, ...vals) * 1.08), mn = Math.min(0, ...vals);
   const y = v => m.t + ih - ((v - mn) / (E2.max - mn)) * ih;
-  let h = `<svg class="lin" viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Linhas mensais de 2024 a 2027">`;
+  let h = `<svg class="lin" viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Linhas mensais de 2023 a 2027">`;
   for (let v = 0; v <= E2.max + 1e-6; v += E2.passo) h += `<line class="ax" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${curto(v)}</text>`;
   if (mn < 0) h += `<line class="ax" x1="${m.l}" x2="${W - m.r}" y1="${y(mn)}" y2="${y(mn)}"/><text x="${m.l - 8}" y="${y(mn) + 4}" text-anchor="end">${curto(mn)}</text>`;
   MESES.forEach((n, i) => { h += `<text class="mes" x="${x(i)}" y="${H - m.b + 22}" text-anchor="middle">${estreito ? n[0] : n}</text>`; });
@@ -561,6 +605,11 @@ function grafico(E, S) {
     h += `<path class="ln y${a}" style="stroke:var(--a${a})" d="M${pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join('L')}"/>`;
     if (a === 2027) pts.forEach(p => { h += `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" style="fill:var(--bg);stroke:var(--a2027);stroke-width:2"/>`; });
     else { const u = pts[pts.length - 1]; h += `<circle cx="${u[0]}" cy="${u[1]}" r="3" style="fill:var(--a${a})"/>`; }
+    if (a === 2026 && VP) {
+      const pp = VP.map((v, i) => v == null ? null : [x(i), y(v)]).filter(Boolean);
+      h += `<path class="ln pj" style="stroke:var(--a2026)" d="M${pp.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join('L')}"/>`;
+      pp.slice(1).forEach(q => { h += `<circle class="pj-pt" cx="${q[0]}" cy="${q[1]}" r="3.5" style="fill:var(--bg);stroke:var(--a2026);stroke-width:2"/>`; });
+    }
   });
   // rótulo do ano no fim de cada linha, sem sobreposição
   if (!estreito) {
@@ -580,15 +629,19 @@ function grafico(E, S) {
     r.addEventListener('pointermove', ev => {
       const gd = $('#g-guia'); gd.setAttribute('x1', x(i)); gd.setAttribute('x2', x(i)); gd.setAttribute('visibility', 'visible');
       let t = `<div class="t">${MESES_L[i][0].toUpperCase() + MESES_L[i].slice(1)}${ac ? ' · acumulado' : ''}</div>`;
-      anos.forEach(a => { if (st.anos[a]) t += `<div class="l"><span><i style="background:var(--a${a})"></i>${a}${a === 2027 ? ' orçado' : ''}</span><b>${V[a][i] == null ? 'sem dado' : brl(V[a][i])}</b></div>`; });
+      anos.forEach(a => {
+        if (!st.anos[a]) return;
+        const pj = a === 2026 && V[a][i] == null && VP && VP[i] != null;
+        t += `<div class="l"><span><i style="background:var(--a${a})"></i>${a}${a === 2027 ? ' orçado' : pj ? ' projeção' : ''}</span><b>${pj ? brl(VP[i]) : V[a][i] == null ? 'sem dado' : brl(V[a][i])}</b></div>`;
+      });
       if (!ac && t27 > 0) t += `<div class="l"><span>% de 2027 no mês</span><b>${pct(S[2027][i] / t27)}</b></div>`;
       dica(ev, t);
     });
     r.addEventListener('pointerleave', () => { $('#g-guia').setAttribute('visibility', 'hidden'); dica(null); });
   });
-  $('#g-leg').innerHTML = anos.map(a => `<li><button type="button" data-ano="${a}" aria-pressed="${st.anos[a]}"><svg width="22" height="8" aria-hidden="true"><line x1="1" x2="21" y1="4" y2="4" style="stroke:var(--a${a});stroke-width:3${a === 2027 ? ';stroke-dasharray:5 3' : ''}"/></svg>${a}${a === 2027 ? ' orçado' : ''} <span>${curto(soma(S[a]))}</span></button></li>`).join('');
-  const u26 = D.ultimoMes[2026] || 12, notas = [];
-  if (u26 < 12) notas.push(`2026 até ${MESES_L[u26 - 1]}.`);
+  $('#g-leg').innerHTML = anos.map(a => `<li><button type="button" data-ano="${a}" aria-pressed="${st.anos[a]}"><svg width="22" height="8" aria-hidden="true"><line x1="1" x2="21" y1="4" y2="4" style="stroke:var(--a${a});stroke-width:3${a === 2027 ? ';stroke-dasharray:5 3' : ''}"/></svg>${a}${a === 2027 ? ' orçado' : ''} <span>${curto(soma(S[a]))}${a === 2026 && P ? ` · proj. ${curto(soma(S[a]) + soma(P))}` : ''}</span></button></li>`).join('');
+  const notas = [];
+  if (u26 < 12) notas.push(P ? `2026: real até ${MESES_L[u26 - 1]}; ${MESES_L[u26]}–dezembro projetados (pontilhado) pela ${PROJ.rotulo[PROJ.metodo]}.` : `2026 até ${MESES_L[u26 - 1]}.`);
   notas.push(`2027 = orçado espalhado pela curva ${st.base === 'planilha' ? 'da planilha' : 'do realizado ' + BASES[st.base][0] + '–2026'}.`);
   if (nAlterados()) notas.push(`${nAlterados()} projeto(s) alterado(s) na tela.`);
   $('#g-nota').textContent = notas.join(' ');
@@ -656,10 +709,10 @@ function ovDados() {
   const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base];
   const g = st.sel ? IDX.porId.get(st.sel) : null;
   if (g) {
-    const R = Object.fromEntries(ANOS_R.map(a => [a, realAno(g.m, a)]));
+    const R = Object.fromEntries(ANOS_L.map(a => [a, realAno(g.m, a)])), P = projecao(g.m);
     const med = mediaMes(g.m, anosB), d = g.tem ? distrib(g) : Array(12).fill(0), auto = g.tem ? rateia(g.orc, curva(g)) : Array(12).fill(0);
-    const linhas = MESES.map((n, m) => ({ m, r: ANOS_R.map(a => R[a][m]), med: med[m], orc: d[m], auto: auto[m], ed: !!st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005, vr: variacao(d[m], med[m]) }));
-    const tot = { r: ANOS_R.map(a => soma(R[a])), med: soma(med), orc: soma(d) };
+    const linhas = MESES.map((n, m) => ({ m, r: ANOS_L.map(a => R[a][m]), pj: P ? P[m] : null, med: med[m], orc: d[m], auto: auto[m], ed: !!st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005, vr: variacao(d[m], med[m]) }));
+    const tot = { r: ANOS_L.map(a => soma(R[a])), pj: P ? soma(R[2026]) + soma(P) : null, med: soma(med), orc: soma(d) };
     tot.vr = variacao(tot.orc, tot.med);
     return { modo: 'mes', g, anosB, linhas, tot };
   }
@@ -681,13 +734,14 @@ function tabelaOV() {
   let h;
   if (O.modo === 'mes') {
     const g = O.g;
-    h = `<thead><tr><th class="l">Mês</th><th class="oc">Real. 2024</th><th class="oc">Real. 2025</th><th>Real. 2026</th><th>${rotMed}</th><th>Orçado 2027 (R$)</th><th>Variação %</th></tr></thead><tbody>`;
+    h = `<thead><tr><th class="l">Mês</th><th class="oc">Real. 2023</th><th class="oc">Real. 2024</th><th class="oc">Real. 2025</th><th>Real. 2026</th><th>${rotMed}</th><th>Orçado 2027 (R$)</th><th>Variação %</th></tr></thead><tbody>`;
     O.linhas.forEach(l => {
       const orc = g.tem ? inR(`data-m="${l.m}"`, l.orc, l.ed, `Orçado 2027 de ${MESES_L[l.m]}`, `Pela curva: ${fBRL2.format(l.auto)}`) : '—';
       const vp = g.tem ? inP(`data-mp="${l.m}"`, l.vr, `Variação % de ${MESES_L[l.m]}`) : fVar(l.vr);
-      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td>${l.r[2] == null ? '—' : brl(l.r[2])}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${vp}</td></tr>`;
+      const r26 = l.r[3] != null ? brl(l.r[3]) : l.pj != null ? brl(l.pj) : '—';
+      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td class="oc">${l.r[2] == null ? '—' : brl(l.r[2])}</td><td class="${l.r[3] == null && l.pj != null ? 'pj' : ''}">${r26}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${vp}</td></tr>`;
     });
-    h += `</tbody><tfoot><tr><td class="l">Total</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td>${brl(O.tot.r[2])}</td><td>${brl(O.tot.med)}</td>` +
+    h += `</tbody><tfoot><tr><td class="l">Total</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td class="oc">${brl(O.tot.r[2])}</td><td title="${O.tot.pj != null ? 'com projeção: ' + brl(O.tot.pj) : ''}">${brl(O.tot.r[3])}${O.tot.pj != null ? `<small class="ob">proj. ${brl(O.tot.pj)}</small>` : ''}</td><td>${brl(O.tot.med)}</td>` +
       `<td>${g.tem ? inR('data-tot="1"', O.tot.orc, alterado(g), 'Total 2027 do projeto') : '—'}</td><td class="var">${g.tem ? inP('data-totp="1"', O.tot.vr, 'Variação % do total') : fVar(O.tot.vr)}</td></tr></tfoot>`;
     $('#ov-dica').innerHTML = `<button type="button" class="chip" id="ov-voltar">‹ Todos os projetos</button>` + (!g.tem ? `O SIGCO ${esc(g.id)} não tem orçado 2027.`
       : `<b>${esc(g.id)}</b> · ${esc(g.itens.map(i => i.n).join(' + '))}. Digite o valor em R$ ou a variação % de cada mês (ou do total, na última linha) e tecle Enter.${u26 < 12 ? ` Real. 2026 até ${MESES[u26 - 1].toLowerCase()}.` : ''}`);
@@ -850,6 +904,8 @@ function insights() {
   if (r25 > 0) L.push({ k: 'orc25', num: O / r25 - 1, t: 'Orçado 2027 × realizado 2025', v: sinal(O / r25 - 1), c: O >= r25 ? 'sobe' : 'desce', d: `${curto(O)} orçados para 2027 contra ${curto(r25)} realizados pelo DCMD em 2025.` });
   const a26 = ate(2026, u), a25 = ate(2025, u);
   if (a25 > 0) L.push({ k: 'ritmo', num: a26 / a25 - 1, t: `Ritmo de 2026 (jan–${mu})`, v: sinal(a26 / a25 - 1), c: a26 >= a25 ? 'sobe' : 'desce', d: `${curto(a26)} realizados contra ${curto(a25)} no mesmo período de 2025.` });
+  const pTodos = projecao(nums);
+  if (pTodos) { const ano = a26 + soma(pTodos), r25t = tot(2025); L.push({ k: 'proj26', num: ano, t: 'Projeção de 2026 (ano)', v: curto(ano), c: '', d: `${curto(a26)} realizados até ${mu} + ${curto(soma(pTodos))} projetados para ${MESES_L[u]}–dezembro${r25t > 0 ? ` (${sinal(ano / r25t - 1)} sobre 2025)` : ''}.` }); }
   const ord = IDX.grupos.map(g => ({ g, v: valor27(g) })).sort((a, b) => b.v - a.v), top = ord.slice(0, 5);
   if (O > 0) L.push({ k: 'conc', num: soma(top.map(x => x.v)) / O, t: 'Concentração do orçado 2027', v: pct(soma(top.map(x => x.v)) / O, 0), d: `vai para 5 projetos: ${top.map(x => x.g.id).join(', ')}.` });
   const comp = IDX.grupos.map(g => { const m = soma(mediaMes(g.m, base)), v = valor27(g); return { g, v, m, x: m > 0 ? v / m - 1 : null }; }).filter(x => x.v >= 1e6 && x.m >= 1e6);
@@ -1061,14 +1117,14 @@ function exporta() {
 function dadosExcel() {
   const anosB = BASES[st.base === 'planilha' ? 'b2426' : st.base], rotMed = `Média ${anosB[0]}–2026`;
   const aba1 = [['SIGCO', 'Projeto', 'Objetivo', 'Orçado 2027 (planilha)', 'Orçado 2027 (usado)', 'Alterado', ...MESES.map(m => m + '/2027')]];
-  const aba2 = [['SIGCO', 'Projeto', 'Objetivo', 'Mês', 'Realizado 2024', 'Realizado 2025', 'Realizado 2026', rotMed, 'Orçado 2027', 'Variação % (orçado ÷ média − 1)', 'Mês alterado']];
+  const aba2 = [['SIGCO', 'Projeto', 'Objetivo', 'Mês', 'Realizado 2023', 'Realizado 2024', 'Realizado 2025', 'Realizado 2026', 'Projeção 2026', rotMed, 'Orçado 2027', 'Variação % (orçado ÷ média − 1)', 'Mês alterado']];
   IDX.grupos.forEach(g => {
-    const d = distrib(g), auto = rateia(g.orc, curva(g)), med = mediaMes(g.m, anosB), R = ANOS_R.map(a => realAno(g.m, a)), nome = g.itens.map(i => i.n).join(' + ');
+    const d = distrib(g), auto = rateia(g.orc, curva(g)), med = mediaMes(g.m, anosB), R = ANOS_L.map(a => realAno(g.m, a)), P = projecao(g.m), nome = g.itens.map(i => i.n).join(' + ');
     aba1.push([g.id, nome, g.o, g.orc, valor27(g), alterado(g) ? 'sim' : 'não', ...d]);
-    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], r2(med[m]), d[m], variacao(d[m], med[m]), st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
+    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], R[3][m], P && P[m] != null ? r2(P[m]) : null, r2(med[m]), d[m], variacao(d[m], med[m]), st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
   });
   const aba3 = [['Parâmetro', 'Valor'], ['Fonte', D.fonte], ['Dados de', D.gerado], ['Curva de 2027', st.base === 'planilha' ? 'aba Curva da planilha' : `realizado ${anosB[0]}–2026`],
-    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
+    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Projeção de 2026', PROJ.rotulo[PROJ.metodo]], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
   return { aba1, aba2, aba3 };
 }
 async function baixaExcel() {
@@ -1082,7 +1138,7 @@ async function baixaExcel() {
       return ws;
     };
     X.utils.book_append_sheet(wb, folha(A.aba1, -1), 'Orçado 2027 mensal');
-    X.utils.book_append_sheet(wb, folha(A.aba2, 9), 'Orçado x realizado');
+    X.utils.book_append_sheet(wb, folha(A.aba2, 11), 'Orçado x realizado');
     X.utils.book_append_sheet(wb, folha(A.aba3, -1), 'Parâmetros');
     X.writeFile(wb, 'orcamento-sigco-2027.xlsx');
   } catch (e) {
@@ -1243,7 +1299,7 @@ addEventListener('drop', e => { e.preventDefault(); arrasto = 0; $('#solte').hid
 /* ===================== Início ===================== */
 liga();
 if (DADOS_EMBUTIDOS) usa(DADOS_EMBUTIDOS); else $('#sem-dados').hidden = false;
-window.__sigco = { st, rateia, curva, distrib, escopo, series, extrai, extraiQtd, mediaMes, ovDados, valor27, dadosExcel, qtdIndicadores, insights, get D() { return D; }, get IDX() { return IDX; } }; // para os testes
+window.__sigco = { st, PROJ, projecao, rateia, curva, distrib, escopo, series, extrai, extraiQtd, mediaMes, ovDados, valor27, dadosExcel, qtdIndicadores, insights, get D() { return D; }, get IDX() { return IDX; } }; // para os testes
 </script>
 <script src="../assets/menu.js"></script>
 </body></html>
