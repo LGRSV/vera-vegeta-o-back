@@ -369,12 +369,12 @@ const ANOS_L = [2023, 2024, 2025, 2026];   // linhas de realizado do gráfico
 /* Projeção dos meses de 2026 ainda sem realizado (nov–dez). Calculada sobre a série do recorte (todos, objetivo ou SIGCO).
    O método foi escolhido por backtest (2024 e 2025, fingindo que o ano acabava em outubro). */
 const PROJ = {
-  metodo: 'mediaRitmo',
+  metodo: 'mediaAno',   // vencedor do backtest: menor erro no total, não dispara por SIGCO e soma igual ao total
   rotulo: {
     mediaRitmo: 'média de nov–dez dos anos anteriores × ritmo de 2026 (jan–out de 2026 ÷ média jan–out dos anos anteriores)',
     ritmo1: 'nov–dez de 2025 × ritmo de 2026 (jan–out de 2026 ÷ jan–out de 2025)',
     sazonal: 'participação média de nov–dez no ano, aplicada sobre jan–out de 2026',
-    mediaAno: 'média mensal de jan–out de 2026',
+    mediaAno: 'média mensal de jan–out de 2026 (ritmo do ano até agora)',
   },
 };
 function projecao(nums, metodo = PROJ.metodo) {
