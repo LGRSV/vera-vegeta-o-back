@@ -185,6 +185,14 @@ details>summary:hover{color:var(--fg)}
 .tab-bar .acoes{display:flex;flex-wrap:wrap;gap:var(--s2);align-self:end}
 .tab td.var{font-family:var(--f-mono);font-size:var(--t-xs)}
 .tab input.cel{width:130px;min-height:32px;padding:0 8px;border:1px solid var(--line-forte);border-radius:var(--r1);background:var(--paper);color:var(--fg);font:var(--t-sm) var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.tab input.cel[readonly]{cursor:pointer;color:var(--muted);border-style:dashed}
+#senha-dlg{border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--bg);color:var(--fg);padding:var(--s5);width:min(380px,calc(100vw - 32px));box-sizing:border-box}
+#senha-dlg::backdrop{background:rgba(0,0,0,.6)}
+#senha-dlg h3{margin:0 0 var(--s2);font:600 var(--t-xs) var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
+#senha-dlg p{margin:0 0 var(--s3)}
+#senha-dlg .busca{max-width:none;box-sizing:border-box}
+#senha-dlg .acoes{display:flex;justify-content:flex-end;gap:var(--s2);margin-top:var(--s4)}
+#senha-msg.erro{color:var(--alerta)}
 .tab input.cel:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
 .tab input.cel.ed{border-color:var(--aviso);box-shadow:inset 3px 0 0 var(--aviso)}
 .tab input.cel[aria-invalid=true]{border-color:var(--alerta)}
@@ -312,12 +320,19 @@ svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stro
   <div class="tab-bar">
     <div class="f"><span id="l-proj2">Projeto</span><select id="proj2" class="busca" aria-labelledby="l-proj2"></select></div>
     <div class="f"><span id="l-valor">Total 2027 do filtro (R$)</span><input id="valor" class="busca num" inputmode="decimal" autocomplete="off" aria-labelledby="l-valor"><small id="valor-nota"></small></div>
-    <div class="acoes"><button type="button" class="bt" id="desfaz-proj" hidden>Desfazer este projeto</button><button type="button" class="bt" id="reset" hidden>Voltar tudo ao orçado</button><button type="button" class="bt acc" id="excel">Baixar Excel</button></div>
+    <div class="acoes"><button type="button" class="bt" id="trava" title="Pede a senha do ARGOS para alterar os valores">Destravar edição</button><button type="button" class="bt" id="desfaz-proj" hidden>Desfazer este projeto</button><button type="button" class="bt" id="reset" hidden>Voltar tudo ao orçado</button><button type="button" class="bt acc" id="excel">Baixar Excel</button></div>
   </div>
   <p class="nota" id="ov-dica"></p>
   <div class="tab-w"><table class="tab" id="ov"></table></div>
   <p class="nota" id="salvo" aria-live="polite"></p>
 </div>
+<dialog id="senha-dlg" aria-labelledby="senha-tit"><form id="senha-form">
+  <h3 id="senha-tit">Senha para alterar o orçamento</h3>
+  <p class="nota">Ver, filtrar e baixar o Excel não precisam de senha. Depois de destravar, vale até fechar esta aba.</p>
+  <input type="password" id="senha-in" class="busca" autocomplete="current-password" aria-label="Senha" required>
+  <p class="nota" id="senha-msg" aria-live="polite"></p>
+  <div class="acoes"><button type="button" class="bt" id="senha-cancela">Cancelar</button><button type="submit" class="bt acc" id="senha-ok">Destravar</button></div>
+</form></dialog>
 
 <div class="sec" id="mes-sec"><details id="det-tab"><summary>Orçado 2027 de todos os SIGCOs, mês a mês (R$ mil)</summary>
   <div class="tab-bar"><div class="f"><span id="l-proj1">Projeto</span><select id="proj1" class="busca" aria-labelledby="l-proj1"></select></div><div class="acoes"><button type="button" class="bt" id="exportar">Baixar (.csv)</button></div></div>
@@ -477,6 +492,22 @@ const auto27 = g => rateia(st.ajuste[g.id] != null ? st.ajuste[g.id] : g.orc, cu
 const pAnoDe = (v, orc) => orc > 0 ? v / orc : null;
 const nAlterados = () => new Set([...Object.keys(st.mensal), ...Object.keys(st.ajuste)]).size;
 
+/* Senha de edição: conferida no Supabase (função argos_confere_senha; lá só fica o hash). Vale até fechar a aba. */
+const SENHA_API = { url: 'https://uabpevnjfcwidbjscowq.supabase.co/rest/v1/rpc/argos_confere_senha', chave: 'sb_publishable_SHH7EV0MT5grOTdCFM-V-w_FqPrtzPh' };
+const CHAVE_LIB = 'argos-orcamento-liberado';
+let liberado = (() => { try { return sessionStorage.getItem(CHAVE_LIB) === '1'; } catch (e) { return false; } })();
+let aposLiberar = null;
+async function confereSenha(senha) {
+  const r = await fetch(SENHA_API.url, { method: 'POST', headers: { apikey: SENHA_API.chave, 'Content-Type': 'application/json' }, body: JSON.stringify({ chave: 'orcamento', senha }) });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return (await r.json()) === true;
+}
+function pedeSenha(depois) {
+  aposLiberar = depois || null;
+  $('#senha-in').value = ''; $('#senha-msg').textContent = ''; $('#senha-msg').className = 'nota';
+  $('#senha-dlg').showModal(); $('#senha-in').focus();
+}
+
 /* Salvar no navegador (localStorage); vale para este computador e navegador. */
 const CHAVE = 'argos-orcamento-sigco';
 let salvoEm = null, salvoErro = false;
@@ -543,7 +574,8 @@ function abas() {
 function controles(E) {
   const v = soma(E.comOrc.map(valor27)), o = soma(E.comOrc.map(g => g.orc));
   if (document.activeElement !== $('#valor')) $('#valor').value = fDec(v, 2);
-  $('#valor').disabled = !E.comOrc.length;
+  $('#valor').disabled = !E.comOrc.length; $('#valor').readOnly = !liberado;
+  $('#trava').hidden = liberado;
   $('#reset').hidden = !nAlterados();
   $('#valor-nota').textContent = !E.comOrc.length ? 'sem orçado 2027 neste recorte' : Math.abs(v - o) >= 0.5 ? `orçado original ${brl(o)}` : 'igual ao orçado';
   ['#sigco', '#proj1', '#proj2'].forEach(q => { $(q).value = st.sel || ''; });
@@ -743,8 +775,8 @@ const pctTxt = v => v == null ? '' : (v > 0 ? '+' : '') + fDec(v * 100, 1);
 const numPct = t => numero(String(t ?? '').replace(/%/g, '').replace(/^\s*\+/, '').replace('−', '-')) / 100;
 function tabelaOV() {
   const O = ovDados(), u26 = D.ultimoMes[2026] || 12, rotMed = `Média ${O.anosB[0]}–26`;
-  const inR = (attr, v, ed, rot, tit) => `<input class="cel${ed ? ' ed' : ''}" ${attr} value="${fDec(v, 2)}" inputmode="decimal" autocomplete="off" aria-label="${esc(rot)}"${tit ? ` title="${esc(tit)}"` : ''}>`;
-  const inP = (attr, v, rot) => v == null ? '<span class="neutro">—</span>' : `<input class="cel pc" ${attr} value="${pctTxt(v)}" inputmode="decimal" autocomplete="off" aria-label="${esc(rot)}">`;
+  const inR = (attr, v, ed, rot, tit) => `<input class="cel${ed ? ' ed' : ''}" ${attr} value="${fDec(v, 2)}" inputmode="decimal" autocomplete="off"${liberado ? '' : ' readonly'} aria-label="${esc(rot)}"${tit ? ` title="${esc(tit)}"` : ''}>`;
+  const inP = (attr, v, rot) => v == null ? '<span class="neutro">—</span>' : `<input class="cel pc" ${attr} value="${pctTxt(v)}" inputmode="decimal" autocomplete="off"${liberado ? '' : ' readonly'} aria-label="${esc(rot)}">`;
   let h;
   if (O.modo === 'mes') {
     const g = O.g;
@@ -796,6 +828,7 @@ function gravaMes(g, m, v) {
 }
 const TIPOS = ['m', 'mp', 'g', 'gp', 'tot', 'totp'];
 function editaOV(inp) {
+  if (!liberado) return false;
   const k = TIPOS.find(t => inp.dataset[t] != null); if (!k) return false;
   const pctual = k === 'mp' || k === 'gp' || k === 'totp';
   const g = IDX.porId.get(k === 'g' || k === 'gp' ? inp.dataset[k] : st.sel); if (!g || !g.tem) return false;
@@ -1048,6 +1081,7 @@ function liga() {
   $('#so-orc').addEventListener('change', e => { st.soOrc = e.target.checked; tudo(); });
   $('#g-leg').addEventListener('click', e => { const b = e.target.closest('[data-ano]'); if (!b) return; st.anos[b.dataset.ano] = !st.anos[b.dataset.ano]; tudo(); });
   $('#valor').addEventListener('change', e => {
+    if (!liberado) return;
     const novo = numero(e.target.value), E = escopo();
     if (!(novo >= 0) || !E.comOrc.length) { e.target.setAttribute('aria-invalid', 'true'); return; }
     e.target.removeAttribute('aria-invalid');
@@ -1057,11 +1091,33 @@ function liga() {
     salva(); e.target.blur(); tudo();
   });
   $('#valor').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.dispatchEvent(new Event('change')); });
+  /* senha: clicar ou digitar num campo travado, ou em "Destravar edição", abre o pedido de senha */
+  const travado = el => !liberado && el && el.matches && el.matches('#valor, #ov input.cel');
+  const reabre = el => () => { const k = el.id === 'valor' ? null : TIPOS.find(t => el.dataset[t] != null), ni = k ? $('#ov').querySelector(`input[data-${k}="${CSS.escape(el.dataset[k])}"]`) : $('#valor'); if (ni) { ni.focus(); ni.select(); } };
+  document.addEventListener('click', e => { if (travado(e.target)) pedeSenha(reabre(e.target)); });
+  document.addEventListener('keydown', e => { if (travado(e.target) && (e.key.length === 1 || e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete')) { e.preventDefault(); pedeSenha(reabre(e.target)); } });
+  $('#trava').addEventListener('click', () => pedeSenha(null));
+  $('#senha-cancela').addEventListener('click', () => $('#senha-dlg').close());
+  $('#senha-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const s = $('#senha-in').value, msg = $('#senha-msg'), bt = $('#senha-ok');
+    if (!s) return;
+    bt.disabled = true; msg.className = 'nota'; msg.textContent = 'Conferindo…';
+    try {
+      if (await confereSenha(s)) {
+        liberado = true; try { sessionStorage.setItem(CHAVE_LIB, '1'); } catch (er) { /* sem armazenamento: vale até recarregar */ }
+        $('#senha-dlg').close(); tudo();
+        const f = aposLiberar; aposLiberar = null; if (f) f();
+      } else { msg.className = 'nota erro'; msg.textContent = 'Senha incorreta.'; $('#senha-in').select(); }
+    } catch (er) { msg.className = 'nota erro'; msg.textContent = 'Não consegui conferir a senha (sem conexão com o servidor). Tente de novo.'; }
+    bt.disabled = false;
+  });
   $('#reset').addEventListener('click', () => {
+    if (!liberado) { pedeSenha(() => $('#reset').click()); return; }
     if (!confirm(`Voltar ao orçado original e apagar as alterações salvas de ${nAlterados()} projeto(s)?`)) return;
     st.ajuste = {}; st.mensal = {}; salva(); tudo();
   });
-  $('#desfaz-proj').addEventListener('click', () => { if (!st.sel) return; delete st.mensal[st.sel]; delete st.ajuste[st.sel]; salva(); tudo(); });
+  $('#desfaz-proj').addEventListener('click', () => { if (!liberado) { pedeSenha(() => $('#desfaz-proj').click()); return; } if (!st.sel) return; delete st.mensal[st.sel]; delete st.ajuste[st.sel]; salva(); tudo(); });
   $('#excel').addEventListener('click', baixaExcel);
   segs('#ins-aba', v => { st.aba = v; });
   $('#ind').addEventListener('change', e => { st.ind = e.target.value || null; quantidades(); });
