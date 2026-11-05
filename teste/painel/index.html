@@ -10,7 +10,7 @@
 .w{max-width:1320px;margin:0 auto}
 .topo{display:grid;grid-template-columns:260px 1fr;gap:var(--s6);align-items:start;margin-bottom:var(--s4)}
 .mapa svg{width:100%;height:auto;display:block}.mapa path{stroke:var(--bg);stroke-width:.6;cursor:pointer;transition:opacity var(--dur)}
-.mapa path.fora{opacity:.18}.mapa .rot{font:600 10px var(--f-mono);fill:var(--fg);pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:3px}
+.mapa path.fora{opacity:.18}.mapa .mapa-fundo{pointer-events:all;cursor:default}.mapa .rot{font:600 10px var(--f-mono);fill:var(--fg);pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:3px}
 .filtros{display:flex;flex-wrap:wrap;gap:var(--s4);align-items:end}
 .f{display:grid;gap:6px}.f>span{font:600 var(--t-xs)/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r2);padding:3px;gap:2px}
@@ -150,16 +150,18 @@ function desenha() {
 // mapa dos polos (filtro)
 (function () {
   const M = D.mapa, cen = {};
-  let s = `<svg viewBox="-6 -6 ${M.w + 12} ${M.h + 12}" role="group" aria-label="Polos do Tocantins">`;
+  let s = `<svg viewBox="-6 -6 ${M.w + 12} ${M.h + 12}" role="group" aria-label="Polos do Tocantins">` +
+    `<rect class="mapa-fundo" x="-6" y="-6" width="${M.w + 12}" height="${M.h + 12}" fill="transparent"><title>Limpar o polo e a regional</title></rect>`;   // fundo invisível: clicar fora do estado tira a seleção
   M.muns.forEach(([n, d, p]) => { s += `<path d="${d}" data-p="${p}" fill="${COR[p.replace(' ', '_')] || 'var(--sem)'}"><title>${n} · polo ${NOME[p] || p}</title></path>`; });
   $('mapa').innerHTML = s + '</svg>';
 })();
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-a],[data-r],[data-p],[data-c],.hit,[data-ir]');
+  const t = e.target.closest('[data-a],[data-r],[data-p],[data-c],.hit,[data-ir],.mapa-fundo');
   if (!t) return;
   if (t.dataset.a) F.ano = t.dataset.a, F.mes = null;
   else if (t.dataset.r !== undefined && t.closest('#regs')) F.reg = t.dataset.r, F.polo = '';
   else if (t.dataset.p !== undefined && t.closest('#pols')) F.polo = t.dataset.p;
+  else if (t.classList.contains('mapa-fundo')) { if (!F.polo && !F.reg) return; F.polo = ''; F.reg = ''; }
   else if (t.tagName === 'path') F.polo = F.polo === t.dataset.p ? '' : t.dataset.p, F.reg = F.polo ? D.polos[F.polo] : F.reg;
   else if (t.dataset.c) F[t.dataset.c] = t.dataset.c === 'mes' ? null : '', t.dataset.c === 'reg' && (F.polo = '');
   else if (t.classList.contains('hit')) F.mes = F.mes === +t.dataset.m ? null : +t.dataset.m;
