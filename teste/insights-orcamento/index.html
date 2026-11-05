@@ -744,15 +744,16 @@ function tabelaOV() {
   let h;
   if (O.modo === 'mes') {
     const g = O.g;
-    h = `<thead><tr><th class="l">Mês</th><th class="oc">Real. 2023</th><th class="oc">Real. 2024</th><th class="oc">Real. 2025</th><th>Real. 2026</th><th>${rotMed}</th><th>Orçado 2027 (R$)</th><th>Variação %</th></tr></thead><tbody>`;
+    h = `<thead><tr><th class="l">Mês</th><th class="oc">Real. 2023</th><th class="oc">Real. 2024</th><th class="oc">Real. 2025</th><th>Real. 2026</th><th>${rotMed}</th><th>Orçado 2027 (R$)</th><th>Variação %</th><th title="Quanto o orçado do mês representa do orçado 2027 do projeto">% do ano</th></tr></thead><tbody>`;
+    const pAno = v => O.tot.orc > 0 ? pct(v / O.tot.orc, 1) : '—';
     O.linhas.forEach(l => {
       const orc = g.tem ? inR(`data-m="${l.m}"`, l.orc, l.ed, `Orçado 2027 de ${MESES_L[l.m]}`, `Pela curva: ${fBRL2.format(l.auto)}`) : '—';
       const vp = g.tem ? inP(`data-mp="${l.m}"`, l.vr, `Variação % de ${MESES_L[l.m]}`) : fVar(l.vr);
       const r26 = l.r[3] != null ? brl(l.r[3]) : l.pj != null ? brl(l.pj) : '—';
-      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td class="oc">${l.r[2] == null ? '—' : brl(l.r[2])}</td><td class="${l.r[3] == null && l.pj != null ? 'pj' : ''}">${r26}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${vp}</td></tr>`;
+      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td class="oc">${l.r[2] == null ? '—' : brl(l.r[2])}</td><td class="${l.r[3] == null && l.pj != null ? 'pj' : ''}">${r26}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${vp}</td><td class="var pano">${pAno(l.orc)}</td></tr>`;
     });
     h += `</tbody><tfoot><tr><td class="l">Total</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td class="oc">${brl(O.tot.r[2])}</td><td title="${O.tot.pj != null ? 'com projeção: ' + brl(O.tot.pj) : ''}">${brl(O.tot.r[3])}${O.tot.pj != null ? `<small class="ob">proj. ${brl(O.tot.pj)}</small>` : ''}</td><td>${brl(O.tot.med)}</td>` +
-      `<td>${g.tem ? inR('data-tot="1"', O.tot.orc, alterado(g), 'Total 2027 do projeto') : '—'}</td><td class="var">${g.tem ? inP('data-totp="1"', O.tot.vr, 'Variação % do total') : fVar(O.tot.vr)}</td></tr></tfoot>`;
+      `<td>${g.tem ? inR('data-tot="1"', O.tot.orc, alterado(g), 'Total 2027 do projeto') : '—'}</td><td class="var">${g.tem ? inP('data-totp="1"', O.tot.vr, 'Variação % do total') : fVar(O.tot.vr)}</td><td class="var pano">${O.tot.orc > 0 ? '100%' : '—'}</td></tr></tfoot>`;
     $('#ov-dica').innerHTML = `<button type="button" class="chip" id="ov-voltar">‹ Todos os projetos</button>` + (!g.tem ? `O SIGCO ${esc(g.id)} não tem orçado 2027.`
       : `<b>${esc(g.id)}</b> · ${esc(g.itens.map(i => i.n).join(' + '))}. Digite o valor em R$ ou a variação % de cada mês (ou do total, na última linha) e tecle Enter.${u26 < 12 ? ` Real. 2026 até ${MESES[u26 - 1].toLowerCase()}.` : ''}`);
     $('#desfaz-proj').hidden = !alterado(g);
@@ -1128,11 +1129,11 @@ function exporta() {
 function dadosExcel() {
   const anosB = BASES[st.base === 'planilha' ? 'b2326' : st.base], rotMed = `Média ${anosB[0]}–2026`;
   const aba1 = [['SIGCO', 'Projeto', 'Objetivo', 'Orçado 2027 (planilha)', 'Orçado 2027 (usado)', 'Alterado', ...MESES.map(m => m + '/2027')]];
-  const aba2 = [['SIGCO', 'Projeto', 'Objetivo', 'Mês', 'Realizado 2023', 'Realizado 2024', 'Realizado 2025', 'Realizado 2026', rotMed, 'Orçado 2027', 'Variação % (orçado ÷ média − 1)', 'Mês alterado']];
+  const aba2 = [['SIGCO', 'Projeto', 'Objetivo', 'Mês', 'Realizado 2023', 'Realizado 2024', 'Realizado 2025', 'Realizado 2026', rotMed, 'Orçado 2027', 'Variação % (orçado ÷ média − 1)', '% do ano 2027 (orçado do mês ÷ orçado do projeto)', 'Mês alterado']];
   IDX.grupos.forEach(g => {
     const d = distrib(g), auto = rateia(g.orc, curva(g)), med = mediaMes(g.m, anosB), R = ANOS_L.map(a => realAno(g.m, a)), nome = g.itens.map(i => i.n).join(' + ');
     aba1.push([g.id, nome, g.o, g.orc, valor27(g), alterado(g) ? 'sim' : 'não', ...d]);
-    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], R[3][m], r2(med[m]), d[m], variacao(d[m], med[m]), st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
+    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], R[3][m], r2(med[m]), d[m], variacao(d[m], med[m]), soma(d) > 0 ? d[m] / soma(d) : null, st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
   });
   const aba3 = [['Parâmetro', 'Valor'], ['Fonte', D.fonte], ['Dados de', D.gerado], ['Curva de 2027', st.base === 'planilha' ? 'aba Curva da planilha' : `realizado ${anosB[0]}–2026`],
     ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Realizado de 2026', 'só até o último mês da planilha, sem projeção'], ['Média / variação %', `média ${anosB.join(', ')} por mês${avisoNovDez(anosB) ? '; ' + avisoNovDez(anosB) : ''}`], ['Realizado (responsáveis)', 'DCMD completo: gerência e coordenações (todos os responsáveis da aba Realizado)'], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
@@ -1142,15 +1143,15 @@ async function baixaExcel() {
   const sv = $('#salvo'), A = dadosExcel();
   try {
     const X = await carregaXLSX(), wb = X.utils.book_new();
-    const folha = (aoa, pctCol) => {
+    const folha = (aoa, ...pctCols) => {
       const ws = X.utils.aoa_to_sheet(aoa);
-      Object.keys(ws).forEach(k => { if (k[0] === '!') return; const c = ws[k]; if (c.t === 'n') c.z = X.utils.decode_cell(k).c === pctCol ? '0.0%' : '#,##0.00'; });
+      Object.keys(ws).forEach(k => { if (k[0] === '!') return; const c = ws[k]; if (c.t === 'n') c.z = pctCols.includes(X.utils.decode_cell(k).c) ? '0.0%' : '#,##0.00'; });
       ws['!cols'] = aoa[0].map((_, i) => ({ wch: i === 1 ? 46 : i === 2 ? 22 : 15 }));
       return ws;
     };
-    X.utils.book_append_sheet(wb, folha(A.aba1, -1), 'Orçado 2027 mensal');
-    X.utils.book_append_sheet(wb, folha(A.aba2, 10), 'Orçado x realizado');
-    X.utils.book_append_sheet(wb, folha(A.aba3, -1), 'Parâmetros');
+    X.utils.book_append_sheet(wb, folha(A.aba1), 'Orçado 2027 mensal');
+    X.utils.book_append_sheet(wb, folha(A.aba2, 10, 11), 'Orçado x realizado');
+    X.utils.book_append_sheet(wb, folha(A.aba3), 'Parâmetros');
     X.writeFile(wb, 'orcamento-sigco-2027.xlsx');
   } catch (e) {
     const csvC = v => { const s = typeof v === 'number' ? fDec(v, 2) : String(v ?? ''); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
