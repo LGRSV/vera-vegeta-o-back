@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="../assets/site.css">
 <style>
 /* Tela inicial nova do ARGOS: módulos em cartões, cada módulo abre num quadro (iframe) e o dock embaixo troca entre eles.
-   Shift sozinho volta à versão anterior (../index.html) e lembra a escolha. */
+   */
 html,body{height:100%;overscroll-behavior-y:contain}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);display:flex;flex-direction:column;height:100dvh;overflow:hidden}
 button,a{-webkit-tap-highlight-color:transparent}
@@ -31,8 +31,6 @@ main{flex:1;min-height:0;position:relative;overflow:auto}
 .module:hover .module-icon{transform:translateY(-2px)}
 .secondary{margin-top:22px;padding-top:22px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .secondary .module{min-height:100px}
-.dica{max-width:none;margin:22px 0 0;text-align:center;color:var(--muted);font-size:var(--t-xs)}
-.dica kbd{font:600 var(--t-xs) var(--f-mono);border:1px solid var(--line-forte);border-radius:4px;padding:1px 6px}
 .screen{position:absolute;inset:0;display:none}
 .screen iframe{border:0;width:100%;height:100%;display:block;background:var(--bg)}
 .tools{max-width:950px;margin:auto;padding:24px 24px 40px}
@@ -67,7 +65,6 @@ main{flex:1;min-height:0;position:relative;overflow:auto}
     <div class="hero"><p>MANUTENÇÃO · VEGETAÇÃO · PLANEJAMENTO</p></div>
     <div class="grid" id="modules"></div>
     <div class="secondary" id="secundarios"></div>
-    <p class="dica"><kbd>Shift</kbd> volta à versão anterior · <a href="../index.html?classico=1" id="classico">abrir a versão anterior</a></p>
   </section>
   <section class="screen" id="screen"><iframe id="frame" title="Módulo ARGOS" allow="fullscreen; clipboard-write"></iframe></section>
   <section class="tools" id="scripts" hidden>
@@ -194,37 +191,11 @@ function liga(w, raiz) {
 }
 liga(window, () => $('main'));
 
-// ---- Shift sozinho: volta à versão anterior (também com o foco dentro do módulo)
-function shiftSolo(w, aoSolo, ocupado) {
-  let t = 0; const zera = () => { t = 0; };
-  w.addEventListener('keydown', e => {
-    t = e.key === 'Shift' && !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey && !e.isComposing && !ocupado(e.target) ? Date.now() : 0;
-  }, true);
-  w.addEventListener('keyup', e => {
-    const ok = e.key === 'Shift' && t && Date.now() - t < 600;
-    t = 0;
-    if (ok && !ocupado(e.target)) aoSolo();
-  }, true);
-  ['pointerdown', 'mousedown', 'wheel', 'contextmenu', 'blur'].forEach(n => w.addEventListener(n, zera, true));
-}
-const docFrame = () => { try { return frame.contentDocument; } catch (e) { return null; } };
-function ocupado(el) {
-  if (el && (el.isContentEditable || (el.closest && el.closest('input,textarea,select')))) return true;
-  return [document, docFrame()].some(d => d && d.querySelector('dialog[open]'));
-}
-function paraClassico() {
-  let u = '../index.html' + location.search.replace(/[?&]classico=1/, '');
-  try { sessionStorage.setItem('visao', 'classico'); } catch (e) { u += (u.indexOf('?') < 0 ? '?' : '&') + 'classico=1'; }
-  location.replace(u);
-}
-shiftSolo(window, paraClassico, ocupado);
-$('classico').addEventListener('click', e => { e.preventDefault(); paraClassico(); });
-
-// ---- módulo carregado: gestos, Shift, título oculto (o módulo atual aparece no topo), tema e "Atualizar bases"
+// ---- módulo carregado: gestos, título oculto (o módulo atual aparece no topo), tema e "Atualizar bases"
 frame.addEventListener('load', () => {
   let w, d;
   try { w = frame.contentWindow; d = frame.contentDocument; if (!d) return; } catch (e) { console.warn('ARGOS: módulo fora da mesma origem'); return; }
-  liga(w); shiftSolo(w, paraClassico, ocupado);
+  liga(w);
   const st = d.createElement('style');
   st.textContent = 'header.cab h1,.pd-cab h1{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}';
   d.head.appendChild(st);
