@@ -348,7 +348,7 @@ svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stro
 
 <div class="sec"><h2>Dados</h2>
   <div class="dados"><button type="button" class="bt" data-abrir>Atualizar planilhas (.xlsx)</button></div>
-  <p class="nota">Curva orçamento.xlsx e/ou Qtd_2026.xlsx. Realizado de todos os responsáveis (como a tabela dinâmica do Excel); quantidades só do DCMD.</p>
+  <p class="nota">Curva orçamento.xlsx e/ou Qtd_2026.xlsx. Realizado do DCMD completo: gerência e coordenações (COCMs, COEP, COPC e LPT), igual à tabela dinâmica do Excel. Quantidades da Qtd_2026 (DCMD).</p>
   <p class="nota" id="arq-info" aria-live="polite"></p>
 </div>
 </main>
@@ -870,7 +870,7 @@ function quantidades() {
     $('#qt').innerHTML = h;
     $('#qt-dica').textContent = `${q.id} · ${q.n}. Orçado ${D.alvo} dos SIGCOs ${q.gs.map(g => g.id).join(', ') || '—'}${q.rs ? `; quantidade = orçado ÷ ${fBRL2.format(q.rs)} por unidade (aba Ligações projetos): o total do ano é arredondado e as unidades são repartidas nos meses na proporção do orçado` : '; sem R$ por unidade na aba Ligações projetos, então não há quantidade de ' + D.alvo}. Mudou o orçado, muda a quantidade.`;
   }
-  $('#qt-nota').textContent = `Só Dpto = DCMD. ${D.qtd.ano}: meses depois de ${mu} são projeção. R$/unid. real = realizado em R$ (todos os responsáveis, jan–${mu}) ÷ quantidade realizada jan–${mu}. Meta de ligações ${D.alvo} da aba Ligações projetos aparece ao passar o mouse na quantidade.`;
+  $('#qt-nota').textContent = `Só Dpto = DCMD. ${D.qtd.ano}: meses depois de ${mu} são projeção. R$/unid. real = realizado em R$ do DCMD (jan–${mu}) ÷ quantidade realizada jan–${mu}. Meta de ligações ${D.alvo} da aba Ligações projetos aparece ao passar o mouse na quantidade.`;
   $('#qt').querySelectorAll('td.orc').forEach((td, i) => { const q = st.ind ? Q.find(x => x.id === st.ind) : Q[i]; if (q && q.lig) td.title = `Meta ${D.alvo} (Ligações projetos): ${qn(q.lig)}`; });
 }
 function quantGraf(q) {
@@ -1279,7 +1279,7 @@ async function importa(arqs) {
 }
 function fonteTxt() {
   const u = D.ultimoMes, anos = Object.keys(u), ua = anos[anos.length - 1];
-  return `Fonte: ${D.fonte} (dados de ${D.gerado.split('-').reverse().join('/')}) · ${IDX.grupos.length} SIGCOs com orçado ${D.alvo} · ${Object.keys(D.real).length} SIGCOs com realizado (${D.resp === 'DCMD' ? 'só DCMD' : 'todos os responsáveis'}) de ${anos[0]} a ${ua} (último mês: ${MESES[u[ua] - 1].toLowerCase()}/${ua})` +
+  return `Fonte: ${D.fonte} (dados de ${D.gerado.split('-').reverse().join('/')}) · ${IDX.grupos.length} SIGCOs com orçado ${D.alvo} · ${Object.keys(D.real).length} SIGCOs com realizado do DCMD (gerência e coordenações) de ${anos[0]} a ${ua} (último mês: ${MESES[u[ua] - 1].toLowerCase()}/${ua})` +
     (D.qtd ? ` · quantidades: ${D.qtd.fonte} (${D.qtd.ind.length} indicadores do DCMD)` : ' · sem planilha de quantidades');
 }
 function usa(d) {
