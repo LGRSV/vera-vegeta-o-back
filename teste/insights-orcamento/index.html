@@ -341,7 +341,7 @@ svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stro
     <div class="tab-w"><table class="tab lg" id="log-tab"></table></div>
     <div class="regras">
       <div><h3>Orçado de cada SIGCO</h3><p>Vem da aba <b>Orçado Futuro</b> e só é espalhado pelos 12 meses. Chaves com mais de um número (ex.: 8364/8405) usam o realizado de todos eles.</p></div>
-      <div><h3>Curva pelo realizado</h3><p>Peso do mês = média do realizado do mês nos anos da base (2026 até o último mês com dado); negativo conta como zero; sem realizado, 1/12 por mês.</p></div>
+      <div><h3>Curva pelo realizado</h3><p>Peso do mês = média do realizado do mês nos anos da base (nov–dez sem 2026, que só tem realizado até outubro); média negativa (estornos) conta como zero; sem realizado, 1/12 por mês.</p></div>
       <div><h3>Fecha no centavo</h3><p>Os 12 meses somam exatamente o valor do SIGCO. Mudar o total do filtro reparte o novo valor na proporção do orçado.</p></div>
     </div></div>
 </div>
@@ -561,7 +561,7 @@ function resumo(E, S) {
     cartao(2025, 'Realizado 2025', t(2025), vari(t(2025), t(2024), 'vs 2024')),
     cartao(2026, u26 < 12 ? `Realizado 2026 · jan–${mu}` : 'Realizado 2026', t(2026), (u26 < 12 ? vari(t(2026), t25ate, `vs jan–${mu} 2025`) : vari(t(2026), t(2025), 'vs 2025')) +
       (S.p2026 ? `<em class="neutro">proj. ano ${curto(t(2026) + soma(S.p2026))}</em>` : '')),
-    cartao(2027, 'Orçado 2027', t(2027), vari(t(2027), t(2025), 'vs realizado 2025')),
+    cartao(2027, 'Orçado 2027', t(2027), vari(t(2027), soma(mediaMes(numsDe(E.comOrc), baseAnos())), `vs média ${baseAnos()[0]}–26`)),
     `<div class="r"><small>Pico de 2027</small><b>${t(2027) > 0 ? MESES[pico] : '—'}</b><em class="neutro">${t(2027) > 0 ? curto(S[2027][pico]) + ' · ' + pct(S[2027][pico] / t(2027)) + ' do ano' : 'sem orçado'}</em></div>`,
   ].join('');
 }
@@ -643,7 +643,7 @@ function grafico(E, S) {
   $('#g-leg').innerHTML = anos.map(a => `<li><button type="button" data-ano="${a}" aria-pressed="${st.anos[a]}"><svg width="22" height="8" aria-hidden="true"><line x1="1" x2="21" y1="4" y2="4" style="stroke:var(--a${a});stroke-width:3${a === 2027 ? ';stroke-dasharray:5 3' : ''}"/></svg>${a}${a === 2027 ? ' orçado' : ''} <span>${curto(soma(S[a]))}${a === 2026 && P ? ` · proj. ${curto(soma(S[a]) + soma(P))}` : ''}</span></button></li>`).join('');
   const notas = [];
   if (u26 < 12) notas.push(P ? `2026: real até ${MESES_L[u26 - 1]}; ${MESES_L[u26]}–dezembro projetados (pontilhado) pela ${PROJ.rotulo[PROJ.metodo]}.` : `2026 até ${MESES_L[u26 - 1]}.`);
-  notas.push(`2027 = orçado espalhado pela curva ${st.base === 'planilha' ? 'da planilha' : 'do realizado ' + BASES[st.base][0] + '–2026'}.`);
+  notas.push(`2027 = orçado espalhado pela curva ${st.base === 'planilha' ? 'da planilha' : 'do realizado ' + BASES[st.base][0] + '–2026' + (avisoNovDez() ? '; ' + avisoNovDez() : '')}.`);
   if (nAlterados()) notas.push(`${nAlterados()} projeto(s) alterado(s) na tela.`);
   $('#g-nota').textContent = notas.join(' ');
 }
@@ -662,6 +662,7 @@ function dica(ev, html) {
 const COLS = [
   { k: 'id', t: 'SIGCO', l: true, v: x => x.g.id },
   { k: 'n', t: 'Projeto', l: true, v: x => x.g.n },
+  { k: 'r2023', t: '2023', v: x => x.r[2023], oc: true },
   { k: 'r2024', t: '2024', v: x => x.r[2024], oc: true },
   { k: 'r2025', t: '2025', v: x => x.r[2025], oc: true },
   { k: 'r2026', t: '2026', v: x => x.r[2026] },
@@ -670,7 +671,7 @@ const COLS = [
 ];
 function linhasTab() {
   return IDX.grupos.filter(g => st.sel ? g.id === st.sel : (st.obj === 'Todos' || g.o === st.obj))
-    .map(g => ({ g, v: valor27(g), d: distrib(g), r: Object.fromEntries(ANOS_R.map(a => [a, soma(realAno(g.m, a))])) }));
+    .map(g => ({ g, v: valor27(g), d: distrib(g), r: Object.fromEntries(ANOS_L.map(a => [a, soma(realAno(g.m, a))])) }));
 }
 function tabela() {
   const c = COLS.find(c => c.k === st.ord.col) || COLS.find(c => c.k === 'orc');
@@ -680,7 +681,7 @@ function tabela() {
     return r * st.ord.dir || a.g.id.localeCompare(b.g.id, 'pt-BR', { numeric: true });
   });
   const u26 = D.ultimoMes[2026] || 12;
-  let h = `<thead><tr><th colspan="2"></th><th class="grp oc" colspan="2">Realizado</th><th class="grp">${u26 < 12 ? `até ${MESES[u26 - 1].toLowerCase()}` : ''}</th><th></th><th class="grp" colspan="12">2027 por mês</th></tr><tr>`;
+  let h = `<thead><tr><th colspan="2"></th><th class="grp oc" colspan="3">Realizado</th><th class="grp">${u26 < 12 ? `até ${MESES[u26 - 1].toLowerCase()}` : ''}</th><th></th><th class="grp" colspan="12">2027 por mês</th></tr><tr>`;
   COLS.forEach(col => {
     const s = st.ord.col === col.k ? (st.ord.dir < 0 ? 'descending' : 'ascending') : null;
     h += `<th class="${col.l ? 'l' : ''}${col.oc ? ' oc' : ''}"${s ? ` aria-sort="${s}"` : ''}><button type="button" data-ord="${col.k}">${col.t}</button></th>`;
@@ -691,13 +692,13 @@ function tabela() {
     const pico = x.d.reduce((b, v, i) => v > x.d[b] ? i : b, 0), plano = x.v > 0 && Math.max(...x.d) - Math.min(...x.d) > 1, aj = alterado(x.g);
     h += `<tr data-s="${esc(x.g.id)}" class="${x.g.id === st.sel ? 'sel' : ''}" tabindex="0" aria-selected="${x.g.id === st.sel}">
       <td class="l m">${esc(x.g.id).replace(/\//g, '/<wbr>')}</td><td class="l d">${esc(nomeG(x.g))}<small class="ob">${esc(x.g.o)}</small></td>
-      <td class="oc">${mil(x.r[2024])}</td><td class="oc">${mil(x.r[2025])}</td><td>${mil(x.r[2026])}</td>
+      <td class="oc">${mil(x.r[2023])}</td><td class="oc">${mil(x.r[2024])}</td><td class="oc">${mil(x.r[2025])}</td><td>${mil(x.r[2026])}</td>
       <td class="orc">${mil(x.v)}${aj ? ' <span class="tag">alterado</span>' : ''}</td>
       ${x.d.map((v, i) => `<td class="mm${i === pico && plano ? ' pico' : ''}">${mil(v)}</td>`).join('')}</tr>`;
   });
   const tot = k => soma(ls.map(k));
   h += `</tbody><tfoot><tr><td class="l" colspan="2">Total · ${ls.length} SIGCOs</td>
-    <td class="oc">${mil(tot(x => x.r[2024]))}</td><td class="oc">${mil(tot(x => x.r[2025]))}</td><td>${mil(tot(x => x.r[2026]))}</td>
+    ${(un => ANOS_L.map(a => `<td${a < 2026 ? ' class="oc"' : ''}>${mil(soma(realAno(un, a)))}</td>`).join(''))(numsDe(ls.map(x => x.g)))}
     <td>${mil(tot(x => x.v))}</td>${MESES.map((_, i) => `<td class="mm">${mil(tot(x => x.d[i]))}</td>`).join('')}</tr></tfoot>`;
   $('#tab').innerHTML = h;
   $('#tab-nota').textContent = `R$ mil · total exato ${fBRL2.format(tot(x => x.v))} · mês sublinhado = maior valor de 2027 · clique no cabeçalho para ordenar.`;
@@ -721,11 +722,19 @@ function ovDados() {
     const med = soma(mediaMes(x.m, anosB)), v = valor27(x);
     return { g: x, r: ANOS_R.map(a => soma(realAno(x.m, a))), med, orc: v, vr: variacao(v, med) };
   }).sort((a, b) => b.orc - a.orc);
-  const tot = { r: ANOS_R.map((_, i) => soma(linhas.map(l => l.r[i]))), med: soma(linhas.map(l => l.med)), orc: soma(linhas.map(l => l.orc)) };
+  const un = numsDe(linhas.map(l => l.g));
+  const tot = { r: ANOS_R.map(a => soma(realAno(un, a))), med: soma(mediaMes(un, anosB)), orc: soma(linhas.map(l => l.orc)) };
   tot.vr = variacao(tot.orc, tot.med);
   return { modo: 'proj', anosB, linhas, tot };
 }
 const baseAnos = () => BASES[st.base === 'planilha' ? 'b2326' : st.base];
+/* Totais somam cada número de SIGCO uma vez só (ex.: o 68733 está em duas chaves da aba Curva). */
+const numsDe = gs => [...new Set(gs.flatMap(g => g.m))];
+/* Meses sem realizado em 2026 usam a média dos outros anos da base. */
+function avisoNovDez(anos = baseAnos()) {
+  const u = D.ultimoMes[2026] || 12;
+  return u < 12 && anos.includes(2026) ? `${MESES[u].toLowerCase()}–dez: média de ${anos.filter(a => a < 2026).join(', ').replace(/, (\d+)$/, ' e $1')}, porque 2026 só tem realizado até ${MESES[u - 1].toLowerCase()}` : '';
+}
 const pctTxt = v => v == null ? '' : (v > 0 ? '+' : '') + fDec(v * 100, 1);
 const numPct = t => numero(String(t ?? '').replace(/%/g, '').replace(/^\s*\+/, '').replace('−', '-')) / 100;
 function tabelaOV() {
@@ -755,7 +764,7 @@ function tabelaOV() {
         `<td><button type="button" class="abre" data-s="${esc(l.g.id)}">Meses</button></td></tr>`;
     });
     h += `</tbody><tfoot><tr><td class="l">Total · ${O.linhas.length} projetos</td><td class="oc">${brl(O.tot.r[2])}</td><td>${brl(O.tot.med)}</td><td>${fBRL2.format(O.tot.orc)}</td><td class="var">${fVar(O.tot.vr)}</td><td></td></tr></tfoot>`;
-    $('#ov-dica').textContent = `Digite o valor em R$ ou a variação % de cada SIGCO e tecle Enter. "Meses" abre o projeto mês a mês. Variação % = orçado 2027 ÷ média ${O.anosB[0]}–2026 − 1.`;
+    $('#ov-dica').textContent = `Digite o valor em R$ ou a variação % de cada SIGCO e tecle Enter. "Meses" abre o projeto mês a mês. Variação % = orçado 2027 ÷ média ${O.anosB[0]}–2026 − 1${avisoNovDez(O.anosB) ? '; ' + avisoNovDez(O.anosB) : ''}. Os totais contam cada SIGCO uma vez só.`;
     $('#desfaz-proj').hidden = true;
   }
   $('#ov').innerHTML = h;
@@ -847,7 +856,7 @@ function quantidades() {
   const fv = v => fVar(v);
   if (!st.ind) {
     const lim = Math.max(2, ...Q.map(q => q.at || 0));
-    $('#qt-g').innerHTML = `<div class="leg2"><span><i style="background:var(--a2026)"></i>realizado jan–${mu}</span><span><i style="background:repeating-linear-gradient(45deg,var(--a2026) 0 3px,transparent 3px 6px)"></i>projeção nov–dez</span><span><i style="background:var(--fg);width:2px"></i>100% do previsto</span></div><div class="qb">` +
+    $('#qt-g').innerHTML = `<div class="leg2"><span><i style="background:var(--a2026)"></i>realizado jan–${mu}</span><span><i style="background:repeating-linear-gradient(45deg,var(--a2026) 0 3px,transparent 3px 6px)"></i>projeção ${MESES[u].toLowerCase()}–dez</span><span><i style="background:var(--fg);width:2px"></i>100% do previsto</span></div><div class="qb">` +
       Q.map(q => {
         const a1 = q.prevT > 0 ? q.realAte / q.prevT : 0, a2 = q.at || 0;
         return `<button type="button" data-ind="${esc(q.id)}"><span class="n"><b class="m">${esc(q.id)}</b> · ${esc(q.n)}</span><span class="tr"><i style="width:${(Math.min(a1, lim) / lim * 100).toFixed(2)}%"></i><i class="pj" style="left:${(Math.min(a1, lim) / lim * 100).toFixed(2)}%;width:${(Math.max(0, Math.min(a2, lim) - Math.min(a1, lim)) / lim * 100).toFixed(2)}%"></i><u style="left:${(1 / lim * 100).toFixed(2)}%"></u></span><span class="v ${q.at == null ? 'neutro' : q.at >= 1 ? 'sobe' : 'desce'}">${q.at == null ? '—' : pct(q.at, 0)}</span><span class="x">${qn(q.realT)} de ${qn(q.prevT)}</span></button>`;
@@ -857,7 +866,7 @@ function quantidades() {
       h += `<tr data-ind="${esc(q.id)}" tabindex="0"><td class="l d"><b class="m">${esc(q.id)}</b> · ${esc(q.n)}<small class="ob">${esc(q.cap)}</small></td><td>${qn(q.prevT)}</td><td>${qn(q.realAte)}</td><td>${qn(q.realT)}</td><td class="var">${q.at == null ? '—' : `<span class="${q.at >= 1 ? 'sobe' : 'desce'}">${pct(q.at, 0)}</span>`}</td><td class="oc">${q.custo ? brl(q.custo) : '—'}</td><td>${q.rs ? brl(q.rs) : '—'}</td><td class="orc">${qn(q.q27T)}</td><td class="var">${fv(q.vr)}</td></tr>`;
     });
     $('#qt').innerHTML = h + '</tbody>';
-    $('#qt-dica').textContent = `Escolha um indicador (ou clique na barra) para ver mês a mês. Realizado ${ano}: jan–${mu} real e nov–dez projeção (planilha ${D.qtd.fonte}).`;
+    $('#qt-dica').textContent = `Escolha um indicador (ou clique na barra) para ver mês a mês. Realizado ${ano}: jan–${mu} real e ${MESES[u].toLowerCase()}–dez projeção da planilha ${D.qtd.fonte}.`;
   } else {
     const q = Q.find(x => x.id === st.ind);
     quantGraf(q);
@@ -900,9 +909,10 @@ function insights() {
   const L = [], u = D.ultimoMes[2026] || 12, mu = MESES[u - 1].toLowerCase(), nums = Object.keys(D.real);
   const tot = a => soma(realAno(nums, a)), ate = (a, n) => soma(realAno(nums, a).slice(0, n));
   const base = BASES[st.base === 'planilha' ? 'b2326' : st.base];
-  const O = soma(IDX.grupos.map(valor27)), r25 = tot(2025);
+  const O = soma(IDX.grupos.map(valor27));
   const sinal = v => (v > 0 ? '+' : v < 0 ? '−' : '') + pct(Math.abs(v), Math.abs(v) >= 0.995 ? 0 : 1);
-  if (r25 > 0) L.push({ k: 'orc25', num: O / r25 - 1, t: 'Orçado 2027 × realizado 2025', v: sinal(O / r25 - 1), c: O >= r25 ? 'sobe' : 'desce', d: `${curto(O)} orçados para 2027 contra ${curto(r25)} realizados em 2025.` });
+  const Mh = soma(mediaMes(numsDe(IDX.grupos), base));
+  if (Mh > 0) L.push({ k: 'orcmed', num: O / Mh - 1, t: `Orçado 2027 × média ${base[0]}–2026`, v: sinal(O / Mh - 1), c: O >= Mh ? 'sobe' : 'desce', d: `${curto(O)} orçados para 2027 contra média de ${curto(Mh)} por ano no realizado dos mesmos projetos${avisoNovDez(base) ? '; ' + avisoNovDez(base) : ''}.` });
   const a26 = ate(2026, u), a25 = ate(2025, u);
   if (a25 > 0) L.push({ k: 'ritmo', num: a26 / a25 - 1, t: `Ritmo de 2026 (jan–${mu})`, v: sinal(a26 / a25 - 1), c: a26 >= a25 ? 'sobe' : 'desce', d: `${curto(a26)} realizados contra ${curto(a25)} no mesmo período de 2025.` });
   const pTodos = projecao(nums);
@@ -914,7 +924,7 @@ function insights() {
   if (up && up.x > 0) L.push({ k: 'up', num: up.x, sel: up.g.id, t: 'Maior aumento sobre o histórico', v: sinal(up.x), c: 'sobe', d: `${up.g.id} · ${up.g.n}: ${curto(up.v)} em 2027 contra média de ${curto(up.m)} por ano.` });
   if (dn && dn.x < 0) L.push({ k: 'dn', num: dn.x, sel: dn.g.id, t: 'Maior corte sobre o histórico', v: sinal(dn.x), c: 'desce', d: `${dn.g.id} · ${dn.g.n}: ${curto(dn.v)} em 2027 contra média de ${curto(dn.m)} por ano.` });
   const novos = IDX.grupos.filter(g => !(soma(mediaMes(g.m, base).map(v => Math.max(0, v))) > 0) && valor27(g) > 0);
-  if (novos.length) L.push({ k: 'novos', num: novos.length, t: 'Projetos sem histórico', v: String(novos.length), d: `somam ${curto(soma(novos.map(valor27)))} em 2027 sem realizado em ${base[0]}–2026: a curva fica plana (1/12 por mês).` });
+  if (novos.length) L.push({ k: 'novos', num: novos.length, t: 'Projetos sem histórico', v: String(novos.length), d: `somam ${curto(soma(novos.map(valor27)))} em 2027 sem realizado em ${base[0]}–2026: nas curvas pelo realizado, ficam com 1/12 por mês.` });
   const so = IDX.soltos.map(g => ({ g, r: soma(realAno(g.m, 2026)) })).filter(x => x.r > 0).sort((a, b) => b.r - a.r);
   if (so.length) L.push({ k: 'semorc', num: so.length, sel: so[0].g.id, t: 'Realizado 2026 sem orçado 2027', v: `${so.length} SIGCOs`, d: `${curto(soma(so.map(x => x.r)))} realizados em 2026 (jan–${mu}) sem orçado 2027; o maior é o ${so[0].g.id} (${curto(so[0].r)}).` });
   const S27 = Array(12).fill(0); IDX.grupos.forEach(g => distrib(g).forEach((v, m) => { S27[m] += v; }));
@@ -923,7 +933,7 @@ function insights() {
   if (D.qtd) {
     const Q = qtdIndicadores().filter(q => q.at != null && q.prevT >= 20);
     const lo = Q.slice().sort((a, b) => a.at - b.at)[0], hi = Q.slice().sort((a, b) => b.at - a.at)[0];
-    if (lo && lo.at < 1) L.push({ k: 'qlo', num: lo.at, ind: lo.id, t: `Quantidade abaixo do previsto ${D.qtd.ano}`, v: pct(lo.at, 0), c: 'desce', d: `${lo.n} (${lo.id}): ${qn(lo.realT)} de ${qn(lo.prevT)} previstas, já contando a projeção de nov–dez.` });
+    if (lo && lo.at < 1) L.push({ k: 'qlo', num: lo.at, ind: lo.id, t: `Quantidade abaixo do previsto ${D.qtd.ano}`, v: pct(lo.at, 0), c: 'desce', d: `${lo.n} (${lo.id}): ${qn(lo.realT)} de ${qn(lo.prevT)} previstas, já contando a projeção da planilha para ${MESES[lo.u].toLowerCase()}–dez.` });
     if (hi && hi.at > 1) L.push({ k: 'qhi', num: hi.at, ind: hi.id, t: `Quantidade acima do previsto ${D.qtd.ano}`, v: pct(hi.at, 0), c: 'sobe', d: `${hi.n} (${hi.id}): ${qn(hi.realT)} contra ${qn(hi.prevT)} previstas.` });
     const cu = qtdIndicadores().filter(q => q.custo && q.rs && q.realAte >= 20).map(q => ({ q, x: q.rs / q.custo - 1 })).sort((a, b) => Math.abs(b.x) - Math.abs(a.x))[0];
     if (cu) L.push({ k: 'custo', num: cu.x, ind: cu.q.id, t: 'R$ por unidade: 2027 × realizado 2026', v: sinal(cu.x), c: cu.x >= 0 ? 'sobe' : 'desce', d: `${cu.q.n} (${cu.q.id}): ${brl(cu.q.rs)} por unidade no orçado 2027 contra ${brl(cu.q.custo)} realizados em 2026 (jan–${mu}).` });
@@ -963,7 +973,7 @@ function visoes() {
       `</tbody><tfoot><tr><td class="l">Todos do filtro (${L.length})</td>${T.map(v => cel(tt > 0 ? v / tt : 0)).join('')}<td class="t">${curto(tt)}</td></tr></tfoot></table></div>`;
   } else {
     const objs = [...new Set(IDX.grupos.map(g => g.o))].map(o => {
-      const g2 = IDX.grupos.filter(g => g.o === o), v = soma(g2.map(valor27)), m = soma(g2.map(g => soma(mediaMes(g.m, base))));
+      const g2 = IDX.grupos.filter(g => g.o === o), v = soma(g2.map(valor27)), m = soma(mediaMes(numsDe(g2), base));
       return { o, v, m, x: m > 0 ? v / m - 1 : null, n: g2.length };
     }).sort((a, b) => b.v - a.v);
     const mx = Math.max(...objs.flatMap(x => [x.v, x.m]), 1);
@@ -993,7 +1003,7 @@ function logica() {
     <li><span><span class="ds">Orçado 2027 do SIGCO (aba Orçado Futuro${g.itens.length > 1 ? ', somando ' + g.itens.map(i => i.p).join(' + ') : ''})${alterado(g) ? ' · alterado na tela' : ''}</span><span class="fx"><b>${fBRL2.format(v)}</b></span></span></li>
     ${plan ? `<li><span><span class="ds">Curva usada: a da aba Curva da planilha (Perc_Mes)</span><span class="fx">${MESES[ex]}: <b>${pct(c[ex], 2)}</b> do ano</span></span></li>` : semReal
       ? `<li><span><span class="ds">Sem realizado nos anos da base: a curva fica igual em todos os meses</span><span class="fx">1 ÷ 12 = <b>${pct(1 / 12, 2)}</b> por mês</span></span></li>`
-      : `<li><span><span class="ds">Média do realizado de cada mês nos anos da base (SIGCO ${g.m.join(' + ')}); exemplo com o mês de maior peso</span><span class="fx">${MESES[ex]}: (${anosMes(ex).map(a => brl(rm(a, ex))).join(' + ')}) ÷ ${anosMes(ex).length} = <b>${brl(med[ex])}</b>${u26 < 12 ? `<br>${MESES[11]}: só ${anosMes(11).join(' e ')}, porque 2026 tem dado até ${MESES[u26 - 1].toLowerCase()} = ${brl(med[11])}` : ''}</span></span></li>
+      : `<li><span><span class="ds">Média do realizado de cada mês nos anos da base (SIGCO ${g.m.join(' + ')}); exemplo com o mês de maior peso</span><span class="fx">${MESES[ex]}: (${anosMes(ex).map(a => brl(rm(a, ex))).join(' + ')}) ÷ ${anosMes(ex).length} = <b>${brl(med[ex])}</b>${u26 < 12 ? `<br>${MESES[u26]}–${MESES[11]}: só ${anosMes(11).join(', ')}, porque 2026 tem realizado até ${MESES[u26 - 1].toLowerCase()} (${MESES[11]} = ${brl(med[11])})` : ''}</span></span></li>
       <li><span><span class="ds">Peso do mês = média do mês ÷ soma das 12 médias</span><span class="fx">${MESES[ex]}: ${brl(Math.max(0, med[ex]))} ÷ ${brl(somaPos)} = <b>${pct(c[ex], 2)}</b></span></span></li>`}
     ${st.mensal[g.id] ? `<li class="fim"><span><span class="ds">Meses de 2027 digitados na tabela Orçado × realizado (alterados à mão; a curva não é mais usada neste projeto)</span><span class="fx">${MESES[ex]}: <b>${fBRL2.format(d[ex])}</b> (pela curva seria ${fBRL2.format(rateia(v, c)[ex])}) · soma dos 12 meses = ${fBRL2.format(soma(d))}</span></span></li>`
       : `<li class="fim"><span><span class="ds">Valor do mês em 2027 = orçado × peso do mês (os 12 meses fecham no centavo)</span><span class="fx">${MESES[ex]}: ${fBRL2.format(v)} × ${pct(c[ex], 2)} = <b>${fBRL2.format(d[ex])}</b> · soma dos 12 meses = ${fBRL2.format(soma(d))}</span></span></li>`}`;
@@ -1125,7 +1135,7 @@ function dadosExcel() {
     MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], R[3][m], r2(med[m]), d[m], variacao(d[m], med[m]), st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
   });
   const aba3 = [['Parâmetro', 'Valor'], ['Fonte', D.fonte], ['Dados de', D.gerado], ['Curva de 2027', st.base === 'planilha' ? 'aba Curva da planilha' : `realizado ${anosB[0]}–2026`],
-    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Realizado de 2026', 'só até o último mês da planilha, sem projeção'], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
+    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Realizado de 2026', 'só até o último mês da planilha, sem projeção'], ['Média / variação %', `média ${anosB.join(', ')} por mês${avisoNovDez(anosB) ? '; ' + avisoNovDez(anosB) : ''}`], ['Realizado (responsáveis)', 'DCMD completo: gerência e coordenações (todos os responsáveis da aba Realizado)'], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
   return { aba1, aba2, aba3 };
 }
 async function baixaExcel() {
