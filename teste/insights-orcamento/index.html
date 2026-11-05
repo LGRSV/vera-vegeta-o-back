@@ -781,18 +781,20 @@ function tabelaOV() {
   if (O.modo === 'mes') {
     const g = O.g;
     h = `<thead><tr><th class="l">Mês</th><th class="oc">Real. 2023</th><th class="oc">Real. 2024</th><th class="oc">Real. 2025</th><th>Real. 2026</th><th>${rotMed}</th><th>Orçado 2027 (R$)</th><th>Variação %</th><th title="Orçado do mês ÷ orçado 2027 da planilha${g.orc > 0 ? ' (' + esc(brl(g.orc)) + ')' : ''}. Mudar um mês não mexe no % dos outros; o total mostra quanto a simulação soma.">% do ano</th></tr></thead><tbody>`;
-    const pAno = v => g.orc > 0 ? pct(v / g.orc, 1) : '—';
-    const pAnoT = g.orc > 0 ? (Math.abs(O.tot.orc - g.orc) < 0.5 ? '100%' : `<span class="${O.tot.orc > g.orc ? 'sobe' : 'desce'}">${pct(O.tot.orc / g.orc, 1)}</span>`) : '—';
+    const inA = (attr, txt, rot, cls) => `<input class="cel pc${cls ? ' ' + cls : ''}" ${attr} value="${txt}" inputmode="decimal" autocomplete="off"${liberado ? '' : ' readonly'} aria-label="${esc(rot)}" title="% do orçado 2027 da planilha (${esc(brl(g.orc))})">`;
+    const pAno = l => !(g.tem && g.orc > 0) ? '—' : inA(`data-pa="${l.m}"`, fDec(l.orc / g.orc * 100, 1), `% do ano de ${MESES_L[l.m]}`);
+    const igual = Math.abs(O.tot.orc - g.orc) < 0.5;
+    const pAnoT = !(g.tem && g.orc > 0) ? '—' : inA('data-pat="1"', igual ? '100' : fDec(O.tot.orc / g.orc * 100, 1), '% do ano do total', igual ? '' : O.tot.orc > g.orc ? 'sobe' : 'desce');
     O.linhas.forEach(l => {
       const orc = g.tem ? inR(`data-m="${l.m}"`, l.orc, l.ed, `Orçado 2027 de ${MESES_L[l.m]}`, `Pela curva: ${fBRL2.format(l.auto)}`) : '—';
       const vp = g.tem ? inP(`data-mp="${l.m}"`, l.vr, `Variação % de ${MESES_L[l.m]}`) : fVar(l.vr);
       const r26 = l.r[3] != null ? brl(l.r[3]) : l.pj != null ? brl(l.pj) : '—';
-      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td class="oc">${l.r[2] == null ? '—' : brl(l.r[2])}</td><td class="${l.r[3] == null && l.pj != null ? 'pj' : ''}">${r26}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${vp}</td><td class="var pano">${pAno(l.orc)}</td></tr>`;
+      h += `<tr class="mes"><td class="l m">${MESES[l.m]}</td><td class="oc">${l.r[0] == null ? '—' : brl(l.r[0])}</td><td class="oc">${l.r[1] == null ? '—' : brl(l.r[1])}</td><td class="oc">${l.r[2] == null ? '—' : brl(l.r[2])}</td><td class="${l.r[3] == null && l.pj != null ? 'pj' : ''}">${r26}</td><td>${brl(l.med)}</td><td>${orc}</td><td class="var">${vp}</td><td class="var pano">${pAno(l)}</td></tr>`;
     });
     h += `</tbody><tfoot><tr><td class="l">Total</td><td class="oc">${brl(O.tot.r[0])}</td><td class="oc">${brl(O.tot.r[1])}</td><td class="oc">${brl(O.tot.r[2])}</td><td title="${O.tot.pj != null ? 'com projeção: ' + brl(O.tot.pj) : ''}">${brl(O.tot.r[3])}${O.tot.pj != null ? `<small class="ob">proj. ${brl(O.tot.pj)}</small>` : ''}</td><td>${brl(O.tot.med)}</td>` +
       `<td>${g.tem ? inR('data-tot="1"', O.tot.orc, alterado(g), 'Total 2027 do projeto') : '—'}</td><td class="var">${g.tem ? inP('data-totp="1"', O.tot.vr, 'Variação % do total') : fVar(O.tot.vr)}</td><td class="var pano">${pAnoT}</td></tr></tfoot>`;
     $('#ov-dica').innerHTML = `<button type="button" class="chip" id="ov-voltar">‹ Todos os projetos</button>` + (!g.tem ? `O SIGCO ${esc(g.id)} não tem orçado 2027.`
-      : `<b>${esc(g.id)}</b> · ${esc(g.itens.map(i => i.n).join(' + '))}. Digite o valor em R$ ou a variação % de cada mês (ou do total, na última linha) e tecle Enter.${u26 < 12 ? ` Real. 2026 até ${MESES[u26 - 1].toLowerCase()}.` : ''}`);
+      : `<b>${esc(g.id)}</b> · ${esc(g.itens.map(i => i.n).join(' + '))}. Digite o valor em R$, a variação % ou o % do ano de cada mês (ou do total, na última linha) e tecle Enter. % do ano = % do orçado 2027 da planilha.${u26 < 12 ? ` Real. 2026 até ${MESES[u26 - 1].toLowerCase()}.` : ''}`);
     $('#desfaz-proj').hidden = !alterado(g);
   } else {
     h = `<thead><tr><th class="l">SIGCO · projeto</th><th class="oc">Real. 2026${u26 < 12 ? ` (até ${MESES[u26 - 1].toLowerCase()})` : ''}</th><th>${rotMed}</th><th>Orçado 2027 (R$)</th><th>Variação %</th><th></th></tr></thead><tbody>`;
@@ -826,7 +828,7 @@ function gravaMes(g, m, v) {
   if (d.every((x, i) => Math.abs(x - auto[i]) < 0.005)) delete st.mensal[g.id]; else st.mensal[g.id] = d;
   return true;
 }
-const TIPOS = ['m', 'mp', 'g', 'gp', 'tot', 'totp'];
+const TIPOS = ['m', 'mp', 'pa', 'g', 'gp', 'tot', 'totp', 'pat'];
 function editaOV(inp) {
   if (!liberado) return false;
   const k = TIPOS.find(t => inp.dataset[t] != null); if (!k) return false;
@@ -834,14 +836,14 @@ function editaOV(inp) {
   const g = IDX.porId.get(k === 'g' || k === 'gp' ? inp.dataset[k] : st.sel); if (!g || !g.tem) return false;
   const anos = baseAnos();
   let v;
-  if (k === 'm' || k === 'mp') {
+  if (k === 'm' || k === 'mp' || k === 'pa') {
     const m = +inp.dataset[k], med = mediaMes(g.m, anos)[m];
-    v = k === 'm' ? numero(inp.value) : (med > 0 ? med * (1 + numPct(inp.value)) : NaN);
+    v = k === 'm' ? numero(inp.value) : k === 'pa' ? (g.orc > 0 ? g.orc * numPct(inp.value) : NaN) : (med > 0 ? med * (1 + numPct(inp.value)) : NaN);
     if (!(v >= 0)) { inp.setAttribute('aria-invalid', 'true'); return false; }
     if (!gravaMes(g, m, v)) { tabelaOV(); return false; }
   } else {
     const med = soma(mediaMes(g.m, anos));
-    v = pctual ? (med > 0 ? med * (1 + numPct(inp.value)) : NaN) : numero(inp.value);
+    v = k === 'pat' ? (g.orc > 0 ? g.orc * numPct(inp.value) : NaN) : pctual ? (med > 0 ? med * (1 + numPct(inp.value)) : NaN) : numero(inp.value);
     if (!(v >= 0)) { inp.setAttribute('aria-invalid', 'true'); return false; }
     if (Math.abs(r2(v) - valor27(g)) < 0.005) { tabelaOV(); return false; }
     defineTotal(g, v);
