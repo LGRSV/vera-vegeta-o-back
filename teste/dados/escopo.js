@@ -40,6 +40,7 @@ window.ARGOS_ESCOPO = {
    {"t": "As cargas dependem do envio manual de arquivos.", "acao": "Envio pelo menu Atualizar bases, com processamento automático; responsável e dia definidos por base."},
    {"t": "O site é público, sem login: quem tem o endereço vê a rede e as OS.", "acao": "Decidir se continua assim ou se passa a ter controle de acesso."},
    {"t": "A rede vem de uma exportação do GIS (03/10/2026): obras novas não aparecem até a próxima exportação.", "acao": "Definir a rotina de atualização do cadastro."},
+   {"t": "Alimentador reclassificado aparece na Crítica com código novo e a NAE dele fica fora do site (caso do PS01112193).", "acao": "Lista de/para dos códigos reclassificados ou nova exportação do GIS."},
    {"t": "O ponto da OS e da ocorrência no mapa é aproximado quando o ativo não tem posição no cadastro.", "acao": "A regra usada fica registrada em cada ocorrência; os casos sem posição ficam listados à parte."}
   ]
  },
@@ -145,7 +146,7 @@ window.ARGOS_ESCOPO = {
   {"id": "3.3", "frente": "nae", "titulo": "Crítica em dia", "itens": [
    {"t": "Enviar os arquivos da Crítica de set e out/2026 (o site vai até ago/2026)", "st": "pend", "prazo": "2026-11-13", "resp": "proj"},
    {"t": "Processar e publicar a NAE de set e out/2026", "st": "pend", "prazo": "2026-11-17", "resp": "dev", "obs": "Depende do item anterior."},
-   {"t": "Conferir o alimentador PS01112193: 5 NAE em mai/2026 na Crítica e fora do cadastro do site", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
+   {"t": "Definir como contar a NAE de alimentador reclassificado: o PS01112193 (Campos Lindos, conjunto Bielândia) tem 5 NAE em mai/2026 fora do site", "st": "bloq", "desde": "2026-11-09", "prazo": "2026-11-20", "resp": "proj", "obs": "O código novo não existe no cadastro do GIS de 03/10/2026; falta a regra e a lista de/para dos códigos."},
    {"t": "Rotina mensal: Crítica do mês anterior carregada até o dia 10 (primeira: nov/2026)", "st": "pend", "prazo": "2026-12-10", "resp": "proj"}
   ]},
 
