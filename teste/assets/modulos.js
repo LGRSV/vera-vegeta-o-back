@@ -16,6 +16,8 @@ window.ARGOS_MODULOS = [
     icone: '<path d="M12 21v-8m0 4 4-4M12 13C5 14 3 7 5 3c6-1 13 1 12 7-1 4-5 3-5 3ZM8 7l4 6M17 17l4-4m-3-1 4 4"/>'},
   {id: 'apresentacao', titulo: 'Apresentação', desc: 'Visão geral do ARGOS', href: 'apresentacao/', dock: '', grade: true,
     icone: '<path d="M3 3h18M5 3v13h14V3M12 16v4m-4 2 4-2 4 2"/><path d="m10 7 5 3-5 3Z"/>'},
+  {id: 'escopo', titulo: 'Escopo e acompanhamento', desc: 'Tarefas com datas, bases e histórico de mudanças', href: 'escopo/', dock: '', grade: true,
+    icone: '<path d="M9 4h6v3H9z"/><path d="M9 5H6v16h12V5h-3"/><path d="m9 13 2 2 4-4"/>'},
   {id: 'relatorio', titulo: 'Relatório de validação', desc: 'Trechos, NAE e avisos por município', href: 'relatorio.html', dock: '', grade: false,
     icone: '<path d="M6 3h8l4 4v14H6ZM14 3v5h4M9 12h6M9 16h6"/>'}
 ];

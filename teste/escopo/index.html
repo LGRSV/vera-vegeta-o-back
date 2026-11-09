@@ -1,0 +1,379 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ARGOS · Escopo e acompanhamento</title>
+<script>(function(){var t;try{t=localStorage.getItem("tema")}catch(e){}document.documentElement.dataset.theme=t==="claro"?"light":"dark"})()</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+/* Escopo e acompanhamento do ARGOS. Tudo o que a página mostra vem de dados/escopo.js (fonte, editada à mão) e de
+   dados/escopo-gerado.js (bases e histórico, refeitos por scripts/escopo.py). A situação das bases e os prazos são
+   calculados com a data de hoje, no navegador. Componentes iguais aos da Carteira de faixa (seg, resumo, tab, tg). */
+:root{--ok:#2f9e5b;--nok:var(--alerta)}
+[data-theme=dark]{--ok:#4cc38a}
+.w{max-width:1320px;margin:0 auto}
+.w p{max-width:none}
+.pos{text-align:center;color:var(--muted);font-size:var(--t-sm);margin:-8px 0 0}
+.abas{display:flex;justify-content:center;position:sticky;top:0;z-index:5;background:var(--bg);padding:var(--s2) 0}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r2);padding:3px;gap:2px}
+.seg button{font:600 var(--t-sm) var(--f-body);color:var(--muted);background:none;border:0;border-radius:var(--r1);padding:8px 12px;cursor:pointer}
+.seg button:hover{color:var(--fg)}.seg button[aria-pressed=true]{background:var(--seg-on);color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
+.aba[hidden]{display:none}
+.lead{font-size:var(--t-lg);color:var(--fg);margin:0 0 var(--s4)}
+.resumo{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--s4) var(--s4);margin:var(--s4) 0}
+.r{border-top:2px solid var(--line);padding-top:var(--s2);cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;color:inherit;font:inherit}
+.r:hover{border-top-color:var(--accent)}
+.r small{display:block;font:600 var(--t-xs) var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.r b{display:block;font:700 var(--t-2xl)/1.15 var(--f-display);font-variant-numeric:tabular-nums}
+.r em{display:block;font-style:normal;font-size:var(--t-sm);color:var(--muted)}
+.ok{color:var(--ok)}.nok{color:var(--nok)}.avi{color:var(--aviso)}
+.sec{border-top:1px solid var(--line);padding:var(--s4) 0 var(--s3)}
+.sec h2,.col h2{font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 var(--s3)}
+.linha{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--s6);border-top:1px solid var(--line);padding:var(--s4) 0 var(--s2)}
+.lista{margin:0;padding:0 0 0 18px;display:grid;gap:6px;font-size:var(--t-md)}
+.aten{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.aten li{border-left:3px solid var(--aviso);padding:8px 10px;background:var(--paper);border-radius:var(--r1);font-size:var(--t-sm)}
+.aten li.venc{border-left-color:var(--nok)}
+.aten b{font-family:var(--f-mono)}.aten small{color:var(--muted);display:block;margin-top:2px}
+.marcos{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:var(--t-sm)}
+.marcos li{display:grid;grid-template-columns:86px 1fr;gap:var(--s3)}
+.marcos b{font:600 var(--t-sm) var(--f-mono);color:var(--muted)}
+.baixar{display:flex;flex-wrap:wrap;gap:var(--s3);margin:var(--s4) 0 var(--s2)}
+.bt{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 var(--s4);border-radius:var(--r2);border:1px solid var(--line-forte);background:var(--paper);color:var(--fg);font:600 var(--t-md) var(--f-body);text-decoration:none}
+.bt:hover{border-color:var(--accent)}
+.bt.p{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.bt svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* frentes */
+.frs{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3);margin:0 0 var(--s4)}
+.fr{display:grid;gap:6px;text-align:left;border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3);background:var(--paper);color:inherit;font:inherit;cursor:pointer}
+.fr:hover{border-color:var(--line-forte)}.fr[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
+.fr h3{font:700 var(--t-md)/1.2 var(--f-display);margin:0;display:flex;justify-content:space-between;gap:8px}
+.fr h3 span{font:600 var(--t-sm) var(--f-mono);color:var(--muted);white-space:nowrap}
+.fr p{font-size:var(--t-xs);color:var(--muted);margin:0}
+.pb{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--sem)}
+.pb i{display:block;height:100%}.pb .a{background:var(--ok)}.pb .b{background:var(--aviso)}
+.filtros{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;margin:0 0 var(--s3)}
+.filtros .busca{flex:1 1 220px;max-width:340px;min-height:40px}
+.filtros select{min-height:40px;border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--paper);color:var(--fg);font:500 var(--t-md) var(--f-body);padding:0 10px}
+.cont{color:var(--muted);font-size:var(--t-sm);margin-left:auto}
+.tabela-wrap{overflow-x:auto}
+.tab{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.tab th{font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tab td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tab td.m{font-family:var(--f-mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tab td small{display:block;color:var(--muted);font-size:var(--t-xs);margin-top:2px}
+.tab tr.ent td{background:var(--paper);font-weight:600;border-top:1px solid var(--line-forte)}
+.tab tr.ent td span{font:600 var(--t-xs) var(--f-mono);color:var(--muted);margin-left:8px}
+.tab tr.ent a{font-weight:600;font-size:var(--t-xs);margin-left:10px}
+.tg{display:inline-block;font:600 var(--t-xs) var(--f-mono);border:1px solid var(--line);border-radius:var(--rp);padding:2px 8px;white-space:nowrap;color:var(--muted)}
+.tg.ok{color:var(--ok);border-color:currentColor}.tg.nok{color:var(--nok);border-color:currentColor}
+.tg.and,.tg.avi{color:var(--aviso);border-color:currentColor}.tg.bloq{color:var(--accent);border-color:currentColor}
+.tab td.m small{white-space:normal;font-family:var(--f-body)}
+.tab td small.so-cel{display:none}
+.nota{color:var(--muted);font-size:var(--t-xs);margin:var(--s3) 0}
+.vazio{color:var(--muted);font-size:var(--t-sm);margin:var(--s4) 0}
+/* histórico */
+.hist h3{font:600 var(--t-sm) var(--f-mono);color:var(--muted);margin:var(--s4) 0 var(--s2);border-top:1px solid var(--line);padding-top:var(--s3)}
+.hist ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.hist li{display:grid;grid-template-columns:170px 1fr;gap:var(--s3);font-size:var(--t-sm);align-items:start}
+.hist li .tg{justify-self:start}
+/* técnica */
+.argos{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4)}
+.argos div{border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3);font-size:var(--t-sm)}
+.argos h3{font:700 var(--t-md)/1.2 var(--f-display);margin:0 0 8px}
+.argos ul{margin:0;padding:0 0 0 16px;display:grid;gap:5px;color:var(--muted)}
+.fonte{color:var(--muted);font-size:var(--t-xs);margin:var(--s5) 0 var(--s7)}
+@media(max-width:1000px){.frs{grid-template-columns:repeat(2,1fr)}.resumo{grid-template-columns:repeat(3,1fr)}.argos{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){
+  .linha{grid-template-columns:1fr}.resumo{grid-template-columns:repeat(2,1fr)}.argos{grid-template-columns:1fr}
+  .abas .seg{flex-wrap:nowrap}.abas .seg button{padding:8px 8px;font-size:var(--t-xs)}
+  .frs{grid-template-columns:1fr 1fr}.fr p{display:none}
+.c-id,.c-resp,.c-usa,.c-rit,.c-ha,.c-sit{display:none}.tab td small.so-cel{display:block}.hist li{grid-template-columns:1fr;gap:4px}
+  .cont{margin-left:0;flex-basis:100%}
+}
+@media print{.abas,.baixar,.filtros,.mnu{display:none!important}.aba[hidden]{display:block}body{background:#fff}}
+</style>
+</head><body><div class="wrap w">
+<header class="cab"><h1><b>ARGOS</b> <span>ESCOPO</span></h1><a class="cab-link" href="../">Mapa</a></header>
+<p class="pos" id="pos"></p>
+<nav class="abas" aria-label="Seções do escopo"><div class="seg" id="abas">
+  <button type="button" data-aba="resumo">Resumo</button>
+  <button type="button" data-aba="andamento">Andamento</button>
+  <button type="button" data-aba="bases">Bases</button>
+  <button type="button" data-aba="historico">Histórico</button>
+  <button type="button" data-aba="tecnica">Técnica</button>
+</div></nav>
+
+<main>
+<section class="aba" id="aba-resumo" aria-label="Resumo">
+  <p class="lead" id="lead"></p>
+  <div class="resumo" id="kpis"></div>
+  <div class="baixar">
+    <a class="bt p" href="ARGOS_acompanhamento.xlsx" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>Excel de acompanhamento</a>
+    <a class="bt" href="ARGOS_escopo.docx" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>Word do escopo</a>
+  </div>
+  <div class="linha">
+    <div class="col"><h2>Aguardando decisão ou arquivo</h2><ul class="aten" id="aguardando"></ul></div>
+    <div class="col"><h2>Próximos prazos</h2><ul class="aten" id="proximos"></ul></div>
+  </div>
+  <div class="linha">
+    <div class="col"><h2>Objetivos</h2><ul class="lista" id="objetivos"></ul></div>
+    <div class="col"><h2>Marcos</h2><ul class="marcos" id="marcos"></ul></div>
+  </div>
+  <div class="linha">
+    <div class="col"><h2>O que entra</h2><ul class="lista" id="entra"></ul></div>
+    <div class="col"><h2>O que não entra</h2><ul class="lista" id="naoentra"></ul></div>
+  </div>
+  <div class="sec"><h2>Riscos e tratamento</h2>
+    <div class="tabela-wrap"><table class="tab"><thead><tr><th>Risco</th><th>Tratamento</th></tr></thead><tbody id="riscos"></tbody></table></div>
+  </div>
+</section>
+
+<section class="aba" id="aba-andamento" aria-label="Andamento" hidden>
+  <div class="frs" id="frentes"></div>
+  <div class="filtros">
+    <div class="seg" id="f-sit" role="group" aria-label="Situação">
+      <button type="button" data-s="">Todas</button>
+      <button type="button" data-s="abertas">Abertas</button>
+      <button type="button" data-s="bloq">Aguardando</button>
+      <button type="button" data-s="ok">Concluídas</button>
+    </div>
+    <input class="busca" type="search" id="f-busca" placeholder="Buscar tarefa" aria-label="Buscar tarefa" autocomplete="off">
+    <span class="cont" id="cont" role="status"></span>
+  </div>
+  <div class="tabela-wrap"><table class="tab">
+    <thead><tr><th class="c-id">ID</th><th>Tarefa</th><th>Situação</th><th>Data</th><th class="c-resp">Responsável</th></tr></thead>
+    <tbody id="tarefas"></tbody>
+  </table></div>
+  <p class="vazio" id="t-vazio" hidden>Nenhuma tarefa com esse filtro.</p>
+  <p class="nota" id="nota-prazos"></p>
+</section>
+
+<section class="aba" id="aba-bases" aria-label="Bases de dados" hidden>
+  <div class="resumo" id="kpis-bases" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="tabela-wrap"><table class="tab">
+    <thead><tr><th>Base</th><th class="c-usa">Usada em</th><th class="c-rit">Ritmo</th><th>Dados até</th><th class="c-ha">Há</th><th class="c-sit">Situação</th><th>Como atualizar</th></tr></thead>
+    <tbody id="bases"></tbody>
+  </table></div>
+  <p class="nota" id="nota-bases"></p>
+</section>
+
+<section class="aba" id="aba-historico" aria-label="Histórico de mudanças" hidden>
+  <div class="filtros">
+    <select id="h-frente" aria-label="Frente"></select>
+    <input class="busca" type="search" id="h-busca" placeholder="Buscar no histórico" aria-label="Buscar no histórico" autocomplete="off">
+    <span class="cont" id="h-cont" role="status"></span>
+  </div>
+  <div class="hist" id="hist"></div>
+  <p class="vazio" id="h-vazio" hidden>Nenhuma mudança com esse filtro.</p>
+  <div class="baixar"><button type="button" class="bt" id="h-mais" hidden>Mostrar mais</button></div>
+</section>
+
+<section class="aba" id="aba-tecnica" aria-label="Parte técnica" hidden>
+  <div class="sec" style="border-top:0;padding-top:0"><h2>Arquitetura</h2><ul class="lista" id="arq"></ul></div>
+  <div class="sec"><h2>Scripts</h2>
+    <div class="tabela-wrap"><table class="tab"><thead><tr><th>Script</th><th>O que faz</th><th>Entrada</th><th>Saída</th></tr></thead><tbody id="scripts"></tbody></table></div>
+  </div>
+  <div class="sec"><h2>Regras de negócio</h2><div class="argos" id="regras"></div></div>
+  <div class="sec"><h2>Publicação</h2><ul class="lista" id="pub"></ul></div>
+</section>
+</main>
+<p class="fonte" id="fonte"></p>
+</div>
+
+<script src="../dados/escopo.js"></script>
+<script src="../dados/escopo-gerado.js"></script>
+<script>
+(function () {
+'use strict';
+const E = window.ARGOS_ESCOPO, G = window.ARGOS_ESCOPO_GERADO || { gerado: '', numeros: {}, bases: {}, historico: [] };
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const agora = new Date(), p2 = n => String(n).padStart(2, '0');
+const HOJE = `${agora.getFullYear()}-${p2(agora.getMonth() + 1)}-${p2(agora.getDate())}`;
+const br = d => (d ? `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}` : '');
+const utc = d => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
+const dias = (de, ate) => Math.round((utc(ate) - utc(de)) / 864e5);
+const num = n => Number(n).toLocaleString('pt-BR');
+const plural = (n, um, varios) => `${num(n)} ${n === 1 ? um : varios}`;
+const FR = Object.fromEntries(E.frentes.map(f => [f.id, f]));
+const SIT = E.situacoes;
+const itens = E.entregas.flatMap(e => e.itens.map((i, n) => Object.assign({}, i, { id: `${e.id}.${n + 1}`, eid: e.id, frente: e.frente, entrega: e.titulo })));
+const abertos = itens.filter(i => i.st !== 'ok').sort((a, b) => a.prazo.localeCompare(b.prazo));
+const conta = (l, st) => l.filter(i => i.st === st).length;
+const vencido = i => i.st !== 'ok' && i.prazo < HOJE;
+
+// ---------- situação de cada base, com a data de hoje (mesma regra do script e do Excel)
+function sitBase(b) {
+  const g = G.bases[b.id] || {}, ref = g.ate || g.carga, r = E.ritmos[b.ritmo];
+  if (b.ritmo === 'fixa') return { s: 'fixa', d: null };
+  if (!ref) return { s: 'sem registro', d: null };
+  const d = dias(ref, HOJE);
+  if (b.ritmo === 'demanda') return { s: 'sob demanda', d };
+  return { s: d <= r.em_dia ? 'em dia' : d <= r.atencao ? 'atenção' : 'atrasada', d };
+}
+const BASES = E.bases.map(b => Object.assign({}, b, sitBase(b), G.bases[b.id] || {}));
+const CL_BASE = { 'em dia': 'ok', 'atenção': 'avi', 'atrasada': 'nok' };
+
+// ---------- abas (o endereço guarda a aba: escopo/#bases)
+const ABAS = ['resumo', 'andamento', 'bases', 'historico', 'tecnica'];
+function abre(aba, semHistorico) {
+  if (!ABAS.includes(aba)) aba = 'resumo';
+  ABAS.forEach(a => { $('aba-' + a).hidden = a !== aba; });
+  $('abas').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.aba === aba)));
+  if (!semHistorico && location.hash.slice(1) !== aba) history.replaceState(null, '', '#' + aba);
+}
+$('abas').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { abre(b.dataset.aba); scrollTo(0, 0); } });
+addEventListener('hashchange', () => abre(location.hash.slice(1), true));
+
+// ---------- resumo
+function tagData(i) {
+  if (i.st === 'ok') return esc(br(i.d));
+  const d = dias(HOJE, i.prazo);
+  const quando = d < 0 ? `<small class="nok">venceu há ${plural(-d, 'dia', 'dias')}</small>` : `<small>${d === 0 ? 'hoje' : 'em ' + plural(d, 'dia', 'dias')}</small>`;
+  return `até ${esc(br(i.prazo))}${quando}`;
+}
+function resumo() {
+  const tot = itens.length, ok = conta(itens, 'ok'), mensais = BASES.filter(b => b.ritmo === 'mensal');
+  const emDia = mensais.filter(b => b.s === 'em dia').length, atras = mensais.filter(b => b.s === 'atrasada').length, aten = mensais.filter(b => b.s === 'atenção').length;
+  const ult = G.historico[0], N = G.numeros;
+  $('pos').textContent = `Versão ${E.versao} do escopo · atualizado em ${br(E.atualizado)} · posição de hoje, ${br(HOJE)}`;
+  $('lead').textContent = E.projeto.resumo;
+  const k = (aba, rot, valor, sub, cl) => `<button type="button" class="r" data-vai="${aba}"><small>${rot}</small><b class="${cl || ''}">${valor}</b><em>${sub}</em></button>`;
+  $('kpis').innerHTML =
+    k('andamento', 'Tarefas concluídas', Math.round(100 * ok / tot) + '%', `${ok} de ${tot}`, 'ok') +
+    k('andamento:abertas', 'Abertas', tot - ok, `${conta(itens, 'and')} em andamento · ${conta(itens, 'pend')} a fazer`) +
+    k('andamento:bloq', 'Aguardando', conta(itens, 'bloq'), 'decisão ou arquivo', conta(itens, 'bloq') ? 'avi' : '') +
+    k('bases', 'Bases em dia', `${emDia} de ${mensais.length}`, atras || aten ? [atras ? plural(atras, 'atrasada', 'atrasadas') : '', aten ? `${aten} em atenção` : ''].filter(Boolean).join(' · ') : 'nenhuma atrasada', atras ? 'nok' : aten ? 'avi' : 'ok') +
+    k('historico', 'Última publicação', ult ? br(ult[0]).slice(0, 5) : '—', plural(G.historico.length, 'mudança', 'mudanças')) +
+    k('tecnica', 'Rede no mapa', N.alimentadores ? num(N.alimentadores) : '—', N.trechos ? `alimentadores · ${num(N.trechos)} trechos` : 'alimentadores');
+  const li = i => `<li class="${vencido(i) ? 'venc' : ''}"><b>${esc(br(i.prazo).slice(0, 5))}</b> · ${esc(i.t)}<small>${esc(FR[i.frente].nome)} · ${esc(E.responsaveis[i.resp])}` +
+    `${i.desde ? ' · aguardando desde ' + esc(br(i.desde)) : ''}${vencido(i) ? ' · <span class="nok">prazo vencido</span>' : ''}</small></li>`;
+  const bloq = abertos.filter(i => i.st === 'bloq'), prox = abertos.filter(i => i.st !== 'bloq').slice(0, 6);
+  $('aguardando').innerHTML = bloq.map(li).join('') || '<li>Nada aguardando.</li>';
+  $('proximos').innerHTML = prox.map(li).join('') || '<li>Nenhum item aberto.</li>';
+  const lista = (id, l) => { $(id).innerHTML = l.map(t => `<li>${esc(t)}</li>`).join(''); };
+  lista('objetivos', E.projeto.objetivos); lista('entra', E.projeto.entra); lista('naoentra', E.projeto.nao_entra);
+  $('marcos').innerHTML = E.marcos.slice().reverse().map(m => `<li><b>${esc(br(m.d))}</b><span>${esc(m.t)}</span></li>`).join('');
+  $('riscos').innerHTML = E.projeto.riscos.map(r => `<tr><td>${esc(r.t)}</td><td>${esc(r.acao)}</td></tr>`).join('');
+  $('kpis').addEventListener('click', e => {
+    const b = e.target.closest('.r'); if (!b) return;
+    const [aba, s] = b.dataset.vai.split(':');
+    if (aba === 'andamento') { F.sit = s || ''; F.frente = ''; tarefas(); }
+    abre(aba); scrollTo(0, 0);
+  });
+}
+
+// ---------- andamento
+const F = { frente: '', sit: '', q: '' };
+function frentes() {
+  $('frentes').innerHTML = E.frentes.map((f, n) => {
+    const l = itens.filter(i => i.frente === f.id), ok = conta(l, 'ok'), bl = conta(l, 'bloq') + l.filter(vencido).filter(i => i.st !== 'bloq').length;
+    return `<button type="button" class="fr" data-f="${f.id}" aria-pressed="${F.frente === f.id}"><h3>${n + 1}. ${esc(f.nome)}<span>${ok} / ${l.length}</span></h3>` +
+      `<div class="pb" role="img" aria-label="${ok} de ${l.length} tarefas concluídas"><i class="a" style="width:${100 * ok / l.length}%"></i><i class="b" style="width:${100 * bl / l.length}%"></i></div>` +
+      `<p>${esc(f.objetivo)}</p></button>`;
+  }).join('');
+}
+function tarefas() {
+  const q = F.q.trim().toLowerCase();
+  const passa = i => (!F.frente || i.frente === F.frente) &&
+    (!F.sit || (F.sit === 'abertas' ? i.st !== 'ok' : i.st === F.sit)) &&
+    (!q || (i.t + ' ' + i.entrega + ' ' + i.id + ' ' + FR[i.frente].nome + ' ' + (i.obs || '')).toLowerCase().includes(q));
+  let h = '', n = 0;
+  E.entregas.forEach(e => {
+    const l = itens.filter(i => i.eid === e.id && passa(i));
+    if (!l.length) return;
+    n += l.length;
+    const todos = itens.filter(i => i.eid === e.id);
+    h += `<tr class="ent"><td class="c-id m">${e.id}</td><td colspan="4">${esc(e.titulo)}<span>${esc(FR[e.frente].nome)} · ${conta(todos, 'ok')} / ${todos.length}</span></td></tr>`;
+    h += l.map(i => `<tr><td class="c-id m">${i.id}</td><td>${esc(i.t)}${i.obs ? `<small>${esc(i.obs)}</small>` : ''}${i.desde ? `<small>Aguardando desde ${esc(br(i.desde))}</small>` : ''}${i.st === 'ok' ? '' : `<small class="so-cel">${esc(E.responsaveis[i.resp])}</small>`}</td>` +
+      `<td><span class="tg ${vencido(i) ? 'nok' : i.st}">${esc(SIT[i.st])}</span></td><td class="m">${tagData(i)}</td>` +
+      `<td class="c-resp">${i.st === 'ok' ? '' : esc(E.responsaveis[i.resp])}</td></tr>`).join('');
+  });
+  $('tarefas').innerHTML = h;
+  $('t-vazio').hidden = n > 0;
+  const f = F.frente && FR[F.frente];
+  $('cont').innerHTML = `${plural(n, 'tarefa', 'tarefas')}${f ? ` em ${esc(f.nome)} · <a href="../${esc(f.pagina)}">abrir o módulo</a>` : ''}`;
+  $('f-sit').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === F.sit)));
+  $('frentes').querySelectorAll('.fr').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === F.frente)));
+}
+$('frentes').addEventListener('click', e => { const b = e.target.closest('.fr'); if (b) { F.frente = F.frente === b.dataset.f ? '' : b.dataset.f; tarefas(); } });
+$('f-sit').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { F.sit = b.dataset.s; tarefas(); } });
+$('f-busca').addEventListener('input', e => { F.q = e.target.value; tarefas(); });
+
+// ---------- bases
+function bases() {
+  const ordem = ['atrasada', 'atenção', 'sem registro', 'em dia', 'sob demanda', 'fixa'];
+  const l = BASES.slice().sort((a, b) => ordem.indexOf(a.s) - ordem.indexOf(b.s) || (b.d || 0) - (a.d || 0));
+  const c = s => BASES.filter(b => b.s === s).length;
+  const k = (rot, v, sub, cl) => `<div class="r" style="cursor:default"><small>${rot}</small><b class="${cl}">${v}</b><em>${sub}</em></div>`;
+  $('kpis-bases').innerHTML = k('Em dia', c('em dia'), 'bases mensais', 'ok') + k('Atenção', c('atenção'), 'perto de vencer', c('atenção') ? 'avi' : '') +
+    k('Atrasadas', c('atrasada'), 'precisam de carga', c('atrasada') ? 'nok' : '') + k('Sob demanda ou fixas', c('sob demanda') + c('fixa'), 'sem prazo de carga', '');
+  $('bases').innerHTML = l.map(b => `<tr><td><b>${esc(b.nome)}</b><small>${esc(b.origem)}</small>` +
+    `<small class="so-cel"><span class="tg ${CL_BASE[b.s] || ''}">${esc(b.s)}</span>${b.d == null ? '' : ' há ' + plural(b.d, 'dia', 'dias')}</small></td>` +
+    `<td class="c-usa">${esc(b.usa.map(u => FR[u].nome).join(', '))}</td>` +
+    `<td class="c-rit">${esc(E.ritmos[b.ritmo].nome)}</td><td class="m">${esc(br(b.ate || b.carga)) || '—'}${b.detalhe ? `<small>${esc(b.detalhe)}</small>` : ''}</td>` +
+    `<td class="m c-ha">${b.d == null ? '—' : plural(b.d, 'dia', 'dias')}</td><td class="c-sit"><span class="tg ${CL_BASE[b.s] || ''}">${esc(b.s)}</span></td><td>${esc(b.como)}</td></tr>`).join('');
+  $('nota-bases').textContent = `Base mensal: ${E.ritmos.mensal.regra} As datas são lidas dos arquivos publicados no site (última leitura em ${br(G.gerado)}); a situação é recalculada todo dia.`;
+}
+
+// ---------- histórico (o que já foi publicado + o que entrou depois, lido ao vivo do GitHub quando há rede)
+const H = { frente: '', q: '', n: 60, l: G.historico.slice() };
+function limpa(msg) {
+  let m = msg.replace(/﻿/g, '').trim().replace(/^(\/?teste(\/[\w-]+)?\/?|Teste( GIS)?|ferramentas)\s*:\s*/i, '').replace(/\s*\(#\d+\)$/, '');
+  return m.charAt(0).toUpperCase() + m.slice(1);
+}
+const classifica = t => (E.classifica.find(([, p]) => new RegExp(p, 'i').test(t)) || E.classifica[E.classifica.length - 1])[0];
+function historico() {
+  const q = H.q.trim().toLowerCase();
+  const l = H.l.filter(h => (!H.frente || h[1] === H.frente) && (!q || h[2].toLowerCase().includes(q)));
+  let h = '', dia = '';
+  l.slice(0, H.n).forEach(x => {
+    if (x[0] !== dia) { h += (dia ? '</ul>' : '') + `<h3>${esc(br(x[0]))}</h3><ul>`; dia = x[0]; }
+    h += `<li><span class="tg">${esc((FR[x[1]] || { nome: x[1] }).nome)}</span><span>${esc(x[2])}</span></li>`;
+  });
+  $('hist').innerHTML = h + (dia ? '</ul>' : '');
+  $('h-vazio').hidden = l.length > 0;
+  $('h-mais').hidden = l.length <= H.n;
+  $('h-cont').textContent = plural(l.length, 'mudança publicada', 'mudanças publicadas') + (H.l.length ? ` desde ${br(H.l[H.l.length - 1][0])}` : '');
+}
+$('h-frente').innerHTML = '<option value="">Todas as frentes</option>' + E.frentes.map(f => `<option value="${f.id}">${esc(f.nome)}</option>`).join('');
+$('h-frente').addEventListener('change', e => { H.frente = e.target.value; H.n = 60; historico(); });
+$('h-busca').addEventListener('input', e => { H.q = e.target.value; H.n = 60; historico(); });
+$('h-mais').addEventListener('click', () => { H.n += 100; historico(); });
+function aoVivo() {
+  if (!G.gerado || !window.fetch) return;
+  fetch(`https://api.github.com/repos/LGRSV/vera-vegeta-o-back/commits?sha=gh-pages&since=${G.gerado}T00:00:00Z&per_page=100`, { headers: { Accept: 'application/vnd.github+json' } })
+    .then(r => (r.ok ? r.json() : [])).then(cs => {
+      const tem = new Set(H.l.map(h => h[0] + '|' + h[2].slice(0, 25)));
+      let novos = 0;
+      cs.forEach(c => {
+        const msg = c.commit.message.split('\n')[0];
+        if (/^Merge pull request/.test(msg)) return;
+        const d = new Date(c.commit.author.date), dia = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`, t = limpa(msg);
+        if (tem.has(dia + '|' + t.slice(0, 25))) return;
+        tem.add(dia + '|' + t.slice(0, 25)); H.l.push([dia, classifica(t), t]); novos++;
+      });
+      if (!novos) return;
+      H.l.sort((a, b) => b[0].localeCompare(a[0]));
+      historico();
+    }).catch(() => {});
+}
+
+// ---------- técnica
+function tecnica() {
+  const T = E.tecnica;
+  $('arq').innerHTML = T.arquitetura.map(t => `<li>${esc(t)}</li>`).join('');
+  $('scripts').innerHTML = T.scripts.map(s => `<tr><td class="m"><b>${esc(s[0])}</b></td><td>${esc(s[1])}</td><td>${esc(s[2])}</td><td>${esc(s[3])}</td></tr>`).join('');
+  $('regras').innerHTML = T.regras.map(r => `<div><h3>${esc(r.titulo)}</h3><ul>${r.itens.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('');
+  $('pub').innerHTML = T.publicacao.map(t => `<li>${esc(t)}</li>`).join('');
+}
+
+resumo(); frentes(); tarefas(); bases(); historico(); tecnica();
+$('nota-prazos').textContent = E.nota_prazos + ' Tarefa concluída mostra a data da publicação no site; tarefa aberta mostra o prazo.';
+$('fonte').textContent = `Fonte: dados/escopo.js (versão ${E.versao}, de ${br(E.atualizado)}) e histórico de publicações do site. Bases e histórico lidos em ${br(G.gerado)}.`;
+abre(location.hash.slice(1), true);
+aoVivo();
+})();
+</script>
+<script src="../assets/menu.js"></script>
+</body></html>
