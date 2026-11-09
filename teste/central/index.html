@@ -223,6 +223,24 @@ frame.addEventListener('load', () => {
 });
 $('atualiza').addEventListener('click', () => { pendente = true; frame.dataset.page = ''; go('mapa'); });
 
+// Night shift na casca: Shift+K fora dos campos de texto troca claro/escuro (mesma escolha "tema" do menu ☰ das páginas).
+// Com o foco dentro do módulo, quem troca é o menu.js do módulo e o observador acima traz o tema para a casca.
+document.addEventListener('keydown', e => {
+  if (!e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || e.code !== 'KeyK') return;
+  if (e.target.closest && e.target.closest('input,textarea,select,[contenteditable="true"]')) return;
+  e.preventDefault();
+  const claro = document.documentElement.dataset.theme !== 'light', novo = claro ? 'light' : 'dark';
+  document.documentElement.dataset.theme = novo;
+  try { localStorage.setItem('tema', claro ? 'claro' : 'escuro'); } catch (er) { /* sem armazenamento: vale só nesta aba */ }
+  try {
+    const d = frame.contentDocument;
+    if (d && d.documentElement) {
+      d.documentElement.dataset.theme = novo;
+      const b = d.querySelector('.mnu-tema'); if (b) b.setAttribute('aria-pressed', String(!claro));
+    }
+  } catch (er) { /* módulo fora da mesma origem */ }
+});
+
 go(location.hash.slice(1) || 'inicio', true);
 if (!location.hash) history.replaceState(null, '', '#inicio');
 })();
