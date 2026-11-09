@@ -162,7 +162,7 @@ document.addEventListener('click', e => {
   else if (t.dataset.r !== undefined && t.closest('#regs')) F.reg = t.dataset.r, F.polo = '';
   else if (t.dataset.p !== undefined && t.closest('#pols')) F.polo = t.dataset.p;
   else if (t.classList.contains('mapa-fundo')) { if (!F.polo && !F.reg) return; F.polo = ''; F.reg = ''; }
-  else if (t.tagName === 'path') F.polo = F.polo === t.dataset.p ? '' : t.dataset.p, F.reg = F.polo ? D.polos[F.polo] : F.reg;
+  else if (t.tagName === 'path') F.polo = F.polo === t.dataset.p ? '' : t.dataset.p, F.reg = F.polo ? D.polos[F.polo] : '';   // clicar de novo no polo limpa tudo (polo e regional)
   else if (t.dataset.c) F[t.dataset.c] = t.dataset.c === 'mes' ? null : '', t.dataset.c === 'reg' && (F.polo = '');
   else if (t.classList.contains('hit')) F.mes = F.mes === +t.dataset.m ? null : +t.dataset.m;
   else if (t.dataset.ir) { $('l-' + t.dataset.ir).scrollIntoView({behavior: 'smooth', block: 'center'}); return; }
