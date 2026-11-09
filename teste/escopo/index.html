@@ -346,16 +346,18 @@ function aoVivo() {
     .then(r => (r.ok ? r.json() : [])).then(cs => {
       const tem = new Set(H.l.map(h => h[0] + '|' + h[2].slice(0, 25)));
       let novos = 0;
-      cs.forEach(c => {
+      cs.slice().reverse().forEach(c => {                    // a API traz do mais novo para o mais antigo
         const msg = c.commit.message.split('\n')[0];
         if (/^Merge pull request/.test(msg)) return;
         const d = new Date(c.commit.author.date), dia = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`, t = limpa(msg);
         if (tem.has(dia + '|' + t.slice(0, 25))) return;
-        tem.add(dia + '|' + t.slice(0, 25)); H.l.push([dia, classifica(t), t]); novos++;
+        tem.add(dia + '|' + t.slice(0, 25)); H.l.unshift([dia, classifica(t), t]); novos++;
       });
       if (!novos) return;
       H.l.sort((a, b) => b[0].localeCompare(a[0]));
       historico();
+      const k = document.querySelector('#kpis [data-vai=historico]');      // o resumo acompanha o que chegou ao vivo
+      if (k) { k.querySelector('b').textContent = br(H.l[0][0]).slice(0, 5); k.querySelector('em').textContent = plural(H.l.length, 'mudança', 'mudanças'); }
     }).catch(() => {});
 }
 
