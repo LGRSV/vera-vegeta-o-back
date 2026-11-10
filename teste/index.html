@@ -3,7 +3,12 @@
 <script>/* tela inicial nova (central/): aberta direto, esta página vai para lá. Dentro do quadro da tela nova, fica como está. */
 (function () {
   var W = window, L = location;
-  function paraCasca() { L.replace('central/' + L.search.replace(/([?&])classico=1&?/, '$1').replace(/[?&]$/, '') + L.hash); }
+  function paraCasca() {
+    var q = L.search.replace(/([?&])classico=1&?/, '$1').replace(/[?&]$/, ''), h = L.hash, n = /^#mapa\/(.+)$/.exec(h);
+    /* nível do mapa (#mapa/norte/...): a casca usa só #mapa, então o nível vai como ?nivel= */
+    if (n) { q = (q ? q + '&' : '?') + 'nivel=' + n[1]; h = '#mapa'; }
+    L.replace('central/' + q + h);
+  }
   if (W.top === W) { document.documentElement.style.display = 'none'; paraCasca(); return; }
 })();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -18,9 +23,9 @@
 <div class="mt-mapa"><svg role="group" aria-label="Mapa dos municípios do Tocantins" tabindex="-1" viewBox="-6 -6 572 944"></svg><div class="mt-dica" aria-hidden="true"></div></div></div>
 <script src="assets/mapa-municipios-dados.js"></script>
 <script src="assets/mapa-municipios-visoes.js"></script>
-<script src="assets/mapa-municipios.js"></script>
-<script src="assets/busca-ativo.js"></script>
-<script src="assets/mapa-raiox.js"></script>
+<script src="assets/mapa-municipios.js?v=20261110"></script>
+<script src="assets/busca-ativo.js?v=20261110"></script>
+<script src="assets/mapa-raiox.js?v=20261110"></script>
 </div>
 <script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();document.querySelectorAll("[data-busca]").forEach(e=>{e.hidden=!e.dataset.busca.includes(q)});document.querySelectorAll(".grade").forEach(g=>{let v=g.nextElementSibling;if(!v||!v.classList.contains("sem-res")){v=document.createElement("p");v.className="sem-res";v.setAttribute("role","status");g.after(v)}v.textContent=!q||g.querySelector("[data-busca]:not([hidden])")?"":"Nada encontrado para “"+b.value.trim()+"”."})});</script>
 <script src="assets/menu.js"></script>

@@ -98,10 +98,16 @@ header{display:grid;gap:var(--s2);max-width:80ch}
 /* site: o painel aparece de uma vez, já completo (filtros, lista, detalhe), quando todos os scripts rodaram — sem ir empurrando a lista
    (a busca também, até subir para a barra acima do mapa; a barra, que na tela cheia entra na gaveta, fica de fora) */
 .al-site:not(.al-pronto) .panel>:not(.barra-busca){visibility:hidden;opacity:0}
+.al-site:not(.al-pronto) #lista{display:none}   /* a lista (~2.000 linhas) não entra no cálculo da página a cada script que chega; aparece pronta no fim */
 @media (prefers-reduced-motion:no-preference){.al-site .panel>:not(.barra-busca){transition:opacity var(--dur-l) var(--ease)}}
-/* site: a busca e o município sobem para uma barra acima do mapa (extras.js); até ela chegar, o lugar fica guardado e o mapa não desce */
-.al-site:not(.al-pronto) .wrap:not(:has(>.barra-busca))>.stage{margin-top:calc(40px + var(--s5))}
-@media (max-width:980px){.al-site:not(.al-pronto) .wrap:not(:has(>.barra-busca))>.stage{margin-top:calc(44px + var(--s5))}}
+/* site: a barra de busca (extras.js) passa um instante acima do mapa e o lupa-painel.js a leva para dentro dele: até o fim
+   da carga ela não ocupa lugar ali, e o mapa não desce e sobe (antes ficava um espaço guardado que sumia no fim) */
+.al-site:not(.al-pronto) .wrap>.barra-busca{display:none}
+/* site: o mapa não sobe no fim da carga: a linha do ☰ (menu.js, o último script) fica guardada desde o 1º quadro, e o
+   "Como os trechos são divididos", que o extras.js leva para "Dados e procedência", não ocupa lugar antes disso */
+.al-site .wrap:not(:has(>.mnu))::before{content:'';min-height:40px;margin-bottom:calc(var(--s2) * -1)}
+.al-site:not(.al-pronto) header>.regra{display:none}
+.al-site .migalhas{min-height:32px}   /* a altura do botão de voltar (lupa-painel.js) desde o 1º quadro */
 .eyebrow{font:600 var(--t-xs)/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 h1{font:700 var(--t-h1)/1.1 var(--f-display);letter-spacing:-.01em;margin:0}
 .sub{font-size:var(--t-md);color:var(--muted);margin-top:calc(-1 * var(--s1))}
@@ -111,9 +117,15 @@ h1{font:700 var(--t-h1)/1.1 var(--f-display);letter-spacing:-.01em;margin:0}
 .regra>.lede{max-width:72ch;padding-bottom:var(--s2)}
 
 /* ====== Mapa: a peça principal ====== */
-.stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:var(--s5);align-items:start}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:var(--s5);align-items:start;
+  --mapa-h:min(78vh,760px,calc(100svh - 240px))}   /* computador: o mapa inteiro cabe na tela ao chegar (240: cabeçalho e busca acima dele), também dentro da casca central */
 .mapbox{position:relative;border:0;border-radius:var(--r3);overflow:hidden;background:var(--mapbg);box-shadow:var(--sh2)}
-#map{height:min(78vh,760px);min-height:400px;background:var(--mapbg)}
+#map{height:var(--mapa-h);min-height:400px;background:var(--mapbg)}
+/* até a rede chegar (dados.js é o arquivo mais pesado): o lugar do mapa já aparece, com um aviso leve no lugar do vazio */
+#map:not(.leaflet-container){display:grid;place-items:center}
+#map:not(.leaflet-container)::after{content:'Carregando o mapa da rede…';font:500 var(--t-sm) var(--f-body);color:var(--vidro-fg)}
+@media (prefers-reduced-motion:no-preference){#map:not(.leaflet-container)::after{animation:esmaece 1.2s var(--ease) infinite alternate}}
+.mapbox:has(#nolib:not([hidden])) #map::after{content:none}   /* sem o Leaflet o aviso de erro fala sozinho */
 @media (min-width:981px){.mapbox{position:sticky;top:8px;z-index:5}}  /* computador: o mapa fica à vista enquanto o painel rola */
 @media (max-width:980px){
   .stage{grid-template-columns:minmax(0,1fr)}
@@ -144,7 +156,7 @@ h1{font:700 var(--t-h1)/1.1 var(--f-display);letter-spacing:-.01em;margin:0}
 .panel{display:grid;grid-auto-rows:max-content;gap:var(--s5);align-content:start;min-width:0}   /* max-content: a lista (que rola) não encolhe quando o painel tem altura fixa (gaveta da tela cheia) */
 .panel>*{min-width:0}
 @media (min-width:981px){   /* computador: o painel rola por dentro, ao lado do mapa */
-  .panel{position:sticky;top:8px;max-height:min(78vh,760px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:var(--s1) var(--s1) var(--s5)}
+  .panel{position:sticky;top:8px;max-height:max(400px,var(--mapa-h));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:var(--s1) var(--s1) var(--s5)}
 }
 .panel>.dados{border-top:1px solid var(--line);padding-top:var(--s5)}
 /* campo de busca */
@@ -236,7 +248,7 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
    e o que vem depois (limpeza, legenda, "Dados e procedência") continua ao alcance. Teclado: a lista é uma parada só do Tab; ↑ ↓ Home End PgUp PgDn andam nela. */
 .lista{position:relative;display:grid;align-content:start;min-width:0;max-height:clamp(220px,38svh,340px);overflow-y:auto;overflow-anchor:none;scrollbar-width:thin;scrollbar-gutter:stable;
   border-block:1px solid var(--line);padding-bottom:var(--s2)}   /* relative: o texto escondido (.vh) das linhas fica preso dentro da lista; sem âncora de rolagem: a lista não anda sozinha quando o painel muda de largura (tela cheia) */
-@media (min-width:981px){.lista{max-height:clamp(200px,calc(min(78vh,760px) - 440px),360px)}}   /* o começo do detalhe aparece embaixo, no painel */
+@media (min-width:981px){.lista{max-height:clamp(200px,calc(var(--mapa-h) - 440px),360px)}}   /* o começo do detalhe aparece embaixo, no painel */
 .lista>.lede{padding:var(--s3) var(--s2)}
 .lista:empty{display:none}
 /* ordem da lista: embaixo dela, à esquerda (some com a lista) */
@@ -247,6 +259,7 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 .row{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto auto;grid-template-areas:"sw nome nae selo km" ". rota rota rota rota";grid-auto-flow:row;column-gap:var(--s2);row-gap:2px;align-items:center;
   width:100%;min-height:48px;padding:var(--s2);text-align:left;border:0;border-radius:var(--r2);background:transparent;color:var(--fg);cursor:pointer;font:var(--t-sm)/1.3 var(--f-body)}
 .row{scroll-margin-top:32px;scroll-margin-bottom:var(--s2)}   /* 32: o título do grupo, fixo no alto da lista */
+.row{content-visibility:auto;contain-intrinsic-size:auto 52px}   /* ~2.000 linhas: o navegador só monta as que estão à vista na lista (a 1ª pintura do mapa não espera por elas) */
 .row:hover{background:var(--hover)}
 .row[aria-current="true"]{background:var(--sel);box-shadow:inset 3px 0 0 var(--accent)}
 .row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}

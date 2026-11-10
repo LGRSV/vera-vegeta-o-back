@@ -11,6 +11,9 @@
   const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
   const rotMes = m => `${MES[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`;
   const periodo = P.meses.length ? `${rotMes(P.meses[0])} a ${rotMes(P.meses[1])}` : '';
+  // a Crítica da base não cobre 12 meses: o rótulo diz o período e a quantidade real de meses
+  const nMeses = P.meses.length ? (+P.meses[1].slice(0, 4) - +P.meses[0].slice(0, 4)) * 12 + +P.meses[1].slice(5, 7) - +P.meses[0].slice(5, 7) + 1 : 0;
+  const periodoCr = periodo ? `Crítica de ${periodo} (${nMeses} meses)` : 'Crítica';
   const HOJE = new Date(); HOJE.setHours(0, 0, 0, 0);
   const UM_ANO = new Date(HOJE); UM_ANO.setFullYear(UM_ANO.getFullYear() + 1);
   const SIT = { dia: ['Em dia', '#22c55e'], vence: ['Vence em até 12 meses', '#facc15'], vencida: ['Vencida', '#ef4444'], sem: ['Sem registro', 'var(--sem)'] };
@@ -26,7 +29,9 @@
       s[v < HOJE ? 'vencida' : v < UM_ANO ? 'vence' : 'dia'] += m;
     }));
     const tot = s.dia + s.vence + s.vencida + s.sem;
-    return { s, tot, ult, prazo: tot ? (s.dia + s.vence) / tot : null };
+    // prazo só sobre os km com data de limpeza; o que não tem OS fica à parte, em "% sem registro"
+    const dat = tot - s.sem;
+    return { s, tot, dat, ult, prazo: dat ? (s.dia + s.vence) / dat : null, semReg: tot ? s.sem / tot : null };
   }
   // NAE/100 km: a NAE da mesma rede dos km (nae_rede: onde o ativo está hoje no GIS, ferramentas/nae_rede.py);
   // o trecho já conta a NAE onde o ativo está
@@ -63,11 +68,12 @@
   const POR_VEZ = 100;                                     // linhas por vez (a ETO tem milhares de trechos)
   const COLS = {
     nae: { rot: 'NAE', val: a => a.nae },
-    cons: { rot: 'Consumidores', val: a => a.cons },
-    chi: { rot: 'CHI (h)', val: a => a.chi },
+    cons: { rot: 'CI (consumidores interrompidos)', val: a => a.cons },
+    chi: { rot: 'CHI (consumidor·hora)', val: a => a.chi },
     km: { rot: 'Km no polo', val: a => a.km },
     n100: { rot: 'NAE / 100 km', val: a => a.n100 },
-    prazo: { rot: 'Limpeza no prazo', val: a => a.limp.prazo ?? -1 },
+    prazo: { rot: '% no prazo (km com data)', val: a => a.limp.prazo ?? -1 },
+    semreg: { rot: '% sem registro', val: a => a.limp.semReg ?? -1 },
     ult: { rot: 'Última limpeza', val: a => a.limp.ult || '' },
   };
   const cel = matchMedia('(max-width:900px)');             // o seletor de escopo muda de forma no celular
@@ -98,6 +104,11 @@
   --sh2:0 1px 2px rgb(0 0 0 / .3),0 12px 32px -12px rgb(0 0 0 / .7);
 }
 @keyframes esmaece{from{opacity:.35}}
+.pl-tab th.w{white-space:normal;max-width:130px;min-width:96px}
+.pl-tab th.w button{white-space:normal;line-height:1.3;padding:var(--s2) 0}
+.pl-ordrap{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3)}
+#polos .pl-ordtxt{margin:0;max-width:none;font-size:var(--t-sm);line-height:1.4;color:var(--muted)}
+.pl-ordtxt b{color:var(--fg);font-weight:600}
 
 .wrap{max-width:var(--wrap)}
 #polos{display:grid;gap:var(--s5);min-width:0}
@@ -226,7 +237,11 @@
   .pl-ferr{gap:var(--s3)}
   .pl-cl{display:flex;flex:1 1 100%}
   .pl-cl button{flex:1 1 0;padding:0 var(--s1)}
-  .pl-ordw{display:flex;flex:1 1 100%;gap:var(--s2);align-items:center}
+  .pl-lista{grid-template-columns:minmax(0,1fr)}   /* rótulos longos do select não alargam a página */
+  .pl-ord select{text-overflow:ellipsis}
+  .pl-ordrap{flex:1 1 100%;min-width:0}
+  .pl-ordq{display:none}   /* no celular a ordem vem do select */
+  .pl-ordw{display:flex;min-width:0;flex:1 1 100%;gap:var(--s2);align-items:center}
   .pl-ord{flex:1;min-width:0;display:flex;align-items:center;gap:var(--s2);font-size:var(--t-sm);color:var(--muted);white-space:nowrap}
   .pl-ord select{flex:1;min-width:0;min-height:44px;padding:0 32px 0 var(--s3);border:1px solid var(--line-forte);border-radius:var(--r2);
     background:var(--paper) ${seta('5a636a')} no-repeat right 12px center/12px;color:var(--fg);font:16px var(--f-body);
@@ -274,8 +289,9 @@
     const nMuns = sel.polos.reduce((s, p) => s + p.n_muns, 0), nTr = sel.trs.length;
     const nCl = c => sel.trs.filter(a => a.t.split('-')[0] === c).length;
     const pil = (id, nome, n) => `<button type="button" class="pl-pil" data-p="${id}" aria-pressed="${sel.id === id}">${esc(nome)} <small>${nf(n)} NAE</small></button>`;
-    const th = (k, cls = '') => `<th scope="col" class="${cls}"${k === ord ? ` aria-sort="${desc ? 'descending' : 'ascending'}"` : ''}><button type="button" data-o="${k}">${k === 'km' ? rotKm : COLS[k].rot}</button></th>`;
+    const th = (k, cls = '') => `<th scope="col" class="${cls}"${k === ord ? ` aria-sort="${desc ? 'descending' : 'ascending'}"` : ''}><button type="button" data-o="${k}"${k === 'nae' || k === 'n100' ? ` title="${esc(periodoCr)}"` : ''}>${k === 'km' ? rotKm : COLS[k].rot}</button></th>`;
     const vis = als.slice(0, mostra);
+    const ordTxt = `${col.rot.replace(/ \(.*\)$/, '')}, ${desc ? 'maior' : 'menor'} primeiro`;
     // seletor: no computador, uma linha por regional (a regional e os polos dela); no celular, ETO/regionais em segmentos e os polos numa nuvem
     const seletor = cel.matches
       ? `<div class="pl-seg pl-topo">${[['eto', 'ETO', 'ETO · Tocantins'], ...regs.map(r => [regId(r), r, ''])].map(([id, rot, nome]) => {
@@ -286,7 +302,7 @@
       : `${pil('eto', 'ETO · Tocantins', naeEsc(ESC.eto))}<span aria-hidden="true"></span>${regs.map(r =>
           pil(regId(r), r, naeEsc(ESC[regId(r)])) + `<div class="pl-polos">${polosDe(r).map(p => pil(p.id, p.nome, totNae(p))).join('')}</div>`).join('')}`;
     const sup = varios ? esc(sel.polos.map(p => p.nome).join(', ')) : `Regional ${esc(polo.regional)} · equipe ${esc(polo.equipe)}`;
-    const kpi = [[nf(nae), 'NAE árvore/eucalipto'], [nf(sel.als.length), 'alimentadores'], [nf(nTr), 'trechos com NAE'], [km(kmPolo), 'km de rede'],
+    const kpi = [[nf(nae), 'NAE árvore/eucalipto · ' + periodoCr], [nf(sel.als.length), 'alimentadores'], [nf(nTr), 'trechos com NAE'], [km(kmPolo), 'km de rede'],
       [nf(nMuns), 'municípios'], ...(varios ? [[nf(sel.polos.length), 'polos']] : [])];
     alvo.innerHTML = `<div class="pl-esc" role="group" aria-label="Escolher a visão">${seletor}</div>
       <div class="pl-cab"><p class="pl-sup">${sup}${periodo ? ' · ' + periodo : ''}</p><h2>${esc(sel.nome)}</h2>
@@ -295,12 +311,14 @@
       <div class="pl-vis" role="group" aria-label="Ver ranking de"><button type="button" data-v="al" aria-pressed="${!tr}">Alimentadores</button><button type="button" data-v="tr" aria-pressed="${tr}">Trechos</button></div>
       <div class="pl-ferr">${tr ? `<div class="pl-seg pl-cl" role="group" aria-label="Classe do trecho"><button type="button" data-c="" aria-pressed="${!classe}">Todos <small>${nf(nTr)}</small></button>${
           ['T1', 'T2', 'T3'].map(c => `<button type="button" data-c="${c}" aria-pressed="${classe === c}">${c} <small>${nf(nCl(c))}</small></button>`).join('')}</div>` : ''}
+        <div class="pl-ordrap"><div class="pl-seg pl-ordq" role="group" aria-label="Ordenar por"><button type="button" data-o="nae" aria-pressed="${ord === 'nae'}">NAE</button><button type="button" data-o="n100" aria-pressed="${ord === 'n100'}">NAE / 100 km</button></div>
+          <p class="pl-ordtxt" role="status">Ordem ativa: <b>${esc(ordTxt)}</b></p></div>
         <div class="pl-ordw"><label class="pl-ord">Ordenar por <select id="pl-ord">${Object.keys(COLS).map(k =>
           `<option value="${k}"${k === ord ? ' selected' : ''}>${k === 'km' ? rotKm : COLS[k].rot}</option>`).join('')}</select></label><button type="button" class="pl-inv" data-inv="1" aria-label="Inverter ordem">${desc ? '↓' : '↑'}</button></div>
         <div class="pl-leg" role="group" aria-label="Cores da limpeza"><span class="pl-leg-t">Limpeza:</span>${Object.entries(SIT).map(([k, [n, c]]) =>
           `<span><i${k === 'sem' ? ' class="vz"' : ` style="background:${c}"`}></i>${n}</span>`).join('')}</div></div>
       <table class="pl-tab">
-        <thead><tr><th scope="col" class="t"><span>#</span></th><th scope="col" class="t"><span>${tr ? 'Trecho' : 'Alimentador'}</span></th>${th('nae')}${th('cons')}${th('chi')}${th('km')}${th('n100')}${th('prazo', 't')}${th('ult')}</tr></thead>
+        <thead><tr><th scope="col" class="t"><span>#</span></th><th scope="col" class="t"><span>${tr ? 'Trecho' : 'Alimentador'}</span></th>${th('nae')}${th('cons', 'w')}${th('chi', 'w')}${th('km')}${th('n100')}${th('prazo', 't w')}${th('ult')}</tr></thead>
         <tbody>${vis.map((a, i) => {
           const L = a.limp, muns = tr ? [P.muns[a.mun] || a.mun].filter(Boolean) : a.muns.map(c => P.muns[c] || c);
           const q = [tr ? 't=' + encodeURIComponent(a.t) : '', a.m ? 'm=' + encodeURIComponent(a.m) : ''].filter(Boolean).join('&');
@@ -310,12 +328,13 @@
           return `<tr><td class="n">${i + 1}º</td>
             <td class="al t"><a href="${href}" data-pos="${i + 1}">${esc(tr ? a.t : a.al)}</a>${tr ? `<span class="al-cod">${esc(a.al)}</span>` : ''}<span class="det" title="${det}">${det}</span></td>
             <td data-r="NAE"><b>${nf(a.nae)}</b>${a.sem ? `<small>${nf(a.sem)} sem trecho</small>` : ''}</td>
-            <td data-r="Consumidores">${nf(a.cons)}</td>
-            <td data-r="CHI (h)">${nf(a.chi)}</td>
+            <td data-r="CI (consumidores interrompidos)">${nf(a.cons)}</td>
+            <td data-r="CHI (consumidor·hora)">${nf(a.chi)}</td>
             <td data-r="${rotKm}">${km(a.km)}${a.km_total > a.km + 50 ? `<small>de ${km(a.km_total)} km</small>` : ''}</td>
             <td data-r="NAE / 100 km">${nf(a.n100, 1)}${a.nae_rede !== a.nae ? `<small>${nf(a.nae_rede)} NAE nesta rede</small>` : ''}</td>
-            <td class="t lim" data-r="Limpeza no prazo">${L.tot ? `<div class="pl-limw"><span class="pl-bar" title="${Object.entries(SIT).map(([k, [n]]) => `${n}: ${km(L.s[k])} km`).join(' · ')}">${
-              Object.entries(SIT).map(([k, [, c]]) => L.s[k] ? `<i style="width:${100 * L.s[k] / L.tot}%;background:${c}"></i>` : '').join('')}</span><span class="pl-pc">${nf(100 * L.prazo)}%<span class="pl-np"> no prazo</span></span></div>`
+            <td class="t lim" data-r="% no prazo (km com data)">${L.tot ? `<div class="pl-limw"><span class="pl-bar" title="${Object.entries(SIT).map(([k, [n]]) => `${n}: ${km(L.s[k])} km`).join(' · ')}">${
+              Object.entries(SIT).map(([k, [, c]]) => L.s[k] ? `<i style="width:${100 * L.s[k] / L.tot}%;background:${c}"></i>` : '').join('')}</span>${L.prazo === null ? '<span class="pl-vazio">sem OS</span>' : `<span class="pl-pc">${nf(100 * L.prazo)}%<span class="pl-np"> no prazo</span></span>`}</div>${
+              L.s.sem ? `<small>${nf(100 * L.semReg)}% sem registro (${km(L.s.sem)} km)</small>` : ''}`
               : '<span class="pl-vazio">sem dados de limpeza</span>'}</td>
             <td data-r="Última limpeza">${L.ult ? br(L.ult) : '<span class="pl-vazio">sem registro</span>'}</td></tr>`;
         }).join('')}</tbody></table>
@@ -323,9 +342,10 @@
       ${als.length > mostra ? `<button type="button" class="pl-mais" data-m="1">Mostrar mais ${nf(Math.min(POR_VEZ, als.length - mostra))} (de ${nf(als.length - mostra)} restantes)</button>` : ''}
       </div>
       <details class="pl-nota"${notaAberta ? ' open' : ''}><summary>Como contamos</summary><div class="pl-nota-c">
+        <p><b>Período:</b> NAE, CI e CHI são da ${esc(periodoCr)}, ocorrências por vegetação; a base não tem 12 meses. <b>CI</b> é a soma dos consumidores interrompidos em cada ocorrência (o mesmo consumidor entra a cada vez que é interrompido) e <b>CHI</b> é o consumidor·hora. <b>Ordem:</b> a tabela começa por NAE; <b>NAE / 100 km</b> divide a NAE pelos km da rede e pode ser escolhida em Ordenar por.</p>
         <p><b>Como conta:</b> alimentador que passa por mais de um polo aparece em cada um, com a rede e a NAE dos trechos que estão no polo (o trecho conta no município onde tem mais rede). NAE sem trecho localizado conta no polo onde o alimentador tem mais rede. A coluna NAE segue a Crítica; o NAE / 100 km usa a NAE da mesma rede dos km: sai a NAE cujo ativo hoje está em outro alimentador no GIS e entra a de outro alimentador cujo ativo está aqui (uma vez só, se a Crítica lançou o evento nos dois). NAE de ativo que não está no GIS não entra, a não ser que o ativo esteja no export anterior do GIS em cima da rede de hoje.${varios ? ' Na regional e na ETO, o alimentador aparece uma vez só, somando os polos.' : ''}</p>
         ${tr ? '<p><b>Trechos:</b> só os que tiveram NAE no período; o trecho conta no polo do município onde tem mais rede. A NAE do trecho soma todos os ativos dele (chaves e transformadores), inclusive NAE registrada em outro alimentador cujo ativo hoje está no trecho. Tocar no trecho abre o mapa com ele selecionado.</p>' : ''}
-        <p><b>Limpeza:</b> só OS executadas${P.equipes ? ' pelas equipes ' + esc(P.equipes.join(', ')) : ''}, pela data de execução; T1 a cada ${P.regra.T1} anos, T2 a cada ${P.regra.T2}, T3 a cada ${P.regra.T3}, contando da última limpeza de cada vão (situação de hoje).</p>
+        <p><b>Limpeza:</b> só OS executadas${P.equipes ? ' pelas equipes ' + esc(P.equipes.join(', ')) : ''}, pela data de execução; T1 a cada ${P.regra.T1} anos, T2 a cada ${P.regra.T2}, T3 a cada ${P.regra.T3}, contando da última limpeza de cada vão (situação de hoje). O <b>% no prazo</b> é calculado só sobre os km que têm data de limpeza; os km sem OS aparecem à parte, em <b>% sem registro</b>, sobre a rede toda. A última limpeza vem das OS (a mesma base), não do campo de <code>ranking-nae.js</code>.</p>
         <p>Polo de cada município: <code>${esc(P.fonte)}</code>.${P.fora.length ? ' ' + esc(P.fora.join('; ')) + '.' : ''}</p></div></details>`;
     alvo.classList.toggle('pl-anima', anima);
     anima = false;

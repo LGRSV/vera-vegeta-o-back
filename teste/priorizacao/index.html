@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
-<link rel="stylesheet" href="../assets/priorizacao.css?v=202610292330"></head><body><div class="wrap">
+<link rel="stylesheet" href="../assets/priorizacao.css?v=202611101200"></head><body><div class="wrap">
 <header class="cab"><h1><b>ARGOS</b> <span>PRIORIZAÇÃO</span></h1><a class="cab-link" href="../">Mapa</a></header>
 <div class="pz-app">
 <div class="pz" id="pz">
@@ -27,12 +27,25 @@
         <p class="dica">A <b>nota</b> do trecho vai de 0 a 100 e é a <b>soma dos pontos</b> dos critérios. Cada critério dá pontos conforme o valor no trecho: <span id="pt-exemplo">por exemplo, 1 a 9 clientes vale 5 pontos e 10 a 99 clientes vale 10 pontos</span>. Os pontos podem ser mudados; os máximos devem somar 100.</p>
         <div class="pontos" id="pontos"></div>
         <div class="pt-rodape"><div class="pt-total" id="pt-total"><span>Nota máxima</span><b id="nota-max">100</b></div><p class="aviso-pontos" id="aviso-pontos" role="status" hidden></p><button class="botao" id="restaurar" type="button">Restaurar padrão</button></div>
+        <div class="pt-limites">
+          <h3>Limites conhecidos da conta</h3>
+          <ul>
+            <li><b>Mesmo evento em três critérios.</b> NAE, CHI e CI saem das mesmas ocorrências: um trecho com evento soma pontos três vezes pelo mesmo fato, e um sem evento perde os três. Clientes e Hierarquia também medem a mesma exposição (o T1 tem mais clientes). Decisão pendente do dono da metodologia.</li>
+            <li><b>Mínimo de 5 km no cálculo por 100 km</b> (padrão, editável em Opções). A maior parte dos trechos tem menos de 5 km e, para eles, a taxa é só a contagem × 20. Um trecho longo com várias ocorrências pode levar menos pontos que um curto com uma. A ficha mostra a contagem e a extensão reais. Decisão pendente.</li>
+            <li><b>CHI acima do real em religamento por etapas.</b> O consumidor·hora usa a maior duração do evento para todos os consumidores; quando o religamento é feito por etapas, o valor fica acima do real. Será corrigido quando a Crítica for reprocessada.</li>
+            <li><b>CHI e CI não são DEC e FEC.</b> São valores absolutos do trecho; o DEC e o FEC do PRODIST dividem pelos consumidores do conjunto.</li>
+            <li><b>Histórico curto.</b> As ocorrências são as da Crítica que está nos dados (<span class="js-periodo">jan a ago/2026</span>); não é uma janela de 12 meses.</li>
+            <li><b>Bases congeladas.</b> Trechos da segmentação de <span class="js-seg">07/10/2026</span> e OS de <span class="js-os">29/10/2026</span>; as duas não podem ser regeradas nesta página.</li>
+          </ul>
+        </div>
       </div>
     </section>
   </div>
 
   <section class="pz-centro conteudo" id="pz-centro" aria-labelledby="pz-tit">
-    <h2 class="pz-h2" id="pz-tit" title="Limpeza de faixa · referência 07/10/2026">Trechos</h2>
+    <h2 class="pz-h2" id="pz-tit" title="Limpeza de faixa · referência 29/10/2026">Trechos</h2>
+    <p class="pz-ref" id="pz-ref"></p>
+    <p class="pz-lacuna" id="pz-lacuna" role="note" hidden></p>
     <div class="resumo" id="resumo"></div>
     <div class="tabela-wrap">
       <table>
@@ -40,6 +53,7 @@
         <tbody id="corpo"></tbody>
       </table>
     </div>
+    <div class="pz-mais"><span id="exibindo" role="status"></span><button class="botao" id="mais" type="button" hidden>Carregar mais</button></div>
   </section>
 
   <aside class="pz-ficha gaveta" id="gaveta" aria-label="Ficha do trecho"><p class="dica">Escolha um trecho.</p></aside>
@@ -118,7 +132,7 @@
         <tr><td>Identificação e topologia</td><td>id estável, alimentador, SE, classe T1/T2/T3, zona de proteção (DJ, religador, fusível), fase predominante, extensão, vãos, trecho pai e derivações, versão do cadastro, confiança da segmentação</td><td>Existe (GIS processado no protótipo)</td></tr>
         <tr><td>Território e operação</td><td>polo, regional, município, base e equipe responsável, centro e geometria, rural ou urbano, acesso, restrição ambiental ou autorização pendente</td><td>Parcial: polo, município e equipe (pelas OS); falta acesso e restrição</td></tr>
         <tr><td>Impacto</td><td>consumidores a jusante, clientes Grupo A e essenciais (hospital, captação de água, posto de saúde) a jusante, carga</td><td>UCs ligadas por trafo (planilha UC por trafo). Falta Grupo A e essenciais</td></tr>
-        <tr><td>Continuidade</td><td>ocorrências associadas (regra e confiança da associação), CI, CHI, duração, contribuição DEC/FEC</td><td>Existe (Crítica jan–ago/2026)</td></tr>
+        <tr><td>Continuidade</td><td>ocorrências associadas (regra e confiança da associação), CI, CHI, duração, contribuição DEC/FEC</td><td>Existe (Crítica <span class="js-periodo">jan a ago/2026</span>)</td></tr>
         <tr><td>Manutenção</td><td>OS por tipo (emergencial, corretiva, preventiva, programada), status, datas, cobertura por vão, método e confiança da cobertura</td><td>Existe (cobertura estimada pela descrição da OS)</td></tr>
         <tr><td>Vegetação</td><td>inspeções: distância à MT e à BT, espécie, altura, DAP, pontos críticos, data, fotos, validade; <b>classe de vegetação predominante</b>, que define o tipo de equipe e a produtividade</td><td>Não disponível hoje; fora do score. Classe de vegetação não existe</td></tr>
         <tr><td>Planos e qualidade</td><td>plano climático ou campanha, data de referência de cada fonte, completude</td><td>Falta</td></tr>
@@ -153,30 +167,31 @@
     <div class="tabela-wrap"><table>
       <thead><tr><th>Critério</th><th>Medida</th><th>Valor no trecho: pontos</th><th class="r">Máximo</th></tr></thead>
       <tbody>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> NAE por 100 km</td><td>ocorrências por vegetação dos últimos 12 meses, depois da última limpeza, por 100 km do trecho</td><td>menos de 20: 5 · 20 a 39,9: 10 · 40 a 59,9: 15 · 60 ou mais: 20</td><td class="r num">20</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> DEC por 100 km</td><td>consumidor·hora interrompido nessas ocorrências, por 100 km</td><td>menos de 1.000: 5 · 1.000 a 9.999: 10 · 10.000 ou mais: 15</td><td class="r num">15</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> FEC por 100 km</td><td>consumidores interrompidos nessas ocorrências, por 100 km</td><td>menos de 100: 3 · 100 a 999: 5 · 1.000 a 9.999: 8 · 10.000 ou mais: 10</td><td class="r num">10</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> NAE por 100 km</td><td>ocorrências por vegetação do período da Crítica (<span class="js-periodo">jan a ago/2026</span>), depois da última limpeza, por 100 km do trecho</td><td>menos de 20: 5 · 20 a 39,9: 10 · 40 a 59,9: 15 · 60 ou mais: 20</td><td class="r num">20</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> CHI por 100 km (consumidor·hora)</td><td>consumidor·hora interrompido (CHI) nessas ocorrências, por 100 km</td><td>menos de 1.000: 5 · 1.000 a 9.999: 10 · 10.000 ou mais: 15</td><td class="r num">15</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> CI por 100 km (consumidores interrompidos)</td><td>consumidores interrompidos (CI) nessas ocorrências, por 100 km</td><td>menos de 100: 3 · 100 a 999: 5 · 1.000 a 9.999: 8 · 10.000 ou mais: 10</td><td class="r num">10</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Clientes (UCs ligadas)</td><td>UCs ligadas nos transformadores do trecho e dos que saem dele (planilha UC por trafo)</td><td>1 a 9: 5 · 10 a 99: 10 · 100 a 999: 15 · 1.000 ou mais: 20</td><td class="r num">20</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Hierarquia do trecho</td><td>classe do trecho: o tronco (T1) desliga mais clientes quando falha</td><td>T1: 10 · T2: 5 · T3: 3</td><td class="r num">10</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Cliente Grupo A</td><td>cliente de média tensão no trecho</td><td>tem: 5</td><td class="r num">5</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-man)"></span> Limpeza de faixa</td><td>última limpeza efetiva + ciclo (T1 3 anos, T2 4 anos, T3 5 anos)</td><td>vencida: 20 · vence em até 3 meses: 10</td><td class="r num">20</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-man)"></span> Limpeza de faixa</td><td>última limpeza efetiva + ciclo (T1 3 anos, T2 4 anos, T3 5 anos)</td><td>vencida: 20 · vence em até 3 meses: 10 · sem registro: 10</td><td class="r num">20</td></tr>
         <tr><td colspan="3"><b>Nota máxima</b></td><td class="r num"><b>100</b></td></tr>
       </tbody>
     </table></div>
-    <p>Valor zero (nenhuma ocorrência, nenhum consumidor·hora, sem cliente Grupo A, limpeza em dia) não dá ponto. O valor que cai exatamente num limite já é da faixa de cima: NAE de 40 por 100 km dá 15. Faixas (padrão, editáveis em Opções): P1 com nota 70 ou mais, P2 de 50 a 70, P3 de 30 a 50, P4 abaixo de 30. Os perfis sazonais mudam só os pontos, somam 100 e são versionados: <b>pré-chuva (set–nov)</b> dá até 30 pontos à limpeza vencida; <b>plano climático</b> dá até 25 ao NAE e 20 ao DEC. No Tocantins o período chuvoso vai de outubro a abril; a própria Crítica de 2026 mostra janeiro com 2,5 vezes as ocorrências por vegetação de agosto.</p>
+    <p>Valor zero (nenhuma ocorrência, nenhum consumidor·hora, sem cliente Grupo A, limpeza em dia) não dá ponto. O valor que cai exatamente num limite já é da faixa de cima: NAE de 40 por 100 km dá 15. Faixas (padrão, editáveis em Opções): P1 com nota 70 ou mais, P2 de 50 a 70, P3 de 30 a 50, P4 abaixo de 30. Os perfis sazonais mudam só os pontos, somam 100 e são versionados: <b>pré-chuva (set–nov)</b> dá até 30 pontos à limpeza vencida; <b>plano climático</b> dá até 25 ao NAE e 20 ao CHI. No Tocantins o período chuvoso vai de outubro a abril; a própria Crítica de 2026 mostra janeiro com 2,5 vezes as ocorrências por vegetação de agosto.</p>
   </section>
 
   <section>
     <h2>4. Como cada valor é medido</h2>
     <ul>
-      <li><b>Últimos 12 meses, depois da última limpeza.</b> NAE, DEC e FEC contam as ocorrências por vegetação dos últimos 12 meses que aconteceram depois da última limpeza efetiva (OS executada cobrindo pelo menos 50% do trecho). As anteriores já foram tratadas pela limpeza e não contam; continuam valendo para as regras de recorrência F1 e F4.</li>
+      <li><b>Período da Crítica, depois da última limpeza.</b> NAE, CHI e CI contam as ocorrências por vegetação da Crítica que está nos dados (<span class="js-periodo">jan a ago/2026</span>; a janela nominal é de 12 meses, mas a base não tem mais que isso) que aconteceram depois da última limpeza efetiva (OS executada cobrindo pelo menos 50% do trecho). As anteriores já foram tratadas pela limpeza e não contam; continuam valendo para as regras de recorrência F1 e F4.</li>
       <li><b>Por 100 km.</b> As três medidas são contadas no próprio trecho (a unidade que a equipe executa), divididas pela extensão dele e multiplicadas por 100, para comparar trechos de tamanhos diferentes. Trecho com menos de 5 km (editável em Opções) conta como 5 km: a mediana dos trechos tem 0,21 km e, sem esse mínimo, um trecho curtinho com uma só ocorrência passaria o tronco. Com 5 km, cada ocorrência vale 20 por 100 km: 1, 2 e 3 ocorrências dão 20, 40 e 60, o começo das faixas de 10, 15 e 20 pontos. Trecho curto com evento atribuído pela abrangência do DJ recebe o alerta Q4.</li>
-      <li><b>Clientes (UCs ligadas).</b> Soma das UCs ligadas nos transformadores do trecho e dos trechos que saem dele, pela planilha de UC por trafo: o que um evento no trecho pode deixar sem energia. A limpeza não muda quantos clientes o trecho alimenta. Alimentador fora da planilha usa o maior número de clientes desligados num evento dos últimos 12 meses, e trecho sem evento, o típico da classe.</li>
-      <li><b>Ordem de grandeza.</b> Clientes, DEC e FEC sobem de faixa a cada 10 vezes: clientes 1 a 9, 10 a 99, 100 a 999 e 1.000 ou mais; DEC por 100 km menos de 1.000, 1.000 a 9.999 e 10.000 ou mais; FEC por 100 km menos de 100, 100 a 999, 1.000 a 9.999 e 10.000 ou mais. Um valor extremo ganha só o máximo do critério e não domina a nota.</li>
-      <li><b>Grupo A.</b> Ainda não há cadastro na base: o critério dá 0 até ser marcado (no teste, pela ficha do trecho), e a regra F2 garante mínimo P2.</li>
+      <li><b>Clientes (UCs ligadas).</b> Soma das UCs ligadas nos transformadores do trecho e dos trechos que saem dele, pela planilha de UC por trafo: o que um evento no trecho pode deixar sem energia. A limpeza não muda quantos clientes o trecho alimenta. Alimentador fora da planilha usa o maior número de clientes desligados num evento do período da Crítica, e trecho sem evento, o típico da classe. Trecho que não está na planilha do seu alimentador fica sem dado e não pontua.</li>
+      <li><b>Ordem de grandeza.</b> Clientes, CHI e CI sobem de faixa a cada 10 vezes: clientes 1 a 9, 10 a 99, 100 a 999 e 1.000 ou mais; CHI por 100 km menos de 1.000, 1.000 a 9.999 e 10.000 ou mais; CI por 100 km menos de 100, 100 a 999, 1.000 a 9.999 e 10.000 ou mais. Um valor extremo ganha só o máximo do critério e não domina a nota.</li>
+      <li><b>Grupo A.</b> Ainda não há cadastro na base: o critério dá 0 até ser marcado (no teste, pela ficha do trecho), e a regra F2 garante mínimo P2. Sem marcação, a nota máxima alcançável é 95.</li>
+      <li><b>Limpeza sem registro.</b> Trecho sem OS executada cobrindo pelo menos 50% dele desde o início das OS não tem data de vencimento: fica como sem registro e leva a pontuação própria (10 de 20 no perfil padrão, editável nas Premissas), menor que a de vencida.</li>
       <li><b>Empate.</b> Entre notas iguais vem antes o trecho com mais ocorrências por 100 km, depois o de mais consumidor·hora por 100 km, depois o mais longo.</li>
       <li><b>Referência fixa por rodada.</b> Os típicos por classe são calculados sobre a rede inteira e gravados na rodada; filtrar a tela não muda nenhuma nota.</li>
-      <li><b>Confiança.</b> Parte da nota máxima que vem de dado real: valor estimado (clientes típicos, limpeza sem registro) conta metade e critério sem dado (Grupo A) não conta. Abaixo de 6 de 10 em P1 ou P2 gera o alerta Q1.</li>
+      <li><b>Confiança.</b> Parte da nota máxima que vem de dado real: valor estimado (clientes típicos, limpeza sem registro) conta metade e critério sem dado (Grupo A, trecho fora da planilha de UC) não conta. Abaixo de 6 de 10 em P1 ou P2 gera o alerta Q1.</li>
     </ul>
   </section>
 
@@ -195,7 +210,7 @@
     <ul>
       <li>Ocorrência deduplicada pela chave da Crítica (sequência de operação + passo + competência); a mesma falha não conta duas vezes.</li>
       <li>Bloqueio por carência após limpeza com cobertura ≥ 80% (B1); OS aberta não gera nova (B2).</li>
-      <li>Ocorrências anteriores à última limpeza efetiva não contam no NAE, DEC e FEC: a causa foi tratada.</li>
+      <li>Ocorrências anteriores à última limpeza efetiva não contam no NAE, CHI e CI: a causa foi tratada.</li>
       <li>Cada fonte guarda sua data de referência.</li>
       <li>Trecho ligado à versão do cadastro: se o ativo mudou de alimentador, o histórico segue o ativo.</li>
       <li>Plano aprovado fica congelado: o ranking novo não reembaralha o que já está programado.</li>
@@ -316,6 +331,7 @@
       <thead><tr><th>Topo</th><th>Ordenação</th><th class="r">Ocorr. futuras</th><th class="r">Cons·h futuro</th><th class="r">Extensão</th><th class="r">Cons·h ÷ km</th></tr></thead>
       <tbody id="tab-retro"><tr><td colspan="6" class="vazio">Calculando…</td></tr></tbody>
     </table></div>
+    <p class="aviso-pontos" id="retro-aviso" role="note" hidden></p>
     <p class="dica" id="retro-nota"></p>
   </section>
   <section>
@@ -326,9 +342,10 @@
   </details>
 </footer>
 </div>
-<script src="../assets/priorizacao-dados.js?v=202610292330"></script>
-<script src="../dados/ucs-trechos.js?v=202610292330"></script>
-<script src="../assets/priorizacao.js?v=202610292330"></script>
+<!-- defer: a página pinta o esqueleto enquanto os 3,4 MB de dados chegam -->
+<script defer src="../assets/priorizacao-dados.js?v=202610292330"></script>
+<script defer src="../dados/ucs-trechos.js?v=202610292330"></script>
+<script defer src="../assets/priorizacao.js?v=202611101200"></script>
 </div>
 <script src="../assets/menu.js"></script>
 </body></html>

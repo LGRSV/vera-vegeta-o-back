@@ -56,11 +56,13 @@
   // visão do mapa (mapa-municipios.js: NAE, Manutenção, Inspeção…): os números e a ordem da lista seguem a métrica escolhida;
   // na NAE (visao() = null) ficam os de antes. Regional, polo e alimentador: soma dos municípios (como nos cartões do mapa)
   const vis = () => (mapa() && mapa().visao ? mapa().visao() : null);
+  // na densidade (NAE por 100 km) o grupo não é a soma das densidades: v.grupo soma NAE e km e divide; o alimentador é o inteiro
   const valor = x => {
     const v = vis();
     if (!v) return x.nae || 0;
     const ms = x.slug !== undefined ? [x] : x.polos ? muns.filter(m => m.reg === x.nome) : x.se !== undefined ? null : x.muns;
-    return ms ? ms.reduce((s, m) => s + v.mun(m.cod), 0) : x.muns.reduce((s, m) => s + v.al(x.cod, m.cod), 0);
+    if (ms) return v.grupo ? v.grupo(ms.map(m => m.cod)) : ms.reduce((s, m) => s + v.mun(m.cod), 0);
+    return v.alTot ? v.alTot(x.cod) : x.muns.reduce((s, m) => s + v.al(x.cod, m.cod), 0);
   };
   const porNae = (a, b) => valor(b) - valor(a);
   const mais = () => (vis() ? vis().mais : 'NAE');
@@ -96,7 +98,14 @@
     al: (a, n, k) => ({ s: { al: a.cod }, tipo: 'al', t: realce(a.cod, k), c: `${realce(a.se, n)} · ${plural(a.muns.length, 'município', 'municípios')} · ${kmTxt(a.m)}`, nae: valor(a) }),
     // alimentador do município aberto (a lista que ficava ao lado do mapa): miniatura da rede, código e NAE (sem km e SE,
     // pedido do usuário); o que está em foco no mapa fica marcado
-    almun: (a, m, foco) => ({ s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: vis() ? vis().al(a.cod, m.cod) : a.n || 0, c: foco ? 'Em foco no mapa' : '' }),
+    // número: NAE do alimentador neste município (regra aprovada) quando os dados trazem; sem isso, a do alimentador todo,
+    // dito na linha de baixo (só é a do município quando ele não passa por outro)
+    almun: (a, m, foco) => {
+      const v = vis(), x = mapa() && mapa().alNoMun ? mapa().alNoMun(a.cod, m.cod) : { n: a.n || 0, tot: a.n || 0, todo: true };
+      const quem = v ? (v.dens ? 'no alimentador todo' : '') : x.todo ? `NAE do alimentador todo (${plural(AL[a.cod] ? AL[a.cod].muns.length : 1, 'município', 'municípios')})` :
+        x.n !== x.tot ? `neste município, de ${nf(x.tot)} no alimentador` : '';
+      return { s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: v ? v.al(a.cod, m.cod) : x.n, c: [foco ? 'Em foco no mapa' : '', esc(quem)].filter(Boolean).join(' · ') };
+    },
     ativo: ([c, tipo], k) => ({ s: { ativo: c }, tipo: 'ativo', t: realce(c, k), c: esc(TIPO[tipo] || 'Chave ' + tipo) }),
     os: txt => ({ s: { os: txt }, tipo: 'os', t: `OS ${esc(txt)}`, c: 'buscar nas bases de faixa, inspeção, manutenção e executadas' }),
     uc: (k, hits) => ({ s: { uc: k }, tipo: 'uc', t: `UC ${esc(k)}`,
@@ -149,6 +158,7 @@
     const o = res.querySelector(`#ativo-sug-${i}`);
     if (o) { q.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } else q.removeAttribute('aria-activedescendant');
     const s = sug[i];
+    if (mapa() && mapa().prepara) mapa().prepara(s && s.almun);   // mouse parado no alimentador: a página dele começa a vir
     if (s && s.almun) { previa(null); realceAl(s.almun); }   // alimentador do município aberto: a rede dele acende no mapa
     else { realceAl(null); previa(alvoMapa(s)); }
   };
@@ -158,7 +168,7 @@
   function atalhos() {
     pedido++;
     const nv = nivel(), m = porCod[nv.mun];
-    if (m) mostra([[`Alimentadores de ${m.nome} · ${m.als.length}`, m.als.slice().sort((a, b) => b.m - a.m)
+    if (m) mostra([[`Alimentadores de ${m.nome} · ${m.als.length} · município: ${vis() ? vis().txt(valor(m)) : nf(m.nae) + ' NAE'}`, m.als.slice().sort((a, b) => b.m - a.m)
       .map(a => item.almun({ ...a, se: (AL[a.cod] || {}).se || a.se }, m, a.cod === nv.al))]], '', 'lista-mun');
     else if (nv.pol && POL[nv.pol]) mostra([[`Municípios do polo ${nv.pol}`, POL[nv.pol].muns.slice().sort(porNae).map(x => item.mun(x))],
       [`Alimentadores com mais ${mais()} no polo ${nv.pol}`, topAls(x => x.polo === nv.pol)]]);
@@ -260,6 +270,10 @@
     marca(e.key === 'ArrowDown' ? Math.min(sug.length - 1, marcado + 1) : Math.max(0, marcado - 1));
   });
   res.addEventListener('mousedown', e => { if (e.target.closest('.sug-op, .ir-mapa')) e.preventDefault(); });   // o campo não perde o foco
+  res.addEventListener('pointerdown', e => {           // dedo (ou botão) no alimentador do município: os dados dele já vêm
+    const o = e.target.closest('.sug-op'), s = o && sug[+o.dataset.i];
+    if (s && s.almun && mapa() && mapa().prepara) mapa().prepara(s.almun, true);
+  });
   res.addEventListener('mouseover', e => { const o = e.target.closest('.sug-op'); if (o && +o.dataset.i !== marcado) marca(+o.dataset.i); });
   res.addEventListener('click', e => {
     const o = e.target.closest('.sug-op');

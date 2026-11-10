@@ -386,7 +386,16 @@
       '.ctl-lgs.sob-balao{visibility:hidden;opacity:0}' +
       '@media (prefers-reduced-motion:no-preference){.ctl-lgs{transition:opacity var(--dur) var(--ease),visibility 0s}.ctl-lgs.sob-balao{transition:opacity var(--dur) var(--ease),visibility 0s var(--dur)}}' +
       '.mapbox>.ctl-lgs>*{position:static;inset:auto;z-index:auto;flex:none;margin:0;max-width:none;float:none;clear:none}' +   // sem o canto antigo de cada uma
-      '@media (max-width:640px){.mapbox>.ctl-lgs>.limp-maplg>:is(.lg-cab,.lg-info){display:none}}';   // celular: só o traço e o ano
+      '@media (max-width:640px){.mapbox>.ctl-lgs>.limp-maplg>:is(.lg-cab,.lg-info){display:none}}' +   // celular: só o traço e o ano
+      // fileira das camadas sempre à vista no alto do mapa (lupa-painel.js): as legendas param abaixo dela
+      '.mapbox:has(>.lp-cams)>.ctl-lgs{max-height:calc(100% - 28px - 124px)}' +
+      // aba "Trechos" do painel: abre e fecha a lista
+      '.lista-aba{display:flex;align-items:center;gap:var(--s2);width:100%;min-height:var(--alvo);padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);' +
+      'background:var(--paper);color:var(--fg);font:var(--t-sm) var(--f-body);text-align:left;cursor:pointer}' +
+      '.lista-aba b{font:700 var(--t-base) var(--f-display)}.lista-aba span{flex:1;min-width:0;color:var(--muted);font-size:var(--t-xs);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      '.lista-aba::after{content:"";flex:none;width:7px;height:7px;margin:0 4px 4px;border:solid var(--muted);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}' +
+      '.lista-aba[aria-expanded=true]::after{margin:4px 4px 0;transform:rotate(-135deg)}' +
+      '.lista-aba:hover{background:var(--hover)}.lista-aba:focus-visible{outline:2px solid var(--accent);outline-offset:1px}';
     document.head.append(s);
   }
 
@@ -413,14 +422,29 @@
     };
     poe(document.getElementById('ferramentas'));
     const cards = [...document.querySelectorAll('.panel>.limp-card')];
-    cards.forEach(poe);
+    // aba "Trechos" logo depois do resumo, antes dos blocos das camadas: a lista fica a um toque, com ou sem camada ligada
+    const aba = document.createElement('button');
+    aba.type = 'button'; aba.className = 'lista-aba'; aba.setAttribute('aria-controls', 'lista');
+    det.parentElement.append(aba);                       // no painel; poe() o leva ao lugar
+    poe(aba);
     poe(lista);
     poe(document.getElementById('ord-lista'));          // a ordem da lista fica logo embaixo dela
-    // com alguma camada do Menu ligada, a lista de trechos sai do painel (fica o bloco da camada); volta ao buscar
+    cards.forEach(poe);
+    // com camada ligada a lista começa fechada (o bloco da camada vem logo abaixo); a aba abre e fecha; buscar abre
     const campo = document.getElementById('busca');
-    const mostra = () => { lista.hidden = cards.some(c => !c.hidden) && !(campo && campo.value.trim()); };
+    let escolha = null;                                  // null: automático; true/false: a pessoa abriu ou fechou
+    const mostra = () => {
+      const ver = !!(campo && campo.value.trim()) || (escolha ?? !cards.some(c => !c.hidden));
+      lista.hidden = !ver;
+      aba.setAttribute('aria-expanded', String(ver));
+      const ord = document.getElementById('ordem'), o = ord && !ord.closest('[hidden]') && ord.selectedOptions[0];
+      aba.innerHTML = `<b>Trechos</b><span>${D.trechos.length.toLocaleString('pt-BR')}${o ? ' · ordem: ' + o.textContent : ''}</span>`;
+    };
+    aba.addEventListener('click', () => { escolha = lista.hidden; mostra(); });
     cards.forEach(c => new MutationObserver(mostra).observe(c, { attributes: true, attributeFilter: ['hidden'] }));
     if (campo) campo.addEventListener('input', mostra);
+    const ord = document.getElementById('ordem');
+    if (ord) ord.addEventListener('change', mostra);
     mostra();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ordena); else ordena();

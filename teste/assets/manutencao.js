@@ -2,7 +2,8 @@
 // scripts/manutencao.py; as canceladas já ficaram de fora). "Insp→manut" no menu Camadas do mapa, com "Faixa" e
 // "Inspeção": um losango por poste com as OS dele, na cor da pior situação; fica por cima do que estiver ligado (com a
 // Manutenção, de executadas.js, também ligada, o losango dela no mesmo poste fica um pouco deslocado: os dois aparecem).
-// Situação pela data do dia: vencida (não executada e o prazo já passou), no prazo, executada.
+// Situação na data do OS status (MN.situacao_ate), não no relógio do navegador: vencida (não executada e o prazo já
+// passou), no prazo, executada no prazo e executada fora do prazo.
 // Posição: o poste da ESTRUTURA da OS. Sem o poste no mapa, tocar na OS mostra o bloco da inspeção que a gerou.
 // No painel: o alimentador ao lado do polo dele (as três situações), tipos e uma linha por situação (liga/desliga no mapa; abre as OS dela embaixo). Usa o visual do cartão da limpeza (classes limp-* do limpeza.js).
 (function () {
@@ -16,13 +17,19 @@
   const guarda = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { /* sem armazenamento */ } return null; };
   const celular = () => matchMedia('(max-width:980px)').matches;
   const telaCheia = () => document.body.classList.contains('tela-cheia');
+  // a situação das OS é a do OS status: comparar com o dia de hoje daria "vencida" a OS que pode ter sido feita depois
   const H = new Date();
-  const HOJE = `${H.getFullYear()}-${String(H.getMonth() + 1).padStart(2, '0')}-${String(H.getDate()).padStart(2, '0')}`;
+  const HOJE = MN.situacao_ate || `${H.getFullYear()}-${String(H.getMonth() + 1).padStart(2, '0')}-${String(H.getDate()).padStart(2, '0')}`;
+  const EM = `em ${br(HOJE)}`;
 
-  const SIT = { venc: ['Vencidas', '#ef4444'], pend: ['No prazo', '#f59e0b'], exec: ['Executadas', '#22c55e'] };
-  const ORDEM = ['venc', 'pend', 'exec'];
-  const sitDe = o => o.sit === 'EXECUTADA' ? 'exec' : o.limite && o.limite < HOJE ? 'venc' : 'pend';
-  const quando = o => sitDe(o) === 'exec' ? `executada ${br(o.exec)}` : sitDe(o) === 'venc' ? `venceu ${br(o.limite)}` : `prazo ${br(o.limite)}`;
+  const SIT = { venc: ['Vencidas', '#ef4444'], pend: ['No prazo', '#f59e0b'], exec: ['Executadas no prazo', '#22c55e'], fora: ['Executadas fora do prazo', '#0ea5e9'] };
+  const ORDEM = ['venc', 'pend', 'fora', 'exec'];
+  const sitDe = o => o.sit === 'EXECUTADA' ? (o.limite && o.exec && o.exec > o.limite ? 'fora' : 'exec') : o.limite && o.limite < HOJE ? 'venc' : 'pend';
+  const quando = o => sitDe(o) === 'exec' ? `executada ${br(o.exec)}` : sitDe(o) === 'fora' ? `executada ${br(o.exec)}, prazo ${br(o.limite)}` : sitDe(o) === 'venc' ? `venceu ${br(o.limite)}` : `prazo ${br(o.limite)}`;
+  // prazo de cada criticidade (dias da criação ao limite), lido das próprias OS: "alta 60 dias · baixa 180 dias"
+  const dias = o => o.limite && o.criada ? Math.round((new Date(o.limite) - new Date(o.criada)) / 864e5) : null;
+  const PRAZOS = Object.entries(MN.os.reduce((m, o) => { const d = dias(o); if (d !== null && o.crit) (m[o.crit] = m[o.crit] || {})[d] = ((m[o.crit] || {})[d] || 0) + 1; return m; }, {}))
+    .map(([c, ds]) => `${c} ${Object.entries(ds).sort((a, b) => b[1] - a[1])[0][0]} dias`).join(' · ');
   const POR_SIT = Object.fromEntries(ORDEM.map(s => [s, MN.os.map((o, k) => k).filter(k => sitDe(MN.os[k]) === s)]));
   // o polo do alimentador (assets/manutencao-polos.js, gera_trechos.manutencao_polos): a mesma conta por situação, somada
   // nos alimentadores do polo, para comparar no bloco
@@ -30,7 +37,7 @@
   const DO_POLO = PO && {
     venc: Object.entries(PO.lim).reduce((s, [d, n]) => s + (d && d < HOJE ? n : 0), 0),
     pend: Object.entries(PO.lim).reduce((s, [d, n]) => s + (d && d < HOJE ? 0 : n), 0),
-    exec: PO.exec,
+    exec: PO.exec,                                    // no polo não há a data de execução: as executadas vão juntas
   };
   const TIPOS = Object.entries(MN.os.reduce((m, o) => (m[o.tipo] = (m[o.tipo] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]);
   // um ponto por poste
@@ -235,12 +242,14 @@
     const f = document.activeElement;
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
     const n = MN.os.length;
-    const sub = n ? `${nf(n)} OS · ${ORDEM.map(s => `${nf(POR_SIT[s].length)} ${SIT[s][0].toLowerCase()}`).join(' · ')}` : 'Nenhuma OS gerada pela inspeção';
+    const sub = n ? `${nf(n)} OS · situação ${EM} · ${ORDEM.map(s => `${nf(POR_SIT[s].length)} ${SIT[s][0].toLowerCase()}`).join(' · ')}` : 'Nenhuma OS gerada pela inspeção';
+    const nota = n ? `<p class="limp-nota">Prazo pela criticidade: ${esc(PRAZOS)}. Situação pelo OS status de ${br(HOJE)}${MN.base_ate ? `; OS geradas até ${br(MN.base_ate)}` : ''}.</p>` : '';
     const tipos = n ? `<p class="mnt-tipos">${TIPOS.map(([t, c]) => `<b>${esc(t.charAt(0) + t.slice(1).toLowerCase())}</b> ${nf(c)}`).join(' · ')}</p>` : '';
-    const polo = DO_POLO ? `<table class="resumo-classe mnt-polo"><tr><th></th>${ORDEM.map(s => `<th>${SIT[s][0]}</th>`).join('')}</tr>` +
-      `<tr><td>${esc((D.meta || {}).al)}</td>${ORDEM.map(s => `<td>${nf(POR_SIT[s].length)}</td>`).join('')}</tr>` +
-      `<tr><td>Polo ${esc(PO.nome)} <small>${nf(PO.als)} alim.</small></td>${ORDEM.map(s => `<td>${nf(DO_POLO[s])}</td>`).join('')}</tr></table>` : '';
-    const resto = polo + (n ? tipos + `<div class="limp-anos">${ORDEM.map(linha).join('')}</div>` : '');
+    const P3 = ['venc', 'pend', 'exec'], doAl = s => s === 'exec' ? POR_SIT.exec.length + POR_SIT.fora.length : POR_SIT[s].length;
+    const polo = DO_POLO ? `<table class="resumo-classe mnt-polo"><tr><th></th>${P3.map(s => `<th>${s === 'exec' ? 'Executadas' : SIT[s][0]}</th>`).join('')}</tr>` +
+      `<tr><td>${esc((D.meta || {}).al)}</td>${P3.map(s => `<td>${nf(doAl(s))}</td>`).join('')}</tr>` +
+      `<tr><td>Polo ${esc(PO.nome)} <small>${nf(PO.als)} alim.</small></td>${P3.map(s => `<td>${nf(DO_POLO[s])}</td>`).join('')}</tr></table>` : '';
+    const resto = polo + (n ? tipos + `<div class="limp-anos">${ORDEM.map(linha).join('')}</div>` + nota : '');
     card.hidden = !st.ligado && !!btn;                    // bloco do Insp→manut só com ele ligado no mapa
     card.innerHTML = `<div class="limp-top"><h2>Insp→manut<small>${sub}</small></h2></div>
       ${resto}`;
@@ -289,11 +298,11 @@
   // ---------- Downloads (em "Dados", extras.js): todas as OS geradas pela inspeção ----------
   if (window.__baixar && window.__csv && MN.os.length) {
     const C = window.__csv;
-    const SIT_CSV = { venc: 'vencida', pend: 'no prazo', exec: 'executada' };
+    const SIT_CSV = { venc: 'vencida', pend: 'no prazo', exec: 'executada no prazo', fora: 'executada fora do prazo' };
     window.__baixar.botao('mnt', 'OS da inspeção (Excel)', () => {
       const ks = MN.os.map((o, k) => k).sort((a, b) => (MN.os[b].criada || '').localeCompare(MN.os[a].criada || ''));
       C(`OS_da_inspecao_${C.al}.csv`,
-        ['Alimentador', 'OS', 'Situação', 'Situação hoje', 'Tipo', 'Defeito', 'Criticidade', 'Criada', 'Prazo', 'Execução', 'Equipe', 'Executora',
+        ['Alimentador', 'OS', 'Situação', `Situação em ${br(HOJE)}`, 'Tipo', 'Defeito', 'Criticidade', 'Criada', 'Prazo', 'Execução', 'Equipe', 'Executora',
           'Inspeção', 'Data da inspeção', 'Poste', 'Trechos', 'Latitude', 'Longitude'],
         ks.map(k => {
           const o = MN.os[k];

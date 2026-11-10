@@ -2,6 +2,10 @@
 
 Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = ocorrências da Crítica (coletivas e individuais) associadas a um trecho ou não.
 
+ATENÇÃO, divididos por exceção: AL01102271, LD01414015 e LD02424015 vieram do GIS sem as chaves fechadas, então foram divididos pelos religadores dos by-pass NA e pelas chaves das OS (aprovado em 16/10/2026). Têm poucos trechos e muito longos (de 134,4 km a 372,6 km num só trecho): a NAE por trecho e os km vencidos deles não são confiáveis. Estão marcados "(exceção)" nas tabelas e na seção "Divididos por exceção".
+
+O total de cada município soma o alimentador inteiro (trechos, extensão e NAE de toda a rede, também a de outros municípios); só a coluna "No município (km)" é a parte do município. Por isso a soma dos municípios passa do total geral.
+
 ## Abreulândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
@@ -13,7 +17,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Abreulândia | CENTRO | SE-2BRR | AL01017017 | 162 | 1 | 0 | 161 | 183,7 | 14,8 | 0 | 161 | 3 | 1 | 0 | 0 | 2 | aviso |
 | Abreulândia | CENTRO | SE-2PR0 | LD04062013 | 1079 | 1 | 8 | 1070 | 1.191,9 | 11,3 | 8 | 1070 | 42 | 11 | 0 | 0 | 6 | aviso |
 | Abreulândia | CENTRO | SE-2MRN | LD01050008 | 507 | 1 | 7 | 499 | 591,8 | 7,2 | 7 | 499 | 17 | 0 | 0 | 0 | 4 | aviso |
-| **Total Abreulândia** | | | 7 alimentadores | 5092 | | | | 7.191,6 | 697,0 | | | | | | | | |
+| **Total Abreulândia (alimentadores inteiros)** | | | 7 alimentadores | 5092 | | | | 7.191,6 | 697,0 | | | | | | | | |
 
 ## Aguiarnópolis
 
@@ -22,7 +26,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Aguiarnópolis | NORTE | SE-2TOC | LD01084002 | 576 | 1 | 12 | 563 | 625,9 | 148,8 | 12 | 563 | 60 | 3 | 0 | 0 | 4 | aviso |
 | Aguiarnópolis | NORTE | SE-2AGP | AL01055123 | 20 | 1 | 0 | 19 | 22,5 | 22,5 | 0 | 19 | 2 | 0 | 0 | 0 | 1 | aviso |
 | Aguiarnópolis | NORTE | SE-2AGP | AL02055123 | 8 | 1 | 0 | 7 | 15,7 | 15,1 | 0 | 7 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Aguiarnópolis** | | | 3 alimentadores | 604 | | | | 664,1 | 186,4 | | | | | | | | |
+| **Total Aguiarnópolis (alimentadores inteiros)** | | | 3 alimentadores | 604 | | | | 664,1 | 186,4 | | | | | | | | |
 
 ## Aliança do Tocantins
 
@@ -33,7 +37,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Aliança do Tocantins | SUL | SE-2DRE | AL01031076 | 196 | 1 | 3 | 192 | 298,5 | 75,0 | 3 | 192 | 12 | 1 | 0 | 0 | 4 | aviso |
 | Aliança do Tocantins | SUL | SE-2ALN | AL01001037 | 18 | 1 | 1 | 16 | 13,3 | 13,3 | 1 | 16 | 1 | 0 | 0 | 0 | 2 | aviso |
 | Aliança do Tocantins | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 8,2 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
-| **Total Aliança do Tocantins** | | | 5 alimentadores | 2249 | | | | 2.947,4 | 696,2 | | | | | | | | |
+| **Total Aliança do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 2249 | | | | 2.947,4 | 696,2 | | | | | | | | |
 
 ## Almas
 
@@ -47,7 +51,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Almas | SUL | SE-2AL2 | LD07002091 | 292 | 1 | 5 | 286 | 356,4 | 47,0 | 5 | 286 | 18 | 0 | 0 | 0 | 4 | aviso |
 | Almas | SUL | SE-2AL2 | AL01002091 | 25 | 1 | 1 | 23 | 16,7 | 16,7 | 1 | 23 | 1 | 0 | 0 | 0 | 2 | aviso |
 | Almas | SUL | SE-2DIA | LD01028074 | 158 | 1 | 3 | 154 | 203,7 | 4,0 | 3 | 154 | 13 | 0 | 0 | 0 | 3 | aviso |
-| **Total Almas** | | | 8 alimentadores | 3414 | | | | 6.050,8 | 994,3 | | | | | | | | |
+| **Total Almas (alimentadores inteiros)** | | | 8 alimentadores | 3414 | | | | 6.050,8 | 994,3 | | | | | | | | |
 
 ## Alvorada
 
@@ -59,7 +63,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Alvorada | SUL | SE-2ALV | LD01003036 | 1144 | 1 | 17 | 1126 | 1.496,8 | 45,6 | 17 | 1126 | 37 | 0 | 0 | 0 | 4 | aviso |
 | Alvorada | SUL | SE-2ALV | LD02003036 | 997 | 1 | 10 | 986 | 1.427,7 | 16,4 | 10 | 986 | 27 | 0 | 0 | 0 | 7 | aviso |
 | Alvorada | SUL | SE-2FGR | AL02033047 | 174 | 1 | 3 | 170 | 242,4 | 2,1 | 3 | 170 | 6 | 0 | 0 | 0 | 3 | aviso |
-| **Total Alvorada** | | | 6 alimentadores | 3487 | | | | 4.808,3 | 538,8 | | | | | | | | |
+| **Total Alvorada (alimentadores inteiros)** | | | 6 alimentadores | 3487 | | | | 4.808,3 | 538,8 | | | | | | | | |
 
 ## Ananás
 
@@ -70,7 +74,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Ananás | NORTE | SE-2AN2 | AL01005098 | 268 | 1 | 4 | 263 | 269,4 | 45,1 | 4 | 263 | 33 | 0 | 0 | 0 | 4 | aviso |
 | Ananás | NORTE | SE-2AN2 | LD02005098 | 2 | 1 | 0 | 1 | 12,1 | 9,8 | 0 | 1 | 1 | 0 | 0 | 0 | 2 | aviso |
 | Ananás | NORTE | SE-2RCH | AL01030124 | 166 | 1 | 1 | 164 | 161,2 | 1,2 | 1 | 164 | 31 | 0 | 0 | 0 | 4 | aviso |
-| **Total Ananás** | | | 5 alimentadores | 1711 | | | | 2.015,2 | 530,8 | | | | | | | | |
+| **Total Ananás (alimentadores inteiros)** | | | 5 alimentadores | 1711 | | | | 2.015,2 | 530,8 | | | | | | | | |
 
 ## Angico
 
@@ -79,7 +83,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Angico | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 202,9 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
 | Angico | NORTE | SE-2AN2 | AL01005098 | 268 | 1 | 4 | 263 | 269,4 | 16,4 | 4 | 263 | 33 | 0 | 0 | 0 | 4 | aviso |
 | Angico | NORTE | SE-2NZR | AL01053090 | 193 | 1 | 4 | 188 | 188,3 | 10,0 | 4 | 188 | 23 | 1 | 0 | 0 | 2 | aviso |
-| **Total Angico** | | | 3 alimentadores | 1465 | | | | 1.619,1 | 229,3 | | | | | | | | |
+| **Total Angico (alimentadores inteiros)** | | | 3 alimentadores | 1465 | | | | 1.619,1 | 229,3 | | | | | | | | |
 
 ## Aparecida do Rio Negro
 
@@ -88,7 +92,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Aparecida do Rio Negro | CENTRO | SE-2PA2 | LD01059122 | 909 | 1 | 14 | 894 | 1.652,7 | 388,4 | 14 | 894 | 38 | 0 | 0 | 0 | 5 | aviso |
 | Aparecida do Rio Negro | CENTRO | SE-2PA2 | LD03059122 | 1342 | 1 | 12 | 1329 | 1.080,6 | 207,6 | 12 | 1329 | 73 | 0 | 0 | 0 | 4 | aviso |
 | Aparecida do Rio Negro | CENTRO | SE-2PA2 | LD02059122 | 1803 | 1 | 24 | 1778 | 2.138,3 | 44,0 | 24 | 1778 | 170 | 0 | 0 | 0 | 6 | aviso |
-| **Total Aparecida do Rio Negro** | | | 3 alimentadores | 4054 | | | | 4.871,6 | 640,0 | | | | | | | | |
+| **Total Aparecida do Rio Negro (alimentadores inteiros)** | | | 3 alimentadores | 4054 | | | | 4.871,6 | 640,0 | | | | | | | | |
 
 ## Aragominas
 
@@ -97,7 +101,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Aragominas | NORTE | SE-2AR0 | LD03010004 | 1997 | 1 | 20 | 1976 | 2.299,4 | 535,1 | 20 | 1976 | 477 | 1 | 0 | 0 | 4 | aviso |
 | Aragominas | NORTE | SE-2ARM | AL01006040 | 113 | 1 | 1 | 111 | 107,9 | 96,8 | 1 | 111 | 11 | 0 | 0 | 0 | 4 | aviso |
 | Aragominas | NORTE | SE-2AR0 | LD04010004 | 120 | 1 | 6 | 113 | 146,2 | 32,0 | 6 | 113 | 27 | 2 | 0 | 0 | 4 | aviso |
-| **Total Aragominas** | | | 3 alimentadores | 2230 | | | | 2.553,5 | 663,9 | | | | | | | | |
+| **Total Aragominas (alimentadores inteiros)** | | | 3 alimentadores | 2230 | | | | 2.553,5 | 663,9 | | | | | | | | |
 
 ## Araguacema
 
@@ -108,7 +112,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Araguacema | CENTRO | SE-2AGC | AL01007055 | 45 | 1 | 1 | 43 | 28,9 | 28,8 | 1 | 43 | 3 | 1 | 0 | 0 | 5 | aviso |
 | Araguacema | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 22,2 | 16 | 1370 | 73 | 21 | 0 | 0 | 6 | aviso |
 | Araguacema | NORTE | SE-2CLM | LD02022033 | 1019 | 1 | 9 | 1009 | 1.375,2 | 6,5 | 9 | 1009 | 60 | 0 | 0 | 0 | 6 | aviso |
-| **Total Araguacema** | | | 5 alimentadores | 3246 | | | | 4.771,5 | 1.020,3 | | | | | | | | |
+| **Total Araguacema (alimentadores inteiros)** | | | 5 alimentadores | 3246 | | | | 4.771,5 | 1.020,3 | | | | | | | | |
 
 ## Araguaçu
 
@@ -119,7 +123,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Araguaçu | SUL | SE-2ARG | LD01008032 | 130 | 1 | 2 | 127 | 163,9 | 147,3 | 2 | 127 | 7 | 0 | 0 | 0 | 4 | aviso |
 | Araguaçu | SUL | SE-2MAR | AL01098118 | 103 | 1 | 2 | 100 | 141,8 | 134,2 | 2 | 100 | 2 | 1 | 0 | 0 | 4 | aviso |
 | Araguaçu | SUL | SE-2ALV | AL02003036 | 506 | 1 | 6 | 499 | 776,5 | 2,6 | 6 | 499 | 13 | 1 | 0 | 0 | 7 | aviso |
-| **Total Araguaçu** | | | 5 alimentadores | 2136 | | | | 2.888,2 | 1.697,2 | | | | | | | | |
+| **Total Araguaçu (alimentadores inteiros)** | | | 5 alimentadores | 2136 | | | | 2.888,2 | 1.697,2 | | | | | | | | |
 
 ## Araguaína
 
@@ -158,7 +162,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Araguaína | NORTE | SE-2BIE | LD04105019 | 344 | 1 | 0 | 343 | 380,3 | 5,4 | 0 | 343 | 23 | 0 | 0 | 0 | 2 | aviso |
 | Araguaína | NORTE | SE-2ARM | AL01006040 | 113 | 1 | 1 | 111 | 107,9 | 5,3 | 1 | 111 | 11 | 0 | 0 | 0 | 4 | aviso |
 | Araguaína | NORTE | SE-2AR2 | AL01096004 | 1 | 1 | 0 | 0 | 1,2 | 1,2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Araguaína** | | | 33 alimentadores | 7561 | | | | 8.011,5 | 2.152,2 | | | | | | | | |
+| **Total Araguaína (alimentadores inteiros)** | | | 33 alimentadores | 7561 | | | | 8.011,5 | 2.152,2 | | | | | | | | |
 
 ## Araguanã
 
@@ -166,7 +170,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Araguanã | NORTE | SE-2AR0 | LD03010004 | 1997 | 1 | 20 | 1976 | 2.299,4 | 226,5 | 20 | 1976 | 477 | 1 | 0 | 0 | 4 | aviso |
 | Araguanã | NORTE | SE-2XB2 | LD01095030 | 821 | 1 | 15 | 805 | 924,6 | 24,2 | 15 | 805 | 42 | 2 | 0 | 0 | 4 | aviso |
-| **Total Araguanã** | | | 2 alimentadores | 2818 | | | | 3.224,0 | 250,7 | | | | | | | | |
+| **Total Araguanã (alimentadores inteiros)** | | | 2 alimentadores | 2818 | | | | 3.224,0 | 250,7 | | | | | | | | |
 
 ## Araguatins
 
@@ -181,7 +185,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Araguatins | NORTE | SE-2AXX | AL01016065 | 289 | 1 | 3 | 285 | 276,1 | 40,7 | 3 | 285 | 94 | 1 | 0 | 0 | 2 | aviso |
 | Araguatins | NORTE | SE-2ATN | AL01109039 | 49 | 1 | 2 | 46 | 34,7 | 34,7 | 2 | 46 | 5 | 0 | 0 | 0 | 1 | aviso |
 | Araguatins | NORTE | SE-2ATN | AL02109039 | 43 | 1 | 2 | 40 | 26,6 | 26,6 | 2 | 40 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Araguatins** | | | 9 alimentadores | 3598 | | | | 3.810,3 | 1.573,9 | | | | | | | | |
+| **Total Araguatins (alimentadores inteiros)** | | | 9 alimentadores | 3598 | | | | 3.810,3 | 1.573,9 | | | | | | | | |
 
 ## Arapoema
 
@@ -192,7 +196,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Arapoema | NORTE | SE-2ARP | AL01012025 | 40 | 1 | 1 | 38 | 27,5 | 27,4 | 1 | 38 | 1 | 0 | 0 | 0 | 5 | aviso |
 | Arapoema | NORTE | SE-2NVO | LD01054060 | 406 | 1 | 8 | 397 | 562,1 | 24,0 | 8 | 397 | 18 | 10 | 0 | 0 | 5 | aviso |
 | Arapoema | NORTE | SE-2BNS | LD05454153 | 55 | 1 | 0 | 54 | 130,9 | 21,5 | 0 | 54 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Arapoema** | | | 5 alimentadores | 2186 | | | | 2.676,3 | 542,9 | | | | | | | | |
+| **Total Arapoema (alimentadores inteiros)** | | | 5 alimentadores | 2186 | | | | 2.676,3 | 542,9 | | | | | | | | |
 
 ## Arraias
 
@@ -205,7 +209,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Arraias | SUL | SE-2CMB | AL01023050 | 186 | 1 | 1 | 184 | 157,4 | 67,8 | 1 | 185 | 3 | 2 | 0 | 0 | 7 | aviso |
 | Arraias | SUL | SE-2DIA | LD05028074 | 713 | 1 | 10 | 702 | 1.206,2 | 12,7 | 10 | 702 | 53 | 0 | 0 | 0 | 4 | aviso |
 | Arraias | SUL | SE-2PRN | LD03010021 | 333 | 1 | 6 | 326 | 807,9 | 2,3 | 6 | 326 | 8 | 0 | 0 | 0 | 4 | aviso |
-| **Total Arraias** | | | 7 alimentadores | 3028 | | | | 4.799,8 | 1.684,7 | | | | | | | | |
+| **Total Arraias (alimentadores inteiros)** | | | 7 alimentadores | 3028 | | | | 4.799,8 | 1.684,7 | | | | | | | | |
 
 ## Augustinópolis
 
@@ -217,7 +221,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Augustinópolis | NORTE | SE-2AGT | AL02014045 | 25 | 1 | 2 | 22 | 15,1 | 15,1 | 2 | 22 | 0 | 1 | 0 | 0 | 2 | aviso |
 | Augustinópolis | NORTE | SE-2ATN | LD03109039 | 480 | 1 | 6 | 473 | 523,7 | 14,3 | 6 | 473 | 101 | 0 | 0 | 0 | 4 | aviso |
 | Augustinópolis | NORTE | SE-2AGT | LD01014045 | 364 | 1 | 3 | 360 | 350,6 | 3,6 | 3 | 360 | 71 | 33 | 0 | 0 | 2 | aviso |
-| **Total Augustinópolis** | | | 6 alimentadores | 1993 | | | | 2.028,3 | 314,3 | | | | | | | | |
+| **Total Augustinópolis (alimentadores inteiros)** | | | 6 alimentadores | 1993 | | | | 2.028,3 | 314,3 | | | | | | | | |
 
 ## Aurora do Tocantins
 
@@ -226,7 +230,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Aurora do Tocantins | SUL | SE-2ARS | LD02110005 | 1139 | 1 | 10 | 1128 | 1.584,7 | 302,5 | 10 | 1128 | 14 | 0 | 0 | 0 | 5 | aviso |
 | Aurora do Tocantins | SUL | SE-2AUR | AL01015049 | 11 | 1 | 1 | 9 | 5,5 | 5,5 | 1 | 9 | 3 | 0 | 0 | 0 | 2 | aviso |
 | Aurora do Tocantins |  | SE-SGE | LD02414027 | 330 | 1 | 6 | 323 | 371,7 | 2,1 | 6 | 323 | 2 | 0 | 0 | 0 | 7 | aviso |
-| **Total Aurora do Tocantins** | | | 3 alimentadores | 1480 | | | | 1.961,9 | 310,1 | | | | | | | | |
+| **Total Aurora do Tocantins (alimentadores inteiros)** | | | 3 alimentadores | 1480 | | | | 1.961,9 | 310,1 | | | | | | | | |
 
 ## Axixá do Tocantins
 
@@ -236,7 +240,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Axixá do Tocantins | NORTE | SE-2ATN | LD03109039 | 480 | 1 | 6 | 473 | 523,7 | 24,4 | 6 | 473 | 101 | 0 | 0 | 0 | 4 | aviso |
 | Axixá do Tocantins | NORTE | SE-2AGT | LD01014045 | 364 | 1 | 3 | 360 | 350,6 | 21,5 | 3 | 360 | 71 | 33 | 0 | 0 | 2 | aviso |
 | Axixá do Tocantins | NORTE | SE-2STN | AL01077088 | 140 | 1 | 4 | 135 | 118,4 | 1,2 | 4 | 135 | 14 | 1 | 0 | 0 | 2 | aviso |
-| **Total Axixá do Tocantins** | | | 4 alimentadores | 1273 | | | | 1.268,7 | 125,4 | | | | | | | | |
+| **Total Axixá do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 1273 | | | | 1.268,7 | 125,4 | | | | | | | | |
 
 ## Babaçulândia
 
@@ -247,7 +251,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Babaçulândia | NORTE | SE-2BIE | LD01105019 | 328 | 1 | 3 | 324 | 456,7 | 102,1 | 3 | 324 | 14 | 0 | 0 | 0 | 3 | aviso |
 | Babaçulândia | NORTE | SE-2WND | AL01086016 | 101 | 1 | 1 | 99 | 153,5 | 28,0 | 1 | 99 | 3 | 2 | 0 | 0 | 5 | aviso |
 | Babaçulândia | NORTE | SE-2AR0 | LD02010004 | 1178 | 1 | 16 | 1161 | 1.278,7 | 25,9 | 16 | 1161 | 128 | 0 | 0 | 0 | 6 | aviso |
-| **Total Babaçulândia** | | | 5 alimentadores | 2923 | | | | 3.130,4 | 903,3 | | | | | | | | |
+| **Total Babaçulândia (alimentadores inteiros)** | | | 5 alimentadores | 2923 | | | | 3.130,4 | 903,3 | | | | | | | | |
 
 ## Bandeirantes do Tocantins
 
@@ -260,7 +264,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Bandeirantes do Tocantins | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 16,5 | 16 | 1316 | 38 | 0 | 0 | 0 | 6 | aviso |
 | Bandeirantes do Tocantins | NORTE | SE-2BNS | LD02010153 | 963 | 1 | 12 | 950 | 1.259,0 | 14,1 | 12 | 951 | 43 | 1 | 0 | 0 | 7 | aviso |
 | Bandeirantes do Tocantins | NORTE | SE-2CLN | AL01020023 | 130 | 1 | 3 | 126 | 116,6 | 13,0 | 3 | 126 | 5 | 0 | 0 | 0 | 4 | aviso |
-| **Total Bandeirantes do Tocantins** | | | 7 alimentadores | 3682 | | | | 4.629,9 | 561,4 | | | | | | | | |
+| **Total Bandeirantes do Tocantins (alimentadores inteiros)** | | | 7 alimentadores | 3682 | | | | 4.629,9 | 561,4 | | | | | | | | |
 
 ## Barra do Ouro
 
@@ -268,7 +272,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Barra do Ouro | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 373,5 | 13 | 777 | 54 | 2 | 0 | 0 | 6 | aviso |
 | Barra do Ouro | NORTE | SE-2ITC | AL01042078 | 213 | 1 | 4 | 208 | 611,4 | 62,5 | 4 | 208 | 17 | 0 | 0 | 0 | 1 | aviso |
-| **Total Barra do Ouro** | | | 2 alimentadores | 1004 | | | | 2.208,7 | 436,0 | | | | | | | | |
+| **Total Barra do Ouro (alimentadores inteiros)** | | | 2 alimentadores | 1004 | | | | 2.208,7 | 436,0 | | | | | | | | |
 
 ## Barrolândia
 
@@ -279,7 +283,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Barrolândia | CENTRO | SE-2MRN | LD01050008 | 507 | 1 | 7 | 499 | 591,8 | 50,5 | 7 | 499 | 17 | 0 | 0 | 0 | 4 | aviso |
 | Barrolândia | CENTRO | SE-2BRR | AL02017017 | 235 | 1 | 3 | 231 | 273,1 | 39,5 | 3 | 231 | 2 | 1 | 0 | 0 | 2 | aviso |
 | Barrolândia | CENTRO | SE-2PR0 | LD04062013 | 1079 | 1 | 8 | 1070 | 1.191,9 | 24,2 | 8 | 1070 | 42 | 11 | 0 | 0 | 6 | aviso |
-| **Total Barrolândia** | | | 5 alimentadores | 2354 | | | | 2.609,8 | 411,6 | | | | | | | | |
+| **Total Barrolândia (alimentadores inteiros)** | | | 5 alimentadores | 2354 | | | | 2.609,8 | 411,6 | | | | | | | | |
 
 ## Bernardo Sayão
 
@@ -292,16 +296,16 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Bernardo Sayão | NORTE | SE-2BNS | AL01010153 | 6 | 1 | 0 | 5 | 5,9 | 5,9 | 0 | 5 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Bernardo Sayão | NORTE | SE-2BNS | LD05454153 | 55 | 1 | 0 | 54 | 130,9 | 2,7 | 0 | 54 | 0 | 0 | 0 | 0 | 2 | aviso |
 | Bernardo Sayão | NORTE | SE-2BNS | LD04444153 | 2 | 1 | 0 | 1 | 1,1 | 1,1 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Bernardo Sayão** | | | 7 alimentadores | 2543 | | | | 3.022,6 | 536,0 | | | | | | | | |
+| **Total Bernardo Sayão (alimentadores inteiros)** | | | 7 alimentadores | 2543 | | | | 3.022,6 | 536,0 | | | | | | | | |
 
 ## Bom Jesus do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Bom Jesus do Tocantins | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 288,9 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
-| Bom Jesus do Tocantins |  | SE-2PAI | LD01414015 | 10 | 1 | 3 | 6 | 563,6 | 202,5 | 3 | 6 | 0 | 2 | 0 | 0 | 6 | aviso |
+| Bom Jesus do Tocantins |  | SE-2PAI | LD01414015 (exceção) | 10 | 1 | 3 | 6 | 563,6 | 202,5 | 3 | 6 | 0 | 2 | 0 | 0 | 6 | aviso |
 | Bom Jesus do Tocantins | NORTE | SE-2PDA | AL02065015 | 46 | 1 | 2 | 43 | 40,4 | 34,3 | 2 | 43 | 2 | 0 | 2 | 0 | 4 | aviso |
-| **Total Bom Jesus do Tocantins** | | | 3 alimentadores | 1406 | | | | 3.362,4 | 525,6 | | | | | | | | |
+| **Total Bom Jesus do Tocantins (alimentadores inteiros)** | | | 3 alimentadores | 1406 | | | | 3.362,4 | 525,6 | | | | | | | | |
 
 ## Brasilândia do Tocantins
 
@@ -309,7 +313,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Brasilândia do Tocantins | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 205,4 | 16 | 1316 | 38 | 0 | 0 | 0 | 6 | aviso |
 | Brasilândia do Tocantins | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 10,7 | 14 | 954 | 60 | 17 | 0 | 0 | 4 | aviso |
-| **Total Brasilândia do Tocantins** | | | 2 alimentadores | 2302 | | | | 3.111,8 | 216,1 | | | | | | | | |
+| **Total Brasilândia do Tocantins (alimentadores inteiros)** | | | 2 alimentadores | 2302 | | | | 3.111,8 | 216,1 | | | | | | | | |
 
 ## Brejinho de Nazaré
 
@@ -322,7 +326,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Brejinho de Nazaré | CENTRO | SE-2PNA | LD03072001 | 38 | 1 | 2 | 35 | 82,2 | 48,1 | 2 | 35 | 3 | 0 | 0 | 0 | 1 | aviso |
 | Brejinho de Nazaré | SUL | SE-2CRX | AL01026041 | 111 | 1 | 1 | 109 | 172,3 | 27,3 | 1 | 109 | 7 | 2 | 0 | 0 | 4 | aviso |
 | Brejinho de Nazaré | CENTRO | SE-2NPN | AL02057189 | 491 | 1 | 5 | 485 | 416,7 | 0,8 | 5 | 485 | 42 | 2 | 0 | 0 | 3 | aviso |
-| **Total Brejinho de Nazaré** | | | 7 alimentadores | 2405 | | | | 2.908,5 | 575,7 | | | | | | | | |
+| **Total Brejinho de Nazaré (alimentadores inteiros)** | | | 7 alimentadores | 2405 | | | | 2.908,5 | 575,7 | | | | | | | | |
 
 ## Buriti do Tocantins
 
@@ -332,21 +336,21 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Buriti do Tocantins | NORTE | SE-2BRT | AL01019068 | 75 | 1 | 0 | 74 | 80,0 | 23,2 | 0 | 74 | 13 | 1 | 0 | 0 | 2 | aviso |
 | Buriti do Tocantins | NORTE | SE-2ATN | LD02109039 | 484 | 1 | 6 | 477 | 489,8 | 17,4 | 6 | 477 | 120 | 1 | 0 | 0 | 7 | aviso |
 | Buriti do Tocantins | NORTE | SE-2BRT | AL02019068 | 25 | 1 | 0 | 24 | 31,3 | 4,9 | 0 | 24 | 14 | 1 | 0 | 0 | 2 | aviso |
-| **Total Buriti do Tocantins** | | | 4 alimentadores | 1472 | | | | 1.517,2 | 135,6 | | | | | | | | |
+| **Total Buriti do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 1472 | | | | 1.517,2 | 135,6 | | | | | | | | |
 
 ## Cachoeirinha
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Cachoeirinha | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 94,6 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
-| **Total Cachoeirinha** | | | 1 alimentadores | 1004 | | | | 1.161,4 | 94,6 | | | | | | | | |
+| **Total Cachoeirinha (alimentadores inteiros)** | | | 1 alimentadores | 1004 | | | | 1.161,4 | 94,6 | | | | | | | | |
 
 ## Campos Lindos
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Campos Lindos | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 177,5 | 13 | 777 | 54 | 2 | 0 | 0 | 6 | aviso |
-| **Total Campos Lindos** | | | 1 alimentadores | 791 | | | | 1.597,3 | 177,5 | | | | | | | | |
+| **Total Campos Lindos (alimentadores inteiros)** | | | 1 alimentadores | 791 | | | | 1.597,3 | 177,5 | | | | | | | | |
 
 ## Cariri do Tocantins
 
@@ -362,14 +366,14 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Cariri do Tocantins | SUL | SE-2CAR | AL01085042 | 26 | 1 | 0 | 25 | 16,4 | 16,4 | 0 | 25 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Cariri do Tocantins | SUL | SE-2GP3 | AL05020003 | 43 | 1 | 2 | 40 | 44,9 | 1,5 | 2 | 40 | 1 | 0 | 0 | 0 | 1 | aviso |
 | Cariri do Tocantins | SUL | SE-2FRM | LD02036052 | 1018 | 1 | 18 | 999 | 1.355,2 | 1,1 | 18 | 999 | 40 | 0 | 0 | 0 | 5 | aviso |
-| **Total Cariri do Tocantins** | | | 10 alimentadores | 3400 | | | | 4.425,7 | 542,2 | | | | | | | | |
+| **Total Cariri do Tocantins (alimentadores inteiros)** | | | 10 alimentadores | 3400 | | | | 4.425,7 | 542,2 | | | | | | | | |
 
 ## Carmolândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Carmolândia | NORTE | SE-2AR0 | LD03010004 | 1997 | 1 | 20 | 1976 | 2.299,4 | 186,6 | 20 | 1976 | 477 | 1 | 0 | 0 | 4 | aviso |
-| **Total Carmolândia** | | | 1 alimentadores | 1997 | | | | 2.299,4 | 186,6 | | | | | | | | |
+| **Total Carmolândia (alimentadores inteiros)** | | | 1 alimentadores | 1997 | | | | 2.299,4 | 186,6 | | | | | | | | |
 
 ## Carrasco Bonito
 
@@ -377,7 +381,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Carrasco Bonito | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 82,7 | 10 | 877 | 175 | 11 | 0 | 0 | 6 | aviso |
 | Carrasco Bonito | NORTE | SE-2AGT | LD02014045 | 218 | 1 | 2 | 215 | 206,5 | 13,1 | 2 | 215 | 49 | 37 | 0 | 0 | 1 | aviso |
-| **Total Carrasco Bonito** | | | 2 alimentadores | 1106 | | | | 1.122,5 | 95,8 | | | | | | | | |
+| **Total Carrasco Bonito (alimentadores inteiros)** | | | 2 alimentadores | 1106 | | | | 1.122,5 | 95,8 | | | | | | | | |
 
 ## Caseara
 
@@ -386,16 +390,16 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Caseara | CENTRO | SE-2CSR | LD03414149 | 659 | 1 | 10 | 648 | 1.150,1 | 438,9 | 10 | 648 | 41 | 0 | 0 | 0 | 4 | aviso |
 | Caseara | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 129,7 | 8 | 723 | 28 | 0 | 0 | 0 | 4 | aviso |
 | Caseara | CENTRO | SE-2CSR | LD02424149 | 14 | 1 | 0 | 13 | 10,6 | 10,6 | 0 | 13 | 2 | 0 | 0 | 0 | 1 | aviso |
-| **Total Caseara** | | | 3 alimentadores | 1405 | | | | 2.349,0 | 579,2 | | | | | | | | |
+| **Total Caseara (alimentadores inteiros)** | | | 3 alimentadores | 1405 | | | | 2.349,0 | 579,2 | | | | | | | | |
 
 ## Centenário
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Centenário | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 404,7 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
-| Centenário |  | SE-2PAI | LD02424015 | 31 | 1 | 8 | 22 | 1.672,6 | 53,1 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
-| Centenário |  | SE-2PAI | LD01414015 | 10 | 1 | 3 | 6 | 563,6 | 33,9 | 3 | 6 | 0 | 2 | 0 | 0 | 6 | aviso |
-| **Total Centenário** | | | 3 alimentadores | 1391 | | | | 4.994,7 | 491,7 | | | | | | | | |
+| Centenário |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 53,1 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
+| Centenário |  | SE-2PAI | LD01414015 (exceção) | 10 | 1 | 3 | 6 | 563,6 | 33,9 | 3 | 6 | 0 | 2 | 0 | 0 | 6 | aviso |
+| **Total Centenário (alimentadores inteiros)** | | | 3 alimentadores | 1391 | | | | 4.994,7 | 491,7 | | | | | | | | |
 
 ## Chapada da Natividade
 
@@ -405,7 +409,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Chapada da Natividade | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 112,3 | 18 | 1054 | 69 | 10 | 0 | 0 | 4 | aviso |
 | Chapada da Natividade | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 50,0 | 28 | 1494 | 63 | 2 | 0 | 0 | 7 | aviso |
 | Chapada da Natividade | SUL | SE-2CNT | AL01075116 | 1 | 1 | 0 | 0 | 3,5 | 3,5 | 0 | 0 | 1 | 1 | 0 | 0 | 1 | aviso |
-| **Total Chapada da Natividade** | | | 4 alimentadores | 3499 | | | | 6.397,8 | 737,5 | | | | | | | | |
+| **Total Chapada da Natividade (alimentadores inteiros)** | | | 4 alimentadores | 3499 | | | | 6.397,8 | 737,5 | | | | | | | | |
 
 ## Chapada de Areia
 
@@ -413,7 +417,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Chapada de Areia | CENTRO | SE-2PR0 | LD03062013 | 821 | 1 | 7 | 813 | 1.071,2 | 308,5 | 7 | 813 | 39 | 0 | 0 | 0 | 4 | aviso |
 | Chapada de Areia | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 0,4 | 13 | 552 | 29 | 13 | 0 | 0 | 1 | aviso |
-| **Total Chapada de Areia** | | | 2 alimentadores | 1387 | | | | 1.951,5 | 308,9 | | | | | | | | |
+| **Total Chapada de Areia (alimentadores inteiros)** | | | 2 alimentadores | 1387 | | | | 1.951,5 | 308,9 | | | | | | | | |
 
 ## Colinas do Tocantins
 
@@ -429,7 +433,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Colinas do Tocantins | NORTE | SE-2CLN | LD01020023 | 335 | 1 | 6 | 328 | 599,5 | 14,1 | 6 | 328 | 21 | 0 | 0 | 0 | 4 | aviso |
 | Colinas do Tocantins | NORTE | SE-2CLN | AL04020023 | 7 | 1 | 0 | 6 | 12,4 | 12,4 | 0 | 6 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Colinas do Tocantins | NORTE | SE-2CLN | AL03020023 | 3 | 1 | 0 | 2 | 11,3 | 11,3 | 0 | 2 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Colinas do Tocantins** | | | 10 alimentadores | 3135 | | | | 3.939,3 | 601,1 | | | | | | | | |
+| **Total Colinas do Tocantins (alimentadores inteiros)** | | | 10 alimentadores | 3135 | | | | 3.939,3 | 601,1 | | | | | | | | |
 
 ## Colméia
 
@@ -444,7 +448,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Colméia | NORTE | SE-2CLM | AL01022033 | 40 | 1 | 1 | 38 | 22,4 | 22,4 | 1 | 38 | 5 | 0 | 0 | 0 | 4 | aviso |
 | Colméia | NORTE | SE-2ITP | AL01044024 | 54 | 1 | 1 | 52 | 57,5 | 1,3 | 1 | 52 | 14 | 0 | 0 | 0 | 4 | aviso |
 | Colméia | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 0,9 | 16 | 1370 | 73 | 21 | 0 | 0 | 6 | aviso |
-| **Total Colméia** | | | 9 alimentadores | 4973 | | | | 6.684,5 | 858,2 | | | | | | | | |
+| **Total Colméia (alimentadores inteiros)** | | | 9 alimentadores | 4973 | | | | 6.684,5 | 858,2 | | | | | | | | |
 
 ## Combinado
 
@@ -452,7 +456,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Combinado | SUL | SE-2ARS | LD02110005 | 1139 | 1 | 10 | 1128 | 1.584,7 | 95,9 | 10 | 1128 | 14 | 0 | 0 | 0 | 5 | aviso |
 | Combinado | SUL | SE-2CMB | AL01023050 | 186 | 1 | 1 | 184 | 157,4 | 56,2 | 1 | 185 | 3 | 2 | 0 | 0 | 7 | aviso |
-| **Total Combinado** | | | 2 alimentadores | 1325 | | | | 1.742,1 | 152,2 | | | | | | | | |
+| **Total Combinado (alimentadores inteiros)** | | | 2 alimentadores | 1325 | | | | 1.742,1 | 152,2 | | | | | | | | |
 
 ## Conceição do Tocantins
 
@@ -462,7 +466,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Conceição do Tocantins | SUL | SE-2DIA | LD05028074 | 713 | 1 | 10 | 702 | 1.206,2 | 107,6 | 10 | 702 | 53 | 0 | 0 | 0 | 4 | aviso |
 | Conceição do Tocantins | SUL | SE-2ARS | LD01110005 | 240 | 1 | 3 | 236 | 506,0 | 27,6 | 3 | 236 | 6 | 0 | 0 | 0 | 1 | aviso |
 | Conceição do Tocantins | SUL | SE-2AL2 | LD05002091 | 155 | 1 | 1 | 153 | 284,3 | 8,1 | 1 | 153 | 5 | 0 | 0 | 0 | 4 | aviso |
-| **Total Conceição do Tocantins** | | | 4 alimentadores | 1594 | | | | 3.085,9 | 679,1 | | | | | | | | |
+| **Total Conceição do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 1594 | | | | 3.085,9 | 679,1 | | | | | | | | |
 
 ## Couto Magalhães
 
@@ -473,7 +477,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Couto Magalhães | NORTE | SE-2BNS | LD01010153 | 722 | 1 | 7 | 714 | 696,7 | 82,8 | 7 | 714 | 25 | 0 | 0 | 0 | 7 | aviso |
 | Couto Magalhães | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 50,2 | 8 | 348 | 8 | 8 | 0 | 0 | 4 | aviso |
 | Couto Magalhães | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 15,2 | 8 | 723 | 28 | 0 | 0 | 0 | 4 | aviso |
-| **Total Couto Magalhães** | | | 5 alimentadores | 3263 | | | | 4.082,2 | 725,6 | | | | | | | | |
+| **Total Couto Magalhães (alimentadores inteiros)** | | | 5 alimentadores | 3263 | | | | 4.082,2 | 725,6 | | | | | | | | |
 
 ## Cristalândia
 
@@ -486,7 +490,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Cristalândia | CENTRO | SE-2CRI | LD02025012 | 88 | 1 | 1 | 86 | 115,6 | 32,7 | 1 | 86 | 4 | 0 | 0 | 0 | 3 | aviso |
 | Cristalândia | CENTRO | SE-2CRI | AL01025012 | 19 | 1 | 0 | 18 | 9,1 | 9,1 | 0 | 18 | 1 | 0 | 0 | 0 | 1 | aviso |
 | Cristalândia | CENTRO | SE-2NRS | AL01056046 | 117 | 1 | 1 | 115 | 100,9 | 1,4 | 1 | 115 | 4 | 0 | 0 | 0 | 3 | aviso |
-| **Total Cristalândia** | | | 7 alimentadores | 2366 | | | | 3.514,4 | 681,3 | | | | | | | | |
+| **Total Cristalândia (alimentadores inteiros)** | | | 7 alimentadores | 2366 | | | | 3.514,4 | 681,3 | | | | | | | | |
 
 ## Crixás do Tocantins
 
@@ -497,7 +501,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Crixás do Tocantins | SUL | SE-2DRE | AL01031076 | 196 | 1 | 3 | 192 | 298,5 | 71,2 | 3 | 192 | 12 | 1 | 0 | 0 | 4 | aviso |
 | Crixás do Tocantins | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 51,2 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
 | Crixás do Tocantins | SUL | SE-2ALN | LD02001037 | 350 | 1 | 6 | 343 | 580,8 | 33,9 | 6 | 343 | 30 | 2 | 0 | 0 | 2 | aviso |
-| **Total Crixás do Tocantins** | | | 5 alimentadores | 2342 | | | | 3.106,4 | 326,9 | | | | | | | | |
+| **Total Crixás do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 2342 | | | | 3.106,4 | 326,9 | | | | | | | | |
 
 ## Darcinópolis
 
@@ -508,7 +512,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Darcinópolis | NORTE | SE-2AN2 | AL01005098 | 268 | 1 | 4 | 263 | 269,4 | 29,7 | 4 | 263 | 33 | 0 | 0 | 0 | 4 | aviso |
 | Darcinópolis | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 4,2 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
 | Darcinópolis | NORTE | SE-2TOC | LD01084002 | 576 | 1 | 12 | 563 | 625,9 | 3,7 | 12 | 563 | 60 | 3 | 0 | 0 | 4 | aviso |
-| **Total Darcinópolis** | | | 5 alimentadores | 3847 | | | | 4.260,0 | 593,8 | | | | | | | | |
+| **Total Darcinópolis (alimentadores inteiros)** | | | 5 alimentadores | 3847 | | | | 4.260,0 | 593,8 | | | | | | | | |
 
 ## Dianópolis
 
@@ -525,7 +529,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Dianópolis |  | SE-2DIA | LD07028074 | 1 | 1 | 0 | 0 | 29,3 | 18,5 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
 | Dianópolis | SUL | SE-2MAL | LD01107074 | 9 | 1 | 0 | 8 | 7,0 | 7,0 | 0 | 8 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Dianópolis |  | SE-1UAT | AL01089074 | 1 | 1 | 0 | 0 | 0,5 | 0,5 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Dianópolis** | | | 11 alimentadores | 1770 | | | | 2.543,6 | 1.132,4 | | | | | | | | |
+| **Total Dianópolis (alimentadores inteiros)** | | | 11 alimentadores | 1770 | | | | 2.543,6 | 1.132,4 | | | | | | | | |
 
 ## Divinópolis do Tocantins
 
@@ -535,7 +539,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Divinópolis do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 178,3 | 13 | 552 | 29 | 13 | 0 | 0 | 1 | aviso |
 | Divinópolis do Tocantins | CENTRO | SE-2CSR | LD03414149 | 659 | 1 | 10 | 648 | 1.150,1 | 177,5 | 10 | 648 | 41 | 0 | 0 | 0 | 4 | aviso |
 | Divinópolis do Tocantins | CENTRO | SE-2BRR | AL01017017 | 162 | 1 | 0 | 161 | 183,7 | 0,5 | 0 | 161 | 3 | 1 | 0 | 0 | 2 | aviso |
-| **Total Divinópolis do Tocantins** | | | 4 alimentadores | 2466 | | | | 3.405,9 | 1.102,0 | | | | | | | | |
+| **Total Divinópolis do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2466 | | | | 3.405,9 | 1.102,0 | | | | | | | | |
 
 ## Dois Irmãos do Tocantins
 
@@ -547,7 +551,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Dois Irmãos do Tocantins | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 23,1 | 8 | 723 | 28 | 0 | 0 | 0 | 4 | aviso |
 | Dois Irmãos do Tocantins | CENTRO | SE-2BRR | AL01017017 | 162 | 1 | 0 | 161 | 183,7 | 1,7 | 0 | 161 | 3 | 1 | 0 | 0 | 2 | aviso |
 | Dois Irmãos do Tocantins | NORTE | SE-2CLM | LD02022033 | 1019 | 1 | 9 | 1009 | 1.375,2 | 0,3 | 9 | 1009 | 60 | 0 | 0 | 0 | 6 | aviso |
-| **Total Dois Irmãos do Tocantins** | | | 6 alimentadores | 4373 | | | | 6.224,8 | 1.703,3 | | | | | | | | |
+| **Total Dois Irmãos do Tocantins (alimentadores inteiros)** | | | 6 alimentadores | 4373 | | | | 6.224,8 | 1.703,3 | | | | | | | | |
 
 ## Dueré
 
@@ -562,7 +566,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Dueré | CENTRO | SE-SLC | LD02047073 | 483 | 1 | 9 | 473 | 862,1 | 5,5 | 9 | 473 | 21 | 23 | 0 | 0 | 6 | aviso |
 | Dueré | SUL | SE-2GP3 | AL05020003 | 43 | 1 | 2 | 40 | 44,9 | 1,9 | 2 | 40 | 1 | 0 | 0 | 0 | 1 | aviso |
 | Dueré | SUL | SE-2FRM | LD03036052 | 77 | 1 | 1 | 75 | 174,2 | 1,9 | 1 | 75 | 4 | 0 | 0 | 0 | 4 | aviso |
-| **Total Dueré** | | | 9 alimentadores | 2864 | | | | 3.990,3 | 1.162,1 | | | | | | | | |
+| **Total Dueré (alimentadores inteiros)** | | | 9 alimentadores | 2864 | | | | 3.990,3 | 1.162,1 | | | | | | | | |
 
 ## Esperantina
 
@@ -570,7 +574,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Esperantina | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 236,8 | 10 | 877 | 175 | 11 | 0 | 0 | 6 | aviso |
 | Esperantina | NORTE | SE-2ATN | LD02109039 | 484 | 1 | 6 | 477 | 489,8 | 14,6 | 6 | 477 | 120 | 1 | 0 | 0 | 7 | aviso |
-| **Total Esperantina** | | | 2 alimentadores | 1372 | | | | 1.405,8 | 251,5 | | | | | | | | |
+| **Total Esperantina (alimentadores inteiros)** | | | 2 alimentadores | 1372 | | | | 1.405,8 | 251,5 | | | | | | | | |
 
 ## Fátima
 
@@ -579,7 +583,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Fátima | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 191,7 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
 | Fátima | CENTRO | SE-2FTM | AL01032044 | 74 | 1 | 1 | 72 | 92,7 | 80,6 | 1 | 72 | 3 | 1 | 0 | 0 | 3 | aviso |
 | Fátima | CENTRO | SE-2NPN | AL02057189 | 491 | 1 | 5 | 485 | 416,7 | 0,2 | 5 | 485 | 42 | 2 | 0 | 0 | 3 | aviso |
-| **Total Fátima** | | | 3 alimentadores | 1484 | | | | 1.619,1 | 272,5 | | | | | | | | |
+| **Total Fátima (alimentadores inteiros)** | | | 3 alimentadores | 1484 | | | | 1.619,1 | 272,5 | | | | | | | | |
 
 ## Figueirópolis
 
@@ -592,7 +596,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Figueirópolis | SUL | SE-2GUR | LD04040003 | 934 | 1 | 13 | 920 | 1.156,3 | 49,6 | 13 | 920 | 92 | 1 | 0 | 0 | 4 | aviso |
 | Figueirópolis | SUL | SE-2ALV | LD01003036 | 1144 | 1 | 17 | 1126 | 1.496,8 | 15,2 | 17 | 1126 | 37 | 0 | 0 | 0 | 4 | aviso |
 | Figueirópolis | SUL | SE-2FGR | AL03033047 | 2 | 1 | 0 | 1 | 0,3 | 0,3 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Figueirópolis** | | | 7 alimentadores | 3938 | | | | 5.116,0 | 776,4 | | | | | | | | |
+| **Total Figueirópolis (alimentadores inteiros)** | | | 7 alimentadores | 3938 | | | | 5.116,0 | 776,4 | | | | | | | | |
 
 ## Filadélfia
 
@@ -604,7 +608,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Filadélfia | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 146,6 | 13 | 777 | 54 | 2 | 0 | 0 | 6 | aviso |
 | Filadélfia |  | SE-2BIE | LD05105019 | 4 | 1 | 0 | 3 | 36,9 | 36,9 | 0 | 3 | 0 | 0 | 0 | 0 | 2 | aviso |
 | Filadélfia | NORTE | SE-2FLD | AL01034019 | 29 | 1 | 0 | 28 | 22,2 | 22,2 | 0 | 28 | 1 | 0 | 0 | 0 | 1 | aviso |
-| **Total Filadélfia** | | | 6 alimentadores | 1756 | | | | 3.043,1 | 1.064,0 | | | | | | | | |
+| **Total Filadélfia (alimentadores inteiros)** | | | 6 alimentadores | 1756 | | | | 3.043,1 | 1.064,0 | | | | | | | | |
 
 ## Formoso do Araguaia
 
@@ -618,7 +622,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Formoso do Araguaia | SUL | SE-2CAR | AL02085042 | 257 | 1 | 3 | 253 | 316,3 | 124,4 | 3 | 253 | 13 | 0 | 0 | 0 | 4 | aviso |
 | Formoso do Araguaia | SUL | SE-2FRM | AL01036052 | 109 | 1 | 3 | 105 | 117,5 | 117,5 | 3 | 105 | 4 | 1 | 0 | 0 | 1 | aviso |
 | Formoso do Araguaia | SUL | SE-2COB | AL01035052 | 44 | 1 | 0 | 43 | 109,2 | 36,5 | 0 | 43 | 2 | 0 | 0 | 0 | 2 | aviso |
-| **Total Formoso do Araguaia** | | | 8 alimentadores | 2270 | | | | 2.932,5 | 1.808,3 | | | | | | | | |
+| **Total Formoso do Araguaia (alimentadores inteiros)** | | | 8 alimentadores | 2270 | | | | 2.932,5 | 1.808,3 | | | | | | | | |
 
 ## Goianorte
 
@@ -629,7 +633,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Goianorte | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 37,8 | 8 | 723 | 28 | 0 | 0 | 0 | 4 | aviso |
 | Goianorte | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 35,4 | 16 | 1370 | 73 | 21 | 0 | 0 | 6 | aviso |
 | Goianorte | NORTE | SE-2GU2 | LD04038009 | 603 | 1 | 5 | 597 | 744,2 | 25,3 | 5 | 597 | 102 | 0 | 0 | 0 | 7 | aviso |
-| **Total Goianorte** | | | 5 alimentadores | 3804 | | | | 5.486,9 | 915,7 | | | | | | | | |
+| **Total Goianorte (alimentadores inteiros)** | | | 5 alimentadores | 3804 | | | | 5.486,9 | 915,7 | | | | | | | | |
 
 ## Goiatins
 
@@ -639,7 +643,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Goiatins | NORTE | SE-2ITC | AL01042078 | 213 | 1 | 4 | 208 | 611,4 | 539,7 | 4 | 208 | 17 | 0 | 0 | 0 | 1 | aviso |
 | Goiatins | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 87,6 | 14 | 954 | 60 | 17 | 0 | 0 | 4 | aviso |
 | Goiatins | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 13,5 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
-| **Total Goiatins** | | | 4 alimentadores | 3323 | | | | 6.446,6 | 1.524,5 | | | | | | | | |
+| **Total Goiatins (alimentadores inteiros)** | | | 4 alimentadores | 3323 | | | | 6.446,6 | 1.524,5 | | | | | | | | |
 
 ## Guaraí
 
@@ -655,7 +659,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Guaraí | NORTE | SE-2GU1 | AL02037009 | 19 | 1 | 2 | 16 | 13,4 | 13,4 | 2 | 16 | 1 | 4 | 0 | 0 | 4 | aviso |
 | Guaraí | NORTE | SE-2GU2 | LD01038009 | 1 | 1 | 0 | 0 | 4,5 | 4,5 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Guaraí | NORTE | SE-2PKN | AL01073034 | 28 | 1 | 0 | 27 | 18,4 | 3,9 | 0 | 27 | 3 | 1 | 0 | 0 | 2 | aviso |
-| **Total Guaraí** | | | 10 alimentadores | 3684 | | | | 4.840,2 | 1.069,3 | | | | | | | | |
+| **Total Guaraí (alimentadores inteiros)** | | | 10 alimentadores | 3684 | | | | 4.840,2 | 1.069,3 | | | | | | | | |
 
 ## Gurupi
 
@@ -680,7 +684,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Gurupi | SUL | SE-2GUR | AL03040003 | 27 | 1 | 1 | 25 | 8,0 | 8,0 | 1 | 25 | 1 | 2 | 0 | 0 | 2 | aviso |
 | Gurupi | SUL | SE-2GUR | AL02040003 | 12 | 1 | 0 | 11 | 6,0 | 6,0 | 0 | 11 | 1 | 0 | 0 | 0 | 1 | aviso |
 | Gurupi | SUL | SE-2GUR | LD01040003 | 14 | 1 | 3 | 10 | 25,9 | 3,5 | 3 | 10 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Gurupi** | | | 19 alimentadores | 3459 | | | | 4.100,8 | 1.261,8 | | | | | | | | |
+| **Total Gurupi (alimentadores inteiros)** | | | 19 alimentadores | 3459 | | | | 4.100,8 | 1.261,8 | | | | | | | | |
 
 ## Ipueiras
 
@@ -688,7 +692,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Ipueiras | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 279,6 | 18 | 1054 | 69 | 10 | 0 | 0 | 4 | aviso |
 | Ipueiras | CENTRO | SE-2MTC | LD01051035 | 580 | 1 | 5 | 574 | 891,6 | 19,8 | 5 | 574 | 59 | 0 | 0 | 0 | 5 | aviso |
-| **Total Ipueiras** | | | 2 alimentadores | 1653 | | | | 2.772,2 | 299,4 | | | | | | | | |
+| **Total Ipueiras (alimentadores inteiros)** | | | 2 alimentadores | 1653 | | | | 2.772,2 | 299,4 | | | | | | | | |
 
 ## Itacajá
 
@@ -697,7 +701,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Itacajá | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 611,3 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
 | Itacajá | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 289,3 | 14 | 954 | 60 | 17 | 0 | 0 | 4 | aviso |
 | Itacajá | NORTE | SE-2ITC | AL01042078 | 213 | 1 | 4 | 208 | 611,4 | 9,2 | 4 | 208 | 17 | 0 | 0 | 0 | 1 | aviso |
-| **Total Itacajá** | | | 3 alimentadores | 2532 | | | | 4.849,3 | 909,7 | | | | | | | | |
+| **Total Itacajá (alimentadores inteiros)** | | | 3 alimentadores | 2532 | | | | 4.849,3 | 909,7 | | | | | | | | |
 
 ## Itaguatins
 
@@ -708,7 +712,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Itaguatins | NORTE | SE-2AXX | AL01016065 | 289 | 1 | 3 | 285 | 276,1 | 58,3 | 3 | 285 | 94 | 1 | 0 | 0 | 2 | aviso |
 | Itaguatins | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 48,9 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
 | Itaguatins | NORTE | SE-2STN | AL01077088 | 140 | 1 | 4 | 135 | 118,4 | 12,9 | 4 | 135 | 14 | 1 | 0 | 0 | 2 | aviso |
-| **Total Itaguatins** | | | 5 alimentadores | 1924 | | | | 2.099,6 | 497,9 | | | | | | | | |
+| **Total Itaguatins (alimentadores inteiros)** | | | 5 alimentadores | 1924 | | | | 2.099,6 | 497,9 | | | | | | | | |
 
 ## Itapiratins
 
@@ -717,7 +721,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Itapiratins | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 471,8 | 14 | 954 | 60 | 17 | 0 | 0 | 4 | aviso |
 | Itapiratins | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 68,7 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
 | Itapiratins | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 16,1 | 13 | 777 | 54 | 2 | 0 | 0 | 6 | aviso |
-| **Total Itapiratins** | | | 3 alimentadores | 3110 | | | | 5.835,2 | 556,6 | | | | | | | | |
+| **Total Itapiratins (alimentadores inteiros)** | | | 3 alimentadores | 3110 | | | | 5.835,2 | 556,6 | | | | | | | | |
 
 ## Itaporã do Tocantins
 
@@ -727,7 +731,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Itaporã do Tocantins | NORTE | SE-2CLM | LD02022033 | 1019 | 1 | 9 | 1009 | 1.375,2 | 74,5 | 9 | 1009 | 60 | 0 | 0 | 0 | 6 | aviso |
 | Itaporã do Tocantins | NORTE | SE-2CLN | AL05020023 | 438 | 1 | 3 | 434 | 528,6 | 61,1 | 3 | 434 | 11 | 0 | 0 | 0 | 3 | aviso |
 | Itaporã do Tocantins | NORTE | SE-2ITP | AL01044024 | 54 | 1 | 1 | 52 | 57,5 | 56,2 | 1 | 52 | 14 | 0 | 0 | 0 | 4 | aviso |
-| **Total Itaporã do Tocantins** | | | 4 alimentadores | 2844 | | | | 3.593,6 | 434,8 | | | | | | | | |
+| **Total Itaporã do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2844 | | | | 3.593,6 | 434,8 | | | | | | | | |
 
 ## Jaú do Tocantins
 
@@ -736,7 +740,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Jaú do Tocantins | SUL | SE-2ALV | LD02003036 | 997 | 1 | 10 | 986 | 1.427,7 | 823,7 | 10 | 986 | 27 | 0 | 0 | 0 | 7 | aviso |
 | Jaú do Tocantins | SUL | SE-2ALV | AL02003036 | 506 | 1 | 6 | 499 | 776,5 | 3,0 | 6 | 499 | 13 | 1 | 0 | 0 | 7 | aviso |
 | Jaú do Tocantins | SUL | SE-2UPX | LD02066094 | 262 | 1 | 4 | 257 | 469,5 | 0,1 | 4 | 257 | 16 | 3 | 0 | 0 | 2 | aviso |
-| **Total Jaú do Tocantins** | | | 3 alimentadores | 1765 | | | | 2.673,7 | 826,9 | | | | | | | | |
+| **Total Jaú do Tocantins (alimentadores inteiros)** | | | 3 alimentadores | 1765 | | | | 2.673,7 | 826,9 | | | | | | | | |
 
 ## Juarina
 
@@ -744,7 +748,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Juarina | NORTE | SE-2BNS | LD01010153 | 722 | 1 | 7 | 714 | 696,7 | 302,4 | 7 | 714 | 25 | 0 | 0 | 0 | 7 | aviso |
 | Juarina | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 4,2 | 8 | 348 | 8 | 8 | 0 | 0 | 4 | aviso |
-| **Total Juarina** | | | 2 alimentadores | 1079 | | | | 1.097,1 | 306,6 | | | | | | | | |
+| **Total Juarina (alimentadores inteiros)** | | | 2 alimentadores | 1079 | | | | 1.097,1 | 306,6 | | | | | | | | |
 
 ## Lagoa da Confusão
 
@@ -758,7 +762,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Lagoa da Confusão | CENTRO | SE-SLC | LD05047073 | 31 | 1 | 1 | 29 | 21,2 | 21,2 | 1 | 29 | 2 | 0 | 0 | 0 | 3 | aviso |
 | Lagoa da Confusão |  | SE-SLC | AL02047073 | 20 | 1 | 1 | 18 | 13,3 | 13,3 | 1 | 18 | 0 | 0 | 0 | 0 | 3 | aviso |
 | Lagoa da Confusão | SUL | SE-2COB | LD01035052 | 341 | 1 | 2 | 338 | 416,8 | 12,1 | 2 | 338 | 27 | 0 | 0 | 0 | 3 | aviso |
-| **Total Lagoa da Confusão** | | | 8 alimentadores | 1537 | | | | 2.208,4 | 960,9 | | | | | | | | |
+| **Total Lagoa da Confusão (alimentadores inteiros)** | | | 8 alimentadores | 1537 | | | | 2.208,4 | 960,9 | | | | | | | | |
 
 ## Lagoa do Tocantins
 
@@ -766,7 +770,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Lagoa do Tocantins | CENTRO | SE-2PA2 | LD02059122 | 1803 | 1 | 24 | 1778 | 2.138,3 | 388,9 | 24 | 1778 | 170 | 0 | 0 | 0 | 6 | aviso |
 | Lagoa do Tocantins | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 7,1 | 28 | 1494 | 63 | 2 | 0 | 0 | 7 | aviso |
-| **Total Lagoa do Tocantins** | | | 2 alimentadores | 3326 | | | | 5.234,2 | 396,0 | | | | | | | | |
+| **Total Lagoa do Tocantins (alimentadores inteiros)** | | | 2 alimentadores | 3326 | | | | 5.234,2 | 396,0 | | | | | | | | |
 
 ## Lajeado
 
@@ -775,7 +779,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Lajeado | CENTRO | SE-2PA2 | LD03059122 | 1342 | 1 | 12 | 1329 | 1.080,6 | 205,0 | 12 | 1329 | 73 | 0 | 0 | 0 | 4 | aviso |
 | Lajeado | CENTRO | SE-2MRN | LD05050008 | 675 | 1 | 9 | 665 | 651,2 | 12,6 | 9 | 665 | 56 | 2 | 0 | 0 | 4 | aviso |
 | Lajeado | CENTRO | SE-2BLD | AL02049010 | 7 | 1 | 0 | 6 | 7,5 | 7,5 | 0 | 6 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Lajeado** | | | 3 alimentadores | 2024 | | | | 1.739,2 | 225,1 | | | | | | | | |
+| **Total Lajeado (alimentadores inteiros)** | | | 3 alimentadores | 2024 | | | | 1.739,2 | 225,1 | | | | | | | | |
 
 ## Lavandeira
 
@@ -783,22 +787,22 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Lavandeira | SUL | SE-2ARS | LD02110005 | 1139 | 1 | 10 | 1128 | 1.584,7 | 194,4 | 10 | 1128 | 14 | 0 | 0 | 0 | 5 | aviso |
 | Lavandeira | SUL | SE-2CMB | AL01023050 | 186 | 1 | 1 | 184 | 157,4 | 19,8 | 1 | 185 | 3 | 2 | 0 | 0 | 7 | aviso |
-| **Total Lavandeira** | | | 2 alimentadores | 1325 | | | | 1.742,1 | 214,2 | | | | | | | | |
+| **Total Lavandeira (alimentadores inteiros)** | | | 2 alimentadores | 1325 | | | | 1.742,1 | 214,2 | | | | | | | | |
 
 ## Lizarda
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Lizarda |  | SE-2PAI | LD02424015 | 31 | 1 | 8 | 22 | 1.672,6 | 380,4 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
+| Lizarda |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 380,4 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
 | Lizarda | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 76,2 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
-| **Total Lizarda** | | | 2 alimentadores | 1381 | | | | 4.431,0 | 456,6 | | | | | | | | |
+| **Total Lizarda (alimentadores inteiros)** | | | 2 alimentadores | 1381 | | | | 4.431,0 | 456,6 | | | | | | | | |
 
 ## Luzinópolis
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Luzinópolis | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 115,8 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
-| **Total Luzinópolis** | | | 1 alimentadores | 1004 | | | | 1.161,4 | 115,8 | | | | | | | | |
+| **Total Luzinópolis (alimentadores inteiros)** | | | 1 alimentadores | 1004 | | | | 1.161,4 | 115,8 | | | | | | | | |
 
 ## Marianópolis do Tocantins
 
@@ -808,14 +812,14 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Marianópolis do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 226,9 | 13 | 552 | 29 | 13 | 0 | 0 | 1 | aviso |
 | Marianópolis do Tocantins | CENTRO | SE-2CRI | LD01025012 | 672 | 1 | 8 | 663 | 1.231,5 | 53,2 | 8 | 663 | 25 | 0 | 0 | 0 | 4 | aviso |
 | Marianópolis do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 1079 | 1 | 8 | 1070 | 1.191,9 | 42,4 | 8 | 1070 | 42 | 11 | 0 | 0 | 6 | aviso |
-| **Total Marianópolis do Tocantins** | | | 4 alimentadores | 2976 | | | | 4.453,7 | 773,4 | | | | | | | | |
+| **Total Marianópolis do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2976 | | | | 4.453,7 | 773,4 | | | | | | | | |
 
 ## Mateiros
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Mateiros | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 661,1 | 28 | 1494 | 63 | 2 | 0 | 0 | 7 | aviso |
-| **Total Mateiros** | | | 1 alimentadores | 1523 | | | | 3.095,9 | 661,1 | | | | | | | | |
+| **Total Mateiros (alimentadores inteiros)** | | | 1 alimentadores | 1523 | | | | 3.095,9 | 661,1 | | | | | | | | |
 
 ## Maurilândia do Tocantins
 
@@ -824,7 +828,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Maurilândia do Tocantins | NORTE | SE-2ITG | AL02043081 | 370 | 1 | 6 | 363 | 415,9 | 165,9 | 6 | 363 | 15 | 0 | 0 | 0 | 4 | aviso |
 | Maurilândia do Tocantins | NORTE | SE-2TOC | AL01084002 | 129 | 1 | 3 | 125 | 141,1 | 8,6 | 3 | 125 | 39 | 0 | 0 | 0 | 3 | aviso |
 | Maurilândia do Tocantins | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 5,6 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
-| **Total Maurilândia do Tocantins** | | | 3 alimentadores | 1503 | | | | 1.718,4 | 180,1 | | | | | | | | |
+| **Total Maurilândia do Tocantins (alimentadores inteiros)** | | | 3 alimentadores | 1503 | | | | 1.718,4 | 180,1 | | | | | | | | |
 
 ## Miracema do Tocantins
 
@@ -836,12 +840,12 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Miracema do Tocantins | CENTRO | SE-2MIR | AL02048007 | 105 | 1 | 2 | 102 | 82,7 | 82,7 | 2 | 102 | 12 | 0 | 0 | 0 | 1 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 371 | 1 | 1 | 369 | 369,3 | 62,3 | 1 | 369 | 9 | 0 | 0 | 0 | 3 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2LUZ | AL02101271 | 342 | 1 | 3 | 338 | 274,1 | 57,1 | 3 | 338 | 6 | 0 | 0 | 0 | 2 | aviso |
-| Miracema do Tocantins | CENTRO | SE-2LUI | AL01102271 | 19 | 1 | 3 | 15 | 384,4 | 52,3 | 3 | 15 | 4 | 3 | 0 | 0 | 3 | aviso |
+| Miracema do Tocantins | CENTRO | SE-2LUI | AL01102271 (exceção) | 19 | 1 | 3 | 15 | 384,4 | 52,3 | 3 | 15 | 4 | 3 | 0 | 0 | 3 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2BRR | AL01017017 | 162 | 1 | 0 | 161 | 183,7 | 26,1 | 0 | 161 | 3 | 1 | 0 | 0 | 2 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2MRN | LD03050008 | 391 | 1 | 4 | 386 | 512,8 | 24,3 | 4 | 386 | 24 | 1 | 0 | 0 | 2 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2MIR | AL01048007 | 32 | 1 | 1 | 30 | 16,4 | 16,4 | 1 | 30 | 3 | 0 | 0 | 0 | 4 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2MRN | LD04050008 | 7 | 1 | 0 | 6 | 18,6 | 13,9 | 0 | 6 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Miracema do Tocantins** | | | 11 alimentadores | 2846 | | | | 3.358,2 | 1.501,0 | | | | | | | | |
+| **Total Miracema do Tocantins (alimentadores inteiros)** | | | 11 alimentadores | 2846 | | | | 3.358,2 | 1.501,0 | | | | | | | | |
 
 ## Miranorte
 
@@ -854,7 +858,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Miranorte | CENTRO | SE-2MRN | AL02050008 | 43 | 1 | 1 | 41 | 31,5 | 31,5 | 1 | 41 | 4 | 0 | 0 | 0 | 3 | aviso |
 | Miranorte | CENTRO | SE-2MRN | LD05050008 | 675 | 1 | 9 | 665 | 651,2 | 19,8 | 9 | 665 | 56 | 2 | 0 | 0 | 4 | aviso |
 | Miranorte | CENTRO | SE-2MRN | LD04050008 | 7 | 1 | 0 | 6 | 18,6 | 4,7 | 0 | 6 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Miranorte** | | | 7 alimentadores | 3098 | | | | 3.884,0 | 626,8 | | | | | | | | |
+| **Total Miranorte (alimentadores inteiros)** | | | 7 alimentadores | 3098 | | | | 3.884,0 | 626,8 | | | | | | | | |
 
 ## Monte do Carmo
 
@@ -869,7 +873,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Monte do Carmo | CENTRO | SE-2PNA | AL06072001 | 206 | 1 | 3 | 202 | 204,5 | 20,3 | 3 | 202 | 21 | 0 | 0 | 0 | 1 | aviso |
 | Monte do Carmo | CENTRO | SE-2PNA | LD01072001 | 199 | 1 | 3 | 195 | 154,0 | 14,4 | 3 | 195 | 21 | 2 | 0 | 0 | 2 | aviso |
 | Monte do Carmo | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 13,5 | 28 | 1494 | 63 | 2 | 0 | 0 | 7 | aviso |
-| **Total Monte do Carmo** | | | 9 alimentadores | 6285 | | | | 9.316,6 | 1.549,2 | | | | | | | | |
+| **Total Monte do Carmo (alimentadores inteiros)** | | | 9 alimentadores | 6285 | | | | 9.316,6 | 1.549,2 | | | | | | | | |
 
 ## Monte Santo do Tocantins
 
@@ -880,7 +884,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 371 | 1 | 1 | 369 | 369,3 | 35,3 | 1 | 369 | 9 | 0 | 0 | 0 | 3 | aviso |
 | Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 33,2 | 13 | 552 | 29 | 13 | 0 | 0 | 1 | aviso |
 | Monte Santo do Tocantins | CENTRO | SE-2PR0 | AL05062013 | 142 | 1 | 4 | 137 | 94,6 | 6,2 | 4 | 137 | 5 | 0 | 0 | 0 | 7 | aviso |
-| **Total Monte Santo do Tocantins** | | | 5 alimentadores | 2979 | | | | 3.607,2 | 578,3 | | | | | | | | |
+| **Total Monte Santo do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 2979 | | | | 3.607,2 | 578,3 | | | | | | | | |
 
 ## Muricilândia
 
@@ -889,7 +893,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Muricilândia | NORTE | SE-2AR0 | LD03010004 | 1997 | 1 | 20 | 1976 | 2.299,4 | 363,5 | 20 | 1976 | 477 | 1 | 0 | 0 | 4 | aviso |
 | Muricilândia | NORTE | SE-2AR0 | LD04010004 | 120 | 1 | 6 | 113 | 146,2 | 34,2 | 6 | 113 | 27 | 2 | 0 | 0 | 4 | aviso |
 | Muricilândia | NORTE | SE-2ARM | AL01006040 | 113 | 1 | 1 | 111 | 107,9 | 5,8 | 1 | 111 | 11 | 0 | 0 | 0 | 4 | aviso |
-| **Total Muricilândia** | | | 3 alimentadores | 2230 | | | | 2.553,5 | 403,5 | | | | | | | | |
+| **Total Muricilândia (alimentadores inteiros)** | | | 3 alimentadores | 2230 | | | | 2.553,5 | 403,5 | | | | | | | | |
 
 ## Natividade
 
@@ -902,7 +906,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Natividade | SUL | SE-2NAT | AL01052028 | 35 | 1 | 1 | 33 | 20,4 | 20,4 | 1 | 33 | 2 | 1 | 0 | 0 | 3 | aviso |
 | Natividade | SUL | SE-2UPX | LD01066094 | 1467 | 1 | 15 | 1451 | 2.182,1 | 20,1 | 15 | 1451 | 41 | 2 | 0 | 0 | 4 | aviso |
 | Natividade | SUL | SE-2AL2 | LD05002091 | 155 | 1 | 1 | 153 | 284,3 | 18,9 | 1 | 153 | 5 | 0 | 0 | 0 | 4 | aviso |
-| **Total Natividade** | | | 7 alimentadores | 4647 | | | | 8.266,9 | 1.023,0 | | | | | | | | |
+| **Total Natividade (alimentadores inteiros)** | | | 7 alimentadores | 4647 | | | | 8.266,9 | 1.023,0 | | | | | | | | |
 
 ## Nazaré
 
@@ -911,7 +915,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Nazaré | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 200,3 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
 | Nazaré | NORTE | SE-2NZR | AL01053090 | 193 | 1 | 4 | 188 | 188,3 | 27,9 | 4 | 188 | 23 | 1 | 0 | 0 | 2 | aviso |
 | Nazaré | NORTE | SE-2TOC | LD01084002 | 576 | 1 | 12 | 563 | 625,9 | 21,2 | 12 | 563 | 60 | 3 | 0 | 0 | 4 | aviso |
-| **Total Nazaré** | | | 3 alimentadores | 1773 | | | | 1.975,6 | 249,3 | | | | | | | | |
+| **Total Nazaré (alimentadores inteiros)** | | | 3 alimentadores | 1773 | | | | 1.975,6 | 249,3 | | | | | | | | |
 
 ## Nova Olinda
 
@@ -924,7 +928,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Nova Olinda | NORTE | SE-2AR2 | AL02096004 | 285 | 1 | 3 | 281 | 264,3 | 51,2 | 3 | 281 | 74 | 8 | 0 | 0 | 2 | aviso |
 | Nova Olinda |  | SE-2NVO | AL03054060 | 2 | 1 | 0 | 1 | 1,9 | 1,9 | 0 | 1 | 0 | 0 | 0 | 0 | 2 | aviso |
 | Nova Olinda | NORTE | SE-2CLN | LD01020023 | 335 | 1 | 6 | 328 | 599,5 | 0,3 | 6 | 328 | 21 | 0 | 0 | 0 | 4 | aviso |
-| **Total Nova Olinda** | | | 7 alimentadores | 3767 | | | | 4.595,2 | 926,3 | | | | | | | | |
+| **Total Nova Olinda (alimentadores inteiros)** | | | 7 alimentadores | 3767 | | | | 4.595,2 | 926,3 | | | | | | | | |
 
 ## Nova Rosalândia
 
@@ -932,7 +936,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Nova Rosalândia | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 213,9 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
 | Nova Rosalândia | CENTRO | SE-2NRS | AL01056046 | 117 | 1 | 1 | 115 | 100,9 | 97,8 | 1 | 115 | 4 | 0 | 0 | 0 | 3 | aviso |
-| **Total Nova Rosalândia** | | | 2 alimentadores | 1036 | | | | 1.210,7 | 311,7 | | | | | | | | |
+| **Total Nova Rosalândia (alimentadores inteiros)** | | | 2 alimentadores | 1036 | | | | 1.210,7 | 311,7 | | | | | | | | |
 
 ## Novo Acordo
 
@@ -941,7 +945,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Novo Acordo | CENTRO | SE-2PA2 | LD01059122 | 909 | 1 | 14 | 894 | 1.652,7 | 339,3 | 14 | 894 | 38 | 0 | 0 | 0 | 5 | aviso |
 | Novo Acordo | CENTRO | SE-2PA2 | LD02059122 | 1803 | 1 | 24 | 1778 | 2.138,3 | 154,1 | 24 | 1778 | 170 | 0 | 0 | 0 | 6 | aviso |
 | Novo Acordo | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 132,1 | 28 | 1494 | 63 | 2 | 0 | 0 | 7 | aviso |
-| **Total Novo Acordo** | | | 3 alimentadores | 4235 | | | | 6.886,9 | 625,5 | | | | | | | | |
+| **Total Novo Acordo (alimentadores inteiros)** | | | 3 alimentadores | 4235 | | | | 6.886,9 | 625,5 | | | | | | | | |
 
 ## Novo Alegre
 
@@ -951,7 +955,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Novo Alegre | SUL | SE-2NVL | AL02058020 | 199 | 1 | 1 | 197 | 241,2 | 15,1 | 1 | 197 | 5 | 0 | 0 | 0 | 3 | aviso |
 | Novo Alegre | SUL | SE-2CMB | AL01023050 | 186 | 1 | 1 | 184 | 157,4 | 13,6 | 1 | 185 | 3 | 2 | 0 | 0 | 7 | aviso |
 | Novo Alegre | SUL | SE-2NVL | AL01058020 | 15 | 1 | 0 | 14 | 9,7 | 9,7 | 0 | 14 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Novo Alegre** | | | 4 alimentadores | 1539 | | | | 1.993,0 | 98,8 | | | | | | | | |
+| **Total Novo Alegre (alimentadores inteiros)** | | | 4 alimentadores | 1539 | | | | 1.993,0 | 98,8 | | | | | | | | |
 
 ## Novo Jardim
 
@@ -960,7 +964,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Novo Jardim | SUL | SE-2DIA | LD04028074 | 223 | 1 | 3 | 219 | 326,5 | 196,7 | 3 | 219 | 11 | 10 | 3 | 0 | 7 | aviso |
 | Novo Jardim | SUL | SE-2DIA | LD03028074 | 117 | 1 | 3 | 113 | 189,7 | 2,2 | 3 | 113 | 2 | 1 | 0 | 0 | 4 | aviso |
 | Novo Jardim | SUL | SE-2DIA | LD05028074 | 713 | 1 | 10 | 702 | 1.206,2 | 1,6 | 10 | 702 | 53 | 0 | 0 | 0 | 4 | aviso |
-| **Total Novo Jardim** | | | 3 alimentadores | 1053 | | | | 1.722,4 | 200,5 | | | | | | | | |
+| **Total Novo Jardim (alimentadores inteiros)** | | | 3 alimentadores | 1053 | | | | 1.722,4 | 200,5 | | | | | | | | |
 
 ## Oliveira de Fátima
 
@@ -969,7 +973,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Oliveira de Fátima | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 82,8 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
 | Oliveira de Fátima | CENTRO | SE-2NPN | AL02057189 | 491 | 1 | 5 | 485 | 416,7 | 24,4 | 5 | 485 | 42 | 2 | 0 | 0 | 3 | aviso |
 | Oliveira de Fátima | CENTRO | SE-2FTM | AL01032044 | 74 | 1 | 1 | 72 | 92,7 | 4,7 | 1 | 72 | 3 | 1 | 0 | 0 | 3 | aviso |
-| **Total Oliveira de Fátima** | | | 3 alimentadores | 1484 | | | | 1.619,1 | 111,9 | | | | | | | | |
+| **Total Oliveira de Fátima (alimentadores inteiros)** | | | 3 alimentadores | 1484 | | | | 1.619,1 | 111,9 | | | | | | | | |
 
 ## Palmas
 
@@ -1021,7 +1025,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Palmas | CENTRO | SE-2PA2 | AL05059122 | 30 | 1 | 1 | 28 | 11,7 | 11,7 | 1 | 28 | 0 | 0 | 0 | 0 | 3 | aviso |
 | Palmas | CENTRO | SE-2PNA | AL03072001 | 435 | 1 | 3 | 431 | 511,6 | 9,9 | 3 | 431 | 37 | 0 | 0 | 0 | 3 | aviso |
 | Palmas | CENTRO | SE-2PA4 | AL01060122 | 1 | 1 | 0 | 0 | 2,0 | 2,0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Palmas** | | | 46 alimentadores | 6902 | | | | 6.780,2 | 2.467,7 | | | | | | | | |
+| **Total Palmas (alimentadores inteiros)** | | | 46 alimentadores | 6902 | | | | 6.780,2 | 2.467,7 | | | | | | | | |
 
 ## Palmeirante
 
@@ -1035,7 +1039,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Palmeirante | NORTE | SE-2CLN | AL02020023 | 53 | 1 | 1 | 51 | 33,5 | 4,2 | 1 | 51 | 1 | 0 | 0 | 0 | 3 | aviso |
 | Palmeirante | NORTE | SE-2CLN | AL06020023 | 73 | 1 | 2 | 70 | 42,6 | 2,5 | 2 | 70 | 4 | 2 | 0 | 0 | 3 | aviso |
 | Palmeirante | NORTE | SE-2CLN | AL01020023 | 130 | 1 | 3 | 126 | 116,6 | 1,3 | 3 | 126 | 5 | 0 | 0 | 0 | 4 | aviso |
-| **Total Palmeirante** | | | 8 alimentadores | 3260 | | | | 4.334,4 | 1.172,6 | | | | | | | | |
+| **Total Palmeirante (alimentadores inteiros)** | | | 8 alimentadores | 3260 | | | | 4.334,4 | 1.172,6 | | | | | | | | |
 
 ## Palmeiras do Tocantins
 
@@ -1045,7 +1049,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Palmeiras do Tocantins | NORTE | SE-2AR0 | LD02010004 | 1178 | 1 | 16 | 1161 | 1.278,7 | 102,9 | 16 | 1161 | 128 | 0 | 0 | 0 | 6 | aviso |
 | Palmeiras do Tocantins | NORTE | SE-2NZR | AL01053090 | 193 | 1 | 4 | 188 | 188,3 | 15,8 | 4 | 188 | 23 | 1 | 0 | 0 | 2 | aviso |
 | Palmeiras do Tocantins | NORTE | SE-2AGP | AL02055123 | 8 | 1 | 0 | 7 | 15,7 | 0,6 | 0 | 7 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Palmeiras do Tocantins** | | | 4 alimentadores | 1955 | | | | 2.108,6 | 442,1 | | | | | | | | |
+| **Total Palmeiras do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 1955 | | | | 2.108,6 | 442,1 | | | | | | | | |
 
 ## Palmeirópolis
 
@@ -1054,14 +1058,14 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Palmeirópolis | SUL | SE-2PLM | AL01061029 | 372 | 1 | 5 | 366 | 479,0 | 414,5 | 5 | 366 | 11 | 1 | 0 | 0 | 4 | aviso |
 | Palmeirópolis | SUL | SE-2PRN | LD02010021 | 524 | 1 | 7 | 516 | 769,0 | 247,5 | 7 | 516 | 24 | 1 | 0 | 0 | 4 | aviso |
 | Palmeirópolis | SUL | SE-2ALV | LD02003036 | 997 | 1 | 10 | 986 | 1.427,7 | 150,0 | 10 | 986 | 27 | 0 | 0 | 0 | 7 | aviso |
-| **Total Palmeirópolis** | | | 3 alimentadores | 1893 | | | | 2.675,7 | 811,9 | | | | | | | | |
+| **Total Palmeirópolis (alimentadores inteiros)** | | | 3 alimentadores | 1893 | | | | 2.675,7 | 811,9 | | | | | | | | |
 
 ## Paraíso do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | AL03062013 | 509 | 1 | 5 | 503 | 520,7 | 229,8 | 5 | 503 | 22 | 0 | 0 | 0 | 2 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2LUI | AL01102271 | 19 | 1 | 3 | 15 | 384,4 | 150,2 | 3 | 15 | 4 | 3 | 0 | 0 | 3 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2LUI | AL01102271 (exceção) | 19 | 1 | 3 | 15 | 384,4 | 150,2 | 3 | 15 | 4 | 3 | 0 | 0 | 3 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | LD03062013 | 821 | 1 | 7 | 813 | 1.071,2 | 143,6 | 7 | 813 | 39 | 0 | 0 | 0 | 4 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 371 | 1 | 1 | 369 | 369,3 | 114,9 | 1 | 369 | 9 | 0 | 0 | 0 | 3 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | LD01062013 | 204 | 1 | 1 | 202 | 187,0 | 103,3 | 1 | 202 | 9 | 1 | 0 | 0 | 4 | aviso |
@@ -1074,7 +1078,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Paraíso do Tocantins | CENTRO | SE-2PR2 | LD02004013 | 25 | 1 | 0 | 24 | 11,5 | 11,5 | 0 | 24 | 1 | 0 | 0 | 0 | 1 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR2 | LD01004013 | 1 | 1 | 0 | 0 | 5,2 | 5,2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 3,0 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
-| **Total Paraíso do Tocantins** | | | 14 alimentadores | 4884 | | | | 5.961,5 | 1.018,5 | | | | | | | | |
+| **Total Paraíso do Tocantins (alimentadores inteiros)** | | | 14 alimentadores | 4884 | | | | 5.961,5 | 1.018,5 | | | | | | | | |
 
 ## Paranã
 
@@ -1088,7 +1092,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Paranã | SUL | SE-2ARS | LD02110005 | 1139 | 1 | 10 | 1128 | 1.584,7 | 80,1 | 10 | 1128 | 14 | 0 | 0 | 0 | 5 | aviso |
 | Paranã | SUL | SE-2PLM | AL01061029 | 372 | 1 | 5 | 366 | 479,0 | 64,6 | 5 | 366 | 11 | 1 | 0 | 0 | 4 | aviso |
 | Paranã | SUL | SE-2PRN | AL01010021 | 13 | 1 | 1 | 11 | 13,7 | 13,7 | 1 | 11 | 3 | 0 | 0 | 0 | 2 | aviso |
-| **Total Paranã** | | | 8 alimentadores | 4574 | | | | 7.431,9 | 2.067,9 | | | | | | | | |
+| **Total Paranã (alimentadores inteiros)** | | | 8 alimentadores | 4574 | | | | 7.431,9 | 2.067,9 | | | | | | | | |
 
 ## Pau D'Arco
 
@@ -1097,19 +1101,19 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Pau D'Arco | NORTE | SE-2BNS | LD02010153 | 963 | 1 | 12 | 950 | 1.259,0 | 432,3 | 12 | 951 | 43 | 1 | 0 | 0 | 7 | aviso |
 | Pau D'Arco | NORTE | SE-2NVO | AL01054060 | 670 | 1 | 10 | 659 | 798,0 | 49,4 | 10 | 659 | 40 | 0 | 0 | 0 | 4 | aviso |
 | Pau D'Arco | NORTE | SE-2NVO | LD01054060 | 406 | 1 | 8 | 397 | 562,1 | 14,2 | 8 | 397 | 18 | 10 | 0 | 0 | 5 | aviso |
-| **Total Pau D'Arco** | | | 3 alimentadores | 2039 | | | | 2.619,2 | 495,9 | | | | | | | | |
+| **Total Pau D'Arco (alimentadores inteiros)** | | | 3 alimentadores | 2039 | | | | 2.619,2 | 495,9 | | | | | | | | |
 
 ## Pedro Afonso
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Pedro Afonso |  | SE-2PAI | LD02424015 | 31 | 1 | 8 | 22 | 1.672,6 | 365,9 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
-| Pedro Afonso |  | SE-2PAI | LD01414015 | 10 | 1 | 3 | 6 | 563,6 | 327,3 | 3 | 6 | 0 | 2 | 0 | 0 | 6 | aviso |
+| Pedro Afonso |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 365,9 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
+| Pedro Afonso |  | SE-2PAI | LD01414015 (exceção) | 10 | 1 | 3 | 6 | 563,6 | 327,3 | 3 | 6 | 0 | 2 | 0 | 0 | 6 | aviso |
 | Pedro Afonso | NORTE | SE-2PDA | LD02065015 | 44 | 1 | 1 | 42 | 36,9 | 36,9 | 1 | 42 | 4 | 24 | 0 | 0 | 3 | aviso |
 | Pedro Afonso | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 27,3 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
 | Pedro Afonso | NORTE | SE-2PDA | AL01065015 | 194 | 1 | 4 | 189 | 214,1 | 25,3 | 4 | 189 | 11 | 1 | 0 | 0 | 2 | aviso |
 | Pedro Afonso | NORTE | SE-2PDA | AL02065015 | 46 | 1 | 2 | 43 | 40,4 | 6,1 | 2 | 43 | 2 | 0 | 2 | 0 | 4 | aviso |
-| **Total Pedro Afonso** | | | 6 alimentadores | 1675 | | | | 5.286,0 | 788,8 | | | | | | | | |
+| **Total Pedro Afonso (alimentadores inteiros)** | | | 6 alimentadores | 1675 | | | | 5.286,0 | 788,8 | | | | | | | | |
 
 ## Peixe
 
@@ -1124,7 +1128,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Peixe | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 27,7 | 18 | 1054 | 69 | 10 | 0 | 0 | 4 | aviso |
 | Peixe | SUL | SE-2PXE | AL02067094 | 5 | 1 | 0 | 4 | 16,4 | 16,4 | 0 | 4 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Peixe | SUL | SE-2ALN | LD02001037 | 350 | 1 | 6 | 343 | 580,8 | 7,0 | 6 | 343 | 30 | 2 | 0 | 0 | 2 | aviso |
-| **Total Peixe** | | | 9 alimentadores | 5653 | | | | 8.529,6 | 2.228,5 | | | | | | | | |
+| **Total Peixe (alimentadores inteiros)** | | | 9 alimentadores | 5653 | | | | 8.529,6 | 2.228,5 | | | | | | | | |
 
 ## Pequizeiro
 
@@ -1134,7 +1138,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Pequizeiro | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 149,3 | 16 | 1316 | 38 | 0 | 0 | 0 | 6 | aviso |
 | Pequizeiro | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 136,4 | 8 | 348 | 8 | 8 | 0 | 0 | 4 | aviso |
 | Pequizeiro | NORTE | SE-2CLN | AL05020023 | 438 | 1 | 3 | 434 | 528,6 | 107,8 | 3 | 434 | 11 | 0 | 0 | 0 | 3 | aviso |
-| **Total Pequizeiro** | | | 4 alimentadores | 3147 | | | | 3.936,5 | 647,5 | | | | | | | | |
+| **Total Pequizeiro (alimentadores inteiros)** | | | 4 alimentadores | 3147 | | | | 3.936,5 | 647,5 | | | | | | | | |
 
 ## Pindorama do Tocantins
 
@@ -1144,7 +1148,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Pindorama do Tocantins | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 54,8 | 18 | 1054 | 69 | 10 | 0 | 0 | 4 | aviso |
 | Pindorama do Tocantins | SUL | SE-2AL2 | LD06002091 | 280 | 1 | 4 | 275 | 499,0 | 10,4 | 4 | 275 | 12 | 0 | 0 | 0 | 4 | aviso |
 | Pindorama do Tocantins | SUL | SE-2AL2 | LD04002091 | 902 | 1 | 12 | 889 | 1.417,8 | 0,1 | 12 | 889 | 45 | 2 | 0 | 0 | 7 | aviso |
-| **Total Pindorama do Tocantins** | | | 4 alimentadores | 3778 | | | | 6.893,2 | 719,6 | | | | | | | | |
+| **Total Pindorama do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 3778 | | | | 6.893,2 | 719,6 | | | | | | | | |
 
 ## Piraquê
 
@@ -1155,7 +1159,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Piraquê | NORTE | SE-2RCH | AL01030124 | 166 | 1 | 1 | 164 | 161,2 | 38,2 | 1 | 164 | 31 | 0 | 0 | 0 | 4 | aviso |
 | Piraquê | NORTE | SE-2AN2 | AL01005098 | 268 | 1 | 4 | 263 | 269,4 | 13,2 | 4 | 263 | 33 | 0 | 0 | 0 | 4 | aviso |
 | Piraquê | NORTE | SE-2AR0 | LD03010004 | 1997 | 1 | 20 | 1976 | 2.299,4 | 2,3 | 20 | 1976 | 477 | 1 | 0 | 0 | 4 | aviso |
-| **Total Piraquê** | | | 5 alimentadores | 4430 | | | | 4.933,3 | 456,6 | | | | | | | | |
+| **Total Piraquê (alimentadores inteiros)** | | | 5 alimentadores | 4430 | | | | 4.933,3 | 456,6 | | | | | | | | |
 
 ## Pium
 
@@ -1170,7 +1174,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Pium | CENTRO | SE-SLC | LD01047073 | 164 | 1 | 2 | 161 | 159,3 | 21,6 | 2 | 161 | 11 | 0 | 0 | 0 | 1 | aviso |
 | Pium | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 18,5 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
 | Pium | CENTRO | SE-2NRS | AL01056046 | 117 | 1 | 1 | 115 | 100,9 | 1,7 | 1 | 115 | 4 | 0 | 0 | 0 | 3 | aviso |
-| **Total Pium** | | | 9 alimentadores | 3878 | | | | 5.578,7 | 1.428,3 | | | | | | | | |
+| **Total Pium (alimentadores inteiros)** | | | 9 alimentadores | 3878 | | | | 5.578,7 | 1.428,3 | | | | | | | | |
 
 ## Ponte Alta do Bom Jesus
 
@@ -1182,7 +1186,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Ponte Alta do Bom Jesus |  | SE-SGE | LD02414027 | 330 | 1 | 6 | 323 | 371,7 | 17,5 | 6 | 323 | 2 | 0 | 0 | 0 | 7 | aviso |
 | Ponte Alta do Bom Jesus | SUL | SE-1UBJ | AL01070027 | 55 | 1 | 1 | 53 | 39,6 | 14,3 | 1 | 53 | 3 | 0 | 0 | 0 | 3 | aviso |
 | Ponte Alta do Bom Jesus |  | SE-SGE | LD03414027 | 1 | 1 | 0 | 0 | 1,3 | 1,3 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Ponte Alta do Bom Jesus** | | | 6 alimentadores | 2000 | | | | 2.689,9 | 576,5 | | | | | | | | |
+| **Total Ponte Alta do Bom Jesus (alimentadores inteiros)** | | | 6 alimentadores | 2000 | | | | 2.689,9 | 576,5 | | | | | | | | |
 
 ## Ponte Alta do Tocantins
 
@@ -1193,7 +1197,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Ponte Alta do Tocantins | SUL | SE-2AL2 | LD06002091 | 280 | 1 | 4 | 275 | 499,0 | 102,8 | 4 | 275 | 12 | 0 | 0 | 0 | 4 | aviso |
 | Ponte Alta do Tocantins | CENTRO | SE-2PTA | AL01069026 | 1 | 1 | 0 | 0 | 39,4 | 39,4 | 0 | 0 | 1 | 1 | 0 | 0 | 3 | aviso |
 | Ponte Alta do Tocantins | CENTRO | SE-2MTC | LD01051035 | 580 | 1 | 5 | 574 | 891,6 | 5,4 | 5 | 574 | 59 | 0 | 0 | 0 | 5 | aviso |
-| **Total Ponte Alta do Tocantins** | | | 5 alimentadores | 4187 | | | | 6.664,2 | 1.476,6 | | | | | | | | |
+| **Total Ponte Alta do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 4187 | | | | 6.664,2 | 1.476,6 | | | | | | | | |
 
 ## Porto Alegre do Tocantins
 
@@ -1203,7 +1207,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Porto Alegre do Tocantins | SUL | SE-2AL2 | LD05002091 | 155 | 1 | 1 | 153 | 284,3 | 18,8 | 1 | 153 | 5 | 0 | 0 | 0 | 4 | aviso |
 | Porto Alegre do Tocantins | SUL | SE-2DIA | LD01028074 | 158 | 1 | 3 | 154 | 203,7 | 12,8 | 3 | 154 | 13 | 0 | 0 | 0 | 3 | aviso |
 | Porto Alegre do Tocantins | SUL | SE-2AL2 | LD06002091 | 280 | 1 | 4 | 275 | 499,0 | 5,1 | 4 | 275 | 12 | 0 | 0 | 0 | 4 | aviso |
-| **Total Porto Alegre do Tocantins** | | | 4 alimentadores | 885 | | | | 1.343,4 | 292,3 | | | | | | | | |
+| **Total Porto Alegre do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 885 | | | | 1.343,4 | 292,3 | | | | | | | | |
 
 ## Porto Nacional
 
@@ -1215,7 +1219,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Porto Nacional | CENTRO | SE-2LUZ | AL03101271 | 289 | 1 | 2 | 286 | 240,5 | 240,5 | 2 | 286 | 15 | 0 | 0 | 0 | 3 | aviso |
 | Porto Nacional | CENTRO | SE-2LUZ | AL02101271 | 342 | 1 | 3 | 338 | 274,1 | 217,0 | 3 | 338 | 6 | 0 | 0 | 0 | 2 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | AL06072001 | 206 | 1 | 3 | 202 | 204,5 | 184,2 | 3 | 202 | 21 | 0 | 0 | 0 | 1 | aviso |
-| Porto Nacional | CENTRO | SE-2LUI | AL01102271 | 19 | 1 | 3 | 15 | 384,4 | 181,9 | 3 | 15 | 4 | 3 | 0 | 0 | 3 | aviso |
+| Porto Nacional | CENTRO | SE-2LUI | AL01102271 (exceção) | 19 | 1 | 3 | 15 | 384,4 | 181,9 | 3 | 15 | 4 | 3 | 0 | 0 | 3 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 162,7 | 18 | 1054 | 69 | 10 | 0 | 0 | 4 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | AL03072001 | 435 | 1 | 3 | 431 | 511,6 | 149,0 | 3 | 431 | 37 | 0 | 0 | 0 | 3 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | LD01072001 | 199 | 1 | 3 | 195 | 154,0 | 139,6 | 3 | 195 | 21 | 2 | 0 | 0 | 2 | aviso |
@@ -1233,7 +1237,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Porto Nacional | CENTRO | SE-2FTM | AL01032044 | 74 | 1 | 1 | 72 | 92,7 | 7,4 | 1 | 72 | 3 | 1 | 0 | 0 | 3 | aviso |
 | Porto Nacional | CENTRO | SE-2BRR | AL02017017 | 235 | 1 | 3 | 231 | 273,1 | 5,3 | 3 | 231 | 2 | 1 | 0 | 0 | 2 | aviso |
 | Porto Nacional | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 3,8 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
-| **Total Porto Nacional** | | | 24 alimentadores | 5921 | | | | 7.067,8 | 2.692,7 | | | | | | | | |
+| **Total Porto Nacional (alimentadores inteiros)** | | | 24 alimentadores | 5921 | | | | 7.067,8 | 2.692,7 | | | | | | | | |
 
 ## Praia Norte
 
@@ -1243,7 +1247,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Praia Norte | NORTE | SE-2AGT | LD02014045 | 218 | 1 | 2 | 215 | 206,5 | 39,4 | 2 | 215 | 49 | 37 | 0 | 0 | 1 | aviso |
 | Praia Norte | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 16,2 | 10 | 877 | 175 | 11 | 0 | 0 | 6 | aviso |
 | Praia Norte | NORTE | SE-2AXX | AL01016065 | 289 | 1 | 3 | 285 | 276,1 | 14,6 | 3 | 285 | 94 | 1 | 0 | 0 | 2 | aviso |
-| **Total Praia Norte** | | | 4 alimentadores | 1759 | | | | 1.749,2 | 224,9 | | | | | | | | |
+| **Total Praia Norte (alimentadores inteiros)** | | | 4 alimentadores | 1759 | | | | 1.749,2 | 224,9 | | | | | | | | |
 
 ## Presidente Kennedy
 
@@ -1252,7 +1256,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Presidente Kennedy | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 180,8 | 16 | 1316 | 38 | 0 | 0 | 0 | 6 | aviso |
 | Presidente Kennedy | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 95,9 | 14 | 954 | 60 | 17 | 0 | 0 | 4 | aviso |
 | Presidente Kennedy | NORTE | SE-2PKN | AL01073034 | 28 | 1 | 0 | 27 | 18,4 | 14,5 | 0 | 27 | 3 | 1 | 0 | 0 | 2 | aviso |
-| **Total Presidente Kennedy** | | | 3 alimentadores | 2330 | | | | 3.130,3 | 291,2 | | | | | | | | |
+| **Total Presidente Kennedy (alimentadores inteiros)** | | | 3 alimentadores | 2330 | | | | 3.130,3 | 291,2 | | | | | | | | |
 
 ## Pugmil
 
@@ -1261,14 +1265,14 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Pugmil | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 112,3 | 11 | 907 | 38 | 2 | 0 | 0 | 6 | aviso |
 | Pugmil | CENTRO | SE-2PR0 | LD01062013 | 204 | 1 | 1 | 202 | 187,0 | 83,7 | 1 | 202 | 9 | 1 | 0 | 0 | 4 | aviso |
 | Pugmil | CENTRO | SE-2PR0 | AL03062013 | 509 | 1 | 5 | 503 | 520,7 | 30,8 | 5 | 503 | 22 | 0 | 0 | 0 | 2 | aviso |
-| **Total Pugmil** | | | 3 alimentadores | 1632 | | | | 1.817,5 | 226,8 | | | | | | | | |
+| **Total Pugmil (alimentadores inteiros)** | | | 3 alimentadores | 1632 | | | | 1.817,5 | 226,8 | | | | | | | | |
 
 ## Recursolândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Recursolândia | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 699,5 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
-| **Total Recursolândia** | | | 1 alimentadores | 1350 | | | | 2.758,4 | 699,5 | | | | | | | | |
+| **Total Recursolândia (alimentadores inteiros)** | | | 1 alimentadores | 1350 | | | | 2.758,4 | 699,5 | | | | | | | | |
 
 ## Riachinho
 
@@ -1277,7 +1281,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Riachinho | NORTE | SE-2AN2 | AL01005098 | 268 | 1 | 4 | 263 | 269,4 | 165,0 | 4 | 263 | 33 | 0 | 0 | 0 | 4 | aviso |
 | Riachinho | NORTE | SE-2RCH | AL01030124 | 166 | 1 | 1 | 164 | 161,2 | 121,8 | 1 | 164 | 31 | 0 | 0 | 0 | 4 | aviso |
 | Riachinho | NORTE | SE-2AN2 | LD02005098 | 2 | 1 | 0 | 1 | 12,1 | 2,3 | 0 | 1 | 1 | 0 | 0 | 0 | 2 | aviso |
-| **Total Riachinho** | | | 3 alimentadores | 436 | | | | 442,7 | 289,1 | | | | | | | | |
+| **Total Riachinho (alimentadores inteiros)** | | | 3 alimentadores | 436 | | | | 442,7 | 289,1 | | | | | | | | |
 
 ## Rio da Conceição
 
@@ -1285,7 +1289,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Rio da Conceição | SUL | SE-2DIA | LD01028074 | 158 | 1 | 3 | 154 | 203,7 | 102,9 | 3 | 154 | 13 | 0 | 0 | 0 | 3 | aviso |
 | Rio da Conceição |  | SE-2DIA | LD07028074 | 1 | 1 | 0 | 0 | 29,3 | 10,8 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Rio da Conceição** | | | 2 alimentadores | 159 | | | | 233,0 | 113,7 | | | | | | | | |
+| **Total Rio da Conceição (alimentadores inteiros)** | | | 2 alimentadores | 159 | | | | 233,0 | 113,7 | | | | | | | | |
 
 ## Rio dos Bois
 
@@ -1294,16 +1298,16 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Rio dos Bois | CENTRO | SE-2MRN | LD03050008 | 391 | 1 | 4 | 386 | 512,8 | 287,7 | 4 | 386 | 24 | 1 | 0 | 0 | 2 | aviso |
 | Rio dos Bois | NORTE | SE-2GU2 | LD02038009 | 323 | 1 | 6 | 316 | 491,4 | 119,2 | 6 | 316 | 43 | 2 | 0 | 0 | 3 | aviso |
 | Rio dos Bois | CENTRO | SE-2MRN | LD05050008 | 675 | 1 | 9 | 665 | 651,2 | 0,4 | 9 | 665 | 56 | 2 | 0 | 0 | 4 | aviso |
-| **Total Rio dos Bois** | | | 3 alimentadores | 1389 | | | | 1.655,4 | 407,3 | | | | | | | | |
+| **Total Rio dos Bois (alimentadores inteiros)** | | | 3 alimentadores | 1389 | | | | 1.655,4 | 407,3 | | | | | | | | |
 
 ## Rio Sono
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Rio Sono | CENTRO | SE-2PA2 | LD01059122 | 909 | 1 | 14 | 894 | 1.652,7 | 853,7 | 14 | 894 | 38 | 0 | 0 | 0 | 5 | aviso |
-| Rio Sono |  | SE-2PAI | LD02424015 | 31 | 1 | 8 | 22 | 1.672,6 | 778,8 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
+| Rio Sono |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 778,8 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
 | Rio Sono | CENTRO | SE-2RSN | AL01074070 | 29 | 1 | 0 | 28 | 55,2 | 54,0 | 0 | 28 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Rio Sono** | | | 3 alimentadores | 969 | | | | 3.380,5 | 1.686,5 | | | | | | | | |
+| **Total Rio Sono (alimentadores inteiros)** | | | 3 alimentadores | 969 | | | | 3.380,5 | 1.686,5 | | | | | | | | |
 
 ## Sampaio
 
@@ -1311,7 +1315,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Sampaio | NORTE | SE-2AGT | LD02014045 | 218 | 1 | 2 | 215 | 206,5 | 100,0 | 2 | 215 | 49 | 37 | 0 | 0 | 1 | aviso |
 | Sampaio | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 26,0 | 10 | 877 | 175 | 11 | 0 | 0 | 6 | aviso |
-| **Total Sampaio** | | | 2 alimentadores | 1106 | | | | 1.122,5 | 126,1 | | | | | | | | |
+| **Total Sampaio (alimentadores inteiros)** | | | 2 alimentadores | 1106 | | | | 1.122,5 | 126,1 | | | | | | | | |
 
 ## Sandolândia
 
@@ -1321,7 +1325,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Sandolândia | SUL | SE-2ALV | LD01003036 | 1144 | 1 | 17 | 1126 | 1.496,8 | 165,0 | 17 | 1126 | 37 | 0 | 0 | 0 | 4 | aviso |
 | Sandolândia | SUL | SE-2FRM | LD01036052 | 267 | 1 | 3 | 263 | 289,6 | 26,1 | 3 | 263 | 12 | 0 | 0 | 0 | 4 | aviso |
 | Sandolândia | SUL | SE-2SDL | AL01063107 | 4 | 1 | 0 | 3 | 5,2 | 5,2 | 0 | 3 | 1 | 0 | 0 | 0 | 1 | aviso |
-| **Total Sandolândia** | | | 4 alimentadores | 2433 | | | | 3.146,8 | 888,2 | | | | | | | | |
+| **Total Sandolândia (alimentadores inteiros)** | | | 4 alimentadores | 2433 | | | | 3.146,8 | 888,2 | | | | | | | | |
 
 ## Santa Fé do Araguaia
 
@@ -1330,14 +1334,14 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Santa Fé do Araguaia | NORTE | SE-2AR0 | LD03010004 | 1997 | 1 | 20 | 1976 | 2.299,4 | 480,2 | 20 | 1976 | 477 | 1 | 0 | 0 | 4 | aviso |
 | Santa Fé do Araguaia | NORTE | SE-2AR0 | LD04010004 | 120 | 1 | 6 | 113 | 146,2 | 12,5 | 6 | 113 | 27 | 2 | 0 | 0 | 4 | aviso |
 | Santa Fé do Araguaia | NORTE | SE-2BNS | LD02010153 | 963 | 1 | 12 | 950 | 1.259,0 | 8,5 | 12 | 951 | 43 | 1 | 0 | 0 | 7 | aviso |
-| **Total Santa Fé do Araguaia** | | | 3 alimentadores | 3080 | | | | 3.704,6 | 501,3 | | | | | | | | |
+| **Total Santa Fé do Araguaia (alimentadores inteiros)** | | | 3 alimentadores | 3080 | | | | 3.704,6 | 501,3 | | | | | | | | |
 
 ## Santa Maria do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Santa Maria do Tocantins | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 568,3 | 17 | 1332 | 29 | 1 | 0 | 0 | 6 | aviso |
-| **Total Santa Maria do Tocantins** | | | 1 alimentadores | 1350 | | | | 2.758,4 | 568,3 | | | | | | | | |
+| **Total Santa Maria do Tocantins (alimentadores inteiros)** | | | 1 alimentadores | 1350 | | | | 2.758,4 | 568,3 | | | | | | | | |
 
 ## Santa Rita do Tocantins
 
@@ -1350,7 +1354,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Santa Rita do Tocantins | SUL | SE-2DRE | AL01031076 | 196 | 1 | 3 | 192 | 298,5 | 40,8 | 3 | 192 | 12 | 1 | 0 | 0 | 4 | aviso |
 | Santa Rita do Tocantins | CENTRO | SE-SLC | LD06047073 | 422 | 1 | 11 | 410 | 600,2 | 23,2 | 11 | 410 | 21 | 5 | 0 | 0 | 4 | aviso |
 | Santa Rita do Tocantins | SUL | SE-2GUR | LD03040003 | 766 | 1 | 11 | 754 | 945,0 | 12,8 | 11 | 754 | 78 | 1 | 0 | 0 | 4 | aviso |
-| **Total Santa Rita do Tocantins** | | | 7 alimentadores | 3569 | | | | 5.219,4 | 968,6 | | | | | | | | |
+| **Total Santa Rita do Tocantins (alimentadores inteiros)** | | | 7 alimentadores | 3569 | | | | 5.219,4 | 968,6 | | | | | | | | |
 
 ## Santa Rosa do Tocantins
 
@@ -1358,14 +1362,14 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Santa Rosa do Tocantins | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 831,7 | 18 | 1054 | 69 | 10 | 0 | 0 | 4 | aviso |
 | Santa Rosa do Tocantins | SUL | SE-2AL2 | LD04002091 | 902 | 1 | 12 | 889 | 1.417,8 | 0,4 | 12 | 889 | 45 | 2 | 0 | 0 | 7 | aviso |
-| **Total Santa Rosa do Tocantins** | | | 2 alimentadores | 1975 | | | | 3.298,3 | 832,1 | | | | | | | | |
+| **Total Santa Rosa do Tocantins (alimentadores inteiros)** | | | 2 alimentadores | 1975 | | | | 3.298,3 | 832,1 | | | | | | | | |
 
 ## Santa Tereza do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Santa Tereza do Tocantins | CENTRO | SE-2PA2 | LD02059122 | 1803 | 1 | 24 | 1778 | 2.138,3 | 276,4 | 24 | 1778 | 170 | 0 | 0 | 0 | 6 | aviso |
-| **Total Santa Tereza do Tocantins** | | | 1 alimentadores | 1803 | | | | 2.138,3 | 276,4 | | | | | | | | |
+| **Total Santa Tereza do Tocantins (alimentadores inteiros)** | | | 1 alimentadores | 1803 | | | | 2.138,3 | 276,4 | | | | | | | | |
 
 ## Santa Terezinha do Tocantins
 
@@ -1375,7 +1379,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Santa Terezinha do Tocantins | NORTE | SE-2TOC | LD01084002 | 576 | 1 | 12 | 563 | 625,9 | 5,5 | 12 | 563 | 60 | 3 | 0 | 0 | 4 | aviso |
 | Santa Terezinha do Tocantins | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 4,4 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
 | Santa Terezinha do Tocantins | NORTE | SE-2AR0 | LD02010004 | 1178 | 1 | 16 | 1161 | 1.278,7 | 0,1 | 16 | 1161 | 128 | 0 | 0 | 0 | 6 | aviso |
-| **Total Santa Terezinha do Tocantins** | | | 4 alimentadores | 2951 | | | | 3.254,3 | 140,3 | | | | | | | | |
+| **Total Santa Terezinha do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2951 | | | | 3.254,3 | 140,3 | | | | | | | | |
 
 ## São Bento do Tocantins
 
@@ -1385,14 +1389,14 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | São Bento do Tocantins | NORTE | SE-2AXX | AL01016065 | 289 | 1 | 3 | 285 | 276,1 | 31,4 | 3 | 285 | 94 | 1 | 0 | 0 | 2 | aviso |
 | São Bento do Tocantins | NORTE | SE-2ATN | LD03109039 | 480 | 1 | 6 | 473 | 523,7 | 21,4 | 6 | 473 | 101 | 0 | 0 | 0 | 4 | aviso |
 | São Bento do Tocantins | NORTE | SE-2AN2 | LD01005098 | 271 | 1 | 2 | 268 | 411,2 | 1,6 | 2 | 268 | 48 | 0 | 0 | 0 | 6 | aviso |
-| **Total São Bento do Tocantins** | | | 4 alimentadores | 2044 | | | | 2.372,3 | 408,1 | | | | | | | | |
+| **Total São Bento do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2044 | | | | 2.372,3 | 408,1 | | | | | | | | |
 
 ## São Félix do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | São Félix do Tocantins | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 252,1 | 28 | 1494 | 63 | 2 | 0 | 0 | 7 | aviso |
-| **Total São Félix do Tocantins** | | | 1 alimentadores | 1523 | | | | 3.095,9 | 252,1 | | | | | | | | |
+| **Total São Félix do Tocantins (alimentadores inteiros)** | | | 1 alimentadores | 1523 | | | | 3.095,9 | 252,1 | | | | | | | | |
 
 ## São Miguel do Tocantins
 
@@ -1403,7 +1407,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | São Miguel do Tocantins | NORTE | SE-2SMG | LD02076103 | 60 | 1 | 1 | 58 | 48,4 | 48,4 | 1 | 58 | 28 | 6 | 0 | 0 | 2 | aviso |
 | São Miguel do Tocantins | NORTE | SE-2AXX | AL01016065 | 289 | 1 | 3 | 285 | 276,1 | 13,4 | 3 | 285 | 94 | 1 | 0 | 0 | 2 | aviso |
 | São Miguel do Tocantins | NORTE | SE-2STN | AL01077088 | 140 | 1 | 4 | 135 | 118,4 | 5,6 | 4 | 135 | 14 | 1 | 0 | 0 | 2 | aviso |
-| **Total São Miguel do Tocantins** | | | 5 alimentadores | 1033 | | | | 931,1 | 295,7 | | | | | | | | |
+| **Total São Miguel do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 1033 | | | | 931,1 | 295,7 | | | | | | | | |
 
 ## São Salvador do Tocantins
 
@@ -1412,7 +1416,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | São Salvador do Tocantins | SUL | SE-2UPX | LD02066094 | 262 | 1 | 4 | 257 | 469,5 | 327,5 | 4 | 257 | 16 | 3 | 0 | 0 | 2 | aviso |
 | São Salvador do Tocantins | SUL | SE-2PRN | LD02010021 | 524 | 1 | 7 | 516 | 769,0 | 160,4 | 7 | 516 | 24 | 1 | 0 | 0 | 4 | aviso |
 | São Salvador do Tocantins | SUL | SE-2ALV | LD02003036 | 997 | 1 | 10 | 986 | 1.427,7 | 95,7 | 10 | 986 | 27 | 0 | 0 | 0 | 7 | aviso |
-| **Total São Salvador do Tocantins** | | | 3 alimentadores | 1783 | | | | 2.666,1 | 583,6 | | | | | | | | |
+| **Total São Salvador do Tocantins (alimentadores inteiros)** | | | 3 alimentadores | 1783 | | | | 2.666,1 | 583,6 | | | | | | | | |
 
 ## São Sebastião do Tocantins
 
@@ -1420,7 +1424,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | São Sebastião do Tocantins | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 110,0 | 10 | 877 | 175 | 11 | 0 | 0 | 6 | aviso |
 | São Sebastião do Tocantins | NORTE | SE-2BRT | AL02019068 | 25 | 1 | 0 | 24 | 31,3 | 26,4 | 0 | 24 | 14 | 1 | 0 | 0 | 2 | aviso |
-| **Total São Sebastião do Tocantins** | | | 2 alimentadores | 913 | | | | 947,4 | 136,4 | | | | | | | | |
+| **Total São Sebastião do Tocantins (alimentadores inteiros)** | | | 2 alimentadores | 913 | | | | 947,4 | 136,4 | | | | | | | | |
 
 ## São Valério
 
@@ -1430,7 +1434,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | São Valério | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 53,4 | 18 | 1054 | 69 | 10 | 0 | 0 | 4 | aviso |
 | São Valério | SUL | SE-2AL2 | LD04002091 | 902 | 1 | 12 | 889 | 1.417,8 | 33,3 | 12 | 889 | 45 | 2 | 0 | 0 | 7 | aviso |
 | São Valério | SUL | SE-2PRN | LD01010021 | 486 | 1 | 7 | 478 | 1.089,3 | 2,7 | 7 | 478 | 10 | 0 | 0 | 0 | 2 | aviso |
-| **Total São Valério** | | | 4 alimentadores | 3928 | | | | 6.569,7 | 887,0 | | | | | | | | |
+| **Total São Valério (alimentadores inteiros)** | | | 4 alimentadores | 3928 | | | | 6.569,7 | 887,0 | | | | | | | | |
 
 ## Silvanópolis
 
@@ -1440,7 +1444,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Silvanópolis | CENTRO | SE-2MTC | LD01051035 | 580 | 1 | 5 | 574 | 891,6 | 194,4 | 5 | 574 | 59 | 0 | 0 | 0 | 5 | aviso |
 | Silvanópolis | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 74,2 | 28 | 1494 | 63 | 2 | 0 | 0 | 7 | aviso |
 | Silvanópolis | CENTRO | SE-2SIL | AL01093043 | 34 | 1 | 1 | 32 | 19,6 | 19,6 | 1 | 32 | 0 | 0 | 0 | 0 | 3 | aviso |
-| **Total Silvanópolis** | | | 4 alimentadores | 3210 | | | | 5.887,7 | 563,0 | | | | | | | | |
+| **Total Silvanópolis (alimentadores inteiros)** | | | 4 alimentadores | 3210 | | | | 5.887,7 | 563,0 | | | | | | | | |
 
 ## Sítio Novo do Tocantins
 
@@ -1451,7 +1455,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Sítio Novo do Tocantins | NORTE | SE-2AXX | AL01016065 | 289 | 1 | 3 | 285 | 276,1 | 39,3 | 3 | 285 | 94 | 1 | 0 | 0 | 2 | aviso |
 | Sítio Novo do Tocantins | NORTE | SE-2SMG | LD01076103 | 180 | 1 | 4 | 175 | 137,6 | 17,8 | 4 | 175 | 19 | 1 | 0 | 0 | 2 | aviso |
 | Sítio Novo do Tocantins | NORTE | SE-2ATN | LD03109039 | 480 | 1 | 6 | 473 | 523,7 | 3,6 | 6 | 473 | 101 | 0 | 0 | 0 | 4 | aviso |
-| **Total Sítio Novo do Tocantins** | | | 5 alimentadores | 1453 | | | | 1.406,3 | 221,9 | | | | | | | | |
+| **Total Sítio Novo do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 1453 | | | | 1.406,3 | 221,9 | | | | | | | | |
 
 ## Sucupira
 
@@ -1460,7 +1464,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Sucupira | SUL | SE-2GUR | LD04040003 | 934 | 1 | 13 | 920 | 1.156,3 | 275,1 | 13 | 920 | 92 | 1 | 0 | 0 | 4 | aviso |
 | Sucupira | SUL | SE-2FGR | AL01033047 | 240 | 1 | 2 | 237 | 318,8 | 50,5 | 2 | 237 | 16 | 0 | 0 | 0 | 4 | aviso |
 | Sucupira | SUL | SE-2ALV | LD02003036 | 997 | 1 | 10 | 986 | 1.427,7 | 7,9 | 10 | 986 | 27 | 0 | 0 | 0 | 7 | aviso |
-| **Total Sucupira** | | | 3 alimentadores | 2171 | | | | 2.902,7 | 333,4 | | | | | | | | |
+| **Total Sucupira (alimentadores inteiros)** | | | 3 alimentadores | 2171 | | | | 2.902,7 | 333,4 | | | | | | | | |
 
 ## Tabocão
 
@@ -1469,7 +1473,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Tabocão | NORTE | SE-2GU2 | LD02038009 | 323 | 1 | 6 | 316 | 491,4 | 219,5 | 6 | 316 | 43 | 2 | 0 | 0 | 3 | aviso |
 | Tabocão | CENTRO | SE-2MRN | LD03050008 | 391 | 1 | 4 | 386 | 512,8 | 48,8 | 4 | 386 | 24 | 1 | 0 | 0 | 2 | aviso |
 | Tabocão | NORTE | SE-2GU1 | AL01037009 | 151 | 1 | 1 | 149 | 182,3 | 6,5 | 1 | 149 | 14 | 0 | 0 | 0 | 4 | aviso |
-| **Total Tabocão** | | | 3 alimentadores | 865 | | | | 1.186,5 | 274,8 | | | | | | | | |
+| **Total Tabocão (alimentadores inteiros)** | | | 3 alimentadores | 865 | | | | 1.186,5 | 274,8 | | | | | | | | |
 
 ## Taguatinga
 
@@ -1482,7 +1486,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Taguatinga | SUL | SE-2TGT | AL01078038 | 66 | 1 | 1 | 64 | 40,2 | 40,2 | 1 | 64 | 0 | 0 | 0 | 0 | 2 | aviso |
 | Taguatinga | SUL | SE-1UBJ | AL01070027 | 55 | 1 | 1 | 53 | 39,6 | 25,3 | 1 | 53 | 3 | 0 | 0 | 0 | 3 | aviso |
 | Taguatinga | SUL | SE-2TGT | AL02078038 | 28 | 1 | 0 | 27 | 15,6 | 15,6 | 0 | 27 | 0 | 0 | 0 | 0 | 3 | aviso |
-| **Total Taguatinga** | | | 7 alimentadores | 3009 | | | | 4.002,7 | 1.113,1 | | | | | | | | |
+| **Total Taguatinga (alimentadores inteiros)** | | | 7 alimentadores | 3009 | | | | 4.002,7 | 1.113,1 | | | | | | | | |
 
 ## Taipas do Tocantins
 
@@ -1490,7 +1494,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Taipas do Tocantins | SUL | SE-2DIA | LD05028074 | 713 | 1 | 10 | 702 | 1.206,2 | 303,9 | 10 | 702 | 53 | 0 | 0 | 0 | 4 | aviso |
 | Taipas do Tocantins | SUL | SE-2ARS | LD01110005 | 240 | 1 | 3 | 236 | 506,0 | 33,3 | 3 | 236 | 6 | 0 | 0 | 0 | 1 | aviso |
-| **Total Taipas do Tocantins** | | | 2 alimentadores | 953 | | | | 1.712,3 | 337,2 | | | | | | | | |
+| **Total Taipas do Tocantins (alimentadores inteiros)** | | | 2 alimentadores | 953 | | | | 1.712,3 | 337,2 | | | | | | | | |
 
 ## Talismã
 
@@ -1500,7 +1504,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Talismã | SUL | SE-2ALV | LD01003036 | 1144 | 1 | 17 | 1126 | 1.496,8 | 167,1 | 17 | 1126 | 37 | 0 | 0 | 0 | 4 | aviso |
 | Talismã | SUL | SE-2ALV | LD02003036 | 997 | 1 | 10 | 986 | 1.427,7 | 55,6 | 10 | 986 | 27 | 0 | 0 | 0 | 7 | aviso |
 | Talismã | SUL | SE-2ALV | AL01003036 | 426 | 1 | 8 | 417 | 546,2 | 4,5 | 8 | 417 | 19 | 0 | 0 | 0 | 4 | aviso |
-| **Total Talismã** | | | 4 alimentadores | 3073 | | | | 4.247,1 | 821,3 | | | | | | | | |
+| **Total Talismã (alimentadores inteiros)** | | | 4 alimentadores | 3073 | | | | 4.247,1 | 821,3 | | | | | | | | |
 
 ## Tocantínia
 
@@ -1508,10 +1512,10 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Tocantínia | CENTRO | SE-2PA2 | LD03059122 | 1342 | 1 | 12 | 1329 | 1.080,6 | 335,0 | 12 | 1329 | 73 | 0 | 0 | 0 | 4 | aviso |
 | Tocantínia | CENTRO | SE-2TCN | AL01082006 | 125 | 1 | 2 | 122 | 208,0 | 208,0 | 2 | 122 | 2 | 0 | 0 | 0 | 1 | aviso |
-| Tocantínia |  | SE-2PAI | LD02424015 | 31 | 1 | 8 | 22 | 1.672,6 | 93,3 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
+| Tocantínia |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 93,3 | 8 | 22 | 1 | 2 | 0 | 0 | 6 | aviso |
 | Tocantínia | CENTRO | SE-2MRN | LD05050008 | 675 | 1 | 9 | 665 | 651,2 | 43,6 | 9 | 665 | 56 | 2 | 0 | 0 | 4 | aviso |
 | Tocantínia | CENTRO | SE-2RSN | AL01074070 | 29 | 1 | 0 | 28 | 55,2 | 1,2 | 0 | 28 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Tocantínia** | | | 5 alimentadores | 2202 | | | | 3.667,5 | 681,2 | | | | | | | | |
+| **Total Tocantínia (alimentadores inteiros)** | | | 5 alimentadores | 2202 | | | | 3.667,5 | 681,2 | | | | | | | | |
 
 ## Tocantinópolis
 
@@ -1522,7 +1526,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Tocantinópolis | NORTE | SE-2TOC | AL02084002 | 90 | 1 | 3 | 86 | 84,5 | 84,5 | 3 | 86 | 17 | 0 | 0 | 0 | 1 | aviso |
 | Tocantinópolis | NORTE | SE-2NZR | AL01053090 | 193 | 1 | 4 | 188 | 188,3 | 4,3 | 4 | 188 | 23 | 1 | 0 | 0 | 2 | aviso |
 | Tocantinópolis | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 1,3 | 15 | 988 | 186 | 1 | 0 | 0 | 4 | aviso |
-| **Total Tocantinópolis** | | | 5 alimentadores | 1992 | | | | 2.201,2 | 346,6 | | | | | | | | |
+| **Total Tocantinópolis (alimentadores inteiros)** | | | 5 alimentadores | 1992 | | | | 2.201,2 | 346,6 | | | | | | | | |
 
 ## Tupirama
 
@@ -1531,7 +1535,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Tupirama | NORTE | SE-2PDA | AL01065015 | 194 | 1 | 4 | 189 | 214,1 | 188,8 | 4 | 189 | 11 | 1 | 0 | 0 | 2 | aviso |
 | Tupirama | NORTE | SE-2GU1 | AL03037009 | 171 | 1 | 0 | 170 | 211,7 | 63,3 | 0 | 170 | 31 | 6 | 0 | 0 | 2 | aviso |
 | Tupirama | NORTE | SE-2GU2 | LD02038009 | 323 | 1 | 6 | 316 | 491,4 | 28,7 | 6 | 316 | 43 | 2 | 0 | 0 | 3 | aviso |
-| **Total Tupirama** | | | 3 alimentadores | 688 | | | | 917,2 | 280,8 | | | | | | | | |
+| **Total Tupirama (alimentadores inteiros)** | | | 3 alimentadores | 688 | | | | 917,2 | 280,8 | | | | | | | | |
 
 ## Tupiratins
 
@@ -1540,7 +1544,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Tupiratins | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 322,8 | 14 | 954 | 60 | 17 | 0 | 0 | 4 | aviso |
 | Tupiratins | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 29,7 | 16 | 1316 | 38 | 0 | 0 | 0 | 6 | aviso |
 | Tupiratins | NORTE | SE-2CLN | LD01020023 | 335 | 1 | 6 | 328 | 599,5 | 8,9 | 6 | 328 | 21 | 0 | 0 | 0 | 4 | aviso |
-| **Total Tupiratins** | | | 3 alimentadores | 2637 | | | | 3.711,3 | 361,4 | | | | | | | | |
+| **Total Tupiratins (alimentadores inteiros)** | | | 3 alimentadores | 2637 | | | | 3.711,3 | 361,4 | | | | | | | | |
 
 ## Wanderlândia
 
@@ -1550,7 +1554,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Wanderlândia | NORTE | SE-2XB2 | LD01095030 | 821 | 1 | 15 | 805 | 924,6 | 177,1 | 15 | 805 | 42 | 2 | 0 | 0 | 4 | aviso |
 | Wanderlândia | NORTE | SE-2WND | AL01086016 | 101 | 1 | 1 | 99 | 153,5 | 125,5 | 1 | 99 | 3 | 2 | 0 | 0 | 5 | aviso |
 | Wanderlândia | NORTE | SE-2AR4 | AL01040004 | 29 | 1 | 1 | 27 | 26,9 | 2,9 | 1 | 27 | 0 | 0 | 0 | 0 | 4 | aviso |
-| **Total Wanderlândia** | | | 4 alimentadores | 2129 | | | | 2.383,7 | 628,2 | | | | | | | | |
+| **Total Wanderlândia (alimentadores inteiros)** | | | 4 alimentadores | 2129 | | | | 2.383,7 | 628,2 | | | | | | | | |
 
 ## Xambioá
 
@@ -1559,12 +1563,18 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 | Xambioá | NORTE | SE-2XB2 | LD01095030 | 821 | 1 | 15 | 805 | 924,6 | 428,9 | 15 | 805 | 42 | 2 | 0 | 0 | 4 | aviso |
 | Xambioá | NORTE | SE-2XB2 | LD02095030 | 49 | 1 | 2 | 46 | 51,6 | 51,6 | 2 | 46 | 5 | 0 | 0 | 0 | 1 | aviso |
 | Xambioá | NORTE | SE-2XMB | AL01087030 | 43 | 1 | 0 | 42 | 19,1 | 19,1 | 0 | 42 | 1 | 0 | 0 | 0 | 1 | aviso |
-| **Total Xambioá** | | | 3 alimentadores | 913 | | | | 995,3 | 499,5 | | | | | | | | |
+| **Total Xambioá (alimentadores inteiros)** | | | 3 alimentadores | 913 | | | | 995,3 | 499,5 | | | | | | | | |
 
 ## Total geral
 
 - Municípios: 139
 - Alimentadores processados sem falha: 322 (94.155,2 km, 71374 trechos)
+
+## Divididos por exceção (sem chaves fechadas no GIS)
+
+- **AL01102271** (aviso): 19 trechos para 384,4 km; maior trecho T2 com 134,4 km
+- **LD01414015** (aviso): 10 trechos para 563,6 km; maior trecho T2-B com 285,7 km
+- **LD02424015** (aviso): 31 trechos para 1.672,6 km; maior trecho T2-A com 372,6 km
 
 ## Avisos por alimentador
 
@@ -1653,7 +1663,7 @@ Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = o
 - **AL01098118** (aviso): 7601 m fora da malha municipal do Tocantins; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01099059** (aviso): 0% da rede fora da árvore do DJ (1 de 2570 vãos); trechos a revisar: T2-A, T2-B; 1 trecho(s) fechavam laço e ficaram fora da árvore: 3186349; Mais de um religador pode ser o 2º do tronco; escolhido 7937505059 (mais rede depois dele). Outros candidatos: 7933766059.
 - **AL01101271** (aviso): 0% da rede fora da árvore do DJ (1 de 1215 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: 3640834; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01102271** (aviso): 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (10 de 4897 vãos); 10 trecho(s) fechavam laço e ficaram fora da árvore: 3070680, 3661015, 3661698, 3661705, 3661708, 25361195, 37886214, 41776649, 47096680, 56256261
+- **AL01102271** (aviso): dividido por exceção (GIS sem as chaves fechadas: 19 trechos para 384,4 km, o maior com 134,4 km); 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (10 de 4897 vãos); 10 trecho(s) fechavam laço e ficaram fora da árvore: 3070680, 3661015, 3661698, 3661705, 3661708, 25361195, 37886214, 41776649, 47096680, 56256261
 - **AL01109039** (aviso): 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3302856039, 3350864039
 - **AL01113003** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01114007** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.

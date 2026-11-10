@@ -27,6 +27,8 @@
   const COR_ANO = { 2024: '#c084fc', 2025: '#818cf8', 2026: '#2dd4bf', 2027: '#a3e635' };
   const corAno = a => COR_ANO[a] || (a < 2024 ? '#e879f9' : '#bef264');
   const SEMCOR = '#cbd5e1';
+  // a base de inspeção começa em 2026: "sem inspeção" quer dizer sem registro nesse período, não rede nunca inspecionada
+  const BASE = `${IN.desde || '2026'}${IN.base_ate ? ', até ' + br(IN.base_ate) : ''}`;
   const VERMELHO = '#dc2626';
 
   // ---------- dados ----------
@@ -113,13 +115,16 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
 
   // ---------- mapa ----------
   const seg = v => [[v[0], v[1]], [v[2], v[3]]];
+  // vãos seguidos numa linha só (alimentador.js): menos pontos para o mapa refazer a cada zoom
+  const linhaDe = window.__cadeias || (vs => vs.map(seg));
   let camada = null, realce = null, selL = null, fundoCache = null, pontosL = [];
   let comFaixa = false, bordas = [], arruma = 0;     // Faixa também ligada: bordas largas por baixo dela
   const raio = () => map.getZoom() < 13 ? 3.5 : map.getZoom() < 16 ? 5 : 6.5;
   function linhaDupla(vs, cor, peso, opacidade, extra) {
     // contorno escuro por baixo: a cor aparece igual sobre mata escura ou solo claro
-    return [L.polyline(vs.map(seg), { color: '#0b0f14', weight: peso + 4, opacity: .75 * opacidade, interactive: false, lineCap: 'round' }),
-      L.polyline(vs.map(seg), Object.assign({ color: cor, weight: peso, opacity: opacidade, interactive: false, lineCap: 'round' }, extra))];
+    const ls = linhaDe(vs);
+    return [L.polyline(ls, { color: '#0b0f14', weight: peso + 4, opacity: .75 * opacidade, interactive: false, lineCap: 'round' }),
+      L.polyline(ls, Object.assign({ color: cor, weight: peso, opacity: opacidade, interactive: false, lineCap: 'round' }, extra))];
   }
   function fundo() {
     const chave = JSON.stringify(window.__visivel || {}) + (window.__munSel || '');
@@ -182,7 +187,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
         const vs = VAOS_ANO[a].filter(vis);
         if (!vs.length) return;
         // com a Faixa: borda larga por baixo de tudo (a linha da Faixa, com o contorno escuro, fica no meio dela)
-        if (comFaixa) bordas.push(L.polyline(vs.map(seg), { color: corAno(a), weight: 15, opacity: .9 * op, interactive: false, lineCap: 'round' }));
+        if (comFaixa) bordas.push(L.polyline(linhaDe(vs), { color: corAno(a), weight: 15, opacity: .9 * op, interactive: false, lineCap: 'round' }));
         else ls.push(...clicavel(linhaDupla(vs, corAno(a), 5, op), vs));
       });
       pontosL = pontos(op);
@@ -260,8 +265,8 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       if (!marcas.length && o.pa) marcas.push(marca(o.pa, 'Abrangência (a montante)', o.abr, 'ref'));
       if (map && vs.length) {
         realce = L.layerGroup([
-          L.polyline(vs.map(seg), { color: '#fff', weight: 14, opacity: 1, interactive: false, lineCap: 'round' }),
-          L.polyline(vs.map(seg), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round' }),
+          L.polyline(linhaDe(vs), { color: '#fff', weight: 14, opacity: 1, interactive: false, lineCap: 'round' }),
+          L.polyline(linhaDe(vs), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round' }),
           ...marcas,
         ]).addTo(map);
         if (enquadrar) enquadra(vs.flatMap(seg));
@@ -356,12 +361,13 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const f = document.activeElement;
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
     const n = IN.os.length;
-    const sub = n ? `${nf(n)} inspeç${n === 1 ? 'ão executada' : 'ões executadas'} · ${ext(KM_INSP)} de ${km(KM_REDE)}` : 'Nenhuma inspeção executada';
+    const sub = (n ? `${nf(n)} inspeç${n === 1 ? 'ão executada' : 'ões executadas'} · ${ext(KM_INSP)} estimados de ${km(KM_REDE)}` : 'Nenhuma inspeção registrada') + ` · base ${BASE}`;
+    const nota = `<p class="limp-nota">Km estimados: cada inspeção cobre o bloco da rede abaixo do elemento citado na OS, até as próximas chaves.</p>`;
     const resto = ANOS.length ? `<div class="limp-anos">${ANOS.map(linha).join('')}</div>` +
       (st.ligado && st.anos.size < ANOS.length ? '<button type="button" class="limp-todos" data-acao="todos" data-foco="todos">Mostrar todos os anos</button>' : '') : '';
     card.hidden = !st.ligado && !!btn;                    // bloco da Inspeção só com ela ligada no mapa
     card.innerHTML = `<div class="limp-top"><h2>Inspeção visual<small>${sub}</small></h2></div>
-      ${resto}`;
+      ${resto}${n ? nota : ''}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
     if (btn) btn.setAttribute('aria-pressed', String(st.ligado));
     if (maplg) {
@@ -369,7 +375,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       maplg.innerHTML = `<span class="lg-cab"><b>Inspeção</b></span>` +
         ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a}"><i style="--c:${corAno(a)}"></i><b>${a}</b></button>`).join('') +
         (PONTOS.length ? '<span class="lg-info"><i class="insp-dot"></i>início / fim</span>' : '') +
-        `<span class="lg-info"><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem inspeção</span>`;
+        `<span class="lg-info"><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem inspeção registrada</span>`;
     }
     if (det) det.querySelectorAll('.insp-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));
   }
@@ -390,7 +396,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const lst = [...ks].sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
     const tot = somaM(vaosDoTrecho[nome] || []), feito = somaM((vaosDoTrecho[nome] || []).filter(v => porVao[v[5]].ks.length));
     return `<section class="limp-sec insp-sec" aria-live="off"><h3>Inspeção visual</h3>
-      <dl><dt>Última</dt><dd>${lst.length ? br(IN.os[lst[0]].data) + ` · ${ext(feito)} de ${ext(tot)} do trecho inspecionados` : 'nenhuma inspeção executada passou por este trecho'}</dd></dl>
+      <dl><dt>Última</dt><dd>${lst.length ? br(IN.os[lst[0]].data) + ` · ${ext(feito)} de ${ext(tot)} do trecho inspecionados (estimado)` : `sem inspeção registrada (base ${BASE})`}</dd></dl>
       ${lst.map(k => osBtn(k, false)).join('')}</section>`;
   }
   function poeDetalhe() {

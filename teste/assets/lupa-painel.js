@@ -114,7 +114,7 @@
     const doCls = c => D.trechos.filter(t => classe(t.nome) === c && (!visivel(c) || !escondida.has(t.nome)));
     let html = '';
     if (!aberta) {
-      html += '<p class="lp-t">Classes</p>' + CLS.filter(c => { const b = btCls(c); return b && !b.hidden; }).map(c => {   // só as que o alimentador tem
+      html += `<p class="lp-t">Classes${nae && window.__periodoNae ? ` · NAE ${esc(window.__periodoNae())}` : ''}</p>` + CLS.filter(c => { const b = btCls(c); return b && !b.hidden; }).map(c => {   // só as que o alimentador tem
         const ts = doCls(c), m = ts.reduce((s, t) => s + t.ext, 0), n = nae ? ts.reduce((s, t) => s + (nae[t.nome] || 0), 0) : null, v = visivel(c);
         return `<div class="lp-cls${v ? '' : ' off'}" style="--c:${esc(cor(c))}">` +
           `<button type="button" class="lp-op lp-abre" data-c="${c}"><span class="lp-bar" aria-hidden="true"></span>` +
@@ -129,7 +129,7 @@
     } else {
       const ts = doCls(aberta).sort((a, b) => nae ? (nae[b.nome] || 0) - (nae[a.nome] || 0) : 0);
       html += `<button type="button" class="lp-op lp-volta"><span class="lp-seta" aria-hidden="true">‹</span><span class="lp-x"><b>Classes</b></span></button>` +
-        `<p class="lp-t">${aberta} · ${mil(ts.length)} trecho${ts.length === 1 ? '' : 's'}${nae ? ' · maior NAE primeiro' : ''}</p>` +
+        `<p class="lp-t">${aberta} · ${mil(ts.length)} trecho${ts.length === 1 ? '' : 's'}${nae ? ` · maior NAE primeiro (${esc(window.__periodoNae ? window.__periodoNae() : '')})` : ''}</p>` +
         ts.slice(0, limite).map(t => `<button type="button" class="lp-op lp-tr" data-t="${esc(t.nome)}" style="--c:${esc(t.cor)}"><span class="lp-bol" aria-hidden="true"></span>` +
           `<span class="lp-x"><b>${esc(t.nome)}</b><small>${esc(t.inicio)} → ${esc(t.fim.join(' / ').replace('fim de linha · poste ', 'fim '))} · ${km(t.ext)}</small></span>${pill(nae ? nae[t.nome] || 0 : null)}</button>`).join('') ||
         '<p class="lp-vazio">Nenhum trecho com o filtro de município.</p>';
@@ -659,7 +659,7 @@
 
   // ---------- prévia no mapa: camada temporária, sem mexer na seleção (some ao fechar ou ao trocar) ----------
   let luz = null;
-  const segs = vs => vs.map(v => [[v[0], v[1]], [v[2], v[3]]]);
+  const segs = vs => window.__cadeias ? window.__cadeias(vs) : vs.map(v => [[v[0], v[1]], [v[2], v[3]]]);   // vãos seguidos numa linha só
   const SEM = { interactive: false, lineCap: 'round', lineJoin: 'round', className: 'lp-previa' };   // className: só marca (o mapa desenha em canvas)
   // brilho na cor de destaque (a da opção marcada na lista), diferente do halo branco da seleção
   const destaque = () => (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '').trim() || '#f08a5d';
@@ -862,6 +862,25 @@
     cls.querySelectorAll('button[data-c]').forEach(b => { b.hidden = !D.trechos.some(t => classe(t.nome) === b.dataset.c); algum = algum || !b.hidden; });
     if (algum) lupa.after(cls);
   }
+  // camadas sempre à vista: Faixa | Inspeção | Insp→manut | Manutenção numa fileira no alto do mapa, embaixo do olho e do
+  // T1 T2 T3 (antes ficavam só dentro do olho). Cada botão aciona o do Menu (a mesma lógica de cada camada) e copia o estado
+  const camL = document.getElementById('ctl-camadas');
+  let fila = null;
+  if (caixaMapa && camL) {
+    const bts = [...camL.querySelectorAll('.ctl-card > button')].filter(b => !b.classList.contains('tc-painel-m'));
+    if (bts.length) {
+      fila = document.createElement('div');
+      fila.className = 'lp-cams';
+      fila.setAttribute('role', 'group');
+      fila.setAttribute('aria-label', 'Camadas do mapa');
+      fila.innerHTML = bts.map((b, i) => `<button type="button" data-i="${i}" aria-pressed="${b.getAttribute('aria-pressed') === 'true'}" title="${esc(b.title)}">${esc(b.textContent.trim())}</button>`).join('');
+      const copia = () => bts.forEach((b, i) => fila.children[i].setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') === 'true')));
+      new MutationObserver(copia).observe(camL, { subtree: true, attributes: true, attributeFilter: ['aria-pressed'] });
+      fila.addEventListener('click', e => { const x = e.target.closest('button[data-i]'); if (x) { e.stopPropagation(); bts[+x.dataset.i].click(); } });
+      if (window.L) { L.DomEvent.disableClickPropagation(fila); L.DomEvent.disableScrollPropagation(fila); }
+      caixaMapa.append(fila);
+    }
+  }
   rotuloOlho();
   // tela cheia: telacheia.js leva a barra para a gaveta e, ao sair, para cima do mapa; aqui ela volta para dentro do mapa
   // na mesma hora (antes de pintar), como estava, e quem digitava continua no campo
@@ -878,8 +897,8 @@
   window.__folgaBalao = () => {
     const r = folga0 ? folga0() : [20, 20], m = document.getElementById('map');
     if (!noMapa() || !m) return r;
-    const b = (fechada() ? lupa : linha).getBoundingClientRect();
-    return [r[0], Math.max(r[1], Math.round(b.bottom - m.getBoundingClientRect().top) + 12)];
+    const b = (fechada() ? lupa : linha).getBoundingClientRect(), f = fila && fila.offsetParent ? fila.getBoundingClientRect().bottom : 0;
+    return [r[0], Math.max(r[1], Math.round(Math.max(b.bottom, f) - m.getBoundingClientRect().top) + 12)];
   };
   addEventListener('resize', () => { if (noMapa() && !fechada()) medeMax(); ajustaDica(); });
 
@@ -974,7 +993,18 @@
     // sem a barra em cima do mapa, a folga que o modelo reserva para ela (até o fim da carga) não faz mais sentido
     '.al-site:not(.al-pronto) .wrap:not(:has(>.barra-busca))>.stage:has(.barra-busca){margin-top:0}' +
     '@media (prefers-reduced-motion:no-preference){.lp-drop:not([hidden]),.lp-fdrop:not([hidden]),.lp-sug:not([hidden]){animation:lp-entra var(--dur,160ms) ease-out}}' +
-    '@keyframes lp-entra{from{opacity:0;transform:translateY(4px)}}';
+    '@keyframes lp-entra{from{opacity:0;transform:translateY(4px)}}' +
+    // fileira das camadas, embaixo do olho (44 px no celular, 40 no computador): o vidro dos controles do mapa
+    '.mapbox>.lp-cams{position:absolute;left:12px;top:64px;z-index:1000;display:flex;gap:2px;max-width:calc(100% - 24px);padding:2px;overflow-x:auto;scrollbar-width:none;' +
+    'background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--vidro-borda);border-radius:var(--r2);box-shadow:var(--sh-vidro)}' +
+    '@media (min-width:861px){.mapbox>.lp-cams{top:60px}}' +
+    // com a fileira de camadas, os avisos do mapa (satélite, Leaflet) descem para baixo dela e não ficam cobertos
+    '.mapbox:has(>.lp-cams)>.banner{top:116px}' +
+    '.lp-cams button{flex:none;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--vidro-fg);font:600 var(--t-xs)/1 var(--f-body);white-space:nowrap;cursor:pointer}' +
+    '@media (pointer:coarse){.lp-cams button{min-height:40px}}' +
+    '.lp-cams button:hover{background:var(--vidro-hover)}.lp-cams button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}' +
+    '.lp-cams button[aria-pressed=true]{background:var(--accent);color:var(--on-accent)}' +
+    '.mapbox.fx-modo>.lp-cams{display:none}';
   document.head.append(s);
 })();
 

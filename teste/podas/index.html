@@ -63,12 +63,13 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 .pd-res .nada{cursor:default;color:#aab3b9;font-size:var(--t-sm)}
 /* legenda (canto de baixo, à esquerda) */
 .pd-card{width:0!important;height:0!important;pointer-events:none}
-.qc{position:absolute;transform:translate(-50%,-50%) scale(var(--e,1));width:max-content;max-width:300px;background:rgba(15,20,23,.88);color:#f3f4f4;border:1px solid var(--vidro-borda);border-left:4px solid var(--c);border-radius:8px;padding:6px 9px 7px;font:600 11px/1.25 var(--f-body);box-shadow:var(--sh-vidro);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);--qm:#aab3b9}
+.qc{position:absolute;transform:translate(-50%,-50%) scale(var(--e,1));width:max-content;max-width:300px;background:rgba(15,20,23,.88);color:#f3f4f4;border:1px solid var(--vidro-borda);border-left:4px solid var(--c);border-radius:8px;padding:6px 9px 7px;font:600 11px/1.25 var(--f-body);box-shadow:var(--sh-vidro);--qm:#aab3b9}
+/* card sem backdrop-filter: com dezenas na tela, o desfoque dobrava o tempo de cada quadro ao arrastar (fundo já quase opaco) */
 .qc-h{display:flex;align-items:center;gap:8px;white-space:nowrap}
 .qc-h b{font:700 13px/1.1 var(--f-display)}
 .qc-m{margin:3px 0 0;max-width:250px;white-space:normal;font:500 10px/1.25 var(--f-body);color:#ffd9d2}
 .qc-h em{margin-left:auto;font:600 9.5px/1 var(--f-body);font-style:normal;letter-spacing:.05em;text-transform:uppercase;color:#cfd5d8}
-.qc-l{display:flex;gap:12px;margin:5px 0 4px;white-space:nowrap;color:var(--qm)}
+.qc-l{display:flex;flex-wrap:wrap;gap:2px 12px;margin:5px 0 4px;white-space:nowrap;color:var(--qm)}
 .qc-l b{color:#fff;font-variant-numeric:tabular-nums;font-size:12px}
 .qt{border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:10.5px;width:100%}
 .qt caption{caption-side:top;text-align:left;font:600 9.5px/1.3 var(--f-body);letter-spacing:.05em;text-transform:uppercase;color:var(--qm);padding:2px 0}
@@ -87,6 +88,7 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 .pd-leg[hidden]{display:none}
 .pd-leg div{display:flex;align-items:center;gap:var(--s2)}
 .pd-leg i{width:12px;height:12px;border-radius:3px;background:var(--c);flex:none}
+.pd-leg small{font:500 10.5px/1.2 var(--f-body);color:#cfd5d8}
 .pd-leg i.pt{border-radius:50%;border:1.5px solid #fff;width:11px;height:11px}
 .pd-leg hr{border:0;border-top:1px solid var(--vidro-borda);margin:2px 0}
 /* tela cheia (canto de baixo, à direita) */
@@ -126,6 +128,7 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 .pd-os li.ex{border-left-color:var(--pd-ok)}
 .pd-os li.pe{border-left-color:var(--pd-pend)}
 .pd-os li.nae{border-left-color:var(--pd-nae)}
+.pd-os li.zona{border-left-style:dashed}
 .pd-nae-t{display:flex;align-items:center;gap:var(--s2)}
 .pd-nae-t i{width:12px;height:12px;border-radius:50%;background:var(--pd-nae);border:1.5px solid #fff;flex:none}
 .pd-os b{font:600 var(--t-sm) var(--f-mono);overflow-wrap:anywhere}
@@ -137,7 +140,7 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 .nota{color:var(--muted);font-size:var(--t-xs);margin:0;max-width:110ch}
 @media(max-width:700px){
   #map{height:clamp(420px,72svh,700px)}
-  .pd-painel{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:58%;border-radius:var(--r3)}
+  .pd-painel{top:auto;left:8px;right:8px;bottom:28px;width:auto;max-height:56%;border-radius:var(--r3)}
   .pd-leg{bottom:20px}
   body.pd-aberto .pd-leg,body.pd-aberto .pd-tc{display:none}
   .pd-cids button{padding:0 9px}
@@ -178,14 +181,14 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 
 <script src="../assets/leaflet/leaflet.js"></script>
 <script src="../assets/mapa-satelite.js"></script>
-<script src="../dados/podas.js"></script>
+<script src="../dados/podas.js?v=20261110b"></script>
 <script src="../dados/quadras.js"></script>
 <script>
 (function () {
 'use strict';
 const $ = id => document.getElementById(id);
 const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
-const nf = n => Number(n).toLocaleString('pt-BR');
+const NF = new Intl.NumberFormat('pt-BR'), nf = n => NF.format(Number(n));   // um formatador só: toLocaleString a cada número pesava no pan
 const br = d => d ? String(d).slice(0, 10).split('-').reverse().join('/') : '';
 const sem = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const cap = s => { s = String(s ?? '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); };
@@ -197,6 +200,7 @@ const ORDEM = ['executado', 'pendente', 'critico', 'sem'];
 const ROT = {executado: 'Executado', pendente: 'Pendente', critico: 'Crítico', sem: 'Sem poda recente'};
 const ROTP = {executado: 'Executada (6 meses)', pendente: 'Pendente', critico: 'Pendente emergencial/urgente'};
 const COR = {executado: '#22c55e', pendente: '#facc15', critico: '#ef4444', sem: '#d1d5db'};
+const LEGX = {critico: 'OS urgente ou NAE sem poda'};   // o porquê do Crítico, curto, na legenda
 const OPAC = {executado: .5, pendente: .55, critico: .6, sem: .25};
 const SANGUE = '#8a0303';
 const P = window.PODAS;
@@ -204,6 +208,10 @@ const CIDADES = P && P.cidades ? ['Palmas', 'Araguaína', 'Gurupi'].filter(c => 
 const titulo = a => a.tipo === 'quadra' && a.setores ? 'Quadra ' + a.nome : a.nome || 'Setor IBGE ' + a.id;
 const TIPOA = {quadra: 'Quadra', bairro: 'Bairro', area: 'Área verde ou de equipamento', setor: 'Setor censitário'};
 const TIPO = t => t === 'poste' ? 'Poste' : t === 'TR' ? 'Trafo' : 'Chave/equipamento (' + t + ')';
+// abreviaturas do tipo de ativo da Crítica, por extenso
+const ABR = {TR: 'Trafo', 'TR PART': 'Trafo particular', DJ: 'Disjuntor', RL: 'Religador', 'CH FUS': 'Chave fusível', 'CH FUS REL': 'Chave fusível religadora',
+  'CH FACA': 'Chave faca', 'CH BYPASS': 'Chave bypass', 'TRIP SAVER': 'Trip saver', UC: 'Unidade consumidora'};
+const abr = t => ABR[t] || t;
 const mesTxt = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1] + '/' + m.slice(0, 4);
 const dataNae = d => br(d.slice(0, 10)) + (d.length > 10 ? ' ' + d.slice(11) : '');
 
@@ -231,19 +239,21 @@ function juntar(c) {
     a.os = ss.flatMap(x => x.os || []).filter(o => !vistas.has(o[0]) && vistas.add(o[0]))   // todas as pendentes, depois as 12 executadas mais novas
       .sort((x, y) => (ex(x) - ex(y)) || (quando(y) > quando(x) ? 1 : quando(y) < quando(x) ? -1 : 0));
     a.os = a.os.filter(o => !ex(o)).concat(a.os.filter(ex).slice(0, 12));
-    a._naeSem = [...new Set(ss.filter(x => !x.exec6m).flatMap(x => x.nae_alto || []))].sort();   // setor com NAE alto e sem poda
     out.push(a);
   });
-  P.cidades[c].forEach(a => { if (!usados.has(a.id)) out.push(Object.assign({}, a, {tipo: 'setor', _naeSem: a.exec6m ? [] : (a.nae_alto || [])})); });
+  P.cidades[c].forEach(a => { if (!usados.has(a.id)) out.push(Object.assign({}, a, {tipo: 'setor'})); });
   P.cidades[c] = out;
 }
+// Crítico (regra aprovada): OS de poda pendente emergencial/urgente, ou NAE de vegetação em ativo dentro da quadra nos
+// últimos 6 meses da Crítica (sem disjuntor e religador) e nenhuma poda executada nela nos últimos 6 meses.
+// O NAE alto do alimentador não pinta a quadra: é só informação no painel.
 function situacao(a) {
-  a.motivo = '';
-  const sem = a._naeSem || [];
-  if (a.crit) { a.st = 'critico'; a.motivo = `${a.crit} OS de poda pendente emergencial/urgente`; }
-  else if (sem.length) {                                // um setor crítico (NAE alto sem poda) deixa a área crítica
-    a.st = 'critico';
-    a.motivo = `alimentador${sem.length > 1 ? 'es' : ''} ${sem.join(', ')} com NAE alto e ${a.exec6m ? 'parte da área' : 'a área'} sem poda nos últimos 6 meses`;
+  a.motivo = ''; a.porque = '';
+  const n = a.k.nae;
+  if (a.crit) { a.st = 'critico'; a.porque = 'os'; a.motivo = `${a.crit} OS de poda pendente emergencial/urgente`; }
+  else if (n && !a.exec6m) {
+    a.st = 'critico'; a.porque = 'nae';
+    a.motivo = `${n} NAE de vegetação em ativo desta quadra (${PER6}) e nenhuma poda executada nos últimos 6 meses`;
   }
   else a.st = a.pend ? 'pendente' : a.exec6m ? 'executado' : 'sem';
 }
@@ -261,13 +271,31 @@ const COM_DEC = !!P.conjuntos;
 // contada à parte (zona); o ponto continua no mapa, na camada NAE.
 const ZONA = new Set(['DJ', 'RL']);
 const MESES6 = (P.nae_meses || []).slice(-6);
+const PER6 = MESES6.length ? `${['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+MESES6[0].slice(5, 7) - 1]} a ` +
+  `${['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+MESES6[MESES6.length - 1].slice(5, 7) - 1]}/${MESES6[MESES6.length - 1].slice(0, 4)}` : '';
+// prazo da OS (DATA_LIMITE) antes da data da base: vencida
+const vencida = lim => !!lim && lim < P.gerado;
+const BASE = br(P.gerado).slice(0, 5);                  // dia/mês da base de OS, no card
+const MIN_NAE = P.nae_alim_min || 5;                   // com menos ocorrências a taxa por 100 km não diz nada
+// grade de ~550 m: cada ponto só testa as quadras da sua célula (e vizinhas), não as da cidade inteira
+const CEL = 0.005, cel = (x, y) => Math.floor(x / CEL) + ':' + Math.floor(y / CEL);
 function indiceGeo(itens) {
   const aneis = g => g.type === 'Polygon' ? [g.coordinates] : g.coordinates;           // lista de polígonos [anel externo, buracos...]
-  return itens.filter(a => a.geo).map(a => {
+  const lst = itens.filter(a => a.geo).map(a => {
     const polis = aneis(a.geo); let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     polis.forEach(po => po[0].forEach(([x, y]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }));
     return {a, polis, x0, y0, x1, y1, area: (x1 - x0) * (y1 - y0)};
   });
+  const grade = new Map();
+  lst.forEach(e => { for (let i = Math.floor(e.x0 / CEL); i <= Math.floor(e.x1 / CEL); i++) for (let j = Math.floor(e.y0 / CEL); j <= Math.floor(e.y1 / CEL); j++) {
+    const k = i + ':' + j; if (!grade.has(k)) grade.set(k, []); grade.get(k).push(e); } });
+  lst.grade = grade;
+  return lst;
+}
+function perto(idx, lon, lat) {                        // quadras da célula do ponto e das 8 vizinhas (cobre os ~150 m da busca)
+  const i = Math.floor(lon / CEL), j = Math.floor(lat / CEL), out = new Set();
+  for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) (idx.grade.get((i + di) + ':' + (j + dj)) || []).forEach(e => out.add(e));
+  return out;
 }
 function dentroAnel(x, y, r) {
   let d = false;
@@ -288,37 +316,47 @@ function distBorda(e, x, y) {                          // graus (≈ metros/111 
 }
 function ondeEsta(idx, lat, lon) {                     // a menor quadra que contém o ponto; senão a mais perto, até ~150 m
   let melhor = null;
-  idx.forEach(e => { if (lon >= e.x0 && lon <= e.x1 && lat >= e.y0 && lat <= e.y1 && dentro(e, lon, lat) && (!melhor || e.area < melhor.area)) melhor = e; });
+  (idx.grade.get(cel(lon, lat)) || []).forEach(e => { if (lon >= e.x0 && lon <= e.x1 && lat >= e.y0 && lat <= e.y1 && dentro(e, lon, lat) && (!melhor || e.area < melhor.area)) melhor = e; });
   if (melhor) return melhor.a;
   const R = 0.0014; let d0 = R;
-  idx.forEach(e => { if (lon >= e.x0 - R && lon <= e.x1 + R && lat >= e.y0 - R && lat <= e.y1 + R) { const d = distBorda(e, lon, lat); if (d < d0) { d0 = d; melhor = e; } } });
+  perto(idx, lon, lat).forEach(e => { if (lon >= e.x0 - R && lon <= e.x1 + R && lat >= e.y0 - R && lat <= e.y1 + R) { const d = distBorda(e, lon, lat); if (d < d0) { d0 = d; melhor = e; } } });
   return melhor && melhor.a;
 }
 function contarPorQuadra(c) {
   const lista = P.cidades[c], idx = indiceGeo(lista);
-  lista.forEach(a => { a.k = {exec: 0, pend: 0, crit: 0, lv: 0, h: Object.fromEntries(MESES6.map(m => [m, {n: 0, dec: 0, fec: 0, chi: 0, ci: 0, sem: 0, zona: 0}]))}; });
+  lista.forEach(a => { a.k = {exec: 0, pend: 0, crit: 0, lv: 0, lvx: 0, venc: 0, nae: 0, pend0: '', cj: new Set(), h: Object.fromEntries(MESES6.map(m => [m, {n: 0, dec: 0, fec: 0, chi: 0, ci: 0, sem: 0, zona: 0}]))}; });
   (P.pontos && P.pontos[c] || []).forEach(pt => {
     const a = ondeEsta(idx, pt[0], pt[1]); if (!a) return;
-    if (pt[2] === 'executado') { a.k.exec++; if (pt[10]) a.k.lv++; } else { a.k.pend++; if (pt[2] === 'critico') a.k.crit++; }
+    // linha viva: só a equipe da OS diz (null = OS sem equipe na base, contada à parte)
+    if (pt[2] === 'executado') { a.k.exec++; if (pt[10] === 1) a.k.lv++; else if (pt[10] == null) a.k.lvx++; }
+    else {
+      a.k.pend++; if (pt[2] === 'critico') a.k.crit++; if (!a.k.pend0 || pt[6] < a.k.pend0) a.k.pend0 = pt[6];   // criação da pendente mais antiga
+      if (vencida(pt[11])) a.k.venc++;
+    }
   });
   (P.nae && P.nae[c] || []).forEach(o => {
     const a = ondeEsta(idx, o[0], o[1]); if (!a) return;
     const h = a.k.h[String(o[3]).slice(0, 7)]; if (!h) return;
     if (ZONA.has(o[5])) { h.zona++; return; }
-    h.n++; h.ci += o[7] || 0; h.chi += (o[7] || 0) * (o[8] || 0) / 60;
-    if (o[10] != null) { h.dec += o[10]; h.fec += o[11]; } else h.sem++;
+    // consumidor·hora da Crítica (coluna 13) quando o podas.js traz; senão consumidores × duração
+    h.n++; a.k.nae++; h.ci += o[7] || 0; h.chi += o[13] != null ? o[13] : (o[7] || 0) * (o[8] || 0) / 60;
+    if (o[10] != null) { h.dec += o[10]; h.fec += o[11]; if (o[12]) a.k.cj.add(o[12]); } else h.sem++;
   });
   lista.forEach(a => { a.exec6m = a.k.exec; a.pend = a.k.pend; a.crit = a.k.crit; situacao(a); });
 }
-CIDADES.forEach(c => { juntar(c); contarPorQuadra(c); });
+// cada cidade é montada só quando aparece (ou na busca): a primeira tela não espera as outras duas
+const prontas = new Set();
+function preparar(c) { if (prontas.has(c)) return; prontas.add(c); juntar(c); contarPorQuadra(c); }
 
 const mm = P.nae_meses || [];
 $('fonte').textContent = 'Palmas, Araguaína e Gurupi · OS status de ' + br(P.gerado) + (mm.length ? ' · NAE de ' + mesTxt(mm[0]) + ' a ' + mesTxt(mm[mm.length - 1]) : '');
 $('nota').textContent = (Q ? 'Quadras e bairros de Palmas com o contorno do GeoPalmas (Prefeitura); em Araguaína e Gurupi, o bairro dos endereços do IBGE (CNEFE 2022). ' +
   'Os números de cada um somam os setores censitários do IBGE 2022 que caem nele. ' : 'Quadra = setor censitário do IBGE 2022. ') + 'OS no poste da estrutura; sem ele no mapa, no trafo, na chave ou em outro ativo da OS. ' +
-  'Crítico: OS emergencial/urgente pendente, ou alimentador com NAE alto (quinto mais alto da cidade) sem poda em 6 meses. NAE só do perímetro urbano. ' +
-  'De perto, cada quadra mostra o card: linha viva = OS executadas pela equipe de linha viva nos últimos 6 meses; OS executadas = executadas nos 6 meses ÷ (executadas + pendentes); ' +
-  'NAE, DEC (h) e FEC por mês, dos últimos 6 meses da Crítica: DEC e FEC são quanto as ocorrências de vegetação da quadra somaram ao conjunto elétrico do alimentador ' +
+  `Crítico: OS de poda emergencial/urgente pendente, ou NAE de vegetação em ativo dentro da quadra nos últimos 6 meses da Crítica (${PER6}) e nenhuma poda executada nela nos últimos 6 meses. ` +
+  `NAE alto do alimentador (quinto mais alto por 100 km da cidade, com pelo menos ${MIN_NAE} ocorrências) não pinta a quadra: aparece no painel. NAE só do perímetro urbano. ` +
+  `De perto, cada quadra mostra o card: executadas = OS de poda executadas nos últimos 6 meses (até ${br(P.gerado)}); pendentes = OS pendentes na base de ${br(P.gerado)}; ` +
+  `vencidas = pendentes com o prazo da OS (data limite) antes de ${br(P.gerado)}; linha viva = executadas pela equipe de linha viva da OS (OS sem equipe na base contam à parte, como sem equipe). ` +
+  `NAE, DEC (h) e FEC por mês, dos últimos 6 meses da Crítica (${PER6}): DEC e FEC são quanto as ocorrências de vegetação da quadra somaram ao conjunto elétrico do alimentador ` +
   '(consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto). Desligamento de disjuntor ou religador não entra na conta da quadra: ' +
   'o defeito pode estar em qualquer ponto do alimentador. Cada OS e NAE conta na quadra que contém o ponto.';
 
@@ -402,6 +440,7 @@ function estilo(a, hover) {
 }
 function construir(c) {
   if (cache[c]) return cache[c];
+  preparar(c);
   const lays = [];
   P.cidades[c].forEach(a => {
     if (!a.geo) return;
@@ -433,7 +472,7 @@ function rotulosDe(c) {
 }
 const nomesLay = L.layerGroup();
 // ---- card dentro da quadra, de perto: nome, linha viva, OS executadas/total e histórico de NAE, DEC e FEC -------------
-const cardsLay = L.layerGroup(), comCard = new Set();
+const cardsLay = L.layerGroup(), comCard = new Set(), cardM = new Map();   // cardM: área -> {m, chave}, para reaproveitar o card no pan
 const fn = v => !v ? '0' : v >= 1000 ? (v / 1000).toFixed(1).replace('.', ',') + 'k' : v >= 100 ? String(Math.round(v)) : v >= 10 ? v.toFixed(1).replace('.', ',') : v.toFixed(1).replace('.', ',').replace(/,0$/, '');
 const mes3 = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1];
 // índice (DEC em horas, FEC em interrupções por consumidor): 3 casas; abaixo de 0,001 mostra "<0,001" em vez de zero
@@ -443,35 +482,38 @@ function tabelaHist(a, completo) {
   const max = Math.max(1, ...ms.map(m => h[m].n)), nenhum = ms.every(m => !h[m].n);
   const lin = (rot, f, fmt) => `<tr><th>${rot}</th>` + ms.map(m => { const v = f(h[m]); return `<td class="${v ? '' : 'z'}"${rot === 'NAE' && v ? ` style="background:rgba(138,3,3,${(.35 + .65 * v / max).toFixed(2)});color:#fff"` : ''}>${fmt(v)}</td>`; }).join('') + '</tr>';
   const bruto = lin('CHI', x => x.chi, fn) + lin('CI', x => x.ci, v => fn(Math.round(v)).replace(/,0$/, ''));
-  return `<table class="qt"><caption>NAE · ${COM_DEC ? 'DEC · FEC' : 'CHI · CI'} · ${ms.length} meses${nenhum ? ' · sem NAE aqui' : ''}</caption><thead><tr><th></th>${ms.map(m => `<th>${mes3(m)}</th>`).join('')}</tr></thead><tbody>` +
-    lin('NAE', x => x.n, v => v || '0') + (COM_DEC ? lin('DEC', x => x.dec, fi) + lin('FEC', x => x.fec, fi) + (completo ? bruto : '') : bruto) + '</tbody></table>';
+  return `<table class="qt"><caption>Crítica ${esc(PER6)}${nenhum ? ' · sem NAE aqui' : ''}</caption><thead><tr><th></th>${ms.map(m => `<th>${mes3(m)}</th>`).join('')}</tr></thead><tbody>` +
+    lin('NAE', x => x.n, v => v || '0') + (COM_DEC ? lin('DEC (h)', x => x.dec, fi) + lin('FEC', x => x.fec, fi) + (completo ? bruto : '') : bruto) + '</tbody></table>';
 }
 // o que cada linha da tabela quer dizer, no painel da quadra
 function notaHist(a) {
   const sem = MESES6.reduce((n, m) => n + a.k.h[m].sem, 0), zona = MESES6.reduce((n, m) => n + a.k.h[m].zona, 0), per = MESES6.length ? `${mes3(MESES6[0])} a ${mes3(MESES6[MESES6.length - 1])}/${MESES6[MESES6.length - 1].slice(0, 4)}` : '';
-  const base = 'Linha viva: OS de poda executadas nos últimos 6 meses pela equipe de linha viva. OS executadas: executadas nos 6 meses / executadas mais pendentes. ' +
-    `NAE: ocorrências de vegetação registradas em ativos dentro do contorno, por mês de competência (${per}). `;
+  const base = `NAE: ocorrências de vegetação registradas em ativos dentro do contorno, por mês de competência (${per}). `;
   const fora = zona ? ` ${zona} desligamento${zona === 1 ? '' : 's'} de disjuntor ou religador com o equipamento nesta área ${zona === 1 ? 'ficou' : 'ficaram'} fora da conta: o defeito pode estar em qualquer ponto do alimentador.` : '';
   if (!COM_DEC) return base + 'CHI = consumidor·hora interrompido; CI = consumidores interrompidos.' + fora;
   const ref = P.conjuntos.mes ? ` de ${mes3(P.conjuntos.mes)}/${P.conjuntos.mes.slice(0, 4)}` : '';
+  const cj = [...a.k.cj];
   return base + `DEC (horas) e FEC (interrupções por consumidor): quanto essas ocorrências somaram ao DEC e ao FEC do conjunto elétrico de cada alimentador ` +
-    `(consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto, pela Crítica${ref}). CHI = consumidor·hora interrompido; CI = consumidores interrompidos.` +
+    `(consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto, pela Crítica${ref})${cj.length ? '; conjunto ' + cj.join(', ') : ''}. CHI = consumidor·hora interrompido; CI = consumidores interrompidos.` +
     (sem ? ` ${sem} ocorrência${sem === 1 ? '' : 's'} sem conjunto conhecido ${sem === 1 ? 'ficou' : 'ficaram'} fora do DEC e do FEC.` : '') + fora;
 }
+// executadas (fluxo de 6 meses) e pendentes (estoque na data da base) em números separados: a razão entre os dois não quer dizer nada
 function linhaOS(a) {
   const k = a.k;
-  return `<div class="qc-l"><span>Linha viva <b>${nf(k.lv)}</b></span><span>OS executadas <b>${nf(k.exec)}/${nf(k.exec + k.pend)}</b></span></div>`;
+  return `<div class="qc-l"><span>Executadas 6 meses <b>${nf(k.exec)}</b></span><span>Pendentes em ${BASE} <b>${nf(k.pend)}</b></span>` +
+    (k.venc ? `<span>Vencidas <b>${nf(k.venc)}</b></span>` : '') +
+    `<span>Linha viva <b>${nf(k.lv)}</b>${k.lvx ? ` (${nf(k.lvx)} sem equipe)` : ''}</span></div>`;
 }
 function cardHTML(a, cheio, e) {
   const nome = a.tipo === 'quadra' && a.nome ? a.nome : titulo(a);
-  // área crítica diz o porquê no próprio card: OS urgente pendente ou alimentador com NAE alto (o NAE do alimentador, não o da quadra)
-  const sem = a._naeSem || [], porque = a.st !== 'critico' ? '' : a.crit ? `${nf(a.crit)} OS urgente${a.crit > 1 ? 's' : ''} pendente${a.crit > 1 ? 's' : ''}`
-    : sem.length ? `NAE alto no alimentador ${sem[0]}${sem.length > 1 ? ' e em mais ' + (sem.length - 1) : ''}; sem poda em 6 meses` : '';
+  // área crítica diz o porquê no próprio card: OS urgente pendente ou NAE aqui sem poda
+  const porque = a.st !== 'critico' ? '' : a.porque === 'os' ? `${nf(a.crit)} OS urgente${a.crit > 1 ? 's' : ''} pendente${a.crit > 1 ? 's' : ''}`
+    : `${nf(a.k.nae)} NAE aqui (${PER6}) e sem poda em 6 meses`;
   return `<div class="qc" style="--c:${COR[a.st] || COR.sem}${e ? ';--e:' + e.toFixed(2) : ''}"><div class="qc-h"><b>${esc(nome)}</b><em>${esc(ROT[a.st] || '')}</em></div>` +
     `${porque ? `<p class="qc-m">${esc(porque)}</p>` : ''}${linhaOS(a)}${cheio ? tabelaHist(a) : ''}</div>`;
 }
 function cards() {
-  cardsLay.clearLayers(); comCard.clear();
+  const velhos = new Map(cardM); cardM.clear(); comCard.clear();
   if (camadas.areas && map.getZoom() >= 15.5 && cache[cidade]) {
     const vista = map.getBounds().pad(0.1), lista = [];
     cache[cidade].lays.forEach(l => {
@@ -482,10 +524,14 @@ function cards() {
       if (nivel) lista.push({a, l, nivel, w: w * h, e: Math.max(1, Math.min(1.5, 1 + (map.getZoom() - 16.5) * 0.3))});
     });
     lista.sort((x, y) => y.w - x.w).slice(0, 70).forEach(({a, l, nivel, e}) => {
+      // o mesmo card (mesmo nível e escala) continua no mapa: só os que mudaram são refeitos
+      const chave = nivel + ':' + e.toFixed(2), v = velhos.get(a);
+      if (v && v.chave === chave) { velhos.delete(a); cardM.set(a, v); comCard.add(a); return; }
       const m = L.marker(a.rot || l.getBounds().getCenter(), {icon: L.divIcon({className: 'pd-card', html: cardHTML(a, nivel === 2, e), iconSize: [0, 0]}), interactive: false, keyboard: false, zIndexOffset: 500});
-      cardsLay.addLayer(m); comCard.add(a);
+      cardsLay.addLayer(m); cardM.set(a, {m, chave}); comCard.add(a);
     });
   }
+  velhos.forEach(v => cardsLay.removeLayer(v.m));
   nomes();
 }
 function nomes() {
@@ -516,7 +562,8 @@ function aplicarPts(c) {
 function naeMarca(o, destaque) {
   const m = L.circleMarker([o[0], o[1]], destaque ? {radius: 8, color: '#ffffff', weight: 3, fillColor: SANGUE, fillOpacity: 1}
     : {radius: 5.5, color: '#ffffff', weight: 1.2, fillColor: SANGUE, fillOpacity: 1});
-  m.bindTooltip(`<b>NAE · ${esc(dataNae(o[3]))}</b><small>${esc(o[5])} ${esc(o[4])} · ${esc(o[2])} ${esc(o[9])}</small>` +
+  m.bindTooltip(`<b>NAE · ${esc(dataNae(o[3]))}</b><small>${esc(abr(o[5]))} ${esc(o[4])} · ${esc(o[2])} ${esc(o[9])}</small>` +
+    (ZONA.has(o[5]) ? `<small>Local do defeito desconhecido: desligou ${o[5] === 'DJ' ? 'o alimentador inteiro' : 'a zona do religador'}</small>` : '') +
     `<small>${esc(nf(o[7]))} consumidor${o[7] === 1 ? '' : 'es'} · ${esc(nf(o[8]))} min</small><small>${esc(o[6])}</small>`, {direction: 'top', className: 'pd-tip', opacity: 1});
   m.on('click', e => { L.DomEvent.stopPropagation(e); escolherNae(o); });
   return m;
@@ -533,11 +580,13 @@ function naeSec(als, lst) {
   if (!als.length) return '';
   if (!lst.length) return `<div><h3>NAE${esc(per)}</h3><p class="pd-peq">Nenhum NAE no perímetro urbano em ${esc(als.join(', '))}.</p></div>`;
   const por = new Map();
-  lst.forEach(o => { const k = o[5] + ' ' + o[4]; const v = por.get(k) || {n: 0, al: o[2], t: o[9], ult: ''}; v.n++; if (o[3] > v.ult) v.ult = o[3]; por.set(k, v); });
-  const top = [...por.entries()].sort((x, y) => y[1].n - x[1].n || (y[1].ult > x[1].ult ? 1 : -1)).slice(0, 12);
+  lst.forEach(o => { const k = abr(o[5]) + ' ' + o[4]; const v = por.get(k) || {n: 0, al: o[2], t: o[9], ult: '', tipo: o[5]}; v.n++; if (o[3] > v.ult) v.ult = o[3]; por.set(k, v); });
+  // disjuntor e religador vão para o fim, marcados: o defeito não está no ponto do equipamento
+  const top = [...por.entries()].sort((x, y) => ZONA.has(x[1].tipo) - ZONA.has(y[1].tipo) || y[1].n - x[1].n || (y[1].ult > x[1].ult ? 1 : -1)).slice(0, 12);
+  const zona = v => ZONA.has(v.tipo) ? `<span>Local do defeito desconhecido: desligou ${v.tipo === 'DJ' ? 'o alimentador inteiro' : 'a zona do religador'}. Não entra na conta da quadra.</span>` : '';
   return `<div><h3 class="pd-nae-t"><i></i>NAE${esc(per)}</h3>` +
     `<p class="pd-peq" style="margin:0 0 var(--s2)">${esc(nf(lst.length))} em ${esc(nf(por.size))} ativo${por.size === 1 ? '' : 's'} de ${esc(als.join(', '))}</p>` +
-    `<ul class="pd-os">${top.map(([k, v]) => `<li class="nae"><b>${esc(k)}</b><span>${esc(nf(v.n))} NAE · ${esc(v.al)} ${esc(v.t)} · última em ${esc(dataNae(v.ult))}</span></li>`).join('')}</ul>` +
+    `<ul class="pd-os">${top.map(([k, v]) => `<li class="nae${ZONA.has(v.tipo) ? ' zona' : ''}"><b>${esc(k)}</b><span>${esc(nf(v.n))} NAE · ${esc(v.al)} ${esc(v.t)} · última em ${esc(dataNae(v.ult))}</span>${zona(v)}</li>`).join('')}</ul>` +
     (por.size > top.length ? `<p class="pd-peq">e mais ${esc(nf(por.size - top.length))} ativos.</p>` : '') + '</div>';
 }
 // abrir o local no Google: Street View (panorama mais recente perto do ponto), Google Earth e Maps em satélite
@@ -566,16 +615,17 @@ function mostrar(c, ajustar) {
   if (camadas.os) { aplicarPts(c); pontos(c).grupo.addTo(map); }
   if (camadas.nae) naeTodos(c).addTo(map);
   naeLay.addTo(map); selecao.addTo(map);
-  nomesLay.clearLayers(); nomesLay.addTo(map); cardsLay.clearLayers(); cardsLay.addTo(map); cards();
-  if (ajustar) {                                        // enquadra a mancha urbana: as OS sem os 2% mais afastados de
-    const pts = (P.pontos && P.pontos[c] || []);      // cada lado (distritos longe da sede deixariam a cidade pequena)
-    let b = k.bounds;
-    if (pts.length > 20) {
-      const q = (i, f) => { const v = pts.map(x => x[i]).sort((u, w) => u - w); return v[Math.min(v.length - 1, Math.floor(v.length * f))]; };
-      b = L.latLngBounds([q(0, .02), q(1, .02)], [q(0, .98), q(1, .98)]);
-    }
-    if (b) map.fitBounds(b, {paddingTopLeft: [!mobile() && !drop.hidden ? 392 : 24, 24], paddingBottomRight: [24, 24]});   // com a lista do olho aberta, enquadra só a parte livre
-  }
+  nomesLay.clearLayers(); nomesLay.addTo(map); cardsLay.clearLayers(); cardM.clear(); cardsLay.addTo(map); cards();
+  if (ajustar) enquadrar(c);
+}
+function enquadrar(c) {                                 // enquadra a mancha urbana: as OS sem os 2% mais afastados de
+  const pts = (P.pontos && P.pontos[c] || []);        // cada lado (distritos longe da sede deixariam a cidade pequena)
+  let b = null;
+  if (pts.length > 20) {
+    const q = (i, f) => { const v = pts.map(x => x[i]).sort((u, w) => u - w); return v[Math.min(v.length - 1, Math.floor(v.length * f))]; };
+    b = L.latLngBounds([q(0, .02), q(1, .02)], [q(0, .98), q(1, .98)]);
+  } else b = construir(c).bounds;
+  if (b) map.fitBounds(b, {paddingTopLeft: [!mobile() && !drop.hidden ? 392 : 24, 24], paddingBottomRight: [24, 24]});   // com a lista do olho aberta, enquadra só a parte livre
 }
 
 // ---- cidades --------------------------------------------------------------------------------------------
@@ -590,6 +640,7 @@ $('cids').addEventListener('click', e => {
 
 // ---- olho: camadas, situação e fundo --------------------------------------------------------------------
 function contagem(c) {
+  preparar(c);
   const n = {executado: 0, pendente: 0, critico: 0, sem: 0}, o = {executado: 0, pendente: 0, critico: 0};
   P.cidades[c].forEach(a => { n[a.st in n ? a.st : 'sem']++; });
   (P.pontos && P.pontos[c] || []).forEach(pt => { o[pt[2]]++; });
@@ -627,7 +678,7 @@ $('fundo').addEventListener('click', e => {
 });
 function legenda() {
   const l = [];
-  if (camadas.areas) ORDEM.filter(st => ativos.has(st)).forEach(st => l.push(`<div><i style="--c:${COR[st]}"></i>${ROT[st]}</div>`));
+  if (camadas.areas) ORDEM.filter(st => ativos.has(st)).forEach(st => l.push(`<div><i style="--c:${COR[st]}"></i>${ROT[st]}${LEGX[st] ? `<small>${LEGX[st]}</small>` : ''}</div>`));
   const pts = [];
   if (camadas.os) pts.push('<div><i class="pt" style="--c:#9ca3af"></i>OS de poda</div>');
   if (camadas.nae) pts.push(`<div><i class="pt" style="--c:${SANGUE}"></i>NAE</div>`);
@@ -652,19 +703,29 @@ function dias(ult) {                                   // contado de hoje (a bas
   const hoje = new Date(), d = Math.round((Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()) - Date.parse(ult)) / 864e5);
   return isNaN(d) ? '' : d <= 0 ? 'hoje' : d === 1 ? 'há 1 dia' : `há ${nf(d)} dias`;
 }
+// alimentadores da área com NAE alto na cidade: só com pelo menos MIN_NAE ocorrências no período do ranking
+function altos(a, c) {
+  const info = P.nae_alim && P.nae_alim[c] || {};
+  return (a.nae_alto || []).filter(x => info[x] && info[x][0] >= MIN_NAE);
+}
 function detalhe(a, c) {
-  const alto = new Set(a.nae_alto || []);
-  const corte = P.corte_nae100km && P.corte_nae100km[c];
+  const info = P.nae_alim && P.nae_alim[c] || {}, alto = new Set(altos(a, c));
+  const corte = P.corte_nae100km && P.corte_nae100km[c], rm = P.nae_alim_meses || [];
+  const perR = rm.length ? `${mesTxt(rm[0])} a ${mesTxt(rm[rm.length - 1])}` : '';
+  const frase = x => { const [n, km] = info[x]; return `${x} está entre os de maior NAE por 100 km de ${c}: ${nf(n)} NAE em ${km.toLocaleString('pt-BR')} km` +
+    ` (${(n * 100 / km).toLocaleString('pt-BR', {maximumFractionDigits: 1})} por 100 km${perR ? ', ' + perR : ''}).`; };
   const als = (a.als || []).length
     ? `<ul class="pd-als">${a.als.map(x => `<li class="${alto.has(x) ? 'alto' : ''}">${esc(x)}${alto.has(x) ? '<em>NAE alto</em>' : ''}</li>`).join('')}</ul>` +
-      (alto.size && corte != null ? `<p class="pd-peq">Corte de ${esc(c)}: ${esc(nf(corte))} NAE por 100 km.</p>` : '')
+      [...alto].map(x => `<p class="pd-peq">${esc(frase(x))}</p>`).join('') +
+      (alto.size && corte != null ? `<p class="pd-peq">Corte de ${esc(c)}: ${esc(nf(corte))} NAE por 100 km, com pelo menos ${esc(nf(MIN_NAE))} ocorrências. Informação do alimentador inteiro: não pinta a quadra.</p>` : '')
     : '<p class="pd-peq">Nenhum alimentador ligado a esta área.</p>';
   const os = (a.os || []).map(o => {
-    const [num, sit, crit, cri, exe] = o;
+    const [num, sit, crit, cri, exe, lim] = o;
     return `<li class="${/^exec/i.test(sit || '') ? 'ex' : 'pe'}"><b>${esc(num)}</b><span>${esc(cap(sit))} · ${esc((crit || '—').toString().toLowerCase())}</span>` +
-      `<span>Criada em ${esc(br(cri) || '—')}${exe ? ' · executada em ' + esc(br(exe)) : ''}</span></li>`;
+      `<span>Criada em ${esc(br(cri) || '—')}${exe ? ' · executada em ' + esc(br(exe)) : ''}${lim ? ' · prazo ' + esc(br(lim)) + (vencida(lim) ? ' (vencida)' : '') : ''}</span></li>`;
   }).join('');
   const pendL = (a.os || []).filter(o => !/^exec/i.test(o[1] || '')).length;   // a base traz só as 12 OS mais novas de cada setor
+  const desde = new Date(Date.parse(P.gerado) - (P.janela_dias || 182) * 864e5).toISOString().slice(0, 10);   // início da janela de 6 meses
   const falta = a.pend > pendL ? `<p class="pd-peq">Na lista, ${esc(nf(pendL))} das ${esc(nf(a.pend))} pendentes: a base traz só as 12 OS mais recentes de cada setor.</p>` : '';
   return `<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
     `<div><h2 id="pd-tit" tabindex="-1">${esc(titulo(a))}</h2><p class="pd-tipo">${esc(TIPOA[a.tipo] || 'Quadra')} · ${a.cod ? esc(a.cod) + ' · ' : ''}${a.setores && a.tipo !== 'setor' ? esc(nf(a.setores.length)) + (a.setores.length === 1 ? ' setor' : ' setores') + ' IBGE' : esc(a.id)} · ${esc(c)}</p></div>` +
@@ -672,10 +733,15 @@ function detalhe(a, c) {
     (a._c ? links(a._c.lat, a._c.lng) : '') +
     `<dl class="pd-kp">` +
     `<div><dt>Última poda</dt><dd>${a.ult ? esc(br(a.ult)) : 'Nenhuma'}${a.ult ? `<small>${esc(dias(a.ult))}</small>` : ''}</dd></div>` +
-    `<div><dt>Podas em 6 meses</dt><dd>${esc(nf(a.exec6m || 0))}</dd></div>` +
-    `<div><dt>Pendentes</dt><dd>${esc(nf(a.pend || 0))}<small>${a.crit ? esc(nf(a.crit)) + ' emergencial/urgente' : ''}</small></dd></div>` +
+    `<div><dt>Executadas em 6 meses</dt><dd>${esc(nf(a.exec6m || 0))}<small>${esc(nf(a.k ? a.k.lv : 0))} pela linha viva` +
+      `${a.k && a.k.lvx ? ' · ' + esc(nf(a.k.lvx)) + ' sem equipe na base' : ''} · desde ${esc(br(desde))}</small></dd></div>` +
+    `<div><dt>Pendentes em ${esc(br(P.gerado))}</dt><dd>${esc(nf(a.pend || 0))}<small>${a.crit ? esc(nf(a.crit)) + ' emergencial/urgente · ' : ''}` +
+      `${a.k && a.k.venc ? esc(nf(a.k.venc)) + (a.k.venc === 1 ? ' vencida' : ' vencidas') + ' · ' : ''}` +
+      `${a.k && a.k.pend0 ? 'a mais antiga criada ' + esc(dias(a.k.pend0)) : 'nenhuma'}</small></dd></div>` +
     `<div><dt>OS no histórico</dt><dd>${esc(nf(a.total || 0))}<small>todas as OS de poda da base</small></dd></div></dl>` +
-    (a.k ? `<div class="pd-hist">${linhaOS(a)}${tabelaHist(a, true)}<p class="pd-peq">${notaHist(a)}</p></div>` : '') +
+    `<p class="pd-peq" style="margin:0">OS status de ${esc(br(P.gerado))}: executadas de ${esc(br(desde))} a ${esc(br(P.gerado))}; pendentes como estavam em ${esc(br(P.gerado))}.</p>` +
+    (a.k ? `<div class="pd-hist"><h3>NAE, DEC e FEC · Crítica de ${esc(PER6)}</h3><p class="pd-peq" style="margin:0 0 var(--s1)">A Crítica da base vai até ${esc(MESES6.length ? mesTxt(MESES6[MESES6.length - 1]) : '—')}. Conta os ativos dentro do contorno, sem disjuntor e religador.</p>` +
+      `${tabelaHist(a, true)}<p class="pd-peq">${notaHist(a)}</p></div>` : '') +
     `<div><h3>Alimentadores</h3>${als}</div>` +
     `<div><h3>OS recentes</h3>${os ? `<ul class="pd-os">${os}</ul>` : '<p class="pd-peq">Nenhuma OS de poda.</p>'}${falta}</div></div>`;
 }
@@ -690,7 +756,7 @@ function escolher(a, c, lay, foco) {
   if (sel && sel.lay !== lay) sel.lay.setStyle(estilo(sel.a, false));
   selPt = null; sel = {a, c, lay};
   marcar(a, lay);
-  const alsN = a.st === 'critico' ? ((a.nae_alto || []).length ? a.nae_alto : (a.als || [])) : [];
+  const al2 = altos(a, c), alsN = a.st === 'critico' ? (al2.length ? al2 : (a.als || [])) : [];
   abrePainel(comNae(detalhe(a, c), alsN.length ? naeSec(alsN, mostraNae(alsN)) : ''));
   if (!alsN.length) naeLay.clearLayers();
   if (foco) { const h = $('pd-tit'); if (h) h.focus({preventScroll: true}); }
@@ -717,8 +783,9 @@ function escolherNae(o) {
   selecao.clearLayers();
   selecao.addLayer(L.circleMarker([o[0], o[1]], {radius: 11, color: '#ffffff', weight: 3, fill: false, interactive: false}));
   abrePainel(`<div class="pd-det"><button type="button" class="pd-x" aria-label="Fechar">${X}</button>` +
-    `<div><h2 id="pd-tit" tabindex="-1">${esc(o[5])} ${esc(o[4])}</h2><p class="pd-tipo">NAE · ${esc(cidade)}</p></div>` +
-    `<div class="pd-sit" style="--c:${SANGUE}"><b>${esc(dataNae(o[3]))}</b><span>${esc(o[6])}</span></div>` +
+    `<div><h2 id="pd-tit" tabindex="-1">${esc(abr(o[5]))} ${esc(o[4])}</h2><p class="pd-tipo">NAE · ${esc(o[5])} · ${esc(cidade)}</p></div>` +
+    `<div class="pd-sit" style="--c:${SANGUE}"><b>${esc(dataNae(o[3]))}</b><span>${esc(o[6])}</span>` +
+    (ZONA.has(o[5]) ? `<span>Desligamento do ${o[5] === 'DJ' ? 'alimentador' : 'trecho do religador'}, local do defeito desconhecido: não entra na conta da quadra.</span>` : '') + '</div>' +
     `<dl class="pd-kp"><div><dt>Alimentador</dt><dd>${esc(o[2])}<small>${esc(o[9])}</small></dd></div>` +
     `<div><dt>Consumidores</dt><dd>${esc(nf(o[7]))}<small>${esc(nf(o[8]))} min</small></dd></div></dl>${links(o[0], o[1])}</div>`);
 }
@@ -739,6 +806,7 @@ let achados = [], marc = -1;
 function achar(txt) {
   const n = sem(txt).trim(); if (!n) return [];
   const out = [];
+  CIDADES.forEach(preparar);
   CIDADES.forEach((c, ci) => {
     const ids = /^\d{6,}$/.test(n);                       // código IBGE do setor só com 6+ dígitos (senão "405" acha tudo)
     P.cidades[c].forEach(a => { const i = sem([titulo(a), a.id, a.cod, ...(a.apelidos || []), ...(ids ? a.setores || [] : [])].filter(Boolean).join(' ')).indexOf(n); if (i >= 0) out.push({k: 'a', c, a, o: (i === 0 ? 0 : 1) + (c === cidade ? 0 : 2 + ci)}); });
@@ -811,14 +879,22 @@ document.addEventListener('fullscreenchange', ajustaTc);
 document.addEventListener('webkitfullscreenchange', ajustaTc);
 
 // ---- início ---------------------------------------------------------------------------------------------
-botoesCidade(); opcoes(); legenda();
+botoesCidade(); legenda();
 if (!mobile()) { drop.hidden = false; olho.setAttribute('aria-expanded', 'true'); }   // no computador a lista do olho já abre (no celular cobriria o mapa)
-mostrar(cidade, true);
-window.__podas = {estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, google: !!gSess}),
+// abertura em três tarefas curtas em vez de uma longa: primeiro o mapa e o satélite, depois as contas da cidade, depois as quadras
+enquadrar(cidade);
+const depois = f => setTimeout(f, 0);
+depois(() => { preparar(cidade); opcoes(); depois(() => { mostrar(cidade, false); pronto(); }); });
+function pronto() {
+// as outras cidades se montam (contas e camadas, fora do mapa) quando o navegador estiver livre, uma por vez: a troca fica imediata
+const ocioso = window.requestIdleCallback || (f => setTimeout(f, 200));
+CIDADES.forEach(c => { ocioso(() => preparar(c), {timeout: 4000}); ocioso(() => construir(c), {timeout: 5000}); });
+window.__podas = {preparar: () => CIDADES.forEach(preparar),estado: () => ({cidade, ativos: [...ativos], sel: sel && sel.a.id, selPt: selPt && selPt[3], fundo, google: !!gSess}),
   camada: id => (cache[cidade] ? cache[cidade].lays.find(l => l._pa.id === id || (l._pa.setores || []).includes(id)) : null),
   visivel: id => { const l = window.__podas.camada(id); return !!l && l._pv !== false && map.hasLayer(l); },
   pontos: () => map.hasLayer(pontos(cidade).grupo) ? pontos(cidade).grupo.getLayers().length : 0, nae: () => naeLay.getLayers().length,
   naeTodos: () => map.hasLayer(naeTodos(cidade)) ? naeTodos(cidade).getLayers().length : 0, camadas: () => ({...camadas})};
+}
 })();
 </script>
 <script src="../assets/menu.js"></script>

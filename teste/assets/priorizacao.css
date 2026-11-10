@@ -337,3 +337,16 @@ td.r, th.r { text-align: right }
 }
 @media (max-width:380px){.pz-centro th,.pz-centro td{padding:8px 4px}.pz-centro .trecho-id{font-size:12px}}
 @media (max-width:340px){.pz-centro .trecho-id{font-size:11px}.pz-centro .faixa{padding:3px 4px;gap:3px}.pz-centro .score{grid-template-columns:30px 32px;gap:4px}.pz-centro .score b{font-size:13px}}
+
+/* linha fixa de referência e bases acima da lista; aviso discreto da lacuna da Crítica */
+.pz-ref{display:flex;flex-wrap:wrap;gap:2px var(--s4);font-size:var(--t-xs);color:var(--muted)}
+.pz-ref b{font-weight:600;color:var(--fg)}
+.pz-lacuna{padding:6px 10px;border-left:3px solid var(--aviso);background:color-mix(in srgb,var(--aviso) 9%,var(--paper));border-radius:0 var(--r2) var(--r2) 0;font-size:var(--t-xs);color:var(--fg)}
+/* rodapé da lista: quantos trechos estão desenhados e o botão para desenhar mais */
+.pz-mais{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);font-size:var(--t-sm);color:var(--muted)}
+.pz-mais .botao{min-height:40px;margin-left:auto}
+@media (max-width:860px){.pz-mais .botao{min-height:44px;flex:1 1 100%;margin-left:0}}
+/* premissas: limites conhecidos da conta */
+.pt-limites{border-top:1px solid var(--line);padding-top:var(--s3)}
+.pt-limites ul{margin:6px 0 0;padding-left:18px;display:grid;gap:4px;font-size:var(--t-sm);color:var(--muted);max-width:90ch}
+.pt-limites b{color:var(--fg)}

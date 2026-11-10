@@ -24,10 +24,22 @@
   //      alimentador da OS quando é outro]; ativo: [código, tipo no índice, trecho, lat, lon, de onde veio (p, e, l)]
   const OS = EX.os, AT = EX.ativos;
   const COR_ANO = { 2021: '#a78bfa', 2022: '#60a5fa', 2023: '#22d3ee', 2024: '#4ade80', 2025: '#facc15', 2026: '#fb923c', 2027: '#f87171', 2028: '#f472b6' };
-  const corAno = a => COR_ANO[a] || (a < 2021 ? '#c4b5fd' : '#fb7185');
-  const anoDe = k => +(OS[k][2] || '').slice(0, 4) || 0;
+  // OS "NAE DEOP" vêm todas com execução em 03/01/2025, de tipos variados: é data padrão, não a do serviço. Ficam numa
+  // linha própria (DEOP), fora dos anos, até a data ser corrigida na origem
+  const DEOP = -1, ehDeop = k => /\bNAE DEOP\b/i.test(OS[k][5] || '');
+  const corAno = a => a === DEOP ? '#9ca3af' : COR_ANO[a] || (a < 2021 ? '#c4b5fd' : '#fb7185');
+  const anoDe = k => ehDeop(k) ? DEOP : +(OS[k][2] || '').slice(0, 4) || 0;
+  // um serviço = OS com o mesmo tipo, ativo, data e descrição (a distribuidora e a contratada abrem cada uma a sua: OS
+  // espelho). Conta e lista o serviço uma vez; a 1ª OS do grupo representa as outras
+  const REP = new Array(OS.length), IRMAS = {};
+  { const g = new Map(); OS.forEach((o, k) => { const c = o[1] + '|' + o[2] + '|' + o[4] + '|' + o[5]; if (!g.has(c)) g.set(c, k); REP[k] = g.get(c); (IRMAS[REP[k]] = IRMAS[REP[k]] || []).push(k); }); }
+  const SERV = OS.map((o, k) => k).filter(k => REP[k] === k);
+  const espelhos = k => (IRMAS[k] || []).filter(x => x !== k);
+  const nOs = ks => ks.reduce((n, k) => n + IRMAS[k].length, 0);   // OS dos serviços (com as espelho)
+  const servTxt = ks => { const m = nOs(ks); return `${nf(ks.length)} serviço${ks.length === 1 ? '' : 's'}${m !== ks.length ? ` (${nf(m)} OS)` : ''}`; };
+  const servCurto = ks => { const m = nOs(ks); return `${nf(ks.length)}${m !== ks.length ? ` (${nf(m)} OS)` : ''}`; };   // linha do ano: serviços (OS), cabe no celular
   const ANOS = [...new Set(OS.map((o, k) => anoDe(k)))].sort((a, b) => b - a);
-  const rotAno = a => a ? String(a) : 'Sem data';
+  const rotAno = a => a === DEOP ? 'NAE DEOP (data padrão)' : a ? String(a) : 'Sem data';
   const classe = t => t.startsWith('MP') ? 'preventiva' : 'corretiva';
   const nomeTipo = t => { const s = t.replace(/^M[CP] - /, ''); return s.charAt(0) + s.slice(1).toLowerCase(); };
   const TIPO_TXT = EX.tipos.map(t => `${nomeTipo(t)} (${classe(t)})`);
@@ -37,7 +49,7 @@
     l: 'ELEMENTO da OS (o poste da OS não está no mapa: é o trafo ou a chave que atende o local)' };
   // OS de cada ativo (já vêm da mais recente para a mais antiga)
   const DO_ATIVO = AT.map(() => []);
-  OS.forEach((o, k) => { if (o[4] >= 0) DO_ATIVO[o[4]].push(k); });
+  SERV.forEach(k => { if (OS[k][4] >= 0) DO_ATIVO[OS[k][4]].push(k); });
   // postes de cada trecho (pontas dos vãos), para o detalhe do trecho
   const postesDoTrecho = {};
   D.vaos.forEach(v => { const n = D.trechos[v[4]].nome; (postesDoTrecho[n] = postesDoTrecho[n] || new Set()).add(v[6]); postesDoTrecho[n].add(v[7]); });
@@ -52,7 +64,7 @@
   };
   const doTipo = k => !st.tipos.size || st.tipos.has(OS[k][1]);   // só o download
   const passa = k => st.anos.has(anoDe(k));
-  const contaAno = a => OS.reduce((n, o, k) => n + (anoDe(k) === a), 0);
+  const doAno = a => SERV.filter(k => anoDe(k) === a);
   const N_TIPO = EX.tipos.map(() => 0);
   OS.forEach(o => { N_TIPO[o[1]]++; });
   const TIPOS_ORD = EX.tipos.map((t, i) => i).sort((a, b) => N_TIPO[b] - N_TIPO[a]);   // mais OS primeiro
@@ -63,6 +75,8 @@
   css.textContent = `
 .ctl-card .ctl-exe{background-image:linear-gradient(90deg,${ANOS.slice().reverse().map(corAno).join(',')}${ANOS.length < 2 ? ',' + corAno(ANOS[0]) : ''});background-repeat:no-repeat;background-size:100% 3px;background-position:0 100%}
 .ctl-card .ctl-exe[aria-pressed=false]{opacity:.6;text-decoration:line-through;background-image:none;box-shadow:inset 0 -3px 0 #5a636a}
+.exe-card{min-width:0}
+.exe-card .limp-ano-l em{white-space:normal;text-align:right}
 .exe-m{position:relative;width:0;height:0;cursor:pointer}
 .exe-m i{position:absolute;left:-7px;top:-7px;width:14px;height:14px;box-sizing:border-box;transform:rotate(45deg);border-radius:2px;background:var(--c);
   border:2px solid #fff;box-shadow:0 0 0 1.5px #0b0f14,0 1px 4px #0008}
@@ -122,11 +136,11 @@
   const losango = (ll, cls, cor, n, titulo, z) => L.marker(ll, { keyboard: false, zIndexOffset: z, title: titulo,
     icon: L.divIcon({ className: '', iconSize: null, html: `<div class="exe-m${cls}" style="--c:${cor}"><i></i>${n > 1 ? `<b>${nf(n)}</b>` : ''}</div>` }) });
   const marcaAtivo = (i, ks, fa) => losango([AT[i][3], AT[i][4]], fa >= 0 ? (fa === i ? ' foco' : ' apaga') : '', corAno(Math.max(...ks.map(anoDe))), ks.length,
-    `${nomeAtivo(AT[i])}: ${ks.length} OS de manutenção executadas`, fa === i ? 3000 : 1400).on('click', e => balao(e, i));
+    `${nomeAtivo(AT[i])}: ${servTxt(ks)} de manutenção executados`, fa === i ? 3000 : 1400).on('click', e => balao(e, i));
   function marcaGrupo(c, fa) {
     const lls = c.is.map(i => [AT[i][3], AT[i][4]]);
     const ll = [lls.reduce((s, p) => s + p[0], 0) / lls.length, lls.reduce((s, p) => s + p[1], 0) / lls.length];
-    return losango(ll, ' grupo' + (fa >= 0 ? ' apaga' : ''), corAno(c.ano), c.n, `${nf(c.is.length)} ativos, ${nf(c.n)} OS: toque para aproximar`, 1300)
+    return losango(ll, ' grupo' + (fa >= 0 ? ' apaga' : ''), corAno(c.ano), c.n, `${nf(c.is.length)} ativos, ${nf(c.n)} serviços: toque para aproximar`, 1300)
       .on('click', e => { L.DomEvent.stopPropagation(e); map.fitBounds(L.latLngBounds(lls), { padding: [60, 60], maxZoom: ZOOM_SOLTO }); });
   }
   function desenha() {
@@ -152,13 +166,14 @@
   if (map) map.on('moveend', () => { if (st.ligado) desenha(); });   // depois de arrastar e de mudar o zoom
   const linhaOs = k => {
     const o = OS[k];
-    return `<div class="lb-l" style="--c:${corAno(anoDe(k))}"><b>${esc(nomeTipo(EX.tipos[o[1]]))}</b> · ${br(o[2])} · ${classe(EX.tipos[o[1]])}` +
-      `${o[5] ? `<small>${esc(o[5])}</small>` : ''}<small>OS ${esc(o[0])} · ${esc(o[3])}${o[6] ? ' · ' + esc(o[6]) : ''}${o[7] ? ' · OS do alimentador ' + esc(o[7]) : ''}</small></div>`;
+    return `<div class="lb-l" style="--c:${corAno(anoDe(k))}"><b>${esc(nomeTipo(EX.tipos[o[1]]))}</b> · ${br(o[2])}${ehDeop(k) ? ' (data padrão)' : ''} · ${classe(EX.tipos[o[1]])}` +
+      `${o[5] ? `<small>${esc(o[5])}</small>` : ''}<small>OS ${esc(o[0])} · ${esc(o[3])}${o[6] ? ' · ' + esc(o[6]) : ''}${o[7] ? ' · OS do alimentador ' + esc(o[7]) : ''}</small>` +
+      `${espelhos(k).length ? `<small>mesmo serviço: ${espelhos(k).map(x => esc(OS[x][0])).join(', ')}</small>` : ''}</div>`;
   };
   function balao(e, i) {
     L.DomEvent.stopPropagation(e);
     const a = AT[i], ks = visiveis(i);
-    const html = `<div class="exe-pop"><div class="t">${esc(nomeAtivo(a))} <small>${ks.length} OS executada${ks.length > 1 ? 's' : ''}</small></div>` +
+    const html = `<div class="exe-pop"><div class="t">${esc(nomeAtivo(a))} <small>${servTxt(ks)} executado${ks.length > 1 ? 's' : ''}</small></div>` +
       `<div class="onde">${a[2] ? 'Trecho ' + esc(a[2]) + ' · ' : ''}posição: ${COMO[a[5]]}</div>${ks.map(linhaOs).join('')}</div>`;
     L.popup({ className: 'limp-popup', maxWidth: 320, maxHeight: 340, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] })
       .setLatLng([a[3], a[4]]).setContent(html).openOn(map);
@@ -235,35 +250,36 @@
     : 'sem posição no mapa: nem o poste da ESTRUTURA nem o ELEMENTO da OS estão no mapa';
   const focoHtml = k => {
     const o = OS[k];
-    return `<div class="limp-foco"><span class="q">OS ${esc(o[0])} · ${esc(nomeTipo(EX.tipos[o[1]]))} (${classe(EX.tipos[o[1]])}) · executada ${br(o[2])}</span>
+    return `<div class="limp-foco"><span class="q">OS ${esc(o[0])} · ${esc(nomeTipo(EX.tipos[o[1]]))} (${classe(EX.tipos[o[1]])}) · executada ${br(o[2])}${ehDeop(k) ? ' (data padrão do NAE DEOP, não a do serviço)' : ''}</span>
       ${o[5] ? `<span>${esc(o[5])}</span>` : ''}
+      ${espelhos(k).length ? `<span class="limp-nota">Mesmo serviço (tipo, ativo, data e descrição iguais): ${espelhos(k).map(x => `OS ${esc(OS[x][0])}`).join(', ')}</span>` : ''}
       <span class="limp-nota">Equipe ${esc(o[3])}${o[6] ? ' · criticidade ' + esc(o[6]) : ''}${o[7] ? ' · OS do alimentador ' + esc(o[7]) + ' (o ativo hoje está neste)' : ''}</span>
       <span class="limp-nota">${ondeTxt(o)}</span></div>`;
   };
   const osBtn = (k, comFoco) => {
     const o = OS[k];
     return `<button type="button" class="exe-os-b" data-k="${k}" style="--c:${corAno(anoDe(k))}" aria-pressed="${st.foco === k}">` +
-      `<span class="q">${esc(nomeTipo(EX.tipos[o[1]]))} · ${br(o[2])} · OS ${esc(o[0])}</span><span class="s">${esc(o[5].slice(0, 110))}${o[5].length > 110 ? '…' : ''}` +
+      `<span class="q">${esc(nomeTipo(EX.tipos[o[1]]))} · ${br(o[2])} · OS ${esc(o[0])}${espelhos(k).length ? ` +${espelhos(k).length} espelho` : ''}</span><span class="s">${esc(o[5].slice(0, 110))}${o[5].length > 110 ? '…' : ''}` +
       `${o[4] >= 0 ? (o[5] ? ' · ' : '') + esc(nomeAtivo(AT[o[4]])) : (o[5] ? ' · ' : '') + 'sem posição no mapa'}</span></button>` +
       (comFoco && st.foco === k ? focoHtml(k) : '');
   };
   // linha de um ano (o mesmo visual da Faixa): a cor liga/desliga no mapa, o resto abre as OS do ano logo abaixo; elas
   // só são montadas com a linha aberta (há alimentador com milhares de OS)
   function linha(a) {
-    const n = contaAno(a), aberto = st.grupos.has(a) && n > 0, id = 'exe-g-' + a, on = st.anos.has(a);
+    const todas = doAno(a), n = todas.length, aberto = st.grupos.has(a) && n > 0, id = 'exe-g-' + a, on = st.anos.has(a);
     const i = `<i style="--c:${corAno(a)}"></i>`;
-    const ks = aberto ? OS.map((o, k) => k).filter(k => anoDe(k) === a) : [];
+    const ks = aberto ? todas : [];
     return `<div class="limp-ano-l${st.ligado && !on ? ' off' : ''}">` +
       (st.ligado ? `<button type="button" class="liga" data-a="${a}" data-foco="a${a}" aria-pressed="${on}" aria-label="${rotAno(a)} no mapa" title="Mostrar/esconder no mapa">${i}</button>`
         : `<span class="cor" aria-hidden="true">${i}</span>`) +
-      `<button type="button" class="abre" data-g="${a}" data-foco="g${a}" aria-expanded="${aberto}" aria-controls="${id}"${n ? '' : ' disabled'}><span><b>${rotAno(a)}</b></span><em>${nf(n)} OS</em></button>` +
+      `<button type="button" class="abre" data-g="${a}" data-foco="g${a}" aria-expanded="${aberto}" aria-controls="${id}"${n ? '' : ' disabled'}><span><b>${rotAno(a)}</b></span><em>${servCurto(todas)}</em></button>` +
       `</div><div class="limp-oss" id="${id}" role="group" aria-label="OS de ${rotAno(a)}"${aberto ? '' : ' hidden'}>${ks.map(k => osBtn(k, true)).join('')}</div>`;
   }
   // ---------- Downloads (em "Dados", extras.js): tipos de serviço para marcar e a planilha das OS desses tipos ----------
   // CSV pelo window.__csv (BOM, ';', CRLF, dd/mm/aaaa, vírgula decimal, proteção contra fórmula); todos os anos
   const ONDE_CSV = { p: 'poste da ESTRUTURA', e: 'ativo da ESTRUTURA', l: 'ELEMENTO' };
   const COLS = ['Alimentador', 'OS', 'Tipo de serviço', 'Classe', 'Execução', 'Equipe', 'Criticidade', 'Ativo', 'Trecho',
-    'Latitude', 'Longitude', 'Posição', 'Alimentador da OS', 'Descrição'];
+    'Latitude', 'Longitude', 'Posição', 'Alimentador da OS', 'Descrição', 'Mesmo serviço que a OS', 'Data padrão (NAE DEOP)'];
   const AL = String((D.meta && D.meta.al) || 'alimentador');
   // OS dos tipos marcados, da mais recente para a mais antiga
   const osDoDownload = () => OS.map((o, k) => k).filter(doTipo).sort((a, b) => (OS[b][2] || '').localeCompare(OS[a][2] || ''));
@@ -273,7 +289,8 @@
     const linhas = ks.map(k => {
       const o = OS[k], t = EX.tipos[o[1]], a = o[4] >= 0 ? AT[o[4]] : null;
       return [AL, o[0], nomeTipo(t), classe(t), C.data(o[2]), o[3], o[6], a ? nomeAtivo(a) : '', a ? a[2] : '',
-        a ? C.num(a[3]) : '', a ? C.num(a[4]) : '', a ? ONDE_CSV[a[5]] || '' : 'sem posição', o[7] && o[7] !== AL ? o[7] : '', o[5]];
+        a ? C.num(a[3]) : '', a ? C.num(a[4]) : '', a ? ONDE_CSV[a[5]] || '' : 'sem posição', o[7] && o[7] !== AL ? o[7] : '', o[5],
+        REP[k] !== k ? OS[REP[k]][0] : '', ehDeop(k) ? 'sim' : ''];
     });
     const datas = ks.map(k => OS[k][2]).filter(Boolean), hoje = new Date().toISOString().slice(0, 10);
     const de = datas.length ? datas[datas.length - 1] : hoje, ate = datas.length ? datas[0] : hoje;
@@ -350,16 +367,19 @@
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
     const n = OS.length;
     const noMapa = AT.length;
-    const sub = n ? `${nf(n)} OS executadas · ${nf(noMapa)} ativos` : 'Nenhuma OS de manutenção executada';
+    const sub = n ? `${servTxt(SERV)} executados · ${nf(noMapa)} ativos · ${br(EX.de)} a ${br(EX.ate)}` : 'Nenhuma OS de manutenção executada';
+    const nd = OS.filter((o, k) => ehDeop(k)).length;
+    const nota = n ? `<p class="limp-nota">Serviço: OS com o mesmo tipo, ativo, data e descrição contam uma vez (OS espelho entre equipes)` +
+      `${nd ? `. ${nf(nd)} OS "NAE DEOP" vêm com execução em ${br(OS[OS.findIndex((o, k) => ehDeop(k))][2])} (data padrão, a corrigir na origem) e ficam à parte` : ''}.</p>` : '';
     card.hidden = !st.ligado && !!btn;                    // bloco da Manutenção só com ela ligada no mapa
     card.innerHTML = `<div class="limp-top"><h2>Manutenção<small>${sub}</small></h2></div>
-      ${n ? `<div class="limp-anos">${ANOS.map(linha).join('')}</div>` : ''}`;
+      ${n ? `<div class="limp-anos">${ANOS.map(linha).join('')}</div>${nota}` : ''}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
     if (btn) btn.setAttribute('aria-pressed', String(st.ligado));
     if (lg) {
       lg.hidden = !st.ligado || !n;
       lg.innerHTML = '<span>Manutenção</span>' +
-        ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${rotAno(a)}"><i style="--c:${corAno(a)}"></i><span class="nm">${rotAno(a)}</span><em>${nf(contaAno(a))}</em></button>`).join('');
+        ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${rotAno(a)}"><i style="--c:${corAno(a)}"></i><span class="nm">${a === DEOP ? 'NAE DEOP' : rotAno(a)}</span><em>${nf(doAno(a).length)}</em></button>`).join('');
     }
     if (det) det.querySelectorAll('.exe-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));
   }
@@ -376,14 +396,14 @@
   const MAX_TRECHO = 60;
   function secTrecho(nome) {
     const ps = postesDoTrecho[nome] || new Set();
-    const ks = OS.map((o, k) => k).filter(k => {
+    const ks = SERV.filter(k => {
       const i = OS[k][4];
       return i >= 0 && (AT[i][1] === 'poste' ? ps.has(AT[i][0]) : AT[i][2] === nome);
     });
     if (!ks.length) return '';
     const porAno = ANOS.map(a => [a, ks.filter(k => anoDe(k) === a).length]).filter(([, c]) => c);
     return `<section class="limp-sec exe-sec" aria-live="off"><h3>Manutenção executada</h3>
-      <dl><dt>OS</dt><dd>${nf(ks.length)} · ${porAno.map(([a, c]) => `${rotAno(a)}: ${nf(c)}`).join(' · ')}</dd></dl>
+      <dl><dt>Serviços</dt><dd>${servTxt(ks)} · ${porAno.map(([a, c]) => `${rotAno(a)}: ${nf(c)}`).join(' · ')}</dd></dl>
       ${ks.slice(0, MAX_TRECHO).map(k => osBtn(k, false)).join('')}
       ${ks.length > MAX_TRECHO ? `<p class="limp-nota">As ${MAX_TRECHO} mais recentes.</p>` : ''}</section>`;
   }

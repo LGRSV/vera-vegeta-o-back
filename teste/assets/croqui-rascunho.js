@@ -526,6 +526,21 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
     const todos = !sel.length, nomes = todos ? D.trechos.map(t => t.nome) : sel;
     if (!nomes.length) return;
     const d = dados(nomes);
+    // marcado no mapa (modo Limpeza de faixa): as pontas do croqui são as do pedaço marcado, não as do trecho inteiro.
+    // Começo = a ponta marcada mais perto da chave de início do trecho; fim = a mais longe dela; cada uma com o poste
+    // mais perto (o pedaço quase nunca começa numa chave). Entram como 1ª opção; as chaves do trecho seguem na lista
+    const pontas = misto && misto.marcas ? [...(misto.marcas.leve || []), ...(misto.marcas.pesada || [])].flat() : [];
+    if (pontas.length) {
+      const ref = d.inicios[0].ll, idx = new Set(nomes.map(n => TR[n].i));
+      const ini = pontas.reduce((a, b) => dist(b, ref) < dist(a, ref) ? b : a), fim = pontas.reduce((a, b) => dist(b, ini) > dist(a, ini) ? b : a);
+      const poste = ll => {
+        let melhor = null, dm = Infinity;
+        D.vaos.forEach(v => { if (!idx.has(v[4])) return; [[v[0], v[1], v[6]], [v[2], v[3], v[7]]].forEach(([la, lo, p]) => { const x = dist([la, lo], ll); if (x < dm) { dm = x; melhor = p; } }); });
+        return melhor ? 'poste ' + melhor : 'ponto marcado';
+      };
+      d.inicios.unshift({ cod: poste(ini), ll: ini, d: -1, t: 'começo do marcado' });
+      d.fins.unshift({ cod: poste(fim), ll: fim, t: 'fim do marcado' });
+    }
     let prop = {};
     try { await carregaModelo(); prop = proporcoes(); } catch (e) { /* sem o modelo, a janela abre e o erro aparece ao baixar */ }
     const mt = await rede(), soma = {};
@@ -549,8 +564,8 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
         <dt>Município</dt><dd>${esc(listaMun(d.muns)) || '—'}</dd>
         <dt>Início</dt><dd class="u-ini"></dd><dt>Fim</dt><dd class="u-fim"></dd></dl>
       <div class="campos">
-        <label>Chave inicial<select name="ini">${opt(d.inicios, x => x.cod + (nomes.length > 1 ? ' · ' + x.t : ''))}</select></label>
-        <label>Chave final<select name="fim">${opt(d.fins, x => textoFim(x.cod) + (nomes.length > 1 ? ' · ' + x.t : ''))}</select></label>
+        <label>Chave inicial<select name="ini">${opt(d.inicios, x => x.cod + (nomes.length > 1 || x.d === -1 ? ' · ' + x.t : ''))}</select></label>
+        <label>Chave final<select name="fim">${opt(d.fins, x => textoFim(x.cod) + (nomes.length > 1 || /marcado/.test(x.t) ? ' · ' + x.t : ''))}</select></label>
         <label>Faixa a limpar<select name="base"><option value="total">Trecho inteiro</option><option value="caminho">Só entre as chaves</option></select></label>
         <label>Tamanho da faixa (km)<input name="km" type="number" step="0.01" min="0" value="${(Math.round(d.ext / 10) / 100).toFixed(2)}"></label>
         <label>Tipo<select name="tipo"><option>Convencional</option><option>Expedita</option></select></label>

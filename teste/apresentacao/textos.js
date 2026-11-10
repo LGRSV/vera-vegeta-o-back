@@ -23,7 +23,7 @@ window.ARGOS_TEXTOS = {
    "titulo": "ARGOS Manutenção",
    "bloco": "Abertura",
    "tempo": "0:00–1:30",
-   "frase": "De jan a ago/2026 foram 5.748 ocorrências de árvore e eucalipto na rede. Onde agir primeiro?",
+   "frase": "De jan a ago/2026 foram 5.760 ocorrências de árvore e eucalipto na rede. Onde agir primeiro?",
    "opcional": false,
    "topicos": [
     "Mapa da NAE por município, polo e alimentador",
@@ -42,11 +42,11 @@ window.ARGOS_TEXTOS = {
    "titulo": "O problema",
    "bloco": "Abertura",
    "tempo": "0:00–1:30",
-   "frase": "De jan a ago/2026 foram 5.748 ocorrências de árvore e eucalipto na rede. Onde agir primeiro?",
+   "frase": "De jan a ago/2026 foram 5.760 ocorrências de árvore e eucalipto na rede. Onde agir primeiro?",
    "opcional": false,
    "topicos": [
     "Árvore e eucalipto na rede derrubam alimentadores",
-    "5.748 ocorrências (NAE) de jan a ago/2026 no Tocantins: Norte 3.130, Centro 1.655, Sul 963",
+    "5.760 ocorrências (NAE) de jan a ago/2026 no Tocantins: Norte 3.132, Centro 1.665, Sul 963",
     "As equipes de manutenção não alcançam tudo ao mesmo tempo",
     "Pergunta: onde agir primeiro?"
    ],
@@ -61,10 +61,10 @@ window.ARGOS_TEXTOS = {
    "titulo": "O que é o ARGOS",
    "bloco": "Abertura",
    "tempo": "0:00–1:30",
-   "frase": "De jan a ago/2026 foram 5.748 ocorrências de árvore e eucalipto na rede. Onde agir primeiro?",
+   "frase": "De jan a ago/2026 foram 5.760 ocorrências de árvore e eucalipto na rede. Onde agir primeiro?",
    "opcional": false,
    "topicos": [
-    "Rede de média tensão do GIS (KML) dividida em trechos T1, T2 e T3 (319 alimentadores, 91.534,6 km)",
+    "Rede de média tensão do GIS (KML) dividida em trechos T1, T2 e T3 (322 alimentadores, 94.155 km, 71.374 trechos)",
     "Ocorrências da Crítica, cada uma no trecho certo",
     "OS de limpeza de faixa, inspeção e manutenção no mesmo mapa",
     "Site no navegador, também no celular, sem instalar nada"
@@ -84,7 +84,7 @@ window.ARGOS_TEXTOS = {
    "opcional": false,
    "topicos": [
     "Municípios coloridos pela NAE-Vegetação em 6 faixas: 0, 1 a 10, 11 a 30, 31 a 100, 101 a 200 e 201 ou mais",
-    "Bandeirinhas pretas saem do contorno de cada regional: Norte 3.130, Centro 1.655, Sul 963 (soma 5.748)",
+    "Bandeirinhas pretas saem do contorno de cada regional: Norte 3.132, Centro 1.665, Sul 963 (soma 5.760)",
     "A legenda tem título e orelhinha: recolhida, tira os números do mapa e deixa só a cor",
     "No alto: menu ☰, olho (busca), Ranking e tela cheia"
    ],
@@ -107,7 +107,7 @@ window.ARGOS_TEXTOS = {
    "opcional": false,
    "topicos": [
     "Clicar na bandeirinha abre a regional: as outras saem e os polos aparecem na barra, cada um com cor e NAE",
-    "Norte: Augustinópolis 1.352, Araguaína 1.235, Guaraí 543. Centro: Palmas 434, Paraíso 588, Porto Nacional 633. Sul: Gurupi 702, Dianópolis 261",
+    "Norte: Augustinópolis 1.352, Araguaína 1.235, Guaraí 545. Centro: Palmas 437, Paraíso 588, Porto Nacional 640. Sul: Gurupi 702, Dianópolis 261",
     "Ao abrir o polo, todos os municípios têm rótulo com nome e NAE (dentro, ou ao lado com um fio)",
     "A trilha \"Tocantins › Norte › Augustinópolis\" volta direto a qualquer passo"
    ],
@@ -196,7 +196,7 @@ window.ARGOS_TEXTOS = {
    "topicos": [
     "Tocar no olho (canto esquerdo, acima do mapa) abre o campo; a tecla \"/\" também abre",
     "Sem digitar: as 3 regionais (Norte 3 polos e 65 municípios, Centro 3 e 40, Sul 2 e 34) e os alimentadores com mais NAE",
-    "Digitando: polos, municípios, alimentadores e ativos; ignora maiúsculas e acentos. \"Palmas\": polo (434 NAE) e município (46 alimentadores, 336 NAE)",
+    "Digitando: polos, municípios, alimentadores e ativos; ignora maiúsculas e acentos. \"Palmas\": polo (437 NAE) e município (46 alimentadores, 336 NAE)",
     "Alimentador: AL03037009, SE Guaraí I, 2 municípios, 212 km, 37 NAE; escolher leva o mapa até ele"
    ],
    "imgs": [
@@ -270,7 +270,7 @@ window.ARGOS_TEXTOS = {
     "Cabeçalho com a subestação (SE-2PNA, SE Porto Nacional), busca de trecho, ativo ou poste, filtro de município e botão Meses",
     "Mapa de satélite com a rede em trechos; os botões T1, T2 e T3 ligam e desligam cada classe; o Menu liga as camadas",
     "Tabela: 199 trechos e 153,98 km (T1 1 com 13,02 km, T2 3 com 25,97 km, T3 195 com 114,99 km)",
-    "NAE de vegetação: 23 no alimentador. Limpeza de faixa: 6 OS executadas, 24,2 km de 154,0 km, 3 criadas"
+    "NAE de vegetação: 23 no alimentador. Limpeza de faixa: 13 OS executadas, 25,2 km de 154,0 km, 41 criadas"
    ],
    "imgs": [
     {
@@ -286,7 +286,7 @@ window.ARGOS_TEXTOS = {
    "frase": "Cada trecho tem chave de início e fim, NAE, limpeza, inspeção e manutenção; o croqui sai em Excel.",
    "opcional": false,
    "topicos": [
-    "T1: do disjuntor (DJ) ao 1º religador. T2: de religador a religador (T2-A, T2-B…). T3: cada fusível abre um T3 (T3-A, T3-B…); não existe T4",
+    "T1: do disjuntor (DJ) ao 1º religador. T2: de religador a religador (T2-A, T2-B…). T3: cada fusível abre um T3 (T3-A, T3-B…), inclusive fusível dentro de fusível; não existe T4. Exceção: o 1º fusível depois do religador do tronco, a menos de 300 m dele, não abre T3 e o tronco segue como T2",
     "T1 do LD01072001: DJ LD01072001 até 7927413001, 13,02 km, 256 vãos. T2-A: 7933799001 até 7954762001, 16,58 km, 265 vãos",
     "T3-BC: começa no fusível 0309785001 e termina no fim de linha (poste 31175389), 3,85 km",
     "Pinos INÍCIO (verde) e FIM (vermelho) no mapa; \"Vem de\" e \"Derivações\" navegam entre trechos; Ctrl (⌘) + clique soma trechos",
@@ -311,8 +311,8 @@ window.ARGOS_TEXTOS = {
    "opcional": false,
    "topicos": [
     "NAE de vegetação (Meio Ambiente, árvore ou eucalipto), da Crítica, cai no trecho do ativo que atuou; o número vermelho aparece no rótulo do trecho",
-    "T1 do LD01072001: 4 desarmes do DJ por árvore (150, 150, 304 e 160 consumidores), cada um com data e hora",
-    "Meses (jan a ago/2026): jan/2026 tem 9 das 23 NAE e o T2-A lidera (4)",
+    "T1 do LD01072001: 4 desarmes do DJ por árvore (150, 150, 304 e 160 CI, consumidores interrompidos), cada um com data e hora",
+    "Meses (jan a ago/2026): jan/2026 tem 9 das 23 NAE; no ano, T1 e T2-A lideram, com 4 cada",
     "NAE registrada em outro alimentador é indicada com link (2 das 4 do T2-A)",
     "Lista por maior NAE, com início → fim, km e ano da última limpeza"
    ],
@@ -334,9 +334,9 @@ window.ARGOS_TEXTOS = {
    "frase": "Cada trecho tem chave de início e fim, NAE, limpeza, inspeção e manutenção; o croqui sai em Excel.",
    "opcional": false,
    "topicos": [
-    "Menu do mapa › Faixa, em duas vistas: Por ano (uma cor por ano; cinza sem limpeza) e Vencimento (T1 a cada 3 anos, T2 a cada 4, T3 a cada 5)",
-    "LD01072001, vencimento: em dia 3,9 km, vence em até 12 meses 12,4 km, vencida 7,9 km, sem registro 129,7 km",
-    "Criadas (tracejado): 3 OS, 21,0 km. Pendentes (pontilhado), no LD02010004: 22 executadas, 4 criadas, 6 pendentes",
+    "Menu do mapa › Faixa, em duas vistas: Por ano (uma cor por ano; magenta sem registro) e Vencimento (T1 a cada 3 anos, T2 a cada 4, T3 a cada 5; o trecho vale a pior situação com mais de 10% ou 300 m)",
+    "LD01072001, vencimento: em dia 4,9 km, vence em até 12 meses 12,4 km, vencida 7,9 km, sem registro 128,8 km",
+    "Criadas (tracejado): 41 OS, 35,4 km. Pendentes (pontilhado), no LD02010004: 24 executadas, 12 criadas, 6 pendentes",
     "No T1 do LD01072001: 7,9 km vencidos e 5,1 km sem registro dos 13,02 km: candidato claro à limpeza de faixa"
    ],
    "imgs": [
@@ -359,8 +359,8 @@ window.ARGOS_TEXTOS = {
    "topicos": [
     "Menu do mapa: Faixa, Inspeção, Insp→manut e Manutenção, quantas quiser ao mesmo tempo, cada uma com legenda e bloco no painel",
     "Inspeção: rede inspecionada na cor do ano; LD01072001 tem 21 inspeções, 34,0 km de 154,0 km",
-    "Manutenção executada: um losango por ativo, na cor do ano da última OS; 825 OS em 415 ativos",
-    "Insp→manut: OS de manutenção geradas pela inspeção, por situação (153 no prazo); cada OS mostra \"INSP 000071/2026 → MANUT 002375/2026\""
+    "Manutenção executada: um losango por ativo, na cor do ano da última OS; 858 OS (699 serviços) em 425 ativos",
+    "Insp→manut: OS de manutenção geradas pela inspeção, por situação (153 OS: 147 no prazo e 6 vencidas); cada OS mostra \"INSP 000071/2026 → MANUT 002375/2026\""
    ],
    "imgs": [
     {
@@ -383,7 +383,7 @@ window.ARGOS_TEXTOS = {
     "Tela cheia (botão no canto inferior direito do mapa; Esc sai): o painel vira gaveta e o satélite chega ao zoom 19",
     "Croqui da faixa (Dados › Downloads › Faixa): janela já preenchida com alimentador, trecho, extensão, município, chaves inicial e final em UTM e imagem; você completa tipo, OS, obra e deslocamento",
     "Baixa o Excel no modelo da Energisa; vale para o trecho selecionado, vários trechos ou o alimentador inteiro",
-    "Downloads: Excel por camada (OS de faixa, inspeções, OS da inspeção, 825 OS de manutenção) e KMZ para o Google Earth"
+    "Downloads: Excel por camada (OS de faixa, inspeções, OS da inspeção, 858 OS de manutenção) e KMZ para o Google Earth"
    ],
    "imgs": [
     {
@@ -403,10 +403,10 @@ window.ARGOS_TEXTOS = {
    "frase": "A visão do gestor: qual alimentador e qual trecho primeiro.",
    "opcional": false,
    "topicos": [
-    "Página <code>polos/</code> (botão Ranking): ETO (Tocantins), regionais e 8 polos; os números dos botões são os mesmos do mapa (5.748, Norte 3.130, Centro 1.655, Sul 963)",
-    "ETO: 302 alimentadores, 3.908 trechos com NAE, 91.477,0 km, 139 municípios",
-    "Colunas: NAE, consumidores, CHI (h), km, NAE/100 km, limpeza no prazo e última limpeza; abas Alimentadores e Trechos (T1 101, T2 257, T3 3.550)",
-    "1º LD03010004: 478 NAE, 17.002 consumidores, 34% da limpeza no prazo. Polo Araguaína: 1.235 NAE, 62 alimentadores, 814 trechos",
+    "Página <code>polos/</code> (botão Ranking): ETO (Tocantins), regionais e 8 polos; os números dos botões são os mesmos do mapa (5.760, Norte 3.132, Centro 1.665, Sul 963)",
+    "ETO: 305 alimentadores, 3.913 trechos com NAE, 94.096,6 km, 139 municípios",
+    "Colunas: NAE, CI (consumidores interrompidos), CHI (consumidor·hora), km, NAE/100 km, % no prazo (só os km com data de limpeza) e última limpeza; abas Alimentadores e Trechos (T1 101, T2 260, T3 3.552)",
+    "1º LD03010004: 478 NAE, 17.002 CI, 99% da limpeza no prazo (dos km com data) e 66% da rede sem registro. Polo Araguaína: 1.235 NAE, 62 alimentadores, 814 trechos",
     "O endereço guarda a visão (<code>#araguaina</code>, <code>#eto/trechos/T3</code>)"
    ],
    "imgs": [
@@ -448,9 +448,9 @@ window.ARGOS_TEXTOS = {
    "opcional": false,
    "topicos": [
     "<code>relatorio.html</code> (menu ☰ › Relatórios): uma tabela por município com polo, SE, trechos, km, religadores, fusíveis, NAE associada e não associada, avisos e status",
-    "139 municípios; 319 alimentadores processados sem falha (91.534,6 km, 71.314 trechos)",
-    "306 alimentadores com aviso (revisar): vão na divisa entre municípios, alimentador sem 2º religador, seccionamento, trechos a revisar",
-    "3 falhas críticas (AL01102271, LD01414015, LD02424015: classificação colapsada, 1 trecho para centenas de km) e 18 sem município com 100 m ou mais de rede ficam de fora"
+    "139 municípios; 322 alimentadores processados, nenhum com falha (94.155,2 km, 71.374 trechos)",
+    "309 alimentadores com aviso (revisar): vão na divisa entre municípios, alimentador sem 2º religador, seccionamento, trechos a revisar",
+    "AL01102271, LD01414015 e LD02424015 foram divididos por exceção (GIS sem as chaves fechadas) e têm trechos muito longos, de 134,4 a 372,6 km: NAE e km vencidos por trecho deles não são confiáveis. O total por município soma o alimentador inteiro. 18 alimentadores sem município com 100 m ou mais de rede ficam fora das tabelas"
    ],
    "imgs": [
     {
@@ -471,7 +471,7 @@ window.ARGOS_TEXTOS = {
    "opcional": false,
    "topicos": [
     "KML do GIS (rede e chaves, convertido por camadas; única fonte de T1/T2/T3; também os trafos e onde o ativo está hoje), Crítica (um arquivo por mês), planilha de polos (DCMD) e bases de OS",
-    "Hoje: limpeza 2.615 OS (03/10), inspeção 2.081 (até 09/10), manutenção da inspeção 5.323 (até 10/10), executadas 215.325 (até 15/10), Crítica jan a ago/2026",
+    "Hoje: limpeza 3.735 OS (até 29/10), inspeção 2.081 (até 09/10), manutenção da inspeção 4.882 (até 10/10), executadas 239.529 (até 29/10), Crítica jan a ago/2026",
     "Atualizar: ☰ › Atualização de dados › arrastar o arquivo; a chave do GitHub é pedida uma vez e fica só no navegador",
     "A automação leva uns 5 minutos; se der erro, não publica nada"
    ],
@@ -508,7 +508,7 @@ window.ARGOS_TEXTOS = {
    "frase": "Piloto com um polo, rotina mensal e perguntas.",
    "opcional": false,
    "topicos": [
-    "Carregar a Crítica de setembro e manter a rotina mensal pelo menu",
+    "Carregar as Críticas de setembro e outubro e manter a rotina mensal pelo menu",
     "Piloto com um polo: Augustinópolis (1.352 NAE) ou Araguaína (1.235)",
     "Validar com as equipes ETO-RD os trechos a revisar e a posição das OS",
     "Definir responsável e calendário de atualização",

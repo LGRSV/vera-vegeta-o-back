@@ -156,6 +156,7 @@ svg.lin .hit{fill:transparent;cursor:crosshair}
 .tab td.m{font-family:var(--f-mono);white-space:normal;max-width:96px}
 .tab td.d{white-space:normal;min-width:170px;max-width:240px;font-size:var(--t-xs);line-height:1.35}
 .tab td.d .ob{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.tab tfoot small.ob{display:block;color:var(--muted);font-size:11px;font-weight:400}
 .tab td.mm{font-family:var(--f-mono);font-size:var(--t-xs);color:var(--muted)}
 .tab td.mm.pico{color:var(--fg);font-weight:600;box-shadow:inset 0 -2px 0 var(--accent)}
 .tab tbody tr{cursor:pointer}.tab tbody tr:hover td{background:var(--hover)}
@@ -322,6 +323,8 @@ svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stro
       <div class="seg" id="vis" role="group" aria-labelledby="l-vis"><button type="button" data-v="mensal" aria-pressed="true">Mensal</button><button type="button" data-v="acum" aria-pressed="false">Acumulado</button></div></div>
   </div>
   <div class="resumo" id="resumo"></div>
+  <p class="nota" id="resumo-nota"></p>
+  <p class="nota" id="orc-fonte"></p>
 </div>
 
 <div class="sec" id="g-sec">
@@ -376,7 +379,7 @@ svg.qg .lab{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--bg);stro
     <div class="tab-w"><table class="tab lg" id="log-tab"></table></div>
     <div class="regras">
       <div><h3>Orçado de cada SIGCO</h3><p>Vem do <b>Capex</b> (txt do sistema), só com as linhas dos centros de custo do DCMD (tabela CC1, a mesma do ETL do Power BI), e os meses de 2027 são os do próprio Capex. SIGCO sem Capex mantém o valor da aba <b>Orçado Futuro</b> e é espalhado pela curva do realizado.</p><p>Sem o Capex, o orçado vem da aba Orçado Futuro e é espalhado pelos 12 meses. Chaves com mais de um número (ex.: 8364/8405) usam o realizado de todos eles.</p></div>
-      <div><h3>Curva pelo realizado</h3><p>Peso do mês = média do realizado do mês nos anos da base (nov–dez sem 2026, que só tem realizado até outubro); média negativa (estornos) conta como zero; sem realizado, 1/12 por mês.</p></div>
+      <div><h3>Curva pelo realizado</h3><p>Peso do mês = média do realizado do mês nos anos da base (nov–dez sem 2026, que só tem realizado até outubro); na curva, mês com média negativa (estornos) conta como zero; a média e a variação % usam o realizado com os estornos. Sem realizado, 1/12 por mês. Variação % só com média de pelo menos R$ 100 mil por ano (n/d abaixo disso).</p></div>
       <div><h3>Fecha no centavo</h3><p>Os 12 meses somam exatamente o valor do SIGCO. Mudar o total do filtro reparte o novo valor na proporção do orçado.</p></div>
     </div></div>
 </div>
@@ -583,8 +586,17 @@ function aplicaCapex(d) {
   });
   return gs.filter(g => g.orc > 0).sort((a, b) => b.orc - a.orc || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
+/* Cada número de SIGCO conta o realizado num grupo só: no que tem o número como item (orçado), senão no primeiro.
+   Ex.: o 68733 está na chave 68733/68312 da aba Curva e tem orçado próprio; o realizado dele fica só no grupo 68733. */
+function umGrupoPorSigco(grupos) {
+  const dono = new Map();
+  grupos.forEach(g => g.itens.forEach(i => { if (!dono.has(i.p)) dono.set(i.p, g); }));
+  grupos.forEach(g => g.m.forEach(s => { if (!dono.has(s)) dono.set(s, g); }));
+  grupos.forEach(g => { g.m = g.m.filter(s => dono.get(s) === g); });
+  return grupos;
+}
 function prepara(d) {
-  const grupos = aplicaCapex(d);
+  const grupos = umGrupoPorSigco(aplicaCapex(d));
   const naChave = new Set(grupos.flatMap(g => g.m));
   const tot = s => ANOS_R.reduce((t, a) => t + soma(d.real[s].r[a] || []), 0);
   const soltos = Object.keys(d.real).filter(s => !naChave.has(s)).sort((a, b) => tot(b) - tot(a))
@@ -664,16 +676,43 @@ function resumo(E, S) {
   const u26 = D.ultimoMes[2026] || 12, t = a => soma(S[a]), mu = MESES[u26 - 1].toLowerCase();
   const t25ate = soma(S[2025].slice(0, u26));
   const pico = S[2027].reduce((b, v, m) => v > S[2027][b] ? m : b, 0);
+  /* Escopo de cada cartão: o realizado soma os SIGCOs do recorte (com e sem orçado); o orçado e a variação, só os projetos com orçado 2027. */
+  const nR = E.nums.filter(s => D.real[s]).length, nO = E.comOrc.length, b0 = baseAnos()[0];
+  const numsO = numsDe(E.comOrc), medO = soma(mediaMes(numsO, baseAnos())), r25O = soma(realAno(numsO, 2025));
+  const escR = a => { const n = E.nums.filter(s => D.real[s] && (D.real[s].r[a] || []).some(v => v)).length; return `<em class="neutro">${n} SIGCO${n === 1 ? '' : 's'}${st.soOrc && !st.sel ? ' com orçado' : ''}</em>`; };
   const cartao = (a, rot, v, extra) => `<div class="r"><small><i style="background:var(--a${a})"></i>${rot}</small><b>${curto(v)}</b>${extra}</div>`;
   $('#resumo').innerHTML = [
-    cartao(2023, 'Realizado 2023', t(2023), '<em class="neutro">jan–dez</em>'),
-    cartao(2024, 'Realizado 2024', t(2024), vari(t(2024), t(2023), 'vs 2023')),
-    cartao(2025, 'Realizado 2025', t(2025), vari(t(2025), t(2024), 'vs 2024')),
-    cartao(2026, u26 < 12 ? `Realizado 2026 · jan–${mu}` : 'Realizado 2026', t(2026), (u26 < 12 ? vari(t(2026), t25ate, `vs jan–${mu} 2025`) : vari(t(2026), t(2025), 'vs 2025')) +
+    cartao(2023, 'Realizado 2023', t(2023), '<em class="neutro">jan–dez</em>' + escR(2023)),
+    cartao(2024, 'Realizado 2024', t(2024), vari(t(2024), t(2023), 'vs 2023') + escR(2024)),
+    cartao(2025, 'Realizado 2025', t(2025), vari(t(2025), t(2024), 'vs 2024') + escR(2025)),
+    cartao(2026, u26 < 12 ? `Realizado 2026 · jan–${mu}` : 'Realizado 2026', t(2026), (u26 < 12 ? vari(t(2026), t25ate, `vs jan–${mu} 2025`) : vari(t(2026), t(2025), 'vs 2025')) + escR(2026) +
       (S.p2026 ? `<em class="neutro">proj. ano ${curto(t(2026) + soma(S.p2026))}</em>` : '')),
-    cartao(2027, 'Orçado 2027', t(2027), vari(t(2027), soma(mediaMes(numsDe(E.comOrc), baseAnos())), `vs média ${baseAnos()[0]}–26`)),
+    cartao(2027, 'Orçado 2027', t(2027), vari(t(2027), medO, `vs média ${b0}–26 dos mesmos projetos`) + `<em class="neutro">${nO} projeto${nO === 1 ? '' : 's'} · nominal</em>`),
     `<div class="r"><small>Pico de 2027</small><b>${t(2027) > 0 ? MESES[pico] : '—'}</b><em class="neutro">${t(2027) > 0 ? curto(S[2027][pico]) + ' · ' + pct(pAnoDe(S[2027][pico], soma(E.comOrc.map(g => g.orc)))) + ' do ano' : 'sem orçado'}</em></div>`,
   ].join('');
+  const escopoR = st.sel ? 'do projeto escolhido' : st.soOrc ? 'só dos SIGCOs com orçado 2027' : `do recorte, com e sem orçado 2027 (marque "Realizado só dos SIGCOs com orçado 2027" para comparar a mesma base)`;
+  $('#resumo-nota').textContent = `Realizado 2023 a 2026: SIGCOs com lançamento no ano (${nR} no período) ${escopoR}. Orçado 2027 e variação: ${nO} projeto${nO === 1 ? '' : 's'} com orçado 2027, contra a média ${b0}–26 do realizado desses mesmos projetos (${curto(medO)} por ano${r25O > 0 ? `; contra o realizado de 2025 deles, ${curto(r25O)}, a variação é ${sinalPct(t(2027) / r25O - 1)}` : ''}). Valores nominais, sem correção pela inflação.`;
+  $('#orc-fonte').textContent = fonteOrcTxt();
+}
+const sinalPct = v => (v > 0 ? '+' : v < 0 ? '−' : '') + pct(Math.abs(v));
+/* Fonte do orçado 2027 e conciliação com a aba Orçado Futuro, por SIGCO (Capex − planilha). Vale para a página toda. */
+function conciliaOrc() {
+  const plan = new Map(), usado = new Map(), sem = [];
+  D.grupos.forEach(g => g.itens.forEach(i => plan.set(i.p, (plan.get(i.p) || 0) + i.v)));
+  let vSem = 0;
+  IDX.grupos.forEach(g => g.itens.forEach(i => { usado.set(i.p, (usado.get(i.p) || 0) + i.v); if (!i.cx) { vSem += i.v; sem.push(i.p); } }));
+  const tUsado = soma(IDX.grupos.map(g => g.orc)), tPlan = soma(D.grupos.map(g => g.orc));
+  const dif = [...new Set([...plan.keys(), ...usado.keys()])].map(p => ({ p, d: (usado.get(p) || 0) - (plan.get(p) || 0) }))
+    .filter(x => Math.abs(x.d) >= 1e6).sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+  return { tUsado, tPlan, cx: tUsado - vSem, vSem, sem, dif, n: IDX.grupos.length };
+}
+function fonteOrcTxt() {
+  const C = conciliaOrc();
+  if (!capexAlvo()) return `Fonte do orçado 2027: aba Orçado Futuro da planilha, ${brl(C.tUsado)} em ${C.n} projetos.`;
+  const sd = v => (v > 0 ? '+' : '') + curto(v);
+  return `Fonte do orçado 2027: Capex do DCMD (centros de custo CC1) ${brl(C.cx)}${C.sem.length ? ` + ${brl(C.vSem)} da aba Orçado Futuro para ${C.sem.length === 1 ? 'o SIGCO sem Capex' : 'os SIGCOs sem Capex'} (${C.sem.join(', ')})` : ''} = ${brl(C.tUsado)} em ${C.n} projetos.` +
+    (Math.abs(C.tUsado - C.tPlan) >= 0.5 ? ` A aba Orçado Futuro da planilha soma ${brl(C.tPlan)} (${sd(C.tUsado - C.tPlan)} no Capex).` +
+      (C.dif.length ? ` Diferenças acima de R$ 1 mi (Capex − planilha): ${C.dif.slice(0, 6).map(x => `${x.p} ${sd(x.d)}`).join('; ')}${C.dif.length > 6 ? `; e mais ${C.dif.length - 6}` : ''}.` : '') : ' Igual à aba Orçado Futuro da planilha.');
 }
 
 /* ----- gráfico ----- */
@@ -817,7 +856,14 @@ function tabela() {
 }
 
 /* ----- orçado × realizado por projeto (variação % = orçado 2027 ÷ média realizada − 1) ----- */
-const variacao = (o, b) => (b > 0 ? o / b - 1 : null);
+/* Variação com base mínima: média abaixo do limite dá n/d (null), em vez de % gigante sobre quase zero. */
+const MIN_MED = 1e5;   // média anual do projeto (mesmo corte da visão Orçado × histórico)
+const MIN_MED_MES = MIN_MED / 12;
+const variacao = (o, b, lim = 0) => (b > 0 && b >= lim ? o / b - 1 : null);
+const pctVar = v => (v > 0 ? '+' : v < 0 ? '−' : '') + pct(Math.abs(v), Math.abs(v) >= 0.995 ? 0 : 1);
+/* Ano conta como histórico se o realizado do projeto no ano passou deste piso. */
+const PISO_ANO = 1e5;
+const histCompleto = (g, anos) => anos.every(a => soma(realAno(g.m, a)) >= PISO_ANO);
 const fVar = v => v == null ? '<span class="neutro">—</span>' : `<span class="${Math.abs(v) < 0.0005 ? 'neutro' : v > 0 ? 'sobe' : 'desce'}">${v > 0 ? '+' : v < 0 ? '−' : ''}${pct(Math.abs(v))}</span>`;
 function ovDados() {
   const anosB = anosBase();
@@ -825,18 +871,18 @@ function ovDados() {
   if (g) {
     const R = Object.fromEntries(ANOS_L.map(a => [a, realAno(g.m, a)])), P = projecao(g.m);
     const med = mediaMes(g.m, anosB), d = g.tem ? distrib(g) : Array(12).fill(0), auto = g.tem ? auto27(g) : Array(12).fill(0);
-    const linhas = MESES.map((n, m) => ({ m, r: ANOS_L.map(a => R[a][m]), pj: P ? P[m] : null, med: med[m], orc: d[m], auto: auto[m], ed: !!st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005, vr: variacao(d[m], med[m]) }));
+    const linhas = MESES.map((n, m) => ({ m, r: ANOS_L.map(a => R[a][m]), pj: P ? P[m] : null, med: med[m], orc: d[m], auto: auto[m], ed: !!st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005, vr: variacao(d[m], med[m], MIN_MED_MES) }));
     const tot = { r: ANOS_L.map(a => soma(R[a])), pj: P ? soma(R[2026]) + soma(P) : null, med: soma(med), orc: soma(d) };
-    tot.vr = variacao(tot.orc, tot.med);
+    tot.vr = variacao(tot.orc, tot.med, MIN_MED);
     return { modo: 'mes', g, anosB, linhas, tot };
   }
   const linhas = IDX.grupos.filter(x => st.multi.length ? st.multi.includes(x.id) : (st.obj === 'Todos' || x.o === st.obj)).map(x => {
     const med = soma(mediaMes(x.m, anosB)), v = valor27(x);
-    return { g: x, r: ANOS_R.map(a => soma(realAno(x.m, a))), med, orc: v, vr: variacao(v, med) };
+    return { g: x, r: ANOS_R.map(a => soma(realAno(x.m, a))), med, orc: v, vr: variacao(v, med, MIN_MED) };
   }).sort((a, b) => b.orc - a.orc);
   const un = numsDe(linhas.map(l => l.g));
   const tot = { r: ANOS_R.map(a => soma(realAno(un, a))), med: soma(mediaMes(un, anosB)), orc: soma(linhas.map(l => l.orc)) };
-  tot.vr = variacao(tot.orc, tot.med);
+  tot.vr = variacao(tot.orc, tot.med, MIN_MED);
   return { modo: 'proj', anosB, linhas, tot };
 }
 const baseAnos = () => anosBase();
@@ -852,7 +898,7 @@ const numPct = t => numero(String(t ?? '').replace(/%/g, '').replace(/^\s*\+/, '
 function tabelaOV() {
   const O = ovDados(), u26 = D.ultimoMes[2026] || 12, rotMed = `Média ${O.anosB[0]}–26`;
   const inR = (attr, v, ed, rot, tit) => `<input class="cel${ed ? ' ed' : ''}" ${attr} value="${fDec(v, 2)}" inputmode="decimal" autocomplete="off"${liberado ? '' : ' readonly'} aria-label="${esc(rot)}"${tit ? ` title="${esc(tit)}"` : ''}>`;
-  const inP = (attr, v, rot) => v == null ? '<span class="neutro">—</span>' : `<input class="cel pc" ${attr} value="${pctTxt(v)}" inputmode="decimal" autocomplete="off"${liberado ? '' : ' readonly'} aria-label="${esc(rot)}">`;
+  const inP = (attr, v, rot) => v == null ? '<span class="neutro" title="Sem variação: média abaixo de R$ 100 mil por ano (ou R$ 8,3 mil no mês)">n/d</span>' : `<input class="cel pc" ${attr} value="${pctTxt(v)}" inputmode="decimal" autocomplete="off"${liberado ? '' : ' readonly'} aria-label="${esc(rot)}">`;
   let h;
   if (O.modo === 'mes') {
     const g = O.g;
@@ -930,6 +976,8 @@ function editaOV(inp) {
 
 /* ----- quantidades (DCMD): previsto × realizado do ano anterior e quantidade 2027 = orçado do mês ÷ R$ por unidade ----- */
 const qn = v => v == null ? '—' : fDec(v, 0);
+/* Atingimento não é variação: 178% do previsto = +78%. */
+const atTxt = at => `${pct(at, 0)} (${at >= 1 ? '+' : '−'}${pct(Math.abs(at - 1), 0)})`;
 /* Reparte n unidades inteiras em proporção a "partes" (maior resto): o total do ano fecha e projeto pequeno não zera. */
 function rateiaInt(n, partes) {
   const tot = soma(partes);
@@ -950,12 +998,15 @@ function qtdIndicadores() {
     const ref = Array(12).fill(0); gs.forEach(g => auto27(g).forEach((v, m) => { ref[m] += v; }));
     const qRef = rs ? rateiaInt(Math.round(soma(ref) / rs), ref) : null;
     const q27 = rs ? orc.map((v, m) => Math.abs(v - ref[m]) < 0.005 ? qRef[m] : Math.round(v / rs)) : null;
-    const prev = q.prev || Array(12).fill(0), real = q.real || Array(12).fill(0);
-    const prevT = soma(prev), realT = soma(real), realAte = soma(real.slice(0, u));
+    /* Depois do último mês do realizado em R$ a planilha traz projeção na linha Realizado: fica sem valor (null).
+       Atingimento e variação comparam o mesmo período (jan até o último mês). */
+    const prev = q.prev || Array(12).fill(0), real = (q.real || Array(12).fill(0)).map((v, m) => m < u ? v : null);
+    const prevT = soma(prev), prevAte = soma(prev.slice(0, u)), realAte = soma(real.slice(0, u));
     const rsReal = soma(realAno(mem, ano).slice(0, u).map(v => v || 0));
-    return { id: q.id, n: q.n, cap: q.cap, gs, rs, lig: un ? un.lig : null, orc, q27, prev, real, u, prevT, realT, realAte, rsReal,
-      at: prevT > 0 ? realT / prevT : null, custo: realAte > 0 && rsReal > 0 ? rsReal / realAte : null,
-      q27T: q27 ? soma(q27) : null, vr: q27 && realT > 0 ? soma(q27) / realT - 1 : null };
+    const q27Ate = q27 ? soma(q27.slice(0, u)) : null;
+    return { id: q.id, n: q.n, cap: q.cap, gs, rs, lig: un ? un.lig : null, orc, q27, prev, real, u, prevT, prevAte, realAte, rsReal,
+      at: prevAte > 0 ? realAte / prevAte : null, custo: realAte > 0 && rsReal > 0 ? rsReal / realAte : null,
+      q27T: q27 ? soma(q27) : null, q27Ate, vr: q27 && realAte > 0 ? q27Ate / realAte - 1 : null };
   });
 }
 function quantidades() {
@@ -974,52 +1025,51 @@ function quantidades() {
   const fv = v => fVar(v);
   if (!st.ind) {
     const lim = Math.max(2, ...Q.map(q => q.at || 0));
-    $('#qt-g').innerHTML = `<div class="leg2"><span><i style="background:var(--a2026)"></i>realizado jan–${mu}</span><span><i style="background:repeating-linear-gradient(45deg,var(--a2026) 0 3px,transparent 3px 6px)"></i>projeção ${MESES[u].toLowerCase()}–dez</span><span><i style="background:var(--fg);width:2px"></i>100% do previsto</span></div><div class="qb">` +
+    $('#qt-g').innerHTML = `<div class="leg2"><span><i style="background:var(--a2026)"></i>atingimento jan–${mu} (realizado ÷ previsto do período)</span><span><i style="background:var(--fg);width:2px"></i>100% do previsto</span></div><div class="qb">` +
       Q.map(q => {
-        const a1 = q.prevT > 0 ? q.realAte / q.prevT : 0, a2 = q.at || 0;
-        return `<button type="button" data-ind="${esc(q.id)}"><span class="n"><b class="m">${esc(q.id)}</b> · ${esc(q.n)}</span><span class="tr"><i style="width:${(Math.min(a1, lim) / lim * 100).toFixed(2)}%"></i><i class="pj" style="left:${(Math.min(a1, lim) / lim * 100).toFixed(2)}%;width:${(Math.max(0, Math.min(a2, lim) - Math.min(a1, lim)) / lim * 100).toFixed(2)}%"></i><u style="left:${(1 / lim * 100).toFixed(2)}%"></u></span><span class="v ${q.at == null ? 'neutro' : q.at >= 1 ? 'sobe' : 'desce'}">${q.at == null ? '—' : pct(q.at, 0)}</span><span class="x">${qn(q.realT)} de ${qn(q.prevT)}</span></button>`;
+        const a1 = q.at || 0;
+        return `<button type="button" data-ind="${esc(q.id)}"><span class="n"><b class="m">${esc(q.id)}</b> · ${esc(q.n)}</span><span class="tr"><i style="width:${(Math.min(a1, lim) / lim * 100).toFixed(2)}%"></i><u style="left:${(1 / lim * 100).toFixed(2)}%"></u></span><span class="v ${q.at == null ? 'neutro' : q.at >= 1 ? 'sobe' : 'desce'}">${q.at == null ? '—' : pct(q.at, 0)}</span><span class="x">${qn(q.realAte)} de ${qn(q.prevAte)}</span></button>`;
       }).join('') + '</div>';
-    let h = `<thead><tr><th class="l">Indicador</th><th>Previsto ${ano}</th><th>Real. jan–${mu}</th><th>Real. + proj.</th><th>% do previsto</th><th class="oc">R$/unid. real ${ano}</th><th>R$/unid. ${D.alvo}</th><th>Qtd ${D.alvo}</th><th>Var. % ${D.alvo} × ${ano}</th></tr></thead><tbody>`;
+    let h = `<thead><tr><th class="l">Indicador</th><th class="oc">Prev. ${ano}</th><th>Prev. jan–${mu}</th><th>Real. jan–${mu}</th><th>Atingim.</th><th class="oc">R$/unid. ${ano}</th><th>R$/unid. ${D.alvo}</th><th class="oc">Meta ${D.alvo}</th><th>Qtd ${D.alvo}</th><th title="Quantidade ${D.alvo} de jan–${mu} ÷ realizado ${ano} de jan–${mu} − 1">Var. %</th></tr></thead><tbody>`;
     Q.forEach(q => {
-      h += `<tr data-ind="${esc(q.id)}" tabindex="0"><td class="l d"><b class="m">${esc(q.id)}</b> · ${esc(q.n)}<small class="ob">${esc(q.cap)}</small></td><td>${qn(q.prevT)}</td><td>${qn(q.realAte)}</td><td>${qn(q.realT)}</td><td class="var">${q.at == null ? '—' : `<span class="${q.at >= 1 ? 'sobe' : 'desce'}">${pct(q.at, 0)}</span>`}</td><td class="oc">${q.custo ? brl(q.custo) : '—'}</td><td>${q.rs ? brl(q.rs) : '—'}</td><td class="orc">${qn(q.q27T)}</td><td class="var">${fv(q.vr)}</td></tr>`;
+      h += `<tr data-ind="${esc(q.id)}" tabindex="0"><td class="l d"><b class="m">${esc(q.id)}</b> · ${esc(q.n)}<small class="ob">${esc(q.cap)}</small></td><td class="oc">${qn(q.prevT)}</td><td>${qn(q.prevAte)}</td><td>${qn(q.realAte)}</td><td class="var">${q.at == null ? '—' : `<span class="${q.at >= 1 ? 'sobe' : 'desce'}">${atTxt(q.at)}</span>`}</td><td class="oc">${q.custo ? brl(q.custo) : '—'}</td><td>${q.rs ? brl(q.rs) : '—'}</td><td class="oc">${q.lig ? qn(q.lig) : '—'}</td><td class="orc">${qn(q.q27T)}</td><td class="var">${fv(q.vr)}</td></tr>`;
     });
     $('#qt').innerHTML = h + '</tbody>';
-    $('#qt-dica').textContent = `Escolha um indicador (ou clique na barra) para ver mês a mês. Realizado ${ano}: jan–${mu} real e ${MESES[u].toLowerCase()}–dez projeção da planilha ${D.qtd.fonte}.`;
+    $('#qt-dica').textContent = `Escolha um indicador (ou clique na barra) para ver mês a mês. Realizado ${ano}: jan–${mu}; ${MESES[u].toLowerCase()} e dez ficam sem valor (a linha Realizado da planilha ${D.qtd.fonte} traz projeção nesses meses). Atingimento = realizado ÷ previsto de jan–${mu}. Var. % = quantidade ${D.alvo} ÷ realizado ${ano}, os dois de jan–${mu}. Meta ${D.alvo} = aba Ligações projetos.`;
   } else {
     const q = Q.find(x => x.id === st.ind);
     quantGraf(q);
-    let h = `<thead><tr><th class="l">Mês</th><th>Previsto ${ano}</th><th>Realizado ${ano}</th><th>% do previsto</th><th class="oc">Orçado ${D.alvo} (R$)</th><th>Qtd ${D.alvo}</th><th>Var. % ${D.alvo} × ${ano}</th></tr></thead><tbody>`;
+    let h = `<thead><tr><th class="l">Mês</th><th>Previsto ${ano}</th><th>Realizado ${ano}</th><th>Atingimento</th><th class="oc">Orçado ${D.alvo} (R$)</th><th>Qtd ${D.alvo}</th><th>Var. % ${D.alvo} × ${ano}</th></tr></thead><tbody>`;
     MESES.forEach((n, m) => {
-      const at = q.prev[m] > 0 ? q.real[m] / q.prev[m] : null, vr = q.q27 && q.real[m] > 0 ? q.q27[m] / q.real[m] - 1 : null;
-      h += `<tr class="mes"><td class="l m">${n}</td><td>${qn(q.prev[m])}</td><td class="${m >= q.u ? 'pj' : ''}">${qn(q.real[m])}</td><td class="var">${at == null ? '—' : `<span class="${at >= 1 ? 'sobe' : 'desce'}">${pct(at, 0)}</span>`}</td><td class="oc">${brl(q.orc[m])}</td><td class="orc">${q.q27 ? qn(q.q27[m]) : '—'}</td><td class="var">${fv(vr)}</td></tr>`;
+      const at = q.real[m] != null && q.prev[m] > 0 ? q.real[m] / q.prev[m] : null, vr = q.q27 && q.real[m] > 0 ? q.q27[m] / q.real[m] - 1 : null;
+      h += `<tr class="mes"><td class="l m">${n}</td><td>${qn(q.prev[m])}</td><td${q.real[m] == null ? ' class="neutro" title="sem realizado: a planilha traz projeção neste mês"' : ''}>${qn(q.real[m])}</td><td class="var">${at == null ? '—' : `<span class="${at >= 1 ? 'sobe' : 'desce'}">${atTxt(at)}</span>`}</td><td class="oc">${brl(q.orc[m])}</td><td class="orc">${q.q27 ? qn(q.q27[m]) : '—'}</td><td class="var">${fv(vr)}</td></tr>`;
     });
-    h += `</tbody><tfoot><tr><td class="l">Total</td><td>${qn(q.prevT)}</td><td>${qn(q.realT)}</td><td class="var">${q.at == null ? '—' : pct(q.at, 0)}</td><td class="oc">${brl(soma(q.orc))}</td><td>${qn(q.q27T)}</td><td class="var">${fv(q.vr)}</td></tr></tfoot>`;
+    h += `</tbody><tfoot><tr><td class="l">Total</td><td>${qn(q.prevT)}<small class="ob">jan–${mu}: ${qn(q.prevAte)}</small></td><td>${qn(q.realAte)}<small class="ob">jan–${mu}</small></td><td class="var">${q.at == null ? '—' : atTxt(q.at)}</td><td class="oc">${brl(soma(q.orc))}</td><td>${qn(q.q27T)}${q.lig ? `<small class="ob">meta ${qn(q.lig)}</small>` : ''}</td><td class="var">${fv(q.vr)}</td></tr></tfoot>`;
     $('#qt').innerHTML = h;
-    $('#qt-dica').textContent = `${q.id} · ${q.n}. Orçado ${D.alvo} dos SIGCOs ${q.gs.map(g => g.id).join(', ') || '—'}${q.rs ? `; quantidade = orçado ÷ ${fBRL2.format(q.rs)} por unidade (aba Ligações projetos): o total do ano é arredondado e as unidades são repartidas nos meses na proporção do orçado; mês alterado à mão = orçado do mês ÷ R$ por unidade, sem mexer nos outros meses` : '; sem R$ por unidade na aba Ligações projetos, então não há quantidade de ' + D.alvo}. Mudou o orçado, muda a quantidade.`;
+    $('#qt-dica').textContent = `${q.id} · ${q.n}. Orçado ${D.alvo} usado na página (${ORC_TXT()}) dos SIGCOs ${q.gs.map(g => g.id).join(', ') || '—'}${q.rs ? `; quantidade = orçado ÷ ${fBRL2.format(q.rs)} por unidade (aba Ligações projetos): o total do ano é arredondado e as unidades são repartidas nos meses na proporção do orçado; mês alterado à mão = orçado do mês ÷ R$ por unidade, sem mexer nos outros meses` : '; sem R$ por unidade na aba Ligações projetos, então não há quantidade de ' + D.alvo}. Mudou o orçado, muda a quantidade.`;
   }
-  $('#qt-nota').textContent = `Só Dpto = DCMD. ${D.qtd.ano}: meses depois de ${mu} são projeção. R$/unid. real = realizado em R$ do DCMD (jan–${mu}) ÷ quantidade realizada jan–${mu}. Meta de ligações ${D.alvo} da aba Ligações projetos aparece ao passar o mouse na quantidade.`;
+  $('#qt-nota').textContent = `Só Dpto = DCMD. ${D.qtd.ano}: realizado até ${mu}; depois fica sem valor. R$/unid. real = realizado em R$ do DCMD (jan–${mu}) ÷ quantidade realizada jan–${mu}. Qtd ${D.alvo} = ${ORC_TXT()} (o usado na página) ÷ R$/unid. da aba Ligações projetos; a meta ${D.alvo} da aba vem do orçado da planilha, por isso difere quando o Capex é outro valor.`;
   $('#qt').querySelectorAll('td.orc').forEach((td, i) => { const q = st.ind ? Q.find(x => x.id === st.ind) : Q[i]; if (q && q.lig) td.title = `Meta ${D.alvo} (Ligações projetos): ${qn(q.lig)}`; });
 }
 function quantGraf(q) {
   const el = $('#qt-g'), W = Math.max(300, Math.round(el.clientWidth || 600)), estreito = W < 640;
   const H = estreito ? 220 : 260, m = { t: 16, r: estreito ? 8 : 20, b: 30, l: estreito ? 40 : 56 };
   const iw = W - m.l - m.r, ih = H - m.t - m.b, bw = iw / 12;
-  const vals = [...q.prev, ...q.real, ...(q.q27 || [])];
+  const vals = [...q.prev, ...q.real.filter(v => v != null), ...(q.q27 || [])];
   const E2 = escala(Math.max(1, ...vals) * 1.1), y = v => m.t + ih - v / E2.max * ih, x = i => m.l + bw * i + bw / 2;
   let h = `<svg class="qg" viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Quantidade por mês: previsto e realizado ${D.qtd.ano} e quantidade ${D.alvo}">`;
-  h += `<defs><pattern id="hach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="6" style="fill:var(--a2026)"/></pattern></defs>`;
   for (let v = 0; v <= E2.max + 1e-9; v += E2.passo) h += `<line class="ax" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${fDec(v, 0)}</text>`;
   const w = Math.min(16, bw * 0.32);
   MESES.forEach((n, i) => {
     h += `<rect x="${x(i) - w - 1}" y="${y(q.prev[i])}" width="${w}" height="${Math.max(0, ih + m.t - y(q.prev[i]))}" style="fill:none;stroke:var(--muted);stroke-width:1.5"/>`;
-    h += `<rect x="${x(i) + 1}" y="${y(q.real[i])}" width="${w}" height="${Math.max(0, ih + m.t - y(q.real[i]))}" style="fill:${i >= q.u ? 'url(#hach)' : 'var(--a2026)'};stroke:var(--a2026);stroke-width:1"/>`;
+    if (q.real[i] != null) h += `<rect x="${x(i) + 1}" y="${y(q.real[i])}" width="${w}" height="${Math.max(0, ih + m.t - y(q.real[i]))}" style="fill:var(--a2026);stroke:var(--a2026);stroke-width:1"/>`;
     h += `<text class="mes" x="${x(i)}" y="${H - m.b + 20}" text-anchor="middle">${estreito ? n[0] : n}</text>`;
   });
   if (q.q27) {
     h += `<path style="fill:none;stroke:var(--a2027);stroke-width:2.5;stroke-dasharray:6 4" d="M${q.q27.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join('L')}"/>`;
     q.q27.forEach((v, i) => { h += `<circle cx="${x(i)}" cy="${y(v)}" r="3.5" style="fill:var(--bg);stroke:var(--a2027);stroke-width:2"/>`; if (!estreito) h += `<text class="lab" x="${x(i)}" y="${y(v) - 8}" text-anchor="middle" style="fill:var(--a2027)">${fDec(v, 0)}</text>`; });
   }
-  el.innerHTML = h + `</svg><div class="leg2" style="margin-top:var(--s2)"><span><i style="border:1.5px solid var(--muted)"></i>previsto ${D.qtd.ano}</span><span><i style="background:var(--a2026)"></i>realizado ${D.qtd.ano}</span><span><i style="background:repeating-linear-gradient(45deg,var(--a2026) 0 3px,transparent 3px 6px)"></i>projeção</span>${q.q27 ? `<span><i style="background:var(--a2027)"></i>quantidade ${D.alvo} (orçado ÷ R$/unid.)</span>` : ''}</div>`;
+  el.innerHTML = h + `</svg><div class="leg2" style="margin-top:var(--s2)"><span><i style="border:1.5px solid var(--muted)"></i>previsto ${D.qtd.ano}</span><span><i style="background:var(--a2026)"></i>realizado ${D.qtd.ano}</span>${q.q27 ? `<span><i style="background:var(--a2027)"></i>quantidade ${D.alvo} (orçado ÷ R$/unid.)</span>` : ''}</div>`;
 }
 
 /* ----- insights ----- */
@@ -1028,19 +1078,23 @@ function insights() {
   const tot = a => soma(realAno(nums, a)), ate = (a, n) => soma(realAno(nums, a).slice(0, n));
   const base = anosBase();
   const O = soma(IDX.grupos.map(valor27));
-  const sinal = v => (v > 0 ? '+' : v < 0 ? '−' : '') + pct(Math.abs(v), Math.abs(v) >= 0.995 ? 0 : 1);
+  const sinal = pctVar;
   const Mh = soma(mediaMes(numsDe(IDX.grupos), base));
-  if (Mh > 0) L.push({ k: 'orcmed', num: O / Mh - 1, t: `Orçado 2027 × média ${base[0]}–2026`, v: sinal(O / Mh - 1), c: O >= Mh ? 'sobe' : 'desce', d: `${curto(O)} orçados para 2027 contra média de ${curto(Mh)} por ano no realizado dos mesmos projetos${avisoNovDez(base) ? '; ' + avisoNovDez(base) : ''}.` });
+  if (Mh > 0) L.push({ k: 'orcmed', num: O / Mh - 1, t: `Orçado 2027 × média ${base[0]}–2026`, v: sinal(O / Mh - 1), c: O >= Mh ? 'sobe' : 'desce', d: `${curto(O)} orçados para 2027 nos ${IDX.grupos.length} projetos com orçado, contra média de ${curto(Mh)} por ano no realizado desses mesmos projetos${avisoNovDez(base) ? '; ' + avisoNovDez(base) : ''}. Valores nominais.` });
   const a26 = ate(2026, u), a25 = ate(2025, u);
-  if (a25 > 0) L.push({ k: 'ritmo', num: a26 / a25 - 1, t: `Ritmo de 2026 (jan–${mu})`, v: sinal(a26 / a25 - 1), c: a26 >= a25 ? 'sobe' : 'desce', d: `${curto(a26)} realizados contra ${curto(a25)} no mesmo período de 2025.` });
+  if (a25 > 0) L.push({ k: 'ritmo', num: a26 / a25 - 1, t: `Ritmo de 2026 (jan–${mu})`, v: sinal(a26 / a25 - 1), c: a26 >= a25 ? 'sobe' : 'desce', d: `${curto(a26)} realizados nos ${nums.length} SIGCOs do DCMD contra ${curto(a25)} no mesmo período de 2025.` });
   const pTodos = projecao(nums);
   if (pTodos) { const ano = a26 + soma(pTodos), r25t = tot(2025); L.push({ k: 'proj26', num: ano, t: 'Projeção de 2026 (ano)', v: curto(ano), c: '', d: `${curto(a26)} realizados até ${mu} + ${curto(soma(pTodos))} projetados para ${MESES_L[u]}–dezembro${r25t > 0 ? ` (${sinal(ano / r25t - 1)} sobre 2025)` : ''}.` }); }
   const ord = IDX.grupos.map(g => ({ g, v: valor27(g) })).sort((a, b) => b.v - a.v), top = ord.slice(0, 5);
   if (O > 0) L.push({ k: 'conc', num: soma(top.map(x => x.v)) / O, t: 'Concentração do orçado 2027', v: pct(soma(top.map(x => x.v)) / O, 0), d: `vai para 5 projetos: ${top.map(x => x.g.id).join(', ')}.` });
-  const comp = IDX.grupos.map(g => { const m = soma(mediaMes(g.m, base)), v = valor27(g); return { g, v, m, x: m > 0 ? v / m - 1 : null }; }).filter(x => x.v >= 1e6 && x.m >= 1e6);
+  /* Maior aumento e corte só entre projetos com histórico completo (realizado ≥ PISO_ANO em todos os anos da base):
+     obra nova ou plurianual com ano zerado distorce a média. Mesmo número da visão Orçado × histórico. */
+  const comp = IDX.grupos.map(g => { const m = soma(mediaMes(g.m, base)), v = valor27(g); return { g, v, m, x: m > 0 ? v / m - 1 : null }; }).filter(x => x.v >= 1e6 && x.m >= 1e6 && histCompleto(x.g, base));
   const up = comp.slice().sort((a, b) => b.x - a.x)[0], dn = comp.slice().sort((a, b) => a.x - b.x)[0];
-  if (up && up.x > 0) L.push({ k: 'up', num: up.x, sel: up.g.id, t: 'Maior aumento sobre o histórico', v: sinal(up.x), c: 'sobe', d: `${up.g.id} · ${up.g.n}: ${curto(up.v)} em 2027 contra média de ${curto(up.m)} por ano.` });
-  if (dn && dn.x < 0) L.push({ k: 'dn', num: dn.x, sel: dn.g.id, t: 'Maior corte sobre o histórico', v: sinal(dn.x), c: 'desce', d: `${dn.g.id} · ${dn.g.n}: ${curto(dn.v)} em 2027 contra média de ${curto(dn.m)} por ano.` });
+  const anosTxt = g => `realizado ${base.map(a => `${a} ${fDec(soma(realAno(g.m, a)) / 1e6, 1)}`).join(' · ')} mi${u < 12 ? ` (2026 até ${mu})` : ''}`;
+  const regra = `só projetos com realizado de pelo menos ${curto(PISO_ANO)} em cada ano de ${base[0]} a 2026`;
+  if (up && up.x > 0) L.push({ k: 'up', num: up.x, sel: up.g.id, t: 'Maior aumento sobre o histórico', v: sinal(up.x), c: 'sobe', d: `${up.g.id} · ${up.g.n}: ${curto(up.v)} em 2027 contra média de ${curto(up.m)} por ano; ${anosTxt(up.g)}. Entram ${regra}.` });
+  if (dn && dn.x < 0) L.push({ k: 'dn', num: dn.x, sel: dn.g.id, t: 'Maior corte sobre o histórico', v: sinal(dn.x), c: 'desce', d: `${dn.g.id} · ${dn.g.n}: ${curto(dn.v)} em 2027 contra média de ${curto(dn.m)} por ano; ${anosTxt(dn.g)}. Entram ${regra}.` });
   const novos = IDX.grupos.filter(g => !(soma(mediaMes(g.m, base).map(v => Math.max(0, v))) > 0) && valor27(g) > 0);
   if (novos.length) L.push({ k: 'novos', num: novos.length, t: 'Projetos sem histórico', v: String(novos.length), d: `somam ${curto(soma(novos.map(valor27)))} em 2027 sem realizado em ${base[0]}–2026: nas curvas pelo realizado, ficam com 1/12 por mês.` });
   const so = IDX.soltos.map(g => ({ g, r: soma(realAno(g.m, 2026)) })).filter(x => x.r > 0).sort((a, b) => b.r - a.r);
@@ -1049,10 +1103,10 @@ function insights() {
   const pico = S27.reduce((b, v, m) => v > S27[b] ? m : b, 0), s1 = pAnoDe(soma(S27.slice(0, 6)), soma(IDX.grupos.map(g => g.orc))) || 0;
   L.push({ k: 'cal', num: s1, t: 'Calendário de 2027', v: MESES[pico], d: `é o mês de maior valor (${curto(S27[pico])}); o 1º semestre concentra ${pct(s1, 0)} do ${ORC_TXT()}.` });
   if (D.qtd) {
-    const Q = qtdIndicadores().filter(q => q.at != null && q.prevT >= 20);
+    const Q = qtdIndicadores().filter(q => q.at != null && q.prevAte >= 20);
     const lo = Q.slice().sort((a, b) => a.at - b.at)[0], hi = Q.slice().sort((a, b) => b.at - a.at)[0];
-    if (lo && lo.at < 1) L.push({ k: 'qlo', num: lo.at, ind: lo.id, t: `Quantidade abaixo do previsto ${D.qtd.ano}`, v: pct(lo.at, 0), c: 'desce', d: `${lo.n} (${lo.id}): ${qn(lo.realT)} de ${qn(lo.prevT)} previstas, já contando a projeção da planilha para ${MESES[lo.u].toLowerCase()}–dez.` });
-    if (hi && hi.at > 1) L.push({ k: 'qhi', num: hi.at, ind: hi.id, t: `Quantidade acima do previsto ${D.qtd.ano}`, v: pct(hi.at, 0), c: 'sobe', d: `${hi.n} (${hi.id}): ${qn(hi.realT)} contra ${qn(hi.prevT)} previstas.` });
+    if (lo && lo.at < 1) L.push({ k: 'qlo', num: lo.at, ind: lo.id, t: `Atingimento abaixo do previsto ${D.qtd.ano}`, v: pct(lo.at, 0), c: 'desce', d: `${lo.n} (${lo.id}): atingimento de ${atTxt(lo.at)}, ${qn(lo.realAte)} de ${qn(lo.prevAte)} previstas de jan a ${mu}.` });
+    if (hi && hi.at > 1) L.push({ k: 'qhi', num: hi.at, ind: hi.id, t: `Atingimento acima do previsto ${D.qtd.ano}`, v: pct(hi.at, 0), c: 'sobe', d: `${hi.n} (${hi.id}): atingimento de ${atTxt(hi.at)}, ${qn(hi.realAte)} contra ${qn(hi.prevAte)} previstas de jan a ${mu}.` });
     const cu = qtdIndicadores().filter(q => q.custo && q.rs && q.realAte >= 20).map(q => ({ q, x: q.rs / q.custo - 1 })).sort((a, b) => Math.abs(b.x) - Math.abs(a.x))[0];
     if (cu) L.push({ k: 'custo', num: cu.x, ind: cu.q.id, t: 'R$ por unidade: 2027 × realizado 2026', v: sinal(cu.x), c: cu.x >= 0 ? 'sobe' : 'desce', d: `${cu.q.n} (${cu.q.id}): ${brl(cu.q.rs)} por unidade no orçado 2027 contra ${brl(cu.q.custo)} realizados em 2026 (jan–${mu}).` });
   }
@@ -1072,12 +1126,13 @@ function visoes() {
   const el = $('#vz'), filtro = st.obj === 'Todos' ? '' : ` · objetivo ${st.obj}`;
   if (st.visao === 'hist') {
     const L = gs.map(g => { const m = soma(mediaMes(g.m, base)), v = valor27(g); return { g, v, m, x: m > 0 ? v / m - 1 : null }; }).filter(x => x.v > 0);
-    const MIN = 1e5, com = L.filter(x => x.m >= MIN).sort((a, b) => b.x - a.x), sem = L.filter(x => !(x.m >= MIN)), lim = 1.5;
+    const MIN = MIN_MED, com = L.filter(x => x.m >= MIN).sort((a, b) => b.x - a.x), sem = L.filter(x => !(x.m >= MIN)), lim = 1.5;
+    const parc = com.filter(x => !histCompleto(x.g, base)).length;
     $('#vis-tit').textContent = `Orçado 2027 × média realizada ${rotB} por projeto${filtro}`;
-    $('#vis-nota').textContent = `Barra = variação % (orçado 2027 ÷ média ${rotB} − 1); verde = mais dinheiro que o histórico, vermelho = menos. Barras cortadas em ±150% (›). ${sem.length ? `${sem.length} projeto(s) sem histórico ou com média abaixo de R$ 100 mil (${curto(soma(sem.map(x => x.v)))} em 2027) não entram. ` : ''}Clique para ver o projeto.`;
+    $('#vis-nota').textContent = `Barra = variação % (orçado 2027 ÷ média ${rotB} − 1); verde = mais dinheiro que o histórico, vermelho = menos. Barras cortadas em ±150% (›). ${parc ? `${parc} projeto(s) marcados "base parcial" têm algum ano de ${rotB} com realizado abaixo de ${curto(PISO_ANO)} (obra nova ou plurianual): a média distorce a variação e eles não entram nos insights de maior aumento e corte. ` : ''}${sem.length ? `${sem.length} projeto(s) sem histórico ou com média abaixo de R$ 100 mil (${curto(soma(sem.map(x => x.v)))} em 2027) não entram. ` : ''}Clique para ver o projeto.`;
     el.innerHTML = `<div class="vb-eixo"><span></span><span><span>−150%</span><span>0</span><span>+150%</span></span><span></span><span style="text-align:right">orçado × média</span></div><div class="vb">` + com.map(x => {
       const w = Math.min(Math.abs(x.x), lim) / lim * 50, pos = x.x >= 0;
-      return `<button type="button" data-s="${esc(x.g.id)}" class="${x.g.id === st.sel ? 'sel' : ''}"><span class="n"><b>${esc(x.g.id)}</b>${esc(x.g.n)}</span><span class="tr"><i class="${pos ? 'p' : 'q'}" style="${pos ? 'left:50%' : `left:${(50 - w).toFixed(2)}%`};width:${w.toFixed(2)}%"></i></span><span class="v ${pos ? 'sobe' : 'desce'}">${pos ? '+' : '−'}${pct(Math.abs(x.x), 0)}${Math.abs(x.x) > lim ? ' ›' : ''}</span><span class="x">${curto(x.v)} × ${curto(x.m)}</span></button>`;
+      return `<button type="button" data-s="${esc(x.g.id)}" class="${x.g.id === st.sel ? 'sel' : ''}"><span class="n"><b>${esc(x.g.id)}</b>${histCompleto(x.g, base) ? '' : '<small class="neutro">base parcial · </small>'}${esc(x.g.n)}</span><span class="tr"><i class="${pos ? 'p' : 'q'}" style="${pos ? 'left:50%' : `left:${(50 - w).toFixed(2)}%`};width:${w.toFixed(2)}%"></i></span><span class="v ${pos ? 'sobe' : 'desce'}">${pctVar(x.x)}${Math.abs(x.x) > lim ? ' ›' : ''}</span><span class="x">${curto(x.v)} × ${curto(x.m)}</span></button>`;
     }).join('') + '</div>';
   } else if (st.visao === 'saz') {
     const L = gs.map(g => ({ g, v: valor27(g), d: distrib(g) })).filter(x => x.v > 0).sort((a, b) => b.v - a.v);
@@ -1092,12 +1147,12 @@ function visoes() {
   } else {
     const objs = [...new Set(IDX.grupos.map(g => g.o))].map(o => {
       const g2 = IDX.grupos.filter(g => g.o === o), v = soma(g2.map(valor27)), m = soma(mediaMes(numsDe(g2), base));
-      return { o, v, m, x: m > 0 ? v / m - 1 : null, n: g2.length };
+      return { o, v, m, x: variacao(v, m, MIN_MED), n: g2.length };
     }).sort((a, b) => b.v - a.v);
     const mx = Math.max(...objs.flatMap(x => [x.v, x.m]), 1);
     $('#vis-tit').textContent = `Orçado 2027 × média realizada ${rotB} por objetivo`;
     $('#vis-nota').textContent = 'Clique num objetivo para filtrar a página toda (clique de novo para tirar o filtro).';
-    el.innerHTML = `<div class="leg2"><span><i style="background:var(--a2027)"></i>orçado 2027</span><span><i style="background:var(--a2025)"></i>média realizada ${rotB}</span></div><div class="ob2">` + objs.map(x => `<button type="button" data-obj="${esc(x.o)}" class="${st.obj === x.o ? 'sel' : ''}"><span>${esc(x.o)} <small class="neutro">· ${x.n}</small></span><span class="bars"><i class="o" style="width:${(x.v / mx * 100).toFixed(2)}%"></i><i class="m" style="width:${(Math.max(0, x.m) / mx * 100).toFixed(2)}%"></i></span><span class="val">${curto(x.v)} × ${curto(x.m)} · ${x.x == null ? '—' : `<span class="${x.x >= 0 ? 'sobe' : 'desce'}">${x.x >= 0 ? '+' : '−'}${pct(Math.abs(x.x), 0)}</span>`}</span></button>`).join('') + '</div>';
+    el.innerHTML = `<div class="leg2"><span><i style="background:var(--a2027)"></i>orçado 2027</span><span><i style="background:var(--a2025)"></i>média realizada ${rotB}</span></div><div class="ob2">` + objs.map(x => `<button type="button" data-obj="${esc(x.o)}" class="${st.obj === x.o ? 'sel' : ''}"><span>${esc(x.o)} <small class="neutro">· ${x.n}</small></span><span class="bars"><i class="o" style="width:${(x.v / mx * 100).toFixed(2)}%"></i><i class="m" style="width:${(Math.max(0, x.m) / mx * 100).toFixed(2)}%"></i></span><span class="val">${curto(x.v)} × ${curto(x.m)} · ${x.x == null ? 'n/d' : `<span class="${x.x >= 0 ? 'sobe' : 'desce'}">${x.x >= 0 ? '+' : '−'}${pct(Math.abs(x.x), 0)}</span>`}</span></button>`).join('') + '</div>';
   }
 }
 
@@ -1285,10 +1340,10 @@ function dadosExcel() {
   IDX.grupos.forEach(g => {
     const d = distrib(g), auto = auto27(g), med = mediaMes(g.m, anosB), R = ANOS_L.map(a => realAno(g.m, a)), nome = g.itens.map(i => i.n).join(' + ');
     aba1.push([g.id, nome, g.o, g.orc, valor27(g), alterado(g) ? 'sim' : 'não', ...d]);
-    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], R[3][m], r2(med[m]), d[m], variacao(d[m], med[m]), g.orc > 0 ? d[m] / g.orc : null, st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
+    MESES.forEach((n, m) => aba2.push([g.id, nome, g.o, n, R[0][m], R[1][m], R[2][m], R[3][m], r2(med[m]), d[m], variacao(d[m], med[m], MIN_MED_MES), g.orc > 0 ? d[m] / g.orc : null, st.mensal[g.id] && Math.abs(d[m] - auto[m]) >= 0.005 ? 'sim' : 'não']));
   });
   const aba3 = [['Parâmetro', 'Valor'], ['Fonte', D.fonte], ['Dados de', D.gerado], ['Curva de 2027', st.base === 'capex' ? 'meses do Capex (SIGCO sem Capex: realizado 2023–2026)' : st.base === 'planilha' ? 'aba Curva da planilha' : `realizado ${anosB[0]}–2026`], ['Orçado 2027', capexAlvo() ? `Capex (${D.capex.fonte}), só centros de custo do DCMD (CC1); sem Capex: aba Orçado Futuro` : 'aba Orçado Futuro'],
-    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Realizado de 2026', 'só até o último mês da planilha, sem projeção'], ['Média / variação %', `média ${anosB.join(', ')} por mês${avisoNovDez(anosB) ? '; ' + avisoNovDez(anosB) : ''}`], ['Realizado (responsáveis)', 'DCMD completo: gerência e coordenações (todos os responsáveis da aba Realizado)'], ['SIGCOs retirados (orçado e realizado)', excluidosTxt() || 'nenhum'], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
+    ['Último mês de 2026 com realizado', MESES[(D.ultimoMes[2026] || 12) - 1]], ['Realizado de 2026', 'só até o último mês da planilha, sem projeção'], ['Média / variação %', `média ${anosB.join(', ')} por mês${avisoNovDez(anosB) ? '; ' + avisoNovDez(anosB) : ''}`], ['Conciliação do orçado 2027', fonteOrcTxt()], ['Variação %', 'n/d quando a média é menor que R$ 100 mil por ano (R$ 8,3 mil no mês); valores nominais'], ['Realizado (responsáveis)', 'DCMD completo: gerência e coordenações (todos os responsáveis da aba Realizado)'], ['SIGCOs retirados (orçado e realizado)', excluidosTxt() || 'nenhum'], ['Projetos alterados na tela', nAlterados()], ['Gerado em', new Date().toLocaleString('pt-BR')]];
   const aba4 = [['SIGCO', 'Projeto', 'Objetivo', ...anosCapexTodos().map(a => `Capex ${a}`)]];
   linhasCapex('').forEach(l => aba4.push([l.p, l.n, objDe(l.p), ...l.v]));
   return { aba1, aba2, aba3, aba4 };

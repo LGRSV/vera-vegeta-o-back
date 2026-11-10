@@ -6,9 +6,9 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "1.2",
- "atualizado": "2026-11-09",
- "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e precisam da confirmação do dono do projeto.",
+ "versao": "1.3",
+ "atualizado": "2026-11-10",
+ "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
   "resumo": "Plataforma web que reúne rede, ocorrências e ordens de serviço em um mapa para decidir onde a manutenção age primeiro.",
@@ -40,7 +40,7 @@ window.ARGOS_ESCOPO = {
    {"t": "As cargas dependem do envio manual de arquivos.", "acao": "Envio pelo menu Atualizar bases, com processamento automático; responsável e dia definidos por base."},
    {"t": "O site é público, sem login: quem tem o endereço vê a rede e as OS.", "acao": "Decidir se continua assim ou se passa a ter controle de acesso."},
    {"t": "A rede vem de uma exportação do GIS (03/10/2026): obras novas não aparecem até a próxima exportação.", "acao": "Definir a rotina de atualização do cadastro."},
-   {"t": "O consumidor·hora das ocorrências usa a maior duração do evento e fica cerca de 2 vezes acima do real quando o religamento é por etapas (mai/2026: 191 mil contra 91 mil).", "acao": "Gravar o consumidor·hora por passo de manobra e reprocessar a Crítica; até lá, não usar o valor absoluto para dimensionar poda."},
+   {"t": "O consumidor·hora das ocorrências usa a maior duração do evento e fica cerca de 2 vezes acima do real quando o religamento é por etapas (mai/2026: 191 mil contra 91 mil).", "acao": "Cálculo por passo de manobra pronto (10/11/2026); reprocessar quando chegarem as Críticas de jan a out/2026. Até lá, não usar o valor absoluto para dimensionar poda."},
    {"t": "Alimentador reclassificado aparece na Crítica com código novo e a NAE dele fica fora do site (caso do PS01112193).", "acao": "Regra de/para no script da Crítica (PS01112193 entra no LD03105019); reprocessar quando chegarem as Críticas."},
    {"t": "O ponto da OS e da ocorrência no mapa é aproximado quando o ativo não tem posição no cadastro.", "acao": "A regra usada fica registrada em cada ocorrência; os casos sem posição ficam listados à parte."}
   ]
@@ -91,7 +91,8 @@ window.ARGOS_ESCOPO = {
   {"d": "2026-10-30", "t": "Tela inicial nova, com os módulos em cartões e o dock."},
   {"d": "2026-11-04", "t": "Insights orçamento e card por quadra no Mapa de podas."},
   {"d": "2026-11-09", "t": "Escopo e acompanhamento do projeto (página, Excel e Word)."},
-  {"d": "2026-11-09", "t": "Levantamento de qualidade por agentes: 111 pontos de melhoria; DEC e FEC do Mapa de podas corrigidos."}
+  {"d": "2026-11-09", "t": "Levantamento de qualidade por agentes: 111 pontos de melhoria; DEC e FEC do Mapa de podas corrigidos."},
+  {"d": "2026-11-10", "t": "Rodada de correções em 11 módulos: 75 pontos de melhoria trabalhados, 41 corrigidos e conferidos, 20 parciais e 13 que dependem de base nova."}
  ],
  "entregas": [
   {"id": "1.1", "frente": "rede", "titulo": "Regras de divisão em trechos", "itens": [
@@ -270,24 +271,44 @@ window.ARGOS_ESCOPO = {
    {"t": "Planilha com os 111 pontos de melhoria publicada nesta página", "st": "ok", "d": "2026-11-09"}
   ]},
   {"id": "12.2", "frente": "qualidade", "titulo": "Correções dos números", "itens": [
-   {"t": "Gravar o consumidor·hora por passo de manobra e reprocessar a Crítica (hoje o site usa a maior duração e fica 2,1 vezes acima)", "st": "pend", "prazo": "2026-11-20", "resp": "dev", "obs": "Depende das Críticas de jan a out/2026."},
-   {"t": "Chamar de CHI e CI o que aparece como DEC, FEC ou Consumidores no Priorizador e no Ranking", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
-   {"t": "Mostrar o período da Crítica e a data das bases em todas as telas (Painel, Mapa, Alimentador e Priorizador)", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
-   {"t": "Mapa de podas: decidir o critério de Crítico por NAE alto do alimentador, que hoje dispara com 1 ocorrência", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
-   {"t": "Limpeza de faixa: tratar trecho sem registro como pendência e a situação do trecho pelo pior pedaço", "st": "pend", "prazo": "2026-11-27", "resp": "dev", "obs": "Regra a confirmar com o dono do projeto."},
-   {"t": "Não localizar no trecho as ocorrências de disjuntor e religador na página do alimentador e no Priorizador", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
-   {"t": "Painel: mesma série para Estruturas, linha morta e linha viva, e inspeções sem polo no total", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
-   {"t": "Carteira: medido e contratado no mesmo universo e filtro de regional em todos os cartões", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
-   {"t": "Insights orçamento: variação com realizado e orçado sobre os mesmos SIGCOs", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
-   {"t": "Atualizar a Apresentação (319 alimentadores e 91,5 mil km estão defasados)", "st": "pend", "prazo": "2026-12-04", "resp": "dev"}
+   {"t": "Cálculo do consumidor·hora por passo de manobra pronto no processamento da Crítica, com as marcas de interrupção momentânea, dia crítico e acima de 24 h (mai/2026: 90.644 em vez de 191.170)", "st": "ok", "d": "2026-11-10"},
+   {"t": "Reprocessar a Crítica de jan a out/2026 com o consumidor·hora por passo de manobra (hoje o site usa a maior duração e fica 2,1 vezes acima)", "st": "pend", "prazo": "2026-11-20", "resp": "dev", "obs": "O cálculo ficou pronto em 10/11; falta receber as Críticas de jan a out/2026."},
+   {"t": "Priorizador e Ranking por polo chamam de CHI (consumidor·hora) e CI (consumidores interrompidos) o que aparecia como DEC, FEC ou Consumidores", "st": "ok", "d": "2026-11-10"},
+   {"t": "Período da Crítica e data das bases escritos nas telas (Painel, Mapa, Alimentador, Priorizador, Ranking e Mapa de podas)", "st": "ok", "d": "2026-11-10"},
+   {"t": "Mapa de podas: Crítico é OS urgente pendente, ou NAE dentro da quadra sem poda em 6 meses; o NAE alto do alimentador virou informação do painel e exige 5 ocorrências (Palmas: de 97 para 73 quadras críticas)", "st": "ok", "d": "2026-11-10"},
+   {"t": "Limpeza de faixa: trecho sem registro conta como pendência e a situação do trecho é a do pior pedaço relevante (mais de 10% ou 300 m)", "st": "ok", "d": "2026-11-10"},
+   {"t": "Ocorrências de disjuntor e religador marcadas como local do defeito desconhecido no Alimentador e no Priorizador, e fora da conta da quadra no Mapa de podas", "st": "ok", "d": "2026-11-10"},
+   {"t": "Painel: Estruturas = linha morta DCMD + linha viva escrito no cartão, realizado sem polo no total, data de corte dos dados e meta zero como \"sem meta\"", "st": "ok", "d": "2026-11-10"},
+   {"t": "Carteira: um só km contratado (1.786,6 km), medido sem comparação com o contratado e filtro de regional em todos os cartões", "st": "ok", "d": "2026-11-10"},
+   {"t": "Insights orçamento: fonte e conciliação do orçado na tela, maior aumento e maior corte só com histórico completo e SIGCO 68733 contado uma vez", "st": "ok", "d": "2026-11-10"},
+   {"t": "Apresentação com os números de hoje (322 alimentadores, 94.155 km, 5.760 NAE) e relatório de validação com os 3 alimentadores divididos por exceção em destaque", "st": "ok", "d": "2026-11-10"},
+   {"t": "Ranking por polo: \"% no prazo\" só sobre km com data de limpeza e \"% sem registro\" à parte", "st": "ok", "d": "2026-11-10"},
+   {"t": "Mapa de podas: executadas (6 meses) e pendentes separadas, OS vencidas pelo prazo e linha viva só pela equipe da OS, com as sem equipe à parte", "st": "ok", "d": "2026-11-10"},
+   {"t": "Trocar as imagens dos slides da Apresentação, que ainda mostram números antigos", "st": "pend", "prazo": "2026-12-04", "resp": "dev"},
+   {"t": "Lista de alimentadores do município com a NAE de dentro do município (hoje a tela avisa que o número é do alimentador inteiro)", "st": "pend", "prazo": "2026-11-27", "resp": "dev", "obs": "Precisa regerar os dados do mapa."}
   ]},
   {"id": "12.3", "frente": "qualidade", "titulo": "Correções de usabilidade", "itens": [
-   {"t": "Tirar a troca de módulo pela roda do mouse na tela inicial", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
-   {"t": "Priorizador: avisar que a lista mostra 200 de N trechos e permitir carregar mais", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
-   {"t": "Mapa: endereço por nível (regional, polo e município) e Voltar subindo um nível", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
-   {"t": "Alimentador: camadas e lista de trechos visíveis sem abrir o olho", "st": "pend", "prazo": "2026-12-04", "resp": "dev"},
-   {"t": "Desempenho no celular: página do alimentador (nota 39) e Priorizador (nota 38)", "st": "pend", "prazo": "2026-12-11", "resp": "dev"},
+   {"t": "A roda do mouse não troca mais de módulo na tela inicial; o gesto de toque continua e não troca com o menu aberto", "st": "ok", "d": "2026-11-10"},
+   {"t": "Priorizador: \"Exibindo N de M trechos\" e botão \"Carregar mais\"", "st": "ok", "d": "2026-11-10"},
+   {"t": "Mapa: endereço por nível (regional, polo e município) e Voltar do navegador subindo um nível por vez", "st": "ok", "d": "2026-11-10"},
+   {"t": "Alimentador: camadas (Faixa, Inspeção, Insp→manut e Manutenção) sempre à vista no mapa e aba Trechos no painel", "st": "ok", "d": "2026-11-10"},
+   {"t": "Clique na LD no mapa: aviso na hora, dados baixando com o mapa fluido e página do alimentador abrindo já carregada", "st": "ok", "d": "2026-11-10"},
+   {"t": "Fluidez da página do alimentador e do Priorizador em aparelho lento", "st": "and", "prazo": "2026-11-20", "resp": "dev", "obs": "1ª passada publicada em 10/11. LD03010004, do clique na LD até a página pronta: 4,5 s (antes 6,6 s) e maior travada de 0,27 s (antes 0,83 s); em aparelho 4 vezes mais lento, 7,3 s (antes 14,0 s) e 1,3 s (antes 3,8 s). Falta fatiar as tarefas que restam."},
    {"t": "Demais pontos médios e baixos da planilha de melhorias", "st": "pend", "prazo": "2026-12-18", "resp": "dev"}
+  ]},
+  {"id": "12.4", "frente": "qualidade", "titulo": "Regras a confirmar depois das correções", "itens": [
+   {"t": "Mapa de podas: como contar a linha viva das OS sem equipe informada", "st": "pend", "prazo": "2026-11-20", "resp": "proj", "obs": "Hoje aparecem à parte (\"sem equipe\"). O prefixo LV do número da OS só coincide com equipe de linha viva em 65% a 70% dos casos conferíveis."},
+   {"t": "Priorizador: peso do trecho sem registro de limpeza (10 dos 20 pontos; 8 de 15 no Plano climático)", "st": "pend", "prazo": "2026-11-20", "resp": "proj", "obs": "Com esse peso, P1 passou de 204 para 43 trechos e P2 de 1.274 para 565."},
+   {"t": "Priorizador: mesmo evento contando em NAE, CHI e CI, piso de 5 km e interrupções de menos de 3 min", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Ocorrências acima de 24 h (553 de jan a ago/2026): limitar a duração, tirar do consumidor·hora ou só avisar", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "NAE com ou sem as interrupções momentâneas e as de dia crítico (as marcas já ficam gravadas no reprocessamento)", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Ocorrência em religador ou disjuntor: ratear pela zona protegida ou só rotular como zona do equipamento", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Carteira: \"OS executadas\" sem as não encontradas e as impedidas (62 de 146) e vermelho abaixo da parte do ano já passada", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Insights orçamento: pisos de R$ 100 mil por ano para variação e maior aumento ou corte, e atingimento de quantidades de jan a out contra jan a out", "st": "pend", "prazo": "2026-11-20", "resp": "proj", "obs": "LPT passou de 45% para 51% e BT Rural de 178% para 156%."},
+   {"t": "Painel: cartão Linha morta só com DCMD ou com o total, meta do mês parcial e realizado sem polo no total", "st": "pend", "prazo": "2026-11-20", "resp": "proj", "obs": "Com o sem polo, Inspeção 2026 passou de 135% para 138%."},
+   {"t": "Mapa: faixas da visão NAE por 100 km (até 3, 3 a 6, 6 a 12, 12 a 25 e 25 ou mais) e mínimo de 50 km de rede", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Mapa de podas: OS vencida pelo prazo original da OS (658 das 893 pendentes em 29/10/2026)", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Alimentador: cor do \"sem registro (pendente)\" na vista Vencimento, selo de situação na lista de trechos e fusíveis só de perto com a Faixa ligada", "st": "pend", "prazo": "2026-11-20", "resp": "proj"}
   ]}
  ],
  "bases": [
@@ -344,31 +365,52 @@ window.ARGOS_ESCOPO = {
    {"titulo": "Trechos", "itens": [
     "T1: do disjuntor até o 1º religador.",
     "T2: de religador a religador ao longo do tronco (T2, T2-A, T2-B…).",
-    "T3: cada ramal aberto por fusível (T3-A, T3-B…); o 1º fusível depois do religador só abre T3 a partir de 300 m.",
+    "T3: cada ramal aberto por fusível (T3-A, T3-B…); fusível dentro de fusível também é T3 (não existe T4); o 1º fusível da linha principal a menos de 300 m depois de um religador não abre T3.",
     "Fusível no tronco não abre trecho. Cada trecho guarda a chave de início e a de fim."
    ]},
    {"titulo": "NAE de vegetação", "itens": [
     "Entra a ocorrência da Crítica com causa Meio Ambiente e subcausa que começa com Árvore ou Eucalipto.",
     "Ficam fora árvore no ramal (outra causa) e poda de árvores.",
     "O mês é o da competência; passo repetido em dois arquivos conta uma vez, pelo arquivo do mês da competência.",
-    "A ocorrência cai no trecho pelo ativo: disjuntor no T1, chave que abre trecho no próprio trecho, demais ativos no vão mais próximo; subestação fica à parte."
+    "A ocorrência cai no trecho pelo ativo: disjuntor no T1, chave que abre trecho no próprio trecho, demais ativos no vão mais próximo; subestação fica à parte.",
+    "Ocorrência de disjuntor ou de religador fica marcada como \"local do defeito desconhecido\": o defeito pode estar em qualquer ponto do alimentador ou da zona do religador.",
+    "CHI é o consumidor·hora interrompido e CI os consumidores interrompidos das ocorrências; DEC e FEC só quando divididos pelos consumidores do conjunto elétrico (PRODIST Módulo 8)."
    ]},
    {"titulo": "Limpeza de faixa", "itens": [
-    "Vencimento da limpeza por classe do trecho: T1 3 anos, T2 4 anos e T3 5 anos.",
+    "Vencimento da limpeza por classe do trecho: T1 3 anos, T2 4 anos e T3 5 anos, contados da última limpeza de cada vão.",
+    "Vão sem OS de limpeza desde 2022 é \"sem registro\" e conta como pendência.",
+    "Situação do trecho: a pior entre as que ocupam mais de 10% ou mais de 300 m do trecho; \"próxima até\" é o vencimento mais cedo entre os vãos.",
     "A OS mãe descreve a obra toda; as parciais não contam km nem OS de novo.",
     "No croqui, limpeza leve é a Expedita e pesada é a Convencional."
    ]},
    {"titulo": "Priorizador", "itens": [
-    "A nota do trecho vai de 0 a 100 e é a soma dos pontos de cada critério: NAE, DEC e FEC por 100 km, clientes (UCs ligadas), cliente do Grupo A, hierarquia do trecho e limpeza de faixa.",
-    "As faixas P1 a P4 saem da nota (P1 é nota 70 ou mais) e das regras adicionais descritas nas Premissas da página.",
-    "Hoje o que a página chama de DEC e FEC é consumidor·hora (CHI) e consumidores interrompidos (CI) por 100 km, não os índices da ANEEL; a troca dos nomes está nas correções planejadas."
+    "A nota do trecho vai de 0 a 100 e é a soma dos pontos de cada critério: NAE, CHI e CI por 100 km, clientes (UCs ligadas), cliente do Grupo A, hierarquia do trecho e limpeza de faixa.",
+    "CHI e CI são o consumidor·hora e os consumidores interrompidos das ocorrências do trecho, não o DEC e o FEC da ANEEL.",
+    "Faixas pela nota: P1 com 70 ou mais, P2 com 50 ou mais, P3 com 30 ou mais e P4 abaixo disso.",
+    "Pisos: T1 com evento em 3 meses ou mais do período, ou 2 ou mais nos últimos 90 dias, é no mínimo P1 (F1); trecho com cliente do Grupo A é no mínimo P2 (F2); evento em 4 meses ou mais é no mínimo P2 (F4).",
+    "Trecho em plano climático aprovado soma 8 pontos à nota (parâmetro). Há três tabelas de pontos: Padrão, Pré-chuva e Plano climático.",
+    "Trecho sem registro de limpeza leva 10 dos 20 pontos do critério no perfil Padrão (editável nas Premissas), menos que o vencido.",
+    "As ocorrências contam no período que a Crítica cobre (hoje jan a ago/2026) e só as posteriores à última limpeza efetiva do trecho."
    ]},
    {"titulo": "Mapa de podas", "itens": [
-    "Situação da quadra pela OS de poda dos últimos 182 dias: executada, pendente, crítica ou sem poda recente.",
+    "Situação da quadra: crítica (OS de poda urgente ou emergencial pendente, ou NAE dentro da quadra nos últimos 6 meses da Crítica sem poda executada em 6 meses), pendente (OS de poda aberta), executada (poda nos últimos 6 meses) ou sem poda recente.",
     "O ponto da OS é o poste da estrutura; sem ele, qualquer ativo da OS.",
     "A NAE mostrada é só a de dentro do perímetro urbano de cada cidade.",
     "Desligamento de disjuntor ou de religador não entra na conta da quadra: o defeito pode estar em qualquer ponto do alimentador; o ponto continua no mapa.",
-    "DEC e FEC da quadra: quanto as ocorrências de vegetação registradas nos ativos da quadra somaram ao DEC e ao FEC do conjunto elétrico do alimentador (consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto)."
+    "DEC e FEC da quadra: quanto as ocorrências de vegetação registradas nos ativos da quadra somaram ao DEC e ao FEC do conjunto elétrico do alimentador (consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto).",
+    "O NAE alto do alimentador (quinto mais alto por 100 km da cidade, com pelo menos 5 ocorrências) é informação do painel e não pinta a quadra.",
+    "Linha viva: só a equipe executora da OS decide; OS sem equipe informada aparece à parte.",
+    "OS pendente é vencida quando o prazo da OS é anterior à data da base."
+   ]},
+   {"titulo": "Painel gerencial", "itens": [
+    "Realizado e meta por mês, regional e polo; os meses depois da data de corte dos dados aparecem como \"sem dado\".",
+    "Estruturas = linha morta DCMD + linha viva (desde 2026); o realizado de localidades sem polo entra no total e não tem meta.",
+    "Meta zero aparece como \"sem meta\"; acima de 150% a barra pede para verificar a meta."
+   ]},
+   {"titulo": "Carteira de faixa", "itens": [
+    "Km contratado: soma do km das OS mãe da contratação, uma vez por obra.",
+    "OS executadas: sobre as OS da contratação, sem as não encontradas e as impedidas.",
+    "O valor medido é da base de medição (todas as obras do ano) e não se compara com o orçado da contratação."
    ]}
   ],
   "publicacao": [

@@ -147,9 +147,14 @@ function go(id, pop, sohTroca) {
 }
 addEventListener('popstate', () => go(location.hash.slice(1) || 'inicio', true));
 
-// ---- rolagem/gesto na borda troca de módulo (fora de mapas, campos e diálogos)
-const FORA = '.leaflet-container,.mt-mapa,dialog,input,select,textarea,[contenteditable],.pd-painel,.pd-drop,.dock,.top';
+// ---- gesto de toque na borda troca de módulo (fora de mapas, campos e diálogos). A roda do mouse não troca: dava troca sem querer.
+const FORA = '.mnu,.leaflet-container,.mt-mapa,dialog,input,select,textarea,[contenteditable],.pd-painel,.pd-drop,.dock,.top';
+function menuAberto() {                                // menu ☰ da casca ou do módulo aberto: nunca troca de módulo
+  let d = null; try { d = frame.contentDocument; } catch (e) { /* fora da mesma origem */ }
+  return [document, d].some(x => x && x.querySelector('.mnu-btn[aria-expanded="true"]'));
+}
 function passo(d) {
+  if (menuAberto()) return;
   if (Date.now() - ultimo < 1100) return;
   const i = ORDEM.indexOf(ativo);
   if (i < 0 || i + d < 0 || i + d >= ORDEM.length) return;
@@ -165,19 +170,8 @@ function rolaveis(el, d, w) {                          // algum contêiner acima
   return false;
 }
 function liga(w, raiz) {
-  let soma = 0, zera = 0, x0 = 0, y0 = 0, ok = false, ini = 0, bordaIni = false, quieto = 0;
+  let x0 = 0, y0 = 0, ok = false, ini = 0;
   const borda = d => { const el = raiz ? raiz() : w.document.scrollingElement; return d > 0 ? el.scrollTop + el.clientHeight >= el.scrollHeight - 8 : el.scrollTop <= 0; };
-  w.addEventListener('wheel', e => {
-    if (e.ctrlKey || (e.target.closest && e.target.closest(FORA))) return;
-    if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
-    const d = Math.sign(e.deltaY), agora = Date.now();
-    // uma sequência de roda começa depois de 400 ms parada; só troca se já começou na borda (a inércia que chega ao fim não troca)
-    if (agora - quieto > 400) bordaIni = borda(d) && !rolaveis(e.target, d, w);
-    quieto = agora;
-    if (!bordaIni || !borda(d) || rolaveis(e.target, d, w)) { soma = 0; return; }
-    soma += e.deltaY; clearTimeout(zera); zera = setTimeout(() => { soma = 0; }, 300);
-    if (Math.abs(soma) > 220) { soma = 0; passo(d); }
-  }, {passive: true});
   w.addEventListener('touchstart', e => {
     ok = e.touches.length === 1 && !(e.target.closest && e.target.closest(FORA));
     if (ok) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; ini = {up: borda(-1), down: borda(1)}; }

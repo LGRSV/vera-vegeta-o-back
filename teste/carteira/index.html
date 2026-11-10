@@ -25,6 +25,10 @@
 .r small{display:block;font:600 var(--t-xs) var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .r b{font:700 var(--t-2xl)/1.15 var(--f-display)}.r em{font-style:normal;font-size:var(--t-sm);margin-left:4px}
 .ok{color:var(--ok)}.nok{color:var(--nok)}
+/* cartão de base sem regional: não responde ao filtro, fica apagado e marcado */
+.r.nf b{color:var(--muted)}.r .nf-t{display:block;margin-top:2px;font:600 var(--t-xs) var(--f-body);color:var(--aviso)}
+.r em{display:block;margin:2px 0 0;color:var(--muted)}
+#datas{margin:var(--s3) 0 0}
 .linha{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--s6);border-top:1px solid var(--line);padding:var(--s4) 0 var(--s2)}
 .gr h2{font:600 var(--t-xs)/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 2px}
 .gr .tot{font:700 var(--t-xl)/1.2 var(--f-display);font-variant-numeric:tabular-nums}.gr .tot small{font:500 var(--t-sm) var(--f-body);color:var(--muted);margin-left:6px}
@@ -123,8 +127,6 @@ svg.km-svg .ln{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:r
 svg.km-svg .ld{fill:none;stroke-width:1;stroke-dasharray:2 3;opacity:.6}
 svg.km-svg .lab{font:600 11.5px var(--f-body)}svg.km-svg .lab.m{font:600 11px var(--f-mono)}
 svg.km-svg .eixo{font:600 10px var(--f-body);letter-spacing:.06em;text-transform:uppercase}
-svg.km-svg .ctr{stroke:var(--km-ctr);stroke-width:1.3;stroke-dasharray:6 4;fill:none}
-svg.km-svg text.ctrt{fill:var(--km-ctr);font:600 11px var(--f-body);paint-order:stroke;stroke:var(--bg);stroke-width:3px}
 svg.km-svg .guia{stroke:var(--fg);stroke-opacity:.35;stroke-width:1}
 svg.km-svg .hit{fill:transparent}svg.km-svg .vz{opacity:.55}
 .km-leg{list-style:none;margin:var(--s4) 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0 var(--s5)}
@@ -160,9 +162,10 @@ table.av-tab tr.nc{cursor:default}
   </div>
   <div class="chips" id="chips"></div>
   <div class="resumo" id="resumo"></div>
+  <p class="nota" id="datas"></p>
 </div></div>
 
-<div class="km-sec" id="km-sec"><h2>Km medido acumulado em 2026</h2>
+<div class="km-sec" id="km-sec"><h2>Km medido acumulado em 2026 · Base medição, todas as obras</h2>
   <div class="km-bar"><div class="f"><span id="km-lbl">Empreiteira</span><select id="km-sel" class="busca km-sel" aria-labelledby="km-lbl"></select></div></div>
   <div class="km-kp" id="km-kp"></div>
   <div class="km-tot" id="km-tot"></div><div id="km-g"></div><ul class="km-leg" id="km-leg"></ul>
@@ -173,12 +176,12 @@ table.av-tab tr.nc{cursor:default}
   <div class="av-wrap"><table class="tab av-tab" id="av-tab"></table></div>
   <p class="nota" id="av-nota"></p></div>
 
-<div class="linha"><div class="gr"><h2>Km de faixa medidos · mensal 2026</h2><div class="tot" id="t-km"></div><div id="g-km"></div></div>
-<div class="gr"><h2>Valor medido · mensal 2026</h2><div class="tot" id="t-val"></div><div id="g-val"></div></div></div>
+<div class="linha"><div class="gr"><h2>Km de faixa medidos · mensal 2026 · todas as obras</h2><div class="tot" id="t-km"></div><div id="g-km"></div></div>
+<div class="gr"><h2>Valor medido · mensal 2026 · todas as obras</h2><div class="tot" id="t-val"></div><div id="g-val"></div></div></div>
 
 <div class="sec"><h2>Por empreiteira · clique numa linha para filtrar e ver as obras</h2><div style="overflow-x:auto"><table class="tab" id="tab"></table></div>
 <div id="det" aria-live="polite"></div>
-<p class="nota">Contratado = aba CONTRATAÇÃO 2026 (km contratado e orçamento estimado por OS). Medido = medições aprovadas no SIAGO (Base medição). OS = aba de OS de limpeza de faixa.</p></div>
+<p class="nota" id="tab-nota"></p></div>
 
 <div class="linha"><div class="gr"><h2>Km contratado por regional</h2><div class="tot" id="t-reg"></div><div id="g-reg"></div></div>
 <div class="gr"><h2>Situação das OS contratadas</h2><div class="tot" id="t-st"></div><div id="g-st"></div></div></div>
@@ -186,7 +189,7 @@ table.av-tab tr.nc{cursor:default}
 <div class="sec"><h2>Pontos de atenção</h2><ul class="aten" id="aten"></ul></div>
 
 <div class="sec"><h2>Como entra no Argos</h2><div class="argos">
-  <div><h3>Resumo (topo)</h3><p>Cards de km contratado, km medido, valor medido e OS executadas. O filtro de regional segue o do Plano de medidas. Fontes: aba CONTRATAÇÃO 2026 (TOTAL CONTRATADO, ORÇAMENTO ESTIMADO, STATUS) e Base medição (vlr_total_real).</p></div>
+  <div><h3>Resumo (topo)</h3><p>Cards de km contratado, orçado, OS executadas, valor medido e OS de faixa. O filtro de regional segue o do Plano de medidas; medição e acompanhamento não têm regional e ficam marcados. O medido não é comparado com o contratado: a medição inclui obras fora da contratação 2026. Fontes: aba CONTRATAÇÃO 2026 (TOTAL CONTRATADO, ORÇAMENTO ESTIMADO, STATUS) e Base medição (vlr_total_real).</p></div>
   <div><h3>Linha "Limpeza de faixa"</h3><p>Mesmo formato das linhas mensal e acumulado do Plano de medidas, com km medido (aba Forecast, "Soma de KM LINEAR") e valor medido por mês (dth_medicao). A meta em km aparece quando a coluna META (KM) estiver preenchida.</p></div>
   <div><h3>Carteira por empreiteira</h3><p>Tabela e pontos de atenção, como na Carteira de OS: OS contratadas por status, obras executadas sem medição e OS pendentes. Chave de ligação: nº da obra (OBRA1 = num_obra) e nome da empreiteira.</p></div>
 </div></div>
@@ -213,6 +216,15 @@ const nCtr = emp => CTR.filter(x => x.emp === emp).length;
 const ctrF = () => CTR.filter(x => (!F.reg || x.reg === F.reg) && (!F.emp || x.emp === F.emp));
 const empF = () => D.emp.filter(e => !F.emp || e.emp === F.emp);
 const soma = (a, k) => a.reduce((t, x) => t + (+x[k] || 0), 0);
+// TOTAL KM é da obra: obra com duas OS (061-26-00179) não soma os trechos em dobro; OS sem nº de obra conta sozinha
+const kmTr = a => { const vis = new Set(); return a.reduce((t, x) => { const k = x.obra || x.os; if (vis.has(k)) return t; vis.add(k); return t + (+x.km_prev || 0); }, 0); };
+// OS que não dá para executar (não encontrada no sistema ou impedida) fica fora do denominador de execução
+const foraExec = x => /NÃO ENCONTRADA|Impedida/i.test(x.st);
+// obras distintas da contratação que aparecem na Base medição (a marca de medição é por obra, não por OS)
+const obrasMedCtr = a => new Set(a.filter(x => x.medida && x.obra).map(x => x.obra)).size;
+// fração do ano já passada na data do OS status: referência para o ritmo de execução
+const anoPct = (() => { const h = PARC.hoje, a = +h.slice(0, 4); return (dN(h) - dN(a + '-01-01') + 1) / ((a % 4 ? 365 : 366)); });
+const dataPl = t => (String(t).match(/modificada (.+)$/) || [, '—'])[1];
 
 function barras(vals, rot, cor = '--accent', fmtv = v => fmt(v)) {
   const W = 600, H = 200, T = 20, B = 22, n = vals.length, max = Math.max(1, ...vals) * 1.12, bw = W / n;
@@ -318,26 +330,27 @@ function detalhe() {
   const kp = `<div class="kp"><span><b>${fmt(cx.length)}</b> OS na contratação${F.reg ? ' (regional ' + F.reg.toLowerCase() + ')' : ''}${ocultas ? ` <span title="OS parcial não conta como OS; o km da obra é o da OS mãe">(+${ocultas} ${ocultas > 1 ? 'parciais agrupadas' : 'parcial agrupada'})</span>` : ''}</span>` +
     `<span><b>${fmt(exe.length)}</b> executadas · <b>${fmt(pend.length)}</b> pendentes${cx.length - exe.length - pend.length ? ' · <b>' + (cx.length - exe.length - pend.length) + '</b> outras' : ''}</span>` +
     (semMed.length ? `<span class="nok"><b>${semMed.length}</b> executadas sem medição</span>` : '') +
-    `<span>medido no ano: <b>${kmMed ? fmt(kmMed, 1) + ' km' : '—'}</b> · <b>${e.valor ? brl(e.valor) : '—'}</b> · <b>${fmt(e.obras_med || 0)}</b> obras medidas</span>` +
+    `<span>medido no ano (Base medição, todas as obras da empreiteira${F.reg ? ', não filtra por regional' : ''}): <b>${kmMed ? fmt(kmMed, 1) + ' km' : '—'}</b> · <b>${e.valor ? brl(e.valor) : '—'}</b> · <b>${fmt(e.obras_med || 0)}</b> obras medidas, <b>${fmt(obrasMedCtr(CTR.filter(x => x.emp === F.emp)))}</b> delas na contratação 2026</span>` +
     `<span>OS de faixa (acompanhamento): <b>${e.os_tot ? fmt(e.os_exec) + ' exec. / ' + fmt(e.os_pend) + ' pend.' : '—'}</b></span></div>`;
   if (!cx.length) {
     el.innerHTML = `<div class="det"><h3>Obras · ${esc(F.emp)}</h3>${kp}<p class="vazio">Nenhuma OS desta empreiteira na aba CONTRATAÇÃO 2026${F.reg ? ' na regional ' + F.reg.toLowerCase() : ''}. As OS de faixa dela vêm só da planilha de acompanhamento.</p></div>`;
     return;
   }
   const tg = x => x.st === 'EXECUTADA' ? `<span class="tg ok">executada</span>` : x.st === 'Pendente' ? `<span class="tg">pendente</span>` : `<span class="tg nok">${esc(x.st.toLowerCase())}</span>`;
-  const med = x => x.medida ? '<span class="tg ok">medida</span>' : x.st === 'EXECUTADA' ? '<span class="tg nok">sem medição</span>' : '<span class="tg">—</span>';
+  // a marca vem da obra: OS não executada de obra já medida não é "medida"
+  const med = x => x.medida ? (x.st === 'EXECUTADA' ? '<span class="tg ok">medida</span>' : '<span class="tg and" title="A obra tem medição no SIAGO, mas esta OS não está executada">obra medida</span>') : x.st === 'EXECUTADA' ? '<span class="tg nok">sem medição</span>' : '<span class="tg">—</span>';
   const linhas = cx.map(x => {
     const o = obraPar(x), id = esc(nOS(x.os)), ab = !!o && ABERTAS.has(nOS(x.os));
     const etq = o ? `<br><button type="button" class="tg pb" aria-expanded="${ab}" aria-controls="pt-${slug(id)}" title="Mostrar a linha do tempo da obra">${o.fora ? `mãe ${esc(o.os.slice(-4))} · ${o.ex}/${o.n} parc. exec.` : `+${o.n} ${o.n > 1 ? 'parciais' : 'parcial'} · ${o.ex}/${o.n} exec.`}</button>${miniEv(o)}` : '';
     return `<tr${o ? ` data-pm="${id}"` : ''}><td class="l m">${esc(x.obra)}${etq}</td><td class="l m oc">${esc(nOS(x.os))}</td><td class="l oc">${esc(x.reg[0] + x.reg.slice(1).toLowerCase())}</td>` +
       `<td class="l oc">${esc(x.polo)}</td><td class="l oc">${esc(x.fase)}</td><td class="l">${tg(x)}</td><td>${fmt(x.km, 1)}</td><td class="oc">${fmt(x.km_prev, 1)}</td>` +
-      `<td>${brl(x.orc)}</td><td class="l">${med(x)}</td></tr>` + (ab ? linhaTempo(o, 'pt-' + slug(id)) : '');
+      `<td>${x.orc ? brl(x.orc) : '<span class="tg nok" title="Orçamento estimado vazio na planilha: soma R$ 0 no orçado">sem orçamento</span>'}</td><td class="l">${med(x)}</td></tr>` + (ab ? linhaTempo(o, 'pt-' + slug(id)) : '');
   }).join('');
   const temEv = cx.some(x => obraPar(x));
   el.innerHTML = `<div class="det"><h3>Obras · ${esc(F.emp)}</h3>${kp}<div style="overflow-x:auto"><table class="tab"><thead><tr><th class="l">Obra</th><th class="l oc">OS</th><th class="l oc">Regional</th>` +
-    `<th class="l oc">Polo</th><th class="l oc">Fase</th><th class="l">Status</th><th>Km contratado</th><th class="oc">Km dos trechos</th><th>Orçamento</th><th class="l">Medição</th></tr></thead><tbody>${linhas}</tbody>` +
-    `<tfoot><tr><td class="l">Total</td><td class="oc"></td><td class="oc"></td><td class="oc"></td><td class="oc"></td><td></td><td>${fmt(soma(cx, 'km'), 1)}</td><td class="oc">${fmt(soma(cx, 'km_prev'), 1)}</td><td>${brl(soma(cx, 'orc'))}</td><td></td></tr></tfoot></table></div>` +
-    `<p class="nota">Cada linha é uma obra (OS mãe da aba CONTRATAÇÃO 2026; obra = nº da obra). Parcial não soma km nem conta como OS; o km da obra é o da mãe. Km contratado = roçada contratada; Km dos trechos = previsão (TOTAL KM). Medição = a obra aparece na Base medição (SIAGO). O valor medido é por empreiteira: a base não traz o valor por obra.` +
+    `<th class="l oc">Polo</th><th class="l oc">Fase</th><th class="l">Status</th><th>Km contratado</th><th class="oc">Km dos trechos</th><th>Orçamento</th><th class="l">Medição da obra</th></tr></thead><tbody>${linhas}</tbody>` +
+    `<tfoot><tr><td class="l">Total</td><td class="oc"></td><td class="oc"></td><td class="oc"></td><td class="oc"></td><td></td><td>${fmt(soma(cx, 'km'), 1)}</td><td class="oc">${fmt(kmTr(cx), 1)}</td><td>${brl(soma(cx, 'orc'))}</td><td></td></tr></tfoot></table></div>` +
+    `<p class="nota">Cada linha é uma obra (OS mãe da aba CONTRATAÇÃO 2026; obra = nº da obra). Parcial não soma km nem conta como OS; o km da obra é o da mãe. Km contratado = roçada contratada (TOTAL CONTRATADO); Km dos trechos = previsão da obra (TOTAL KM), contada uma vez por obra no total. Medição da obra = a obra aparece na Base medição (SIAGO); "obra medida" numa OS pendente quer dizer que outra OS ou parte da obra foi medida. O km e o valor medidos são por empreiteira: a base não traz o valor por obra, então não dá para comparar medido e contratado obra a obra.` +
     `${temEv ? ` Evolução pelas datas de execução das OS no mapa (${esc(dmy(PARC.hoje))}); clique na obra com parciais para abrir a linha do tempo.` : ''}</p></div>`;
   larg();
 }
@@ -353,43 +366,56 @@ function desenha() {
   $('chips').innerHTML = ch.map(([k, t]) => `<span class="chip x" data-c="${k}">${t}</span>`).join('');
 
   const C = ctrF(), E = empF();
-  const kmC = soma(C, 'km'), orc = soma(C, 'orc'), exe = C.filter(x => x.st === 'EXECUTADA').length;
+  const kmC = soma(C, 'km'), orc = soma(C, 'orc'), exe = C.filter(x => x.st === 'EXECUTADA');
   const val = soma(E, 'valor'), kmM = E.reduce((t, e) => t + e.km_mes.reduce((a, b) => a + b, 0), 0);
   const osT = soma(E, 'os_tot'), osE = soma(E, 'os_exec');
   const meta = F.reg ? (D.regionais[F.reg] || {}).meta : (D.regionais.ETO || {}).meta;
-  const card = (t, v, sub, cl = '') => `<div class="r"><small>${t}</small><b class="${cl}">${v}</b><em>${sub}</em></div>`;
-  $('resumo').innerHTML =
-    card('Meta 2026 (km)', meta ? fmt(meta) : '—', meta ? '' : 'sem dado na planilha') +
-    card('Km dos trechos', fmt(soma(C, 'km_prev'), 0), 'previsão (TOTAL KM)') +
-    card('Km contratado', fmt(kmC, 1), `${C.length} OS · roçada`) +
-    card('Executadas', C.length ? Math.round(100 * exe / C.length) + '%' : '—', `${exe} de ${C.length} OS`, C.length && exe / C.length >= .5 ? 'ok' : 'nok') +
-    card('Valor medido', brl(val), `orçado ${brl(orc)}`) +
-    card('OS de faixa', osT ? Math.round(100 * osE / osT) + '%' : '—', `${fmt(osE)} de ${fmt(osT)} executadas`);
-
   const km = MES.map((_, i) => E.reduce((t, e) => t + e.km_mes[i], 0)), vm = MES.map((_, i) => E.reduce((t, e) => t + e.valor_mes[i], 0));
-  const ult = Math.max(0, ...km.map((v, i) => v ? i : 0), ...vm.map((v, i) => v ? i : 0));
-  $('t-km').innerHTML = `${fmt(kmM, 1)}<small>km medidos até ${MES[ult]}/2026</small>`;
+  const ult = Math.max(0, ...km.map((v, i) => v ? i : 0), ...vm.map((v, i) => v ? i : 0)), per = `jan–${MES[ult]}/2026`;
+  // nf: base sem regional (medição e acompanhamento); com regional escolhida o cartão fica marcado e fora da comparação
+  const card = (t, v, sub, cl = '', nf = false, tit = '') => `<div class="r${nf && F.reg ? ' nf' : ''}"${tit ? ` title="${esc(tit)}"` : ''}><small>${t}</small><b class="${nf && F.reg ? '' : cl}">${v}</b><em>${sub}</em>${nf && F.reg ? '<span class="nf-t">não filtra por regional</span>' : ''}</div>`;
+  const exc = C.filter(x => !foraExec(x)), nNE = C.filter(x => /NÃO ENCONTRADA/i.test(x.st)).length, nImp = C.length - exc.length - nNE;
+  const pEx = exc.length ? exe.length / exc.length : 0, pKm = soma(exc, 'km') ? soma(exe, 'km') / soma(exc, 'km') : 0, pAno = anoPct();
+  const semOrc = C.filter(x => !x.orc).length;
+  const obM = soma(E, 'obras_med'), obMC = obrasMedCtr(CTR.filter(x => !F.emp || x.emp === F.emp));
+  $('resumo').innerHTML =
+    (meta ? card('Meta 2026 (km)', fmt(meta), 'coluna META (KM)') : '') +   // sem meta na planilha o cartão some
+    card('Km contratado', fmt(kmC, 1), `roçada de ${C.length} OS mãe · contratação 2026`) +
+    card('Km dos trechos', fmt(kmTr(C), 0), 'previsão das obras (TOTAL KM), não é contratado') +
+    card('Orçado', brl(orc), `orçamento estimado · contratação 2026${semOrc ? ` · ${semOrc} OS sem orçamento` : ''}`) +
+    card('OS executadas (contratação 2026)', exc.length ? Math.round(100 * pEx) + '%' : '—',
+      `${exe.length} de ${exc.length} OS · ${Math.round(100 * pKm)}% do km${nNE + nImp ? ` · fora ${[nNE ? nNE + ' não encontrada' + (nNE > 1 ? 's' : '') : '', nImp ? nImp + ' impedida' + (nImp > 1 ? 's' : '') : ''].filter(Boolean).join(' e ')}` : ''}`,
+      exc.length && pEx >= pAno ? 'ok' : 'nok', false, `Vermelho quando abaixo da parte do ano já passada (${Math.round(100 * pAno)}% em ${dmy(PARC.hoje)})`) +
+    card('Valor medido', brl(val), `${fmt(kmM, 1)} km · Base medição ${per} · ${fmt(obM)} obras, ${fmt(obMC)} da contratação 2026; não comparar com o orçado`, '', true) +
+    card('OS de faixa (acompanhamento)', osT ? Math.round(100 * osE / osT) + '%' : '—', `${fmt(osE)} de ${fmt(osT)} executadas · todas as OS de faixa da planilha 2026, não só a contratação`, '', true);
+  $('datas').innerHTML = `Planilhas: Base medição de ${esc(dataPl(D.fontes.medicao))} · acompanhamento de ${esc(dataPl(D.fontes.acomp))} · situação das OS pelo OS status de ${esc(dmy(PARC.hoje))}. Medição e acompanhamento não têm regional.`;
+
+  const nfR = F.reg ? ' · não filtra por regional' : '';
+  $('t-km').innerHTML = `${fmt(kmM, 1)}<small>km medidos ${per}${nfR}</small>`;
   $('g-km').innerHTML = barras(km.slice(0, ult + 1), MES, '--accent', v => fmt(v));
-  $('t-val').innerHTML = `${brl(val)}<small>medido até ${MES[ult]}/2026</small>`;
+  $('t-val').innerHTML = `${brl(val)}<small>medido ${per}${nfR}</small>`;
   $('g-val').innerHTML = barras(vm.slice(0, ult + 1), MES, '--ok', v => v >= 1e3 ? fmt(v / 1e3) + 'k' : fmt(v));
 
   // tabela
   const maxV = Math.max(1, ...D.emp.map(e => e.valor));
   const linhas = D.emp.filter(e => e.valor || nCtr(e.emp) || e.os_tot).map(e => {
     const cx = CTR.filter(x => x.emp === e.emp && (!F.reg || x.reg === F.reg));
-    const kmc = soma(cx, 'km'), kmm = e.km_mes.reduce((a, b) => a + b, 0);
+    const kmc = soma(cx, 'km'), kmm = e.km_mes.reduce((a, b) => a + b, 0), omc = obrasMedCtr(CTR.filter(x => x.emp === e.emp));
     return `<tr data-e="${e.emp}" class="${e.emp === F.emp ? 'sel' : ''}"><td><b>${e.emp}</b></td><td>${cx.length || '—'}</td><td>${kmc ? fmt(kmc, 1) : '—'}</td>` +
       `<td class="oc">${cx.length ? cx.filter(x => x.st === 'EXECUTADA').length + ' / ' + cx.filter(x => x.st === 'Pendente').length : '—'}</td>` +
       `<td>${kmm ? fmt(kmm, 1) : '—'}</td><td>${e.valor ? brl(e.valor) : '—'}<span class="barra" style="width:${Math.round(60 * e.valor / maxV)}px"></span></td>` +
-      `<td class="oc">${e.obras_med || '—'}</td><td class="oc">${e.os_tot ? fmt(e.os_exec) + ' / ' + fmt(e.os_pend) : '—'}</td></tr>`;
+      `<td class="oc">${e.obras_med ? fmt(e.obras_med) + ` <small title="obras da contratação 2026 com medição">(${fmt(omc)} contr.)</small>` : '—'}</td><td class="oc">${e.os_tot ? fmt(e.os_exec) + ' / ' + fmt(e.os_pend) : '—'}</td></tr>`;
   }).join('');
-  $('tab').innerHTML = `<thead><tr><th>Empreiteira</th><th>OS contratadas</th><th>Km contratado</th><th class="oc">Exec. / pend.</th><th>Km medido</th><th>Valor medido</th><th class="oc">Obras medidas</th><th class="oc">OS faixa exec. / pend.</th></tr></thead><tbody>${linhas}</tbody>`;
+  $('tab').innerHTML = `<thead><tr><th>Empreiteira</th><th>OS contratadas</th><th>Km contratado</th><th class="oc">Exec. / pend.</th><th>Km medido${F.reg ? '*' : ''}</th><th>Valor medido${F.reg ? '*' : ''}</th><th class="oc">Obras medidas</th><th class="oc">OS faixa exec. / pend.${F.reg ? '*' : ''}</th></tr></thead><tbody>${linhas}</tbody>`;
+
+  $('tab-nota').innerHTML = `Contratado = aba CONTRATAÇÃO 2026 (km de roçada e orçamento estimado por OS mãe). Medido = medições aprovadas no SIAGO (Base medição, ${per}), de todas as obras da empreiteira: inclui obras fora da contratação 2026, por isso o km medido pode passar do contratado sem ser estouro. Obras medidas = obras na Base medição (entre parênteses, quantas são da contratação). OS faixa = planilha de acompanhamento.${F.reg ? ' * Não filtra por regional: a medição e o acompanhamento não têm regional.' : ''}`;
 
   // regional e status
   const rr = ['NORTE', 'CENTRO', 'SUL'];
   const kmr = rr.map(r => soma(CTR.filter(x => x.reg === r && (!F.emp || x.emp === F.emp)), 'km'));
-  const kmp = rr.map(r => soma(CTR.filter(x => x.reg === r && (!F.emp || x.emp === F.emp)), 'km_prev'));
-  $('t-reg').innerHTML = `${fmt(kmr.reduce((a, b) => a + b, 0), 1)}<small>km contratados de roçada · trechos somam ${fmt(kmp.reduce((a, b) => a + b, 0))} km (N ${fmt(kmp[0])} · C ${fmt(kmp[1])} · S ${fmt(kmp[2])})</small>`;
+  const kmp = rr.map(r => kmTr(CTR.filter(x => x.reg === r && (!F.emp || x.emp === F.emp))));
+  const cE = CTR.filter(x => !F.emp || x.emp === F.emp), kmSemR = soma(cE.filter(x => !rr.includes(x.reg)), 'km');   // mesmo km contratado do cartão (filtro de empreiteira)
+  $('t-reg').innerHTML = `${fmt(soma(cE, 'km'), 1)}<small>km contratados de roçada${kmSemR ? ` · ${fmt(kmSemR, 1)} km sem regional (fora das barras)` : ''} · trechos somam ${fmt(kmTr(cE))} km (N ${fmt(kmp[0])} · C ${fmt(kmp[1])} · S ${fmt(kmp[2])})</small>`;
   $('g-reg').innerHTML = barras(kmr, ['Norte', 'Centro', 'Sul'], '--accent', v => fmt(v));
   const sts = {}; C.forEach(x => sts[x.st] = (sts[x.st] || 0) + 1);
   const sk = Object.keys(sts).sort((a, b) => sts[b] - sts[a]);
@@ -406,9 +432,20 @@ function desenha() {
   if (pendEnc.length) at.push(['', `<b>${pendEnc.length}</b> OS pendentes em obras já em encerramento.`]);
   E.filter(e => e.os_pend >= 20).sort((a, b) => b.os_pend - a.os_pend).forEach(e => at.push(['', `<b>${e.emp}</b>: ${e.os_pend} OS de faixa pendentes (${Math.round(100 * e.os_pend / e.os_tot)}% das ${e.os_tot}).`]));
   E.filter(e => nCtr(e.emp) && !e.valor && !['Sem empreiteira', 'Equipe própria'].includes(e.emp)).forEach(e => at.push(['', `<b>${e.emp}</b>: ${nCtr(e.emp)} OS contratadas e nenhuma medição em 2026.`]));
+  const medNaoExe = C.filter(x => x.medida && x.st !== 'EXECUTADA');
+  if (medNaoExe.length) at.push(['inf', `<b>${medNaoExe.length}</b> OS não executadas de obras que já têm medição no SIAGO: a marca de medição é por obra, não quer dizer que a OS foi medida.`]);
+  // medido sem contrato e executada sem medição, entre as planilhas
+  E.filter(e => e.valor && !nCtr(e.emp)).forEach(e => at.push(['', `<b>${e.emp}</b>: ${brl(e.valor)} medidos em 2026 e nenhuma OS na contratação 2026.`]));
+  E.filter(e => e.os_exec && !e.valor && !nCtr(e.emp) && !['Sem empreiteira', 'Equipe própria'].includes(e.emp)).forEach(e => at.push(['', `<b>${e.emp}</b>: ${fmt(e.os_exec)} OS de faixa executadas no acompanhamento e nenhuma medição em 2026.`]));
+  if (!F.emp && D.emp.some(e => e.emp === 'Dineng' && e.os_tot) && nCtr('Dinamo')) at.push(['inf', '<b>Dinamo</b> (contratação) e <b>Dineng</b> (acompanhamento) podem ser grafias da mesma empreiteira. Conferir antes de somar.']);
+  const orc0 = C.filter(x => !x.orc);
+  if (orc0.length) { const pe = {}; orc0.forEach(x => pe[x.emp] = (pe[x.emp] || 0) + 1); at.push(['', `<b>${orc0.length}</b> OS sem orçamento estimado, somadas como R$ 0 no orçado (${Object.entries(pe).map(([k, v]) => k + ' ' + v).join(', ')}).`]); }
+  const rk = CTR.filter(x => x.km > 0 && x.orc > 0).map(x => x.orc / x.km).sort((a, b) => a - b), rMed = rk[rk.length >> 1] || 0;
+  const caro = C.filter(x => x.km > 0 && x.orc / x.km > 3 * rMed).sort((a, b) => b.orc / b.km - a.orc / a.km);   // 3 vezes a mediana: fora da faixa de roçada
+  if (caro.length) at.push(['', `<b>${caro.length}</b> OS com orçado por km acima de 3 vezes a mediana (R$ ${fmt(rMed)}/km): ${caro.map(x => `${esc(x.obra)} R$ ${fmt(x.orc / x.km)}/km`).join(', ')}.`]);
   const semEmp = D.emp.find(e => e.emp === 'Sem empreiteira');
   if (semEmp && semEmp.os_tot && !F.emp) at.push(['inf', `<b>${fmt(semEmp.os_tot)}</b> OS de faixa sem empreiteira informada na planilha de acompanhamento.`]);
-  at.push(['inf', 'Meta anual de km por regional: a coluna META (KM) da aba CONTRATAÇÃO 2026 está vazia.']);
+  if (!meta) at.push(['inf', 'Meta anual de km por regional: a coluna META (KM) da aba CONTRATAÇÃO 2026 está vazia; o cartão de meta só aparece quando houver dado.']);
   at.push(['inf', 'DB Norte, DB Sul e DB Centro (contratação) foram tratadas como D. B. Machado Ltda (medição). Conferir.']);
   detalhe();
   kmRender();
@@ -430,8 +467,7 @@ document.addEventListener('click', ev => {
   desenha();
   if (linha && F.emp) $('det').scrollIntoView({behavior: 'smooth', block: 'nearest'});
 });
-// ---- Km medido acumulado em 2026 (lê D.emp[].km_mes / valor_mes; km contratado = soma das OS mãe da contratação, como a tabela; segue o filtro F.emp) ----
-const kmCtr = emp => CTR.filter(x => x.emp === emp).reduce((s, x) => s + (+x.km || 0), 0);
+// ---- Km medido acumulado em 2026 (lê D.emp[].km_mes / valor_mes; segue o filtro F.emp; sem linha do contratado, que é outro universo) ----
 const KM_N = 6;   // empreiteiras com mais km; o resto vira "Demais"
 const kmSoma = a => a.reduce((t, v) => t + (+v || 0), 0);
 const kmEmps = D.emp.slice().sort((a, b) => kmSoma(b.km_mes) - kmSoma(a.km_mes));
@@ -470,12 +506,12 @@ function kmInit() {
 function kmGrafico() {
   const el = $('km-g'), W = Math.max(300, el.clientWidth), est = W < 560, uni = !!F.emp, H = est ? 340 : 420;
   const ML = est ? 38 : 48, MT = 22, MB = 26, MR = uni ? (est ? 40 : 52) : (est ? 96 : 176), pw = W - ML - MR, ph = H - MT - MB, X = i => ML + i * pw / 11;
-  let L, ctr = 0, q1 = null;
+  let L, q1 = null;
   if (uni) {
     const e = D.emp.find(x => x.emp === F.emp), r = kmRanque(F.emp);
-    q1 = kmSerie(e.emp, e.km_mes, kmCor(r)); ctr = kmCtr(e.emp); L = [q1];
+    q1 = kmSerie(e.emp, e.km_mes, kmCor(r)); L = [q1];   // sem linha do contratado: o medido inclui obras fora da contratação
   } else L = kmSeries;
-  const yn = kmNice(Math.max(1, ...L.map(s => s.ac[11]), ctr) * 1.01, 4), Y = v => MT + ph - v / yn.max * ph;
+  const yn = kmNice(Math.max(1, ...L.map(s => s.ac[11])) * 1.01, 4), Y = v => MT + ph - v / yn.max * ph;
   let s = '';
   for (let v = 0; v <= yn.max + 1e-9; v += yn.st) s += `<line class="${v ? 'ax' : 'axf'}" x1="${ML}" x2="${ML + pw}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${ML - 6}" y="${Y(v) + 4}" text-anchor="end">${fmt(v)}</text>`;
   s += `<text class="eixo" x="0" y="${MT - 10}">km acum.</text>`;
@@ -485,7 +521,6 @@ function kmGrafico() {
     for (let v = 0; v <= yb.max + 1e-9; v += yb.st) s += `<text x="${ML + pw + 6}" y="${B(v) + 4}">${fmt(v)}</text>`;
     s += `<text class="eixo" x="${ML + pw + 6}" y="${MT - 10}">km/mês</text>`;
     q1.km.forEach((v, i) => { if (v > 0) s += `<rect x="${X(i) - bw / 2}" y="${B(v)}" width="${bw}" height="${MT + ph - B(v)}" rx="1.5" fill="${q1.cor}" fill-opacity=".38" data-bar="${i}"/>`; });
-    if (ctr > 0) s += `<line class="ctr" x1="${ML}" x2="${ML + pw}" y1="${Y(ctr)}" y2="${Y(ctr)}"/><text class="ctrt" x="${ML + 4}" y="${Y(ctr) - 5}">contratado ${fmt(ctr)} km</text>`;
   }
   L.forEach(q => {   // do mês anterior ao 1º com medição até o último com medição: nada depois
     if (q.b < 0) return;
@@ -518,14 +553,15 @@ function kmGrafico() {
 }
 function kmRender() {
   const e = F.emp ? D.emp.find(x => x.emp === F.emp) : null, lista = e ? [e] : D.emp;
-  const km = kmSoma(lista.map(x => kmSoma(x.km_mes))), val = kmSoma(lista.map(x => kmSoma(x.valor_mes))), ctr = kmSoma(lista.map(x => kmCtr(x.emp)));
+  const km = kmSoma(lista.map(x => kmSoma(x.km_mes))), val = kmSoma(lista.map(x => kmSoma(x.valor_mes))), obm = kmSoma(lista.map(x => x.obras_med));
+  const obc = obrasMedCtr(CTR.filter(x => !e || x.emp === e.emp));
   $('km-sel').value = F.emp;
-  $('km-kp').innerHTML = `<span>Km medido no ano <b>${fmt(km, 1)} km</b></span><span>R$ medido <b>R$ ${fmt(val)}</b></span><span>Km contratado <b>${ctr > 0 ? fmt(ctr, 1) + ' km' : '—'}</b></span>`;
+  $('km-kp').innerHTML = `<span>Km medido no ano <b>${fmt(km, 1)} km</b></span><span>R$ medido <b>R$ ${fmt(val)}</b></span><span>Obras medidas <b>${fmt(obm)}</b>, <b>${fmt(obc)}</b> delas na contratação 2026</span>${F.reg ? '<span style="color:var(--aviso)">não filtra por regional</span>' : ''}`;
   $('km-kp').dataset.km = km;
   const ult = e ? kmFaixa(e.km_mes)[1] : kmUltimo;
   $('km-tot').innerHTML = `${fmt(km, 1)} km<small>${ult >= 0 ? 'até ' + MES[ult] + '/2026' : 'sem medição em 2026'} · ${e ? esc(e.emp) : 'soma de todas'}</small>`;
   $('km-leg').innerHTML = e ? '' : kmSeries.map(q => `<li ${q.demais ? `title="${esc(q.demais.join(', '))}"` : `data-km-e="${esc(q.nome)}"`}><i style="background:${q.cor}"></i><span class="n">${esc(q.nome)}${q.demais ? ` <em>· ${esc(q.demais.filter(n => kmSoma(D.emp.find(x => x.emp === n).km_mes) > 0).join(', '))} +${q.demais.filter(n => kmSoma(D.emp.find(x => x.emp === n).km_mes) === 0).length} sem km</em>` : ''}</span><span class="v">${fmt(q.tot, 1)} km</span></li>`).join('');
-  $('km-nota').innerHTML = `Fonte: ${esc(D.fontes.medicao)} (dados gerados em ${esc(D.gerado)}). Km medido = Base medição (SIAGO); não é por obra e não tem regional. Meses sem medição não entram na linha. Km contratado = aba CONTRATAÇÃO 2026.`;
+  $('km-nota').innerHTML = `Fonte: ${esc(D.fontes.medicao)} (dados gerados em ${esc(D.gerado)}). Km medido = Base medição (SIAGO), de todas as obras medidas no ano; não é por obra e não tem regional. Inclui obras fora da contratação 2026, por isso não é comparado com o km contratado. Meses sem medição não entram na linha.`;
   kmGrafico();
 }
 kmInit();
@@ -559,11 +595,11 @@ function avRender() {
   const nomeCol = {emp: 'Empreiteira', polo: 'Polo', reg: 'Regional'}[AV.g];
   const sel = g => AV.g === 'emp' ? g.nome && g.nome === F.emp : AV.g === 'reg' ? g.nome && g.nome === F.reg : g.k && g.k === AV.polo;
   const rot = g => !g.nome ? '—' : AV.g === 'reg' ? g.nome[0] + g.nome.slice(1).toLowerCase() : g.nome;
-  $('av-tab').innerHTML = `<thead><tr><th>${nomeCol}</th><th>Obras</th><th>Executadas</th><th>Km exec. / contr.</th><th>Com parciais</th></tr></thead><tbody>` +
+  $('av-tab').innerHTML = `<thead><tr><th>${nomeCol}</th><th>Obras</th><th>Executadas</th><th>Km das OS executadas / contratado</th><th>Com parciais</th></tr></thead><tbody>` +
     gs.map(g => `<tr data-av="${esc(g.k)}" class="${sel(g) ? 'sel' : ''}${AV.g === 'reg' && !g.nome ? ' nc' : ''}"><td class="g">${esc(rot(g))}</td>${cel(g)}</tr>`).join('') +
     `</tbody><tfoot><tr class="tot"><td class="g">Total</td>${cel(T)}</tr></tfoot>`;
   $('av-tab').querySelectorAll('tfoot tr').forEach(r => r.classList.add('tot'));
-  $('av-nota').innerHTML = `Conta por obra: OS parcial agrupada na mãe não conta; km executado = km das OS executadas da CONTRATAÇÃO 2026; situação atualizada pelo OS status de ${esc(dmy(PARC.hoje))}. Resumo da carteira inteira: não segue os filtros de regional e empreiteira (só destaca a linha escolhida). Clique numa linha para filtrar${AV.g === 'polo' ? ' (por polo, só destaca)' : ''}.`;
+  $('av-nota').innerHTML = `Conta por obra: OS parcial agrupada na mãe não conta; km das OS executadas = km contratado (roçada) das OS executadas da CONTRATAÇÃO 2026, não o km medido; situação atualizada pelo OS status de ${esc(dmy(PARC.hoje))}. Resumo da carteira inteira: não segue os filtros de regional e empreiteira (só destaca a linha escolhida). Clique numa linha para filtrar${AV.g === 'polo' ? ' (por polo, só destaca)' : ''}.`;
   $('av-tab').dataset.tot = JSON.stringify(T);
 }
 $('av-sel').onchange = ev => { AV.g = ev.target.value; AV.polo = ''; avRender(); };

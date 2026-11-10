@@ -14,7 +14,8 @@
   if (!LP || !window.D) return;
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const km = m => (m / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
+  const NF1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });   // criado uma vez: roda milhares de vezes
+  const km = m => NF1.format(m / 1000) + ' km';
   const br = d => d ? d.split('-').reverse().join('/') : '—';
   const REGRA = LP.regra_anos;
   // executadas só das equipes da regra (prefixo do número da OS); pendentes aparecem de qualquer equipe
@@ -45,8 +46,17 @@
   // cores fixas por ano (iguais em todos os alimentadores), de frio (antigo) a quente (recente)
   const COR_ANO = { 2021: '#a78bfa', 2022: '#60a5fa', 2023: '#22d3ee', 2024: '#4ade80', 2025: '#facc15', 2026: '#fb923c', 2027: '#f87171', 2028: '#f472b6' };
   const corAno = a => COR_ANO[a] || (a < 2021 ? '#c4b5fd' : '#fb7185');
-  const SEMCOR = '#cbd5e1';
-  const SIT = { dia: ['Em dia', '#22c55e'], vence: ['Vence em até 12 meses', '#facc15'], vencida: ['Vencida', '#ef4444'], sem: ['Sem registro', SEMCOR] };
+  // sem OS de faixa = situação desconhecida, tratada como pendente (regra aprovada): cor própria, nunca o cinza neutro
+  const SEMCOR = '#d946ef';
+  const FUNDOCOR = '#cbd5e1';     // vista Por ano: vão sem OS fica neutro no mapa (a cor é do ano da limpeza); na vista Vencimento ele é pendência (SEMCOR)
+  const SIT = { dia: ['Em dia', '#22c55e'], vence: ['Vence em até 12 meses', '#facc15'], vencida: ['Vencida', '#ef4444'], sem: ['Sem registro (pendente)', SEMCOR] };
+  const PIOR = ['vencida', 'sem', 'vence', 'dia'];      // ordem de gravidade
+  const CURTO = { dia: 'em dia', vence: 'vence', vencida: 'vencida', sem: 'sem registro' };
+  // a base de OS de faixa quase não tem registro antes de 2022 (31 OS no estado de 2016 a 2021): o "sem registro" vem daí
+  const BASE_DESDE = LP.desde || '2022';
+  const kmm = m => m < 1000 ? Math.round(m) + ' m' : km(m);   // pedaço pequeno do trecho em metros (não vira "0,0 km")
+  const pct = (m, t) => t ? Math.round(100 * m / t).toLocaleString('pt-BR') + '%' : '—';
+  const km1 = m => NF1.format(m / 1000);   // sem a unidade: "0,2 de 35,7 km"
   function situacao(data, classe) {
     if (!data) return 'sem';
     const v = somaAnos(data, REGRA[classe]);
@@ -101,17 +111,21 @@
   function resumoTrecho(nome) {
     const vs = vaosDoTrecho[nome] || [], classe = classeDe(nome);
     const m = { dia: 0, vence: 0, vencida: 0, sem: 0 }, ks = new Set();
-    let ult = null, ext = 0;
+    let ult = null, ven = null, ext = 0;
     vs.forEach(v => {
       const p = porVao[v[5]];
       m[situacao(p.ult, classe)] += v[8]; ext += v[8];
       p.ks.forEach(k => ks.add(k));
       if (p.ult && (!ult || p.ult > ult)) ult = p.ult;
+      // próxima: o vencimento MAIS CEDO entre os vãos com OS (a OS mais recente não cobre o trecho todo)
+      if (p.ult) { const x = somaAnos(p.ult, REGRA[classe]); if (!ven || x < ven) ven = x; }
     });
-    return { m, ext, ult, ks: [...ks], classe };
+    return { m, ext, ult, ven, limpo: ext - m.sem, ks: [...ks], classe };
   }
   const RT = Object.fromEntries(D.trechos.map(t => [t.nome, resumoTrecho(t.nome)]));
-  const sitTrecho = r => Object.entries(r.m).sort((a, b) => b[1] - a[1])[0][0];
+  // situação do trecho: a PIOR entre as que têm extensão relevante (mais de 10% do trecho ou mais de 300 m)
+  const relevante = (r, k) => r.m[k] > 300 || r.m[k] > 0.1 * r.ext;
+  const sitTrecho = r => PIOR.find(k => r.m[k] && relevante(r, k)) || PIOR.find(k => r.m[k]) || 'sem';
   const TOT_SIT = { dia: 0, vence: 0, vencida: 0, sem: 0 };
   Object.values(RT).forEach(r => Object.keys(TOT_SIT).forEach(k => (TOT_SIT[k] += r.m[k])));
 
@@ -169,6 +183,8 @@
 .limp-bar{display:flex;height:8px;border-radius:var(--rp);overflow:hidden;background:var(--sem)}
 .limp-bar span{display:block;height:100%}
 .limp-nota{font-size:var(--t-xs);color:var(--muted);margin:0}
+.limp-pend{margin:0;font-size:var(--t-sm);line-height:1.45;font-variant-numeric:tabular-nums}
+.limp-sec dd small{color:var(--muted)}
 .limp-card[hidden]{display:none}
 .limp-os-b{display:grid;gap:2px;text-align:left;width:100%;min-height:var(--alvo);padding:var(--s2) var(--s3);border:0;border-left:3px solid var(--c);border-radius:0 var(--r1) var(--r1) 0;
   background:color-mix(in srgb,var(--fg) 4%,transparent);color:var(--fg);cursor:pointer;font-size:var(--t-sm)}
@@ -227,7 +243,7 @@ body.limp-on #legenda{display:none}
 body.limp-on .classes button{box-shadow:inset 0 -3px 0 #9ca3af}
 body.limp-on .lb{border-left-color:#9ca3af}
 body.limp-on #map.longe .lb:not(.sel),body.limp-on #map.longe .at{display:none}
-body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
+body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){display:none}   /* fora do Tab e fora da conta de cada quadro do zoom (~300 rótulos) */
 @media (min-width:701px){body.tela-cheia.tc-gaveta .limp-chip{right:calc(min(420px,92vw) + 12px)}}
 @media (prefers-reduced-motion:no-preference){
   .limp-seg button,.limp-ano-l>button,.limp-todos,.limp-os-b,.limp-maplg button,.limp-chip button{
@@ -239,19 +255,22 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   // ---------- mapa ----------
   const map = window.__map;
   const seg = v => [[v[0], v[1]], [v[2], v[3]]];
+  // vãos seguidos numa linha só (alimentador.js): menos pontos para o mapa refazer a cada zoom
+  const linhaDe = window.__cadeias || (vs => vs.map(seg));
   let camada = null, realce = null, selL = null, fundoCache = null;
   // classe à vista (T1/T2/T3) e, com o filtro de município (lupa-painel.js: __munFora), só os trechos do município
   const vis = v => (!window.__visivel || window.__visivel[classeDe(D.trechos[v[4]].nome)]) && !(window.__munFora && window.__munFora(D.trechos[v[4]].nome));
   function linhaDupla(vs, cor, peso, opacidade, extra) {
     // contorno escuro por baixo: a cor aparece igual sobre mata escura ou solo claro
-    return [L.polyline(vs.map(seg), { color: '#0b0f14', weight: peso + 4, opacity: .75 * opacidade, interactive: false, lineCap: 'round' }),
-      L.polyline(vs.map(seg), Object.assign({ color: cor, weight: peso, opacity: opacidade, interactive: false, lineCap: 'round' }, extra))];
+    const ls = linhaDe(vs);
+    return [L.polyline(ls, { color: '#0b0f14', weight: peso + 4, opacity: .75 * opacidade, interactive: false, lineCap: 'round' }),
+      L.polyline(ls, Object.assign({ color: cor, weight: peso, opacity: opacidade, interactive: false, lineCap: 'round' }, extra))];
   }
   function fundo() {
     const chave = JSON.stringify(window.__visivel || {}) + (window.__munSel || '');
     if (!fundoCache || fundoCache.chave !== chave) {
       const vs = D.vaos.filter(vis);
-      fundoCache = { chave, ls: linhaDupla(vs, SEMCOR, 2.5, .9) };
+      fundoCache = { chave, ls: linhaDupla(vs, FUNDOCOR, 2.5, .9) };   // sem OS: neutro e fino, para os anos aparecerem
     }
     return fundoCache.ls;
   }
@@ -294,7 +313,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const html = `<div class="limp-pop"><div class="t">Trecho ${esc(nome)} <small>${classe} · a cada ${REGRA[classe]} anos</small></div>` +
       (exec.length ? linha(exec[0], 'Limpo em') + exec.slice(1).map(k => linha(k, 'Antes:')).join('') +
         `<div class="sit" style="--c:${SIT[sit][1]}">${SIT[sit][0]} · próxima até ${br(iso(somaAnos(ult, REGRA[classe])))}</div>`
-        : '<div class="nada">Sem registro de limpeza aqui</div>') +
+        : '<div class="nada">Sem registro de limpeza aqui: situação desconhecida, tratar como pendente</div>') +
       nexe.map(k => linha(k)).join('') + '</div>' +
       (window.__balaoInsp ? window.__balaoInsp(v) : '');   // Inspeção também ligada: as inspeções do vão no mesmo balão
     L.popup({ className: 'limp-popup', maxWidth: 300, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] }).setLatLng(e.latlng).setContent(html).openOn(map);
@@ -331,10 +350,13 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       // prefere os troncos/ramais (T1, T2…) por onde a OS passa; senão, o ramal de fusível com mais metros
       const nomes = Object.entries(mt).sort((a, b) => b[1] - a[1]).map(e => e[0]);
       const tronco = nomes.filter(n => classeDe(n) !== 'T3');
-      const tr = (tronco.length ? tronco.slice(0, 2) : nomes.slice(0, 1)).join(' / ');
+      const ns = tronco.length ? tronco.slice(0, 2) : nomes.slice(0, 1), tr = ns.join(' / ');
+      // a parte limpa dos trechos da etiqueta ("0,2 de 35,7 km"): uma OS curta não pode parecer o trecho inteiro limpo
+      const doTr = new Set(ns), feito = somaM(uniao(ks).filter(x => doTr.has(D.trechos[x[4]].nome)));
+      const total = ns.reduce((s, n) => s + RT[n].ext, 0);
       return L.marker([(v[0] + v[2]) / 2, (v[1] + v[3]) / 2], {
         zIndexOffset: 1000, interactive: false, keyboard: false,     // não cobre o clique na rede (o balão da linha mostra a OS)
-        icon: L.divIcon({ className: '', iconSize: null, html: `<div class="limp-tag" data-d="${esc(o.data)}" style="--c:${corAno(anoDe(o))}"><em>${esc(tr)}</em>${txt}<small>${ks.length > 1 ? ks.length + ' OS' : km(o.m)}</small></div>` }),
+        icon: L.divIcon({ className: '', iconSize: null, html: `<div class="limp-tag" data-d="${esc(o.data)}" style="--c:${corAno(anoDe(o))}"><em>${esc(tr)}</em>${txt}<small>${ks.length > 1 ? ks.length + ' OS · ' : ''}${km1(feito)} de ${km(total)}</small></div>` }),
       }).on('click', e => { L.DomEvent.stopPropagation(e); focar(ks[0], true); });
     });
   }
@@ -358,18 +380,18 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
         // não executadas por cima dos anos (ligadas pelo usuário): criadas tracejado branco, pendentes pontilhado branco com borda
         if (st.nexe.has('cri')) {
           const vs = NEXE.cri.vaos.filter(vis);
-          if (vs.length) ls.push(L.polyline(vs.map(seg), { color: '#fff', weight: 4, dashArray: '6 7', opacity: op, interactive: false }));
+          if (vs.length) ls.push(L.polyline(linhaDe(vs), { color: '#fff', weight: 4, dashArray: '6 7', opacity: op, interactive: false }));
         }
         if (st.nexe.has('pend')) {
           const vs = NEXE.pend.vaos.filter(vis);
-          if (vs.length) ls.push(L.polyline(vs.map(seg), { color: '#0b0f14', weight: 9, dashArray: '1 11', lineCap: 'round', opacity: .8 * op, interactive: false }),
-            L.polyline(vs.map(seg), { color: '#fff', weight: 6, dashArray: '1 11', lineCap: 'round', opacity: op, interactive: false }));
+          if (vs.length) ls.push(L.polyline(linhaDe(vs), { color: '#0b0f14', weight: 9, dashArray: '1 11', lineCap: 'round', opacity: .8 * op, interactive: false }),
+            L.polyline(linhaDe(vs), { color: '#fff', weight: 6, dashArray: '1 11', lineCap: 'round', opacity: op, interactive: false }));
         }
         if (st.foco === null) ls.push(...etiquetas());
       } else {
         const g = { sem: [], vencida: [], vence: [], dia: [] };
         D.vaos.filter(vis).forEach(v => g[situacao(porVao[v[5]].ult, classeDe(D.trechos[v[4]].nome))].push(v));
-        Object.entries(g).forEach(([k, vs]) => vs.length && ls.push(...clicavel(linhaDupla(vs, SIT[k][1], k === 'sem' ? 2.5 : 5, k === 'sem' ? .9 : op), vs)));
+        Object.entries(g).forEach(([k, vs]) => vs.length && ls.push(...clicavel(linhaDupla(vs, SIT[k][1], k === 'sem' ? 4 : 5, op), vs)));
       }
       camada = L.layerGroup(ls).addTo(map);
       requestAnimationFrame(desamontoa);
@@ -415,8 +437,8 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       const vs = vaosDaOs[k], o = LP.os[k];
       const cor = o.data ? corAno(anoDe(o)) : '#fff';
       realce = L.layerGroup([
-        L.polyline(vs.map(seg), { color: '#fff', weight: 14, opacity: 1, interactive: false, lineCap: 'round' }),
-        L.polyline(vs.map(seg), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round', dashArray: o.data ? null : grupoDe(o) === 'cri' ? '8 6' : '1 13' }),
+        L.polyline(linhaDe(vs), { color: '#fff', weight: 14, opacity: 1, interactive: false, lineCap: 'round' }),
+        L.polyline(linhaDe(vs), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round', dashArray: o.data ? null : grupoDe(o) === 'cri' ? '8 6' : '1 13' }),
       ]).addTo(map);
       st.grupos.add(o.data ? String(anoDe(o)) : grupoDe(o));   // abre a linha do ano (ou do grupo) da OS
       if (enquadrar) enquadra(vs);
@@ -485,7 +507,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const ts = [...new Set(vaosDaOs[k].map(v => D.trechos[v[4]].nome))];
     return `<div class="limp-foco"><span class="q">OS ${esc(o.os_completa)} · ${o.data ? 'executada ' + br(o.data) : grupoDe(o) === 'cri' ? 'criada ' + br(o.criada) : 'pendente (' + esc(o.sit.toLowerCase()) + ') · criada ' + br(o.criada)}${andamento(o) ? ' · <b>em andamento</b>' : ''}</span>
       <span>${esc(o.desc)}</span>
-      <span class="limp-nota">No mapa: ${vaosDaOs[k].length ? km(o.m) : 'sem localização'}${o.km_desc ? ` · descrição: ${String(o.km_desc).replace('.', ',')} km` : ''} · ${esc(o.metodo)}${o.al_os && o.al_os !== (D.meta || {}).al ? ` · OS lançada no ${esc(o.al_os)}` : ''}</span>
+      <span class="limp-nota">No mapa: ${vaosDaOs[k].length ? kmm(o.m) : 'sem localização'}${o.km_desc ? ` · descrição: ${String(o.km_desc).replace('.', ',')} km` : ''} · ${esc(o.metodo)}${o.al_os && o.al_os !== (D.meta || {}).al ? ` · OS lançada no ${esc(o.al_os)}` : ''}</span>
       ${filhasDe(o).length ? `<span class="limp-nota">${parcs(filhasDe(o).length, 'OS ')} (o km conta só o da mãe): ${filhasDe(o).map(k => { const f = LP.os[k]; return `${esc(f.os_completa)} ${f.data ? 'executada ' + br(f.data) : esc(f.sit.toLowerCase()) + ' · criada ' + br(f.criada)}`; }).join('; ')}</span>` : ''}
       ${o.ativos.length ? `<span class="limp-nota">Ativos: ${o.ativos.map(esc).join('; ')}</span>` : ''}
       ${ts.length ? `<span class="limp-nota">Trechos: ${ts.slice(0, 30).map(esc).join(', ')}${ts.length > 30 ? ` e mais ${ts.length - 30}` : ''}</span>` : ''}</div>`;
@@ -496,7 +518,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const quando = (!g ? br(o.data) : g === 'cri' ? 'criada ' + br(o.criada) : esc(o.sit.toLowerCase()) + ' · criada ' + br(o.criada)) +
       (andamento(o) ? ' · em andamento' : '') + (filhasDe(o).length ? ` · +${parcs(filhasDe(o).length)}` : '');
     return `<button type="button" class="limp-os-b${g ? ' ' + g : ''}" data-k="${k}" style="--c:${cor}" aria-pressed="${st.foco === k}">` +
-      `<span class="q">${quando} · OS ${esc(o.os)} · ${vaosDaOs[k].length ? km(o.m) : 'sem localização'}</span>` +
+      `<span class="q">${quando} · OS ${esc(o.os)} · ${vaosDaOs[k].length ? kmm(o.m) : 'sem localização'}</span>` +
       `<span class="s">${esc(o.desc.slice(0, 110))}${o.desc.length > 110 ? '…' : ''}</span></button>` +
       (comFoco && st.foco === k ? focoHtml(k) : '');
   };
@@ -519,8 +541,15 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
 
     const exec = PRIN.filter(k => LP.os[k].sit === 'EXECUTADA').length;
-    const sub = `${exec} OS executada${exec === 1 ? '' : 's'} · ${km(KM_LIMPO)} de ${km(KM_REDE)}` +
+    const sub = `${exec} OS executada${exec === 1 ? '' : 's'}${KM_LIMPO ? ` · ${km(KM_LIMPO)} estimados de ${km(KM_REDE)}` : ''}` +
       GRUPOS_NEXE.map(([, x]) => ' · ' + plural(x.ks.length, x.um)).join('');
+    // "vencida 22,0 km (1%) · sem registro …", só as situações com extensão
+    const ROT = { vencida: 'vencida', sem: 'sem registro', vence: 'vence em até 12 meses', dia: 'em dia' };
+    const parte = (ks, antes) => { const t = ks.filter(k => TOT_SIT[k]).map(k => `${ROT[k]} ${km(TOT_SIT[k])} (${pct(TOT_SIT[k], KM_REDE)})`).join(' · '); return t ? antes + t : ''; };
+    // pendência do alimentador nas duas vistas: vencida e sem registro (desconhecida = pendente), com o % da rede
+    const pend = `<div class="limp-bar" role="img" aria-label="Situação da rede">${['dia', 'vence', 'vencida', 'sem'].map(k => TOT_SIT[k] ? `<span style="width:${100 * TOT_SIT[k] / KM_REDE}%;background:${SIT[k][1]}" title="${SIT[k][0]}: ${km(TOT_SIT[k])}"></span>` : '').join('')}</div>
+      <p class="limp-pend"><b>Pendente ${km(TOT_SIT.vencida + TOT_SIT.sem)} de ${km(KM_REDE)} (${pct(TOT_SIT.vencida + TOT_SIT.sem, KM_REDE)})</b>${parte(['vencida', 'sem'], ': ')}${parte(['vence', 'dia'], '<br>')}</p>
+      <p class="limp-nota">Sem registro: nenhuma OS de faixa${EQ} na base, que tem OS regulares desde ${BASE_DESDE} (antes, quase nenhuma). A situação é desconhecida: tratar como pendente. Km estimados pelos ativos e pelos km citados na OS. A poda (OS MC/MP de poda, rede urbana) não entra nesta conta.</p>`;
     const porAno = st.ligado && st.vista === 'ano';
     const linhas = ANOS.map(a => linha(String(a), `<b>${a}</b> · ${OS_ANO[a].length} OS`, km(KM_ANO[a]), corAno(a), OS_ANO[a],
       porAno ? { liga: `Mostrar/esconder ${a} no mapa`, on: st.anos.has(a), nome: String(a) } : { nome: String(a) })).join('') +
@@ -528,10 +557,10 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
         porAno ? { liga: `Mostrar/esconder no mapa as OS ${x.rot.toLowerCase()}${x.nota ? ' (' + x.nota + ')' : ''}`, on: st.nexe.has(g), nome: x.rot, cls: x.cls }
           : { nome: x.rot, cls: x.cls })).join('');
     let corpo = '';
-    if (porAno && !ANOS.length) corpo = `<p class="limp-nota">Nenhuma OS executada${EQ} caiu neste alimentador.</p>`;
+    if (st.ligado) corpo = pend;
+    if (porAno && !ANOS.length) corpo += `<p class="limp-nota">Nenhuma OS executada${EQ} caiu neste alimentador.</p>`;
     else if (st.ligado && st.vista === 'sit') {      // vencimento: as situações só informam; os anos seguem embaixo, sem liga/desliga
-      corpo = `<div class="limp-bar">${['dia', 'vence', 'vencida', 'sem'].map(k => TOT_SIT[k] ? `<span style="width:${100 * TOT_SIT[k] / KM_REDE}%;background:${SIT[k][1]}"></span>` : '').join('')}</div>
-        <div class="limp-anos">${Object.entries(SIT).map(([k, [n, c]]) => `<div class="limp-ano-l fixo"><span class="cor" aria-hidden="true"><i style="--c:${c}"></i></span><span class="rot"><span>${n}</span><em>${km(TOT_SIT[k])}</em></span></div>`).join('')}</div>`;
+      corpo += `<div class="limp-anos">${PIOR.map(k => `<div class="limp-ano-l fixo"><span class="cor" aria-hidden="true"><i style="--c:${SIT[k][1]}"></i></span><span class="rot"><span>${SIT[k][0]}</span><em>${km(TOT_SIT[k])} · ${pct(TOT_SIT[k], KM_REDE)}</em></span></div>`).join('')}</div>`;
     }
     if (linhas) corpo += `<div class="limp-anos">${linhas}</div>` +
       (porAno && st.anos.size < ANOS.length ? '<button type="button" class="limp-todos" data-acao="todos" data-foco="todos">Mostrar todos os anos</button>' : '');
@@ -548,8 +577,8 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       maplg.innerHTML = '<span class="lg-cab"><b>Faixa</b></span>' + (st.vista === 'ano'
         ? ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a}"><i style="--c:${corAno(a)}"></i><b>${a}</b></button>`).join('') +
           GRUPOS_NEXE.map(([g, x]) => `<button type="button" data-a="${g}" aria-pressed="${st.nexe.has(g)}" title="Mostrar/esconder as OS ${x.rot.toLowerCase()}${x.nota ? ' (' + x.nota + ')' : ''}"><i class="${x.cls}" style="--c:#fff"></i>${x.rot}</button>`).join('') +
-          `<span class="lg-info"><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem registro</span>`
-        : Object.values(SIT).map(([n, c]) => `<span><i style="--c:${c}"></i>${n}</span>`).join(''));
+          `<span class="lg-info"><i style="--c:${FUNDOCOR};box-shadow:0 0 0 1px #000"></i>sem registro (pendente)</span>`
+        : PIOR.map(k => `<span><i style="--c:${SIT[k][1]}"></i>${SIT[k][0]}</span>`).join(''));
     }
     if (chip) {
       chip.hidden = st.foco === null;
@@ -557,13 +586,14 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
         const o = LP.os[st.foco];
         chip.style.setProperty('--c', o.data ? corAno(anoDe(o)) : CINZA);
         chip.innerHTML = `<button type="button" data-v="-" title="OS anterior" aria-label="OS anterior">‹</button>` +
-          `<span title="${esc(o.desc)}">OS ${esc(o.os)} · ${o.data ? br(o.data) : esc(o.sit.toLowerCase())} · ${km(o.m)}</span>` +
+          `<span title="${esc(o.desc)}">OS ${esc(o.os)} · ${o.data ? br(o.data) : esc(o.sit.toLowerCase())} · ${kmm(o.m)}</span>` +
           `<button type="button" data-v="+" title="Próxima OS" aria-label="Próxima OS">›</button>` +
           `<button type="button" data-v="x" title="Fechar" aria-label="Fechar OS">✕</button>`;
       }
     }
     det.querySelectorAll('.limp-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));
-    if (vistaSelos !== st.vista) { vistaSelos = st.vista; poeSelos(true); }
+    // 1ª vez (ao abrir a página): selos em fatias, com a página ociosa; a lista começa fechada com a Faixa ligada
+    if (vistaSelos !== st.vista) { const prim = vistaSelos === null; vistaSelos = st.vista; poeSelos(true, prim); }
   }
   card.addEventListener('click', e => {
     const b = e.target.closest('button');
@@ -581,13 +611,17 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   // ---------- detalhe do trecho ----------
   function secTrecho(nome) {
     const r = RT[nome], anos = REGRA[r.classe];
-    const prox = r.ult ? somaAnos(r.ult, anos) : null;
     const s = sitTrecho(r);
+    const ks4 = ['dia', 'vence', 'vencida', 'sem'];
+    // próxima: o vencimento mais cedo entre os vãos com OS; vão sem registro conta como já vencido
+    const prox = (r.m.sem ? `<b>já</b>: ${kmm(r.m.sem)} sem registro (tratar como vencido)` : '') +
+      (r.ven ? `${r.m.sem ? ' · nos vãos com OS, ' : ''}${r.ven < HOJE ? 'vencida desde ' : ''}${br(iso(r.ven))} <small>(o vencimento mais cedo entre os vãos)</small>` : '');
     const ks = r.ks.slice().sort((a, b) => (LP.os[b].data || LP.os[b].criada || '').localeCompare(LP.os[a].data || LP.os[a].criada || ''));
     return `<section class="limp-sec" aria-live="off"><h3>Limpeza de faixa · ${esc(r.classe)} a cada ${anos} anos</h3>
-      <div class="limp-bar">${['dia', 'vence', 'vencida', 'sem'].map(k => r.m[k] ? `<span style="width:${100 * r.m[k] / (r.ext || 1)}%;background:${SIT[k][1]}" title="${SIT[k][0]}: ${km(r.m[k])}"></span>` : '').join('')}</div>
-      <dl><dt>Situação</dt><dd><b>${SIT[s][0]}</b> · ${['dia', 'vence', 'vencida', 'sem'].filter(k => r.m[k]).map(k => `${SIT[k][0].toLowerCase()} ${km(r.m[k])}`).join(' · ')}</dd>
-      <dt>Última</dt><dd>${r.ult ? br(r.ult) + ` · próxima até ${br(iso(prox))}` : 'nenhuma OS executada encontrada neste trecho'}</dd></dl>
+      <div class="limp-bar">${ks4.map(k => r.m[k] ? `<span style="width:${100 * r.m[k] / (r.ext || 1)}%;background:${SIT[k][1]}" title="${SIT[k][0]}: ${km(r.m[k])}"></span>` : '').join('')}</div>
+      <dl><dt>Situação</dt><dd><b>${SIT[s][0]}</b> · ${PIOR.filter(k => r.m[k]).map(k => `${CURTO[k]} ${kmm(r.m[k])} (${pct(r.m[k], r.ext)})`).join(' · ')} <small>· vale a pior com mais de 10% ou 300 m do trecho</small></dd>
+      <dt>Última</dt><dd>${r.ult ? `${br(r.ult)} · com OS ${km1(r.limpo)} de ${km(r.ext)} <small>(km estimados)</small>` : 'nenhuma OS executada encontrada neste trecho'}</dd>
+      <dt>Próxima até</dt><dd>${prox || '—'}</dd></dl>
       ${ks.map(k => osBtn(k, false)).join('')}</section>`;
   }
   const det = $('det');
@@ -604,19 +638,27 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   // ---------- lista: ano da última limpeza ----------
   const lista = $('lista');
   let vistaSelos = null;
-  function poeSelos(refaz) {
-    lista.querySelectorAll(refaz ? '.row' : '.row:not([data-limp])').forEach(b => {
-      b.dataset.limp = '1';
-      const r = RT[b.dataset.t];
-      if (!r) return;
-      const s = sitTrecho(r);
-      let el = b.querySelector('.limp-selo');
-      if (!el) { el = document.createElement('span'); b.querySelector('em')?.before(el); }
-      el.className = 'limp-selo' + (r.ult ? '' : ' nada');
-      el.style.setProperty('--c', r.ult ? (st.vista === 'sit' ? SIT[s][1] : corAno(+r.ult.slice(0, 4))) : 'transparent');
-      el.title = `Limpeza de faixa: ${SIT[s][0].toLowerCase()}${r.ult ? ' · última ' + br(r.ult) : ''}`;
-      el.textContent = r.ult ? r.ult.slice(0, 4) : 'sem limpeza';
-    });
+  const ocioso = f => window.requestIdleCallback ? requestIdleCallback(f, { timeout: 1000 }) : setTimeout(() => f(null), 50);
+  function poeSelos(refaz, fatiado) {
+    const rs = [...lista.querySelectorAll(refaz ? '.row' : '.row:not([data-limp])')];
+    if (!fatiado) return rs.forEach(selo);
+    let i = 0;                                           // ~2.000 linhas sem travar o mapa: um pedaço por folga do navegador
+    const vez = d => { const fim = performance.now() + 12; do selo(rs[i++]); while (i < rs.length && (d ? d.timeRemaining() > 1 : performance.now() < fim)); if (i < rs.length) ocioso(vez); };
+    if (rs.length) ocioso(vez);
+  }
+  function selo(b) {
+    if (!b.isConnected) return;                        // a lista foi refeita no meio: a nova já ganhou os selos
+    b.dataset.limp = '1';
+    const r = RT[b.dataset.t];
+    if (!r) return;
+    const s = sitTrecho(r);
+    let el = b.querySelector('.limp-selo');
+    if (!el) { el = document.createElement('span'); b.querySelector('em')?.before(el); }
+    // a cor e o texto são a situação do trecho (a pior relevante), não o ano da OS mais recente
+    el.className = 'limp-selo';
+    el.style.setProperty('--c', SIT[s][1]);
+    el.title = `Limpeza de faixa: ${SIT[s][0].toLowerCase()}${r.ult ? ` · última ${br(r.ult)} em ${km1(r.limpo)} de ${km(r.ext)}` : ' · nenhuma OS'}`;
+    el.textContent = CURTO[s];
   }
   new MutationObserver(() => poeSelos(false)).observe(lista, { childList: true });
 
