@@ -40,7 +40,7 @@ window.ARGOS_ESCOPO = {
    {"t": "As cargas dependem do envio manual de arquivos.", "acao": "Envio pelo menu Atualizar bases, com processamento automático; responsável e dia definidos por base."},
    {"t": "O site é público, sem login: quem tem o endereço vê a rede e as OS.", "acao": "Decidir se continua assim ou se passa a ter controle de acesso."},
    {"t": "A rede vem de uma exportação do GIS (03/10/2026): obras novas não aparecem até a próxima exportação.", "acao": "Definir a rotina de atualização do cadastro."},
-   {"t": "Alimentador reclassificado aparece na Crítica com código novo e a NAE dele fica fora do site (caso do PS01112193).", "acao": "Lista de/para dos códigos reclassificados ou nova exportação do GIS."},
+   {"t": "Alimentador reclassificado aparece na Crítica com código novo e a NAE dele fica fora do site (caso do PS01112193).", "acao": "Regra de/para no script da Crítica (PS01112193 entra no LD03105019); reprocessar quando chegarem as Críticas."},
    {"t": "O ponto da OS e da ocorrência no mapa é aproximado quando o ativo não tem posição no cadastro.", "acao": "A regra usada fica registrada em cada ocorrência; os casos sem posição ficam listados à parte."}
   ]
  },
@@ -146,7 +146,8 @@ window.ARGOS_ESCOPO = {
   {"id": "3.3", "frente": "nae", "titulo": "Crítica em dia", "itens": [
    {"t": "Enviar os arquivos da Crítica de set e out/2026 (o site vai até ago/2026)", "st": "pend", "prazo": "2026-11-13", "resp": "proj"},
    {"t": "Processar e publicar a NAE de set e out/2026", "st": "pend", "prazo": "2026-11-17", "resp": "dev", "obs": "Depende do item anterior."},
-   {"t": "Definir como contar a NAE de alimentador reclassificado: o PS01112193 (Campos Lindos, conjunto Bielândia) tem 5 NAE em mai/2026 fora do site", "st": "bloq", "desde": "2026-11-09", "prazo": "2026-11-20", "resp": "proj", "obs": "O código novo não existe no cadastro do GIS de 03/10/2026; falta a regra e a lista de/para dos códigos."},
+   {"t": "Regra do alimentador reclassificado no script da Crítica: o PS01112193 (Campos Lindos) entra no LD03105019, sem trecho", "st": "ok", "d": "2026-11-09"},
+   {"t": "Enviar as Críticas de mai a out/2026 para reprocessar a NAE com a regra do alimentador reclassificado (5 NAE de mai/2026 estão fora do site)", "st": "bloq", "desde": "2026-11-09", "prazo": "2026-11-13", "resp": "proj", "obs": "Decisão de 09/11: aplicar em todos os meses de uma vez, quando os arquivos chegarem."},
    {"t": "Rotina mensal: Crítica do mês anterior carregada até o dia 10 (primeira: nov/2026)", "st": "pend", "prazo": "2026-12-10", "resp": "proj"}
   ]},
 
@@ -216,7 +217,7 @@ window.ARGOS_ESCOPO = {
    {"t": "DEC e FEC da quadra pela definição da ANEEL (contribuição ao conjunto elétrico), com consumidor·hora e consumidores no painel", "st": "ok", "d": "2026-11-09"}
   ]},
   {"id": "9.2", "frente": "podas", "titulo": "Próximas cidades e ajustes", "itens": [
-   {"t": "Aprovar a entrada da marca de linha viva no gerador (PR #10 do repositório smartled)", "st": "bloq", "desde": "2026-11-04", "prazo": "2026-11-13", "resp": "proj"},
+   {"t": "Marca de linha viva e DEC/FEC da ANEEL juntados ao gerador (PR #10 do repositório smartled aprovado)", "st": "ok", "d": "2026-11-09"},
    {"t": "Definir as próximas cidades do Mapa de podas", "st": "pend", "prazo": "2026-11-27", "resp": "proj"},
    {"t": "Obter os limites oficiais dos bairros (Aurenys, Araguaína e Gurupi) para agrupar por bairro", "st": "pend", "prazo": "2026-12-04", "resp": "proj"},
    {"t": "Publicar a primeira cidade nova", "st": "pend", "prazo": "2026-12-11", "resp": "dev", "obs": "Depende da definição das cidades."}
@@ -253,7 +254,7 @@ window.ARGOS_ESCOPO = {
   {"id": "11.4", "frente": "plataforma", "titulo": "Escopo e acompanhamento", "itens": [
    {"t": "Página de escopo com andamento, bases e histórico de mudanças", "st": "ok", "d": "2026-11-09"},
    {"t": "Excel de acompanhamento e Word do escopo gerados da mesma fonte", "st": "ok", "d": "2026-11-09"},
-   {"t": "Regra de atualizar o escopo a cada publicação (script e instrução no repositório)", "st": "and", "prazo": "2026-11-13", "resp": "dev", "obs": "O script está pronto; a regra entra quando o PR do smartled for aprovado."},
+   {"t": "Regra de atualizar o escopo a cada publicação (script e instrução no repositório)", "st": "ok", "d": "2026-11-09"},
    {"t": "Confirmar os prazos propostos dos itens abertos", "st": "pend", "prazo": "2026-11-13", "resp": "proj"}
   ]}
  ],
