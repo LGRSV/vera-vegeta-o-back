@@ -128,7 +128,7 @@
           (it.nae != null ? `<i class="so-n">${vis() ? vis().num(it.nae) : nf(it.nae)}<span class="vh"> ${vis() ? vis().un : 'NAE'}</span></i>` : '') + '</li>';
       }).join('')).join('');
     res.className = classe;
-    res.innerHTML = `<ul class="sug" role="listbox" aria-label="Resultados">${html}</ul>${rodape}`;
+    res.innerHTML = (html ? `<ul class="sug" role="listbox" aria-label="Resultados">${html}</ul>` : '') + rodape;
     q.setAttribute('aria-expanded', 'true');
     marca(-1);
     // miniatura da rede de cada alimentador (a mesma que o mapa desenha, dados/redes/)
@@ -205,8 +205,52 @@
   const ORDEM = ['DJ', '79', '03', '33', '02', '40', '41', 'SEC', 'FTR', '88', 'TR', 'ET', 'EP', 'poste'];
   const peso = t => { const i = ORDEM.indexOf(t); return i < 0 ? ORDEM.length - 1.5 : i; };
   // regional e polo: pelo nome, ou pela palavra "regional"/"polo" (ex.: "reg" lista as três regionais)
+  // códigos de um tipo no arquivo de sugestão; o disjuntor vem como "DJ LD01001037 DJ LD01002037 …" (o nome tem espaço)
+  const codigos = (tipo, lista) => tipo === 'DJ' ? (lista.match(/DJ\s+\S+/g) || []) : lista.split(' ');
+  const achaPref = (d, k) => {
+    const r = [];
+    if (d) Object.entries(d).forEach(([tipo, lista]) => codigos(tipo, lista).forEach(c => { if (chave(c).startsWith(k)) r.push([c, tipo]); }));
+    return r.sort((a, b) => (chave(b[0]) === k) - (chave(a[0]) === k) || peso(a[1]) - peso(b[1]) || a[0].length - b[0].length || a[0].localeCompare(b[0]));
+  };
+  // nome do tipo de ativo (a partir de 4 letras, com ou sem acento, singular ou plural). arq: arquivos de sugestão do tipo (poucos
+  // ativos: mostra o grupo); sem arq, o tipo tem muitos ativos e só diz como o código começa; zero: o site não tem o tipo nos dados
+  const TIPOS = [
+    { nomes: ['religador'], nome: 'Religador', arq: [['79', '79']], ini: '79' },
+    { nomes: ['disjuntor'], exato: 'dj', nome: 'Disjuntor', arq: [['DJ', 'DJ']], ini: 'DJ e o código do alimentador, como DJ LD03010004' },
+    { nomes: ['tripsaver'], nome: 'Trip saver', arq: [['40', '40'], ['41', '41']], ini: '40 ou 41' },
+    { nomes: ['fusivel'], nome: 'Fusível', ini: '03 ou 33' },
+    { nomes: ['transformador', 'trafo'], nome: 'Transformador', ini: '57, 56, 53 ou 51 (na maioria)' },
+    { nomes: ['chave'], nome: 'Chave', ini: '02' },
+    { nomes: ['chavefaca'], nome: 'Chave faca', ini: '88' },
+    { nomes: ['poste'], nome: 'Poste', ini: null },
+    { nomes: ['regulador'], nome: 'Regulador', zero: true },
+    { nomes: ['capacitor'], nome: 'Capacitor', zero: true }
+  ];
+  function tiposDe(n) {
+    const c = n.replace(/\s+/g, '');
+    if (!/^[a-z]+$/.test(c)) return [];
+    const base = c.replace(/eis$/, 'el').replace(/(es|s)$/, '');
+    return TIPOS.filter(t => c === t.exato || (c.length >= 4 && t.nomes.some(x => x.startsWith(c) || (base.length >= 4 && x.startsWith(base)))));
+  }
+  async function tipoBloco(ts) {
+    const blocos = [], rod = [];
+    for (const t of ts) {
+      if (t.zero) { rod.push(`<b>${t.nome}</b>: o site ainda não tem esse tipo de equipamento nos dados (hoje são 0).`); continue; }
+      if (!t.arq) {
+        rod.push(`<b>${t.nome}</b>: ${t.ini ? `digite o código; começa com ${t.ini}` : 'digite o número do poste'}. Ou abra o alimentador e busque lá.`);
+        continue;
+      }
+      const ds = await Promise.all(t.arq.map(([f]) => baixa('ativos-pref/' + f)));
+      const lista = [];
+      t.arq.forEach(([, tipo], i) => { if (ds[i] && ds[i][tipo]) codigos(tipo, ds[i][tipo]).forEach(c => lista.push([c, tipo])); });
+      if (!lista.length) { rod.push(`<b>${t.nome}</b>: digite o código; começa com ${t.ini}.`); continue; }
+      blocos.push([`${t.nome} · ${nf(lista.length)} no estado`, lista.slice(0, 6).map(a => item.ativo(a, ''))]);
+      rod.push(`<b>${t.nome}</b>: o código começa com ${t.ini}. Continue digitando para ver os outros.`);
+    }
+    return { blocos, rodape: rod.map(r => `<p class="sug-mais">${r}</p>`).join('') };
+  }
   const bateNome = (kw, nome, n) => n.length >= 2 && (semAcento(nome).includes(n) || (n.length >= 3 && kw.startsWith(n)) || semAcento(kw + ' ' + nome).startsWith(n));
-  async function sugere() {
+  async function sugere(forcar) {
     const txt = q.value.trim(), k = chave(txt), meu = ++pedido, n = semAcento(txt), K = txt.toUpperCase().replace(/[^0-9A-Z]/g, ''), kl = K.toLowerCase();
     if (!txt) { if (document.activeElement === q) atalhos(); else fecha(); return; }
     const nv = nivel();
@@ -224,13 +268,14 @@
       const [d, du] = await Promise.all([k.length >= 3 ? baixa('ativos-pref/' + k.slice(0, 2)) : null, kUC ? baixa('uc/' + fatia(kUC)) : null]);
       if (meu !== pedido) return;                   // já digitaram outra coisa
       if (du && du[kUC]) ucs = [item.uc(kUC, du[kUC])];
-      if (d) Object.entries(d).forEach(([tipo, lista]) => lista.split(' ').forEach(c => { if (chave(c).startsWith(k)) achados.push([c, tipo]); }));
-      achados.sort((a, b) => (chave(b[0]) === k) - (chave(a[0]) === k) || peso(a[1]) - peso(b[1]) || a[0].length - b[0].length || a[0].localeCompare(b[0]));
+      achados = achaPref(d, k);
     }
+    if (meu !== pedido) return;
+    const tipos = tiposDe(n), tp = tipos.length ? await tipoBloco(tipos) : null;
     if (meu !== pedido) return;
     const kOS = chaveOS(txt);
     const at = achados.slice(0, rs.length || ps.length || ms.length || as.length ? 6 : 12);
-    if (!kOS && !ucs.length && !rs.length && !ps.length && !ms.length && !as.length && !at.length) {
+    if (!kOS && !ucs.length && !rs.length && !ps.length && !ms.length && !as.length && !at.length && !tp) {
       const per = soUC(txt) && kUC ? await periodoUC() : null;
       if (meu !== pedido) return;
       fechaSug();
@@ -240,9 +285,11 @@
       return;
     }
     mostra([['OS', kOS ? [item.os(txt)] : []], ['UC', ucs], ['Regionais', rs.map(r => item.reg(r, n))], ['Polos', ps.map(p => item.polo(p, n))],
-      ['Municípios', ms.map(m => item.mun(m, n))], ['Alimentadores', as.map(a => item.al(a, n, kl))], ['Ativos', at.map(a => item.ativo(a, kl))]],
-    achados.length > at.length ? `<p class="sug-mais">e mais ${(achados.length - at.length).toLocaleString('pt-BR')} ativos: continue digitando</p>` : '');
+      ['Municípios', ms.map(m => item.mun(m, n))], ['Alimentadores', as.map(a => item.al(a, n, kl))], ['Ativos', at.map(a => item.ativo(a, kl))], ...(tp ? tp.blocos : [])],
+    (forcar && achados.length > 1 ? `<p class="sug-mais">${nf(achados.length)} ativos começam com <b>${esc(txt)}</b>: escolha um ou continue digitando</p>` :
+      achados.length > at.length ? `<p class="sug-mais">e mais ${(achados.length - at.length).toLocaleString('pt-BR')} ativos: continue digitando</p>` : '') + (tp ? tp.rodape : ''));
     sugDe = txt;
+    if (forcar) { const i = sug.findIndex(o => o.ativo); if (i >= 0) marca(i); }   // Enter sem código exato: lista aberta, 1º ativo marcado
     if (enterDepois === txt) { enterDepois = null; if (!enter()) envia(); }   // ativo na lista: busca o código digitado
   }
   const envia = () => form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
@@ -373,6 +420,13 @@
     if (d === null) { res.innerHTML = '<p>Não foi possível carregar o índice. Confira a internet e tente de novo.</p>'; return; }
     const hits = d[k] || [], ucHits = (du && du[kUC]) || [];
     if (!hits.length && !ucHits.length) {
+      if (k.length >= 3) {                          // não é código exato: ativos que começam com o texto
+        const mais = achaPref(await baixa('ativos-pref/' + k.slice(0, 2)), k).filter(a => chave(a[0]) !== k);
+        if (meu !== pedido) return;
+        if (mais.length === 1) { q.value = mais[0][0]; setTimeout(envia); return; }
+        if (mais.length > 1) { sugere(true); return; }
+      }
+      if (tiposDe(semAcento(txt)).length) { sugere(true); return; }   // nome de tipo de ativo
       const per = soUC(txt) && kUC ? await periodoUC() : null;
       if (meu !== pedido) return;
       res.innerHTML = per !== null ? ucNao(kUC, per) : `<p><b>${esc(txt)}</b> não foi encontrado. Confira o código: a busca é pelo código ` +

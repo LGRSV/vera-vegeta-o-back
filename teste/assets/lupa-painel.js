@@ -155,6 +155,7 @@
   };
   // olho: no mapa abre e fecha a barra; na gaveta da tela cheia abre e fecha a lista das classes (teclado: o foco entra nela)
   lupa.addEventListener('click', e => {
+    garanteAtivos(true);                                 // abrir a busca também pede o ativos.js (uma vez; se falhou, tenta de novo)
     if (!noMapa()) { abreDrop(drop.hidden, e.detail === 0); return; }
     if (fechada()) {
       abreBarra(true);
@@ -308,11 +309,12 @@
     ms += performance.now() - t0; yield; t0 = performance.now();
     // chaves e ativos: código → tipo, ponto, trecho e papéis (início, fim ou passagem de trechos)
     const at = new Map();
-    const poe = (cod, tipo, ll, tr, rel) => {
+    const poe = (cod, tipo, ll, tr, rel, fo) => {
       if (cod == null || cod === '' || /^fim de linha/.test(cod)) return;
       cod = String(cod);
       let a = at.get(cod);
-      if (!a) at.set(cod, a = { cod, k: alnum(cod), tipo: null, ll: null, tr: null, rel: [] });
+      if (!a) at.set(cod, a = { cod, k: alnum(cod), tipo: null, ll: null, tr: null, rel: [], fo: !!fo });
+      else if (!fo) a.fo = false;                      // fo: só existe aqui por uma NAE marcada como fora (hoje em outro alimentador, ou sem trecho)
       if (!a.tipo && tipo) a.tipo = String(tipo);
       if (!a.ll && ll && isFinite(ll[0]) && isFinite(ll[1]) && ll[0] !== null) a.ll = [+ll[0], +ll[1]];
       if (!a.tr && tr) a.tr = tr;
@@ -335,7 +337,7 @@
         if (i % 2000 === 1999) { ms += performance.now() - t0; yield; t0 = performance.now(); }
       }
     }
-    if (D.nae) [...(D.nae.oc || []), ...(D.nae.ext || [])].forEach(o => poe(o.ativo, o.abr, o.lonlat && [o.lonlat[1], o.lonlat[0]], o.trecho));
+    if (D.nae) [...(D.nae.oc || []), ...(D.nae.ext || [])].forEach(o => poe(o.ativo, o.abr, o.lonlat && [o.lonlat[1], o.lonlat[0]], o.trecho, null, !!o.fora));
     at.forEach(a => { if (!a.tr && a.rel.length) a.tr = a.rel[0][1]; });
     I = { TS, VS, iT, tk, vaosT, postes, minus, ordP, at, ats: [...at.values()], ms: ms + performance.now() - t0 };
     sugBox.dataset.indice = I.ms.toFixed(1);             // tempo para montar o índice (testes)
@@ -476,6 +478,99 @@
     return s ? parseInt(s.textContent, 10) || 0 : null;
   };
 
+  // ---------- ativos.js do alimentador: transformadores e outros equipamentos na busca ----------
+  // O arquivo só é pedido na primeira vez que a pessoa abre ou usa a busca (e o ativos-zoom.js, no zoom 16, aproveita o mesmo
+  // pedido: window.__ativosCarga). Entra no índice em fatias curtas (o LD03010004 tem 2.261 transformadores); o que já está
+  // no índice da página (NAE, OS, chaves) não entra de novo.
+  const carregaAtivos = () => window.__ativosCarga || (window.__ativosCarga = new Promise(res => {
+    if (window.ATIVOS) return res(window.ATIVOS);
+    const sc = document.createElement('script');
+    sc.src = 'ativos.js';
+    sc.onload = () => res(window.ATIVOS || { tr: [], eq: [] });
+    sc.onerror = () => { sc.remove(); res({ tr: [], eq: [] }); };   // sem o arquivo: a busca segue só com os dados da página
+    document.head.append(sc);
+  }));
+  const IA = { ats: [], m: new Map() };
+  let ultTxt = '';                                      // texto da busca na tecla anterior (vazio: uso novo)
+  let ativosEstado = 0;                                  // 0: não pedido, 1: baixando ou entrando no índice, 2: pronto, 3: não chegou (tenta de novo no próximo uso da busca)
+  function indexaAtivos(A, fim) {
+    const trs = A.tr || [], eqs = A.eq || [], n1 = trs.length, tot = n1 + eqs.length;
+    const nomes = new Set((D.trechos || []).map(t => t.nome));
+    let i = 0;
+    const passo = () => {
+      const limite = performance.now() + 5;              // no máximo ~5 ms por fatia
+      while (i < tot) {
+        const it = i < n1 ? trs[i] : eqs[i - n1], tr = i < n1;
+        i++;
+        const cod = it && it[0] != null ? String(it[0]) : '';
+        if (cod) {
+          const tipo = tr ? 'TR' : String(it[1] ?? ''), lat = tr ? it[1] : it[2], lon = tr ? it[2] : it[3], tre = tr ? it[3] : it[4];
+          const ll = lat != null && lon != null && isFinite(lat) && isFinite(lon) ? [+lat, +lon] : null;
+          const a = IA.m.get(cod);
+          if (!a) { const n = { cod, k: alnum(cod), tipo: tipo || null, ll, tr: tre && nomes.has(tre) ? tre : null, rel: [], ia: true }; IA.m.set(cod, n); IA.ats.push(n); }
+          else { if (!a.tipo && tipo) a.tipo = tipo; if (!a.ll && ll) a.ll = ll; if (!a.tr && tre && nomes.has(tre)) a.tr = tre; }
+        }
+        if ((i & 63) === 0 && performance.now() > limite) break;
+      }
+      if (i < tot) setTimeout(passo, 0); else fim();
+    };
+    passo();
+  }
+  function garanteAtivos(novo) {
+    if (ativosEstado === 1 || ativosEstado === 2 || (ativosEstado === 3 && !novo)) return;
+    ativosEstado = 1;
+    carregaAtivos().then(A => {
+      if (window.ATIVOS) return A;
+      window.__ativosCarga = null;                       // não chegou: a falha não fica guardada na promessa (o ativos-zoom.js pede de novo com o mesmo carregador)
+      return null;
+    }).then(A => indexaAtivos(A || {}, () => {
+      ativosEstado = A && window.ATIVOS ? 2 : 3;
+      const txt = q.value.trim();
+      if (txt && !sugBox.hidden) mostra(txt, true);      // tinha um "Procurando": refaz a lista com os ativos
+    }));
+  }
+
+  // nome do tipo digitado (com ou sem acento, singular ou plural, a partir de 4 letras; DJ com 2): lista os ativos do tipo
+  const DEFS = [
+    { pal: ['religador'], un: 'religador', pl: 'Religadores', pag: true, ok: /^religador/i },
+    { pal: ['disjuntor'], curto: 'dj', un: 'disjuntor', pl: 'Disjuntores', pag: true, ok: /^disjuntor/i },
+    { pal: ['fusivel'], un: 'fusível', pl: 'Fusíveis', pag: true, ok: /^fus/i },
+    { pal: ['chave'], un: 'chave', pl: 'Chaves', dep: true, ok: /^chave/i, faca: { un: 'chave faca', pl: 'Chaves faca', dep: false, ok: /faca/i } },
+    { pal: ['trip', 'tripsaver'], un: 'trip saver', pl: 'Trip savers', pag: true, dep: true, ok: /^trip/i },
+    { pal: ['transformador', 'trafo'], un: 'transformador', pl: 'Transformadores', dep: true, ok: /^transformador/i },
+    { pal: ['regulador'], un: 'regulador', pl: 'Reguladores', dep: true, ok: /^regulador/i },
+    { pal: ['capacitor'], un: 'capacitor', pl: 'Capacitores', dep: true, ok: /capacitor/i }
+  ];
+  const singular = x => { const o = [x]; if (/eis$/.test(x)) o.push(x.slice(0, -3) + 'el'); if (/es$/.test(x)) o.push(x.slice(0, -2)); if (/s$/.test(x)) o.push(x.slice(0, -1)); return o; };
+  const casaPal = (x, pal, min) => singular(x).some(y => y.length >= min && pal.startsWith(y));
+  function tipoDigitado(txt) {
+    const ws = txt.trim().split(/\s+/), lw = ws.map(semAcento);
+    if (!lw[0]) return null;
+    for (const d of DEFS) {
+      if (!d.pal.some(p => casaPal(lw[0], p, 4)) && !(d.curto && singular(lw[0]).includes(d.curto))) continue;
+      let def = d, i = 1;
+      if (d.faca && lw[1] && casaPal(lw[1], 'faca', 3)) { def = { ...d, ...d.faca }; i = 2; }
+      else if (d.pal[0] === 'trip' && lw[1] && casaPal(lw[1], 'saver', 3)) i = 2;
+      return { def, rest: ws.slice(i).join(' ') };
+    }
+    return null;
+  }
+  const posteDigitado = txt => { const ws = txt.trim().split(/\s+/); return ws[0] && casaPal(semAcento(ws[0]), 'poste', 4) ? { rest: ws.slice(1).join(' ') } : null; };
+  // os ativos do tipo neste alimentador (índice da página e ativos.js), com o resto digitado afinando pelo código
+  function doTipo(def, K) {
+    const X = indice(), r = [], sim = new Map();
+    const ok = a => {
+      if (!a.tipo) return false;
+      let v = sim.get(a.tipo);
+      if (v === undefined) sim.set(a.tipo, v = def.ok.test(tipoTxt(a.tipo)));
+      return v && (!K || a.k.startsWith(K) || (K.length >= 3 && a.k.includes(K)));
+    };
+    X.ats.forEach(a => { if (ok(a) && (!a.fo || IA.m.has(a.cod))) r.push(a); });   // ativo só de NAE fora não é deste alimentador: não entra no grupo nem no total (o código ainda acha)
+    IA.ats.forEach(a => { if (!X.at.has(a.cod) && ok(a)) r.push(a); });
+    const rk = a => K && !a.k.startsWith(K) ? 1 : 0;      // com parte do código: os que começam por ela vêm antes
+    return r.sort((x, y) => rk(x) - rk(y) || peso(x.tipo) - peso(y.tipo) || x.cod.length - y.cod.length || (x.cod < y.cod ? -1 : 1));
+  }
+
   // ---------- procura ----------
   const LIM = { tr: 6, at: 6, po: 5, os: 5 };          // por grupo (o título diz quantos há ao todo)
   let extra = null;                                     // achados do índice dados/ativos para o texto atual
@@ -490,12 +585,16 @@
     tr.sort((a, b) => a.r - b.r || a.e.t.nome.length - b.e.t.nome.length || a.e.i - b.e.i);
     // chaves e ativos pelo código (3+ caracteres): igual, começa com ou (4+) contém
     const at = [];
-    if (K.length >= 3) X.ats.forEach(a => {
-      const r = a.k === K ? 0 : a.k.startsWith(K) ? 1 : K.length >= 4 && a.k.includes(K) ? 2 : -1;
-      if (r >= 0) at.push({ r, a });
-    });
+    if (K.length >= 3) {
+      const varre = a => {
+        const r = a.k === K ? 0 : a.k.startsWith(K) ? 1 : K.length >= 4 && a.k.includes(K) ? 2 : -1;
+        if (r >= 0) at.push({ r, a });
+      };
+      X.ats.forEach(varre);
+      IA.ats.forEach(a => { if (!X.at.has(a.cod)) varre(a); });   // transformadores e equipamentos do ativos.js (sem repetir os da página)
+    }
     if (extra && extra.txt === txt) extra.hits.forEach(a => { if (!at.some(x => chaveIdx(x.a.cod) === chaveIdx(a.cod))) at.push({ r: 0, a }); });
-    at.sort((x, y) => x.r - y.r || peso(x.a.tipo) - peso(y.a.tipo) || x.a.cod.length - y.a.cod.length || (x.a.cod < y.a.cod ? -1 : 1));
+    at.sort((x, y) => x.r - y.r || (x.a.ia ? 1 : 0) - (y.a.ia ? 1 : 0) || peso(x.a.tipo) - peso(y.a.tipo) || x.a.cod.length - y.a.cod.length || (x.a.cod < y.a.cod ? -1 : 1));
     // trechos pela chave: os que começam, terminam ou passam nas chaves achadas
     const ja = new Set(tr.map(x => x.e.t.nome)), viaChave = [];
     at.slice(0, LIM.at).forEach(({ a }) => a.rel.forEach(([papel, nome]) => {
@@ -504,14 +603,27 @@
       viaChave.push({ e: X.tk[X.iT.get(nome)], papel, cod: a.cod });
     }));
     // postes: igual (2+) ou começa com (3+)
-    const po = [];
-    if (lo.length >= 2) {
+    const po = [], pd = posteDigitado(txt), lp = pd && pd.rest ? semAcento(pd.rest).replace(/\s+/g, '') : lo;   // "poste 1234" procura o 1234
+    if (lp.length >= 2) {
       const P = X.ordP;
       let a = 0, b = P.length;
-      while (a < b) { const m = (a + b) >> 1; if (P[m] < lo) a = m + 1; else b = m; }
-      for (let i = a; i < P.length && P[i].startsWith(lo); i++) if (lo.length >= 3 || P[i] === lo) po.push(X.minus.get(P[i]));
-      po.sort((x, y) => (y.toLowerCase() === lo) - (x.toLowerCase() === lo) || x.length - y.length || (x < y ? -1 : 1));
+      while (a < b) { const m = (a + b) >> 1; if (P[m] < lp) a = m + 1; else b = m; }
+      for (let i = a; i < P.length && P[i].startsWith(lp); i++) if (lp.length >= 3 || P[i] === lp) po.push(X.minus.get(P[i]));
+      po.sort((x, y) => (y.toLowerCase() === lp) - (x.toLowerCase() === lp) || x.length - y.length || (x < y ? -1 : 1));
     }
+    // nome do tipo: os ativos do tipo neste alimentador (ou o aviso de que não há); "poste" sozinho pede o número
+    const T = tipoDigitado(txt);
+    let ti = [], nota = '', proc = false, inc = false;
+    if (T) {
+      const un = esc(T.def.un);
+      if (!T.def.pag && ativosEstado < 2) { proc = true; nota = `Procurando <b>${un}</b> no índice de ativos…`; }
+      else {
+        ti = doTipo(T.def, alnum(T.rest));
+        inc = !!T.def.dep && ativosEstado === 3;         // ativos.js não chegou: a lista só tem o que a página já sabia
+        if (!ti.length && inc) nota = `A lista de ${esc(T.def.pl.toLowerCase())} não carregou por completo. Tente de novo.`;
+        else if (!ti.length) nota = T.rest ? `Nenhum ${un} com <b>${esc(T.rest)}</b> neste alimentador.` : `Este alimentador não tem ${un} nos dados do site.`;
+      }
+    } else if (pd && !pd.rest) nota = 'Digite o número do poste, por exemplo <b>poste 1234</b>.';
     // OS: número/ano (2375/2026, com ou sem a equipe), número (3+ dígitos) ou equipe com número (INPA03)
     const os = [];
     if (K.length >= 3 && /\d/.test(K)) {
@@ -526,7 +638,8 @@
       });
       os.sort((a, b) => a.r - b.r || (b.o.data < a.o.data ? -1 : b.o.data > a.o.data ? 1 : 0));
     }
-    return { tr: tr.map(x => ({ t: x.e.t })), trc: viaChave.map(v => ({ t: v.e.t, papel: v.papel, cod: v.cod })), at: at.map(x => x.a), po, os: os.map(x => x.o) };
+    if (ti.length) { const jaTipo = new Set(ti); for (let i = at.length - 1; i >= 0; i--) if (jaTipo.has(at[i].a)) at.splice(i, 1); }   // no grupo do tipo: não repete em "Chaves e ativos"
+    return { ti, tdef: T && T.def, trest: T ? T.rest : '', nota, proc, inc, tr: tr.map(x => ({ t: x.e.t })), trc: viaChave.map(v => ({ t: v.e.t, papel: v.papel, cod: v.cod })), at: at.map(x => x.a), po, os: os.map(x => x.o) };
   }
 
   // ---------- lista suspensa dos resultados ----------
@@ -553,6 +666,7 @@
   const PAPEL = { ini: 'começa em', fim: 'termina em', passa: 'passa por' };
   const PAPEL_AT = { ini: 'início do', fim: 'fim do', passa: 'passa no' };
   function linhaHtml(r, n, N) {
+    if (r.n != null) n = r.n;                            // grupo do tipo: realça só o que se digitou depois do nome do tipo
     const ico = r.tipo === 'tr' ? `<span class="lp-bol" style="--c:${esc(r.t.cor)}" aria-hidden="true"></span>`
       : `<svg class="lp-si" viewBox="0 0 24 24" aria-hidden="true">${ICO[r.tipo]}</svg>`;
     let b = '', c = '', nae = null;
@@ -591,11 +705,11 @@
     const antes = manter && sug[marcado] ? idDe(sug[marcado]) : null;
     sug = [];
     let html = '', i = 0, total = 0, cortou = false;
-    const grupo = (tit, lista, lim, faz) => {
+    const grupo = (tit, lista, lim, faz, soma, inc) => {
       if (!lista.length) return;
       total += lista.length;
       if (lista.length > lim) cortou = true;
-      html += `<li class="lp-st" role="presentation">${tit}${lista.length > lim ? `<span> · ${mil(lim)} de ${mil(lista.length)}</span>` : ''}</li>` +
+      html += `<li class="lp-st" role="presentation">${tit}${soma ? `<span> · ${mil(lista.length)}${inc ? ' · lista incompleta: os demais não carregaram' : ''}</span>` : lista.length > lim ? `<span> · ${mil(lim)} de ${mil(lista.length)}</span>` : ''}</li>` +
         lista.slice(0, lim).map(x => {
           const r = faz(x);
           sug.push(r);
@@ -604,6 +718,7 @@
     };
     // ordem: trechos pelo nome, chaves e ativos, os trechos dessas chaves (começam, terminam ou passam nelas), postes e OS
     const trecho = e => ({ tipo: 'tr', t: e.t, papel: e.papel, cod: e.cod });
+    if (R.ti.length) grupo(R.tdef.pl, R.ti, LIM.at, a => ({ tipo: 'at', a, n: semAcento(R.trest) }), true, R.inc);   // nome do tipo: o grupo vem antes
     grupo('Trechos', R.tr, LIM.tr, trecho);
     grupo('Chaves e ativos', R.at, LIM.at, a => ({ tipo: 'at', a }));
     grupo(R.at.length === 1 ? 'Trechos da chave' : 'Trechos das chaves', R.trc, LIM.tr, trecho);
@@ -615,18 +730,21 @@
     if (!sug.length) {
       fechaLista();
       // código completo ainda a caminho do índice de ativos: avisa que está procurando (sugere() refaz a lista na volta)
-      const procurando = chaveIdx(txt).length >= 4 && !(extra && extra.txt === txt);
-      if (n.length >= 2) {
+      const procurando = R.proc || (!R.nota && ((chaveIdx(txt).length >= 4 && !(extra && extra.txt === txt)) || (ativosEstado < 2 && alnum(txt).length >= 3)));
+      if (R.nota) {
+        abreLista();
+        sugBox.innerHTML = `<p class="lp-vazio">${R.nota}</p>`;
+      } else if (n.length >= 2) {
         abreLista();
         sugBox.innerHTML = procurando ? `<p class="lp-vazio">Procurando <b>${esc(txt)}</b> no índice de ativos…</p>`
           : `<p class="lp-vazio">Nada encontrado para <b>${esc(txt)}</b>. Trecho (T2-A), código da chave, número do poste ou da OS.</p>`;
       }
-      sugSt.textContent = n.length < 2 ? '' : procurando ? 'Procurando' : 'Nada encontrado';
+      sugSt.textContent = R.nota ? sugBox.textContent : n.length < 2 ? '' : procurando ? 'Procurando' : 'Nada encontrado';
       sugBox.dataset.ms = (performance.now() - t0).toFixed(1);
       return;
     }
     const fino = matchMedia('(hover:hover) and (pointer:fine)').matches;
-    sugBox.innerHTML = `<ul role="listbox" aria-label="Resultados da busca">${html}</ul>` +
+    sugBox.innerHTML = (R.nota ? `<p class="lp-vazio">${R.nota}</p>` : '') + `<ul role="listbox" aria-label="Resultados da busca">${html}</ul>` +
       (fino || cortou ? `<p class="lp-sug-pe">${fino ? '<span>↑ ↓ mostram no mapa · Enter escolhe · Esc fecha</span>' : ''}${cortou ? '<span>Continue digitando para afinar</span>' : ''}</p>` : '');
     abreLista();
     sugSt.textContent = `${mil(total)} resultado${total === 1 ? '' : 's'}`;
@@ -652,6 +770,7 @@
   }
   function fechaSug() {                                  // fecha e esquece o que estava a caminho (índice de ativos, vista de antes)
     pedido++;
+    ultTxt = '';
     clearTimeout(espera);
     vistaAntes = null;
     if (!sugBox.hidden || sug.length) fechaLista();
@@ -672,7 +791,9 @@
   function sugere() {
     const txt = q.value.trim(), meu = ++pedido;
     clearTimeout(espera);
-    if (!txt) { fechaLista(); return; }
+    if (!txt) { ultTxt = ''; fechaLista(); return; }
+    garanteAtivos(!ultTxt);                              // 1ª vez que se usa a busca: baixa o ativos.js (se falhou, tenta de novo a cada uso novo, não a cada tecla)
+    ultTxt = txt;
     mostra(txt);
     const k = chaveIdx(txt);
     if (k.length < 4 || (extra && extra.txt === txt)) return;
@@ -686,7 +807,7 @@
     }, 200);
   }
   q.addEventListener('input', () => { if (q.value.trim() && document.activeElement === q) sugere(); else fechaSug(); });
-  q.addEventListener('focus', () => { if (q.value.trim()) sugere(); });
+  q.addEventListener('focus', () => { garanteAtivos(true); if (q.value.trim()) sugere(); });
   q.addEventListener('click', () => { if (q.value.trim() && sugBox.hidden) sugere(); });   // depois do Esc, tocar no campo reabre
   q.addEventListener('keydown', e => {
     if (e.key === 'ArrowDown' && sugBox.hidden && q.value.trim()) { e.preventDefault(); sugere(); if (sug.length) marca(0, true); return; }

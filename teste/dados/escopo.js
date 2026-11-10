@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "1.4",
+ "versao": "1.5",
  "atualizado": "2026-11-10",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -124,7 +124,9 @@ window.ARGOS_ESCOPO = {
    {"t": "Busca de ativo e de transformador", "st": "ok", "d": "2026-10-06"},
    {"t": "Uma busca só (olho do ARGOS) para ativo, município, alimentador e OS", "st": "ok", "d": "2026-10-15"},
    {"t": "Colar uma lista de códigos e buscar de uma vez", "st": "ok", "d": "2026-10-21"},
-   {"t": "Busca por UC", "st": "ok", "d": "2026-10-26"}
+   {"t": "Busca por UC", "st": "ok", "d": "2026-10-26"},
+   {"t": "Busca de ativo: parte do código com Enter abre o ativo ou a lista (antes respondia \"não foi encontrado\"), o disjuntor aparece nas sugestões, o nome do tipo (religador, fusível, transformador…) é entendido e, dentro do alimentador, todo transformador é achado por parte do código", "st": "ok", "d": "2026-11-10"},
+   {"t": "Enviar a camada de reguladores de tensão do GIS (e a de bancos de capacitor, se quiser) para entrarem na busca e no mapa", "st": "bloq", "desde": "2026-11-10", "prazo": "2026-11-17", "resp": "proj", "obs": "O site tem 0 regulador e 0 capacitor nos dados: só as camadas de chaves e de transformadores foram carregadas. Serve o KMZ da mesma exportação ou uma planilha com código, alimentador e coordenada ou poste."}
   ]},
   {"id": "2.3", "frente": "mapa", "titulo": "Visões e painel do alimentador", "itens": [
    {"t": "Tela cheia do mapa do alimentador", "st": "ok", "d": "2026-10-13"},

@@ -23,14 +23,19 @@
 
   // ---------- dados ----------
   let A = null, pedindo = false, postes = null;
+  // um pedido só, compartilhado com a busca (lupa-painel.js): quem chega primeiro baixa, o outro aproveita
+  const carga = () => window.__ativosCarga || (window.__ativosCarga = new Promise(res => {
+    if (window.ATIVOS) return res(window.ATIVOS);
+    const s = document.createElement('script');
+    s.src = 'ativos.js';
+    s.onload = () => res(window.ATIVOS || { tr: [], eq: [] });
+    s.onerror = () => res({ tr: [], eq: [] });          // sem o arquivo: só os postes
+    document.head.append(s);
+  }));
   function baixa() {                                        // ativos.js do alimentador, só na 1ª vez que chega perto
     if (A || pedindo) return;
     pedindo = true;
-    const s = document.createElement('script');
-    s.src = 'ativos.js';
-    s.onload = () => { A = window.ATIVOS || { tr: [], eq: [] }; atualiza(); };
-    s.onerror = () => { A = { tr: [], eq: [] }; };       // sem o arquivo: só os postes
-    document.head.append(s);
+    carga().then(a => { A = a; atualiza(); });
   }
   function listaPostes() {                                  // pontas dos vãos com número de poste (os "N…" são nós sem poste)
     if (postes) return postes;
