@@ -248,8 +248,13 @@ function situacao(a) {
 }
 
 // ---- cada OS e cada NAE na quadra que contém o ponto (contorno da própria quadra, não a soma dos setores) -------------
-// a.k = {exec, pend, crit, lv, h: {AAAA-MM: {n, fec, dec}}}: OS executadas nos 6 meses, pendentes (crit = emergencial/urgente),
-// executadas pela linha viva e, por mês, NAE, FEC (consumidores atingidos) e DEC (consumidor·hora) dos últimos 6 meses da Crítica.
+// a.k = {exec, pend, crit, lv, h: {AAAA-MM: {n, dec, fec, chi, ci, sem}}}: OS executadas nos 6 meses, pendentes (crit =
+// emergencial/urgente), executadas pela linha viva e, por mês dos últimos 6 da Crítica: NAE (ocorrências de vegetação em
+// ativos da quadra), DEC (h) e FEC que elas somaram ao conjunto elétrico do alimentador (PRODIST Módulo 8: consumidor·hora
+// e consumidores interrompidos divididos pelos consumidores do conjunto; vêm prontos em cada ocorrência do podas.js),
+// CHI (consumidor·hora) e CI (consumidores interrompidos). sem = ocorrências sem conjunto conhecido (fora do DEC e do FEC).
+// Sem P.conjuntos (podas.js gerado sem dados/conjuntos.json) não há DEC nem FEC: a tabela mostra CHI e CI com esses nomes.
+const COM_DEC = !!P.conjuntos;
 const MESES6 = (P.nae_meses || []).slice(-6);
 function indiceGeo(itens) {
   const aneis = g => g.type === 'Polygon' ? [g.coordinates] : g.coordinates;           // lista de polígonos [anel externo, buracos...]
@@ -286,7 +291,7 @@ function ondeEsta(idx, lat, lon) {                     // a menor quadra que con
 }
 function contarPorQuadra(c) {
   const lista = P.cidades[c], idx = indiceGeo(lista);
-  lista.forEach(a => { a.k = {exec: 0, pend: 0, crit: 0, lv: 0, h: Object.fromEntries(MESES6.map(m => [m, {n: 0, fec: 0, dec: 0}]))}; });
+  lista.forEach(a => { a.k = {exec: 0, pend: 0, crit: 0, lv: 0, h: Object.fromEntries(MESES6.map(m => [m, {n: 0, dec: 0, fec: 0, chi: 0, ci: 0, sem: 0}]))}; });
   (P.pontos && P.pontos[c] || []).forEach(pt => {
     const a = ondeEsta(idx, pt[0], pt[1]); if (!a) return;
     if (pt[2] === 'executado') { a.k.exec++; if (pt[10]) a.k.lv++; } else { a.k.pend++; if (pt[2] === 'critico') a.k.crit++; }
@@ -294,7 +299,8 @@ function contarPorQuadra(c) {
   (P.nae && P.nae[c] || []).forEach(o => {
     const a = ondeEsta(idx, o[0], o[1]); if (!a) return;
     const h = a.k.h[String(o[3]).slice(0, 7)]; if (!h) return;
-    h.n++; h.fec += o[7] || 0; h.dec += (o[7] || 0) * (o[8] || 0) / 60;
+    h.n++; h.ci += o[7] || 0; h.chi += (o[7] || 0) * (o[8] || 0) / 60;
+    if (o[10] != null) { h.dec += o[10]; h.fec += o[11]; } else h.sem++;
   });
   lista.forEach(a => { a.exec6m = a.k.exec; a.pend = a.k.pend; a.crit = a.k.crit; situacao(a); });
 }
@@ -422,12 +428,25 @@ const nomesLay = L.layerGroup();
 const cardsLay = L.layerGroup(), comCard = new Set();
 const fn = v => !v ? '0' : v >= 1000 ? (v / 1000).toFixed(1).replace('.', ',') + 'k' : v >= 100 ? String(Math.round(v)) : v >= 10 ? v.toFixed(1).replace('.', ',') : v.toFixed(1).replace('.', ',').replace(/,0$/, '');
 const mes3 = m => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+m.slice(5, 7) - 1];
-function tabelaHist(a) {
+// índice (DEC em horas, FEC em interrupções por consumidor): 3 casas; abaixo de 0,001 mostra "<0,001" em vez de zero
+const fi = v => !v ? '0' : v < 0.0005 ? '<0,001' : v >= 10 ? v.toFixed(1).replace('.', ',') : v >= 1 ? v.toFixed(2).replace('.', ',') : v.toFixed(3).replace('.', ',');
+function tabelaHist(a, completo) {
   const h = a.k.h, ms = MESES6; if (!ms.length) return '';
   const max = Math.max(1, ...ms.map(m => h[m].n)), nenhum = ms.every(m => !h[m].n);
   const lin = (rot, f, fmt) => `<tr><th>${rot}</th>` + ms.map(m => { const v = f(h[m]); return `<td class="${v ? '' : 'z'}"${rot === 'NAE' && v ? ` style="background:rgba(138,3,3,${(.35 + .65 * v / max).toFixed(2)});color:#fff"` : ''}>${fmt(v)}</td>`; }).join('') + '</tr>';
-  return `<table class="qt"><caption>NAE · DEC · FEC · ${ms.length} meses${nenhum ? ' · sem NAE aqui' : ''}</caption><thead><tr><th></th>${ms.map(m => `<th>${mes3(m)}</th>`).join('')}</tr></thead><tbody>` +
-    lin('NAE', x => x.n, v => v || '0') + lin('DEC', x => x.dec, fn) + lin('FEC', x => x.fec, fn) + '</tbody></table>';
+  const bruto = lin('CHI', x => x.chi, fn) + lin('CI', x => x.ci, v => fn(Math.round(v)).replace(/,0$/, ''));
+  return `<table class="qt"><caption>NAE · ${COM_DEC ? 'DEC · FEC' : 'CHI · CI'} · ${ms.length} meses${nenhum ? ' · sem NAE aqui' : ''}</caption><thead><tr><th></th>${ms.map(m => `<th>${mes3(m)}</th>`).join('')}</tr></thead><tbody>` +
+    lin('NAE', x => x.n, v => v || '0') + (COM_DEC ? lin('DEC', x => x.dec, fi) + lin('FEC', x => x.fec, fi) + (completo ? bruto : '') : bruto) + '</tbody></table>';
+}
+// o que cada linha da tabela quer dizer, no painel da quadra
+function notaHist(a) {
+  const sem = MESES6.reduce((n, m) => n + a.k.h[m].sem, 0), per = MESES6.length ? `${mes3(MESES6[0])} a ${mes3(MESES6[MESES6.length - 1])}/${MESES6[MESES6.length - 1].slice(0, 4)}` : '';
+  const base = `Ocorrências de vegetação (NAE) registradas em ativos dentro do contorno, por mês de competência (${per}). `;
+  if (!COM_DEC) return base + 'CHI = consumidor·hora interrompido; CI = consumidores interrompidos.';
+  const ref = P.conjuntos.mes ? ` de ${mes3(P.conjuntos.mes)}/${P.conjuntos.mes.slice(0, 4)}` : '';
+  return base + `DEC (horas) e FEC (interrupções por consumidor): quanto essas ocorrências somaram ao DEC e ao FEC do conjunto elétrico de cada alimentador ` +
+    `(consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto, pela Crítica${ref}). CHI = consumidor·hora interrompido; CI = consumidores interrompidos.` +
+    (sem ? ` ${sem} ocorrência${sem === 1 ? '' : 's'} sem conjunto conhecido ${sem === 1 ? 'ficou' : 'ficaram'} fora do DEC e do FEC.` : '');
 }
 function linhaOS(a) {
   const k = a.k;
@@ -642,7 +661,7 @@ function detalhe(a, c) {
     `<div><dt>Podas em 6 meses</dt><dd>${esc(nf(a.exec6m || 0))}</dd></div>` +
     `<div><dt>Pendentes</dt><dd>${esc(nf(a.pend || 0))}<small>${a.crit ? esc(nf(a.crit)) + ' emergencial/urgente' : ''}</small></dd></div>` +
     `<div><dt>OS no total</dt><dd>${esc(nf(a.total || 0))}</dd></div></dl>` +
-    (a.k ? `<div class="pd-hist">${linhaOS(a)}${tabelaHist(a)}<p class="pd-peq">Contagem pelas OS e NAE dentro do contorno. DEC em consumidor·hora; FEC em consumidores atingidos.</p></div>` : '') +
+    (a.k ? `<div class="pd-hist">${linhaOS(a)}${tabelaHist(a, true)}<p class="pd-peq">${notaHist(a)}</p></div>` : '') +
     `<div><h3>Alimentadores</h3>${als}</div>` +
     `<div><h3>OS recentes</h3>${os ? `<ul class="pd-os">${os}</ul>` : '<p class="pd-peq">Nenhuma OS de poda.</p>'}${falta}</div></div>`;
 }

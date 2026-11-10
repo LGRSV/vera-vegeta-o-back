@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "1.0",
+ "versao": "1.1",
  "atualizado": "2026-11-09",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -212,7 +212,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Ponto de cada OS no poste da estrutura e ocorrências NAE no perímetro urbano", "st": "ok", "d": "2026-10-30"},
    {"t": "Camadas selecionáveis (Áreas, OS e NAE), tela cheia e atalhos para Street View e Google Earth", "st": "ok", "d": "2026-10-30"},
    {"t": "Quadras de Palmas com nome (405 Sul) e contorno oficial do GeoPalmas", "st": "ok", "d": "2026-10-30"},
-   {"t": "Card por quadra: linha viva, OS executadas / total e NAE, DEC e FEC de 6 meses", "st": "ok", "d": "2026-11-04"}
+   {"t": "Card por quadra: linha viva, OS executadas / total e NAE, DEC e FEC de 6 meses", "st": "ok", "d": "2026-11-04"},
+   {"t": "DEC e FEC da quadra pela definição da ANEEL (contribuição ao conjunto elétrico), com consumidor·hora e consumidores no painel", "st": "ok", "d": "2026-11-09"}
   ]},
   {"id": "9.2", "frente": "podas", "titulo": "Próximas cidades e ajustes", "itens": [
    {"t": "Aprovar a entrada da marca de linha viva no gerador (PR #10 do repositório smartled)", "st": "bloq", "desde": "2026-11-04", "prazo": "2026-11-13", "resp": "proj"},
@@ -269,6 +270,7 @@ window.ARGOS_ESCOPO = {
   {"id": "carteira", "nome": "Medições e acompanhamento da carteira", "origem": "Base medição.xlsx e ACOMPANHAMENTO DE LIMPEZA DE FAIXA 2026.xlsx", "usa": ["carteira"], "ritmo": "mensal", "como": "Envio das duas planilhas para reprocessar a página."},
   {"id": "painel", "nome": "Realizado do Painel gerencial", "origem": "Exportações do BI Manutenção", "usa": ["painel"], "ritmo": "mensal", "como": "Exportação do BI e reprocessamento da página (fonte em decisão)."},
   {"id": "orcamento", "nome": "Orçamento e realizado por SIGCO", "origem": "curva.xlsx, Capex 2027 a 2029 e Qtd_2026.xlsx", "usa": ["orcamento"], "ritmo": "mensal", "como": "Planilhas novas e reprocessamento da página."},
+  {"id": "conjuntos", "nome": "Consumidores por conjunto elétrico", "origem": "Calculado da Crítica (consumidores interrompidos / FEC do conjunto)", "usa": ["podas"], "ritmo": "demanda", "como": "Script conjuntos.py com uma Crítica mais nova."},
   {"id": "quadras", "nome": "Quadras e setores (podas)", "origem": "GeoPalmas e IBGE, censo 2022", "usa": ["podas"], "ritmo": "fixa", "como": "Só muda com arquivo oficial novo."},
   {"id": "ibge", "nome": "Malha dos municípios", "origem": "IBGE, API de malhas", "usa": ["rede", "mapa"], "ritmo": "fixa", "como": "Só muda se o IBGE publicar malha nova."}
  ],
@@ -299,6 +301,7 @@ window.ARGOS_ESCOPO = {
    ["ativos_gis.py", "Transformadores do GIS nos trechos e NAE que estava sem trecho", "Transformadores.kmz", "Trafos e NAE nos JSON"],
    ["ucs_trechos.py", "UCs ligadas por trecho", "uc_por_trafo.csv", "dados/ucs-trechos.js"],
    ["priorizacao_os.py", "Troca as OS de limpeza do Priorizador pelas do mapa", "limpeza.js dos alimentadores", "assets/priorizacao-dados.js"],
+   ["conjuntos.py", "Consumidores de cada conjunto elétrico e conjunto de cada alimentador (denominador do DEC e do FEC)", "Uma Crítica", "dados/conjuntos.json"],
    ["mapa_podas.py", "Situação da poda por quadra, pontos das OS e NAE no perímetro urbano", "OS status, setores do IBGE, Crítica", "dados/podas.js"],
    ["gera_visoes.js", "Visões do mapa inicial (Manutenção, Inspeção, Insp→manut, Limpeza)", "Dados dos alimentadores", "assets/mapa-municipios-visoes.js"],
    ["planilha_trechos.py", "Planilha Excel com trechos e NAE para tabelas dinâmicas", "JSON do site", "Excel"],
@@ -329,7 +332,8 @@ window.ARGOS_ESCOPO = {
    {"titulo": "Mapa de podas", "itens": [
     "Situação da quadra pela OS de poda dos últimos 182 dias: executada, pendente, crítica ou sem poda recente.",
     "O ponto da OS é o poste da estrutura; sem ele, qualquer ativo da OS.",
-    "A NAE mostrada é só a de dentro do perímetro urbano de cada cidade."
+    "A NAE mostrada é só a de dentro do perímetro urbano de cada cidade.",
+    "DEC e FEC da quadra: quanto as ocorrências de vegetação registradas nos ativos da quadra somaram ao DEC e ao FEC do conjunto elétrico do alimentador (consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto)."
    ]}
   ],
   "publicacao": [
