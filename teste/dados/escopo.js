@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "1.1",
+ "versao": "1.2",
  "atualizado": "2026-11-09",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -40,6 +40,7 @@ window.ARGOS_ESCOPO = {
    {"t": "As cargas dependem do envio manual de arquivos.", "acao": "Envio pelo menu Atualizar bases, com processamento automático; responsável e dia definidos por base."},
    {"t": "O site é público, sem login: quem tem o endereço vê a rede e as OS.", "acao": "Decidir se continua assim ou se passa a ter controle de acesso."},
    {"t": "A rede vem de uma exportação do GIS (03/10/2026): obras novas não aparecem até a próxima exportação.", "acao": "Definir a rotina de atualização do cadastro."},
+   {"t": "O consumidor·hora das ocorrências usa a maior duração do evento e fica cerca de 2 vezes acima do real quando o religamento é por etapas (mai/2026: 191 mil contra 91 mil).", "acao": "Gravar o consumidor·hora por passo de manobra e reprocessar a Crítica; até lá, não usar o valor absoluto para dimensionar poda."},
    {"t": "Alimentador reclassificado aparece na Crítica com código novo e a NAE dele fica fora do site (caso do PS01112193).", "acao": "Regra de/para no script da Crítica (PS01112193 entra no LD03105019); reprocessar quando chegarem as Críticas."},
    {"t": "O ponto da OS e da ocorrência no mapa é aproximado quando o ativo não tem posição no cadastro.", "acao": "A regra usada fica registrada em cada ocorrência; os casos sem posição ficam listados à parte."}
   ]
@@ -57,7 +58,8 @@ window.ARGOS_ESCOPO = {
   {"id": "painel", "nome": "Painel gerencial", "pagina": "painel/", "objetivo": "Metas e realizado de inspeção, estruturas, para-raio, linha viva e melhoria."},
   {"id": "podas", "nome": "Mapa de podas", "pagina": "podas/", "objetivo": "Situação da poda por quadra em Palmas, Araguaína e Gurupi."},
   {"id": "orcamento", "nome": "Insights orçamento", "pagina": "insights-orcamento/", "objetivo": "Orçado 2027 e realizado por SIGCO (DCMD), com curva mensal e Capex."},
-  {"id": "plataforma", "nome": "Plataforma", "pagina": "central/", "objetivo": "Tela inicial, menu, tema, atualização das bases, publicação e documentação."}
+  {"id": "plataforma", "nome": "Plataforma", "pagina": "central/", "objetivo": "Tela inicial, menu, tema, atualização das bases, publicação e documentação."},
+  {"id": "qualidade", "nome": "Qualidade e melhorias", "pagina": "escopo/", "objetivo": "Pontos de melhoria de usabilidade e de correção técnica dos números, com as correções planejadas."}
  ],
  "classifica": [
   ["orcamento", "orçamento|sigco|capex|projeção de nov|backtest"],
@@ -65,6 +67,7 @@ window.ARGOS_ESCOPO = {
   ["painel", "painel gerencial|briefing"],
   ["carteira", "carteira|empreiteira"],
   ["prio", "priorização|priorizador"],
+  ["qualidade", "pontos de melhoria|usabilidade"],
   ["plataforma", "escopo|tela inicial|central/|shift\\+k|versão anterior|escolha da versão|apresentação|atualiza(r|ção)( automática)? d[ae]s? bases|atualização automática|bases\\.json|ferramentas|raiz abre|cópia congelada|design novo|script kml|para rodar no computador|cache do python|validador"],
   ["faixa", "croqui"],
   ["rede", "trafos do gis|acervo gis|kmz_google_earth2|fusível|religador|mapa de trechos"],
@@ -87,7 +90,8 @@ window.ARGOS_ESCOPO = {
   {"d": "2026-10-29", "t": "Bases lidas do OS status (.parquet) e Mapa de podas."},
   {"d": "2026-10-30", "t": "Tela inicial nova, com os módulos em cartões e o dock."},
   {"d": "2026-11-04", "t": "Insights orçamento e card por quadra no Mapa de podas."},
-  {"d": "2026-11-09", "t": "Escopo e acompanhamento do projeto (página, Excel e Word)."}
+  {"d": "2026-11-09", "t": "Escopo e acompanhamento do projeto (página, Excel e Word)."},
+  {"d": "2026-11-09", "t": "Levantamento de qualidade por agentes: 111 pontos de melhoria; DEC e FEC do Mapa de podas corrigidos."}
  ],
  "entregas": [
   {"id": "1.1", "frente": "rede", "titulo": "Regras de divisão em trechos", "itens": [
@@ -147,7 +151,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Enviar os arquivos da Crítica de set e out/2026 (o site vai até ago/2026)", "st": "pend", "prazo": "2026-11-13", "resp": "proj"},
    {"t": "Processar e publicar a NAE de set e out/2026", "st": "pend", "prazo": "2026-11-17", "resp": "dev", "obs": "Depende do item anterior."},
    {"t": "Regra do alimentador reclassificado no script da Crítica: o PS01112193 (Campos Lindos) entra no LD03105019, sem trecho", "st": "ok", "d": "2026-11-09"},
-   {"t": "Enviar as Críticas de mai a out/2026 para reprocessar a NAE com a regra do alimentador reclassificado (5 NAE de mai/2026 estão fora do site)", "st": "bloq", "desde": "2026-11-09", "prazo": "2026-11-13", "resp": "proj", "obs": "Decisão de 09/11: aplicar em todos os meses de uma vez, quando os arquivos chegarem."},
+   {"t": "Enviar as Críticas de jan a out/2026 para reprocessar a NAE: alimentador reclassificado (5 NAE de mai/2026 fora do site) e consumidor·hora por passo de manobra", "st": "bloq", "desde": "2026-11-09", "prazo": "2026-11-13", "resp": "proj", "obs": "Decisão de 09/11: aplicar em todos os meses de uma vez, quando os arquivos chegarem."},
    {"t": "Rotina mensal: Crítica do mês anterior carregada até o dia 10 (primeira: nov/2026)", "st": "pend", "prazo": "2026-12-10", "resp": "proj"}
   ]},
 
@@ -214,7 +218,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Camadas selecionáveis (Áreas, OS e NAE), tela cheia e atalhos para Street View e Google Earth", "st": "ok", "d": "2026-10-30"},
    {"t": "Quadras de Palmas com nome (405 Sul) e contorno oficial do GeoPalmas", "st": "ok", "d": "2026-10-30"},
    {"t": "Card por quadra: linha viva, OS executadas / total e NAE, DEC e FEC de 6 meses", "st": "ok", "d": "2026-11-04"},
-   {"t": "DEC e FEC da quadra pela definição da ANEEL (contribuição ao conjunto elétrico), com consumidor·hora e consumidores no painel", "st": "ok", "d": "2026-11-09"}
+   {"t": "DEC e FEC da quadra pela definição da ANEEL (contribuição ao conjunto elétrico), com consumidor·hora e consumidores no painel", "st": "ok", "d": "2026-11-09"},
+   {"t": "Desligamento de disjuntor ou religador fora da conta da quadra (o defeito pode estar em qualquer ponto do alimentador) e motivo do Crítico no card", "st": "ok", "d": "2026-11-09"}
   ]},
   {"id": "9.2", "frente": "podas", "titulo": "Próximas cidades e ajustes", "itens": [
    {"t": "Marca de linha viva e DEC/FEC da ANEEL juntados ao gerador (PR #10 do repositório smartled aprovado)", "st": "ok", "d": "2026-11-09"},
@@ -225,7 +230,7 @@ window.ARGOS_ESCOPO = {
 
   {"id": "10.1", "frente": "orcamento", "titulo": "Orçado 2027 e realizado por SIGCO", "itens": [
    {"t": "Página com a curva mensal de 2027 por SIGCO (só DCMD) e o realizado de 2023 a 2026", "st": "ok", "d": "2026-11-04"},
-   {"t": "Edição mês a mês em R$ ou %, com o orçado exato da planilha (R$ 396.113.230,71)", "st": "ok", "d": "2026-11-04"},
+   {"t": "Edição mês a mês em R$ ou %, a partir do orçado da planilha", "st": "ok", "d": "2026-11-04"},
    {"t": "Realizado de todos os responsáveis, igual à tabela dinâmica do Excel", "st": "ok", "d": "2026-11-05"},
    {"t": "SIGCO 20497 fora do orçado e do realizado; senha para alterar valores", "st": "ok", "d": "2026-11-05"},
    {"t": "Capex 2027 a 2029 por SIGCO e seleção de vários SIGCOs", "st": "ok", "d": "2026-11-05"}
@@ -256,6 +261,33 @@ window.ARGOS_ESCOPO = {
    {"t": "Excel de acompanhamento e Word do escopo gerados da mesma fonte", "st": "ok", "d": "2026-11-09"},
    {"t": "Regra de atualizar o escopo a cada publicação (script e instrução no repositório)", "st": "ok", "d": "2026-11-09"},
    {"t": "Confirmar os prazos propostos dos itens abertos", "st": "pend", "prazo": "2026-11-13", "resp": "proj"}
+  ]},
+
+  {"id": "12.1", "frente": "qualidade", "titulo": "Levantamento de qualidade", "itens": [
+   {"t": "Teste de usabilidade ao vivo por agentes, no PC e no celular: 47 pontos, 8 graves", "st": "ok", "d": "2026-11-09"},
+   {"t": "Números do site contra a ANEEL, a Energisa e a Crítica: 25 divergências e 12 conferências que batem", "st": "ok", "d": "2026-11-09"},
+   {"t": "Revisão técnica de cada aba (definições, unidades e fórmulas): 39 pontos", "st": "ok", "d": "2026-11-09"},
+   {"t": "Planilha com os 111 pontos de melhoria publicada nesta página", "st": "ok", "d": "2026-11-09"}
+  ]},
+  {"id": "12.2", "frente": "qualidade", "titulo": "Correções dos números", "itens": [
+   {"t": "Gravar o consumidor·hora por passo de manobra e reprocessar a Crítica (hoje o site usa a maior duração e fica 2,1 vezes acima)", "st": "pend", "prazo": "2026-11-20", "resp": "dev", "obs": "Depende das Críticas de jan a out/2026."},
+   {"t": "Chamar de CHI e CI o que aparece como DEC, FEC ou Consumidores no Priorizador e no Ranking", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
+   {"t": "Mostrar o período da Crítica e a data das bases em todas as telas (Painel, Mapa, Alimentador e Priorizador)", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
+   {"t": "Mapa de podas: decidir o critério de Crítico por NAE alto do alimentador, que hoje dispara com 1 ocorrência", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Limpeza de faixa: tratar trecho sem registro como pendência e a situação do trecho pelo pior pedaço", "st": "pend", "prazo": "2026-11-27", "resp": "dev", "obs": "Regra a confirmar com o dono do projeto."},
+   {"t": "Não localizar no trecho as ocorrências de disjuntor e religador na página do alimentador e no Priorizador", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
+   {"t": "Painel: mesma série para Estruturas, linha morta e linha viva, e inspeções sem polo no total", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
+   {"t": "Carteira: medido e contratado no mesmo universo e filtro de regional em todos os cartões", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
+   {"t": "Insights orçamento: variação com realizado e orçado sobre os mesmos SIGCOs", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
+   {"t": "Atualizar a Apresentação (319 alimentadores e 91,5 mil km estão defasados)", "st": "pend", "prazo": "2026-12-04", "resp": "dev"}
+  ]},
+  {"id": "12.3", "frente": "qualidade", "titulo": "Correções de usabilidade", "itens": [
+   {"t": "Tirar a troca de módulo pela roda do mouse na tela inicial", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
+   {"t": "Priorizador: avisar que a lista mostra 200 de N trechos e permitir carregar mais", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
+   {"t": "Mapa: endereço por nível (regional, polo e município) e Voltar subindo um nível", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
+   {"t": "Alimentador: camadas e lista de trechos visíveis sem abrir o olho", "st": "pend", "prazo": "2026-12-04", "resp": "dev"},
+   {"t": "Desempenho no celular: página do alimentador (nota 39) e Priorizador (nota 38)", "st": "pend", "prazo": "2026-12-11", "resp": "dev"},
+   {"t": "Demais pontos médios e baixos da planilha de melhorias", "st": "pend", "prazo": "2026-12-18", "resp": "dev"}
   ]}
  ],
  "bases": [
@@ -328,12 +360,14 @@ window.ARGOS_ESCOPO = {
    ]},
    {"titulo": "Priorizador", "itens": [
     "A nota do trecho vai de 0 a 100 e é a soma dos pontos de cada critério: NAE, DEC e FEC por 100 km, clientes (UCs ligadas), cliente do Grupo A, hierarquia do trecho e limpeza de faixa.",
-    "As faixas P1 a P4 saem da nota; P1 é nota 70 ou mais."
+    "As faixas P1 a P4 saem da nota (P1 é nota 70 ou mais) e das regras adicionais descritas nas Premissas da página.",
+    "Hoje o que a página chama de DEC e FEC é consumidor·hora (CHI) e consumidores interrompidos (CI) por 100 km, não os índices da ANEEL; a troca dos nomes está nas correções planejadas."
    ]},
    {"titulo": "Mapa de podas", "itens": [
     "Situação da quadra pela OS de poda dos últimos 182 dias: executada, pendente, crítica ou sem poda recente.",
     "O ponto da OS é o poste da estrutura; sem ele, qualquer ativo da OS.",
     "A NAE mostrada é só a de dentro do perímetro urbano de cada cidade.",
+    "Desligamento de disjuntor ou de religador não entra na conta da quadra: o defeito pode estar em qualquer ponto do alimentador; o ponto continua no mapa.",
     "DEC e FEC da quadra: quanto as ocorrências de vegetação registradas nos ativos da quadra somaram ao DEC e ao FEC do conjunto elétrico do alimentador (consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto)."
    ]}
   ],

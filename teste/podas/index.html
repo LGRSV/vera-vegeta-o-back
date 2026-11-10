@@ -66,6 +66,7 @@ body.tela-cheia .mapbox{position:fixed;inset:0;z-index:3000;border-radius:0}
 .qc{position:absolute;transform:translate(-50%,-50%) scale(var(--e,1));width:max-content;max-width:300px;background:rgba(15,20,23,.88);color:#f3f4f4;border:1px solid var(--vidro-borda);border-left:4px solid var(--c);border-radius:8px;padding:6px 9px 7px;font:600 11px/1.25 var(--f-body);box-shadow:var(--sh-vidro);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);--qm:#aab3b9}
 .qc-h{display:flex;align-items:center;gap:8px;white-space:nowrap}
 .qc-h b{font:700 13px/1.1 var(--f-display)}
+.qc-m{margin:3px 0 0;max-width:250px;white-space:normal;font:500 10px/1.25 var(--f-body);color:#ffd9d2}
 .qc-h em{margin-left:auto;font:600 9.5px/1 var(--f-body);font-style:normal;letter-spacing:.05em;text-transform:uppercase;color:#cfd5d8}
 .qc-l{display:flex;gap:12px;margin:5px 0 4px;white-space:nowrap;color:var(--qm)}
 .qc-l b{color:#fff;font-variant-numeric:tabular-nums;font-size:12px}
@@ -255,6 +256,10 @@ function situacao(a) {
 // CHI (consumidor·hora) e CI (consumidores interrompidos). sem = ocorrências sem conjunto conhecido (fora do DEC e do FEC).
 // Sem P.conjuntos (podas.js gerado sem dados/conjuntos.json) não há DEC nem FEC: a tabela mostra CHI e CI com esses nomes.
 const COM_DEC = !!P.conjuntos;
+// Ocorrência que abriu o disjuntor ou um religador: o defeito (a árvore) pode estar em qualquer ponto do alimentador ou da zona
+// do religador, não na quadra onde o equipamento fica (a do disjuntor é a da subestação). Fica fora da conta da quadra e é
+// contada à parte (zona); o ponto continua no mapa, na camada NAE.
+const ZONA = new Set(['DJ', 'RL']);
 const MESES6 = (P.nae_meses || []).slice(-6);
 function indiceGeo(itens) {
   const aneis = g => g.type === 'Polygon' ? [g.coordinates] : g.coordinates;           // lista de polígonos [anel externo, buracos...]
@@ -291,7 +296,7 @@ function ondeEsta(idx, lat, lon) {                     // a menor quadra que con
 }
 function contarPorQuadra(c) {
   const lista = P.cidades[c], idx = indiceGeo(lista);
-  lista.forEach(a => { a.k = {exec: 0, pend: 0, crit: 0, lv: 0, h: Object.fromEntries(MESES6.map(m => [m, {n: 0, dec: 0, fec: 0, chi: 0, ci: 0, sem: 0}]))}; });
+  lista.forEach(a => { a.k = {exec: 0, pend: 0, crit: 0, lv: 0, h: Object.fromEntries(MESES6.map(m => [m, {n: 0, dec: 0, fec: 0, chi: 0, ci: 0, sem: 0, zona: 0}]))}; });
   (P.pontos && P.pontos[c] || []).forEach(pt => {
     const a = ondeEsta(idx, pt[0], pt[1]); if (!a) return;
     if (pt[2] === 'executado') { a.k.exec++; if (pt[10]) a.k.lv++; } else { a.k.pend++; if (pt[2] === 'critico') a.k.crit++; }
@@ -299,6 +304,7 @@ function contarPorQuadra(c) {
   (P.nae && P.nae[c] || []).forEach(o => {
     const a = ondeEsta(idx, o[0], o[1]); if (!a) return;
     const h = a.k.h[String(o[3]).slice(0, 7)]; if (!h) return;
+    if (ZONA.has(o[5])) { h.zona++; return; }
     h.n++; h.ci += o[7] || 0; h.chi += (o[7] || 0) * (o[8] || 0) / 60;
     if (o[10] != null) { h.dec += o[10]; h.fec += o[11]; } else h.sem++;
   });
@@ -312,7 +318,9 @@ $('nota').textContent = (Q ? 'Quadras e bairros de Palmas com o contorno do GeoP
   'Os números de cada um somam os setores censitários do IBGE 2022 que caem nele. ' : 'Quadra = setor censitário do IBGE 2022. ') + 'OS no poste da estrutura; sem ele no mapa, no trafo, na chave ou em outro ativo da OS. ' +
   'Crítico: OS emergencial/urgente pendente, ou alimentador com NAE alto (quinto mais alto da cidade) sem poda em 6 meses. NAE só do perímetro urbano. ' +
   'De perto, cada quadra mostra o card: linha viva = OS executadas pela equipe de linha viva nos últimos 6 meses; OS executadas = executadas nos 6 meses ÷ (executadas + pendentes); ' +
-  'NAE, DEC (consumidor·hora) e FEC (consumidores atingidos) por mês, dos últimos 6 meses da Crítica. Cada OS e NAE conta na quadra que contém o ponto.';
+  'NAE, DEC (h) e FEC por mês, dos últimos 6 meses da Crítica: DEC e FEC são quanto as ocorrências de vegetação da quadra somaram ao conjunto elétrico do alimentador ' +
+  '(consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto). Desligamento de disjuntor ou religador não entra na conta da quadra: ' +
+  'o defeito pode estar em qualquer ponto do alimentador. Cada OS e NAE conta na quadra que contém o ponto.';
 
 // ---- estado ---------------------------------------------------------------------------------------------
 let cidade = CIDADES[0];
@@ -440,13 +448,15 @@ function tabelaHist(a, completo) {
 }
 // o que cada linha da tabela quer dizer, no painel da quadra
 function notaHist(a) {
-  const sem = MESES6.reduce((n, m) => n + a.k.h[m].sem, 0), per = MESES6.length ? `${mes3(MESES6[0])} a ${mes3(MESES6[MESES6.length - 1])}/${MESES6[MESES6.length - 1].slice(0, 4)}` : '';
-  const base = `Ocorrências de vegetação (NAE) registradas em ativos dentro do contorno, por mês de competência (${per}). `;
-  if (!COM_DEC) return base + 'CHI = consumidor·hora interrompido; CI = consumidores interrompidos.';
+  const sem = MESES6.reduce((n, m) => n + a.k.h[m].sem, 0), zona = MESES6.reduce((n, m) => n + a.k.h[m].zona, 0), per = MESES6.length ? `${mes3(MESES6[0])} a ${mes3(MESES6[MESES6.length - 1])}/${MESES6[MESES6.length - 1].slice(0, 4)}` : '';
+  const base = 'Linha viva: OS de poda executadas nos últimos 6 meses pela equipe de linha viva. OS executadas: executadas nos 6 meses / executadas mais pendentes. ' +
+    `NAE: ocorrências de vegetação registradas em ativos dentro do contorno, por mês de competência (${per}). `;
+  const fora = zona ? ` ${zona} desligamento${zona === 1 ? '' : 's'} de disjuntor ou religador com o equipamento nesta área ${zona === 1 ? 'ficou' : 'ficaram'} fora da conta: o defeito pode estar em qualquer ponto do alimentador.` : '';
+  if (!COM_DEC) return base + 'CHI = consumidor·hora interrompido; CI = consumidores interrompidos.' + fora;
   const ref = P.conjuntos.mes ? ` de ${mes3(P.conjuntos.mes)}/${P.conjuntos.mes.slice(0, 4)}` : '';
   return base + `DEC (horas) e FEC (interrupções por consumidor): quanto essas ocorrências somaram ao DEC e ao FEC do conjunto elétrico de cada alimentador ` +
     `(consumidor·hora e consumidores interrompidos divididos pelos consumidores do conjunto, pela Crítica${ref}). CHI = consumidor·hora interrompido; CI = consumidores interrompidos.` +
-    (sem ? ` ${sem} ocorrência${sem === 1 ? '' : 's'} sem conjunto conhecido ${sem === 1 ? 'ficou' : 'ficaram'} fora do DEC e do FEC.` : '');
+    (sem ? ` ${sem} ocorrência${sem === 1 ? '' : 's'} sem conjunto conhecido ${sem === 1 ? 'ficou' : 'ficaram'} fora do DEC e do FEC.` : '') + fora;
 }
 function linhaOS(a) {
   const k = a.k;
@@ -454,7 +464,11 @@ function linhaOS(a) {
 }
 function cardHTML(a, cheio, e) {
   const nome = a.tipo === 'quadra' && a.nome ? a.nome : titulo(a);
-  return `<div class="qc" style="--c:${COR[a.st] || COR.sem}${e ? ';--e:' + e.toFixed(2) : ''}"><div class="qc-h"><b>${esc(nome)}</b><em>${esc(ROT[a.st] || '')}</em></div>${linhaOS(a)}${cheio ? tabelaHist(a) : ''}</div>`;
+  // área crítica diz o porquê no próprio card: OS urgente pendente ou alimentador com NAE alto (o NAE do alimentador, não o da quadra)
+  const sem = a._naeSem || [], porque = a.st !== 'critico' ? '' : a.crit ? `${nf(a.crit)} OS urgente${a.crit > 1 ? 's' : ''} pendente${a.crit > 1 ? 's' : ''}`
+    : sem.length ? `NAE alto no alimentador ${sem[0]}${sem.length > 1 ? ' e em mais ' + (sem.length - 1) : ''}; sem poda em 6 meses` : '';
+  return `<div class="qc" style="--c:${COR[a.st] || COR.sem}${e ? ';--e:' + e.toFixed(2) : ''}"><div class="qc-h"><b>${esc(nome)}</b><em>${esc(ROT[a.st] || '')}</em></div>` +
+    `${porque ? `<p class="qc-m">${esc(porque)}</p>` : ''}${linhaOS(a)}${cheio ? tabelaHist(a) : ''}</div>`;
 }
 function cards() {
   cardsLay.clearLayers(); comCard.clear();
@@ -634,9 +648,9 @@ document.addEventListener('click', e => { if (!drop.hidden && !e.composedPath().
 // ---- painel (dentro do mapa) ----------------------------------------------------------------------------
 const painel = $('painel');
 function abrePainel(html) { painel.innerHTML = html; painel.hidden = false; painel.scrollTop = 0; document.body.classList.add('pd-aberto'); }
-function dias(ult) {
-  const d = Math.round((Date.parse(P.gerado) - Date.parse(ult)) / 864e5);
-  return isNaN(d) ? '' : d <= 0 ? 'na data dos dados' : d === 1 ? 'há 1 dia' : `há ${nf(d)} dias`;
+function dias(ult) {                                   // contado de hoje (a base é de P.gerado; a poda pode ter sido depois dela)
+  const hoje = new Date(), d = Math.round((Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()) - Date.parse(ult)) / 864e5);
+  return isNaN(d) ? '' : d <= 0 ? 'hoje' : d === 1 ? 'há 1 dia' : `há ${nf(d)} dias`;
 }
 function detalhe(a, c) {
   const alto = new Set(a.nae_alto || []);
@@ -660,7 +674,7 @@ function detalhe(a, c) {
     `<div><dt>Última poda</dt><dd>${a.ult ? esc(br(a.ult)) : 'Nenhuma'}${a.ult ? `<small>${esc(dias(a.ult))}</small>` : ''}</dd></div>` +
     `<div><dt>Podas em 6 meses</dt><dd>${esc(nf(a.exec6m || 0))}</dd></div>` +
     `<div><dt>Pendentes</dt><dd>${esc(nf(a.pend || 0))}<small>${a.crit ? esc(nf(a.crit)) + ' emergencial/urgente' : ''}</small></dd></div>` +
-    `<div><dt>OS no total</dt><dd>${esc(nf(a.total || 0))}</dd></div></dl>` +
+    `<div><dt>OS no histórico</dt><dd>${esc(nf(a.total || 0))}<small>todas as OS de poda da base</small></dd></div></dl>` +
     (a.k ? `<div class="pd-hist">${linhaOS(a)}${tabelaHist(a, true)}<p class="pd-peq">${notaHist(a)}</p></div>` : '') +
     `<div><h3>Alimentadores</h3>${als}</div>` +
     `<div><h3>OS recentes</h3>${os ? `<ul class="pd-os">${os}</ul>` : '<p class="pd-peq">Nenhuma OS de poda.</p>'}${falta}</div></div>`;
