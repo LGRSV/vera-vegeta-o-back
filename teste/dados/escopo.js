@@ -42,7 +42,8 @@ window.ARGOS_ESCOPO = {
    {"t": "A rede vem de uma exportação do GIS (03/10/2026): obras novas não aparecem até a próxima exportação.", "acao": "Definir a rotina de atualização do cadastro."},
    {"t": "O consumidor·hora das ocorrências usa a maior duração do evento e fica cerca de 2 vezes acima do real quando o religamento é por etapas (mai/2026: 191 mil contra 91 mil).", "acao": "Cálculo por passo de manobra pronto (10/11/2026); reprocessar quando chegarem as Críticas de jan a out/2026. Até lá, não usar o valor absoluto para dimensionar poda."},
    {"t": "Alimentador reclassificado aparece na Crítica com código novo e a NAE dele fica fora do site (caso do PS01112193).", "acao": "Regra de/para no script da Crítica (PS01112193 entra no LD03105019); reprocessar quando chegarem as Críticas."},
-   {"t": "O ponto da OS e da ocorrência no mapa é aproximado quando o ativo não tem posição no cadastro.", "acao": "A regra usada fica registrada em cada ocorrência; os casos sem posição ficam listados à parte."}
+   {"t": "O ponto da OS e da ocorrência no mapa é aproximado quando o ativo não tem posição no cadastro.", "acao": "A regra usada fica registrada em cada ocorrência; os casos sem posição ficam listados à parte."},
+   {"t": "A publicação depende do GitHub Pages, que na noite de 09 para 10/11/2026 deixou de concluir 6 de 9 publicações (paradas na sincronização dos arquivos, sem incidente declarado).", "acao": "Conferir sempre o site no ar depois de publicar e repetir com um commit novo quando falhar; se continuar, trocar para um fluxo de publicação próprio, com prazo maior."}
   ]
  },
  "responsaveis": {"proj": "Dono do projeto", "dev": "Desenvolvimento"},
