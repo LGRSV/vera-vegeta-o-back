@@ -93,9 +93,11 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
     box.append(canto);
     L.DomEvent.disableClickPropagation(canto);
     canto.addEventListener('click', e => e.stopPropagation());   // clique no card não chega ao mapa (que limparia a seleção)
+    // a largura do card vem do observador (ele avisa já no 1º quadro, com o leiaute feito); medir aqui, no meio da carga,
+    // obrigava o navegador a calcular o leiaute da página inteira nesta hora
     const larg = () => box.style.setProperty('--tc-w', canto.offsetWidth + 'px');
     if (window.ResizeObserver) new ResizeObserver(larg).observe(canto);
-    larg();
+    else larg();
   }
   const btn = (canto || ctl.getContainer()).querySelector('.tc-btn');
   btn.addEventListener('click', alterna);

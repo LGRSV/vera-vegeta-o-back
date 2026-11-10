@@ -26,14 +26,33 @@
   const COR_ANO = { 2021: '#a78bfa', 2022: '#60a5fa', 2023: '#22d3ee', 2024: '#4ade80', 2025: '#facc15', 2026: '#fb923c', 2027: '#f87171', 2028: '#f472b6' };
   // OS "NAE DEOP" vêm todas com execução em 03/01/2025, de tipos variados: é data padrão, não a do serviço. Ficam numa
   // linha própria (DEOP), fora dos anos, até a data ser corrigida na origem
-  const DEOP = -1, ehDeop = k => /\bNAE DEOP\b/i.test(OS[k][5] || '');
+  // a conta de cada OS (é NAE DEOP? de que ano?) é feita uma vez: o bloco, a legenda e o mapa perguntam isso de todas as
+  // OS a cada pintura
+  const DEOP = -1, E_DEOP = OS.map(o => /\bNAE DEOP\b/i.test(o[5] || '')), ehDeop = k => E_DEOP[k];
   const corAno = a => a === DEOP ? '#9ca3af' : COR_ANO[a] || (a < 2021 ? '#c4b5fd' : '#fb7185');
-  const anoDe = k => ehDeop(k) ? DEOP : +(OS[k][2] || '').slice(0, 4) || 0;
+  const ANO_DE = OS.map((o, k) => E_DEOP[k] ? DEOP : +(o[2] || '').slice(0, 4) || 0), anoDe = k => ANO_DE[k];
   // um serviço = OS com o mesmo tipo, ativo, data e descrição (a distribuidora e a contratada abrem cada uma a sua: OS
   // espelho). Conta e lista o serviço uma vez; a 1ª OS do grupo representa as outras
-  const REP = new Array(OS.length), IRMAS = {};
-  { const g = new Map(); OS.forEach((o, k) => { const c = o[1] + '|' + o[2] + '|' + o[4] + '|' + o[5]; if (!g.has(c)) g.set(c, k); REP[k] = g.get(c); (IRMAS[REP[k]] = IRMAS[REP[k]] || []).push(k); }); }
-  const SERV = OS.map((o, k) => k).filter(k => REP[k] === k);
+  // Os serviços (com as OS de cada ativo) passam por todas as OS, milhares num alimentador grande: com a Manutenção
+  // desligada (o padrão) nada disso aparece ao abrir a página e a conta fica para o tempo livre, depois de a página ficar
+  // pronta (fim do arquivo); quem precisa dela antes (ligar a camada, tocar num trecho, baixar a planilha) chama dados()
+  const REP = new Array(OS.length), IRMAS = {}, DO_ATIVO = AT.map(() => []);   // DO_ATIVO: OS de cada ativo (já vêm da mais recente para a mais antiga)
+  let SERV = [], feitos = false;
+  function dados() {
+    if (feitos) return;
+    feitos = true;
+    const g = new Map();                                // agrupa pela descrição (texto longo: comparado uma vez) e, dentro dela, por tipo, data e ativo
+    OS.forEach((o, k) => {
+      let m = g.get(o[5]);
+      if (!m) g.set(o[5], m = new Map());
+      const c = o[1] + '|' + o[2] + '|' + o[4];
+      let r = m.get(c);
+      if (r === undefined) m.set(c, r = k);
+      REP[k] = r; (IRMAS[r] = IRMAS[r] || []).push(k);
+    });
+    SERV = OS.map((o, k) => k).filter(k => REP[k] === k);
+    SERV.forEach(k => { if (OS[k][4] >= 0) DO_ATIVO[OS[k][4]].push(k); });
+  }
   const espelhos = k => (IRMAS[k] || []).filter(x => x !== k);
   const nOs = ks => ks.reduce((n, k) => n + IRMAS[k].length, 0);   // OS dos serviços (com as espelho)
   const servTxt = ks => { const m = nOs(ks); return `${nf(ks.length)} serviço${ks.length === 1 ? '' : 's'}${m !== ks.length ? ` (${nf(m)} OS)` : ''}`; };
@@ -47,12 +66,14 @@
   const nomeAtivo = a => `${NOME_AT[a[1]] || 'Chave'} ${a[0]}`;
   const COMO = { p: 'poste da ESTRUTURA da OS', e: 'ativo da ESTRUTURA da OS',
     l: 'ELEMENTO da OS (o poste da OS não está no mapa: é o trafo ou a chave que atende o local)' };
-  // OS de cada ativo (já vêm da mais recente para a mais antiga)
-  const DO_ATIVO = AT.map(() => []);
-  SERV.forEach(k => { if (OS[k][4] >= 0) DO_ATIVO[OS[k][4]].push(k); });
-  // postes de cada trecho (pontas dos vãos), para o detalhe do trecho
-  const postesDoTrecho = {};
-  D.vaos.forEach(v => { const n = D.trechos[v[4]].nome; (postesDoTrecho[n] = postesDoTrecho[n] || new Set()).add(v[6]); postesDoTrecho[n].add(v[7]); });
+  // postes de cada trecho (pontas dos vãos), para o detalhe do trecho: montados na 1ª vez que um trecho é aberto (com
+  // limpeza.js, o índice é um só para as camadas: window.__baseVaos)
+  let postes = null;
+  const postesDoTrecho = () => {
+    if (!postes && window.__baseVaos) postes = window.__baseVaos.postes();
+    if (!postes) { postes = {}; D.vaos.forEach(v => { const n = D.trechos[v[4]].nome; (postes[n] = postes[n] || new Set()).add(v[6]); postes[n].add(v[7]); }); }
+    return postes;
+  };
 
   const st = {
     ligado: guarda('exe-ligado') === '1',
@@ -64,7 +85,8 @@
   };
   const doTipo = k => !st.tipos.size || st.tipos.has(OS[k][1]);   // só o download
   const passa = k => st.anos.has(anoDe(k));
-  const doAno = a => SERV.filter(k => anoDe(k) === a);
+  const DO_ANO = new Map();                             // serviços de cada ano (a lista é dividida por quem pede: ninguém a altera)
+  const doAno = a => { let l = DO_ANO.get(a); if (!l) DO_ANO.set(a, l = SERV.filter(k => anoDe(k) === a)); return l; };
   const N_TIPO = EX.tipos.map(() => 0);
   OS.forEach(o => { N_TIPO[o[1]]++; });
   const TIPOS_ORD = EX.tipos.map((t, i) => i).sort((a, b) => N_TIPO[b] - N_TIPO[a]);   // mais OS primeiro
@@ -147,6 +169,7 @@
     if (!map) return;
     camada.clearLayers();
     if (!st.ligado) { camada.remove(); return; }
+    dados();
     if (!map.hasLayer(camada)) camada.addTo(map);
     const fa = st.foco !== null ? OS[st.foco][4] : -1;
     const z = map.getZoom(), tela = map.getBounds().pad(0.25), soltos = z >= ZOOM_SOLTO;
@@ -224,7 +247,7 @@
       },
     });
     lg = new Leg().addTo(map).getContainer();
-    pinta();
+    if (feitos || !preguica) pinta(); else leve();
   };
 
   // botão "Manutenção" no menu Camadas do mapa (extras.js), com "Faixa", "Inspeção" e "Insp→manut"
@@ -284,6 +307,7 @@
   // OS dos tipos marcados, da mais recente para a mais antiga
   const osDoDownload = () => OS.map((o, k) => k).filter(doTipo).sort((a, b) => (OS[b][2] || '').localeCompare(OS[a][2] || ''));
   function baixaOs() {
+    dados();
     const C = window.__csv, ks = osDoDownload();
     if (!C || !ks.length) return;
     const linhas = ks.map(k => {
@@ -362,7 +386,12 @@
     pintaDl();
   }
 
+  // camada desligada, na carga: o botão, a legenda e o bloco como o pinta() os deixaria (apagado, escondidos), sem os dados
+  const leve = () => { card.hidden = true; btn.setAttribute('aria-pressed', 'false'); if (lg) lg.hidden = true; };
+  let pintou = false;
   function pinta() {
+    dados();
+    pintou = true;
     const f = document.activeElement;
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
     const n = OS.length;
@@ -395,7 +424,7 @@
   const det = $('det');
   const MAX_TRECHO = 60;
   function secTrecho(nome) {
-    const ps = postesDoTrecho[nome] || new Set();
+    const ps = postesDoTrecho()[nome] || new Set();
     const ks = SERV.filter(k => {
       const i = OS[k][4];
       return i >= 0 && (AT[i][1] === 'poste' ? ps.has(AT[i][0]) : AT[i][2] === nome);
@@ -412,15 +441,28 @@
     const h2 = det.querySelector('h2');
     if (!h2) return;
     const nome = [...h2.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
-    if (postesDoTrecho[nome]) det.insertAdjacentHTML('beforeend', secTrecho(nome));
+    if (postesDoTrecho()[nome]) { dados(); det.insertAdjacentHTML('beforeend', secTrecho(nome)); }
   }
   if (det) {
     new MutationObserver(poeDetalhe).observe(det, { childList: true });
     det.addEventListener('click', e => { const b = e.target.closest('.exe-os-b'); if (b) focar(+b.dataset.k, true); });
   }
 
+  // ---------- carga ----------
+  const FAT = window.__al || null;                      // montagem em fatias (alimentador.js); sem ela, tudo de uma vez, como antes
+  const preguica = !!(FAT && btn && !st.ligado);         // Manutenção desligada: os dados e o bloco (escondido) no tempo livre
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', poeLegenda); else poeLegenda();
   poeDetalhe();
   desenha();
-  pinta();
+  if (!preguica) pinta();
+  else {
+    leve();
+    (async () => {
+      await FAT.pronto;
+      await FAT.ocioso();
+      dados();
+      await FAT.ocioso();
+      if (!pintou) pinta();
+    })().catch(e => console.error(e));
+  }
 })();

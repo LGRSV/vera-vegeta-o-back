@@ -66,12 +66,14 @@
   function desenha() {
     const z = map.getZoom();
     if (z >= Z_EQ) baixa();
-    const b = map.getBounds().pad(0.15), quer = new Map();
-    const entra = (k, tipo, lat, lon, txt) => { if (lat >= b.getSouth() && lat <= b.getNorth() && lon >= b.getWest() && lon <= b.getEast()) quer.set(k, [tipo, lat, lon, txt]); };
-    if (z >= Z_POSTE) listaPostes().forEach(a => entra('p' + a[0], 'poste', a[1], a[2], () => txtPoste(a)));
+    // só o que está na tela (a caixa do mapa lida uma vez; a chave e o texto de cada ativo só para os que entram: são
+    // milhares de postes olhados a cada parada do mapa)
+    const b = map.getBounds().pad(0.15), quer = new Map(), sul = b.getSouth(), norte = b.getNorth(), oeste = b.getWest(), leste = b.getEast();
+    const entra = (pre, tipo, a, lat, lon, txt) => { if (lat >= sul && lat <= norte && lon >= oeste && lon <= leste) quer.set(pre + a[0], [tipo, lat, lon, () => txt(a)]); };
+    if (z >= Z_POSTE) for (const a of listaPostes()) entra('p', 'poste', a, a[1], a[2], txtPoste);
     if (z >= Z_EQ && A) {
-      A.tr.forEach(a => entra('t' + a[0], 'tr', a[1], a[2], () => txtTr(a)));
-      A.eq.forEach(a => entra('e' + a[0], 'eq', a[2], a[3], () => txtEq(a)));
+      for (const a of A.tr) entra('t', 'tr', a, a[1], a[2], txtTr);
+      for (const a of A.eq) entra('e', 'eq', a, a[2], a[3], txtEq);
     }
     const mudouRaio = zAntes !== null && (zAntes >= Z_COD) !== (z >= Z_COD);
     zAntes = z;

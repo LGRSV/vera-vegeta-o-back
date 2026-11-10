@@ -47,9 +47,14 @@
     if (!POSTES.has(o.poste)) POSTES.set(o.poste, { poste: o.poste, ll: o.ll, ks: [] });
     POSTES.get(o.poste).ks.push(k);
   });
-  // postes de cada trecho (pontas dos vãos), para o detalhe do trecho
-  const postesDoTrecho = {};
-  D.vaos.forEach(v => { const n = D.trechos[v[4]].nome; (postesDoTrecho[n] = postesDoTrecho[n] || new Set()).add(v[6]); postesDoTrecho[n].add(v[7]); });
+  // postes de cada trecho (pontas dos vãos), para o detalhe do trecho: montados na 1ª vez que um trecho é aberto (com
+  // limpeza.js, o índice é um só para as camadas: window.__baseVaos)
+  let postes = null;
+  const postesDoTrecho = () => {
+    if (!postes && window.__baseVaos) postes = window.__baseVaos.postes();
+    if (!postes) { postes = {}; D.vaos.forEach(v => { const n = D.trechos[v[4]].nome; (postes[n] = postes[n] || new Set()).add(v[6]); postes[n].add(v[7]); }); }
+    return postes;
+  };
 
   const st = {
     ligado: guarda('mnt-ligado') === '1',
@@ -274,7 +279,7 @@
   // ---------- detalhe do trecho: OS nos postes dele ----------
   const det = $('det');
   function secTrecho(nome) {
-    const ps = postesDoTrecho[nome] || new Set();
+    const ps = postesDoTrecho()[nome] || new Set();
     const ks = MN.os.map((o, k) => k).filter(k => MN.os[k].ll && ps.has(MN.os[k].poste))
       .sort((a, b) => ORDEM.indexOf(sitDe(MN.os[a])) - ORDEM.indexOf(sitDe(MN.os[b])));
     if (!ks.length) return '';
@@ -288,7 +293,7 @@
     const h2 = det.querySelector('h2');
     if (!h2) return;
     const nome = [...h2.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
-    if (postesDoTrecho[nome]) det.insertAdjacentHTML('beforeend', secTrecho(nome));
+    if (postesDoTrecho()[nome]) det.insertAdjacentHTML('beforeend', secTrecho(nome));
   }
   if (det) {
     new MutationObserver(poeDetalhe).observe(det, { childList: true });

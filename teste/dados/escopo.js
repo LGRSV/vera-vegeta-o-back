@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "1.3",
+ "versao": "1.4",
  "atualizado": "2026-11-10",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -294,7 +294,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Mapa: endereço por nível (regional, polo e município) e Voltar do navegador subindo um nível por vez", "st": "ok", "d": "2026-11-10"},
    {"t": "Alimentador: camadas (Faixa, Inspeção, Insp→manut e Manutenção) sempre à vista no mapa e aba Trechos no painel", "st": "ok", "d": "2026-11-10"},
    {"t": "Clique na LD no mapa: aviso na hora, dados baixando com o mapa fluido e página do alimentador abrindo já carregada", "st": "ok", "d": "2026-11-10"},
-   {"t": "Fluidez da página do alimentador e do Priorizador em aparelho lento", "st": "and", "prazo": "2026-11-20", "resp": "dev", "obs": "1ª passada publicada em 10/11. LD03010004, do clique na LD até a página pronta: 4,5 s (antes 6,6 s) e maior travada de 0,27 s (antes 0,83 s); em aparelho 4 vezes mais lento, 7,3 s (antes 14,0 s) e 1,3 s (antes 3,8 s). Falta fatiar as tarefas que restam."},
+   {"t": "Página do alimentador abre em fases, sem travada longa: LD03010004 pronta em 4,0 s do clique na LD (antes das correções 6,6 s) com maior travada de 0,05 s (antes 0,83 s); em aparelho 4 vezes mais lento, 5,4 s (antes 14,0 s) e 0,18 s (antes 3,8 s)", "st": "ok", "d": "2026-11-10"},
+   {"t": "Zoom e arrasto do mapa do alimentador e Priorizador em aparelho lento", "st": "pend", "prazo": "2026-11-20", "resp": "dev", "obs": "Em aparelho 4 vezes mais lento o zoom do mapa do LD03010004 ainda trava de 0,4 a 0,6 s por quadro (antes 0,6 a 0,7 s; meta 0,25 s) e a soma das travadas na abertura é de 1,9 s (meta 1,5 s). Nesse aparelho, ao desligar a Faixa durante a carga, nomes de município ficam atrás dos rótulos dos trechos por cerca de 9 s."},
    {"t": "Demais pontos médios e baixos da planilha de melhorias", "st": "pend", "prazo": "2026-12-18", "resp": "dev"}
   ]},
   {"id": "12.4", "frente": "qualidade", "titulo": "Regras a confirmar depois das correções", "itens": [

@@ -14,7 +14,8 @@
   if (!D || !det) return;
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const xml = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const TR = Object.fromEntries(D.trechos.map((t, i) => [t.nome, Object.assign(t, { i })]));
+  const TR = {};
+  D.trechos.forEach((t, i) => { t.i = i; TR[t.nome] = t; });
   const nf = (n, d) => n.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
   // ---------- UTM (SIRGAS 2000 ≈ GRS80; série de Krüger, erro < 1 mm) ----------

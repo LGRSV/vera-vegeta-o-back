@@ -4,16 +4,20 @@ D.trechos.forEach(t => {
   t.cor = COR_Z[t.zona] || '#d946ef';                  // cor pela classe: T2, T2-A, T2-B… na mesma cor
   t.peso = t.tipo === 'principal' ? 6 : t.tipo === 'ramal' ? 4.5 : 3;
 });
-const TR = Object.fromEntries(D.trechos.map(t => [t.nome, t]));
+const TR = {};
+for (const t of D.trechos) TR[t.nome] = t;
 const TIPO = {DJ:'disjuntor', '79':'religador', '03':'fusível 03', '33':'fusível 33', '02':'chave 02',
               '40':'trip saver 40', '41':'trip saver 41', SEC:'seccionamento',
               FTR:'fusível no tronco (não abre T3)'};
-// formatadores criados uma vez: km e mil rodam milhares de vezes ao montar a lista de trechos
-const NF2 = new Intl.NumberFormat('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}), NF0 = new Intl.NumberFormat('pt-BR');
-const km = m => m < 1000 ? Math.round(m) + ' m' : NF2.format(m / 1000) + ' km';
+// formatadores criados uma vez (km e mil rodam milhares de vezes ao montar a lista de trechos), no 1º uso: montar o 1º
+// formatador de números do navegador leva uns 10 ms, que assim não entram no começo deste script (o mapa vem antes)
+let NF2 = null, NF0 = null;
+const nf2 = () => NF2 || (NF2 = new Intl.NumberFormat('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+const nf0 = () => NF0 || (NF0 = new Intl.NumberFormat('pt-BR'));
+const km = m => m < 1000 ? Math.round(m) + ' m' : nf2().format(m / 1000) + ' km';
 const nv = q => q + (q === 1 ? ' vão' : ' vãos');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const mil = x => NF0.format(Number(x));                 // 1996 → 1.996
+const mil = x => nf0().format(Number(x));               // 1996 → 1.996
 const $ = id => document.getElementById(id);
 // vãos seguidos (o fim de um é o início do outro) viram uma linha só: o mapa projeta metade dos pontos a cada zoom e o
 // Leaflet simplifica a linha de longe. O traço é o mesmo; o clique acha o vão pela lista de vãos, não pela linha.
@@ -28,6 +32,109 @@ function cadeias(vs) {
 }
 window.__cadeias = cadeias;
 const FECHA = '<button type="button" class="fecha" id="todos" aria-label="Limpar seleção" title="Limpar seleção">✕</button>';
+
+// ---------- montagem em fatias (window.__al) ----------
+// O que pesa na carga (as ~2.000 linhas da rede, os rótulos, os pontos dos fusíveis e as linhas da lista) é montado em
+// fatias de poucos milissegundos, devolvendo a vez ao navegador entre elas: a página pinta, anima e responde ao toque
+// enquanto monta. No fim deste script o mapa já existe (window.__map, com vista) e os outros scripts podem usá-lo; a rede
+// entra em seguida, o tronco primeiro. Contrato para os outros scripts da página:
+//   __al.cheia()     a fatia atual acabou? (a conta é uma só para a página: quem fatiar o seu trabalho usa esta)
+//   __al.cede()      promessa: devolve a vez ao navegador, deixa sair o próximo quadro e continua logo depois dele, numa
+//                    fatia nova que vai até pouco antes do quadro seguinte (uso, dentro do laço de uma função async:
+//                    `if (__al.cheia()) await __al.cede();`). Enquanto se espera o quadro, os scripts seguintes da
+//                    página podem rodar: quem usa cede() não pode contar que termina antes deles
+//   __al.segue()     promessa: só devolve a vez (sem esperar o quadro) e continua na frente do resto da fila; os quadros
+//                    ficam para depois, então só para trechos curtos que precisam sair juntos (aqui: o tronco da rede)
+//   __al.ocioso()    promessa: idem, mas só continua quando o navegador estiver à toa (o que não aparece na 1ª tela)
+//   __al.espera(p)   a página só fica pronta (classe al-pronto: o painel aparece) depois de a promessa p terminar
+//   __al.dom         promessa: o HTML acabou e todos os scripts da página já rodaram (DOMContentLoaded)
+//   __al.linhas      promessa: todas as linhas da rede estão no mapa (evento 'al:linhas' no document). Camada que entra no
+//                    canvas depois dela poupa um redesenho inteiro do canvas (linha que chega com camada por cima não pode
+//                    ser só pintada: no fim, o canvas é refeito)
+//   __al.rede        promessa: linhas, rótulos e fusíveis estão no mapa (evento 'al:rede' no document)
+//   __al.lista       promessa: a lista de trechos está inteira (window.__listaInteira() termina na hora, se preciso)
+//   __al.pronto      promessa: o painel apareceu (evento 'al:pronto' no document); window.__alPronto é a mesma
+// Marcas de tempo (performance.mark): al:mapa, al:tronco, al:linhas, al:rede, al:lista, al:pronto.
+let fimRede, fimLista, fimLinhas;
+const marca = n => { try { performance.mark(n); } catch (e) { /* sem marcas */ } };
+const AL = window.__al = (() => {
+  const FATIA = 10, S = window.scheduler, raiz = document.documentElement;
+  let fim = 0;
+  requestAnimationFrame(() => {});                        // um quadro já pedido: ele entra na fila antes da continuação do HTML (ver montaRede)
+  const volta = S && S.yield ? () => S.yield()
+    : S && S.postTask ? () => S.postTask(() => {}, {priority: 'user-blocking'})
+    : window.MessageChannel ? (() => { const c = new MessageChannel(), f = []; c.port1.onmessage = () => f.shift()(); return () => new Promise(r => { f.push(r); c.port2.postMessage(0); }); })()
+    : () => new Promise(r => setTimeout(r, 0));
+  // Uma fatia por quadro. Esperar só a vez (volta) não basta: a continuação passa na frente do desenho da tela, e os
+  // quadros só saíam a cada ~100 ms. Por isso cede() espera o quadro seguinte (requestAnimationFrame), continua logo
+  // depois de ele ser pintado e trabalha até pouco antes do próximo: com quadro leve, 60 por segundo; com quadro pesado
+  // (aparelho lento), um intervalo sim, um não (30 por segundo). Aba escondida ou quadro que não vem (página fora da
+  // tela): segue sem esperar por ele
+  const segue = () => volta().then(() => { fim = performance.now() + FATIA; });
+  const TELA = 1000 / 60;
+  let semQuadro = 0, sonda = 0;
+  const quadro = () => new Promise(r => {
+    let feito = false;
+    const t = setTimeout(() => { if (!feito) { feito = true; semQuadro++; r(0); } }, 60);
+    requestAnimationFrame(ts => { if (!feito) { feito = true; clearTimeout(t); semQuadro = 0; r(ts); } });
+  });
+  const cede = async () => {
+    if (!document.hidden && semQuadro < 3) {
+      const ts = await quadro();
+      await volta();
+      const agora = performance.now();
+      if (ts) {
+        const prox = ts + TELA - 3;                       // até aqui o quadro seguinte sai na hora
+        fim = Math.min(agora + 14, prox - agora >= 5 ? prox : Math.max(agora + 4, prox + TELA));
+        return;
+      }
+    } else {
+      if (!document.hidden && ++sonda % 20 === 0) requestAnimationFrame(() => { semQuadro = 0; });   // os quadros voltaram?
+      await volta();
+    }
+    fim = performance.now() + FATIA;
+  };
+  const ocioso = () => new Promise(r => {
+    const vai = d => { fim = performance.now() + Math.max(3, Math.min(FATIA, (d && d.timeRemaining ? d.timeRemaining() : FATIA) - 1)); r(); };
+    if (window.requestIdleCallback) requestIdleCallback(vai, {timeout: 2000}); else setTimeout(vai, 40);
+  });
+  // Variante só da lista de trechos: espera o tempo ocioso por pouco (80 ms); se a vez vem pelo prazo (o navegador
+  // não tem folga nenhuma), devolve true e a fatia é a de sempre (FATIA), não a de 3 ms de ocioso()
+  const ociosoLista = () => new Promise(r => {
+    let prazo = true;
+    const vai = d => { prazo = !!(d && d.didTimeout); fim = performance.now() + (prazo ? FATIA : Math.max(3, Math.min(FATIA, (d && d.timeRemaining ? d.timeRemaining() : FATIA) - 1))); r(prazo); };
+    if (window.requestIdleCallback) requestIdleCallback(vai, {timeout: 80}); else setTimeout(() => vai({didTimeout: true}), 40);
+  });
+  // pronta = o HTML acabou (todos os scripts rodaram) e nada do que o painel mostra está por montar. A classe al-pronto
+  // quem põe é o script do cabeçalho da página, no DOMContentLoaded; com algo por montar, ela sai e volta quando terminar
+  // (espera() vale até o DOMContentLoaded, ouvintes do document incluídos; depois dele, só enquanto ainda houver espera)
+  let pend = 0, dcl = document.readyState !== 'loading', tarde = dcl, feito = false, solta, soltaDom;
+  const pronto = new Promise(r => { solta = r; }), dom = new Promise(r => { soltaDom = r; });
+  const confere = () => {
+    if (feito || !dcl || pend) return;
+    feito = true;
+    if (raiz.classList.contains('al-site')) raiz.classList.add('al-pronto');
+    marca('al:pronto');
+    solta();
+    document.dispatchEvent(new Event('al:pronto'));
+  };
+  const espera = p => {
+    if (feito || (tarde && !pend)) return p;             // o painel já apareceu (ou vai aparecer neste quadro): não some de novo
+    pend++;
+    const f = () => { pend--; confere(); };
+    Promise.resolve(p).then(f, f);
+    return p;
+  };
+  const chegou = () => { dcl = true; soltaDom(); confere(); };
+  if (dcl) setTimeout(chegou, 0);
+  else {
+    document.addEventListener('DOMContentLoaded', () => { if (pend) raiz.classList.remove('al-pronto'); });
+    addEventListener('DOMContentLoaded', () => { tarde = true; if (pend) raiz.classList.remove('al-pronto'); setTimeout(chegou, 0); });   // chegou(): depois dos ouvintes dos outros scripts
+  }
+  return {fatia: FATIA, cheia: () => performance.now() >= fim, cede, segue, ocioso, ociosoLista, espera, dom, pronto,
+    linhas: new Promise(r => { fimLinhas = r; }), rede: new Promise(r => { fimRede = r; }), lista: new Promise(r => { fimLista = r; })};
+})();
+window.__alPronto = AL.pronto;
 
 // legenda
 const nRamal = D.trechos.filter(t => t.tipo === 'ramal').length;
@@ -177,7 +284,12 @@ let porNome = {}, marcadas = [];                         // linha de cada trecho
 const linha = n => porNome[n] || null;
 let porPoste = null;                                       // poste → trechos dos vãos que chegam nele (busca na lista)
 const doPoste = () => porPoste || (porPoste = D.vaos.reduce((m, v) => { [v[6], v[7]].forEach(p => { if (p) (m[String(p).toLowerCase()] = m[String(p).toLowerCase()] || new Set()).add(D.trechos[v[4]].nome); }); return m; }, {}));
-function desenhaLista(filtro) {
+// A lista sai inteira de uma vez (busca, ordem, meses do NAE). Só na carga ela entra aos poucos (aosPoucos): o começo já,
+// o resto em pedaços no tempo livre (listaAosPoucos), com data-parcial="1" no #lista enquanto falta. Quem precisa dela
+// inteira na hora (teclado na lista, filtro trocado, a lista do olho) chama listaInteira() (window.__listaInteira).
+const LOTE_LISTA = 40;
+let pendLista = null, selSemLinha = null;                  // pendLista: o que falta pôr {itens, html, i}; selSemLinha: trecho escolhido antes de a linha dele chegar
+function desenhaLista(filtro, aosPoucos) {
   const q = (filtro || '').trim().toLowerCase();
   const casa = t => !q || [t.nome, t.inicio, t.inicio_poste, ...t.fim, ...t.passa].some(s => String(s).toLowerCase().includes(q))
     || (q.length >= 3 && (doPoste()[q] || new Set()).has(t.nome));
@@ -188,17 +300,81 @@ function desenhaLista(filtro) {
     : ord === 'chi' ? [['Maior CHI primeiro' + per, D.trechos.filter(casa).sort((a, b) => (ch[b.nome] || 0) - (ch[a.nome] || 0) || pos.get(a) - pos.get(b))]]
     : [[(ord === 'nae' ? 'Maior NAE primeiro' : 'Menor NAE primeiro') + per, D.trechos.filter(casa).sort((a, b) =>
       ((cnt[b.nome] || 0) - (cnt[a.nome] || 0)) * (ord === 'nae' ? 1 : -1) || pos.get(a) - pos.get(b))]];
-  $('lista').innerHTML = blocos.map(([titulo, ts]) => {
-    if (!ts.length) return '';
-    return `<div class="grp" role="heading" aria-level="3">${titulo} · ${mil(ts.length)}</div>` + ts.map(t =>
-      `<button type="button" class="row" tabindex="-1" data-t="${esc(t.nome)}" aria-current="${escolhido(t.nome)}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
-      `<span title="${esc(t.inicio + ' → ' + fimTxt(t))}">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</span>${cnt ? `<strong class="nae ${cnt[t.nome] ? 'tem' : ''}" title="NAE ${esc(pt)}${ch ? ` · ${chiTxt(ch[t.nome] || 0, chE)}` : ''}">${cnt[t.nome] || 0}<span class="vh"> NAE</span></strong>` : ''}<em>${km(t.ext)}</em></button>`).join('');
-  }).join('') || '<p class="lede">Nada encontrado.</p>';
-  porNome = {};
-  $('lista').querySelectorAll('.row').forEach(b => { porNome[b.dataset.t] = b; });
-  marcadas = [...$('lista').querySelectorAll('.row[aria-current="true"]')];
+  // itens da lista na ordem: o título de cada grupo (texto pronto) e os trechos dele
+  const itens = [];
+  blocos.forEach(([titulo, ts]) => {
+    if (!ts.length) return;
+    itens.push(`<div class="grp" role="heading" aria-level="3">${titulo} · ${mil(ts.length)}</div>`);
+    for (const t of ts) itens.push(t);
+  });
+  const html = t => typeof t === 'string' ? t :
+    `<button type="button" class="row" tabindex="-1" data-t="${esc(t.nome)}" aria-current="${escolhido(t.nome)}"><i style="--c:${t.cor}"></i><b>${esc(t.nome)}</b>` +
+    `<span title="${esc(t.inicio + ' → ' + fimTxt(t))}">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</span>${cnt ? `<strong class="nae ${cnt[t.nome] ? 'tem' : ''}" title="NAE ${esc(pt)}${ch ? ` · ${chiTxt(ch[t.nome] || 0, chE)}` : ''}">${cnt[t.nome] || 0}<span class="vh"> NAE</span></strong>` : ''}<em>${km(t.ext)}</em></button>`;
+  listaFeita = true;
+  const n = aosPoucos ? Math.min(itens.length, LOTE_LISTA) : itens.length;
+  pendLista = n < itens.length ? {itens, html, i: n} : null;
+  if (pendLista) $('lista').dataset.parcial = '1'; else delete $('lista').dataset.parcial;
+  let h = '';
+  for (let i = 0; i < n; i++) h += html(itens[i]);
+  $('lista').innerHTML = h || '<p class="lede">Nada encontrado.</p>';
+  porNome = {}; marcadas = [];
+  linhasNovas(null);
   tabLista();
+  if (!pendLista) listaPronta();
 }
+// linhas que acabaram de entrar na lista (depois do elemento `de`, ou todas): o índice por trecho e as escolhidas
+function linhasNovas(de) {
+  for (let b = de ? de.nextElementSibling : $('lista').firstElementChild; b; b = b.nextElementSibling) {
+    if (!b.classList.contains('row')) continue;
+    porNome[b.dataset.t] = b;
+    if (b.getAttribute('aria-current') === 'true') marcadas.push(b);
+  }
+}
+// põe mais n itens da lista em montagem; devolve false quando ela ficou inteira
+function maisLista(n) {
+  const p = pendLista, l = $('lista');
+  if (!p) return false;
+  const ult = l.lastElementChild, ate = Math.min(p.itens.length, p.i + n);
+  let h = '';
+  for (; p.i < ate; p.i++) h += p.html(p.itens[p.i]);
+  l.insertAdjacentHTML('beforeend', h);
+  linhasNovas(ult);
+  if (p.i < p.itens.length) return true;
+  pendLista = null;
+  delete l.dataset.parcial;
+  if (!l.contains(document.activeElement)) tabLista();
+  if (selSemLinha && escolhido(selSemLinha)) rolaNaLista(selSemLinha, areaVisivel(rolador()));   // a linha do trecho escolhido durante a carga chegou
+  listaPronta();
+  document.dispatchEvent(new Event('al:lista'));
+  return false;
+}
+// 1ª montagem do painel, depois da rede (o painel só aparece no fim dela): o resumo e o começo da lista (com texto guardado
+// no campo de busca, a lista filtrada inteira); o resto da lista entra no tempo livre. Quem escolheu um trecho ou buscou
+// antes disso já tem o detalhe e a lista feitos: nada é refeito por cima
+let listaFeita = false;
+async function comeco(vez) {
+  await vez();
+  nf0(); nf2();                                           // o 1º formatador de números do navegador, numa fatia só dele
+  await vez();
+  if (!listaFeita) desenhaLista($('busca').value, !$('busca').value.trim());
+  if (!sel && !multi.length) resumo();
+}
+function listaPronta() { selSemLinha = null; if (fimLista) { fimLista(); fimLista = null; marca('al:lista'); } }
+function listaInteira() { if (pendLista) maisLista(Infinity); }
+window.__listaInteira = listaInteira;
+// o resto da lista, no tempo livre: um pedaço, a vez dos observadores da lista (selos da faixa, filtros) e, se a folga acabou, espera a próxima
+async function listaAosPoucos() {
+  let prazo = false;                                     // a última vez veio pelo prazo (sem folga): daí em diante uma fatia por quadro, como os outros passos
+  while (pendLista) {
+    if (prazo) await AL.cede(); else prazo = await AL.ociosoLista();
+    while (maisLista(LOTE_LISTA)) { await null; if (AL.cheia()) break; }
+  }
+}
+// rolar a lista (mouse, toque) perto do fim da parte já posta: põe mais já, para não haver fim falso enquanto o resto não chegou
+$('lista').addEventListener('scroll', () => {
+  const l = $('lista');
+  if (pendLista && l.scrollTop + 3 * l.clientHeight >= l.scrollHeight) maisLista(2 * LOTE_LISTA);
+}, {passive: true});
 // escolher um trecho só troca o aria-current das linhas (não refaz as ~2.000 linhas): mais rápido e o foco do teclado fica onde está
 function marcaLista() {
   marcadas.forEach(b => b.setAttribute('aria-current', 'false'));
@@ -219,6 +395,7 @@ $('lista').addEventListener('keydown', e => {
   const b = e.target.closest('.row'), passo = {ArrowDown: 1, ArrowUp: -1, PageDown: 10, PageUp: -10, Home: -Infinity, End: Infinity}[e.key];
   if (!b || passo === undefined || e.altKey) return;
   e.preventDefault();
+  listaInteira();                                        // ainda entrando (carga): Fim e PgDn contam com todas as linhas
   const vs = [...$('lista').querySelectorAll('.row:not([hidden])')], i = vs.indexOf(b);
   const n = vs[Math.max(0, Math.min(vs.length - 1, i + passo))] || vs[passo < 0 ? 0 : vs.length - 1];
   if (!n || n === b) return;
@@ -257,8 +434,8 @@ $('lista').addEventListener('click', e => {
   });
 });
 // trecho escolhido fora da lista (mapa, busca, link, detalhe): a lista rola por dentro até a linha e o detalhe aparece
-function naLista(nome) {
-  const b = linha(nome), l = $('lista'), p = rolador(), v = areaVisivel(p);
+function rolaNaLista(nome, v) {
+  const b = linha(nome), l = $('lista');
   if (b && !b.hidden) {                                  // parte da lista que aparece (no celular, a de cima pode estar sob o mapa)
     const r = b.getBoundingClientRect(), q = l.getBoundingClientRect(), c = {top: Math.max(q.top, v.top), bottom: Math.min(q.bottom, v.bottom)};
     if (c.bottom - c.top < 100) Object.assign(c, {top: q.top, bottom: q.bottom});
@@ -266,6 +443,11 @@ function naLista(nome) {
     if (r.top < c.top + topo) l.scrollTop -= c.top + topo - r.top;
     else if (r.bottom > c.bottom - 8) l.scrollTop += r.bottom - c.bottom + 8;
   }
+}
+function naLista(nome) {
+  const p = rolador(), v = areaVisivel(p);
+  if (!linha(nome) && (pendLista || !listaFeita)) selSemLinha = nome;   // a linha ainda não entrou (carga): a lista rola até ela quando chegar
+  rolaNaLista(nome, v);
   if (document.activeElement === $('busca')) return;   // digitando na busca: o campo fica onde está
   const det = $('det').getBoundingClientRect().top;
   if (p) { if (det < v.top || det > v.top + (v.bottom - v.top) / 2) rolaPara(p, p.scrollTop + det - v.top - 8); }   // painel: o detalhe vai para o alto
@@ -356,16 +538,25 @@ $('det').addEventListener('click', e => {
 let map = null, sel = null, multi = [];                // multi: trechos escolhidos com Ctrl (ou ⌘) + clique
 const escolhido = n => n === sel || multi.includes(n);
 const linhas = {}, rotulos = {};
+window.__linhas = linhas;                                 // nome do trecho → [linha no mapa, vãos]; na carga as linhas entram aos poucos (__al.rede)
+// v = [lat1, lon1, lat2, lon2, idx_trecho, id, poste_ini, poste_fim, ext]
+const vaosDe = {};                                        // vãos de cada trecho, pelo índice dele (prontos antes das linhas)
+D.vaos.forEach(v => (vaosDe[v[4]] = vaosDe[v[4]] || []).push(v));
+const vaosDoNome = n => vaosDe[D.trechos.indexOf(TR[n])] || [];
+let realcados = null;                                     // trechos em destaque no mapa (os outros ficam apagados); null: nenhum
 const visivel = {T1: true, T2: true, T3: true};
 window.__visivel = visivel;                               // a camada de limpeza segue os botões T1/T2/T3
 let fusMarcas = null;                                     // pontos dos fusíveis: somem junto com o T3          // botões T1 / T2 / T3 sobre o mapa
 const classeDe = nome => nome.split('-')[0];          // nome do trecho → [polyline com todos os vãos, vãos]; rótulos no mapa
 let halo = null, marcas = null;
-const fimDe = {};
-D.trechos.forEach(t => t.fim.forEach(f => (fimDe[f] = fimDe[f] || []).push(t.nome)));
-const iniDe = {};                                          // índice: sem ele cada um dos ~2.000 fusíveis varria todos os trechos
-D.trechos.forEach(t => (iniDe[t.inicio] = iniDe[t.inicio] || []).push(t.nome));
-const papel = nome => [...(iniDe[nome] || []).map(n => 'início do ' + n), ...(fimDe[nome] || []).map(n => 'fim do ' + n)].join(' · ');
+let fimDe = null, iniDe = null;                            // índices (sem eles cada um dos ~2.000 fusíveis varria todos os trechos), montados no 1º balão
+const papel = nome => {
+  if (!fimDe) {
+    fimDe = {}; iniDe = {};
+    D.trechos.forEach(t => { t.fim.forEach(f => (fimDe[f] = fimDe[f] || []).push(t.nome)); (iniDe[t.inicio] = iniDe[t.inicio] || []).push(t.nome); });
+  }
+  return [...(iniDe[nome] || []).map(n => 'início do ' + n), ...(fimDe[nome] || []).map(n => 'fim do ' + n)].join(' · ');
+};
 // clique com Ctrl (⌘ no Mac): põe ou tira o trecho da seleção; sem Ctrl: um trecho só
 const comCtrl = e => !!e && (e.ctrlKey || e.metaKey);
 function clique(nome, e, enquadrar, vao) {
@@ -393,10 +584,11 @@ function selecionarVarios(l, ultimo) {
 // destaca no mapa os trechos escolhidos: os outros ficam apagados; pinos de início e fim (com vários, só o início de cada um)
 function realca(nomes, enquadrar) {
   if (!map) return;
+  realcados = nomes;                                      // as linhas que ainda vão entrar (carga) já nascem assim
   Object.entries(linhas).forEach(([n, [l]]) => l.setStyle({opacity: nomes.includes(n) ? 1 : 0.28}));
   if (halo) halo.remove();
-  const meus = n => cadeias((linhas[n] || [null, []])[1]);
-  halo = L.layerGroup(nomes.map(n => L.polyline(meus(n), {color: '#fff', weight: TR[n].peso + 6, opacity: .9, interactive: false}))).addTo(map);
+  const meus = n => cadeias(vaosDoNome(n));
+  halo = L.layerGroup(nomes.map(n => Object.assign(L.polyline(meus(n), {color: '#fff', weight: TR[n].peso + 6, opacity: .9, interactive: false}), {_alHalo: true}))).addTo(map);
   halo.eachLayer(l => l.bringToBack());
   Object.entries(rotulos).forEach(([n, m]) => m.getElement() && m.getElement().firstChild.classList.toggle('sel', nomes.includes(n)));
   if (marcas) marcas.remove();
@@ -408,8 +600,20 @@ function realca(nomes, enquadrar) {
   if (enquadrar) map.fitBounds(L.latLngBounds(nomes.flatMap(n => meus(n).flat())).pad(0.12), {maxZoom: 17, paddingTopLeft: [24, 72], paddingBottomRight: [24, 64]});   // folga para os controles sobre o mapa
   marcaNae(nomes);
   rotulosT3();
-  if (window.__onSel) window.__onSel(nomes);               // contorno da seleção por cima da camada de limpeza
+  avisaSel(nomes);                                         // contorno da seleção por cima da camada de limpeza
 }
+// Aviso da seleção às camadas: window.__onSel, que limpeza.js e inspecao.js definem quando carregam. Com um trecho já
+// escolhido quando um deles chega (escolha feita durante a carga), o aviso é repetido assim que o script termina; sem isso
+// o contorno da seleção na camada só aparecia na escolha seguinte
+let ganchoSel = window.__onSel || null;
+try {
+  Object.defineProperty(window, '__onSel', {configurable: true, enumerable: true, get: () => ganchoSel,
+    set: f => {
+      ganchoSel = f;
+      if (realcados && typeof f === 'function') Promise.resolve().then(() => { if (ganchoSel === f && realcados) f(realcados); });
+    }});
+} catch (e) { /* fica como propriedade comum */ }
+function avisaSel(nomes) { const f = window.__onSel; if (f) f(nomes); }
 // ativos com NAE nos trechos escolhidos: um marcador vermelho por ativo, com quantas NAE teve (mês e filtro da tela)
 let naeMarcas = null;
 function marcaNae(nomes) {
@@ -423,12 +627,14 @@ function marcaNae(nomes) {
     .on('click', e => { L.DomEvent.stopPropagation(e); map.setView(e.latlng, Math.max(map.getZoom(), 17)); }))).addTo(map);
 }
 function limpar() {
+  const nada = !sel && !multi.length && !realcados && !halo && !marcas;   // nada escolhido nem em destaque no mapa
   sel = null; multi = [];
   marcaNae(null);
-  if (window.__onSel) window.__onSel(null);
+  avisaSel(null);
   resumo();
   marcaLista();
-  if (!map) return;
+  if (!map || nada) return;                               // (clique fora da rede sem nada escolhido: repintar as ~2.000 linhas iguais era redesenhar o canvas inteiro à toa)
+  realcados = null;
   Object.values(linhas).forEach(([l]) => l.setStyle({opacity: 1}));
   if (halo) { halo.remove(); halo = null; }
   if (marcas) { marcas.remove(); marcas = null; }
@@ -505,9 +711,9 @@ if (typeof L === 'undefined') {
       t.src = `${SAT}${c.z - k}/${c.y >> k}/${c.x >> k}?blankTile=false`;
     }
   });
-  new Satelite(SAT + '{z}/{y}/{x}', {
+  const satelite = new Satelite(SAT + '{z}/{y}/{x}', {
     maxZoom: 19, maxNativeZoom: 18, attribution: ATR_SAT
-  }).on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; }).addTo(map);
+  }).on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; });   // entra no mapa na 1ª fatia da montagem (montaRede)
   // Datas das fotos de satélite na legenda, com o que está na tela (pedido do usuário): o próprio World_Imagery tem, por
   // escala, de quando é cada pedaço da foto (camadas "… Resolution Metadata": SRC_DATE e o fornecedor, NICE_DESC). A cada
   // parada do mapa consulta a camada do nível dos quadros mostrados e põe na legenda a data (ou de qual a qual, se a tela
@@ -554,37 +760,226 @@ if (typeof L === 'undefined') {
     }, 400);
   }
   map.on('moveend', datasSat);
-  // v = [lat1, lon1, lat2, lon2, idx_trecho, id, poste_ini, poste_fim, ext]
-  const vaosDe = {};
-  D.vaos.forEach(v => (vaosDe[v[4]] = vaosDe[v[4]] || []).push(v));
-  Object.keys(vaosDe).forEach(i => {
-    const t = D.trechos[i], vs = vaosDe[i];
-    const l = L.polyline(cadeias(vs), {color: t.cor, weight: t.peso, opacity: 1, lineCap: 'round'}).addTo(map);
-    l.on('click', e => { L.DomEvent.stopPropagation(e); clique(t.nome, e.originalEvent, false, vaoPerto(vs, e.latlng)); });
-    l.bindTooltip(esc(t.nome), {sticky: true, direction: 'top', offset: [0, -8]});
-    l.on('mouseover', () => l.setStyle({weight: t.peso + 3}));
-    l.on('mouseout', () => l.setStyle({weight: t.peso}));
-    linhas[t.nome] = [l, vs];
-  });
-  fusMarcas = L.layerGroup().addTo(map);
-  window.__fusMarcas = fusMarcas;                         // limpeza.js: com a Faixa ligada, os ~2.000 pontos só aparecem de perto (zoom 14+)
-  D.fusiveis.forEach(a => {
-    L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' || a.t === 'FTR' ? '#9ca3af' : '#fff', fillOpacity: 1})
-      .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t] || a.t)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'})
-      .on('click', e => { L.DomEvent.stopPropagation(e); if (a.trecho) clique(a.trecho, e.originalEvent, false); }).addTo(fusMarcas);
-  });
-  D.principais.forEach(a => {
-    L.marker([a.lat, a.lon], {icon: L.divIcon({className: '', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500})
-      .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'}).addTo(map);
-  });
-  D.trechos.forEach(t => { if (t.tipo !== 'fusivel') rotulo(t); });
-  let sul = 90, oeste = 180, norte = -90, leste = -180;    // caixa da rede sem montar 50 mil pares de pontos
+  // a vista primeiro (caixa da rede sem montar 50 mil pares de pontos): com o mapa já no lugar, cada linha entra direto
+  // nele, sem fila de espera, e os outros scripts da página já podem usar window.__map
+  let sul = 90, oeste = 180, norte = -90, leste = -180;
   D.vaos.forEach(v => { sul = Math.min(sul, v[0], v[2]); norte = Math.max(norte, v[0], v[2]); oeste = Math.min(oeste, v[1], v[3]); leste = Math.max(leste, v[1], v[3]); });
   const todos = L.latLngBounds([sul, oeste], [norte, leste]);
   map.fitBounds(todos.pad(0.04));
+  const ren = map.options.renderer;                       // o canvas da rede
+  map.addLayer(ren);
+  fusMarcas = L.layerGroup().addTo(map);
+  window.__fusMarcas = fusMarcas;                         // limpeza.js: com a Faixa ligada, os ~2.000 pontos só aparecem de perto (zoom 14+)
+  marca('al:mapa');
+
+  // Projeção com memória: a cada zoom o Leaflet refaz a conta de Mercator (seno e logaritmo) de todos os pontos de todas as
+  // linhas do mapa (as da rede e as das camadas). A parte que não depende do zoom fica guardada em cada ponto; a cada zoom
+  // sobram uma multiplicação e um arredondamento, com o mesmo resultado, pixel a pixel, da conta original do Leaflet.
+  if (map.options.crs === L.CRS.EPSG3857 && !L.Polyline.prototype._alProj) {
+    const P = L.Polyline.prototype, antes = P._projectLatlngs, tr = L.CRS.EPSG3857.transformation, pj = L.CRS.EPSG3857.projection;
+    P._alProj = true;
+    P._projectLatlngs = function (latlngs, result, projectedBounds) {
+      const m = this._map;
+      if (m.options.crs !== L.CRS.EPSG3857 || !(latlngs[0] instanceof L.LatLng)) return antes.call(this, latlngs, result, projectedBounds);
+      const s = m.options.crs.scale(m.getZoom()), o = m.getPixelOrigin(), ox = o.x, oy = o.y, n = latlngs.length, ring = new Array(n);
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let i = 0; i < n; i++) {
+        const ll = latlngs[i];
+        if (ll._la !== ll.lat || ll._lo !== ll.lng) {      // 1ª vez (ou ponto mudado): a parte da conta que não depende do zoom
+          const q = pj.project(ll);
+          ll._ux = tr._a * q.x + tr._b; ll._uy = tr._c * q.y + tr._d; ll._la = ll.lat; ll._lo = ll.lng;
+        }
+        const x = Math.round(s * ll._ux) - ox, y = Math.round(s * ll._uy) - oy;
+        ring[i] = new L.Point(x, y);
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+      if (n) { projectedBounds.extend(new L.Point(x0, y0)); projectedBounds.extend(new L.Point(x1, y1)); }
+      result.push(ring);
+    };
+  }
+
+  // Um ouvinte só para todas as linhas e outro para todos os fusíveis (clique, realce ao passar o mouse); o balão com o
+  // nome de cada um é criado na 1ª vez que o mouse (ou o toque) chega nele, e não ~4.000 de uma vez na carga
+  const paiL = new L.Evented(), paiF = new L.Evented();
+  const balaoL = l => l.bindTooltip(esc(l._al.nome), {sticky: true, direction: 'top', offset: [0, -8]});
+  paiL.on('click', e => {
+    const l = e.layer, t = l._al, novo = !l.getTooltip();
+    if (novo) balaoL(l);
+    L.DomEvent.stopPropagation(e);
+    clique(t.nome, e.originalEvent, false, vaoPerto(linhas[t.nome][1], e.latlng));
+    if (novo) l._openTooltip(e);
+  });
+  paiL.on('mouseover', e => {
+    const l = e.layer;
+    if (!l.getTooltip()) { balaoL(l); l._openTooltip(e); }
+    l.setStyle({weight: l._al.peso + 3});
+  });
+  paiL.on('mouseout', e => e.layer.setStyle({weight: e.layer._al.peso}));
+  const balaoF = (m, e) => {
+    const a = m._al;
+    m.bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t] || a.t)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'});
+    m._openTooltip(e);
+  };
+  paiF.on('click', e => {
+    const m = e.layer;
+    if (!m.getTooltip()) balaoF(m, e);
+    L.DomEvent.stopPropagation(e);
+    if (m._al.trecho) clique(m._al.trecho, e.originalEvent, false);
+  });
+  paiF.on('mouseover', e => { const m = e.layer; if (!m.getTooltip()) balaoF(m, e); });
+
+  // Ordem de desenho (a mesma de quando tudo entrava de uma vez): as linhas na ordem dos trechos, os pontos dos fusíveis
+  // logo depois delas, e por cima o que os outros scripts põem no mapa. Como aqui linhas e pontos entram aos poucos, algo
+  // alheio (camada de outro script, prévia da busca) pode entrar no meio: cada linha nova vai para logo depois da linha
+  // anterior, e cada ponto para logo depois do ponto anterior (o 1º, para depois das linhas ou, se o grupo dos fusíveis
+  // saiu e voltou ao mapa, para onde ele voltou).
+  // Pintura: o que entra por último na ordem é desenhado por cima do que já está no canvas (a mesma imagem de limpar e
+  // redesenhar tudo, sem o custo disso a cada leva); o que entra no meio da ordem espera o fim da leva e pede um
+  // redesenho do canvas inteiro (por pedaço, o Leaflet recorta as linhas compridas das camadas e as pontas delas saem
+  // com outro serrilhado). O pedido de redesenho do Leaflet só é calado durante a entrada dessas linhas e pontos.
+  let calado = false, inteiro = false;
+  const pede = ren._requestRedraw, redesenha = ren._redraw;
+  ren._requestRedraw = function (layer) { if (!calado) pede.call(this, layer); };
+  ren._redraw = function () { if (inteiro) { inteiro = false; this._redrawBounds = null; } return redesenha.call(this); };
+  const pintaNovas = ls => {
+    if (!ls.length || !ren._ctx) return;
+    ren._ctx.save();
+    ren._drawing = true;
+    for (const l of ls) if (l._map) l._updatePath();
+    ren._drawing = false;
+    ren._ctx.restore();
+  };
+  const naOrdem = o => !!o && o.layer._order === o;     // o nó ainda está na ordem de desenho do canvas
+  function depoisDe(l, a) {                               // leva a camada l para logo depois do nó a (null: para o começo)
+    const o = l._order;
+    if (!o || o === a || o.prev === a) return;
+    if (o.prev) o.prev.next = o.next; else ren._drawFirst = o.next;
+    if (o.next) o.next.prev = o.prev; else ren._drawLast = o.prev;
+    o.prev = a;
+    o.next = a ? a.next : ren._drawFirst;
+    if (o.next) o.next.prev = o; else ren._drawLast = o;
+    if (a) a.next = o; else ren._drawFirst = o;
+  }
+  const criadas = [];                                     // linhas, na ordem em que foram criadas (a dos trechos)
+  // o começo da ordem: os halos da seleção (ficam por baixo de tudo) e, com `linhas`, as linhas da rede que vêm em seguida
+  const comeco0 = linhas => { let a = null; for (let o = ren._drawFirst; o && (o.layer._alHalo || (linhas && o.layer._al && !(o.layer instanceof L.CircleMarker))); o = o.next) a = o; return a; };
+  function poeLinha(i) {
+    const t = D.trechos[i], vs = vaosDe[i];
+    const l = L.polyline(cadeias(vs), {color: t.cor, weight: t.peso, opacity: realcados && !realcados.includes(t.nome) ? 0.28 : 1, lineCap: 'round'});
+    l._al = t;
+    l.addEventParent(paiL);
+    linhas[t.nome] = [l, vs];
+    criadas.push(l);
+    if (!visivel[classeDe(t.nome)]) return null;         // classe escondida nos botões T1 T2 T3: a linha fica pronta, fora do mapa
+    l.addTo(map);
+    let a = null, j = criadas.length - 2;
+    while (j >= 0 && !criadas[j]._order) j--;             // a linha anterior que está no mapa
+    depoisDe(l, j >= 0 ? criadas[j]._order : comeco0(false));
+    return l;
+  }
+  // pontos dos fusíveis: o grupo entra no mapa vazio e os pontos são criados depois (montaFusiveis), um de cada vez, logo
+  // depois das linhas na ordem de desenho. Se o grupo sair e voltar ao mapa antes disso (limpeza.js ao aproximar, botões
+  // T1 T2 T3), os que faltam são criados nessa hora: voltam todos juntos para o fim da ordem, como sempre foi
+  let iFus = 0, fusAncora, fusVoltou = false;
+  function poeFusivel() {
+    const a = D.fusiveis[iFus++];
+    const m = L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' || a.t === 'FTR' ? '#9ca3af' : '#fff', fillOpacity: 1});
+    m._al = a;
+    m.addEventParent(paiF);
+    fusMarcas.addLayer(m);
+    if (!m._map) return null;                             // o grupo está fora do mapa (T3 escondido, ou a Faixa de longe)
+    if (!fusVoltou) {                                     // nunca saiu do mapa: logo depois das linhas (o 1º) e do ponto anterior
+      if (fusAncora === undefined) fusAncora = comeco0(true);
+      if (fusAncora === null || naOrdem(fusAncora)) depoisDe(m, fusAncora);
+      fusAncora = m._order;
+    }
+    return m;
+  }
+  fusMarcas.on('add', () => { fusVoltou = true; while (iFus < D.fusiveis.length) poeFusivel(); });
+  // leva de linhas ou pontos (`faz` devolve o que entrou no mapa, ou null)
+  function leva() {
+    let novas = [], guardadas = [];
+    return {
+      poe(faz, x) {
+        calado = true;
+        let l;
+        try { l = faz(x); } finally { calado = false; }
+        if (!l || map._animatingZoom) return;             // no meio de um zoom: o fim dele redesenha tudo
+        (l._order && !l._order.next ? novas : guardadas).push(l);   // última da ordem: por cima; no meio dela: espera
+      },
+      pinta() { if (!map._animatingZoom) pintaNovas(novas); novas = []; },
+      fim() {
+        this.pinta();
+        const g = guardadas.find(l => l._map);
+        if (g) { inteiro = true; pede.call(ren, g); }       // o próximo redesenho do Leaflet é o do canvas inteiro
+        guardadas = [];
+      }
+    };
+  }
+  // 1) o tronco (T1, T2, T2-A…: poucos trechos) de uma vez, já no 1º quadro, com DJ, religadores e os rótulos dele;
+  // 2) um pouco por quadro: os rótulos de T3 que aparecem de longe (com NAE) e o começo do painel (resumo e lista); daqui
+  //    em diante a página pode ficar pronta; 3) os trechos de fusível. Os pontos dos fusíveis vêm depois (montaFusiveis)
+  let essencial;                                          // promessa: 1) e 2) feitos (o painel espera por ela)
+  async function montaRede() {
+    let feito;
+    essencial = new Promise(r => { feito = r; });
+    try {
+      await AL.segue();                                   // o tronco sai de uma vez, antes dos scripts seguintes da página
+      satelite.addTo(map);
+      const ids = Object.keys(vaosDe), lv = leva();       // na ordem dos trechos, como sempre
+      let k = 0;
+      for (; k < ids.length && D.trechos[ids[k]].tipo !== 'fusivel'; k++) {   // o tronco: os trechos do começo que não são de fusível
+        lv.poe(poeLinha, ids[k]);
+        if (AL.cheia()) { lv.pinta(); await AL.segue(); }
+      }
+      lv.pinta();
+      marca('al:tronco');
+      await AL.segue();
+      D.principais.forEach(a => {
+        L.marker([a.lat, a.lon], {icon: L.divIcon({className: '', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500})
+          .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'}).addTo(map);
+      });
+      let c = contagem();
+      D.trechos.forEach(t => { if (t.tipo !== 'fusivel' && visivel[classeDe(t.nome)] && !rotulos[t.nome]) rotulo(t, c); });
+      // até aqui tudo saiu em sequência, na frente dos scripts seguintes; o quadro que vem agora (pedido no começo deste
+      // script, por isso também na frente deles) mostra o tronco. Daqui em diante, um pouco por quadro
+      await AL.cede();
+      // rótulos de T3: os mesmos que rotulosT3() põe (escolhido, com NAE, ou de perto e na tela)
+      let perto, b;
+      const estado = () => { c = contagem(); perto = map.getZoom() >= 15.5; b = map.getBounds().pad(0.2); };
+      estado();
+      for (const t of D.trechos) {
+        if (t.tipo !== 'fusivel') continue;
+        if (visivel.T3 && !rotulos[t.nome] && (escolhido(t.nome) || c[t.nome] || (perto && b.contains(t.rotulo)))) rotulo(t, c);
+        if (AL.cheia()) { await AL.cede(); estado(); }
+      }
+      await comeco(AL.cede);
+      feito();
+      for (; k < ids.length; k++) {
+        lv.poe(poeLinha, ids[k]);
+        if (AL.cheia()) { lv.pinta(); await AL.cede(); }
+      }
+      lv.fim();
+      marca('al:linhas');
+    } finally { feito(); fimLinhas(); document.dispatchEvent(new Event('al:linhas')); }
+  }
+  // pontos dos fusíveis: depois que todos os scripts da página rodaram. Com a Faixa ligada (o padrão) eles só aparecem de
+  // perto e a limpeza.js já tirou o grupo do mapa: os ~2.000 pontos ficam prontos sem entrar nele (antes entravam e saíam)
+  async function montaFusiveis(antes) {
+    await antes; await AL.dom; await AL.cede();
+    const lv = leva();
+    while (iFus < D.fusiveis.length) {
+      lv.poe(poeFusivel);
+      if (AL.cheia()) { lv.pinta(); await AL.cede(); }
+    }
+    lv.fim();
+  }
   const zoomClasse = () => $('map').classList.toggle('longe', map.getZoom() < 15.5);
   map.on('zoomend', zoomClasse); zoomClasse();
-  map.on('moveend', rotulosT3); rotulosT3();
+  map.on('moveend', rotulosT3);
+  const p1 = montaRede().catch(e => console.error(e));
+  AL.espera(essencial);                                   // o painel só aparece com o tronco da rede, os rótulos e o resumo prontos
+  montaFusiveis(p1).catch(e => console.error(e)).then(() => { marca('al:rede'); fimRede(); document.dispatchEvent(new Event('al:rede')); });
   $('classes').innerHTML = [['T1', COR_Z[1]], ['T2', COR_Z[2]], ['T3', COR_Z[3]]]
     .map(([c, cor]) => `<button type="button" data-c="${c}" aria-pressed="true" style="--c:${cor}" title="Mostrar ou esconder ${c}">${c}</button>`).join('');
   $('classes').addEventListener('click', e => {
@@ -623,5 +1018,6 @@ window.__periodoNae = () => NAE ? periodo() : '';         // lupa-painel.js: o p
 window.__clique = clique;
 window.__selecao = () => multi.length ? multi.slice() : sel ? [sel] : [];   // trechos escolhidos (croqui da faixa)
 window.__limpar = limpar;
-if (NAE) atualizaNae();                                   // desenha a lista e o resumo (com a NAE nos rótulos do mapa)
-else { desenhaLista($('busca').value); limpar(); }
+// Sem o mapa (Leaflet não carregou) a rede já "está pronta": só o resumo e a lista
+if (!map) { AL.espera(comeco(AL.cede).catch(e => console.error(e))); fimLinhas(); fimRede(); document.dispatchEvent(new Event('al:linhas')); document.dispatchEvent(new Event('al:rede')); }
+AL.rede.then(listaAosPoucos);

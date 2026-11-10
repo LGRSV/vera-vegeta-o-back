@@ -91,23 +91,30 @@
     document.head.append(s);
   }
   const tm = M.trecho_mun || {};
+  // Na carga a lista entra aos poucos (alimentador.js: data-parcial no #lista enquanto falta): cada leva só ganha o
+  // escondido de cada linha; a conta dos títulos dos grupos fica para quando a lista está inteira (uma passada só).
+  // Filtro trocado pela pessoa com a lista ainda entrando: ela é terminada na hora (window.__listaInteira).
+  const parcial = () => lista.dataset.parcial === '1';
+  const filtroAtual = () => [window.__visivel || {}, (document.getElementById('f-mun') || {}).value || ''];
+  const some = (r, vis, fm) => { const t = r.dataset.t; return !(vis[t.split('-')[0]] !== false && (!fm || (tm[t] || []).includes(fm))); };
   function aplica(mexeu) {
-    const vis = window.__visivel || {}, fm = (document.getElementById('f-mun') || {}).value || '';
+    if (mexeu === true && parcial() && window.__listaInteira) window.__listaInteira();
+    const [vis, fm] = filtroAtual(), inteira = !parcial();
     let grp = null, n = 0;                               // título de grupo: conta só as linhas à vista; sem nenhuma, some junto
     const fechaGrp = () => {
-      if (!grp) return;
+      if (!grp || !inteira) return;
       grp.hidden = !n;
       const tit = grp.dataset.tit ?? (grp.dataset.tit = grp.textContent.replace(/ · [\d.]+$/, ''));
       const txt = `${tit} · ${mil(n)}`;
       if (grp.textContent !== txt) grp.textContent = txt;
     };
-    [...lista.children].forEach(r => {
-      if (r.classList.contains('grp')) { fechaGrp(); grp = r; n = 0; return; }
-      if (!r.classList.contains('row')) return;
-      const t = r.dataset.t;
-      r.hidden = !(vis[t.split('-')[0]] !== false && (!fm || (tm[t] || []).includes(fm)));
-      n += r.hidden ? 0 : 1;
-    });
+    for (let r = lista.firstElementChild; r; r = r.nextElementSibling) {
+      if (r.classList.contains('grp')) { fechaGrp(); grp = r; n = 0; continue; }
+      if (!r.classList.contains('row')) continue;
+      const h = some(r, vis, fm);
+      if (r.hidden !== h) r.hidden = h;
+      n += h ? 0 : 1;
+    }
     fechaGrp();
     if (window.__tabLista) window.__tabLista();          // a parada do Tab na lista passa para uma linha à vista
     const m = mexeu === true && lista.querySelector('.row[aria-current="true"]:not([hidden])');
@@ -119,10 +126,21 @@
   f.addEventListener('change', () => aplica(true));
   const cls = document.getElementById('classes');      // o clique do mapa (alimentador.js) já trocou o __visivel
   if (cls) cls.addEventListener('click', e => { if (e.target.closest('button')) aplica(true); });
+  const migTrecho = document.getElementById('mig-trecho');
+  let migAntes = migTrecho ? migTrecho.innerHTML : '';
   new MutationObserver(ms => {
-    if (ms.some(m => m.type === 'childList' && m.target === lista)) aplica();   // lista refeita (não a contagem dos títulos)
-    const s = [...lista.querySelectorAll('.row[aria-current="true"]')].map(b => b.dataset.t);
-    document.getElementById('mig-trecho').innerHTML = s.length ? sep + esc(s.join(' + ')) : '';
+    const doFilho = ms.filter(m => m.type === 'childList' && m.target === lista);
+    if (doFilho.length) {                                // lista refeita ou leva nova (não a contagem dos títulos)
+      if (parcial() && doFilho.every(m => !m.removedNodes.length)) {   // leva nova no fim da lista: só as linhas dela
+        const [vis, fm] = filtroAtual();
+        doFilho.forEach(m => m.addedNodes.forEach(r => { if (r.nodeType === 1 && r.classList.contains('row') && some(r, vis, fm)) r.hidden = true; }));
+      } else aplica();
+    }
+    // trecho(s) escolhido(s) no caminho do cabeçalho: os da lista, na ordem dela; com a lista ainda entrando (carga), a
+    // linha do escolhido pode não ter chegado: vale a seleção do mapa (window.__selecao), sem varrer a lista a cada leva
+    const s = parcial() && window.__selecao ? window.__selecao() : [...lista.querySelectorAll('.row[aria-current="true"]')].map(b => b.dataset.t);
+    const h = s.length ? sep + esc(s.join(' + ')) : '';
+    if (h !== migAntes && migTrecho) migTrecho.innerHTML = migAntes = h;
   }).observe(lista, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-current'] });
   aplica();
 
@@ -165,8 +183,11 @@
   csv.arq = s => String(s ?? '').replace(/[^\w.-]+/g, '_');
   csv.al = csv.arq(M.al || 'alimentador');
   // trecho(s) de um conjunto de vãos (ids do D.vaos), na ordem da lista
-  const vaoTrecho = Object.fromEntries(D.vaos.map(x => [x[5], x[4]]));
-  csv.trechos = ids => [...new Set(ids.map(i => vaoTrecho[i]).filter(i => i !== undefined))].sort((a, b) => a - b).map(i => D.trechos[i].nome).join(', ');
+  let vaoTrecho = null;                                  // montado na 1ª planilha baixada (26 mil vãos: não pesa na carga)
+  csv.trechos = ids => {
+    if (!vaoTrecho) vaoTrecho = Object.fromEntries(D.vaos.map(x => [x[5], x[4]]));
+    return [...new Set(ids.map(i => vaoTrecho[i]).filter(i => i !== undefined))].sort((a, b) => a - b).map(i => D.trechos[i].nome).join(', ');
+  };
   // trecho(s) de um poste (pontas dos vãos)
   let tPoste = null;
   csv.trechosPoste = p => {

@@ -97,6 +97,7 @@
   let limite = LOTE;
   // uma passada pela lista do painel: a NAE de cada trecho no período (o número da própria lista) e as linhas escondidas
   function leLista() {
+    if (window.__listaInteira) window.__listaInteira();   // na carga a lista entra aos poucos (alimentador.js): aqui, inteira
     const nae = {}, escondida = new Set();
     let tem = false;
     document.querySelectorAll('#lista .row').forEach(r => {
@@ -269,26 +270,42 @@
   };
 
   // ---------- índice (uma vez) ----------
-  let I = null;
+  // A montagem é feita em etapas (cada `yield` é um ponto de parada): no tempo livre depois de carregar, uma etapa por
+  // vez (sem tarefa longa); quem precisa do índice na hora (ao digitar) termina as etapas que faltam de uma vez.
+  let I = null, GI = null;
   function indice() {
-    if (I) return I;
-    const t0 = performance.now(), TS = D.trechos || [], VS = D.vaos || [];
+    if (!I) { GI = GI || montaIndice(); while (!GI.next().done); }
+    return I;
+  }
+  function* montaIndice() {
+    let ms = 0, t0 = performance.now();
+    const TS = D.trechos || [], VS = D.vaos || [];
     const iT = new Map(TS.map((t, i) => [t.nome, i]));
     const tk = TS.map((t, i) => ({ t, i, nu: t.nome.toUpperCase(), nk: alnum(t.nome) }));
+    ms += performance.now() - t0; yield; t0 = performance.now();
     // vãos de cada trecho (prévia) e postes: número → vãos que chegam nele
     const vaosT = TS.map(() => []), postes = new Map();
-    VS.forEach((v, i) => {
+    for (let i = 0; i < VS.length; i++) {
+      const v = VS[i];
       if (vaosT[v[4]]) vaosT[v[4]].push(v);
       for (const p of [v[6], v[7]]) {
         if (p == null || p === '') continue;
         const k = String(p), l = postes.get(k);
         if (!l) postes.set(k, [i]); else if (l[l.length - 1] !== i) l.push(i);
       }
-    });
+      if (i % 2000 === 1999) { ms += performance.now() - t0; yield; t0 = performance.now(); }
+    }
+    ms += performance.now() - t0; yield; t0 = performance.now();
     // postes em ordem (minúsculas): o começo digitado acha a faixa por busca binária
     const minus = new Map();
-    postes.forEach((l, k) => minus.set(k.toLowerCase(), k));
+    let np = 0;
+    for (const k of postes.keys()) {
+      minus.set(k.toLowerCase(), k);
+      if (++np % 4000 === 0) { ms += performance.now() - t0; yield; t0 = performance.now(); }
+    }
+    ms += performance.now() - t0; yield; t0 = performance.now();
     const ordP = [...minus.keys()].sort();
+    ms += performance.now() - t0; yield; t0 = performance.now();
     // chaves e ativos: código → tipo, ponto, trecho e papéis (início, fim ou passagem de trechos)
     const at = new Map();
     const poe = (cod, tipo, ll, tr, rel) => {
@@ -302,18 +319,26 @@
       if (rel) a.rel.push(rel);
     };
     TS.forEach(t => poe(t.inicio, t.inicio_tipo, [t.inicio_lat, t.inicio_lon], t.nome, ['ini', t.nome]));   // o trecho que a chave abre vem primeiro
+    ms += performance.now() - t0; yield; t0 = performance.now();
     TS.forEach(t => (t.fim || []).forEach((f, i) => poe(f, null, (t.fim_pts || [])[i], null, ['fim', t.nome])));
     TS.forEach(t => (t.passa || []).forEach(c => poe(c, null, null, null, ['passa', t.nome])));
     (D.principais || []).forEach(a => poe(a.nome, a.t, [a.lat, a.lon]));
+    ms += performance.now() - t0; yield; t0 = performance.now();
     (D.fusiveis || []).forEach(a => poe(a.nome, a.t, [a.lat, a.lon], a.trecho));
     (window.CHAVES || []).forEach(c => poe(c[0], c[1], [c[2], c[3]]));
+    ms += performance.now() - t0; yield; t0 = performance.now();
     const EX = window.EXECUTADAS;
-    if (EX && EX.ativos) EX.ativos.forEach(a => { if (a[1] !== 'poste') poe(a[0], a[1], [a[3], a[4]], a[2]); });
+    if (EX && EX.ativos) {
+      for (let i = 0; i < EX.ativos.length; i++) {
+        const a = EX.ativos[i];
+        if (a[1] !== 'poste') poe(a[0], a[1], [a[3], a[4]], a[2]);
+        if (i % 2000 === 1999) { ms += performance.now() - t0; yield; t0 = performance.now(); }
+      }
+    }
     if (D.nae) [...(D.nae.oc || []), ...(D.nae.ext || [])].forEach(o => poe(o.ativo, o.abr, o.lonlat && [o.lonlat[1], o.lonlat[0]], o.trecho));
     at.forEach(a => { if (!a.tr && a.rel.length) a.tr = a.rel[0][1]; });
-    I = { TS, VS, iT, tk, vaosT, postes, minus, ordP, at, ats: [...at.values()], ms: performance.now() - t0 };
+    I = { TS, VS, iT, tk, vaosT, postes, minus, ordP, at, ats: [...at.values()], ms: ms + performance.now() - t0 };
     sugBox.dataset.indice = I.ms.toFixed(1);             // tempo para montar o índice (testes)
-    return I;
   }
   // OS das camadas: só o número e a camada (o resto, em detOS, para as que aparecem na lista)
   let IO = null;
@@ -336,12 +361,23 @@
     return IO;
   }
   // detalhe de uma OS: contexto curto, vãos ou ponto no mapa e o trecho onde ela fica
-  const vdCache = {};
-  const vaosDas = (cam, m, n) => vdCache[cam] || (vdCache[cam] = (() => {
-    const vaoId = vdCache.id || (vdCache.id = new Map((D.vaos || []).map(v => [v[5], v]))), r = Array.from({ length: n }, () => []);
-    Object.entries(m || {}).forEach(([id, ks]) => { const v = vaoId.get(id); if (v) ks.forEach(k => { if (r[k]) r[k].push(v); }); });
-    return r;
-  })());
+  // (montado em etapas, como o índice: no tempo livre uma etapa por vez; quem precisa na hora termina de uma vez)
+  const vdCache = {}, vdG = {};
+  function* montaVaosDas(cam, m, n) {
+    if (!vdCache.id) { vdCache.id = new Map((D.vaos || []).map(v => [v[5], v])); yield; }
+    const vaoId = vdCache.id, r = Array.from({ length: n }, () => []), es = Object.entries(m || {});
+    for (let i = 0; i < es.length; i++) {
+      const v = vaoId.get(es[i][0]);
+      if (v) es[i][1].forEach(k => { if (r[k]) r[k].push(v); });
+      if (i % 3000 === 2999) yield;
+    }
+    vdCache[cam] = r;
+  }
+  const vaosDas = (cam, m, n) => {
+    if (!vdCache[cam]) { const g = vdG[cam] || (vdG[cam] = montaVaosDas(cam, m, n)); while (!g.next().done); }
+    return vdCache[cam];
+  };
+  const aqueceVaos = (cam, m, n, tem) => { const g = vdG[cam] || (vdG[cam] = montaVaosDas(cam, m, n)); do { if (g.next().done) break; } while (!vdCache[cam] && tem()); return !!vdCache[cam]; };
   const maisM = vs => { const m = {}; vs.forEach(v => { const n = D.trechos[v[4]].nome; m[n] = (m[n] || 0) + v[8]; }); return Object.keys(m).sort((a, b) => m[b] - m[a])[0] || null; };
   const doPoste = p => { const X = indice(), l = X.postes.get(String(p)); return l ? X.TS[X.VS[l[0]][4]].nome : null; };
   function detOS(e) {
@@ -371,15 +407,22 @@
     ll = ll && isFinite(ll[0]) && ll[0] !== null ? ll : null;
     return (e.det = { ctx, vs, ll, tr: tr || (vs ? maisM(vs) : null) });
   }
-  // no tempo livre depois de carregar: primeiro os trechos, chaves e postes; depois as OS (cada um numa tarefa)
+  // no tempo livre depois de carregar, um pouco em cada folga do navegador (nenhuma tarefa longa): o índice dos trechos,
+  // chaves e postes (uma etapa por vez); depois as OS, os vãos das OS da Faixa e da Inspeção e a grade do vão mais perto
   const livre = f => window.requestIdleCallback ? requestIdleCallback(f, { timeout: 4000 }) : setTimeout(f, 1500);
-  const aquece = () => {                                // vãos das OS da Faixa e da Inspeção e a grade do vão mais perto
-    const LP = window.LIMPEZA, IN = window.INSPECAO;
-    if (LP && LP.os) vaosDas('faixa', LP.vaos, LP.os.length);
-    if (IN && IN.os) vaosDas('insp', IN.vaos, IN.os.length);
-    montaGrade();
+  const aquecer = [
+    tem => { GI = GI || montaIndice(); do { if (GI.next().done) break; } while (!I && tem()); return !!I; },   // true: esta parte acabou
+    () => { indiceOS(); return true; },
+    tem => { const LP = window.LIMPEZA; return !(LP && LP.os) || aqueceVaos('faixa', LP.vaos, LP.os.length, tem); },
+    tem => { const IN = window.INSPECAO; return !(IN && IN.os) || aqueceVaos('insp', IN.vaos, IN.os.length, tem); },
+    () => { montaGrade(); return true; }
+  ];
+  const aquece = d => {
+    const fim = performance.now() + 8, tem = () => performance.now() < fim && (!d || !d.timeRemaining || d.didTimeout || d.timeRemaining() > 2);   // no máximo 8 ms por folga
+    do { if (aquecer[0](tem)) aquecer.shift(); } while (aquecer.length && tem());
+    if (aquecer.length) livre(aquece);
   };
-  livre(() => { indice(); livre(() => { indiceOS(); livre(aquece); }); });
+  livre(aquece);
 
   // vão mais perto de um ponto (chave solta, sem trecho nos dados): o trecho dela. Grade de ~1 km com os vãos de cada
   // quadrado; olha o quadrado do ponto e os vizinhos (sem nada perto, todos os vãos)
@@ -884,12 +927,20 @@
   rotuloOlho();
   // tela cheia: telacheia.js leva a barra para a gaveta e, ao sair, para cima do mapa; aqui ela volta para dentro do mapa
   // na mesma hora (antes de pintar), como estava, e quem digitava continua no campo
+  // (a classe do body também muda a cada arrasto do mapa, leaflet-dragging: aí nada disto mudou, e medir o campo de novo
+  // forçava o navegador a refazer o leiaute da página no começo e no fim de cada arrasto)
+  const semLeaflet = () => document.body.className.split(/\s+/).filter(c => c && !c.startsWith('leaflet-')).sort().join(' ');
+  let classesAntes = semLeaflet();
   if (caixaMapa) new MutationObserver(() => {
-    if (barra.parentElement !== caixaMapa) {
+    const voltou = barra.parentElement !== caixaMapa;
+    if (voltou) {
       const f = barra.contains(document.activeElement) ? document.activeElement : null;
       caixaMapa.append(barra);
       if (f) f.focus({ preventScroll: true });
     }
+    const agora = semLeaflet();
+    if (!voltou && agora === classesAntes) return;
+    classesAntes = agora;
     rotuloOlho(); ajustaDica();
   }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   // balão do mapa: abre abaixo da barra (o olho ou a barra aberta), como já fazia abaixo do T1 T2 T3 / Menu
@@ -1054,18 +1105,14 @@
   const fm = document.getElementById('f-mun'), map = window.__map, D = window.D;
   if (!fm || !map || !window.L || !D || !D.meta || !D.meta.trecho_mun) return;
   const tm = D.meta.trecho_mun, APAGA = 0.1;
-  let linhas = null;                                      // nome do trecho → polyline (o texto do balão de cada linha é o nome)
-  const indice = () => {
-    if (linhas) return linhas;
-    linhas = {};
-    const nomes = new Set(D.trechos.map(t => t.nome));
-    map.eachLayer(l => { if (l instanceof L.Polyline && l.getTooltip && l.getTooltip()) { const n = l.getTooltip().getContent(); if (nomes.has(n)) linhas[n] = l; } });
-    return linhas;
-  };
+  // nome do trecho → linha no mapa: as de alimentador.js (window.__linhas[nome] = [linha, vãos]). Na carga elas entram aos
+  // poucos (window.__al.rede): cada uma que chega já nasce apagada se estiver fora do município (ouvinte de layeradd, embaixo)
+  const indice = () => { const r = {}, ls = window.__linhas || {}; for (const n in ls) r[n] = ls[n][0]; return r; };
   const fora = n => { const m = fm.value; return !!m && !(tm[n] || []).includes(m); };
   let antes = {};                                         // opacidade que alimentador.js deu à linha (para voltar)
   function aplica() {
     const ls = indice();
+    doQuadro();
     Object.entries(ls).forEach(([n, l]) => {
       const o = l.options.opacity;
       if (fora(n)) { if (o !== APAGA) { antes[n] = o; l.setStyle({ opacity: APAGA }); } l.options.interactive = false; if (l._path) l._path.style.pointerEvents = 'none'; }
@@ -1083,11 +1130,27 @@
       if (p) p.style.display = fora(n) ? 'none' : '';
     });
   }
+  // Enquadramento: os trechos do município cuja classe (T1 T2 T3) estava à vista na 1ª vez que o filtro foi usado (eram as
+  // linhas que estavam no mapa nessa hora; a lista não muda depois). A caixa de cada trecho sai dos vãos dele (a mesma
+  // caixa da linha), não das linhas do mapa: na carga elas entram aos poucos e o mapa enquadrava só as que já tinham chegado
+  let noQuadro = null, caixas = null;
+  const doQuadro = () => noQuadro || (noQuadro = new Set(D.trechos.map(t => t.nome).filter(n => !window.__visivel || window.__visivel[n.split('-')[0]] !== false)));
+  function caixaDe(n) {
+    if (!caixas) {
+      caixas = {};
+      for (const v of D.vaos) {
+        const t = D.trechos[v[4]], c = t && (caixas[t.nome] || (caixas[t.nome] = [90, 180, -90, -180]));
+        if (!c) continue;
+        c[0] = Math.min(c[0], v[0], v[2]); c[1] = Math.min(c[1], v[1], v[3]); c[2] = Math.max(c[2], v[0], v[2]); c[3] = Math.max(c[3], v[1], v[3]);
+      }
+    }
+    return caixas[n];
+  }
   function enquadra() {
-    const m = fm.value, ls = indice();
+    const m = fm.value, q = doQuadro();
     if (!m) return;
     let b = null;
-    Object.entries(ls).forEach(([n, l]) => { if (!fora(n)) { const lb = l.getBounds(); b = b ? b.extend(lb) : L.latLngBounds(lb.getSouthWest(), lb.getNorthEast()); } });
+    q.forEach(n => { const c = !fora(n) && caixaDe(n); if (c) { const lb = L.latLngBounds([c[0], c[1]], [c[2], c[3]]); b = b ? b.extend(lb) : lb; } });
     if (b && b.isValid()) map.fitBounds(b.pad(0.06), { maxZoom: 16, paddingTopLeft: [24, 72], paddingBottomRight: [24, 64] });
   }
   // as camadas (Faixa, Inspeção: limpeza.js, inspecao.js) perguntam por trecho se está fora e redesenham com a troca
@@ -1100,5 +1163,13 @@
   const lista = document.getElementById('lista');
   if (lista) new MutationObserver(depois).observe(lista, { subtree: true, attributes: true, attributeFilter: ['aria-current'] });
   map.on('click moveend zoomend layeradd', depois);
+  // linha da rede entrando no mapa com o município já escolhido (carga): apagada antes de ser desenhada, sem piscar
+  map.on('layeradd', e => {
+    const l = e.layer, t = l && l._al;
+    if (!fm.value || !t || !t.nome || !(l instanceof L.Polyline) || !fora(t.nome) || l.options.opacity === APAGA) return;
+    antes[t.nome] = l.options.opacity;
+    l.options.opacity = APAGA;
+    l.options.interactive = false;
+  });
   if (fm.value) aplica();                                 // página aberta já com o município (?m=)
 })();
