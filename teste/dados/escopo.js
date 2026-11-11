@@ -6,8 +6,8 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "1.5",
- "atualizado": "2026-11-10",
+ "versao": "1.6",
+ "atualizado": "2026-11-11",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
@@ -118,7 +118,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Mapa do Tocantins com a NAE por município e ranking", "st": "ok", "d": "2026-10-02"},
    {"t": "Regionais que abrem nos polos e polos que abrem nos municípios", "st": "ok", "d": "2026-10-14"},
    {"t": "Identidade ARGOS Manutenção: cards Norte, Centro e Sul, legenda de NAE e rótulos dos municípios", "st": "ok", "d": "2026-10-15"},
-   {"t": "Mapa mais leve, com voo fluido entre os níveis", "st": "ok", "d": "2026-10-15"}
+   {"t": "Mapa mais leve, com voo fluido entre os níveis", "st": "ok", "d": "2026-10-15"},
+   {"t": "ARGOS instalável como atalho da web (ícone próprio, abre em janela própria), com aviso na tela inicial para instalar", "st": "ok", "d": "2026-11-11"}
   ]},
   {"id": "2.2", "frente": "mapa", "titulo": "Busca única", "itens": [
    {"t": "Busca de ativo e de transformador", "st": "ok", "d": "2026-10-06"},
@@ -126,7 +127,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Colar uma lista de códigos e buscar de uma vez", "st": "ok", "d": "2026-10-21"},
    {"t": "Busca por UC", "st": "ok", "d": "2026-10-26"},
    {"t": "Busca de ativo: parte do código com Enter abre o ativo ou a lista (antes respondia \"não foi encontrado\"), o disjuntor aparece nas sugestões, o nome do tipo (religador, fusível, transformador…) é entendido e, dentro do alimentador, todo transformador é achado por parte do código", "st": "ok", "d": "2026-11-10"},
-   {"t": "Enviar a camada de reguladores de tensão do GIS (e a de bancos de capacitor, se quiser) para entrarem na busca e no mapa", "st": "bloq", "desde": "2026-11-10", "prazo": "2026-11-17", "resp": "proj", "obs": "O site tem 0 regulador e 0 capacitor nos dados: só as camadas de chaves e de transformadores foram carregadas. Serve o KMZ da mesma exportação ou uma planilha com código, alimentador e coordenada ou poste."}
+   {"t": "Reguladores de tensão e bancos de capacitor na busca e no mapa: reenviar as pastas Equipamentos da exportação do GIS ou aprovar o uso da planilha de equipamentos especiais", "st": "bloq", "desde": "2026-11-10", "prazo": "2026-11-17", "resp": "proj", "obs": "Na cópia da exportação do GIS no Drive (02/10/2026) os Reguladores.kmz e Banco_capacitor.kmz não vieram: no lugar de cada um ficou um aviso de erro (TooManyRequests). A planilha equipamentos_especiais_ETO V2 (03/06/2026) tem 188 reguladores, todos com ponto, 96 com alimentador."}
   ]},
   {"id": "2.3", "frente": "mapa", "titulo": "Visões e painel do alimentador", "itens": [
    {"t": "Tela cheia do mapa do alimentador", "st": "ok", "d": "2026-10-13"},

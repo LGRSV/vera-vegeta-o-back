@@ -2,7 +2,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>ARGOS</title>
-<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}document.documentElement.dataset.theme=t==='claro'?'light':'dark'})()</script>
+<link rel="manifest" href="../argos.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icones/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/icones/apple-touch-icon.png">
+<meta name="theme-color" content="#000000" id="cor-tema">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ARGOS">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}document.documentElement.dataset.theme=t==='claro'?'light':'dark';var m=document.getElementById('cor-tema');if(m&&t==='claro')m.content='#f2f3f0'})()</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
 <style>
@@ -57,6 +65,21 @@ main{flex:1;min-height:0;position:relative;overflow:auto}
   .dock button{padding:0 11px}
 }
 @media(max-height:480px){.top{display:none}}
+.inst{position:fixed;right:16px;bottom:calc(12px + 56px + env(safe-area-inset-bottom));z-index:30;width:340px;max-width:calc(100vw - 32px);box-sizing:border-box;background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);padding:16px 44px 16px 16px;animation:up .35s var(--ease) both}
+.inst[hidden]{display:none}
+.inst b{display:block;font-size:var(--t-sm);font-weight:600;margin-bottom:4px}
+.inst p{margin:0 0 12px;max-width:none;font-size:var(--t-sm);color:var(--muted);line-height:1.45}
+.inst .x{position:absolute;top:4px;right:4px;width:var(--alvo,40px);height:var(--alvo,40px);border:0;background:transparent;color:var(--muted);border-radius:var(--r2);font-size:20px;line-height:1}
+.inst .x:hover{color:var(--fg)}
+.inst .acoes{display:flex;gap:8px}
+.inst .acoes button{min-height:var(--alvo,44px);padding:0 16px;border-radius:var(--r2);font-size:var(--t-sm);font-weight:600;border:1px solid var(--line);background:transparent;color:var(--fg)}
+.inst .acoes .sim{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.inst-ln{background:none;border:0;padding:6px 4px;margin:14px auto 0;display:block;color:var(--muted);font-size:var(--t-sm);text-decoration:underline;text-underline-offset:3px;min-height:var(--alvo,44px)}
+.inst-ln:hover{color:var(--fg)}
+.inst-ln[hidden]{display:none}
+body.inst-on .home{padding-bottom:calc(var(--inst-h,170px) + 24px)}
+@media(max-width:700px){.inst{right:12px;left:12px;width:auto;max-width:none;bottom:calc(12px + 56px + env(safe-area-inset-bottom))}}
+@media (prefers-reduced-motion:reduce){.inst{animation:none}}
 </style></head><body>
 <header class="top"><button class="logo" id="logo" aria-label="Voltar ao início">ARGOS<span>MANUTENÇÃO</span></button><span class="current" id="current" aria-live="polite"></span></header>
 <main id="main">
@@ -65,6 +88,7 @@ main{flex:1;min-height:0;position:relative;overflow:auto}
     <div class="hero"><p>MANUTENÇÃO · VEGETAÇÃO · PLANEJAMENTO</p></div>
     <div class="grid" id="modules"></div>
     <div class="secondary" id="secundarios"></div>
+    <button type="button" class="inst-ln" id="inst-ln" hidden>Instalar o ARGOS</button>
   </section>
   <section class="screen" id="screen"><iframe id="frame" title="Módulo ARGOS" allow="fullscreen; clipboard-write"></iframe></section>
   <section class="tools" id="scripts" hidden>
@@ -76,6 +100,12 @@ main{flex:1;min-height:0;position:relative;overflow:auto}
   </section>
 </main>
 <nav class="dock" id="dock" aria-label="Módulos"></nav>
+<aside class="inst" id="inst" role="dialog" aria-labelledby="inst-t" aria-describedby="inst-d" hidden>
+  <b id="inst-t">Instalar o ARGOS</b>
+  <p id="inst-d" aria-live="polite"></p>
+  <div class="acoes"><button type="button" class="sim" id="inst-sim">Instalar</button><button type="button" id="inst-nao">Agora não</button></div>
+  <button type="button" class="x" id="inst-x" aria-label="Fechar aviso">&times;</button>
+</aside>
 <script src="../assets/modulos.js"></script>
 <script>
 (function () {
@@ -126,6 +156,7 @@ function go(id, pop, sohTroca) {
   ativo = id;
   $('inicio').hidden = id !== 'inicio';
   $('scripts').hidden = id !== 'scripts';
+  if (id !== 'inicio') { $('inst').hidden = true; document.body.classList.remove('inst-on'); }
   $('screen').style.display = m ? 'block' : 'none';
   if (m && frame.dataset.page !== id) {
     frame.dataset.page = id;
@@ -234,6 +265,53 @@ document.addEventListener('keydown', e => {
     }
   } catch (er) { /* módulo fora da mesma origem */ }
 });
+
+new MutationObserver(() => { const m = $('cor-tema'); if (m) m.content = document.documentElement.dataset.theme === 'light' ? '#f2f3f0' : '#000000'; })
+  .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+// ---- atalho/app: aviso discreto para instalar o ARGOS (Chrome/Edge pelo evento do navegador; iPhone/iPad e Safari no Mac com o passo a passo)
+(function () {
+  const ua = navigator.userAgent, aviso = $('inst'), ln = $('inst-ln'), CHAVE = 'instalar-ate', TEMPO = 3500, DIAS = 30;
+  const app = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: window-controls-overlay)').matches || navigator.standalone === true;
+  if (app) return;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const embutido = /FBAN|FBAV|Instagram|Line\/|GSA\//.test(ua);   // navegador de dentro de outro app: não tem "Adicionar à Tela de Início"
+  const safariMac = !ios && /Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|Edg|OPR|Firefox/.test(ua) && Number((/Version\/(\d+)/.exec(ua) || [])[1]) >= 17;
+  const PASSO = ios ? 'Toque em Compartilhar (nos iPhones mais novos ele fica no menu ⋯) e depois em Adicionar à Tela de Início.' : 'No menu do Safari: Arquivo › Adicionar ao Dock.';
+  const OFERTA = 'Um atalho na área de trabalho ou na tela do celular que abre o ARGOS direto, em janela própria.';
+  let passou = false, evento = null, jaInstalou = false, fechado = false;
+  const adiado = () => { try { return Number(localStorage.getItem(CHAVE)) > Date.now(); } catch (e) { return false; } };
+  const possivel = () => !jaInstalou && (!!evento || (ios && !embutido) || safariMac);
+  const atualizaLink = () => { ln.hidden = !possivel(); };
+  const espaco = sim => { document.body.classList.toggle('inst-on', sim); if (sim) document.body.style.setProperty('--inst-h', aviso.offsetHeight + 'px'); };
+  const mostra = pediu => {
+    if (!possivel()) return;
+    $('inst-sim').hidden = !evento;
+    $('inst-d').textContent = '';
+    aviso.hidden = false; fechado = false;
+    $('inst-d').textContent = evento ? OFERTA : PASSO;
+    espaco(true);
+    if (pediu === true) (evento ? $('inst-sim') : $('inst-nao')).focus();
+  };
+  const devolveFoco = () => { if (aviso.contains(document.activeElement)) (ln.hidden ? $('logo') : ln).focus(); };
+  const fecha = adia => {
+    devolveFoco(); aviso.hidden = true; fechado = true; espaco(false);
+    if (adia) { try { localStorage.setItem(CHAVE, String(Date.now() + DIAS * 864e5)); } catch (e) { /* sem armazenamento: vale só nesta visita */ } }
+  };
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); evento = e; atualizaLink(); if (passou && ativo === 'inicio' && !adiado() && !fechado && aviso.hidden) mostra(); });
+  addEventListener('appinstalled', () => { jaInstalou = true; evento = null; devolveFoco(); aviso.hidden = true; ln.hidden = true; espaco(false); try { localStorage.setItem(CHAVE, String(Date.now() + 3650 * 864e5)); } catch (e) { /* ok */ } });
+  $('inst-sim').addEventListener('click', () => {
+    const e = evento; if (!e) return;
+    evento = null; devolveFoco(); aviso.hidden = true; espaco(false); atualizaLink();
+    try { e.prompt(); Promise.resolve(e.userChoice).then(r => { if (r && r.outcome !== 'accepted') fecha(true); }).catch(() => {}); } catch (er) { /* sem prompt */ }
+  });
+  $('inst-nao').addEventListener('click', () => fecha(true));
+  $('inst-x').addEventListener('click', () => fecha(true));
+  ln.addEventListener('click', () => mostra(true));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !aviso.hidden) fecha(true); });
+  atualizaLink();
+  setTimeout(() => { passou = true; if (ativo === 'inicio' && !adiado() && !fechado && aviso.hidden) mostra(); }, TEMPO);
+})();
 
 go(location.hash.slice(1) || 'inicio', true);
 if (!location.hash) history.replaceState(null, '', '#inicio');
