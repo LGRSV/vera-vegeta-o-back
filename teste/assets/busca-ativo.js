@@ -223,7 +223,7 @@
     { nomes: ['chave'], nome: 'Chave', ini: '02' },
     { nomes: ['chavefaca'], nome: 'Chave faca', ini: '88' },
     { nomes: ['poste'], nome: 'Poste', ini: null },
-    { nomes: ['regulador'], nome: 'Regulador', zero: true },
+    { nomes: ['regulador', 'reguladordetensao'], nome: 'Regulador', arq: [['58', 'Regulador']], ini: '58', zero: true },   // zero: sem o tipo nos dados, diz que hoje são 0
     { nomes: ['capacitor'], nome: 'Capacitor', zero: true }
   ];
   function tiposDe(n) {
@@ -235,7 +235,7 @@
   async function tipoBloco(ts) {
     const blocos = [], rod = [];
     for (const t of ts) {
-      if (t.zero) { rod.push(`<b>${t.nome}</b>: o site ainda não tem esse tipo de equipamento nos dados (hoje são 0).`); continue; }
+      if (t.zero && !t.arq) { rod.push(`<b>${t.nome}</b>: o site ainda não tem esse tipo de equipamento nos dados (hoje são 0).`); continue; }
       if (!t.arq) {
         rod.push(`<b>${t.nome}</b>: ${t.ini ? `digite o código; começa com ${t.ini}` : 'digite o número do poste'}. Ou abra o alimentador e busque lá.`);
         continue;
@@ -243,7 +243,10 @@
       const ds = await Promise.all(t.arq.map(([f]) => baixa('ativos-pref/' + f)));
       const lista = [];
       t.arq.forEach(([, tipo], i) => { if (ds[i] && ds[i][tipo]) codigos(tipo, ds[i][tipo]).forEach(c => lista.push([c, tipo])); });
-      if (!lista.length) { rod.push(`<b>${t.nome}</b>: digite o código; começa com ${t.ini}.`); continue; }
+      if (!lista.length) {
+        rod.push(t.zero ? `<b>${t.nome}</b>: o site ainda não tem esse tipo de equipamento nos dados (hoje são 0).` : `<b>${t.nome}</b>: digite o código; começa com ${t.ini}.`);
+        continue;
+      }
       blocos.push([`${t.nome} · ${nf(lista.length)} no estado`, lista.slice(0, 6).map(a => item.ativo(a, ''))]);
       rod.push(`<b>${t.nome}</b>: o código começa com ${t.ini}. Continue digitando para ver os outros.`);
     }
@@ -316,7 +319,7 @@
     e.preventDefault();
     marca(e.key === 'ArrowDown' ? Math.min(sug.length - 1, marcado + 1) : Math.max(0, marcado - 1));
   });
-  res.addEventListener('mousedown', e => { if (e.target.closest('.sug-op, .ir-mapa')) e.preventDefault(); });   // o campo não perde o foco
+  res.addEventListener('mousedown', e => { if (e.target.closest('.sug-op, .ir-mapa, .res-ponto')) e.preventDefault(); });   // o campo não perde o foco
   res.addEventListener('pointerdown', e => {           // dedo (ou botão) no alimentador do município: os dados dele já vêm
     const o = e.target.closest('.sug-op'), s = o && sug[+o.dataset.i];
     if (s && s.almun && mapa() && mapa().prepara) mapa().prepara(s.almun, true);
@@ -326,16 +329,29 @@
     const o = e.target.closest('.sug-op');
     if (o) { escolhe(+o.dataset.i); return; }
     const b = e.target.closest('.ir-mapa');
-    if (b) vaiNoMapa({ al: b.dataset.al });
+    if (b) { vaiNoMapa({ al: b.dataset.al }); return; }
+    const r = e.target.closest('.res-ponto'), h = r && listaAtivos[+r.dataset.i];
+    if (h) irAoAtivo(h.hit, h.txt);
   });
   let indoAl = null;                                     // a caminho de um alimentador: a lista do município não abre no meio
-  function vaiNoMapa(alvo) {
+  function vaiNoMapa(alvo, ponto) {
     q.value = '';
     fecha();
     if (lupa) { q.hidden = true; lupa.setAttribute('aria-expanded', 'false'); }   // escolheu: o campo fecha, fica o olho
     q.blur();
     indoAl = alvo.al || null;
-    Promise.resolve(mapa().vai(alvo)).finally(() => { indoAl = null; });
+    Promise.resolve(ponto ? mapa().ponto(ponto) : mapa().vai(alvo)).finally(() => { indoAl = null; });
+  }
+  // ativo no mapa principal: o mapa abre o alimentador, aproxima no ponto e mostra o marcador e o cartão (ARGOS_MAPA.ponto).
+  // hit: [alimentador, tipo, trecho, papel, lat, lon] do índice dados/ativos; sem o mapa (página antiga), a lista abre a página como antes
+  const podePonto = al => !!(mapa() && mapa().ponto && AL[al]);
+  const ondeDe = (tipo, t, papel) => tipo === 'poste' ? (papel ? 'Trechos ' + papel : t ? 'Trecho ' + t : '') : (papel ? papel[0].toUpperCase() + papel.slice(1) : '');
+  const hrefAtivo = ([al, , t, , lat, lon], txt) => P.url(`alimentadores/${encodeURIComponent(al)}/?${t ? 't=' + encodeURIComponent(t) + '&' : ''}a=${encodeURIComponent(txt)}${lat != null && lat !== '' ? `&ll=${lat},${lon}` : ''}`);
+  let listaAtivos = [];
+  function irAoAtivo(hit, txt) {
+    const [al, tipo, t, papel, lat, lon] = hit, cod = txt.toUpperCase();
+    vaiNoMapa({ al }, { al, ll: lat != null && lat !== '' && lon != null && lon !== '' ? [lat, lon] : null, titulo: `${TIPO[tipo] || 'Chave ' + tipo} ${cod}`,
+      linhas: [[al, t].filter(Boolean).join(' · '), ondeDe(tipo, t, papel)], href: hrefAtivo(hit, txt), alvo: P.alvo });
   }
   function escolhe(i) {
     const s = sug[i];
@@ -436,12 +452,16 @@
     }
     const uc = ucHits.length ? ucBloco(kUC, ucHits) : '';
     if (!hits.length) { res.innerHTML = uc; return; }
+    if (hits.length === 1 && !ucHits.length && podePonto(hits[0][0])) { res.innerHTML = ''; irAoAtivo(hits[0], txt); return; }   // um só: direto ao ativo
+    listaAtivos = hits.map(hit => ({ hit, txt }));
     res.innerHTML = uc + `<p>${hits.length === 1 ? '1 resultado' : hits.length + ' resultados'} para <b>${esc(txt)}</b>${uc ? ' (ativos)' : ''}:</p><ul>` +
-      hits.map(([al, tipo, t, papel, lat, lon]) => {
-        const onde = tipo === 'poste' ? (papel ? 'Trechos ' + esc(papel) : 'Trecho ' + esc(t)) : esc(papel[0] ? papel[0].toUpperCase() + papel.slice(1) : '');
-        return `<li class="res-li"><a href="${esc(P.url(`alimentadores/${encodeURIComponent(al)}/?${t ? 't=' + encodeURIComponent(t) + '&' : ''}a=${encodeURIComponent(txt)}&ll=${lat},${lon}`))}"${P.alvo}>` +
-          `<b>${t ? esc(t) + ' · ' : ''}${esc(al)}</b><span>${esc(TIPO[tipo] || 'Chave ' + tipo)} ${esc(txt)}${AL[al] ? ' · ' + esc(AL[al].se) : ''}</span>` +
-          (onde ? `<span>${onde}</span>` : '') + '<span class="ir">Abrir no mapa do alimentador →</span></a>' + botaoMapa(al) + '</li>';
+      hits.map((hit, i) => {
+        const [al, tipo, t, papel] = hit, onde = esc(ondeDe(tipo, t, papel));
+        const corpo = `<b>${t ? esc(t) + ' · ' : ''}${esc(al)}</b><span>${esc(TIPO[tipo] || 'Chave ' + tipo)} ${esc(txt)}${AL[al] ? ' · ' + esc(AL[al].se) : ''}</span>` +
+          (onde ? `<span>${onde}</span>` : '');
+        if (podePonto(al)) return `<li class="res-li com-ponto"><button type="button" class="res-ponto" data-i="${i}">${corpo}<span class="ir">Ir ao ativo no mapa →</span></button>` +
+          `<a class="res-al" href="${esc(hrefAtivo(hit, txt))}"${P.alvo}>Abrir no mapa do alimentador →</a></li>`;
+        return `<li class="res-li"><a href="${esc(hrefAtivo(hit, txt))}"${P.alvo}>${corpo}<span class="ir">Abrir no mapa do alimentador →</span></a>${botaoMapa(al)}</li>`;
       }).join('') + '</ul>';
   });
 

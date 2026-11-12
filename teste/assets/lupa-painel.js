@@ -453,7 +453,7 @@
     }
     return melhor;
   }
-  const trDoAtivo = a => a.tr || (a.ll ? (a.perto !== undefined ? a.perto : (a.perto = (v => v ? D.trechos[v[4]].nome : null)(vaoPerto(a.ll)))) : null);
+  const trDoAtivo = a => a.tr || (a.ll && !a.fora ? (a.perto !== undefined ? a.perto : (a.perto = (v => v ? D.trechos[v[4]].nome : null)(vaoPerto(a.ll)))) : null);
   // ponto do poste num vão (a ponta certa)
   const pontaDo = (v, p) => String(v[6]) === p ? [v[0], v[1]] : [v[2], v[3]];
 
@@ -507,7 +507,7 @@
           const tipo = tr ? 'TR' : String(it[1] ?? ''), lat = tr ? it[1] : it[2], lon = tr ? it[2] : it[3], tre = tr ? it[3] : it[4];
           const ll = lat != null && lon != null && isFinite(lat) && isFinite(lon) ? [+lat, +lon] : null;
           const a = IA.m.get(cod);
-          if (!a) { const n = { cod, k: alnum(cod), tipo: tipo || null, ll, tr: tre && nomes.has(tre) ? tre : null, rel: [], ia: true }; IA.m.set(cod, n); IA.ats.push(n); }
+          if (!a) { const n = { cod, k: alnum(cod), tipo: tipo || null, ll, tr: tre && nomes.has(tre) ? tre : null, rel: [], ia: true, fora: tipo === 'Regulador' && !tre }; IA.m.set(cod, n); IA.ats.push(n); }
           else { if (!a.tipo && tipo) a.tipo = tipo; if (!a.ll && ll) a.ll = ll; if (!a.tr && tre && nomes.has(tre)) a.tr = tre; }
         }
         if ((i & 63) === 0 && performance.now() > limite) break;
@@ -551,6 +551,7 @@
       let def = d, i = 1;
       if (d.faca && lw[1] && casaPal(lw[1], 'faca', 3)) { def = { ...d, ...d.faca }; i = 2; }
       else if (d.pal[0] === 'trip' && lw[1] && casaPal(lw[1], 'saver', 3)) i = 2;
+      else if (d.pal[0] === 'regulador' && lw[1] === 'de' && (!lw[2] || casaPal(lw[2], 'tensao', 1))) i = lw[2] ? 3 : 2;   // "regulador de tensão"
       return { def, rest: ws.slice(i).join(' ') };
     }
     return null;
