@@ -6,8 +6,8 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "1.7",
- "atualizado": "2026-11-12",
+ "versao": "1.8",
+ "atualizado": "2026-11-13",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
@@ -191,7 +191,8 @@ window.ARGOS_ESCOPO = {
   {"id": "6.1", "frente": "prio", "titulo": "Priorizador de trechos", "itens": [
    {"t": "Página de Priorização: ranking de alimentadores e trechos P1 a P4", "st": "ok", "d": "2026-10-15"},
    {"t": "Nota de 0 a 100 pela soma de pontos de cada critério", "st": "ok", "d": "2026-10-28"},
-   {"t": "Clientes pelas UCs ligadas e OS de limpeza pelo OS status de 29/10", "st": "ok", "d": "2026-10-29"}
+   {"t": "Clientes pelas UCs ligadas e OS de limpeza pelo OS status de 29/10", "st": "ok", "d": "2026-10-29"},
+   {"t": "CHI e CI pelas UCs ligadas a jusante do trecho em cada evento, no lugar dos consumidores registrados na Crítica (decisão de 13/11)", "st": "ok", "d": "2026-11-13"}
   ]},
   {"id": "6.2", "frente": "prio", "titulo": "Validação e atualização", "itens": [
    {"t": "Atualizar as ocorrências do Priorizador (referência de 07/10/2026) com a Crítica nova", "st": "pend", "prazo": "2026-11-20", "resp": "dev", "obs": "Depende da Crítica de set e out/2026."},

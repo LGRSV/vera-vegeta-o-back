@@ -30,10 +30,10 @@
         <div class="pt-limites">
           <h3>Limites conhecidos da conta</h3>
           <ul>
-            <li><b>Mesmo evento em três critérios.</b> NAE, CHI e CI saem das mesmas ocorrências: um trecho com evento soma pontos três vezes pelo mesmo fato, e um sem evento perde os três. Clientes e Hierarquia também medem a mesma exposição (o T1 tem mais clientes). Decisão pendente do dono da metodologia.</li>
+            <li><b>Mesmo evento em três critérios.</b> NAE, CHI e CI saem das mesmas ocorrências: um trecho com evento soma pontos três vezes pelo mesmo fato, e um sem evento perde os três. Clientes e Hierarquia também medem a mesma exposição (o T1 tem mais clientes), e CHI e CI usam as mesmas UCs a jusante do critério Clientes. Decisão pendente do dono da metodologia.</li>
             <li><b>Mínimo de 5 km no cálculo por 100 km</b> (padrão, editável em Opções). A maior parte dos trechos tem menos de 5 km e, para eles, a taxa é só a contagem × 20. Um trecho longo com várias ocorrências pode levar menos pontos que um curto com uma. A ficha mostra a contagem e a extensão reais. Decisão pendente.</li>
             <li><b>CHI acima do real em religamento por etapas.</b> O consumidor·hora usa a maior duração do evento para todos os consumidores; quando o religamento é feito por etapas, o valor fica acima do real. Será corrigido quando a Crítica for reprocessada.</li>
-            <li><b>CHI e CI não são DEC e FEC.</b> São valores absolutos do trecho; o DEC e o FEC do PRODIST dividem pelos consumidores do conjunto.</li>
+            <li><b>CHI e CI não são DEC e FEC.</b> São valores absolutos do trecho; o DEC e o FEC do PRODIST dividem pelos consumidores do conjunto. Desde 13/11/2026 contam as UCs ligadas a jusante do trecho em cada evento coletivo (planilha UC por trafo), e não os consumidores registrados na Crítica, que o DEC e o FEC usam; evento individual (um consumidor) e trecho fora da planilha continuam com os da Crítica.</li>
             <li><b>Histórico curto.</b> As ocorrências são as da Crítica que está nos dados (<span class="js-periodo">jan a ago/2026</span>); não é uma janela de 12 meses.</li>
             <li><b>Bases congeladas.</b> Trechos da segmentação de <span class="js-seg">07/10/2026</span> e OS de <span class="js-os">29/10/2026</span>; as duas não podem ser regeradas nesta página.</li>
           </ul>
@@ -168,8 +168,8 @@
       <thead><tr><th>Critério</th><th>Medida</th><th>Valor no trecho: pontos</th><th class="r">Máximo</th></tr></thead>
       <tbody>
         <tr><td><span class="amostra" style="background:var(--c-his)"></span> NAE por 100 km</td><td>ocorrências por vegetação do período da Crítica (<span class="js-periodo">jan a ago/2026</span>), depois da última limpeza, por 100 km do trecho</td><td>menos de 20: 5 · 20 a 39,9: 10 · 40 a 59,9: 15 · 60 ou mais: 20</td><td class="r num">20</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> CHI por 100 km (consumidor·hora)</td><td>consumidor·hora interrompido (CHI) nessas ocorrências, por 100 km</td><td>menos de 1.000: 5 · 1.000 a 9.999: 10 · 10.000 ou mais: 15</td><td class="r num">15</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> CI por 100 km (consumidores interrompidos)</td><td>consumidores interrompidos (CI) nessas ocorrências, por 100 km</td><td>menos de 100: 3 · 100 a 999: 5 · 1.000 a 9.999: 8 · 10.000 ou mais: 10</td><td class="r num">10</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> CHI por 100 km (consumidor·hora)</td><td>consumidor·hora interrompido (CHI) nessas ocorrências: UCs ligadas a jusante do trecho (planilha UC por trafo) × duração de cada uma (evento individual: consumidores da Crítica), por 100 km</td><td>menos de 1.000: 5 · 1.000 a 9.999: 10 · 10.000 ou mais: 15</td><td class="r num">15</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> CI por 100 km (consumidores interrompidos)</td><td>consumidores interrompidos (CI) nessas ocorrências: UCs ligadas a jusante do trecho em cada uma (evento individual: consumidores da Crítica), por 100 km</td><td>menos de 100: 3 · 100 a 999: 5 · 1.000 a 9.999: 8 · 10.000 ou mais: 10</td><td class="r num">10</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Clientes (UCs ligadas)</td><td>UCs ligadas nos transformadores do trecho e dos que saem dele (planilha UC por trafo)</td><td>1 a 9: 5 · 10 a 99: 10 · 100 a 999: 15 · 1.000 ou mais: 20</td><td class="r num">20</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Hierarquia do trecho</td><td>classe do trecho: o tronco (T1) desliga mais clientes quando falha</td><td>T1: 10 · T2: 5 · T3: 3</td><td class="r num">10</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Cliente Grupo A</td><td>cliente de média tensão no trecho</td><td>tem: 5</td><td class="r num">5</td></tr>
@@ -345,7 +345,7 @@
 <!-- defer: a página pinta o esqueleto enquanto os 3,4 MB de dados chegam -->
 <script defer src="../assets/priorizacao-dados.js?v=202610292330"></script>
 <script defer src="../dados/ucs-trechos.js?v=202610292330"></script>
-<script defer src="../assets/priorizacao.js?v=202611101200"></script>
+<script defer src="../assets/priorizacao.js?v=202611132000"></script>
 </div>
 <script src="../assets/menu.js"></script>
 </body></html>

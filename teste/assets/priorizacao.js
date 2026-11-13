@@ -3,6 +3,9 @@
 // Nota de 0 a 100 = soma de pontos, como numa prova: cada critério dá os pontos da faixa de valor em que o trecho está
 // (NAE, CHI e CI por 100 km, clientes por evento, hierarquia T1/T2/T3, cliente Grupo A e situação da limpeza de faixa).
 // CHI = consumidor·hora interrompido e CI = consumidores interrompidos, em valor absoluto: não são o DEC e o FEC do conjunto.
+// Desde 13/11/2026 (decisão do dono) os dois usam as UCs ligadas a jusante do trecho (planilha UC por trafo) em cada evento
+// coletivo, e não os consumidores registrados na Crítica; evento individual (um consumidor) e trecho fora da planilha continuam
+// com os da Crítica.
 // A tabela de pontos de cada perfil soma 100.
 'use strict';
 /* Motor de priorização VERA (teste). Funções puras: recebem dados + tabela de pontos + parâmetros e devolvem o ranking com
@@ -149,13 +152,21 @@ const VERA = (() => {
       }
       // NAE, CHI e CI contam só as ocorrências da janela depois da última limpeza efetiva: as de antes já foram tratadas.
       // Clientes por evento, meses com evento e eventos nos últimos 90 dias (regras F1 e F4) usam a janela inteira.
-      let n = 0, chi = 0, ci = 0, nJan = 0, n90 = 0, posBloq = 0, cliMax = 0;
+      // CHI e CI: cada evento coletivo conta as UCs ligadas a jusante do trecho (jus, planilha UC por trafo), quem um evento no
+      // trecho deixa sem energia; evento individual (um consumidor, ramal de ligação) e trecho fora da planilha (jus null) usam os
+      // consumidores registrados na Crítica. nUc e nInd: eventos que contam por UC e individuais pela Crítica (texto da ficha)
+      const ucAl = ctx.ucs && ctx.ucs[t.al], ucT = ucAl ? ucAl[t.n] : null, jus = ucT ? ucT[1] : null;
+      let n = 0, chi = 0, ci = 0, nJan = 0, n90 = 0, posBloq = 0, cliMax = 0, nUc = 0, nInd = 0;
       const meses = new Set(), usadas = [];
       for (const [d, cons, dur, col, rg] of t.oc) {
         const age = ref - d;
         if (age < 0 || age > janela) continue;
         const pre = ult !== null && d < ult;
-        if (!pre) { n++; chi += (cons * dur) / 60; ci += cons; }
+        if (!pre) {
+          const porUc = jus !== null && !!col, c = porUc ? jus : cons;
+          n++; chi += (c * dur) / 60; ci += c;
+          if (porUc) nUc++; else if (jus !== null) nInd++;
+        }
         nJan++;
         if (age <= 90) n90++;
         if (bloq && d >= bloq.d) posBloq++;
@@ -163,7 +174,7 @@ const VERA = (() => {
         if (cons > cliMax) cliMax = cons;
         usadas.push({ d, cons, dur, col, rg, pre });
       }
-      return { ult, parcial, bloq, cart, n, chi, ci, nJan, n90, posBloq, meses: meses.size, cliMax, usadas };
+      return { ult, parcial, bloq, cart, n, chi, ci, jus, nUc, nInd, nJan, n90, posBloq, meses: meses.size, cliMax, usadas };
     });
     // por 100 km do trecho. Trecho mais curto que P.pisoKm (padrão 5 km) conta como P.pisoKm: a mediana dos trechos tem 0,21 km e,
     // sem esse mínimo, um trecho curtinho com uma só ocorrência passaria o tronco
@@ -285,8 +296,14 @@ const VERA = (() => {
       nae: [f.n ? qtd(f.n, 'ocorrência', 'ocorrências') + ' em ' + kmTxt + ' = ' + mostra(f.n100) + ' por 100 km' : 'nenhuma ocorrência',
         [prot ? fmtN(prot) + ' de ' + fmtN(f.n) + ' por disjuntor ou religador: defeito em ponto desconhecido da zona' : '',
           antes ? qtd(antes, 'ocorrência anterior', 'ocorrências anteriores') + ' à última limpeza não ' + (antes === 1 ? 'conta' : 'contam') : ''].filter(Boolean).join(' · ')],
-      dec: [f.chi > 0 ? bruto(f.chi) + ' consumidor·hora = ' + mostra(f.chi100) + ' por 100 km' : 'nenhum consumidor·hora', ''],
-      fec: [f.ci > 0 ? qtd(f.ci, 'consumidor interrompido', 'consumidores interrompidos') + ' = ' + mostra(f.ci100) + ' por 100 km' : 'nenhum consumidor interrompido', ''],
+      dec: [f.chi > 0 ? bruto(f.chi) + ' consumidor·hora = ' + mostra(f.chi100) + ' por 100 km' : 'nenhum consumidor·hora',
+        f.n ? (f.jus === null ? 'consumidores da Crítica × duração (trecho fora da planilha de UC)'
+          : [f.nUc ? qtd(f.jus, 'UC', 'UCs') + ' a jusante × duração de cada evento' + (f.nInd ? ' coletivo' : '') : '',
+            f.nInd ? (f.nUc ? '' : 'consumidores da Crítica × duração: ') + qtd(f.nInd, 'evento individual', 'eventos individuais') + (f.nUc ? ' pela Crítica' : '') : ''].filter(Boolean).join('; ')) : ''],
+      fec: [f.ci > 0 ? qtd(f.ci, 'consumidor interrompido', 'consumidores interrompidos') + ' = ' + mostra(f.ci100) + ' por 100 km' : 'nenhum consumidor interrompido',
+        f.n ? (f.jus === null ? 'consumidores registrados na Crítica (trecho fora da planilha de UC)'
+          : [f.nUc ? qtd(f.nUc, f.nInd ? 'evento coletivo' : 'evento', f.nInd ? 'eventos coletivos' : 'eventos') + ' × ' + qtd(f.jus, 'UC', 'UCs') + ' a jusante' : '',
+            f.nInd ? qtd(f.nInd, 'evento individual', 'eventos individuais') + ' pela Crítica' : ''].filter(Boolean).join(' + ')) : ''],
       cli: [cli, ''],
       hier: ['T' + t.c + (t.c === 1 ? ' (tronco)' : ' (ramal)'), ''],
       ga: [v.ga.j === 0 ? 'tem (marcado neste teste)' : 'sem dado na base', ''],
@@ -447,8 +464,8 @@ if (typeof module !== 'undefined') module.exports = VERA;
   const per = () => V.periodo(ctx, S.P).txt;   // período real das ocorrências (Crítica), não a janela nominal de 12 meses
   const REGRA = {
     nae: () => 'Ocorrências por vegetação de ' + per() + ' depois da última limpeza, por 100 km do trecho. Trecho com menos de ' + fmtD(S.P.pisoKm) + ' km conta como ' + fmtD(S.P.pisoKm) + ' km: cada ocorrência vale ' + fmtD(100 / S.P.pisoKm) + '.',
-    dec: () => 'CHI: consumidor·hora interrompido nessas ocorrências (consumidores × duração), por 100 km do trecho. Valor absoluto, não é o DEC do conjunto.',
-    fec: () => 'CI: consumidores interrompidos nessas ocorrências, por 100 km do trecho. Valor absoluto, não é o FEC do conjunto.',
+    dec: () => 'CHI: consumidor·hora interrompido nessas ocorrências, com as UCs ligadas a jusante do trecho (planilha UC por trafo) × a duração de cada uma, por 100 km do trecho. Evento individual (um consumidor) e trecho fora da planilha usam os consumidores da Crítica. Valor absoluto, não é o DEC do conjunto.',
+    fec: () => 'CI: consumidores interrompidos nessas ocorrências, contando em cada uma as UCs ligadas a jusante do trecho (planilha UC por trafo), por 100 km do trecho. Evento individual (um consumidor) e trecho fora da planilha usam os consumidores da Crítica. Valor absoluto, não é o FEC do conjunto.',
     cli: () => {
       const m = S.out && S.out.med.cli;
       if (ctx.ucs) return 'UCs ligadas nos transformadores do trecho e dos trechos que saem dele (planilha UC por trafo): quem um evento no trecho pode deixar sem energia. Alimentador fora da planilha usa os clientes do maior evento de ' + per() + ', e trecho sem evento, o típico da classe. Trecho que não está na planilha do alimentador fica sem dado (0 pontos).';
@@ -688,6 +705,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
     const evOc = ocs.length ? '<div class="lista-ev"><table class="tab-mini"><thead><tr><th>Data</th><th class="r">Consum.</th><th class="r">Min</th><th>Tipo</th><th>Associação</th><th>Conta</th></tr></thead><tbody>' +
       ocs.map((o) => '<tr><td class="num">' + V.dataDe(ctx, o.d) + '</td><td class="r num">' + fmtN(o.cons) + '</td><td class="r num">' + fmtN(o.dur) + (o.dur < 3 ? ' ‡' : '') + '</td><td>' + (o.col ? 'coletiva' : 'individual') + '</td><td>' + rgNome(o) + '</td><td>' + (o.pre ? 'não *' : 'sim') + '</td></tr>').join('') +
       '</tbody></table></div>' +
+      (f.jus !== null && f.nUc ? '<p class="dica">CHI e CI contam ' + qtd(f.jus, 'UC ligada', 'UCs ligadas') + ' a jusante do trecho em cada evento coletivo; a coluna Consum. é o registrado na Crítica' + (f.nInd ? ', que vale nos individuais' : '') + '.</p>' : '') +
       (ocs.some((o) => V.deProtecao(t, o)) ? '<p class="dica">† abertura de disjuntor ou religador: o defeito está em algum ponto da zona protegida, não necessariamente neste trecho.</p>' : '') +
       (curta ? '<p class="dica">‡ interrupção de menos de 3 minutos (o PRODIST não conta no DEC e FEC); aqui ainda entra no NAE, CHI e CI.</p>' : '') +
       (ocs.some((o) => o.pre) ? '<p class="dica">* anterior à última limpeza efetiva: não conta no NAE, CHI e CI.</p>' : '') : '<p class="dica">Nenhuma ocorrência por vegetação em ' + esc(V.periodo(ctx, S.P).txt) + '.</p>';
