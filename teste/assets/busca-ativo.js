@@ -324,7 +324,9 @@
     const o = e.target.closest('.sug-op'), s = o && sug[+o.dataset.i];
     if (s && s.almun && mapa() && mapa().prepara) mapa().prepara(s.almun, true);
   });
-  res.addEventListener('mouseover', e => { const o = e.target.closest('.sug-op'); if (o && +o.dataset.i !== marcado) marca(+o.dataset.i); });
+  // realce ao passar o mouse; com o dedo não: no iPhone, mudar a tela no 'passar por cima' do toque faz o Safari usar o
+  // 1º toque só para isso e pedir um 2º para abrir (o toque no alimentador tem de abrir a página dele direto)
+  res.addEventListener('pointerover', e => { if (e.pointerType !== 'mouse') return; const o = e.target.closest('.sug-op'); if (o && +o.dataset.i !== marcado) marca(+o.dataset.i); });
   res.addEventListener('click', e => {
     const o = e.target.closest('.sug-op');
     if (o) { escolhe(+o.dataset.i); return; }

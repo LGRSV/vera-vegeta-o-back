@@ -1262,7 +1262,9 @@
     voa(enquadra());
     if (tinha) { roda(cod); el[cod].focus({ preventScroll: true }); }
   }
-  legAl.addEventListener('mouseover', e => { const a = e.target.closest('.mt-al'); realceAl(a ? a.dataset.al : null); queroAl(a && a.dataset.al); });
+  // realce ao passar o mouse; com o dedo não (no iPhone, mudar o mapa no 'passar por cima' do toque faz o Safari pedir um 2º
+  // toque para abrir o alimentador); o dedo já pré-carrega no pointerdown
+  legAl.addEventListener('pointerover', e => { if (e.pointerType !== 'mouse') return; const a = e.target.closest('.mt-al'); realceAl(a ? a.dataset.al : null); queroAl(a && a.dataset.al); });
   legAl.addEventListener('mouseleave', () => { realceAl(null); queroAl(null); });
   legAl.addEventListener('focusin', e => { const a = e.target.closest('.mt-al'); realceAl(a ? a.dataset.al : null); queroAl(a && a.dataset.al); });
   legAl.addEventListener('pointerdown', e => { const a = e.target.closest('.mt-al'); if (a) queroAl(a.dataset.al, true); });
