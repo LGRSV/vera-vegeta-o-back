@@ -158,7 +158,7 @@
     const o = res.querySelector(`#ativo-sug-${i}`);
     if (o) { q.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } else q.removeAttribute('aria-activedescendant');
     const s = sug[i];
-    if (mapa() && mapa().prepara) mapa().prepara(s && s.almun);   // mouse parado no alimentador: a página dele começa a vir
+    if (mapa() && mapa().prepara) mapa().prepara(s && (s.almun || s.al));   // mouse parado no alimentador: a página dele começa a vir
     if (s && s.almun) { previa(null); realceAl(s.almun); }   // alimentador do município aberto: a rede dele acende no mapa
     else { realceAl(null); previa(alvoMapa(s)); }
   };
@@ -322,7 +322,7 @@
   res.addEventListener('mousedown', e => { if (e.target.closest('.sug-op, .ir-mapa, .res-ponto')) e.preventDefault(); });   // o campo não perde o foco
   res.addEventListener('pointerdown', e => {           // dedo (ou botão) no alimentador do município: os dados dele já vêm
     const o = e.target.closest('.sug-op'), s = o && sug[+o.dataset.i];
-    if (s && s.almun && mapa() && mapa().prepara) mapa().prepara(s.almun, true);
+    if (s && (s.almun || s.al) && mapa() && mapa().prepara) mapa().prepara(s.almun || s.al, true);
   });
   // realce ao passar o mouse; com o dedo não: no iPhone, mudar a tela no 'passar por cima' do toque faz o Safari usar o
   // 1º toque só para isso e pedir um 2º para abrir (o toque no alimentador tem de abrir a página dele direto)
@@ -360,8 +360,9 @@
     if (!s) return;
     if (s.os) { buscaOS(s.os); return; }
     if (s.uc) { buscaUC(s.uc); return; }
-    // alimentador do município aberto: 1 toque abre o painel dele (passar o mouse ou marcar com as setas acende a rede)
-    if (s.almun) { fecha(); P.abre(`alimentadores/${encodeURIComponent(s.almun)}/`); return; }
+    // alimentador (da lista do município aberto ou achado pela busca): 1 toque abre o mapa dele, o de satélite com Faixa,
+    // Inspeção e Manutenção (passar o mouse ou marcar com as setas só acende a rede no mapa principal)
+    if (s.almun || s.al) { fecha(); P.abre(`alimentadores/${encodeURIComponent(s.almun || s.al)}/`); return; }
     if (s.ativo) {
       q.value = s.ativo;
       fechaSug();

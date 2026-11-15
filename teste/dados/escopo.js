@@ -6,8 +6,8 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "1.9",
- "atualizado": "2026-11-14",
+ "versao": "2.0",
+ "atualizado": "2026-11-15",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
@@ -130,6 +130,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Reguladores de tensão na busca e nos mapas, pela planilha de equipamentos especiais (03/06/2026): 188 no estado, 22 com trecho (até 50 m da rede) e 166 sem trecho, no ponto da planilha", "st": "ok", "d": "2026-11-12"},
    {"t": "Busca no Mapa da rede leva direto ao ativo: abre o alimentador no município do ponto e aproxima nele, com marcador e cartão, sem mudar a visão (NAE-Vegetação)", "st": "ok", "d": "2026-11-12"},
    {"t": "Lista de alimentadores do município: um toque abre o mapa do alimentador direto, também no iPhone (o realce no mapa ficou só para o mouse)", "st": "ok", "d": "2026-11-14"},
+   {"t": "Busca do Mapa da rede: pesquisar ou escolher um alimentador (código, sugestão ou lista do município) abre direto o mapa do alimentador, o de satélite com Faixa, Inspeção e Manutenção", "st": "ok", "d": "2026-11-15"},
    {"t": "Confirmar o alimentador dos reguladores longe da rede", "st": "pend", "prazo": "2026-11-19", "resp": "proj", "obs": "84 sem alimentador na planilha (e 1 com um alimentador que o site não tem) ficaram com o da rede mais próxima, 17 deles a mais de 1 km. 13 com alimentador na planilha estão a mais de 3 km da rede desse alimentador; 10 desses ficam a até 1 km da rede de outro."},
    {"t": "Bancos de capacitor na busca e no mapa: reenviar a pasta Equipamentos da exportação do GIS", "st": "bloq", "desde": "2026-11-10", "prazo": "2026-11-17", "resp": "proj", "obs": "Na cópia da exportação do GIS no Drive (02/10/2026) o Banco_capacitor.kmz não veio: no lugar ficou um aviso de erro (TooManyRequests)."}
   ]},
