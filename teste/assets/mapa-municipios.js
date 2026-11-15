@@ -14,34 +14,12 @@
   const noSite = /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
   const pag = p => noSite ? p : SITE + p;
   const alvoA = noSite ? '' : ' target="_blank" rel="noopener"';
-  // página do alimentador: no próprio site o mapa responde na hora (aviso "Abrindo…") e só então troca de página
-  const vaiPag = p => {
-    const al = /^alimentadores\/([^/?#]+)\//.exec(p);
-    if (noSite && al) abrindo(decodeURIComponent(al[1]), p);
-    else if (noSite) location.href = p; else window.open(SITE + p, '_blank', 'noopener');
-  };
-  window.ARGOS_PAG = { url: pag, alvo: alvoA, abre: vaiPag, prepara: al => queroAl(al) };
-  // troca suave entre as páginas do site (transição entre documentos; navegador sem suporte ignora a regra).
-  // A página de chegada precisa da mesma regra no HTML dela; sem ela o navegador cancela a transição e a página nova
-  // acusa erro no console. Por isso só segue a transição para página que a pré-carga viu com a regra (comVT); as outras
-  // trocam como sempre
-  const estilo = document.createElement('style');
-  estilo.textContent = '@view-transition{navigation:auto}@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}';
-  document.head.append(estilo);
-  const comVT = new Set();
-  addEventListener('pageswap', e => {
-    const t = e.viewTransition, u = e.activation && e.activation.entry && e.activation.entry.url;
-    if (!t || (u && comVT.has(new URL(u).pathname))) return;
-    [t.ready, t.finished, t.updateCallbackDone].forEach(p => p && p.catch(() => {}));   // pular rejeita as promessas: sem erro no console
-    t.skipTransition();
-  });
+  const vaiPag = p => { if (noSite) location.href = p; else window.open(SITE + p, '_blank', 'noopener'); };
+  window.ARGOS_PAG = { url: pag, alvo: alvoA, abre: vaiPag };
   if (!noSite) document.querySelectorAll('.cab-link[href], .rodape a[href]').forEach(a => {
     a.href = pag(a.getAttribute('href')); a.target = '_blank'; a.rel = 'noopener';
   });
-  // formatadores prontos: toLocaleString cria um formatador a cada número e pesava no pouso (dezenas por polo)
-  const NF0 = new Intl.NumberFormat('pt-BR'), NF1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const NFk = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
-  const km = m => NF1.format(m / 1000) + ' km';
+  const km = m => (m / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
   const semAcento = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const kmTot = m => m.als.reduce((s, a) => s + a.m, 0);
   const nAls = m => `${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}`;
@@ -154,77 +132,32 @@
   // Escolhe-se no título da legenda (ou na orelhinha, com ela recolhida); a escolhida fica na URL (?v=limpeza).
   // Sem o arquivo das visões, só a NAE (como antes). c: coluna em MUN_VIS (campos); faixas de MUN_VIS.faixas.
   const MV = window.MUN_VIS && window.MUN_VIS.muns && window.MUN_VIS.faixas ? window.MUN_VIS : null;
-  // período de cada visão, lido dos dados (a tela não diz um período que a base não tem). NAE: meses da Crítica em
-  // assets/ranking-nae.js (window.RANK, do mesmo gera_trechos.py que faz window.MUN), carregado à parte logo abaixo
-  const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-  const dataBr = d => d ? d.slice(0, 10).split('-').reverse().join('/') : '';
-  const meses = ([a, b]) => a.slice(0, 4) === b.slice(0, 4) ? `${MES[+a.slice(5, 7) - 1]} a ${MES[+b.slice(5, 7) - 1]}/${b.slice(0, 4)}` :
-    `${MES[+a.slice(5, 7) - 1]}/${a.slice(0, 4)} a ${MES[+b.slice(5, 7) - 1]}/${b.slice(0, 4)}`;
-  let semRank = false;                                     // ranking-nae.js não veio: o período fica dito como não informado
-  const perCritica = () => { const r = window.RANK && window.RANK.meses; return r && r.length === 2 ? 'Crítica ' + meses(r) : semRank ? 'Crítica: período não informado' : 'Crítica'; };
-  const fv = k => (MV && MV.fonte && MV.fonte[k]) || {};
-  // densidade: NAE por 100 km de rede no município. Com menos de KM_MIN km a conta infla (pouca rede): fica sem cor de densidade
-  const KM_MIN = 50;
   const VIS = [
-    { id: 'nae', nome: 'NAE-Vegetação', curto: 'NAE', un: 'NAE', mais: 'NAE', sem: 'Sem NAE', o: 'pontos de vegetação na rede', faixas: FAIXAS, per: perCritica },
-    { id: 'nae100', nome: 'NAE por 100 km', curto: 'NAE/100 km', un: 'NAE/100 km', mais: 'NAE por 100 km', sem: 'Sem NAE', dens: true,
-      o: `por 100 km de rede (mínimo ${KM_MIN} km)`, faixas: [0, 1e-9, 3, 6, 12, 25], per: () => `${perCritica()} · rede do GIS no município` },
-    { id: 'manutencao', nome: 'Manutenção', curto: 'Manutenção', un: 'OS', mais: 'OS de manutenção', sem: 'Sem OS', o: 'OS executadas (sem limpeza de faixa)', c: 0,
-      per: () => fv('executadas').de ? `executadas de ${dataBr(fv('executadas').de)} a ${dataBr(fv('executadas').ate)}` : 'período não informado' },
-    { id: 'inspecao', nome: 'Inspeção', curto: 'Inspeção', un: 'km', mais: 'km inspecionados', sem: 'Sem inspeção', o: 'km inspecionados', c: 1,
-      per: () => fv('inspecao').base_ate ? `base até ${dataBr(fv('inspecao').base_ate)}` : 'período não informado' },
-    { id: 'insp-manut', nome: 'Inspeção que gerou manutenção', curto: 'Insp→manut', un: 'OS', mais: 'OS geradas pela inspeção', sem: 'Sem OS', o: 'OS geradas pela inspeção', c: 2,
-      per: () => fv('manutencao').base_ate ? `base até ${dataBr(fv('manutencao').base_ate)}` : 'período não informado' },
-    // km somados OS a OS: o mesmo vão limpo duas vezes conta duas (não é extensão distinta de rede)
-    { id: 'limpeza', nome: 'Limpeza de faixa', curto: 'Limpeza', un: 'km', mais: 'km de limpeza (acumulado)', sem: 'Sem limpeza', o: 'km limpos somados OS a OS (com repetição)', c: 3,
-      per: () => `acumulado com repetição · base de ${dataBr(fv('limpeza').gerado) || 'data não informada'}` }
+    { id: 'nae', nome: 'NAE-Vegetação', curto: 'NAE', un: 'NAE', mais: 'NAE', sem: 'Sem NAE', o: 'pontos de vegetação na rede', faixas: FAIXAS },
+    { id: 'manutencao', nome: 'Manutenção', curto: 'Manutenção', un: 'OS', mais: 'OS de manutenção', sem: 'Sem OS', o: 'OS executadas (sem limpeza de faixa)', c: 0 },
+    { id: 'inspecao', nome: 'Inspeção', curto: 'Inspeção', un: 'km', mais: 'km inspecionados', sem: 'Sem inspeção', o: 'km inspecionados', c: 1 },
+    { id: 'insp-manut', nome: 'Inspeção que gerou manutenção', curto: 'Insp→manut', un: 'OS', mais: 'OS geradas pela inspeção', sem: 'Sem OS', o: 'OS geradas pela inspeção', c: 2 },
+    { id: 'limpeza', nome: 'Limpeza de faixa', curto: 'Limpeza', un: 'km', mais: 'km de limpeza de faixa', sem: 'Sem limpeza', o: 'km de faixa limpos (executada)', c: 3 }
   ].filter(v => v.c === undefined || (MV && (v.faixas = MV.faixas[(MV.campos || [])[v.c]])));
   let V = VIS.find(v => v.id === new URLSearchParams(location.search).get('v')) || VIS[0];
   FAIXAS = V.faixas;
-  const kmMun = m => m.als ? kmTot(m) / 1000 : 0;
-  // km de rede de cada alimentador (soma dos municípios) e em quantos municípios ele aparece
-  const alKm = {}, alMuns = {};
-  M.muns.forEach(m => (m.als || []).forEach(a => { alKm[a.cod] = (alKm[a.cod] || 0) + a.m / 1000; alMuns[a.cod] = (alMuns[a.cod] || 0) + 1; }));
-  const dens = (n, k) => k >= KM_MIN ? n / k * 100 : 0;
-  const vMun = m => V.dens ? dens(m.nae || 0, kmMun(m)) : V.c === undefined ? m.nae || 0 : (MV.muns[m.cod] || {})[MV.campos[V.c]] || 0;
-  // NAE do alimentador DENTRO do município (regra aprovada): a.nm quando os dados trazem (mesma regra de nae_por_municipio
-  // em gera_trechos.py); sem ele, só se sabe a do alimentador inteiro, que é a do município quando ele não passa por outro.
-  // todo: o número é do alimentador inteiro (a tela avisa)
-  const naeAl = a => a.nm !== undefined ? { n: a.nm || 0, tot: a.n || 0, todo: false } : { n: a.n || 0, tot: a.n || 0, todo: alMuns[a.cod] > 1 };
-  const vAl = (m, a) => V.dens ? dens(a.n || 0, alKm[a.cod] || 0) : V.c === undefined ? naeAl(a).n : ((((MV.muns[m.cod] || {}).als || {})[a.cod] || [])[V.c] || 0);
-  // texto do alimentador no município: deixa claro quando o número é do alimentador todo (e não só deste município)
-  const txtAl = (m, a) => {
-    if (V.dens) return `${txtV(vAl(m, a))} no alimentador todo`;
-    if (V.c !== undefined) return txtV(vAl(m, a));
-    const x = naeAl(a);
-    return x.todo ? `${numV(x.n)} NAE no alimentador todo` : a.nm !== undefined && x.n !== x.tot ? `${numV(x.n)} NAE aqui (de ${numV(x.tot)} no alimentador)` : `${numV(x.n)} NAE`;
-  };
-  // número (selo) e linha de baixo do alimentador na caixa do município: km aqui e, quando for o caso, de quem é o número
-  const rotAl = (m, a) => {
-    const todo = V.dens || (V.c === undefined && naeAl(a).todo);
-    return `<i>${txtV(vAl(m, a))}</i><em>${km(a.m)} aqui${todo ? ' · número do alimentador todo' : ''}</em>`;
-  };
-  // soma de um grupo de municípios na visão; na densidade, NAE somada sobre km somados (não a soma das densidades)
-  const somaV = ms => {
-    if (!V.dens) return ms.reduce((s, m) => s + vMun(m), 0);
-    const ok = ms.filter(m => kmMun(m) >= KM_MIN);
-    return dens(ok.reduce((s, m) => s + (m.nae || 0), 0), ok.reduce((s, m) => s + kmMun(m), 0));
-  };
+  const vMun = m => V.c === undefined ? m.nae || 0 : (MV.muns[m.cod] || {})[MV.campos[V.c]] || 0;
+  const vAl = (m, a) => V.c === undefined ? a.n || 0 : ((((MV.muns[m.cod] || {}).als || {})[a.cod] || [])[V.c] || 0);   // NAE: a do alimentador
+  const somaV = ms => ms.reduce((s, m) => s + vMun(m), 0);
   const comoNae = f => { const v = V; V = VIS[0]; try { f(); } finally { V = v; } };   // f com os números da NAE
-  // número da visão (km com 1 casa até 100 km) e com a unidade ("36 NAE", "12 OS", "34,5 km", "12,3 NAE/100 km")
-  const numV = n => V.dens ? NF1.format(n || 0) : V.un !== 'km' ? NF0.format(n || 0) : !n ? '0' : n < 50 ? '<0,1' :   // 15 a 49 m não viram 0,0 km
-    (n < 1e5 ? NF1 : NFk).format(n / 1000);
+  // número da visão (km com 1 casa até 100 km) e com a unidade ("36 NAE", "12 OS", "34,5 km")
+  const numV = n => V.un !== 'km' ? (n || 0).toLocaleString('pt-BR') : !n ? '0' : n < 50 ? '<0,1' :   // 15 a 49 m não viram 0,0 km
+    (n / 1000).toLocaleString('pt-BR', n < 1e5 ? { minimumFractionDigits: 1, maximumFractionDigits: 1 } : { maximumFractionDigits: 0 });
   const txtV = n => `${numV(n)} ${V.un}`;
-  const kmF = l => NF0.format(l / 1000);
-  const rotFaixa = i => i === 0 ? V.sem : V.dens ? (i === 1 ? `até ${FAIXAS[2]} por 100 km` : i === FAIXAS.length - 1 ? `${FAIXAS[i]} ou mais por 100 km` : `${FAIXAS[i]} a ${FAIXAS[i + 1]} por 100 km`) :
-    V.un === 'km' ? (i === 1 ? `até ${kmF(FAIXAS[2])} km` : i === FAIXAS.length - 1 ? `${kmF(FAIXAS[i])} km ou mais` : `${kmF(FAIXAS[i])} a ${kmF(FAIXAS[i + 1])} km`) :
-    (i === FAIXAS.length - 1 ? `${NF0.format(FAIXAS[i])}${V.un === 'OS' ? ' OS' : ''} ou mais` : `${NF0.format(FAIXAS[i])} a ${NF0.format(FAIXAS[i + 1] - 1)}${V.un === 'OS' ? ' OS' : ''}`);
-  // texto das faixas na rampa: inteiro (l: "11–30", c: só o começo) ou km/densidade ("10–25", "até 10"; c: ">0")
+  const kmF = l => (l / 1000).toLocaleString('pt-BR');
+  const rotFaixa = i => i === 0 ? V.sem : V.un === 'km' ? (i === 1 ? `até ${kmF(FAIXAS[2])} km` : i === FAIXAS.length - 1 ? `${kmF(FAIXAS[i])} km ou mais` : `${kmF(FAIXAS[i])} a ${kmF(FAIXAS[i + 1])} km`) :
+    (i === FAIXAS.length - 1 ? `${FAIXAS[i].toLocaleString('pt-BR')}${V.un === 'OS' ? ' OS' : ''} ou mais` : `${FAIXAS[i].toLocaleString('pt-BR')} a ${(FAIXAS[i + 1] - 1).toLocaleString('pt-BR')}${V.un === 'OS' ? ' OS' : ''}`);
+  // texto das faixas na rampa: inteiro (l: "11–30", c: só o começo) ou km ("10–25", "até 10"; c: ">0")
   const rotRampa = (i, curto) => {
-    const l = FAIXAS[i], ult = i === FAIXAS.length - 1, f = V.un === 'km' ? kmF : n => NF0.format(n);
+    const l = FAIXAS[i], ult = i === FAIXAS.length - 1, f = V.un === 'km' ? kmF : n => n.toLocaleString('pt-BR');
     if (i === 0) return '0';
     if (ult) return f(l) + '+';
-    if (V.un === 'km' || V.dens) return curto ? (i === 1 ? '>0' : f(l)) : i === 1 ? 'até ' + f(FAIXAS[2]) : f(l) + '–' + f(FAIXAS[i + 1]);
+    if (V.un === 'km') return curto ? (i === 1 ? '>0' : f(l)) : i === 1 ? 'até ' + f(FAIXAS[2]) : f(l) + '–' + f(FAIXAS[i + 1]);
     return curto ? f(l) : f(l) + '–' + f(FAIXAS[i + 1] - 1);
   };
   // municípios agrupados por polo (o grupo é o que se afasta ao abrir a regional), com o contorno do polo no fim do grupo
@@ -299,9 +232,7 @@
       : `<b class="mt-regs-t" aria-hidden="true">${esc(V.nome)}</b>`) +
       `<div class="mt-rampa" role="list" aria-label="Faixas de ${esc(V.nome)}">` + FAIXAS.map((l, i) => `<span role="listitem" title="${rotFaixa(i)}"><i class="nae-${i}" aria-hidden="true"></i>` +
       `<em aria-hidden="true"><span class="mt-f-l">${rotRampa(i)}</span><span class="mt-f-c">${rotRampa(i, true)}</span></em>` +
-      `<span class="vh">${rotFaixa(i)}</span></span>`).join('') + '</div>' +
-      // período e base da visão, sempre à vista (as visões têm períodos diferentes)
-      `<small class="mt-regs-p" style="flex:1 0 100%;margin:0;white-space:normal">${esc(V.per ? V.per() : '')}</small>`;
+      `<span class="vh">${rotFaixa(i)}</span></span>`).join('') + '</div>';
     leg.querySelector('.mt-regs-m').innerHTML = FAIXAS.map((l, i) => `<i class="nae-${i}"></i>`).join('');
     leg.querySelector('.mt-regs-o').textContent = V.curto;
     ajustaTitulo();
@@ -317,16 +248,7 @@
     if (legC.offsetWidth > curto + .5) t.firstChild.textContent = V.curto;
   }
   addEventListener('resize', ajustaTitulo);
-  // meses da Crítica (window.RANK): o arquivo é pequeno e chega logo; a linha do período já existe, só troca o texto
-  if (!window.RANK) {
-    const s = document.createElement('script');
-    s.src = 'assets/ranking-nae.js';
-    const poe = () => { const p = leg && leg.querySelector('.mt-regs-p'); if (p && V.per) p.textContent = V.per(); };
-    s.onload = poe;
-    s.onerror = () => { semRank = true; s.remove(); poe(); };
-    document.head.append(s);
-  }
-  let reancoraPend = false;                            // visão trocada com a legenda recolhida: ao mostrar, os cartões voltam ao fio
+  let reancoraPend = false;                             // visão trocada com a legenda recolhida: ao mostrar, os cartões voltam ao fio
   poeLegenda();
   function legenda(sim, guarda) {
     legAberta = sim;
@@ -608,7 +530,6 @@
   // só aparecem no estado inteiro): o pouso no estado inteiro chama escala(true). Sem forca, só refaz se o tamanho do
   // svg mudou: o ResizeObserver avisa logo depois do pouso a mudança que o próprio pouso já tratou (era tudo em dobro).
   let anima = 0;                                           // id do requestAnimationFrame do voo (0 = parado)
-  let direto = false, hist = null;                         // direto: troca de nível sem voo (link direto, Voltar); hist: endereço por nível
   let reg = null, pol = null, mdesl = {}, corDe = {};      // nível aberto (regional, polo) e os afastamentos
   let tamSvg = '';
   const escala = forca => {
@@ -639,9 +560,8 @@
     if (rd) {
       const m = porCod[mun], a = m.als.find(x => x.cod === rd.dataset.al), r = caixa.getBoundingClientRect();
       realceAl(a.cod);
-      dica.innerHTML = `<span class="mt-dica-h"><b class="cod">${esc(a.cod)}</b><i>${txtAl(m, a)}</i></span><small>${esc(a.se)} · ${km(a.m)} em ${esc(m.nome)}</small>` +
+      dica.innerHTML = `<span class="mt-dica-h"><b class="cod">${esc(a.cod)}</b><i>${txtV(vAl(m, a))}</i></span><small>${esc(a.se)} · ${km(a.m)} em ${esc(m.nome)}</small>` +
         '<small class="mt-dica-c">Clique para abrir o painel do alimentador</small>';
-      queroAl(a.cod);                                   // o mouse parou na rede: a página dele começa a vir
       dica.style.left = (e.clientX - r.left) + 'px'; dica.style.top = (e.clientY - r.top) + 'px'; dica.style.display = 'block';
       return;
     }
@@ -650,9 +570,7 @@
     if (!p) { dica.style.display = 'none'; return; }
     const m = porCod[p.dataset.cod], r = caixa.getBoundingClientRect();
     if (!reg) realca(m.reg); else if (!pol) realcaPolo(m.reg === reg ? m.polo : null);
-    // densidade: a conta à vista (NAE e km), e o aviso quando a rede é pequena demais para a conta valer
-    const dz = V.dens && m.slug ? `<small>${kmMun(m) < KM_MIN ? `rede menor que ${KM_MIN} km: sem densidade` : `${NF0.format(m.nae || 0)} NAE nessa rede`}</small>` : '';
-    dica.innerHTML = `<span class="mt-dica-h"><b>${esc(m.nome)}</b><i>${txtV(vMun(m))}</i></span><small>${m.reg ? `Regional ${esc(m.reg)} · ${esc(m.polo)}` : ''}${m.slug ? `${m.reg ? ' · ' : ''}${nAls(m)} · ${km(kmTot(m))}` : `${m.reg ? ' · ' : ''}sem dados ainda`}</small>` + dz +
+    dica.innerHTML = `<span class="mt-dica-h"><b>${esc(m.nome)}</b><i>${txtV(vMun(m))}</i></span><small>${m.reg ? `Regional ${esc(m.reg)} · ${esc(m.polo)}` : ''}${m.slug ? `${m.reg ? ' · ' : ''}${nAls(m)} · ${km(kmTot(m))}` : `${m.reg ? ' · ' : ''}sem dados ainda`}</small>` +
       (!reg && m.reg ? `<small class="mt-dica-c">Clique para ver os polos da Regional ${esc(m.reg)}</small>` :
         reg && !pol && m.reg === reg ? `<small class="mt-dica-c">Clique para ver os municípios de ${esc(m.polo)}</small>` :
         pol && !mun && m.polo === pol && m.slug ? '<small class="mt-dica-c">Clique para ver os alimentadores</small>' : '');
@@ -701,16 +619,7 @@
   const calmo = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const vb = () => svg.getAttribute('viewBox').split(' ').map(Number);
   const une = (a, b) => !a ? b : { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) };
-  // caixa de cada município guardada: a forma não muda (o afastamento é transform, fora do getBBox), e o getBBox no clique
-  // forçava o navegador a refazer o estilo da página inteira antes do 1º quadro do voo. A do polo é a união dos municípios
-  // dele (o contorno do polo passa pelas bordas deles), sem medir o grupo
-  const caixas = new Map();
-  const caixaDe = e => {
-    let c = caixas.get(e);
-    if (!c) { const r = e.getBBox(); caixas.set(e, c = { x: r.x, y: r.y, x2: r.x + r.width, y2: r.y + r.height }); }
-    return c;
-  };
-  const caixaPolo = polo => M.muns.reduce((b, m) => m.polo === polo ? une(b, caixaDe(el[m.cod])) : b, null);
+  const caixaDe = e => { const r = e.getBBox(); return { x: r.x, y: r.y, x2: r.x + r.width, y2: r.y + r.height }; };
   const polosDe = r => Object.entries(grp).filter(([, gp]) => gp.dataset.reg === r);
   function realca(r) {
     Object.values(grp).forEach(gp => gp.classList.toggle('apaga', !!r && gp.dataset.reg !== r));
@@ -727,7 +636,7 @@
     cancelAnimationFrame(anima);
     caixa.classList.remove('pronta');
     caixa.classList.add('voando');
-    const de = vb(), dur = calmo() || direto ? 0 : DUR, cam = trajeto(de, alvoVb);
+    const de = vb(), dur = calmo() ? 0 : DUR, cam = trajeto(de, alvoVb);
     let t0 = 0;
     const passo = agora => {
       if (!t0) t0 = agora;
@@ -739,7 +648,6 @@
     fios.innerHTML = '';
     anima = requestAnimationFrame(passo);           // antes do evento: quem ouve já vê o voo em andamento (quieto)
     document.dispatchEvent(new CustomEvent('argos-nivel', { detail: { reg, pol, mun, al: alf } }));   // a busca acompanha o nível
-    if (hist) hist.marca();                         // o endereço acompanha o nível
   }
   // trabalho que pode esperar o voo (miniaturas da rede): quieto() resolve depois do pouso, um por tarefa
   // (sem tarefa longa logo depois do pouso); se outro voo começa, o resto espera o próximo pouso
@@ -747,25 +655,15 @@
   const quieto = () => anima ? new Promise(res => esperas.push(res)) : Promise.resolve();
   const solta = () => { if (anima || !esperas.length) return; esperas.shift()(); setTimeout(solta, 0); };
   // pouso: o que esperou o voo (medidas, nomes, cartões, rede) entra de uma vez
-  // Em duas tarefas: o último quadro do voo só troca as classes; as medidas (nomes, cartões, bandeirinhas) vêm na
-  // tarefa seguinte, depois desse quadro já desenhado, com o layout em dia. Juntas, passavam de 100 ms no celular
-  // (o 1º offsetWidth refazia o layout da página toda dentro do quadro do pouso)
-  let pouso = 0, verP = false;                         // verP: ativo recém-aberto (ponto()), que o pouso mostra uma vez
   function pousa() {
     caixa.classList.remove('voando');
     caixa.classList.toggle('pronta', !!reg);
-    clearTimeout(pouso);
-    pouso = setTimeout(assenta, 0);
-  }
-  function assenta() {
-    if (anima) return;                              // outro voo começou: o pouso dele assenta
     if (reg && chaveEnq() !== baseEnq) svg.setAttribute('viewBox', enquadra().join(' '));   // a caixa mudou de tamanho em pleno voo
     tamCaixa = chaveCaixa();                        // nomes e cartões abaixo saem neste tamanho (o ResizeObserver compara com ele)
     if (!reg) escala(true);                         // estado inteiro: letra dos nomes e bandeirinhas das regionais
     poeNomes();
     poeSelos();
     agendaRede();
-    if (verP) { verP = false; mostraPonto(); }
     setTimeout(solta, 0);
   }
   const volta = document.createElement('button');
@@ -840,16 +738,12 @@
   const chaveEnq = () => caixa.clientWidth + 'x' + (matchMedia('(max-width:860px)').matches ? '' : svg.clientHeight || 600);
   // enquadra a regional aberta deixando livre a coluna da legenda (computador) ou o topo para o "← Tocantins" (celular)
   const move = (b, [dx, dy]) => ({ x: b.x + dx, y: b.y + dy, x2: b.x2 + dx, y2: b.y2 + dy });
-  // enquadra(): o do nível aberto; com um ativo escolhido (ponto()), o quadro do ativo, que assim sobrevive à tela cheia, ao
-  // tamanho da janela e ao giro do celular (assenta e o ResizeObserver chamam enquadra)
-  let fixoPonto = null;
-  function enquadra() { const e = enquadraBase(); return fixoPonto && alf && alCaixa ? fixoPonto(e) : e; }
-  function enquadraBase() {
+  function enquadra() {
     let bb = null;
     if (alCaixa) bb = alCaixa;
     else if (mun) bb = move(caixaDe(el[mun]), soma(desl[pol], mdesl[mun]));
     else if (pol) M.muns.forEach(m => { if (m.polo === pol) bb = une(bb, move(caixaDe(el[m.cod]), soma(desl[pol], mdesl[m.cod]))); });
-    else polosDe(reg).forEach(([polo]) => { bb = une(bb, move(caixaPolo(polo), desl[polo])); });
+    else polosDe(reg).forEach(([polo, gp]) => { bb = une(bb, move(caixaDe(gp), desl[polo])); });
     const x = bb.x - 12, y = bb.y - 12, w = bb.x2 - bb.x + 24, h = bb.y2 - bb.y + 24, W = caixa.clientWidth;
     // celular (mesmo corte do site.css): sobra o topo para a seta de voltar e o pé para a seta dos polos
     if (matchMedia('(max-width:860px)').matches) { const t = 52 * w / W, f = 52 * w / W; baseEnq = W + 'x'; return [x, y - t, w, h + t + f]; }
@@ -870,7 +764,7 @@
     realca(null);
     dica.style.display = 'none';
     const ps = polosDe(r).map(([polo, gp]) => {
-      const ms = M.muns.filter(m => m.polo === polo), b = caixaPolo(polo);
+      const ms = M.muns.filter(m => m.polo === polo), b = caixaDe(gp);
       return { polo, gp, ms, cx: (b.x + b.x2) / 2, cy: (b.y + b.y2) / 2, b };
     });
     const vai = k => Math.max(...ps.map(p => p[k])) - Math.min(...ps.map(p => p[k]));
@@ -925,7 +819,7 @@
     pol = polo;
     realcaPolo(null);
     dica.style.display = 'none';
-    const b = caixaPolo(polo), pc = [(b.x + b.x2) / 2, (b.y + b.y2) / 2], ms = M.muns.filter(m => m.polo === polo);
+    const b = caixaDe(grp[polo]), pc = [(b.x + b.x2) / 2, (b.y + b.y2) / 2], ms = M.muns.filter(m => m.polo === polo);
     mdesl = {};
     const g0 = Math.hypot(b.x2 - b.x, b.y2 - b.y) * 0.04;         // folga mínima: os do meio do polo também se soltam
     ms.forEach(m => {
@@ -1062,7 +956,7 @@
     legAl.innerHTML = caixaPolos(`<span class="mt-lh"><b>${esc(m.nome)}</b><small>${m.als.length} alimentador${m.als.length > 1 ? 'es' : ''}</small></span>`,
       als.map(a =>
         `<button type="button" class="mt-al" data-al="${esc(a.cod)}" title="Clique para abrir o painel do alimentador"><span class="mt-al-m" aria-hidden="true"></span>` +
-        `<b>${esc(a.cod)}</b><span>${rotAl(m, a)}</span></button>`).join(''));
+        `<b>${esc(a.cod)}</b><span><i>${txtV(vAl(m, a))}</i><em>${km(a.m)} aqui</em></span></button>`).join(''));
     legAl.classList.toggle('aberta', puxada);
     volta.setAttribute('aria-label', `${m.nome}. Voltar ao polo ${pol}`);
     volta.title = `Voltar ao polo ${pol}`;
@@ -1091,9 +985,6 @@
       if (pede.length) requestAnimationFrame(pedeMais);
     };
     requestAnimationFrame(pedeMais);
-    // depois do pouso e com a tela parada: a página de cada alimentador daqui e os arquivos comuns vão para o cache
-    const ocioso = window.requestIdleCallback || (f => setTimeout(f, 300));
-    quieto().then(() => ocioso(() => { if (mun === cod) als.slice(0, 12).forEach(a => preparaPag(a.cod)); }));   // 12: Palmas tem dezenas
   }
   // miniatura na caixa ao lado do mapa (só sem a busca da barra)
   function miniCaixa(al, r) {
@@ -1105,96 +996,15 @@
   // sem corte; os outros apagam. Clicar num alimentador (na lista ou na rede) abre direto a página dele.
   let alf = null, alCaixa = null;
   const abreAl = al => vaiPag(`alimentadores/${encodeURIComponent(al)}/`);
-  // pré-carga da página do alimentador (fica no cache do navegador, em baixa prioridade, sem travar a tela). A lista do
-  // que ela pede sai do próprio index.html dela (sem lista fixa que envelhece): ao chegar ao município vêm a página e os
-  // arquivos comuns (leaflet, alimentador.js…); com o mouse parado num alimentador (ou o dedo nele) vêm os dados dele.
-  // Conexão econômica (economia de dados, 2G): nada é pré-carregado
-  const prep = new Map(), pagsAl = new Map();             // prep: endereço → promessa que resolve quando o arquivo chegou (ou falhou)
-  const economia = () => { const c = navigator.connection; return !!(c && (c.saveData || /2g/.test(c.effectiveType || ''))); };
-  const prefetch = href => {
-    if (!prep.has(href)) prep.set(href, new Promise(fim => {
-      const l = document.createElement('link');
-      l.rel = 'prefetch';
-      l.href = href;
-      l.onload = l.onerror = () => fim();
-      document.head.append(l);
-    }));
-    return prep.get(href);
-  };
-  function pagAl(al) {                                   // [arquivos comuns, arquivos do alimentador] da página dele
-    if (!pagsAl.has(al)) {
-      const base = new URL(`alimentadores/${encodeURIComponent(al)}/`, location.href);
-      pagsAl.set(al, fetch(base, { priority: 'low' }).then(r => r.ok ? r.text() : '').then(h => {
-        if (/@view-transition/.test(h)) comVT.add(base.pathname);
-        const us = [...h.matchAll(/<(?:script[^>]*?\ssrc|link[^>]*?rel="stylesheet"[^>]*?\shref)="([^"]+)"/g)]
-          .map(x => new URL(x[1], base)).filter(u => u.origin === location.origin);
-        return [us.filter(u => !u.pathname.startsWith(base.pathname)).map(u => u.href), us.filter(u => u.pathname.startsWith(base.pathname)).map(u => u.href)];
-      }).catch(() => [[], []]));
-    }
-    return pagsAl.get(al);
-  }
-  const preparaPag = al => { if (!noSite || economia()) return; pagAl(al).then(([comuns]) => comuns.forEach(prefetch)); };
-  function preparaAl(al) {                               // resolve quando tudo o que a página pede está no cache
-    if (!noSite || economia()) return Promise.resolve();
-    return pagAl(al).then(([comuns, dele]) => Promise.all(comuns.concat(dele).map(prefetch)));
-  }
-  let quer = 0;
-  const queroAl = (al, ja) => { clearTimeout(quer); if (al) quer = setTimeout(() => preparaAl(al), ja ? 0 : 150); };   // passar o mouse por cima não baixa
-  // resposta imediata ao clique: aviso no próprio mapa (o giro é uma animação de transform, que segue mesmo com a página
-  // ocupada). Enquanto os arquivos do alimentador chegam (dados.js tem até 3 MB) o mapa continua vivo, com o aviso; a
-  // troca de página vem quando eles estão no cache (no máximo ESPERA_AL ms), e aí a página nova monta sem esperar a rede,
-  // em vez de ficar em branco baixando. Esc cancela
-  let aviso = null, indo = null;
-  function abrindo(al, p) {
-    if (indo === p) return;                              // clique repetido não recomeça a navegação
-    indo = p;
-    if (!aviso) {
-      aviso = document.createElement('div');
-      aviso.className = 'mt-abrindo';
-      aviso.setAttribute('role', 'status');
-      aviso.style.cssText = 'position:absolute;left:50%;bottom:16px;z-index:8;transform:translateX(-50%);display:flex;align-items:center;gap:10px;' +
-        'padding:10px 16px;border:1px solid var(--line);border-radius:var(--r2,10px);background:var(--paper);color:var(--fg);' +
-        'font:600 var(--t-sm,14px)/1.2 var(--f-body,inherit);box-shadow:0 10px 24px -8px rgb(0 0 0 / .45);white-space:nowrap;max-width:calc(100% - 16px)';
-      aviso.innerHTML = '<i aria-hidden="true" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--accent);flex:none"></i>' +
-        '<span style="overflow:hidden;text-overflow:ellipsis"></span><button type="button" style="flex:none;min-height:32px;padding:0 10px;border:1px solid var(--line);' +
-        'border-radius:var(--r1,6px);background:transparent;color:var(--muted);font:500 var(--t-xs,12px)/1 var(--f-body,inherit);cursor:pointer">Cancelar</button>';
-      caixa.append(aviso);
-      aviso.lastChild.addEventListener('click', cancela);
-      if (!calmo() && aviso.firstChild.animate) aviso.firstChild.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(1turn)' }], { duration: 800, iterations: Infinity });
-    }
-    const txt = aviso.children[1];
-    txt.textContent = `Abrindo ${al}…`;
-    aviso.hidden = false;
-    aviso.lastChild.focus({ preventScroll: true });       // o Esc (e o leitor de tela) chegam ao aviso
-    caixa.style.cursor = 'progress';
-    if (mun) realceAl(al);
-    const t0 = performance.now();
-    const troca = () => { if (indo !== p) return; txt.textContent = `Abrindo ${al}…`; requestAnimationFrame(() => setTimeout(() => { if (indo === p) location.href = p; }, 0)); };
-    const pronto = preparaAl(al);
-    setTimeout(() => { if (indo === p && performance.now() - t0 > 250) txt.textContent = `Baixando ${al}…`; }, 300);
-    Promise.race([pronto, new Promise(r => setTimeout(r, ESPERA_AL))]).then(troca);
-  }
-  const ESPERA_AL = 12000;
-  function cancela() { indo = null; if (aviso) aviso.hidden = true; caixa.style.cursor = ''; }
-  document.addEventListener('keydown', e => {          // Esc enquanto baixa: fica no mapa
-    if (e.key !== 'Escape' || !indo || !aviso || aviso.hidden) return;
-    e.preventDefault();
-    cancela();
-  });
-  // de volta pelo Voltar com a página guardada (bfcache): o aviso sai
-  addEventListener('pageshow', e => { if (e.persisted) cancela(); });
   function trilhaMun() {
     const m = porCod[mun];
     legPolos.innerHTML = passo('estado', 'Tocantins') + passo('regional', esc(reg)) + passo('polo', esc(pol)) +
       (alf ? passo('mun', esc(m.nome)) + atual(esc(alf)) : atual(esc(m.nome)));
   }
-  let destinoAl = null, pedidoP = 0;                   // pedidoP: só o ativo escolhido por último (ponto) põe marcador e cartão
-  let pedAl = 0;                                        // só o alimentador pedido por último entra (redes que chegam fora de ordem)
   async function focaAl(al) {
     if (!mun || alf === al) return;
-    const meu = ++pedAl, cod = mun, r = await rede(al, porCod[mun].polo);
-    if (!r && mun === cod && meu === pedAl && !alf) { voa(enquadra()); return; }   // rede que não veio: o quadro do município, não o de antes
-    if (!r || mun !== cod || meu !== pedAl) return;
+    const cod = mun, r = await rede(al, porCod[mun].polo);
+    if (!r || mun !== cod) return;
     alf = al;
     const [x0, y0, x1, y1] = r.b, d = soma(desl[pol], mdesl[mun]);
     alCaixa = move({ x: x0, y: y0, x2: x1, y2: y1 }, d);
@@ -1208,7 +1018,7 @@
     trilhaMun();
     volta.setAttribute('aria-label', `${al}. Voltar a ${porCod[mun].nome}`);
     volta.title = `Voltar a ${porCod[mun].nome}`;
-    const alvoVb = enquadraBase(), la = lote();               // a rede dele também em pedaços (célula do zoom no alimentador)
+    const alvoVb = enquadra(), la = lote();               // a rede dele também em pedaços (célula do zoom no alimentador)
     pedacos(al, r.d, celula(alvoVb)).forEach(dd => {
       const pa = document.createElementNS(NS, 'path');
       pa.setAttribute('d', dd);
@@ -1216,13 +1026,9 @@
       la.append(pa);
     });
     gf.append(la);
-    const dest = destinoAl && destinoAl.al === al ? destinoAl : null;   // ponto(): o voo vai direto ao ativo, sem parar no alimentador inteiro
-    if (dest) { destinoAl = null; dest.usado = true; }
-    voa(dest ? dest(alvoVb) : alvoVb);
+    voa(alvoVb);
   }
   function saiAl(animar = true) {
-    limpaPonto();
-    pedAl++;                                             // a rede que ainda está chegando não abre mais o alimentador
     if (!alf) return;
     alf = null;
     alCaixa = null;
@@ -1241,7 +1047,6 @@
   }
   function saiMun(animar = true) {
     if (!mun) return;
-    limpaPonto();
     saiAl(false);
     const cod = mun;
     mun = null;
@@ -1262,12 +1067,9 @@
     voa(enquadra());
     if (tinha) { roda(cod); el[cod].focus({ preventScroll: true }); }
   }
-  // realce ao passar o mouse; com o dedo não (no iPhone, mudar o mapa no 'passar por cima' do toque faz o Safari pedir um 2º
-  // toque para abrir o alimentador); o dedo já pré-carrega no pointerdown
-  legAl.addEventListener('pointerover', e => { if (e.pointerType !== 'mouse') return; const a = e.target.closest('.mt-al'); realceAl(a ? a.dataset.al : null); queroAl(a && a.dataset.al); });
-  legAl.addEventListener('mouseleave', () => { realceAl(null); queroAl(null); });
-  legAl.addEventListener('focusin', e => { const a = e.target.closest('.mt-al'); realceAl(a ? a.dataset.al : null); queroAl(a && a.dataset.al); });
-  legAl.addEventListener('pointerdown', e => { const a = e.target.closest('.mt-al'); if (a) queroAl(a.dataset.al, true); });
+  legAl.addEventListener('mouseover', e => { const a = e.target.closest('.mt-al'); realceAl(a ? a.dataset.al : null); });
+  legAl.addEventListener('mouseleave', () => realceAl(null));
+  legAl.addEventListener('focusin', e => { const a = e.target.closest('.mt-al'); realceAl(a ? a.dataset.al : null); });
   legAl.addEventListener('click', e => {
     const al = e.target.closest('.mt-al');
     if (al) { abreAl(al.dataset.al); return; }        // 1 clique abre o painel do alimentador (pedido do usuário)
@@ -1462,7 +1264,7 @@
     const k = chaveCaixa();
     if (k === tamCaixa) return;
     tamCaixa = k;
-    if (reg) { svg.setAttribute('viewBox', enquadra().join(' ')); poeNomes(); poeSelos(); if (fixoPonto) mostraPonto(); }
+    if (reg) { svg.setAttribute('viewBox', enquadra().join(' ')); poeNomes(); poeSelos(); }
   }).observe(caixa);
 
   // no estado inteiro, escolher um município abre a regional dele; com a regional aberta, abre o polo dele; com o polo
@@ -1484,9 +1286,7 @@
 
   // setas: vai ao município mais perto na direção (dentro de um cone de ±56°)
   const centro = {};
-  const cen = cod => centro[cod] || (centro[cod] = (b => [(b.x + b.x2) / 2, (b.y + b.y2) / 2])(caixaDe(el[cod])));
-  // as caixas de todos os municípios medidas com a página parada, logo depois de abrir (e não no 1º clique)
-  (window.requestIdleCallback || (f => setTimeout(f, 200)))(() => M.muns.forEach(m => cen(m.cod)));
+  const cen = cod => centro[cod] || (centro[cod] = (b => [b.x + b.width / 2, b.y + b.height / 2])(el[cod].getBBox()));
   const DIR = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
   svg.addEventListener('keydown', e => {
     const p = e.target.closest('.mun');
@@ -1509,11 +1309,7 @@
   });
   // mover o path no mousedown faria o navegador perder o clique: só o foco do teclado traz o contorno para cima
   let toque = 0;
-  svg.addEventListener('pointerdown', e => {
-    toque = performance.now();
-    const r = e.target.closest && e.target.closest('.mt-redes path[data-al]');
-    if (r) queroAl(r.dataset.al, true);                  // dedo na rede: os dados dele já começam a vir
-  });
+  svg.addEventListener('pointerdown', () => { toque = performance.now(); });
   svg.addEventListener('focusin', e => {
     const p = e.target.closest('.mun');
     if (!p) return;
@@ -1595,7 +1391,7 @@
     if (!reg) { if (!(regK && fios.innerHTML)) poeCartoes(); }
     else if (!pol) { legendaRegional(); if (selK && selK.cards[0].e.isConnected) selK.poeNum(); else poeSelos(); }
     else if (!mun) { legendaPolo(); poeNomes(); }
-    else legAl.querySelectorAll('.mt-al').forEach(b => { const a = porCod[mun].als.find(x => x.cod === b.dataset.al), sp = b.querySelector('b + span'); if (a && sp) sp.innerHTML = rotAl(porCod[mun], a); });
+    else legAl.querySelectorAll('.mt-al').forEach(b => { const a = porCod[mun].als.find(x => x.cod === b.dataset.al), i = b.querySelector('i'); if (a && i) i.textContent = txtV(vAl(porCod[mun], a)); });
     if (!pol) { if (legAberta) reancoraNivel(); else reancoraPend = true; }
     try {
       const u = new URL(location.href);
@@ -1617,22 +1413,8 @@
     const dentro = ms.filter(m => pol ? m.polo === pol : reg ? m.reg === reg : true);
     return (dentro.length ? dentro : ms).sort((a, b) => kmAl(b, al) - kmAl(a, al))[0].cod;
   }
-  // vai() é um passo só para o histórico: uma entrada por nível no fim, não uma por etapa do caminho
-  // saindo do quadro de um ativo para o mesmo alimentador (focaAl não voa: ele já está aberto), o voo volta ao alimentador inteiro
-  const vai = alvo => {
-    const doAtivo = !!(alvo && alvo.al && alf === alvo.al && fixoPonto);
-    pedidoP++;
-    pedAl++;                                             // o alimentador que ainda está chegando não entra mais
-    destinoAl = null;
-    limpaPonto();
-    return vaiHist(alvo).then(() => { if (doAtivo && alf === alvo.al && !fixoPonto) voa(enquadra()); });
-  };
-  async function vaiHist(alvo) {
-    if (hist) hist.pausa++;
-    try { await vaiJa(alvo); } finally { if (hist) { hist.pausa--; hist.marca(); } }
-  }
-  async function vaiJa({ reg: r, polo, cod, al, forca } = {}) {
-    if (al && !forca && !(cod && porCod[cod] && kmAl(porCod[cod], al) > 0)) cod = munDoAl(al);
+  async function vai({ reg: r, polo, cod, al } = {}) {
+    if (al) cod = munDoAl(al);
     const m = porCod[cod];
     if (m) { r = m.reg; polo = m.polo; }
     if (polo && !r) { const x = M.muns.find(y => y.polo === polo); r = x && x.reg; }
@@ -1646,231 +1428,6 @@
     if (polo && !pol) entraPolo(polo);
     if (cod && !mun) entraMun(cod);
     if (al && mun) await focaAl(al);
-  }
-
-  // ---------- ativo no mapa principal (busca da barra: busca-ativo.js) ----------
-  // ponto({ll: [lat, lon], al, titulo, linhas, href, alvo}): o mapa vai até o alimentador pelo mesmo caminho de vai() (regional
-  // › polo › município › alimentador), no município do alimentador onde o ponto FICA (dentro do contorno; senão, o de mais km
-  // dele), e aproxima no ponto (~1,6 km de largura, um voo só, com a rede em volta), com um marcador e um cartãozinho (título,
-  // linhas, link e X). Sem ponto (ll vazio): abre só o alimentador e o cartão diz que o ativo não tem posição no mapa. Rede que
-  // não veio: o cartão diz para tentar de novo. Marcador e cartão saem ao sair do alimentador, no X ou ao escolher outra coisa.
-  // Mesma projeção da rede (dados/redes) e mesmo deslocamento dela (o marcador mora na camada do município, que leva o
-  // afastamento do polo e o do município).
-  const LARG_PONTO_KM = 1.6, LONGE_KM = 3, TOPO_CART_CEL = 58, celular = () => matchMedia('(max-width:860px)').matches;
-  // dadosP: o ativo do quadro (para medir o cartão); medidasP: tamanho do cartão nesta largura; fechadoP: cartão fechado no X;
-  // modoP: lugar do cartão no celular ('topo' ou 'lado', este com o celular deitado)
-  let marcaP = null, cartaoP = null, dadosP = null, medidasP = null, fechadoP = false, modoP = 'topo';
-  const falaP = document.createElement('p');               // o leitor de tela lê o cartão quando ele aparece
-  falaP.className = 'vh';
-  falaP.setAttribute('aria-live', 'polite');
-  caixa.append(falaP);
-  function limpaPonto() {
-    fixoPonto = null;
-    dadosP = null;
-    medidasP = null;
-    fechadoP = false;
-    modoP = 'topo';
-    tiraPonto();
-  }
-  function tiraPonto() {
-    const tinha = !!cartaoP && cartaoP.contains(document.activeElement);
-    if (marcaP) { marcaP.remove(); marcaP = null; }
-    if (cartaoP) { cartaoP.remove(); cartaoP = null; }
-    guardaPonto(null);
-    if (tinha && !volta.hidden) volta.focus({ preventScroll: true });   // quem usa o teclado não perde o lugar
-  }
-  function fechaCartao() {                                 // X: some o marcador e o cartão; o quadro do ativo fica, sem guardar lugar para o cartão
-    tiraPonto();
-    fechadoP = true;
-  }
-  // o ativo aberto fica guardado na aba (sessionStorage); o link do cartão marca a saída (link: true) e, voltando da página do
-  // alimentador, o mapa reabre no alimentador pelo endereço e o ativo volta junto (abre0). Outro link ou o dock: não volta
-  const CHAVE_P = 'argos-mapa-ponto';
-  function guardaPonto(v) {
-    try { if (v) sessionStorage.setItem(CHAVE_P, JSON.stringify(v)); else sessionStorage.removeItem(CHAVE_P); } catch (e) { /* sem armazenamento: só não volta */ }
-  }
-  function pontoGuardado() {
-    try { return JSON.parse(sessionStorage.getItem(CHAVE_P) || 'null'); } catch (e) { return null; }
-  }
-  // ativo e cartão à vista: a página (dentro do quadro da casca) rola o mínimo para mostrar do topo do cartão ao marcador,
-  // abaixo da barra da lupa (presa no topo); se os dois não cabem, o marcador fica embaixo e o cartão até onde couber
-  function mostraPonto() {
-    if (!marcaP || anima || cheia()) return;
-    const m = marcaP.getBoundingClientRect(), mc = (m.top + m.bottom) / 2, c = cartaoP && cartaoP.getBoundingClientRect(), r = svg.getBoundingClientRect();
-    if (mc < r.top || mc > r.bottom) return;               // o marcador saiu do mapa (aproximaram em outro lugar): não rola
-    const b = alvo.querySelector('.mt-barra'), t0 = (b ? Math.max(0, Math.min(b.getBoundingClientRect().bottom, b.offsetHeight + 16)) : 0) + 8;
-    const t1 = innerHeight - 8, cima = Math.min(mc - 20, c ? c.top : mc), baixo = Math.max(mc + 20, c ? c.bottom : mc);
-    const alto = r.height > t1 - t0 + 1;                   // o mapa não cabe na tela: o cartão encosta na barra (como o dest supõe)
-    const dy = baixo - cima > t1 - t0 ? mc + 20 - t1 : alto ? cima - t0 : baixo > t1 ? baixo - t1 : cima < t0 ? cima - t0 : 0;
-    if (Math.abs(dy) >= 2) scrollBy({ top: dy, behavior: calmo() ? 'auto' : 'smooth' });
-  }
-  const projX = lon => 112.8878 * lon + 5722.7136, projY = lat => -111.6377 * lat - 574.6836;
-  function munDoPonto(x, y, al) {                          // município do alimentador cujo contorno tem o ponto; senão, o de mais km
-    const pt = svg.createSVGPoint();
-    pt.x = x; pt.y = y;
-    const ms = M.muns.filter(m => m.slug && el[m.cod] && kmAl(m, al) > 0);
-    return (ms.find(m => {
-      const b = caixaDe(el[m.cod]);
-      return x >= b.x && x <= b.x2 && y >= b.y && y <= b.y2 && el[m.cod].isPointInFill(pt);
-    }) || {}).cod || munDoAl(al);
-  }
-  // ponto da rede do alimentador mais perto de (x, y), em unidades do mapa (sem deslocamento): [x, y] ou null
-  function pertoDaRede(d, x, y) {
-    let best = Infinity, bx = 0, by = 0, px = 0, py = 0;
-    const ok = varre(d, (eM, qx, qy) => {
-      let cx = qx, cy = qy;
-      if (!eM) {
-        const vx = qx - px, vy = qy - py, L = vx * vx + vy * vy, t = L ? Math.max(0, Math.min(1, ((x - px) * vx + (y - py) * vy) / L)) : 0;
-        cx = px + t * vx; cy = py + t * vy;
-      }
-      const dd = (cx - x) ** 2 + (cy - y) ** 2;
-      if (dd < best) { best = dd; bx = cx; by = cy; }
-      px = qx; py = qy;
-    });
-    return ok && isFinite(best) ? [bx, by] : null;
-  }
-  function fazCartaoPonto(a, aviso) {
-    const c = document.createElement('div');
-    c.className = 'mt-ponto-c';
-    c.setAttribute('role', 'group');
-    c.setAttribute('aria-label', 'Ativo no mapa');
-    c.style.cssText = 'position:absolute;z-index:8;display:grid;gap:2px;width:max-content;padding:10px 40px 10px 14px;border:1px solid var(--line);' +
-      'border-radius:var(--r2,10px);background:var(--paper);color:var(--fg);box-shadow:0 10px 24px -8px rgb(0 0 0 / .45);font:400 var(--t-sm,14px)/1.35 var(--f-body,inherit)';
-    const linhas = (a.linhas || []).filter(Boolean).map(t => `<span style="color:var(--muted)">${esc(t)}</span>`).join('');
-    c.innerHTML = `<b style="font:600 var(--t-base,15px)/1.3 var(--f-mono,inherit);overflow-wrap:anywhere">${esc(a.titulo)}</b>${linhas}` +
-      (aviso ? `<span style="color:var(--muted)">${esc(aviso)}</span>` : '') +
-      (a.href ? `<a href="${esc(a.href)}"${a.alvo || ''} style="margin-top:4px;color:var(--accent);font-weight:600;text-decoration:none">Abrir no mapa do alimentador →</a>` : '') +
-      '<button type="button" aria-label="Fechar o cartão do ativo" title="Fechar" style="position:absolute;top:4px;right:4px;width:32px;height:32px;border:0;' +
-      'border-radius:var(--r1,6px);background:transparent;color:var(--muted);font:500 20px/1 var(--f-body,inherit);cursor:pointer">×</button>';
-    c.lastChild.addEventListener('click', fechaCartao);
-    const ln = c.querySelector('a');
-    if (ln) ln.addEventListener('click', () => { const g = pontoGuardado(); if (g) guardaPonto({ ...g, link: true }); });
-    // nome acessível com o conteúdo: com o foco no cartão (escolha pelo teclado) o leitor de tela lê o ativo
-    c.setAttribute('aria-label', 'Ativo no mapa: ' + [a.titulo, ...(a.linhas || []), aviso].filter(Boolean).join('. '));
-    return c;
-  }
-  function poeCartaoPonto(a, aviso) {
-    const c = fazCartaoPonto(a, aviso);
-    if (fixoPonto && modoP === 'lado' && celular()) c.classList.add('lado');
-    caixa.append(c);
-    cartaoP = c;
-    // escolha pelo teclado (o campo da busca sumiu e o foco caiu no body): o foco vai para o cartão, que o leitor de tela lê;
-    // senão, o leitor de tela ouve o cartão pela região aria-live
-    if (!document.activeElement || document.activeElement === document.body) { falaP.textContent = ''; c.tabIndex = -1; c.focus({ preventScroll: true }); }
-    else falaP.textContent = [a.titulo, ...(a.linhas || []), aviso].filter(Boolean).join('. ');
-  }
-  function medeCartao(lado) {                              // [largura, altura] em px do cartão nesta tela, em cima ou ao lado
-    const c = fazCartaoPonto(dadosP, null);
-    c.style.visibility = 'hidden';
-    if (lado) c.classList.add('lado');
-    caixa.append(c);
-    const r = [c.offsetWidth, c.offsetHeight];
-    c.remove();
-    return r;
-  }
-  function medidas() {
-    const W = caixa.clientWidth;
-    if (!medidasP || medidasP.W !== W) medidasP = { W, topo: medeCartao(false), lado: medeCartao(true) };
-    return medidasP;
-  }
-  // celular: a altura do mapa sai do quadro, até o max-height do svg (site.css). O ativo fica no meio da área livre: abaixo
-  // do cartão ('topo') ou, com a tela baixa e larga (celular deitado), à direita dele ('lado'). Devolve a altura do mapa, o
-  // centro do ativo e a meia largura e meia altura livres em volta dele (px)
-  function lugarCel(e) {
-    const W = caixa.clientWidth || 360, mhs = getComputedStyle(svg).maxHeight, mh = parseFloat(mhs), Hmax = mh > 0 ? mh : Infinity;
-    const Hfixa = mhs === 'none' ? svg.getBoundingClientRect().height : 0;   // tela cheia: a altura vem do contêiner (site.css)
-    const alt = min => Hfixa || Math.min(Math.max(base, min), Hmax);
-    const base = W * e[3] / e[2], pe = 52, md = dadosP && !fechadoP ? medidas() : null;
-    const topo = md ? TOPO_CART_CEL + md.topo[1] + 10 : 52;
-    let total = alt(topo + 200 + pe);
-    if (md && total - topo - pe < 160 && W - md.lado[0] - 24 >= 200) {
-      total = alt(Math.max(TOPO_CART_CEL + md.lado[1] + 12, 260));
-      const x0 = md.lado[0] + 24;
-      return { modo: 'lado', W, total, cx: (x0 + W) / 2, cy: total / 2, hx: (W - x0) / 2, hy: Math.max(total / 2 - 20, 20) };
-    }
-    const livre = Math.max(total - topo - pe, 40);
-    return { modo: 'topo', W, total, cx: W / 2, cy: topo + livre / 2, hx: W / 2, hy: livre / 2 };
-  }
-  async function ponto(a = {}) {
-    const al = a.al, ll = a.ll, meu = ++pedidoP, doAtivo = alf === al && !!fixoPonto;
-    pedAl++;
-    limpaPonto();
-    destinoAl = null;
-    const lat = ll && ll[0] != null && ll[0] !== '' ? +ll[0] : NaN, lon = ll && ll[1] != null && ll[1] !== '' ? +ll[1] : NaN;
-    const x = projX(lon), y = projY(lat), cod = isFinite(x + y) ? munDoPonto(x, y, al) : null;
-    const cm = cod || munDoAl(al);
-    let semRede = false, ax = 0, ay = 0;
-    // regulador longe da rede (até LONGE_KM): o quadro cresce até mostrar o pedaço da rede do alimentador mais perto (o ativo
-    // fica no meio); mais longe que isso fica o quadro do ativo. A conta é feita quando a rede chega, antes do voo: este then
-    // entra na fila antes do await de focaAl, que usa a mesma promessa
-    const kmUn = 111.32 * Math.cos(lat * Math.PI / 180) / 112.8878;
-    if (cm) rede(al, porCod[cm].polo).then(r => {
-      if (!r) { semRede = true; return; }
-      const q = cod && pertoDaRede(r.d, x, y);
-      if (q && Math.hypot(q[0] - x, q[1] - y) * kmUn <= LONGE_KM) { ax = Math.abs(q[0] - x) * 1.25; ay = Math.abs(q[1] - y) * 1.25; }
-    });
-    if (!cod) {                                           // sem ponto: só o alimentador
-      await vaiHist({ al });
-      if (meu !== pedidoP) return;
-      if (alf === al) {
-        if (doAtivo) voa(enquadra());                     // estava no quadro de outro ativo dele: volta ao alimentador inteiro
-        poeCartaoPonto(a, 'Este ativo não tem posição no mapa: abri o alimentador.');
-      } else if (!cm) poeCartaoPonto(a, 'O alimentador deste ativo não está no mapa.');
-      else if (semRede && mun === cm) poeCartaoPonto(a, `Não consegui carregar a rede de ${al} agora: tente de novo.`);
-      return;
-    }
-    dadosP = a;
-    // vale a largura de ~LARG_PONTO_KM em km no ponto; a tela e o lugar do centro vêm do enquadramento do alimentador
-    // (coluna da legenda livre no computador), de modo que o ponto cai no meio da área livre (no celular, lugarCel)
-    const dest = e => {
-      const bb = alCaixa, d = soma(desl[pol] || [0, 0], mdesl[cod] || [0, 0]), sL = Math.min(1, (LARG_PONTO_KM / kmUn) / e[2]);
-      if (celular()) {
-        const L = lugarCel(e);
-        modoP = L.modo;
-        if (cartaoP) cartaoP.classList.toggle('lado', L.modo === 'lado');
-        const vw = Math.min(Math.max(e[2] * sL, ax * L.W / L.hx, ay * L.W / L.hy), e[2] * 1.5), k = L.W / vw;
-        return [x + d[0] - L.cx / k, y + d[1] - L.cy / k, vw, L.total / k];
-      }
-      modoP = 'topo';
-      if (cartaoP) cartaoP.classList.remove('lado');
-      const w = bb.x2 - bb.x + 24, h = bb.y2 - bb.y + 24;
-      let s = Math.min(1.5, Math.max(sL, 2 * ax / w, 2 * ay / h));
-      const H = svg.clientHeight || 600, b = alvo.querySelector('.mt-barra'), vis = cheia() ? H : Math.min(H, innerHeight - (b ? b.offsetHeight + 16 : 0) - 16);
-      let yc = null;                                       // px do ativo a partir do topo do mapa (null: o meio, como o alimentador)
-      if (vis < H - 1 && dadosP) {
-        const hC = fechadoP ? 0 : medidas().topo[1], y0 = (hC ? 12 + hC : 0) + 30, y1 = vis - 30;
-        yc = y0 <= y1 ? (y0 + y1) / 2 : y0;
-        const folga = Math.max(40, Math.min(yc - 12, vis - yc) - 10);   // a rede mais perto (ay) cabe acima ou abaixo do ativo
-        if (ay) s = Math.min(1.5, Math.max(s, ay * H / (e[3] * folga)));
-      }
-      return [x + d[0] - ((bb.x + bb.x2) / 2 - e[0]) * s, yc == null ? y + d[1] - ((bb.y + bb.y2) / 2 - e[1]) * s : y + d[1] - yc * e[3] * s / H, e[2] * s, e[3] * s];
-    };
-    dest.al = al;
-    destinoAl = dest;
-    try { await vaiHist({ cod, al, forca: true }); } finally {
-      if (destinoAl === dest) destinoAl = null;
-      if (!dest.usado && meu === pedidoP && alf === al) voa(dest(enquadraBase()));   // o alimentador já estava aberto
-    }
-    if (meu !== pedidoP) return;                         // o usuário escolheu outra coisa no meio do caminho
-    if (alf !== al) { if (semRede && mun === cod) poeCartaoPonto(a, `Não consegui carregar a rede de ${al} agora: tente de novo.`); return; }
-    if (mun !== cod) return;
-    fixoPonto = dest;
-    const g = document.createElementNS(NS, 'g');
-    g.setAttribute('class', 'mt-ponto');
-    g.setAttribute('pointer-events', 'none');
-    const pt = `M${x.toFixed(4)},${y.toFixed(4)}l.0001,0`;
-    [['var(--paper)', 34, .92], ['var(--accent)', 24, 1], ['var(--paper)', 9, 1]].forEach(([cor, w, o]) => {
-      const p = document.createElementNS(NS, 'path');
-      p.setAttribute('d', pt);
-      p.setAttribute('style', `fill:none;stroke:${cor};stroke-width:${w}px;stroke-opacity:${o};stroke-linecap:round!important;pointer-events:none`);
-      g.append(p);
-    });
-    camada.append(g);
-    marcaP = g;
-    poeCartaoPonto(a, null);
-    guardaPonto({ al, cod, a });
-    verP = !!anima;
-    if (!anima) mostraPonto();
   }
   // previa(alvo): acende no mapa o que está marcado na lista da busca, sem mudar de nível (null apaga)
   let acesos = [];
@@ -1898,102 +1455,8 @@
   // no município, e o texto do número; visao(id) troca
   const visaoApi = id => {
     if (id) { visao(id); return; }
-    // grupo: soma de vários municípios (na densidade, NAE somada sobre km somados); alTot: o alimentador inteiro, quando
-    // a visão não se soma município a município (densidade)
-    const alDe = (al, cod) => (porCod[cod] && porCod[cod].als.find(x => x.cod === al)) || { cod: al };
-    return V === VIS[0] ? null : { id: V.id, nome: V.nome, un: V.un, mais: V.mais, num: numV, txt: txtV, dens: !!V.dens,
-      mun: cod => porCod[cod] ? vMun(porCod[cod]) : 0, al: (al, cod) => porCod[cod] ? vAl(porCod[cod], alDe(al, cod)) : 0,
-      grupo: cods => somaV(cods.map(c => porCod[c]).filter(Boolean)),
-      alTot: V.dens ? al => { const m = M.muns.find(x => x.als && x.als.some(a => a.cod === al)); return m ? vAl(m, alDe(al, m.cod)) : 0; } : null };
+    return V === VIS[0] ? null : { id: V.id, nome: V.nome, un: V.un, mais: V.mais, num: numV, txt: txtV,
+      mun: cod => porCod[cod] ? vMun(porCod[cod]) : 0, al: (al, cod) => porCod[cod] ? vAl(porCod[cod], { cod: al }) : 0 };
   };
-
-  // ---------- endereço por nível (#mapa/norte/araguaina/aragominas/LD03010004) ----------
-  // Cada nível aberto é uma entrada do histórico do quadro: o Voltar do navegador (e a seta ←) sobe um nível. Há sempre
-  // uma entrada por nível do Tocantins até o nível atual (descer põe as que faltam; subir ou ir para o lado volta no
-  // histórico até o ancestral comum e desce dali), então voltar k níveis é history.go(-k).
-  // A casca (central/) usa só #mapa: o nível vai para ?nivel=… no endereço dela (o hash dela não muda); o quadro abre com
-  // esse ?nivel=… e volta ao nível. Sem history (cópia em sandbox), o mapa funciona como antes, sem endereço.
-  const slugN = t => semAcento(String(t)).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const partes = () => !reg ? [] : [slugN(reg)].concat(pol ? [slugN(pol)] : [], mun ? [porCod[mun].slug] : [], alf ? [alf] : []);
-  function resolve(ps) {                                  // partes do endereço → {reg, polo, cod, al} (o que não bate fica de fora)
-    const r = Object.keys(M.regs || {}).find(x => slugN(x) === ps[0]);
-    if (!r) return {};
-    const polo = [...new Set(M.muns.filter(m => m.reg === r).map(m => m.polo))].find(x => slugN(x) === ps[1]);
-    if (!polo) return { reg: r };
-    const m = M.muns.find(x => x.polo === polo && x.slug && x.slug === ps[2]);
-    if (!m) return { polo };
-    const a = m.als.find(x => x.cod === ps[3]);
-    return a ? { cod: m.cod, al: a.cod } : { cod: m.cod };
-  }
-  const DOC = Math.random().toString(36).slice(2);
-  const urlDe = ps => { const u = new URL(location.href); u.searchParams.delete('nivel'); u.hash = ps.length ? 'mapa/' + ps.join('/') : ''; return u.href; };
-  const estadoDe = (ps, id) => Object.assign({}, history.state || {}, { argos: ps.join('/'), d: ps.length, id });
-  function paiSinc(ps) {                                  // ?nivel=… no endereço da casca, sem tocar no #mapa dela
-    try {
-      const P = window.parent;
-      if (P === window || P.location.hash !== '#mapa') return;
-      const q = P.location.search.replace(/^\?/, '').split('&').filter(x => x && !/^nivel=/.test(x));
-      if (ps.length) q.push('nivel=' + ps.join('/'));
-      const href = P.location.pathname + (q.length ? '?' + q.join('&') : '') + P.location.hash;
-      if (href !== P.location.pathname + P.location.search + P.location.hash) P.history.replaceState(P.history.state, '', href);
-    } catch (e) { /* casca de outra origem: fica só o endereço do quadro */ }
-  }
-  try {
-    history.replaceState(history.state, '', location.href);   // sandbox sem history: cai no catch e o mapa segue sem endereço
-    hist = { pausa: 0, atual: [], doc: DOC, indo: false, aplica: false };
-  } catch (e) { hist = null; }
-  if (hist) {
-    // põe o histórico em linha com o nível atual (ver acima); chamado a cada troca de nível
-    hist.marca = () => {
-      if (hist.pausa) return;
-      const b = partes();
-      if (b.join('/') === hist.atual.join('/') && !hist.indo) return;
-      hist.atual = b;
-      if (hist.aplica) { paiSinc(b); return; }        // veio do próprio histórico (Voltar/Avançar): só acompanha
-      alinha();
-    };
-    function alinha() {
-      if (hist.indo) return;                          // um history.go está a caminho: o popstate dele chama alinha de novo
-      const s = history.state, b = hist.atual;
-      const a = s && s.id === hist.doc && typeof s.argos === 'string' ? (s.argos ? s.argos.split('/') : []) : null;
-      let k = 0;
-      if (a) while (k < a.length && k < b.length && a[k] === b[k]) k++;
-      if (a && a.length > k) { hist.indo = true; history.go(-(a.length - k)); return; }
-      if (!a) { k = 0; history.replaceState(estadoDe([], hist.doc), '', urlDe([])); }
-      for (let i = k; i < b.length; i++) history.pushState(estadoDe(b.slice(0, i + 1), hist.doc), '', urlDe(b.slice(0, i + 1)));
-      paiSinc(b);
-    }
-    addEventListener('popstate', e => {
-      const s = e.state;
-      if (hist.indo) { hist.indo = false; alinha(); return; }
-      if (!s || s.id !== hist.doc || typeof s.argos !== 'string') return;
-      const ps = s.argos ? s.argos.split('/') : [];
-      hist.aplica = true; direto = true;              // Voltar/Avançar: o mapa vai direto ao nível, sem voo
-      Promise.resolve(vai(resolve(ps))).finally(() => { hist.aplica = false; direto = false; });
-    });
-    // abrir com nível no endereço (#mapa/… do quadro, ?nivel=… vindo da casca, ou a entrada guardada ao voltar da página
-    // do alimentador): vai direto até lá e monta uma entrada por nível, para o Voltar subir um a um
-    const h = /^#mapa\/(.+)$/.exec(location.hash), q = new URLSearchParams(location.search).get('nivel');
-    const ps0 = (h ? decodeURIComponent(h[1]) : q || '').split('/').filter(Boolean);
-    const s0 = history.state;
-    if (s0 && typeof s0.argos === 'string' && s0.argos === ps0.join('/') && s0.id) hist.doc = s0.id;   // mesma entrada de antes: segue a fila dela
-    if (ps0.length) {
-      // depois dos outros scripts da página (a busca da barra ouve a troca de nível para abrir a lista do município)
-      const abre0 = () => {
-        direto = true; hist.pausa++;
-        Promise.resolve(vaiJa(resolve(ps0))).finally(() => {
-          direto = false; hist.pausa--;
-          if (hist.doc !== DOC) { hist.aplica = true; hist.marca(); hist.aplica = false; paiSinc(hist.atual); }
-          else hist.marca();
-          const g = pontoGuardado();
-          if (g && g.link && g.a && g.al === alf && g.cod === mun) ponto(g.a); else guardaPonto(null);
-        });
-      };
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', abre0); else setTimeout(abre0, 0);
-    } else if (!(s0 && s0.id === hist.doc)) history.replaceState(estadoDe([], hist.doc), '', urlDe([]));
-  }
-  // NAE do alimentador no município para a lista da busca: {n, tot, todo} (todo: o número é do alimentador inteiro)
-  const alNoMun = (al, cod) => { const m = porCod[cod], a = m && m.als.find(x => x.cod === al); return a ? naeAl(a) : null; };
-  window.ARGOS_MAPA = { nivel: () => ({ reg, pol, mun, al: alf }), vai, ponto, previa, rede: redeDe, realceAl: al => { if (mun) realceAl(al); }, visao: visaoApi,
-    alNoMun, prepara: queroAl };
+  window.ARGOS_MAPA = { nivel: () => ({ reg, pol, mun, al: alf }), vai, previa, rede: redeDe, realceAl: al => { if (mun) realceAl(al); }, visao: visaoApi };
 })();

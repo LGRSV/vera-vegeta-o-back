@@ -91,30 +91,23 @@
     document.head.append(s);
   }
   const tm = M.trecho_mun || {};
-  // Na carga a lista entra aos poucos (alimentador.js: data-parcial no #lista enquanto falta): cada leva só ganha o
-  // escondido de cada linha; a conta dos títulos dos grupos fica para quando a lista está inteira (uma passada só).
-  // Filtro trocado pela pessoa com a lista ainda entrando: ela é terminada na hora (window.__listaInteira).
-  const parcial = () => lista.dataset.parcial === '1';
-  const filtroAtual = () => [window.__visivel || {}, (document.getElementById('f-mun') || {}).value || ''];
-  const some = (r, vis, fm) => { const t = r.dataset.t; return !(vis[t.split('-')[0]] !== false && (!fm || (tm[t] || []).includes(fm))); };
   function aplica(mexeu) {
-    if (mexeu === true && parcial() && window.__listaInteira) window.__listaInteira();
-    const [vis, fm] = filtroAtual(), inteira = !parcial();
+    const vis = window.__visivel || {}, fm = (document.getElementById('f-mun') || {}).value || '';
     let grp = null, n = 0;                               // título de grupo: conta só as linhas à vista; sem nenhuma, some junto
     const fechaGrp = () => {
-      if (!grp || !inteira) return;
+      if (!grp) return;
       grp.hidden = !n;
       const tit = grp.dataset.tit ?? (grp.dataset.tit = grp.textContent.replace(/ · [\d.]+$/, ''));
       const txt = `${tit} · ${mil(n)}`;
       if (grp.textContent !== txt) grp.textContent = txt;
     };
-    for (let r = lista.firstElementChild; r; r = r.nextElementSibling) {
-      if (r.classList.contains('grp')) { fechaGrp(); grp = r; n = 0; continue; }
-      if (!r.classList.contains('row')) continue;
-      const h = some(r, vis, fm);
-      if (r.hidden !== h) r.hidden = h;
-      n += h ? 0 : 1;
-    }
+    [...lista.children].forEach(r => {
+      if (r.classList.contains('grp')) { fechaGrp(); grp = r; n = 0; return; }
+      if (!r.classList.contains('row')) return;
+      const t = r.dataset.t;
+      r.hidden = !(vis[t.split('-')[0]] !== false && (!fm || (tm[t] || []).includes(fm)));
+      n += r.hidden ? 0 : 1;
+    });
     fechaGrp();
     if (window.__tabLista) window.__tabLista();          // a parada do Tab na lista passa para uma linha à vista
     const m = mexeu === true && lista.querySelector('.row[aria-current="true"]:not([hidden])');
@@ -126,21 +119,10 @@
   f.addEventListener('change', () => aplica(true));
   const cls = document.getElementById('classes');      // o clique do mapa (alimentador.js) já trocou o __visivel
   if (cls) cls.addEventListener('click', e => { if (e.target.closest('button')) aplica(true); });
-  const migTrecho = document.getElementById('mig-trecho');
-  let migAntes = migTrecho ? migTrecho.innerHTML : '';
   new MutationObserver(ms => {
-    const doFilho = ms.filter(m => m.type === 'childList' && m.target === lista);
-    if (doFilho.length) {                                // lista refeita ou leva nova (não a contagem dos títulos)
-      if (parcial() && doFilho.every(m => !m.removedNodes.length)) {   // leva nova no fim da lista: só as linhas dela
-        const [vis, fm] = filtroAtual();
-        doFilho.forEach(m => m.addedNodes.forEach(r => { if (r.nodeType === 1 && r.classList.contains('row') && some(r, vis, fm)) r.hidden = true; }));
-      } else aplica();
-    }
-    // trecho(s) escolhido(s) no caminho do cabeçalho: os da lista, na ordem dela; com a lista ainda entrando (carga), a
-    // linha do escolhido pode não ter chegado: vale a seleção do mapa (window.__selecao), sem varrer a lista a cada leva
-    const s = parcial() && window.__selecao ? window.__selecao() : [...lista.querySelectorAll('.row[aria-current="true"]')].map(b => b.dataset.t);
-    const h = s.length ? sep + esc(s.join(' + ')) : '';
-    if (h !== migAntes && migTrecho) migTrecho.innerHTML = migAntes = h;
+    if (ms.some(m => m.type === 'childList' && m.target === lista)) aplica();   // lista refeita (não a contagem dos títulos)
+    const s = [...lista.querySelectorAll('.row[aria-current="true"]')].map(b => b.dataset.t);
+    document.getElementById('mig-trecho').innerHTML = s.length ? sep + esc(s.join(' + ')) : '';
   }).observe(lista, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-current'] });
   aplica();
 
@@ -183,11 +165,8 @@
   csv.arq = s => String(s ?? '').replace(/[^\w.-]+/g, '_');
   csv.al = csv.arq(M.al || 'alimentador');
   // trecho(s) de um conjunto de vãos (ids do D.vaos), na ordem da lista
-  let vaoTrecho = null;                                  // montado na 1ª planilha baixada (26 mil vãos: não pesa na carga)
-  csv.trechos = ids => {
-    if (!vaoTrecho) vaoTrecho = Object.fromEntries(D.vaos.map(x => [x[5], x[4]]));
-    return [...new Set(ids.map(i => vaoTrecho[i]).filter(i => i !== undefined))].sort((a, b) => a - b).map(i => D.trechos[i].nome).join(', ');
-  };
+  const vaoTrecho = Object.fromEntries(D.vaos.map(x => [x[5], x[4]]));
+  csv.trechos = ids => [...new Set(ids.map(i => vaoTrecho[i]).filter(i => i !== undefined))].sort((a, b) => a - b).map(i => D.trechos[i].nome).join(', ');
   // trecho(s) de um poste (pontas dos vãos)
   let tPoste = null;
   csv.trechosPoste = p => {
@@ -407,16 +386,7 @@
       '.ctl-lgs.sob-balao{visibility:hidden;opacity:0}' +
       '@media (prefers-reduced-motion:no-preference){.ctl-lgs{transition:opacity var(--dur) var(--ease),visibility 0s}.ctl-lgs.sob-balao{transition:opacity var(--dur) var(--ease),visibility 0s var(--dur)}}' +
       '.mapbox>.ctl-lgs>*{position:static;inset:auto;z-index:auto;flex:none;margin:0;max-width:none;float:none;clear:none}' +   // sem o canto antigo de cada uma
-      '@media (max-width:640px){.mapbox>.ctl-lgs>.limp-maplg>:is(.lg-cab,.lg-info){display:none}}' +   // celular: só o traço e o ano
-      // fileira das camadas sempre à vista no alto do mapa (lupa-painel.js): as legendas param abaixo dela
-      '.mapbox:has(>.lp-cams)>.ctl-lgs{max-height:calc(100% - 28px - 124px)}' +
-      // aba "Trechos" do painel: abre e fecha a lista
-      '.lista-aba{display:flex;align-items:center;gap:var(--s2);width:100%;min-height:var(--alvo);padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);' +
-      'background:var(--paper);color:var(--fg);font:var(--t-sm) var(--f-body);text-align:left;cursor:pointer}' +
-      '.lista-aba b{font:700 var(--t-base) var(--f-display)}.lista-aba span{flex:1;min-width:0;color:var(--muted);font-size:var(--t-xs);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
-      '.lista-aba::after{content:"";flex:none;width:7px;height:7px;margin:0 4px 4px;border:solid var(--muted);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}' +
-      '.lista-aba[aria-expanded=true]::after{margin:4px 4px 0;transform:rotate(-135deg)}' +
-      '.lista-aba:hover{background:var(--hover)}.lista-aba:focus-visible{outline:2px solid var(--accent);outline-offset:1px}';
+      '@media (max-width:640px){.mapbox>.ctl-lgs>.limp-maplg>:is(.lg-cab,.lg-info){display:none}}';   // celular: só o traço e o ano
     document.head.append(s);
   }
 
@@ -443,29 +413,14 @@
     };
     poe(document.getElementById('ferramentas'));
     const cards = [...document.querySelectorAll('.panel>.limp-card')];
-    // aba "Trechos" logo depois do resumo, antes dos blocos das camadas: a lista fica a um toque, com ou sem camada ligada
-    const aba = document.createElement('button');
-    aba.type = 'button'; aba.className = 'lista-aba'; aba.setAttribute('aria-controls', 'lista');
-    det.parentElement.append(aba);                       // no painel; poe() o leva ao lugar
-    poe(aba);
+    cards.forEach(poe);
     poe(lista);
     poe(document.getElementById('ord-lista'));          // a ordem da lista fica logo embaixo dela
-    cards.forEach(poe);
-    // com camada ligada a lista começa fechada (o bloco da camada vem logo abaixo); a aba abre e fecha; buscar abre
+    // com alguma camada do Menu ligada, a lista de trechos sai do painel (fica o bloco da camada); volta ao buscar
     const campo = document.getElementById('busca');
-    let escolha = null;                                  // null: automático; true/false: a pessoa abriu ou fechou
-    const mostra = () => {
-      const ver = !!(campo && campo.value.trim()) || (escolha ?? !cards.some(c => !c.hidden));
-      lista.hidden = !ver;
-      aba.setAttribute('aria-expanded', String(ver));
-      const ord = document.getElementById('ordem'), o = ord && !ord.closest('[hidden]') && ord.selectedOptions[0];
-      aba.innerHTML = `<b>Trechos</b><span>${D.trechos.length.toLocaleString('pt-BR')}${o ? ' · ordem: ' + o.textContent : ''}</span>`;
-    };
-    aba.addEventListener('click', () => { escolha = lista.hidden; mostra(); });
+    const mostra = () => { lista.hidden = cards.some(c => !c.hidden) && !(campo && campo.value.trim()); };
     cards.forEach(c => new MutationObserver(mostra).observe(c, { attributes: true, attributeFilter: ['hidden'] }));
     if (campo) campo.addEventListener('input', mostra);
-    const ord = document.getElementById('ordem');
-    if (ord) ord.addEventListener('change', mostra);
     mostra();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ordena); else ordena();

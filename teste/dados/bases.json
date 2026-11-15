@@ -1,8 +1,10 @@
 {
  "critica": {
+  "arquivo": "Critica-CHEIO_09-2026.txt, Critica-CHEIO_10-2026.txt, Critica-CHEIO_11-2026.txt",
+  "enviado": "2026-11-15",
   "meses": [
    "2026-01",
-   "2026-08"
+   "2026-11"
   ],
   "nome": "Crítica (NAE)"
  },
@@ -10,27 +12,27 @@
   "arquivo": "1 - OS_STATUS.parquet",
   "ate": "2026-10-29",
   "nome": "OS de manutenção executadas",
-  "os": 239529,
+  "os": 232664,
   "processado": "2026-10-29"
  },
  "inspecao": {
   "arquivo": "BASE INSPEÇÃO.xlsx",
   "ate": "2026-10-09",
   "nome": "Base de inspeção",
-  "os": 2081,
+  "os": 2188,
   "processado": "2026-10-13"
  },
  "limpeza": {
   "arquivo": "1 - OS_STATUS.parquet",
   "ate": "2026-10-29",
-  "nome": "OS de limpeza de faixa (RD e LD)",
+  "nome": "OS de limpeza de faixa",
   "os": 3735,
   "processado": "2026-10-29"
  },
  "manutencao": {
   "arquivo": "OS GERADAS PELA INSPEÇÃO.xlsx",
   "ate": "2026-10-10",
-  "nome": "OS de manutenção da inspeção (situação pelo OS status de 29/10)",
+  "nome": "OS de manutenção da inspeção",
   "os": 4882,
   "processado": "2026-10-29"
  }
