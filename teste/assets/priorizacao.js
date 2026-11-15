@@ -16,10 +16,10 @@ const VERA = (() => {
   // passo: menor diferença mostrada, para a faixa terminar antes do limite seguinte ("20 a 39,9", "1.000 a 9.999");
   // rot: nome das faixas sem valor numérico. A tabela de pontos do perfil tem um número por faixa; zero: o que não pontua.
   const CRIT = [
-    { k: 'nae', b: 'his', nome: 'NAE por 100 km', curto: 'NAE', lim: [20, 40, 60], passo: 0.1, zero: 'nenhuma' },
+    { k: 'nae', b: 'his', nome: 'NAE Vegetação/100 km', curto: 'NAE', lim: [20, 40, 60], passo: 0.1, zero: 'nenhuma' },
     // chaves dec e fec mantidas: as validações gravadas no navegador guardam os pontos com elas
-    { k: 'dec', b: 'his', nome: 'CHI por 100 km (consumidor·hora)', curto: 'CHI', lim: [1000, 10000], passo: 1, zero: 'nenhum' },
-    { k: 'fec', b: 'his', nome: 'CI por 100 km (consumidores interrompidos)', curto: 'CI', lim: [100, 1000, 10000], passo: 1, zero: 'nenhum' },
+    { k: 'dec', b: 'his', nome: 'CHI por 100 km (consumidor·hora)', curto: 'CHI', lim: [1000, 10000], passo: 1, zero: 'nenhum', edita: true },
+    { k: 'fec', b: 'his', nome: 'CI por 100 km (consumidores interrompidos)', curto: 'CI', lim: [100, 1000, 10000], passo: 1, zero: 'nenhum', edita: true },
     { k: 'cli', b: 'imp', nome: 'Clientes (UCs ligadas)', curto: 'Clientes', lim: [10, 100, 1000], passo: 1, inteiro: true },
     { k: 'hier', b: 'imp', nome: 'Hierarquia do trecho', curto: 'Hierarquia', rot: ['T1', 'T2', 'T3'] },
     { k: 'ga', b: 'imp', nome: 'Cliente Grupo A', curto: 'Grupo A', rot: ['tem'], zero: 'não tem ou sem dado' },
@@ -43,6 +43,7 @@ const VERA = (() => {
       ref: '2026-10-29', janela: 12, cobEfetiva: 0.5, cobBloqueio: 0.8,
       carencia: { 1: 6, 2: 9, 3: 12 }, ciclo: { 1: 3, 2: 4, 3: 5 }, aVencer: 3,
       lim: { p1: 70, p2: 50, p3: 30 }, planoPolos: [], bonus: 8, pisoKm: 5,
+      fx: Object.fromEntries(CRIT.filter((c) => c.edita).map((c) => [c.k, c.lim.slice()])),   // limites de faixa editáveis (CHI e CI)
     };
   }
 
@@ -50,6 +51,7 @@ const VERA = (() => {
   const nf1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const nfP = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
   const nfD = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
+  const nf4 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 4 });
   const fmtN = (x) => nf0.format(x);
   const fmt1 = (x) => nf1.format(x);
   const fmtP = (x) => nfP.format(x);   // pontos e nota: 0,25 · 1,5 · 7
@@ -72,18 +74,22 @@ const VERA = (() => {
   }
 
   // faixa do valor x no critério c (índice na tabela de pontos); -1 = valor 0, não pontua
-  function faixaDe(c, x) {
+  const limDe = (c, P) => (P && P.fx && P.fx[c.k]) || c.lim;
+  function faixaDe(c, x, P) {
     if (!(x > 0)) return -1;
+    const L = limDe(c, P);
     let j = 0;
-    while (j < c.lim.length && x + 1e-9 >= c.lim[j]) j++;   // 1e-9: conta de ponto flutuante que dá 39,999… vale 40
+    while (j < L.length && x + 1e-9 >= L[j]) j++;   // 1e-9: conta de ponto flutuante que dá 39,999… vale 40
     return j;
   }
   // nome da faixa j: "menos de 20", "20 a 39,9", "60 ou mais"; contagem inteira: "1 a 9", "10 a 99", "1.000 ou mais"
   function rotFaixa(c, j, P) {
     if (c.k === 'limp' && j === 1) return 'vence em até ' + meses(P.aVencer);
     if (c.rot) return c.rot[j];
-    const L = c.lim, f = (x) => (c.passo < 1 ? fmtD(x) : fmtN(x));
+    const L = limDe(c, P), f = (x) => (c.passo < 1 ? fmtD(x) : c.edita ? nf4.format(x) : fmtN(x));
     if (j === 0) return c.inteiro ? '1 a ' + f(L[0] - 1) : 'menos de ' + f(L[0]);
+    // limite editado que não é inteiro: "a menos de" (o padrão mostra "1.000 a 9.999", como na versão publicada)
+    if (c.edita && j < L.length && !Number.isInteger(L[j])) return f(L[j - 1]) + ' a menos de ' + f(L[j]);
     if (j < L.length) return f(L[j - 1]) + ' a ' + f(Math.round((L[j] - c.passo) * 10) / 10);
     return f(L[j - 1]) + ' ou mais';
   }
@@ -94,7 +100,10 @@ const VERA = (() => {
 
   function preparar(D) {
     const d0 = Date.parse(D.d0 + 'T00:00:00Z');
-    const ctx = { D, d0, alims: D.alims, muns: D.muns, ucs: (typeof window !== 'undefined' && window.UCS_TRECHOS && window.UCS_TRECHOS.al) || (typeof UCS_TRECHOS !== 'undefined' && UCS_TRECHOS.al) || null };
+    const ctx = { D, d0, alims: D.alims, muns: D.muns, ucs: (typeof window !== 'undefined' && window.UCS_TRECHOS && window.UCS_TRECHOS.al) || (typeof UCS_TRECHOS !== 'undefined' && UCS_TRECHOS.al) || null,
+      // fração urbana por trecho (dados/urbano-trechos.js); sem o arquivo, null
+      urb: (typeof window !== 'undefined' && window.URBANO_TRECHOS && window.URBANO_TRECHOS.al) || null,
+      urbCorte: (typeof window !== 'undefined' && window.URBANO_TRECHOS && window.URBANO_TRECHOS.corte) || 0.5 };
     ctx.osInicio = Math.round((Date.parse(D.os_inicio + 'T00:00:00Z') - d0) / DIA);
     ctx.kmClasse = { 1: D.estat.km_T1, 2: D.estat.km_T2, 3: D.estat.km_T3 };
     // período que a Crítica cobre (meses de D.saz): do 1º dia do primeiro mês ao último dia do último mês
@@ -104,7 +113,8 @@ const VERA = (() => {
     ctx.trechos = D.trechos.map((t, i) => {
       const a = D.alims[t.a];
       return Object.assign(t, {
-        i, al: a[0], se: a[2], polo: a[3] || 'Sem polo', equipe: a[4] || '',
+        i, al: a[0], se: a[2], reg: a[3] || 'Sem regional', polo: a[4] || 'Sem polo', equipe: a[4] || '',
+        urb: ctx.urb ? (ctx.urb[a[0]] && ctx.urb[a[0]][t.n]) || 0 : null,
         mun: t.mu >= 0 ? D.muns[t.mu] : '—', id: a[0] + ' · ' + t.n,
       });
     });
@@ -195,7 +205,7 @@ const VERA = (() => {
 
     // 3. pontos, regras e faixa
     const res = ctx.trechos.map((t, i) => {
-      const f = F[i], eGA = ga.has(t.i), ePlano = plano.has(t.polo) || noPlano.has(t.i);
+      const f = F[i], eGA = ga.has(t.i), ePlano = plano.has(t.reg) || noPlano.has(t.i);
       // UCs ligadas dos trafos do trecho e dos que saem dele (planilha UC por trafo); alimentador sem a planilha usa os clientes
       // por evento da Crítica. Trecho que não está na planilha do seu alimentador fica "sem dado" (0 pontos), não "0 UCs"
       const ucAl = ctx.ucs && ctx.ucs[t.al], uc = ucAl ? ucAl[t.n] || null : null;
@@ -219,7 +229,7 @@ const VERA = (() => {
         ga: eGA ? { j: 0, st: 'real' } : { j: -1, st: 'falta' },
         limp: { j: semReg ? 2 : vencida ? 0 : aVencer ? 1 : -1, st: semReg ? 'est' : 'real' },
       };
-      for (const k of ['nae', 'dec', 'fec', 'cli']) v[k].j = faixaDe(C[k], v[k].x);
+      for (const k of ['nae', 'dec', 'fec', 'cli']) v[k].j = faixaDe(C[k], v[k].x, P);
 
       // nota = soma dos pontos; confiança = parte da nota máxima que vem de dado real (estimado conta metade, sem dado não conta)
       let score = 0, conf = 0;
@@ -315,7 +325,7 @@ const VERA = (() => {
 
   function justificar(ctx, r, P, T) {
     const t = r.t, f = r.f, partes = [];
-    partes.push(t.id + ' (T' + t.c + ', ' + fmtKm(t.km) + ' km, ' + t.mun + ', polo ' + t.polo + ').');
+    partes.push(t.id + ' (T' + t.c + ', ' + fmtKm(t.km) + ' km, ' + t.mun + ', regional ' + t.reg + ', polo ' + t.polo + ').');
     partes.push('Prioridade P' + r.faixa + ' com nota ' + fmtP(r.score) + ' de ' + fmtP(notaMax(T)) + '.');
     if (r.faixa < r.fScore) partes.push('A nota sozinha daria P' + r.fScore + '; a faixa subiu por regra.');
     const lin = CRIT.filter((c) => r.pts[c.k] > 0).map((c) => c.curto + ' ' + fmtP(r.pts[c.k]) + ' (' + rotFaixa(c, r.v[c.k].j, P) + (r.v[c.k].st === 'est' && c.k === 'cli' ? ', típico de T' + t.c : '') + ')');
@@ -343,7 +353,7 @@ const VERA = (() => {
   /* Criticidade primeiro: o líder de cada pacote é o próximo trecho elegível do ranking. Vizinhos entram por
      proximidade; os de faixa inferior (aproveitamento) ficam limitados a uma fração da capacidade do pacote. */
   function pacotes(ctx, ranked, o) {
-    const pool = ranked.filter((r) => r.status === 'Elegível' && r.faixa <= 3 && (o.polo === 'todos' || r.t.polo === o.polo));
+    const pool = ranked.filter((r) => r.status === 'Elegível' && r.faixa <= 3 && (o.polo === 'todos' || r.t.reg === o.polo));
     const usado = new Set(), out = [];
     for (const lider of pool) {
       if (out.length >= o.max) break;
@@ -352,7 +362,7 @@ const VERA = (() => {
       const pk = { lider, membros: [{ r: lider, aprov: false, dist: 0 }], km: lider.t.km, kmAprov: 0 };
       const cands = [];
       for (const c of pool) {
-        if (usado.has(c.t.i) || c.t.polo !== lider.t.polo || c.score < o.scoreMin) continue;
+        if (usado.has(c.t.i) || c.t.reg !== lider.t.reg || c.score < o.scoreMin) continue;
         const d = hav(lider.t.la, lider.t.lo, c.t.la, c.t.lo);
         if (d <= o.raio) cands.push({ c, d });
       }
@@ -426,15 +436,19 @@ if (typeof module !== 'undefined') module.exports = VERA;
   const salvarVal = () => { try { localStorage.setItem(CHAVE_VAL, JSON.stringify(validacoes)); } catch (e) {} };
 
   const clonaT = (t) => JSON.parse(JSON.stringify(t));
-  const editada = () => JSON.stringify(S.T) !== JSON.stringify(V.PERFIS[S.perfil].t);
+  // tabela editada: pontos diferentes do perfil ou limites de faixa (CHI e CI) diferentes do padrão
+  const editada = () => JSON.stringify(S.T) !== JSON.stringify(V.PERFIS[S.perfil].t) || JSON.stringify(S.P.fx) !== JSON.stringify(V.parametrosPadrao().fx);
   const S = {
     perfil: 'padrao', T: clonaT(V.PERFIS.padrao.t), P: V.parametrosPadrao(),
     flags: { ga: new Set(), plano: new Set() },
-    f: { polo: 'todos', mun: 'todos', busca: '', classes: new Set([1, 2, 3]), faixa: null, ocultos: false },
+    f: { reg: 'todos', polo: 'todos', mun: 'todos', busca: '', tipo: 'todos', zona: 'todos', faixa: null, ocultos: false },
     out: null, sel: null,
     pk: { polo: 'NORTE', raio: 10, cap: 20, limAprov: 30, scoreMin: 30, fator: 1.4, max: 12 },
   };
-  const POLOS = ['NORTE', 'CENTRO', 'SUL', 'Sem polo'];
+  const REGIONAIS = ['NORTE', 'CENTRO', 'SUL', 'Sem regional'];   // a[3] do alimentador; o polo é a equipe (a[4])
+  const POLO_NOME = { 'ETO-RD-AR': 'Araguaína', 'ETO-RD-AG': 'Augustinópolis', 'ETO-RD-GR': 'Guaraí', 'ETO-RD-PA': 'Palmas', 'ETO-RD-PS': 'Paraíso', 'ETO-RD-PO': 'Porto Nacional', 'ETO-RD-GU': 'Gurupi', 'ETO-RD-DP': 'Dianópolis' };
+  const poloTxt = (p) => (POLO_NOME[p] ? POLO_NOME[p] + ' (' + p + ')' : p);
+  const temUrb = !!ctx.urb;
   const gaveta = matchMedia('(max-width:860px)');   // celular: a ficha do trecho abre por cima da página
 
   // ---------- controles ----------
@@ -447,16 +461,30 @@ if (typeof module !== 'undefined') module.exports = VERA;
     $('#pz-tit').title = 'Limpeza de faixa · referência ' + S.P.ref.split('-').reverse().join('/');
   }
   $('#ref').value = S.P.ref;
-  const poloSel = $('#f-polo');
-  poloSel.add(new Option('Todos os polos', 'todos'));
-  POLOS.forEach((p) => poloSel.add(new Option(p, p)));
+  const regSel = $('#f-reg'), poloSel = $('#f-polo');
+  regSel.add(new Option('Todas', 'todos'));
+  REGIONAIS.forEach((p) => regSel.add(new Option(p === 'Sem regional' ? p : p[0] + p.slice(1).toLowerCase(), p)));
+  // o polo lista só os da regional escolhida (pares regional/polo que existem nos trechos)
+  const poloPorReg = {};
+  for (const t of ctx.trechos) (poloPorReg[t.reg] = poloPorReg[t.reg] || new Set()).add(t.polo);
+  function listaPolos() {
+    const ps = new Set();
+    for (const [r, set] of Object.entries(poloPorReg)) if (S.f.reg === 'todos' || S.f.reg === r) set.forEach((p) => ps.add(p));
+    const l = [...ps].sort((a, b) => (a === 'Sem polo') - (b === 'Sem polo') || a.localeCompare(b, 'pt-BR'));
+    poloSel.length = 0;
+    poloSel.add(new Option('Todos', 'todos'));
+    l.forEach((p) => poloSel.add(new Option(poloTxt(p), p)));
+    if (!ps.has(S.f.polo)) S.f.polo = 'todos';
+    poloSel.value = S.f.polo;
+  }
+  listaPolos();
   const munSel = $('#f-mun');
   munSel.add(new Option('Todos', 'todos'));
   [...new Set(ctx.trechos.map((t) => t.mun))].filter((m) => m !== '—').sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((m) => munSel.add(new Option(m, m)));
   const pkPolo = $('#pk-polo');
   pkPolo.add(new Option('Todos', 'todos'));
-  POLOS.forEach((p) => pkPolo.add(new Option(p, p)));
-  $('#plano-polos').innerHTML = POLOS.map((p) => '<label><input type="checkbox" value="' + esc(p) + '"> ' + esc(p) + '</label>').join('');
+  REGIONAIS.forEach((p) => pkPolo.add(new Option(p, p)));
+  $('#plano-polos').innerHTML = REGIONAIS.map((p) => '<label><input type="checkbox" value="' + esc(p) + '"> ' + esc(p) + '</label>').join('');
 
   const corGrupo = (c) => V.BLOCOS.find((b) => b.k === c.b).cor;
   const pontos = (p) => fmtP(p) + (p > 0 && p < 2 ? ' ponto' : ' pontos');
@@ -482,8 +510,11 @@ if (typeof module !== 'undefined') module.exports = VERA;
         const rot = V.rotFaixa(c, j, S.P);
         return '<label class="fx"><span>' + esc(rot) + '</span><input type="number" data-k="' + c.k + '" data-j="' + j + '" min="0" max="100" step="0.5" value="' + p + '" aria-label="' + esc(c.nome + ', ' + rot + ': pontos') + '"></label>';
       }).join('');
+      // CHI e CI: os limites que separam as faixas também são editáveis
+      const lim = c.edita ? '<div class="pt-lim"><span>Limites das faixas</span>' + (S.P.fx[c.k]).map((x, j) =>
+        '<input type="number" data-lim="' + c.k + '" data-j="' + j + '" min="0" step="any" value="' + x + '" aria-label="' + esc(c.nome + ': limite ' + (j + 1) + ' (começo da faixa ' + (j + 2) + ')') + '">').join('') + '</div>' : '';
       return '<div class="pt-crit"><div class="pt-nome"><span class="amostra" style="background:' + corGrupo(c) + '"></span><b>' + esc(c.nome) + '</b><span class="pt-max" id="max-' + c.k + '"></span>' +
-        '<p class="pt-regra" id="regra-' + c.k + '"></p></div><div class="pt-faixas">' + (c.zero ? '<span class="fx zero"><span>' + esc(c.zero) + '</span><b>0</b></span>' : '') + fx + '</div></div>';
+        '<p class="pt-regra" id="regra-' + c.k + '"></p></div><div class="pt-faixas">' + (c.zero ? '<span class="fx zero"><span>' + esc(c.zero) + '</span><b>0</b></span>' : '') + fx + lim + '</div></div>';
     }).join('');
     atualizarRegras(); atualizarSomas();
   }
@@ -504,7 +535,8 @@ if (typeof module !== 'undefined') module.exports = VERA;
     $('#p-avenc').value = S.P.aVencer;
     $('#p-cob').value = S.P.cobBloqueio; $('#p-car').value = [1, 2, 3].map((c) => fmtP(S.P.carencia[c])).join(' / ');
     $('#p-bonus').value = S.P.bonus;
-    $('#p-lim').value = [S.P.lim.p1, S.P.lim.p2, S.P.lim.p3].map(fmtP).join(' / '); $('#p-piso').value = S.P.pisoKm;
+    for (const k of ['p1', 'p2', 'p3']) if (document.activeElement !== $('#c-' + k)) $('#c-' + k).value = S.P.lim[k];
+    $('#p-piso').value = S.P.pisoKm;
     for (const [k, v] of Object.entries(S.pk)) { const el = $('#pk-' + ({ limAprov: 'aprov', scoreMin: 'min' }[k] || k)); if (el) el.value = v; }
   }
   // três números de um campo de texto ("6 / 9 / 12", "7,5/5/3"); null se não forem três números
@@ -534,6 +566,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
 
   function aplicarPerfil() {
     S.T = clonaT(V.PERFIS[S.perfil].t);
+    S.P.fx = clonaT(V.parametrosPadrao().fx);
     desenharPontos(); agendar();
   }
   perfilSel.addEventListener('change', () => { S.perfil = perfilSel.value; aplicarPerfil(); });
@@ -546,13 +579,24 @@ if (typeof module !== 'undefined') module.exports = VERA;
     agendar();
   });
   // ao sair do campo, mostra o valor que valeu (ex.: 12 vira 10; vazio volta ao anterior)
-  $('#pontos').addEventListener('change', (e) => { const d = e.target.dataset; if (d.k) e.target.value = S.T[d.k][Number(d.j)]; });
+  $('#pontos').addEventListener('change', (e) => {
+    const d = e.target.dataset;
+    if (d.k) { e.target.value = S.T[d.k][Number(d.j)]; return; }
+    if (!d.lim) return;
+    // limite de faixa: tem de ficar entre o anterior e o seguinte; senão volta ao valor que valia
+    const L = S.P.fx[d.lim], j = Number(d.j), v = Number(String(e.target.value).replace(',', '.'));
+    if (e.target.value !== '' && isFinite(v) && v > (j ? L[j - 1] : 0) && (j === L.length - 1 || v < L[j + 1])) { L[j] = v; agendar(); }
+    desenharPontos();
+  });
   $('#ref').addEventListener('change', (e) => { if (e.target.value) { S.P.ref = e.target.value; dicaPerfil(); agendar(); } else e.target.value = S.P.ref; });
+  regSel.addEventListener('change', () => { S.f.reg = regSel.value; listaPolos(); renderRanking(); });
   poloSel.addEventListener('change', () => { S.f.polo = poloSel.value; renderRanking(); });
+  $('#f-tipo').addEventListener('change', (e) => { S.f.tipo = e.target.value; renderRanking(); });
+  $('#f-zona').addEventListener('change', (e) => { S.f.zona = e.target.value; renderRanking(); });
+  if (!temUrb) { const z = $('#f-zona'); z.disabled = true; z.title = 'Sem a base de área urbanizada (dados/urbano-trechos.js): filtro indisponível'; $('#aviso-zona').hidden = false; }
   munSel.addEventListener('change', () => { S.f.mun = munSel.value; renderRanking(); });
   let tmrBusca = null;
   $('#f-busca').addEventListener('input', (e) => { S.f.busca = e.target.value.trim().toUpperCase(); clearTimeout(tmrBusca); tmrBusca = setTimeout(renderRanking, 160); });
-  $('#f-classe').addEventListener('change', () => { S.f.classes = new Set([...document.querySelectorAll('#f-classe input:checked')].map((i) => Number(i.value))); renderRanking(); });
   $('#f-ocultos').addEventListener('change', (e) => { S.f.ocultos = e.target.checked; renderRanking(); });
   $('#plano-polos').addEventListener('change', () => { S.P.planoPolos = [...document.querySelectorAll('#plano-polos input:checked')].map((i) => i.value); agendar(); });
   const numParam = (id, fn) => $(id).addEventListener('change', (e) => {
@@ -566,7 +610,20 @@ if (typeof module !== 'undefined') module.exports = VERA;
   numParam('#p-bonus', (v) => { S.P.bonus = Math.max(0, v); });
   // texto ilegível volta ao valor anterior (o campo é reescrito); cortes em qualquer ordem viram P1 ≥ P2 ≥ P3
   $('#p-car').addEventListener('change', (e) => { const p = tres(e.target.value); if (p) { S.P.carencia = { 1: p[0], 2: p[1], 3: p[2] }; agendar(); } preencherParams(); });
-  $('#p-lim').addEventListener('change', (e) => { const p = tres(e.target.value); if (p) { p.sort((a, b) => b - a); S.P.lim = { p1: p[0], p2: p[1], p3: p[2] }; agendar(); } preencherParams(); });
+  // cortes das faixas (nota mínima de P1, P2 e P3; P4 é o resto): valem na hora; ao sair do campo viram P1 ≥ P2 ≥ P3
+  for (const k of ['p1', 'p2', 'p3']) {
+    $('#c-' + k).addEventListener('input', (e) => {
+      const v = Number(String(e.target.value).replace(',', '.'));
+      if (e.target.value === '' || !isFinite(v)) return;
+      S.P.lim[k] = Math.min(100, Math.max(0, v)); agendar();
+    });
+    $('#c-' + k).addEventListener('change', () => {
+      const p = [S.P.lim.p1, S.P.lim.p2, S.P.lim.p3].sort((a, b) => b - a);
+      S.P.lim = { p1: p[0], p2: p[1], p3: p[2] };
+      for (const k2 of ['p1', 'p2', 'p3']) $('#c-' + k2).value = S.P.lim[k2];   // também com o campo em foco (Enter)
+      agendar();
+    });
+  }
   for (const [k, id] of [['polo', 'polo'], ['raio', 'raio'], ['cap', 'cap'], ['limAprov', 'aprov'], ['scoreMin', 'min'], ['fator', 'fator'], ['max', 'max']]) {
     $('#pk-' + id).addEventListener('change', (e) => {
       const el = e.target, v = Number(String(el.value).replace(',', '.'));
@@ -599,9 +656,11 @@ if (typeof module !== 'undefined') module.exports = VERA;
     return S.out.ranked.filter((r) => {
       const t = r.t;
       if (!f.ocultos && r.status !== 'Elegível') return false;
+      if (f.reg !== 'todos' && t.reg !== f.reg) return false;
       if (f.polo !== 'todos' && t.polo !== f.polo) return false;
       if (f.mun !== 'todos' && t.mun !== f.mun) return false;
-      if (!f.classes.has(t.c)) return false;
+      if (f.tipo === 'tronco' ? t.c !== 1 : f.tipo === 'ramal' ? t.c === 1 : f.tipo !== 'todos' && t.c !== Number(f.tipo)) return false;
+      if (temUrb && f.zona !== 'todos' && (t.urb >= ctx.urbCorte) !== (f.zona === 'urbano')) return false;
       if (f.busca && !t.id.toUpperCase().includes(f.busca)) return false;
       if (!semFaixa && f.faixa && r.faixa !== f.faixa) return false;
       return true;
@@ -655,8 +714,8 @@ if (typeof module !== 'undefined') module.exports = VERA;
   $('#copiar').addEventListener('click', (e) => {
     const todos = filtrar(false), lista = todos.slice(0, 500);
     const q = (s) => '"' + String(s).replace(/"/g, '""') + '"';
-    const linhas = ['posicao;trecho;classe;polo;municipio;km;nota;faixa;' + V.CRIT.map((c) => 'pontos_' + ({ dec: 'chi', fec: 'ci', hier: 'hierarquia', ga: 'grupo_a', limp: 'limpeza', cli: 'clientes' }[c.k] || c.k)).join(';') + ';pontos_plano;situacao;regras;justificativa'];
-    for (const r of lista) linhas.push([r.pos ?? '', q(r.t.id), 'T' + r.t.c, q(r.t.polo), q(r.t.mun), fmtKm(r.t.km), fmtP(r.score), 'P' + r.faixa, ...V.CRIT.map((c) => fmtP(r.pts[c.k])), fmtP(r.bonus), q(r.status), q(r.regras.map((g) => g.id).join(' ')), q(V.justificar(ctx, r, S.P, S.T))].join(';'));
+    const linhas = ['posicao;trecho;classe;regional;polo;municipio;km;nota;faixa;' + V.CRIT.map((c) => 'pontos_' + ({ dec: 'chi', fec: 'ci', hier: 'hierarquia', ga: 'grupo_a', limp: 'limpeza', cli: 'clientes' }[c.k] || c.k)).join(';') + ';pontos_plano;situacao;regras;justificativa'];
+    for (const r of lista) linhas.push([r.pos ?? '', q(r.t.id), 'T' + r.t.c, q(r.t.reg), q(r.t.polo), q(r.t.mun), fmtKm(r.t.km), fmtP(r.score), 'P' + r.faixa, ...V.CRIT.map((c) => fmtP(r.pts[c.k])), fmtP(r.bonus), q(r.status), q(r.regras.map((g) => g.id).join(' ')), q(V.justificar(ctx, r, S.P, S.T))].join(';'));
     const txt = linhas.join('\n'), btn = e.currentTarget;
     const ok = () => { btn.textContent = 'Copiado: ' + fmtN(lista.length) + ' de ' + qtd(todos.length, 'linha', 'linhas'); setTimeout(() => { btn.textContent = 'Copiar ranking (CSV)'; }, 2500); };
     const falha = () => {
@@ -715,7 +774,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
     const val = validacoes[t.id];
     gav.innerHTML =
       '<div class="g-cab"><div class="g-topo"><div><h2 id="g-titulo">' + esc(t.id) + '</h2></div><button class="fechar" type="button" id="fechar">Fechar</button></div>' +
-      '<div class="chips"><span class="chip">' + fmtKm(t.km) + ' km</span><span class="chip">' + esc(t.mun) + '</span>' + (r.status !== 'Elegível' ? '<span class="chip estado">' + esc(r.status) + '</span>' : '') + '</div></div>' +
+      '<div class="chips"><a class="botao g-mapa" href="../alimentadores/' + encodeURIComponent(t.al) + '/?t=' + encodeURIComponent(t.n) + '">Ver no mapa</a><span class="chip">' + fmtKm(t.km) + ' km</span><span class="chip">' + esc(t.reg) + (t.polo !== 'Sem polo' ? ' · ' + esc(POLO_NOME[t.polo] || t.polo) : '') + '</span><span class="chip">' + esc(t.mun) + '</span>' + (r.status !== 'Elegível' ? '<span class="chip estado">' + esc(r.status) + '</span>' : '') + '</div></div>' +
       '<div class="g-nota"><span class="rot">Nota</span><b>' + fmtP(r.score) + '</b><span class="de">/' + fmtP(V.notaMax(S.T)) + '</span>' + FAIXA(r.faixa) + '<span class="por">' + esc(porque) + '</span></div>' +
       '<section><h3>De onde vem a nota</h3><div class="tabela-wrap"><table class="tab-mini extrato"><thead><tr><th>Critério</th><th>No trecho</th><th class="r">Pontos</th></tr></thead><tbody>' + extrato + '</tbody></table></div></section>' +
       (r.regras.length ? '<section><h3>Regras</h3><ul class="regras" style="margin-top:8px">' + r.regras.map((g) => '<li><span class="chip ' + g.tipo + '">' + g.id + '</span><span>' + esc(g.txt) + '</span></li>').join('') + '</ul></section>' : '') +
@@ -740,7 +799,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
       if (pend) recalcular();
       const rr = S.out.res[i], Pp = S.P;
       validacoes[t.id] = { decisao: b.dataset.dec, motivo, obs, quando: new Date().toLocaleString('pt-BR'), score: Math.round(rr.score * 100) / 100, escala: 'soma100', perfil: V.PERFIS[S.perfil].nome + (editada() ? ' com pontos editados' : ''), pontos: clonaT(S.T),
-        parametros: clonaT({ ref: Pp.ref, lim: Pp.lim, carencia: Pp.carencia, ciclo: Pp.ciclo, aVencer: Pp.aVencer, cobBloqueio: Pp.cobBloqueio, pisoKm: Pp.pisoKm, bonus: Pp.bonus, planoPolos: Pp.planoPolos }),
+        parametros: clonaT({ ref: Pp.ref, lim: Pp.lim, carencia: Pp.carencia, ciclo: Pp.ciclo, aVencer: Pp.aVencer, cobBloqueio: Pp.cobBloqueio, pisoKm: Pp.pisoKm, bonus: Pp.bonus, planoPolos: Pp.planoPolos, fx: Pp.fx }),
         excecoes: { grupoA: S.flags.ga.has(t.i), plano: S.flags.plano.has(t.i) } };
       salvarVal(); abrirFicha(i, true); renderRanking(true);
     }));
@@ -753,7 +812,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
     const { pacotes, elegiveis } = V.pacotes(ctx, S.out.ranked, o);
     const totKm = pacotes.reduce((s, p) => s + p.km, 0), ind = pacotes.reduce((s, p) => s + p.deslInd, 0), pac = pacotes.reduce((s, p) => s + p.deslPac, 0);
     const nTre = pacotes.reduce((s, p) => s + p.membros.length, 0), nAp = pacotes.reduce((s, p) => s + p.membros.filter((m) => m.aprov).length, 0);
-    $('#pk-resumo').innerHTML = '<span><b>' + fmtN(pacotes.length) + '</b> ' + (pacotes.length === 1 ? 'pacote' : 'pacotes') + '</span><span><b>' + fmtN(nTre) + '</b> trechos (' + fmtN(nAp) + ' por aproveitamento)</span><span><b>' + fmt1(totKm) + '</b> km de faixa</span><span>Deslocamento estimado <b>' + fmtN(pac) + ' km</b> contra ' + fmtN(ind) + ' km em visitas separadas</span><span>' + fmtN(elegiveis) + ' trechos P1–P3 elegíveis no polo</span>';
+    $('#pk-resumo').innerHTML = '<span><b>' + fmtN(pacotes.length) + '</b> ' + (pacotes.length === 1 ? 'pacote' : 'pacotes') + '</span><span><b>' + fmtN(nTre) + '</b> trechos (' + fmtN(nAp) + ' por aproveitamento)</span><span><b>' + fmt1(totKm) + '</b> km de faixa</span><span>Deslocamento estimado <b>' + fmtN(pac) + ' km</b> contra ' + fmtN(ind) + ' km em visitas separadas</span><span>' + fmtN(elegiveis) + ' trechos P1–P3 elegíveis na regional</span>';
     $('#pk-lista').innerHTML = pacotes.length ? pacotes.map((p, j) => {
       const L = p.lider, efic = p.deslPac > 0 ? p.km / p.deslPac : 0;
       return '<article class="pk"><div class="pk-cab">' + FAIXA(L.faixa) + '<h3>Pacote ' + (j + 1) + ' · líder ' + esc(L.t.id) + ' (#' + L.pos + ', nota ' + fmtP(L.score) + ')</h3></div>' +
@@ -761,7 +820,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
         '<div class="tabela-wrap"><table class="tab-mini"><thead><tr><th>Trecho</th><th>Município</th><th class="r">km</th><th class="r">Nota</th><th>Faixa</th><th class="r">Dist. do líder</th><th>Entrada</th></tr></thead><tbody>' +
         p.membros.map((m) => '<tr data-i="' + m.r.t.i + '"><td class="trecho-id">' + esc(m.r.t.id) + '</td><td>' + esc(m.r.t.mun) + '</td><td class="r num">' + fmtKm(m.r.t.km) + '</td><td class="r num">' + fmtP(m.r.score) + '</td><td>' + FAIXA(m.r.faixa) + '</td><td class="r num">' + (m.dist ? fmt1(m.dist) + ' km' : 'líder') + '</td><td>' + (m.dist === 0 && m.r === L ? 'prioridade' : m.aprov ? 'aproveitamento' : 'mesma faixa') + '</td></tr>').join('') +
         '</tbody></table></div></article>';
-    }).join('') : '<p class="vazio">Nenhum trecho P1–P3 elegível neste polo.</p>';
+    }).join('') : '<p class="vazio">Nenhum trecho P1–P3 elegível nesta regional.</p>';
   }
   $('#pk-lista').addEventListener('click', (e) => { const tr = e.target.closest('tr[data-i]'); if (tr) abrirFicha(Number(tr.dataset.i)); });
 

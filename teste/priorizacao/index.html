@@ -7,22 +7,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
-<link rel="stylesheet" href="../assets/priorizacao.css?v=202611101200"></head><body><div class="wrap">
+<link rel="stylesheet" href="../assets/priorizacao.css?v=202611151200"></head><body><div class="wrap">
 <header class="cab"><h1><b>ARGOS</b> <span>PRIORIZAÇÃO</span></h1><a class="cab-link" href="../">Mapa</a></header>
 <div class="pz-app">
 <div class="pz" id="pz">
   <div class="pz-topo">
     <div class="pz-barra" role="search" aria-label="Filtros dos trechos">
       <input class="busca pz-busca" type="search" id="f-busca" placeholder="Buscar trecho" aria-label="Buscar trecho" autocomplete="off" enterkeyhint="search">
-      <select id="f-polo" aria-label="Polo"></select>
-      <div class="chk" id="f-classe" role="group" aria-label="Classe">
-        <label><input type="checkbox" value="1" checked> T1</label>
-        <label><input type="checkbox" value="2" checked> T2</label>
-        <label><input type="checkbox" value="3" checked> T3</label>
-      </div>
-      <button type="button" class="pz-prem-btn" id="prem-btn" aria-expanded="false" aria-controls="sec-premissas">Premissas</button>
+      <label class="pz-f"><span class="rot">Regional</span><select id="f-reg"></select></label>
+      <label class="pz-f"><span class="rot">Polo</span><select id="f-polo"></select></label>
+      <label class="pz-f"><span class="rot">Tronco ou ramal</span><select id="f-tipo">
+        <option value="todos">Todos</option><option value="tronco">Tronco (T1)</option><option value="ramal">Ramal (T2 e T3)</option><option value="2">Ramal T2</option><option value="3">Ramal T3</option></select></label>
+      <label class="pz-f"><span class="rot">Urbano ou rural</span><select id="f-zona">
+        <option value="todos">Todos</option><option value="urbano">Urbano</option><option value="rural">Rural</option></select></label>
+      <fieldset class="pz-cortes"><legend class="rot">Nota mínima da faixa</legend>
+        <label><span class="faixa f1"><span class="ponto"></span>P1</span><input type="number" id="c-p1" min="0" max="100" step="1" inputmode="decimal" aria-label="Nota mínima de P1"></label>
+        <label><span class="faixa f2"><span class="ponto"></span>P2</span><input type="number" id="c-p2" min="0" max="100" step="1" inputmode="decimal" aria-label="Nota mínima de P2"></label>
+        <label><span class="faixa f3"><span class="ponto"></span>P3</span><input type="number" id="c-p3" min="0" max="100" step="1" inputmode="decimal" aria-label="Nota mínima de P3"></label>
+        <span class="pz-p4">P4: abaixo de P3</span>
+      </fieldset>
+      <button type="button" class="pz-prem-btn" id="prem-btn" aria-expanded="false" aria-controls="sec-premissas">Pontos e limites</button>
     </div>
-    <section class="pz-prem" id="sec-premissas" aria-label="Premissas" hidden>
+    <p class="pz-aviso" id="aviso-zona" role="note" hidden>Filtro urbano ou rural indisponível: a base de área urbanizada (IBGE 2022) não carregou.</p>
+    <section class="pz-prem" id="sec-premissas" aria-label="Pontos de cada critério e limites das faixas" hidden>
       <div class="prem-corpo">
         <p class="dica">A <b>nota</b> do trecho vai de 0 a 100 e é a <b>soma dos pontos</b> dos critérios. Cada critério dá pontos conforme o valor no trecho: <span id="pt-exemplo">por exemplo, 1 a 9 clientes vale 5 pontos e 10 a 99 clientes vale 10 pontos</span>. Os pontos podem ser mudados; os máximos devem somar 100.</p>
         <div class="pontos" id="pontos"></div>
@@ -87,10 +94,9 @@
         <div class="param"><label for="p-piso">Extensão mínima no cálculo por 100 km (km)</label><input type="number" id="p-piso" min="0.5" max="50" step="0.5"></div>
         <div class="param"><label for="p-cob">Cobertura mínima para bloquear (fração)</label><input type="number" id="p-cob" min="0.1" max="1" step="0.05"></div>
         <div class="param"><label for="p-car">Carência T1 / T2 / T3 (meses) · confirmada</label><input type="text" id="p-car"></div>
-        <div class="param"><label for="p-lim">Corte P1 / P2 / P3 (nota)</label><input type="text" id="p-lim"></div>
       </div>
       <div class="col"><h3>Plano climático</h3>
-        <p class="dica" style="margin-top:8px">Polos incluídos num plano especial (ex.: El Niño, ventos, pré-chuva) ganham pontos extras na nota.</p>
+        <p class="dica" style="margin-top:8px">Regionais incluídas num plano especial (ex.: El Niño, ventos, pré-chuva) ganham pontos extras na nota.</p>
         <div class="chk" id="plano-polos" style="margin-top:8px"></div>
         <div class="param"><label for="p-bonus">Bônus (pontos na nota)</label><input type="number" id="p-bonus" min="0" max="100" step="1"></div>
       </div>
@@ -102,7 +108,7 @@
   <div class="doc" style="max-width:none;gap:14px">
     <p class="nota">O pacote nasce do próximo trecho elegível do ranking (o líder) e herda a faixa dele. Vizinhos entram por proximidade; os de faixa inferior entram como aproveitamento, limitados a uma fração da capacidade. Assim o ganho operacional nunca passa um trecho de faixa superior para trás. Distâncias são em linha reta entre centros dos trechos, multiplicadas pelo fator de estrada, partindo da SE do líder.</p>
     <div class="pk-ctrl">
-      <div class="campo"><label for="pk-polo">Polo</label><select id="pk-polo"></select></div>
+      <div class="campo"><label for="pk-polo">Regional</label><select id="pk-polo"></select></div>
       <div class="campo"><label for="pk-raio">Raio de agrupamento (km)</label><input type="number" id="pk-raio" min="1" max="60" step="1"></div>
       <div class="campo"><label for="pk-cap">Capacidade por pacote (km de faixa)</label><input type="number" id="pk-cap" min="2" max="200" step="1"></div>
       <div class="campo"><label for="pk-aprov">Aproveitamento máximo (%)</label><input type="number" id="pk-aprov" min="0" max="100" step="5"></div>
@@ -130,7 +136,7 @@
       <thead><tr><th>Grupo</th><th>Campos</th><th>Situação na base atual</th></tr></thead>
       <tbody>
         <tr><td>Identificação e topologia</td><td>id estável, alimentador, SE, classe T1/T2/T3, zona de proteção (DJ, religador, fusível), fase predominante, extensão, vãos, trecho pai e derivações, versão do cadastro, confiança da segmentação</td><td>Existe (GIS processado no protótipo)</td></tr>
-        <tr><td>Território e operação</td><td>polo, regional, município, base e equipe responsável, centro e geometria, rural ou urbano, acesso, restrição ambiental ou autorização pendente</td><td>Parcial: polo, município e equipe (pelas OS); falta acesso e restrição</td></tr>
+        <tr><td>Território e operação</td><td>polo, regional, município, base e equipe responsável, centro e geometria, rural ou urbano, acesso, restrição ambiental ou autorização pendente</td><td>Parcial: polo, regional, município, equipe (pelas OS) e urbano/rural (IBGE 2022); falta acesso e restrição</td></tr>
         <tr><td>Impacto</td><td>consumidores a jusante, clientes Grupo A e essenciais (hospital, captação de água, posto de saúde) a jusante, carga</td><td>UCs ligadas por trafo (planilha UC por trafo). Falta Grupo A e essenciais</td></tr>
         <tr><td>Continuidade</td><td>ocorrências associadas (regra e confiança da associação), CI, CHI, duração, contribuição DEC/FEC</td><td>Existe (Crítica <span class="js-periodo">jan a ago/2026</span>)</td></tr>
         <tr><td>Manutenção</td><td>OS por tipo (emergencial, corretiva, preventiva, programada), status, datas, cobertura por vão, método e confiança da cobertura</td><td>Existe (cobertura estimada pela descrição da OS)</td></tr>
@@ -163,11 +169,11 @@
 
   <section>
     <h2>3. Nota de 0 a 100: soma de pontos</h2>
-    <p>Como numa prova: cada critério dá pontos conforme o valor do trecho e a nota é a soma. A tabela do perfil padrão soma 100 pontos; a gestão pode mudar os pontos nas Premissas.</p>
+    <p>Como numa prova: cada critério dá pontos conforme o valor do trecho e a nota é a soma. A tabela do perfil padrão soma 100 pontos; a gestão pode mudar os pontos em Pontos e limites, no topo da página.</p>
     <div class="tabela-wrap"><table>
       <thead><tr><th>Critério</th><th>Medida</th><th>Valor no trecho: pontos</th><th class="r">Máximo</th></tr></thead>
       <tbody>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> NAE por 100 km</td><td>ocorrências por vegetação do período da Crítica (<span class="js-periodo">jan a ago/2026</span>), depois da última limpeza, por 100 km do trecho</td><td>menos de 20: 5 · 20 a 39,9: 10 · 40 a 59,9: 15 · 60 ou mais: 20</td><td class="r num">20</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> NAE Vegetação por 100 km</td><td>ocorrências por vegetação do período da Crítica (<span class="js-periodo">jan a ago/2026</span>), depois da última limpeza, por 100 km do trecho</td><td>menos de 20: 5 · 20 a 39,9: 10 · 40 a 59,9: 15 · 60 ou mais: 20</td><td class="r num">20</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-his)"></span> CHI por 100 km (consumidor·hora)</td><td>consumidor·hora interrompido (CHI) nessas ocorrências: UCs ligadas a jusante do trecho (planilha UC por trafo) × duração de cada uma (evento individual: consumidores da Crítica), por 100 km</td><td>menos de 1.000: 5 · 1.000 a 9.999: 10 · 10.000 ou mais: 15</td><td class="r num">15</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-his)"></span> CI por 100 km (consumidores interrompidos)</td><td>consumidores interrompidos (CI) nessas ocorrências: UCs ligadas a jusante do trecho em cada uma (evento individual: consumidores da Crítica), por 100 km</td><td>menos de 100: 3 · 100 a 999: 5 · 1.000 a 9.999: 8 · 10.000 ou mais: 10</td><td class="r num">10</td></tr>
         <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Clientes (UCs ligadas)</td><td>UCs ligadas nos transformadores do trecho e dos que saem dele (planilha UC por trafo)</td><td>1 a 9: 5 · 10 a 99: 10 · 100 a 999: 15 · 1.000 ou mais: 20</td><td class="r num">20</td></tr>
@@ -177,7 +183,7 @@
         <tr><td colspan="3"><b>Nota máxima</b></td><td class="r num"><b>100</b></td></tr>
       </tbody>
     </table></div>
-    <p>Valor zero (nenhuma ocorrência, nenhum consumidor·hora, sem cliente Grupo A, limpeza em dia) não dá ponto. O valor que cai exatamente num limite já é da faixa de cima: NAE de 40 por 100 km dá 15. Faixas (padrão, editáveis em Opções): P1 com nota 70 ou mais, P2 de 50 a 70, P3 de 30 a 50, P4 abaixo de 30. Os perfis sazonais mudam só os pontos, somam 100 e são versionados: <b>pré-chuva (set–nov)</b> dá até 30 pontos à limpeza vencida; <b>plano climático</b> dá até 25 ao NAE e 20 ao CHI. No Tocantins o período chuvoso vai de outubro a abril; a própria Crítica de 2026 mostra janeiro com 2,5 vezes as ocorrências por vegetação de agosto.</p>
+    <p>Valor zero (nenhuma ocorrência, nenhum consumidor·hora, sem cliente Grupo A, limpeza em dia) não dá ponto. O valor que cai exatamente num limite já é da faixa de cima: NAE de 40 por 100 km dá 15. Faixas (padrão, editáveis no topo da página): P1 com nota 70 ou mais, P2 de 50 a 70, P3 de 30 a 50, P4 abaixo de 30. Os perfis sazonais mudam só os pontos, somam 100 e são versionados: <b>pré-chuva (set–nov)</b> dá até 30 pontos à limpeza vencida; <b>plano climático</b> dá até 25 ao NAE e 20 ao CHI. No Tocantins o período chuvoso vai de outubro a abril; a própria Crítica de 2026 mostra janeiro com 2,5 vezes as ocorrências por vegetação de agosto.</p>
   </section>
 
   <section>
@@ -188,7 +194,7 @@
       <li><b>Clientes (UCs ligadas).</b> Soma das UCs ligadas nos transformadores do trecho e dos trechos que saem dele, pela planilha de UC por trafo: o que um evento no trecho pode deixar sem energia. A limpeza não muda quantos clientes o trecho alimenta. Alimentador fora da planilha usa o maior número de clientes desligados num evento do período da Crítica, e trecho sem evento, o típico da classe. Trecho que não está na planilha do seu alimentador fica sem dado e não pontua.</li>
       <li><b>Ordem de grandeza.</b> Clientes, CHI e CI sobem de faixa a cada 10 vezes: clientes 1 a 9, 10 a 99, 100 a 999 e 1.000 ou mais; CHI por 100 km menos de 1.000, 1.000 a 9.999 e 10.000 ou mais; CI por 100 km menos de 100, 100 a 999, 1.000 a 9.999 e 10.000 ou mais. Um valor extremo ganha só o máximo do critério e não domina a nota.</li>
       <li><b>Grupo A.</b> Ainda não há cadastro na base: o critério dá 0 até ser marcado (no teste, pela ficha do trecho), e a regra F2 garante mínimo P2. Sem marcação, a nota máxima alcançável é 95.</li>
-      <li><b>Limpeza sem registro.</b> Trecho sem OS executada cobrindo pelo menos 50% dele desde o início das OS não tem data de vencimento: fica como sem registro e leva a pontuação própria (10 de 20 no perfil padrão, editável nas Premissas), menor que a de vencida.</li>
+      <li><b>Limpeza sem registro.</b> Trecho sem OS executada cobrindo pelo menos 50% dele desde o início das OS não tem data de vencimento: fica como sem registro e leva a pontuação própria (10 de 20 no perfil padrão, editável em Pontos e limites), menor que a de vencida.</li>
       <li><b>Empate.</b> Entre notas iguais vem antes o trecho com mais ocorrências por 100 km, depois o de mais consumidor·hora por 100 km, depois o mais longo.</li>
       <li><b>Referência fixa por rodada.</b> Os típicos por classe são calculados sobre a rede inteira e gravados na rodada; filtrar a tela não muda nenhuma nota.</li>
       <li><b>Confiança.</b> Parte da nota máxima que vem de dado real: valor estimado (clientes típicos, limpeza sem registro) conta metade e critério sem dado (Grupo A, trecho fora da planilha de UC) não conta. Abaixo de 6 de 10 em P1 ou P2 gera o alerta Q1.</li>
@@ -263,7 +269,7 @@
       <thead><tr><th>API</th><th>Uso</th></tr></thead>
       <tbody>
         <tr><td class="mono">POST /priorizacao/rodadas</td><td>Cria rodada oficial ou simulação (job)</td></tr>
-        <tr><td class="mono">GET /priorizacao/rodadas/{id}/ranking</td><td>Ranking filtrado por polo, município, classe, faixa, fila</td></tr>
+        <tr><td class="mono">GET /priorizacao/rodadas/{id}/ranking</td><td>Ranking filtrado por regional, polo, município, classe, urbano ou rural, faixa, fila</td></tr>
         <tr><td class="mono">GET /priorizacao/rodadas/{id}/trechos/{trecho}</td><td>Componentes, regras, evidências e justificativa</td></tr>
         <tr><td class="mono">POST /priorizacao/simulacoes</td><td>Testa pontos e parâmetros sem gravar rodada oficial</td></tr>
         <tr><td class="mono">GET, POST /metodologias</td><td>Versões da tabela de pontos e das regras; nova versão exige aprovação</td></tr>
@@ -345,7 +351,8 @@
 <!-- defer: a página pinta o esqueleto enquanto os 3,4 MB de dados chegam -->
 <script defer src="../assets/priorizacao-dados.js?v=202610292330"></script>
 <script defer src="../dados/ucs-trechos.js?v=202610292330"></script>
-<script defer src="../assets/priorizacao.js?v=202611132000"></script>
+<script defer src="../dados/urbano-trechos.js?v=202611151200"></script>
+<script defer src="../assets/priorizacao.js?v=202611151200"></script>
 </div>
 <script src="../assets/menu.js"></script>
 </body></html>

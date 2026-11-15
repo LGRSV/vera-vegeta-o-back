@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.0",
+ "versao": "2.1",
  "atualizado": "2026-11-15",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -194,9 +194,11 @@ window.ARGOS_ESCOPO = {
    {"t": "Página de Priorização: ranking de alimentadores e trechos P1 a P4", "st": "ok", "d": "2026-10-15"},
    {"t": "Nota de 0 a 100 pela soma de pontos de cada critério", "st": "ok", "d": "2026-10-28"},
    {"t": "Clientes pelas UCs ligadas e OS de limpeza pelo OS status de 29/10", "st": "ok", "d": "2026-10-29"},
-   {"t": "CHI e CI pelas UCs ligadas a jusante do trecho em cada evento, no lugar dos consumidores registrados na Crítica (decisão de 13/11)", "st": "ok", "d": "2026-11-13"}
+   {"t": "CHI e CI pelas UCs ligadas a jusante do trecho em cada evento, no lugar dos consumidores registrados na Crítica (decisão de 13/11)", "st": "ok", "d": "2026-11-13"},
+   {"t": "Filtros Regional, Polo, Tronco/Ramal e Urbano/Rural (área urbanizada do IBGE 2022), cortes P1–P3 à vista, pontos e limites editáveis e botão Ver no mapa na ficha", "st": "ok", "d": "2026-11-15"}
   ]},
   {"id": "6.2", "frente": "prio", "titulo": "Validação e atualização", "itens": [
+   {"t": "DEC/100 e FEC/100 do conjunto ANEEL pela Crítica no lugar do CHI e do CI (pronto; falta a Crítica de jan a mar/2026 para publicar)", "st": "bloq", "desde": "2026-11-14", "prazo": "2026-11-21", "resp": "proj", "obs": "Os arquivos de jan, fev e mar/2026 passam de 10 MB e não baixam do Drive: mandar na conversa. Com abr a ago só, 47% das ocorrências ficariam sem DEC/FEC."},
    {"t": "Atualizar as ocorrências do Priorizador (referência de 07/10/2026) com a Crítica nova", "st": "pend", "prazo": "2026-11-20", "resp": "dev", "obs": "Depende da Crítica de set e out/2026."},
    {"t": "Validar a tabela de pontos e o ranking com os polos", "st": "pend", "prazo": "2026-12-11", "resp": "proj"}
   ]},
