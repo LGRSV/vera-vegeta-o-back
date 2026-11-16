@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.3",
+ "versao": "2.4",
  "atualizado": "2026-11-16",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -202,7 +202,7 @@ window.ARGOS_ESCOPO = {
   {"id": "6.2", "frente": "prio", "titulo": "Validação e atualização", "itens": [
    {"t": "DEC/100 e FEC/100 do conjunto ANEEL pela Crítica no lugar do CHI e do CI", "st": "ok", "d": "2026-11-16", "obs": "Crítica de jan a mar/2026 recebida em 16/11, já com o expurgo: as 812 ocorrências expurgadas como situação de emergência entram com DEC/FEC zero e continuam na NAE."},
    {"t": "Atualizar as ocorrências do Priorizador (referência de 07/10/2026) com a Crítica nova", "st": "ok", "d": "2026-11-16", "obs": "Jan a nov/2026, até 09/11; OS de limpeza pelo OS status de 15/11."},
-   {"t": "Decidir a regra F5 para T1 com limpeza só parcial no mapa ou só na aba T1 da planilha (27 casos) e para T1 muito curto", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Regra F5: OS executadas nos últimos 3 anos que, somadas, cobrem ≥ 50% do T1 contam como limpeza; T1 com menos de 0,5 km fica fora (alerta Q6)", "st": "ok", "d": "2026-11-16", "obs": "Decisão de 16/11: a data da aba T1 da planilha não entra; cortes P1–P3 seguem 70/50/30. T1 no topo: 268 → 225."},
    {"t": "Validar a tabela de pontos e o ranking com os polos", "st": "pend", "prazo": "2026-12-11", "resp": "proj"}
   ]},
 

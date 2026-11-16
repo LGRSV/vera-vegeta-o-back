@@ -9,8 +9,9 @@
 // DEC e FEC: contribuição das ocorrências do trecho no DEC (horas) e no FEC (interrupções) do conjunto ANEEL, pela Crítica, já
 // sem o que o PRODIST não conta; ocorrência expurgada como situação de emergência vale 0, como no indicador oficial (continua no
 // NAE). Janela de 12 meses (U12M) contada da data de referência. As UCs a jusante só entram no critério Clientes.
-// Regra F5: T1 com a última limpeza efetiva (OS executada cobrindo ≥ 50% do trecho) há mais de P.t1Anos (3) anos, ou sem
-// limpeza efetiva registrada, fica no mínimo P1 e no topo do ranking, entre si pela nota. Solicitações não mudam a nota:
+// Regra F5: T1 sem limpeza nos últimos P.t1Anos (3) anos fica no mínimo P1 e no topo do ranking, entre si pela nota. Conta
+// como limpeza uma OS executada cobrindo ≥ 50% do trecho ou, desde 16/11/2026 (decisão do dono), OS executadas no período que,
+// somadas, cubram ≥ 50%; T1 com menos de P.t1KmMin (0,5 km) fica fora da regra (segue pela nota). Solicitações não mudam a nota:
 // marcam o trecho na lista e na ficha e têm filtro próprio (a de trecho criado depois de 07/10 vai para o trecho que o contém).
 // A tabela de pontos de cada perfil soma 100.
 'use strict';
@@ -63,6 +64,7 @@ const VERA = (() => {
       carencia: { 1: 6, 2: 9, 3: 12 }, ciclo: { 1: 3, 2: 4, 3: 5 }, aVencer: 3,
       lim: { p1: 70, p2: 50, p3: 30 }, planoPolos: [], bonus: 8, pisoKm: 5,
       t1Anos: 3,   // regra F5: T1 sem limpeza efetiva há mais que isso (ou sem registro) vai a P1 e ao topo
+      t1KmMin: 0.5,   // regra F5: T1 mais curto que isso (km) fica fora dela (decisão de 16/11/2026)
       fx: Object.fromEntries(CRIT.filter((c) => c.edita).map((c) => [c.k, c.lim.slice()])),   // limites de faixa editáveis (DEC e FEC)
     };
   }
@@ -222,11 +224,12 @@ const VERA = (() => {
 
     // 1. fatos por trecho na data de referência
     const F = ctx.trechos.map((t) => {
-      let ult = null, bloq = null, cart = null, parcial = null;
+      let ult = null, bloq = null, cart = null, parcial = null, soma3 = 0, nSoma3 = 0;
       for (const [d, s, f, cod] of t.os) {
         if (d > ref) continue;
         if (s === 1) {
           if (f >= P.cobEfetiva && (ult === null || d > ult)) ult = d;
+          if (f >= 0.01 && ref - d <= P.t1Anos * 365.25) { soma3 += f; nSoma3++; }   // regra F5: OS executadas no período, somadas
           if (f >= 0.01 && (!parcial || d > parcial.d)) parcial = { d, f };   // OS sem cobertura no trecho (0%) não é "parcial"
           if (f >= P.cobBloqueio && ref - d <= P.carencia[t.c] * 30.44 && (!bloq || d > bloq.d)) bloq = { d, cod, f };
         } else if (f >= 0.3 && (!cart || f > cart.f)) cart = { d, cod, f };
@@ -257,7 +260,7 @@ const VERA = (() => {
         if (cons > cliMax) cliMax = cons;
         usadas.push({ d, cons, dur, col, rg, pre, ex, dh: ex ? 0 : x ? x[0] : null, fc: ex ? 0 : x ? x[1] : null });
       }
-      return { ult, parcial, bloq, cart, n, dec, fec, nSem, nExp, nJan, n90, posBloq, meses: meses.size, cliMax, usadas };
+      return { ult, parcial, soma3, nSoma3, bloq, cart, n, dec, fec, nSem, nExp, nJan, n90, posBloq, meses: meses.size, cliMax, usadas };
     });
     // por 100 km do trecho. Trecho mais curto que P.pisoKm (padrão 5 km) conta como P.pisoKm: a mediana dos trechos tem 0,21 km e,
     // sem esse mínimo, um trecho curtinho com uma só ocorrência passaria o tronco
@@ -340,15 +343,19 @@ const VERA = (() => {
         status = 'Em carteira';
         regras.push({ id: 'B2', tipo: 'bloqueio', txt: 'OS aberta ' + f.cart.cod + ' já cobre ' + pct(f.cart.f) + ' do trecho' });
       }
-      // F5 (Ranking de faixa, 16/11/2026): T1 com a última limpeza efetiva (OS executada cobrindo ≥ P.cobEfetiva do trecho) há
-      // mais de P.t1Anos anos da referência, ou sem limpeza efetiva registrada, fica no mínimo P1 e vai ao topo do ranking (entre
-      // si, pela nota). OS parcial (abaixo de P.cobEfetiva) não conta como limpeza efetiva; o texto diz a última, se houver.
-      // T1 com menos de 0,5 km (o corte do Q4) é sinalizado: pode não ter faixa a limpar (a regra não tem piso de km)
-      const topo = t.c === 1 && (f.ult === null || ref - f.ult > P.t1Anos * 365.25);
+      // F5 (Ranking de faixa, 16/11/2026): T1 sem limpeza nos últimos P.t1Anos anos da referência fica no mínimo P1 e vai ao topo
+      // do ranking (entre si, pela nota). Conta como limpeza a OS executada cobrindo ≥ P.cobEfetiva do trecho ou as OS executadas
+      // no período que, somadas (f.soma3), cubram ≥ P.cobEfetiva (decisão do dono, 16/11). T1 com menos de P.t1KmMin km fica fora.
+      const anosTxt = fmtP(P.t1Anos) + (P.t1Anos === 1 ? ' ano' : ' anos');
+      const limpo = (f.ult !== null && ref - f.ult <= P.t1Anos * 365.25) || f.soma3 >= P.cobEfetiva;
+      const kmMin = P.t1KmMin ?? 0.5;   // validação gravada antes de 16/11 não tem t1KmMin
+      const topo = t.c === 1 && !limpo && t.km >= kmMin;
       if (topo) {
         piso = 1;
-        const curto = t.km < 0.5 ? '; trecho de ' + fmtN(t.km * 1000) + ' m: confirmar se há faixa a limpar' : '';
-        regras.push({ id: 'F5', tipo: 'piso', txt: (f.ult === null ? 'T1 sem limpeza efetiva registrada (nenhuma OS executada cobrindo ≥ ' + pct(P.cobEfetiva) + ' do trecho' + (f.parcial ? '; a última parcial, em ' + dataDe(ctx, f.parcial.d) + ', cobriu ' + pct(f.parcial.f) : '') + ')' : 'T1 com a última limpeza efetiva em ' + dataDe(ctx, f.ult) + ', há mais de ' + fmtP(P.t1Anos) + (P.t1Anos === 1 ? ' ano' : ' anos')) + ': mínimo P1 e topo do ranking' + curto });
+        const somaTxt = f.nSoma3 ? '; ' + (f.nSoma3 === 1 ? 'a OS executada nos últimos ' + anosTxt + ' cobre ' : 'as ' + f.nSoma3 + ' OS executadas nos últimos ' + anosTxt + ' somam ') + pct(Math.min(1, f.soma3)) : '';
+        regras.push({ id: 'F5', tipo: 'piso', txt: (f.ult === null ? 'T1 sem limpeza efetiva registrada (nenhuma OS executada cobrindo ≥ ' + pct(P.cobEfetiva) + ' do trecho' + (f.parcial && !f.nSoma3 ? '; a última parcial, em ' + dataDe(ctx, f.parcial.d) + ', cobriu ' + pct(f.parcial.f) : '') + somaTxt + ')' : 'T1 com a última limpeza efetiva em ' + dataDe(ctx, f.ult) + ', há mais de ' + anosTxt + (somaTxt ? ' (' + somaTxt.slice(2) + ')' : '')) + ': mínimo P1 e topo do ranking' });
+      } else if (t.c === 1 && !limpo) {
+        regras.push({ id: 'Q6', tipo: 'alerta', txt: 'T1 de ' + fmtN(t.km * 1000) + ' m sem limpeza nos últimos ' + anosTxt + ': fora da regra F5 (T1 com menos de ' + fmtP(kmMin) + ' km segue pela nota)' });
       }
       if (t.c === 1 && (f.meses >= 3 || f.n90 >= 2)) {
         piso = 1;
@@ -608,7 +615,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
     },
     hier: () => 'Classe do trecho: tronco (T1) ou ramal (T2, T3).' + zero('hier'),
     ga: () => 'Cliente Grupo A (média tensão) no trecho. Ainda não há cadastro na base: só pontua quando marcado na ficha do trecho' + (V.maxDe(S.T, 'ga') > 0 ? ', então hoje a nota máxima alcançável é ' + fmtP(V.notaMax(S.T) - V.maxDe(S.T, 'ga')) + '.' : '; a regra F2 (mínimo P2) vale do mesmo jeito.') + zero('ga'),
-    limp: () => 'Última limpeza efetiva + ciclo da classe (T1 ' + S.P.ciclo[1] + ', T2 ' + S.P.ciclo[2] + ', T3 ' + S.P.ciclo[3] + ' anos; regra interna, sem estudo de crescimento publicado). Sem registro: nenhuma OS executada cobrindo ≥ 50% do trecho desde ' + V.dataDe(ctx, ctx.osInicio) + '; não há data de vencimento. O T1 com a última limpeza efetiva há mais de ' + fmtP(S.P.t1Anos) + (S.P.t1Anos === 1 ? ' ano' : ' anos') + ', ou sem limpeza efetiva registrada, vai ao topo pela regra F5 (OS parcial não conta).' + zero('limp'),
+    limp: () => 'Última limpeza efetiva + ciclo da classe (T1 ' + S.P.ciclo[1] + ', T2 ' + S.P.ciclo[2] + ', T3 ' + S.P.ciclo[3] + ' anos; regra interna, sem estudo de crescimento publicado). Sem registro: nenhuma OS executada cobrindo ≥ 50% do trecho desde ' + V.dataDe(ctx, ctx.osInicio) + '; não há data de vencimento. O T1 com a última limpeza efetiva há mais de ' + fmtP(S.P.t1Anos) + (S.P.t1Anos === 1 ? ' ano' : ' anos') + ', ou sem limpeza efetiva registrada, vai ao topo pela regra F5 (contam também OS executadas nos últimos ' + fmtP(S.P.t1Anos) + (S.P.t1Anos === 1 ? ' ano' : ' anos') + ' que, somadas, cubram ≥ 50%; T1 com menos de ' + fmtP(S.P.t1KmMin ?? 0.5) + ' km fica fora).' + zero('limp'),
   };
   // tabela de pontos: uma linha por critério, com os pontos de cada faixa de valor editáveis
   function desenharPontos() {
@@ -946,7 +953,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
       if (pend) recalcular();
       const rr = S.out.res[i], Pp = S.P;
       validacoes[t.id] = { decisao: b.dataset.dec, motivo, obs, quando: new Date().toLocaleString('pt-BR'), score: Math.round(rr.score * 100) / 100, escala: 'soma100', metodologia: V.VERSAO, perfil: V.PERFIS[S.perfil].nome + (editada() ? ' com pontos editados' : ''), pontos: clonaT(S.T),
-        parametros: clonaT({ ref: Pp.ref, lim: Pp.lim, carencia: Pp.carencia, ciclo: Pp.ciclo, aVencer: Pp.aVencer, cobBloqueio: Pp.cobBloqueio, pisoKm: Pp.pisoKm, bonus: Pp.bonus, planoPolos: Pp.planoPolos, fx: Pp.fx, t1Anos: Pp.t1Anos }),
+        parametros: clonaT({ ref: Pp.ref, lim: Pp.lim, carencia: Pp.carencia, ciclo: Pp.ciclo, aVencer: Pp.aVencer, cobBloqueio: Pp.cobBloqueio, pisoKm: Pp.pisoKm, bonus: Pp.bonus, planoPolos: Pp.planoPolos, fx: Pp.fx, t1Anos: Pp.t1Anos, t1KmMin: Pp.t1KmMin }),
         excecoes: { grupoA: S.flags.ga.has(t.i), plano: S.flags.plano.has(t.i) } };
       salvarVal(); abrirFicha(i, true); renderRanking(true);
     }));

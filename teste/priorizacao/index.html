@@ -166,9 +166,9 @@
         <tr><td class="mono">F2</td><td>Piso</td><td>Clientes Grupo A no trecho</td><td>Mínimo P2</td></tr>
         <tr><td class="mono">F3</td><td>Piso</td><td>Inspeção válida com vegetação a ≤ 50 cm da MT (≥ 3 pontos: P1; 1–2 pontos: P2)</td><td>Fila corretiva. Desligada: não há medição de distância</td></tr>
         <tr><td class="mono">F4</td><td>Piso</td><td>Evento em ≥ 4 meses da janela, qualquer classe</td><td>Mínimo P2</td></tr>
-        <tr><td class="mono">F5</td><td>Piso e ordem</td><td>T1 com a última limpeza efetiva (OS executada cobrindo ≥ 50% do trecho) há mais de 3 anos da referência, ou sem limpeza efetiva registrada; OS parcial não conta (Ranking de faixa)</td><td>Mínimo P1 e topo do ranking, acima dos demais; entre si, pela nota</td></tr>
+        <tr><td class="mono">F5</td><td>Piso e ordem</td><td>T1 sem limpeza nos últimos 3 anos da referência (Ranking de faixa). Conta como limpeza uma OS executada cobrindo ≥ 50% do trecho ou OS executadas no período que, somadas, cubram ≥ 50%. T1 com menos de 0,5 km fica fora (alerta Q6)</td><td>Mínimo P1 e topo do ranking, acima dos demais; entre si, pela nota</td></tr>
         <tr><td class="mono">A1</td><td>Aumento</td><td>Trecho em plano climático aprovado</td><td>+8 pontos (parâmetro) e reserva de capacidade</td></tr>
-        <tr><td class="mono">Q1, Q3, Q4, Q5</td><td>Alerta</td><td>Confiança &lt; 6 de 10 em P1/P2, segmentação a revisar, trecho &lt; 0,5 km com ocorrência, alimentador dividido por exceção (GIS sem as chaves fechadas)</td><td>Confirmar em campo antes de programar</td></tr>
+        <tr><td class="mono">Q1, Q3, Q4, Q5, Q6</td><td>Alerta</td><td>Confiança &lt; 6 de 10 em P1/P2, segmentação a revisar, trecho &lt; 0,5 km com ocorrência, alimentador dividido por exceção (GIS sem as chaves fechadas), T1 com menos de 0,5 km sem limpeza nos últimos 3 anos (fora da F5)</td><td>Confirmar em campo antes de programar</td></tr>
       </tbody>
     </table></div>
     <p>As regras ficam numa tabela versionada (código, condição, efeito, prioridade de aplicação). Pisos nunca reduzem uma faixa; bloqueios vencem pisos, exceto L2.</p>
@@ -206,7 +206,7 @@
       <li><b>Clientes (UCs ligadas).</b> Soma das UCs ligadas nos transformadores do trecho e dos trechos que saem dele, pela planilha de UC por trafo: o que um evento no trecho pode deixar sem energia. A limpeza não muda quantos clientes o trecho alimenta. Alimentador fora da planilha usa o maior número de clientes desligados num evento do período da Crítica, e trecho sem evento, o típico da classe. Trecho que não está na planilha do seu alimentador fica sem dado e não pontua.</li>
       <li><b>Faixas por valor.</b> As faixas do DEC e do FEC seguem limites próprios, calibrados em jan a nov/2026 e editáveis na tabela de pontos; Clientes sobe de faixa a cada 10 vezes. Um valor extremo ganha só o máximo do critério e não domina a nota.</li>
       <li><b>Grupo A.</b> Ainda não há cadastro na base: o critério só pontua quando marcado (no teste, pela ficha do trecho; 0 no perfil padrão), e a regra F2 garante mínimo P2.</li>
-      <li><b>Limpeza sem registro.</b> Trecho sem OS executada cobrindo pelo menos 50% dele desde o início das OS não tem data de vencimento: fica como sem registro. No padrão a limpeza não dá ponto; o T1 sem limpeza efetiva registrada, ou com a última limpeza efetiva há mais de 3 anos, vai ao topo pela regra F5 (OS parcial não conta). Nos perfis Pré-chuva e Plano climático, sem registro vale metade de vencida.</li>
+      <li><b>Limpeza sem registro.</b> Trecho sem OS executada cobrindo pelo menos 50% dele desde o início das OS não tem data de vencimento: fica como sem registro. No padrão a limpeza não dá ponto; o T1 sem limpeza efetiva registrada, ou com a última limpeza efetiva há mais de 3 anos, vai ao topo pela regra F5 (para ela contam também as OS executadas nos últimos 3 anos que, somadas, cubram pelo menos 50%; T1 com menos de 0,5 km fica fora). Nos perfis Pré-chuva e Plano climático, sem registro vale metade de vencida.</li>
       <li><b>Empate.</b> Entre notas iguais vem antes o trecho com mais ocorrências por 100 km, depois o de mais DEC por 100 km, depois o mais longo.</li>
       <li><b>Referência fixa por rodada.</b> Os típicos por classe são calculados sobre a rede inteira e gravados na rodada; filtrar a tela não muda nenhuma nota.</li>
       <li><b>Confiança.</b> Parte da nota máxima que vem de dado real: valor estimado (clientes típicos, limpeza sem registro) conta metade e critério sem dado (Grupo A, trecho fora da planilha de UC, alimentador sem Lente de imagem, DEC e FEC sem dado na Crítica) não conta. Abaixo de 6 de 10 em P1 ou P2 gera o alerta Q1.</li>
@@ -368,7 +368,7 @@
 <script defer src="../dados/decfec-trechos.js?v=202611162100"></script>
 <script defer src="../dados/lente-imagem.js?v=202611161900"></script>
 <script defer src="../dados/solicitacoes-trechos.js?v=202611161900"></script>
-<script defer src="../assets/priorizacao.js?v=202611162100"></script>
+<script defer src="../assets/priorizacao.js?v=202611161745"></script>
 </div>
 <script src="../assets/menu.js"></script>
 </body></html>
