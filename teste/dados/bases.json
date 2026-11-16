@@ -10,11 +10,12 @@
   "nome": "Crítica (NAE)"
  },
  "executadas": {
-  "arquivo": "1 - OS_STATUS.parquet",
-  "ate": "2026-10-29",
+  "arquivo": "OS_STATUS.parquet",
+  "ate": "2026-11-15",
+  "enviado": "2026-11-16",
   "nome": "OS de manutenção executadas",
-  "os": 232664,
-  "processado": "2026-10-29"
+  "os": 234286,
+  "processado": "2026-11-16"
  },
  "inspecao": {
   "arquivo": "BASE INSPEÇÃO.xlsx",
@@ -24,17 +25,18 @@
   "processado": "2026-10-13"
  },
  "limpeza": {
-  "arquivo": "1 - OS_STATUS.parquet",
-  "ate": "2026-10-29",
+  "arquivo": "OS_STATUS.parquet",
+  "ate": "2026-11-15",
+  "enviado": "2026-11-16",
   "nome": "OS de limpeza de faixa",
-  "os": 3735,
-  "processado": "2026-10-29"
+  "os": 3800,
+  "processado": "2026-11-16"
  },
  "manutencao": {
   "arquivo": "OS GERADAS PELA INSPEÇÃO.xlsx",
   "ate": "2026-10-10",
   "nome": "OS de manutenção da inspeção",
-  "os": 4882,
-  "processado": "2026-10-29"
+  "os": 4835,
+  "processado": "2026-11-16"
  }
 }

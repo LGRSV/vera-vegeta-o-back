@@ -1,1 +1,1 @@
-window.LIMPEZA = {"regra_anos":{"T1":3,"T2":4,"T3":5},"fonte":"ea74f87f-1_-_OS_STATUS.parquet","gerado":"2026-10-29","equipes":["ETO-RD-PA","ETO-RD-PS","ETO-RD-PO","ETO-RD-GR","ETO-RD-AR","ETO-RD-AG","ETO-RD-GU","ETO-RD-DP"],"os":[],"vaos":{},"sem_local":[]};
+window.LIMPEZA = {"regra_anos":{"T1":3,"T2":4,"T3":5},"fonte":"OS_STATUS.parquet","gerado":"2026-11-16","equipes":["ETO-RD-PA","ETO-RD-PS","ETO-RD-PO","ETO-RD-GR","ETO-RD-AR","ETO-RD-AG","ETO-RD-GU","ETO-RD-DP"],"os":[],"vaos":{},"sem_local":[]};

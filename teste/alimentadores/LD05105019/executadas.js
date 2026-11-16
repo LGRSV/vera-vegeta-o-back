@@ -1,1 +1,1 @@
-window.EXECUTADAS = {"fonte":"ea74f87f-1_-_OS_STATUS.parquet","gerado":"2026-10-29","de":"2022-01-01","ate":"2026-10-29","tipos":[],"ativos":[],"os":[]};
+window.EXECUTADAS = {"fonte":"OS_STATUS.parquet","gerado":"2026-11-16","de":"2022-01-01","ate":"2026-11-15","tipos":["MC - SUBSTITUIÇÃO DE CHAVE"],"ativos":[],"os":[["ETO-CADTOC 000297/2026",0,"2026-11-13","ETO-CADTOC",-1,"PROJETO: SS ETO-CADTOC 00299-2026 Foi realizado o ajuste conforme solicitado na SS ETO-CADTOC 00299/2026, com a devida atualizações cadastrais das chaves.","alta",""]]};
