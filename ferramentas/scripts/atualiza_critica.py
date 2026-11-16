@@ -111,7 +111,7 @@ def no_formato(o):
     """Ocorrência de critica.ocorrencias() no formato do site (o mesmo de trechos.dados_mapa)."""
     return dict(mes=o['mes'], dia=f"{o['abert'][8:10]}/{o['abert'][5:7]} {o['abert'][11:16]}", col=o['coletiva'],
                 abr=o['abr'], ativo=None, prob=o['prob'], causa=o['causa'], sub=o['sub'], prog=o['programada'],
-                cons=o['cons'], dur=o['dur'], trecho=None, fora=None, regra=None, dist_m=None, _cand=[o['prob'], o['inter']])
+                cons=o['cons'], dur=o['dur'], chi=round(o['chi'], 1), mom=o['mom'], dc=o['dc'], long=o['long'], trecho=None, fora=None, regra=None, dist_m=None, _cand=[o['prob'], o['inter']])
 
 
 def abertura(o):
@@ -268,6 +268,7 @@ def atualizar(site, arqs, filtro, planilha=None):
     print(f'{tot["alimentadores"]} alimentador(es) · {tot["nae"]} NAE · {tot["com_trecho"]} com trecho · '
           f'{tot["no_trecho_do_outro"]} também no trecho de outro alimentador')
     print(f'UC: {n_uc} UC(s) com interrupção individual nos meses trocados (busca por UC)')
+    print(gt.texto_resumo_nae(gt.resumo_nae(dados)))
     print('sem trecho: ' + (', '.join(f'{k} {n}' for k, n in sorted(sem.items(), key=lambda x: -x[1])) or 'nenhuma'))
     if planilha:
         import planilha_trechos

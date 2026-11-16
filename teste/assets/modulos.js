@@ -14,6 +14,8 @@ window.ARGOS_MODULOS = [
     icone: '<path d="M4 20h16"/><path d="m5 15 4-4 3 3 7-7"/><path d="M15 7h4v4"/>'},
   {id: 'podas', titulo: 'Mapa de podas', desc: 'Quadras, perímetro urbano e situação da poda', href: 'podas/', dock: 'Podas', grade: true,
     icone: '<path d="M12 21v-8m0 4 4-4M12 13C5 14 3 7 5 3c6-1 13 1 12 7-1 4-5 3-5 3ZM8 7l4 6M17 17l4-4m-3-1 4 4"/>'},
+  {id: 'programacao', titulo: 'Programação de obras', desc: 'Programação bimestral (entra com login)', href: 'programacao/', dock: '', grade: true,
+    icone: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h4M7 17h7"/>'},
   {id: 'apresentacao', titulo: 'Apresentação', desc: 'Visão geral do ARGOS', href: 'apresentacao/', dock: '', grade: true,
     icone: '<path d="M3 3h18M5 3v13h14V3M12 16v4m-4 2 4-2 4 2"/><path d="m10 7 5 3-5 3Z"/>'},
   {id: 'escopo', titulo: 'Escopo e acompanhamento', desc: 'Tarefas com datas, bases e histórico de mudanças', href: 'escopo/', dock: '', grade: true,

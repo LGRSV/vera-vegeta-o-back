@@ -265,10 +265,11 @@
       if (sobre) sobre.classList.remove('on');
       sobre = g;
       if (g) { g.classList.add('on'); g.parentNode.append(g); }
+      if (window.ARGOS_PAG && window.ARGOS_PAG.prepara) window.ARGOS_PAG.prepara(g && g.dataset.al);   // mouse parado: a página dele começa a vir
     }
     if (!g) { balao.hidden = true; return; }
     const a = als.get(g.dataset.al) || {}, r = caixa.getBoundingClientRect();
-    balao.innerHTML = `<b>${g.dataset.al}</b>${a.se ? `<span>${a.se}</span>` : ''}<span>${km(a.m)} km · ${(a.n || 0).toLocaleString('pt-BR')} NAE</span>`;
+    balao.innerHTML = `<b>${g.dataset.al}</b>${a.se ? `<span>${a.se}</span>` : ''}<span>${km(a.m)} km · ${(a.n || 0).toLocaleString('pt-BR')} NAE no alimentador</span>`;
     balao.style.left = (e.clientX - r.left + 14) + 'px';
     balao.style.top = (e.clientY - r.top + 14) + 'px';
     balao.hidden = false;

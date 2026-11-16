@@ -35,10 +35,13 @@
     lua: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
     doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h6"/>',
     dados: '<path d="M8 4c-2 0-2 1.5-2 3v2c0 1.5-1 3-2 3 1 0 2 1.5 2 3v2c0 1.5 0 3 2 3"/><path d="M16 4c2 0 2 1.5 2 3v2c0 1.5 1 3 2 3-1 0-2 1.5-2 3v2c0 1.5 0 3-2 3"/>',
+    escopo: '<path d="M9 4h6v3H9z"/><path d="M9 5H6v16h12V5h-3"/><path d="m9 13 2 2 4-4"/>',
     slides: '<path d="M3 4h18"/><path d="M5 4v11h14V4"/><path d="m10.5 7.5 3.5 2-3.5 2z"/><path d="M12 15v3"/><path d="m8 21 4-3 4 3"/>',
     ranking: '<path d="M5 20V11M12 20V4M19 20v-6"/>',
+    agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h4M7 17h7"/>',
     faixa: '<path d="M4 20l3-1 11-11-2-2L5 17zM14 6l2 2"/>',
     painel: '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/>',
+    orcamento: '<path d="M4 20h16"/><path d="m5 15 4-4 3 3 7-7"/><path d="M15 7h4v4"/>',
     carteira: '<path d="M4 7h16v12H4z"/><path d="M9 7V5h6v2"/><path d="M4 12h16"/>',
     podas: '<path d="M12 21v-8"/><path d="M12 13c-4 0-7-2.5-7-6.5C5 4 8 2.5 12 2.5S19 4 19 6.5C19 10.5 16 13 12 13Z"/><path d="m12 17 3-3"/>',
   };
@@ -148,9 +151,13 @@
     `<li><a class="mnu-rel" href="${doSite('painel/')}"${outraAba}>${svg(ICONE.painel, '')}<span>Painel gerencial<small>Argos Briefing: metas x realizado de inspeção, estruturas, para-raio e melhoria</small></span></a></li>` +
     // carteira de limpeza de faixa por empreiteira: contratado, medido (SIAGO) e OS de faixa executadas e pendentes; página em carteira/
     `<li><a class="mnu-rel" href="${doSite('carteira/')}"${outraAba}>${svg(ICONE.carteira, '')}<span>Carteira de faixa<small>Por empreiteira: km e valor contratado e medido, OS executadas e pendentes</small></span></a></li>` +
+    // insights de orçamento: orçado 2027 × realizado por SIGCO (só DCMD), curva mensal, quantidades e insights; página em insights-orcamento/
+    `<li><a class="mnu-rel" href="${doSite('insights-orcamento/')}"${outraAba}>${svg(ICONE.orcamento, '')}<span>Insights orçamento<small>Orçado 2027 × realizado por SIGCO (DCMD): curva mensal, quantidades e insights</small></span></a></li>` +
     // mapa de podas por quadra (setor censitário) em Palmas, Araguaína e Gurupi; página em podas/
     `<li><a class="mnu-rel" href="${doSite('podas/')}"${outraAba}>${svg(ICONE.podas, '')}<span>Mapa de podas<small>Palmas, Araguaína e Gurupi: poda por quadra executada, pendente ou crítica</small></span></a></li>` +
     `<li><a class="mnu-rel" href="${raiz}priorizacao/">${svg(ICONE.ranking, '')}<span>Priorização de faixa<small>Trechos P1 a P4 pela nota de 0 a 100</small></span></a></li>` +
+    // programação bimestral de obras (página fechada com login; dados cifrados); página em programacao/
+    `<li><a class="mnu-rel" href="${doSite('programacao/')}"${outraAba}>${svg(ICONE.agenda, '')}<span>Programação de obras<small>Programação bimestral; entra com login e senha</small></span></a></li>` +
     // modo Limpeza de faixa (modo-faixa-rascunho.js): escolhe o alimentador e abre o mapa dele já no modo
     `<li><button type="button" class="mnu-rel mnu-fx-abre" aria-haspopup="dialog">${svg(ICONE.faixa, '')}<span>Croqui de limpeza de faixa<small>Escolher os trechos, marcar leve e pesada e baixar o croqui</small></span></button></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
@@ -161,6 +168,8 @@
     `<li><a class="mnu-rel" href="${doSite('manifesto.json')}"${outraAba}>${svg(ICONE.dados, '')}<span>manifesto.json<small>Municípios e alimentadores em JSON</small></span></a></li>` +
     // apresentação do ARGOS (23 slides; textos editáveis na própria página), sempre em outra aba: ocupa a tela toda
     `<li><a class="mnu-rel" href="${doSite('apresentacao/')}" target="_blank" rel="noopener">${svg(ICONE.slides, '')}<span>Apresentação<small>23 slides do ARGOS, em tela cheia</small></span></a></li>` +
+    // escopo do projeto: andamento das tarefas com datas, situação das bases e histórico de mudanças; página em escopo/
+    `<li><a class="mnu-rel" href="${doSite('escopo/')}"${outraAba}>${svg(ICONE.escopo, '')}<span>Escopo e acompanhamento<small>Tarefas com datas, situação das bases e histórico de mudanças</small></span></a></li>` +
     `<li class="mnu-sep" aria-hidden="true"></li>` +
     `<li><a href="${raiz}assets/scripts/trechos-kml.zip" download>${svg(ICONE.baixar, '')}Script KML → trechos (.zip)</a></li></ul>`;
   wrap.prepend(box);

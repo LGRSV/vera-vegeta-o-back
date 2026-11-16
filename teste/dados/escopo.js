@@ -6,8 +6,8 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.1",
- "atualizado": "2026-11-15",
+ "versao": "2.2",
+ "atualizado": "2026-11-16",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
@@ -158,8 +158,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Ranking por polo batendo com o mapa (NAE sem trecho no polo de maior rede)", "st": "ok", "d": "2026-10-15"}
   ]},
   {"id": "3.3", "frente": "nae", "titulo": "Crítica em dia", "itens": [
-   {"t": "Enviar os arquivos da Crítica de set e out/2026 (o site vai até ago/2026)", "st": "pend", "prazo": "2026-11-13", "resp": "proj"},
-   {"t": "Processar e publicar a NAE de set e out/2026", "st": "pend", "prazo": "2026-11-17", "resp": "dev", "obs": "Depende do item anterior."},
+   {"t": "Enviar os arquivos da Crítica de set e out/2026 (o site vai até ago/2026)", "st": "ok", "d": "2026-11-15", "obs": "Enviados pelo menu com nov/2026 até 09/11."},
+   {"t": "Processar e publicar a NAE de set e out/2026", "st": "ok", "d": "2026-11-16", "obs": "Com nov/2026 até 09/11. A carga automática de 15/11 usou as ferramentas de 30/10 e foi refeita com as atuais."},
    {"t": "Regra do alimentador reclassificado no script da Crítica: o PS01112193 (Campos Lindos) entra no LD03105019, sem trecho", "st": "ok", "d": "2026-11-09"},
    {"t": "Enviar as Críticas de jan a out/2026 para reprocessar a NAE: alimentador reclassificado (5 NAE de mai/2026 fora do site) e consumidor·hora por passo de manobra", "st": "bloq", "desde": "2026-11-09", "prazo": "2026-11-13", "resp": "proj", "obs": "Decisão de 09/11: aplicar em todos os meses de uma vez, quando os arquivos chegarem."},
    {"t": "Rotina mensal: Crítica do mês anterior carregada até o dia 10 (primeira: nov/2026)", "st": "pend", "prazo": "2026-12-10", "resp": "proj"}
@@ -254,12 +254,14 @@ window.ARGOS_ESCOPO = {
    {"t": "Marca ARGOS Manutenção e tema escuro ou claro (Shift+K)", "st": "ok", "d": "2026-10-15"},
    {"t": "Apresentação do ARGOS no menu", "st": "ok", "d": "2026-10-15"},
    {"t": "Tela inicial nova, com os módulos em cartões e o dock", "st": "ok", "d": "2026-10-30"},
-   {"t": "Tela inicial nova como única versão; Shift+K também nela", "st": "ok", "d": "2026-11-09"}
+   {"t": "Tela inicial nova como única versão; Shift+K também nela", "st": "ok", "d": "2026-11-09"},
+   {"t": "Atalho para a Programação de obras no menu e na tela inicial", "st": "ok", "d": "2026-11-16"}
   ]},
   {"id": "11.2", "frente": "plataforma", "titulo": "Atualização das bases", "itens": [
    {"t": "Envio de arquivo pelo menu Atualizar bases, com processamento automático", "st": "ok", "d": "2026-10-13"},
    {"t": "Visões do mapa inicial refeitas na atualização automática", "st": "ok", "d": "2026-10-15"},
    {"t": "Executadas, manutenção, limpeza e podas pelo OS status (.parquet)", "st": "ok", "d": "2026-10-29"},
+   {"t": "Cópia das ferramentas da atualização automática em dia com o código do site", "st": "ok", "d": "2026-11-16", "obs": "A carga de 15/11 rodou com a cópia de 30/10 e voltou o /teste/ a 30/10; refeita no mesmo dia 16/11."},
    {"t": "Definir o calendário mensal de cargas (dia e responsável por base)", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
    {"t": "Carga do OS status de nov/2026 (o atual é de 29/10/2026)", "st": "pend", "prazo": "2026-11-30", "resp": "proj"}
   ]},

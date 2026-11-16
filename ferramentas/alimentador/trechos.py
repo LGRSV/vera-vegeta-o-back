@@ -182,7 +182,8 @@ def _ponto_rotulo(t, vaos, chave_vao, chegada, k):
 def dados_mapa(nos, res, interrupcoes=None, nomes_fixos=None):
     """Trechos e o objeto de dados do mapa (o `D` de mapa_trechos.html; coordenadas [lat, lon]).
 
-    interrupcoes: ocorrências de critica.por_trecho(); viram o NAE por trecho e mês na lista lateral.
+    interrupcoes: ocorrências de critica.por_trecho(); viram o NAE por trecho e mês na lista lateral. Cada uma leva o
+    consumidor·hora por passo (chi) e as marcas mom, dc e long de critica.ocorrencias(); cons e dur ficam como antes.
     """
     ts = segmentar(nos, res, nomes_fixos)
     idx = {t['nome']: i for i, t in enumerate(ts)}
@@ -200,6 +201,7 @@ def dados_mapa(nos, res, interrupcoes=None, nomes_fixos=None):
         dados['nae'] = dict(meses=sorted({o['mes'] for o in interrupcoes}), oc=[dict(
             mes=o['mes'], dia=f"{o['abert'][8:10]}/{o['abert'][5:7]} {o['abert'][11:16]}", col=o['coletiva'], abr=o['abr'],
             ativo=o['ativo'], prob=o['prob'], causa=o['causa'], sub=o['sub'], prog=o['programada'], cons=o['cons'], dur=o['dur'],
+            chi=round(o['chi'], 1), mom=o['mom'], dc=o['dc'], long=o['long'],
             trecho=o['trecho'], fora=o.get('fora'), regra=o.get('regra'), dist_m=o.get('dist_m')) for o in interrupcoes])
     return ts, dados
 

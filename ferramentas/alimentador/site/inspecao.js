@@ -21,52 +21,82 @@
   const telaCheia = () => document.body.classList.contains('tela-cheia');
   const classeDe = nome => nome.split('-')[0];
   // classe à vista (T1/T2/T3) e, com o filtro de município (lupa-painel.js: __munFora), só os trechos do município
-  const vis = v => (!window.__visivel || window.__visivel[classeDe(D.trechos[v[4]].nome)]) && !(window.__munFora && window.__munFora(D.trechos[v[4]].nome));
+  const vis = v => (!window.__visivel || window.__visivel[CL[v[4]]]) && !(window.__munFora && window.__munFora(D.trechos[v[4]].nome));
 
   // cores por ano, diferentes das da limpeza (para não confundir as duas camadas)
   const COR_ANO = { 2024: '#c084fc', 2025: '#818cf8', 2026: '#2dd4bf', 2027: '#a3e635' };
   const corAno = a => COR_ANO[a] || (a < 2024 ? '#e879f9' : '#bef264');
   const SEMCOR = '#cbd5e1';
+  // a base de inspeção começa em 2026: "sem inspeção" quer dizer sem registro nesse período, não rede nunca inspecionada
+  const BASE = `${IN.desde || '2026'}${IN.base_ate ? ', até ' + br(IN.base_ate) : ''}`;
   const VERMELHO = '#dc2626';
 
   // ---------- dados ----------
-  const vaoPorId = Object.fromEntries(D.vaos.map(v => [v[5], v]));
-  const vaosDaOs = IN.os.map(() => []);
-  Object.entries(IN.vaos).forEach(([id, ks]) => ks.forEach(k => vaoPorId[id] && vaosDaOs[k].push(vaoPorId[id])));
-  const porVao = {};
-  D.vaos.forEach(v => {
-    const ks = IN.vaos[v[5]] || [];
-    const ds = ks.map(k => IN.os[k].data).filter(Boolean).sort();
-    porVao[v[5]] = { ks, ult: ds[ds.length - 1] || null };
-  });
+  // Leves (só as OS de inspeção), na hora
   const anoDe = o => o.data ? +o.data.slice(0, 4) : null;
   const ANOS = [...new Set(IN.os.map(anoDe).filter(Boolean))].sort((a, b) => b - a);
   const OS_ANO = Object.fromEntries(ANOS.map(a => [a, IN.os.map((o, k) => k).filter(k => anoDe(IN.os[k]) === a)
     .sort((x, y) => IN.os[y].data.localeCompare(IN.os[x].data))]));
+  // Pesados (passam pelos vãos do alimentador): em PASSOS curtos. Com a Inspeção desligada (o padrão) nada dela aparece
+  // ao abrir a página: os passos e o bloco do painel (escondido) ficam para o tempo livre, depois de a página ficar pronta
+  // (fim do arquivo); quem precisa deles antes (ligar a Inspeção, tocar num trecho, a busca) chama dados(), que faz na hora
+  // os que faltam.
+  // Índices dos vãos divididos com a Faixa (limpeza.js: window.__baseVaos), montados uma vez; sem ele, os daqui
+  const IDX = window.__baseVaos || null;
+  let CL = null;                                        // classe de cada trecho, pelo índice dele (o vão guarda o índice: v[4])
+  const vaosDaOs = IN.os.map(() => []);
+  // vão com inspeção: as OS dele e a data da mais recente; os outros (a maioria) dividem o VAZIO
+  const VAZIO = { ks: [], ult: null }, POR_VAO = new Map();
+  const porVao = v => POR_VAO.get(String(v[5])) || VAZIO;
   const uniao = ks => { const s = new Set(); ks.forEach(k => vaosDaOs[k].forEach(v => s.add(v))); return [...s]; };
   const somaM = vs => vs.reduce((m, v) => m + v[8], 0);
-  const VAOS_ANO = Object.fromEntries(ANOS.map(a => [a, uniao(OS_ANO[a])]));
-  const KM_ANO = Object.fromEntries(ANOS.map(a => [a, somaM(VAOS_ANO[a])]));
-  const KM_INSP = somaM(uniao(IN.os.map((o, k) => k)));
-  const KM_REDE = somaM(D.vaos);
+  let VAOS_ANO = {}, KM_ANO = {}, KM_INSP = 0, KM_REDE = 0, doTrecho = null;
   const ext = m => m < 1000 ? Math.round(m) + ' m' : km(m);   // caminho curto (equipamentos vizinhos) em metros
   const onde = k => vaosDaOs[k].length ? ext(IN.os[k].m) : IN.os[k].pt ? 'só o ponto' : 'sem posição';
   // ativos de início e fim no mapa, um ponto por lugar, com as inspeções que começam (ini) e terminam (fim) nele
   const PONTOS = [];
-  {
-    const por = new Map();
-    const poe = (ll, cod, k, papel) => {
-      if (!ll) return;
-      const ch = ll[0].toFixed(6) + ',' + ll[1].toFixed(6);
-      let p = por.get(ch);
-      if (!p) { p = { ll, cods: [], ini: [], fim: [] }; por.set(ch, p); PONTOS.push(p); }
-      if (cod && !p.cods.includes(cod)) p.cods.push(cod);
-      p[papel].push(k);
-    };
-    IN.os.forEach((o, k) => { poe(o.pe, o.elem, k, 'ini'); (o.fins || []).forEach(f => poe([f[0], f[1]], f[2], k, 'fim')); });
-  }
-  const vaosDoTrecho = {};
-  D.vaos.forEach(v => (vaosDoTrecho[D.trechos[v[4]].nome] = vaosDoTrecho[D.trechos[v[4]].nome] || []).push(v));
+  // vãos de cada trecho (contorno do trecho escolhido, detalhe do trecho): na 1ª vez que alguém pede
+  const vaosDoTrecho = () => {
+    if (!doTrecho && IDX) doTrecho = IDX.doTrecho();
+    if (!doTrecho) { doTrecho = {}; D.vaos.forEach(v => (doTrecho[D.trechos[v[4]].nome] = doTrecho[D.trechos[v[4]].nome] || []).push(v)); }
+    return doTrecho;
+  };
+  const PASSOS = [
+    () => {                                             // as inspeções de cada vão e os vãos de cada inspeção
+      CL = D.trechos.map(t => classeDe(t.nome));
+      const vaoPorId = IDX ? IDX.porId() : new Map(D.vaos.map(v => [String(v[5]), v]));
+      Object.keys(IN.vaos).forEach(id => {
+        const ks = IN.vaos[id], v = vaoPorId.get(id);
+        let ult = null;
+        ks.forEach(k => {
+          const d = IN.os[k].data;
+          if (d && (ult === null || d > ult)) ult = d;
+          if (v) vaosDaOs[k].push(v);
+        });
+        POR_VAO.set(id, { ks, ult });
+      });
+    },
+    () => {
+      VAOS_ANO = Object.fromEntries(ANOS.map(a => [a, uniao(OS_ANO[a])]));
+      KM_ANO = Object.fromEntries(ANOS.map(a => [a, somaM(VAOS_ANO[a])]));
+      KM_INSP = somaM(uniao(IN.os.map((o, k) => k)));
+      KM_REDE = somaM(D.vaos);
+    },
+    () => {
+      const por = new Map();
+      const poe = (ll, cod, k, papel) => {
+        if (!ll) return;
+        const ch = ll[0].toFixed(6) + ',' + ll[1].toFixed(6);
+        let p = por.get(ch);
+        if (!p) { p = { ll, cods: [], ini: [], fim: [] }; por.set(ch, p); PONTOS.push(p); }
+        if (cod && !p.cods.includes(cod)) p.cods.push(cod);
+        p[papel].push(k);
+      };
+      IN.os.forEach((o, k) => { poe(o.pe, o.elem, k, 'ini'); (o.fins || []).forEach(f => poe([f[0], f[1]], f[2], k, 'fim')); });
+    },
+  ];
+  let passo = 0;
+  const dados = () => { while (passo < PASSOS.length) PASSOS[passo++](); };
 
   // ---------- estado ----------
   const st = {
@@ -113,14 +143,18 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
 
   // ---------- mapa ----------
   const seg = v => [[v[0], v[1]], [v[2], v[3]]];
+  // vãos seguidos numa linha só (alimentador.js): menos pontos para o mapa refazer a cada zoom
+  const linhaDe = window.__cadeias || (vs => vs.map(seg));
   let camada = null, realce = null, selL = null, fundoCache = null, pontosL = [];
   let comFaixa = false, bordas = [], arruma = 0;     // Faixa também ligada: bordas largas por baixo dela
   const raio = () => map.getZoom() < 13 ? 3.5 : map.getZoom() < 16 ? 5 : 6.5;
-  function linhaDupla(vs, cor, peso, opacidade, extra) {
-    // contorno escuro por baixo: a cor aparece igual sobre mata escura ou solo claro
-    return [L.polyline(vs.map(seg), { color: '#0b0f14', weight: peso + 4, opacity: .75 * opacidade, interactive: false, lineCap: 'round' }),
-      L.polyline(vs.map(seg), Object.assign({ color: cor, weight: peso, opacity: opacidade, interactive: false, lineCap: 'round' }, extra))];
-  }
+  // contorno escuro por baixo: a cor aparece igual sobre mata escura ou solo claro. A da Faixa (limpeza.js) faz os dois
+  // traços numa camada só do canvas (o mapa projeta os pontos uma vez); sem ela, as duas linhas, como antes
+  const linhaDupla = window.__linhaDupla || function (vs, cor, peso, opacidade, extra) {
+    const ls = linhaDe(vs);
+    return [L.polyline(ls, { color: '#0b0f14', weight: peso + 4, opacity: .75 * opacidade, interactive: false, lineCap: 'round' }),
+      L.polyline(ls, Object.assign({ color: cor, weight: peso, opacity: opacidade, interactive: false, lineCap: 'round' }, extra))];
+  };
   function fundo() {
     const chave = JSON.stringify(window.__visivel || {}) + (window.__munSel || '');
     if (!fundoCache || fundoCache.chave !== chave) {
@@ -143,13 +177,13 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   }
   // inspeções de um vão, da mais recente para a mais antiga (balão da Inspeção e, com a Faixa ligada, o balão dela)
   function linhasVao(v) {
-    const ks = porVao[v[5]].ks.slice().sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
+    const ks = porVao(v).ks.slice().sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
     return ks.length ? ks.map((k, i) => {
       const o = IN.os[k], rot = !i ? 'Inspecionado em' : o.data === IN.os[ks[0]].data ? 'Também em' : 'Antes:';
       return `<div class="lb-l" style="--c:${corAno(anoDe(o))}"><b>${rot} ${br(o.data)}</b> · <a href="#" data-k="${k}">OS ${esc(o.os)}</a> · ${esc(o.eq)}</div>`;
     }).join('') : '<div class="nada">Sem inspeção executada registrada aqui</div>';
   }
-  window.__balaoInsp = v => st.ligado && porVao[v[5]] ? `<div class="insp-pop insp-junto"><div class="t">Inspeção visual</div>${linhasVao(v)}</div>` : '';
+  window.__balaoInsp = v => st.ligado ? (dados(), `<div class="insp-pop insp-junto"><div class="t">Inspeção visual</div>${linhasVao(v)}</div>`) : '';
   // balão ao tocar na rede: trecho + inspeções daquele vão
   function balao(e, vs) {
     L.DomEvent.stopPropagation(e);
@@ -176,13 +210,14 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     comFaixa = document.body.classList.contains('limp-on');
     bordas = [];
     if (st.ligado) {
+      dados();
       const op = st.foco === null ? 1 : .35;
       const ls = comFaixa ? [] : [...fundo()];
       ANOS.slice().reverse().filter(a => st.anos.has(a)).forEach(a => {   // o ano mais recente fica por cima
         const vs = VAOS_ANO[a].filter(vis);
         if (!vs.length) return;
         // com a Faixa: borda larga por baixo de tudo (a linha da Faixa, com o contorno escuro, fica no meio dela)
-        if (comFaixa) bordas.push(L.polyline(vs.map(seg), { color: corAno(a), weight: 15, opacity: .9 * op, interactive: false, lineCap: 'round' }));
+        if (comFaixa) bordas.push(L.polyline(linhaDe(vs), { color: corAno(a), weight: 15, opacity: .9 * op, interactive: false, lineCap: 'round' }));
         else ls.push(...clicavel(linhaDupla(vs, corAno(a), 5, op), vs));
       });
       pontosL = pontos(op);
@@ -221,7 +256,8 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       ord(p.ini).map(k => linha(k, 'Início ·')).join('') + ord(p.fim).map(k => linha(k, 'Fim ·')).join('') + '</div>';
     L.popup({ className: 'limp-popup', maxWidth: 300, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] }).setLatLng(p.ll).setContent(html).openOn(map);
   }
-  if (map) map.on('zoomend', () => { const r = raio(); pontosL.forEach(l => l.setRadius(r)); });
+  // o raio só muda em dois zooms (13 e 16): nos outros não há o que redesenhar ponto a ponto
+  if (map) map.on('zoomend', () => { const r = raio(); if (pontosL.length && pontosL[0].getRadius() !== r) pontosL.forEach(l => l.setRadius(r)); });
   // trecho escolhido: contorno amarelo por cima da camada (a limpeza faz o mesmo quando ela está ligada)
   const onSelAntes = window.__onSel;
   window.__onSel = nome => {
@@ -230,7 +266,8 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     if (selL) { selL.remove(); selL = null; }
     const nomes = Array.isArray(nome) ? nome : nome ? [nome] : [];
     if (map && nomes.length && st.ligado) {
-      selL = L.layerGroup(linhaDupla(nomes.flatMap(n => vaosDoTrecho[n] || []), '#fde047', 4, 1)).addTo(map);
+      const doTr = vaosDoTrecho();
+      selL = L.layerGroup(linhaDupla(nomes.flatMap(n => doTr[n] || []), '#fde047', 4, 1)).addTo(map);
       if (realce) realce.eachLayer(l => l.bringToFront && l.bringToFront());
     }
   };
@@ -246,6 +283,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     else map.fitBounds(L.latLngBounds(lls).pad(0.15), { maxZoom: 16 });
   }
   function focar(k, enquadrar, doPainel) {
+    dados();
     st.foco = st.foco === k ? null : k;
     if (realce) { realce.remove(); realce = null; }
     if (st.foco !== null) {
@@ -260,8 +298,8 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       if (!marcas.length && o.pa) marcas.push(marca(o.pa, 'Abrangência (a montante)', o.abr, 'ref'));
       if (map && vs.length) {
         realce = L.layerGroup([
-          L.polyline(vs.map(seg), { color: '#fff', weight: 14, opacity: 1, interactive: false, lineCap: 'round' }),
-          L.polyline(vs.map(seg), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round' }),
+          L.polyline(linhaDe(vs), { color: '#fff', weight: 14, opacity: 1, interactive: false, lineCap: 'round' }),
+          L.polyline(linhaDe(vs), { color: cor, weight: 8, opacity: 1, interactive: false, lineCap: 'round' }),
           ...marcas,
         ]).addTo(map);
         if (enquadrar) enquadra(vs.flatMap(seg));
@@ -284,6 +322,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   // outra camada (Manutenção) mostra a inspeção que gerou uma OS: liga a Inspeção e foca nela (soVer: só diz se ela
   // está no mapa deste alimentador)
   window.__focaInspecao = (num, soVer) => {
+    dados();
     const k = IN.os.findIndex(o => o.os_completa === num);
     if (k < 0 || !(vaosDaOs[k].length || IN.os[k].pt || IN.os[k].pe)) return false;
     if (soVer) return true;
@@ -352,16 +391,20 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       `</div><div class="limp-oss" id="${id}" role="group" aria-label="Inspeções de ${a}"${aberto ? '' : ' hidden'}>${aberto ? ks.map(k => osBtn(k, true)).join('') : ''}</div>`;
   }
 
+  let pintou = false;
   function pinta() {
+    dados();
+    pintou = true;
     const f = document.activeElement;
     const chave = card.contains(f) ? (f.dataset.k !== undefined ? `[data-k="${f.dataset.k}"]` : f.dataset.foco ? `[data-foco="${f.dataset.foco}"]` : null) : null;
     const n = IN.os.length;
-    const sub = n ? `${nf(n)} inspeç${n === 1 ? 'ão executada' : 'ões executadas'} · ${ext(KM_INSP)} de ${km(KM_REDE)}` : 'Nenhuma inspeção executada';
+    const sub = (n ? `${nf(n)} inspeç${n === 1 ? 'ão executada' : 'ões executadas'} · ${ext(KM_INSP)} estimados de ${km(KM_REDE)}` : 'Nenhuma inspeção registrada') + ` · base ${BASE}`;
+    const nota = `<p class="limp-nota">Km estimados: cada inspeção cobre o bloco da rede abaixo do elemento citado na OS, até as próximas chaves.</p>`;
     const resto = ANOS.length ? `<div class="limp-anos">${ANOS.map(linha).join('')}</div>` +
       (st.ligado && st.anos.size < ANOS.length ? '<button type="button" class="limp-todos" data-acao="todos" data-foco="todos">Mostrar todos os anos</button>' : '') : '';
     card.hidden = !st.ligado && !!btn;                    // bloco da Inspeção só com ela ligada no mapa
     card.innerHTML = `<div class="limp-top"><h2>Inspeção visual<small>${sub}</small></h2></div>
-      ${resto}`;
+      ${resto}${n ? nota : ''}`;
     if (chave) card.querySelector(chave)?.focus({ preventScroll: true });
     if (btn) btn.setAttribute('aria-pressed', String(st.ligado));
     if (maplg) {
@@ -369,7 +412,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
       maplg.innerHTML = `<span class="lg-cab"><b>Inspeção</b></span>` +
         ANOS.map(a => `<button type="button" data-a="${a}" aria-pressed="${st.anos.has(a)}" title="Mostrar/esconder ${a}"><i style="--c:${corAno(a)}"></i><b>${a}</b></button>`).join('') +
         (PONTOS.length ? '<span class="lg-info"><i class="insp-dot"></i>início / fim</span>' : '') +
-        `<span class="lg-info"><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem inspeção</span>`;
+        `<span class="lg-info"><i style="--c:${SEMCOR};box-shadow:0 0 0 1px #000"></i>sem inspeção registrada</span>`;
     }
     if (det) det.querySelectorAll('.insp-os-b').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.k === st.foco)));
   }
@@ -385,12 +428,12 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   // ---------- detalhe do trecho: inspeções que passaram por ele ----------
   const det = $('det');
   function secTrecho(nome) {
-    const ks = new Set();
-    (vaosDoTrecho[nome] || []).forEach(v => porVao[v[5]].ks.forEach(k => ks.add(k)));
+    const ks = new Set(), vs = vaosDoTrecho()[nome] || [];
+    vs.forEach(v => porVao(v).ks.forEach(k => ks.add(k)));
     const lst = [...ks].sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
-    const tot = somaM(vaosDoTrecho[nome] || []), feito = somaM((vaosDoTrecho[nome] || []).filter(v => porVao[v[5]].ks.length));
+    const tot = somaM(vs), feito = somaM(vs.filter(v => porVao(v).ks.length));
     return `<section class="limp-sec insp-sec" aria-live="off"><h3>Inspeção visual</h3>
-      <dl><dt>Última</dt><dd>${lst.length ? br(IN.os[lst[0]].data) + ` · ${ext(feito)} de ${ext(tot)} do trecho inspecionados` : 'nenhuma inspeção executada passou por este trecho'}</dd></dl>
+      <dl><dt>Última</dt><dd>${lst.length ? br(IN.os[lst[0]].data) + ` · ${ext(feito)} de ${ext(tot)} do trecho inspecionados (estimado)` : `sem inspeção registrada (base ${BASE})`}</dd></dl>
       ${lst.map(k => osBtn(k, false)).join('')}</section>`;
   }
   function poeDetalhe() {
@@ -398,7 +441,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     const h2 = det.querySelector('h2');
     if (!h2) return;
     const nome = [...h2.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
-    if (vaosDoTrecho[nome]) det.insertAdjacentHTML('beforeend', secTrecho(nome));
+    if (vaosDoTrecho()[nome]) { dados(); det.insertAdjacentHTML('beforeend', secTrecho(nome)); }
   }
   if (det) {
     new MutationObserver(poeDetalhe).observe(det, { childList: true });
@@ -409,6 +452,7 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   if (window.__baixar && window.__csv && IN.os.length) {
     const C = window.__csv;
     window.__baixar.botao('insp', 'Inspeções (Excel)', () => {
+      dados();
       const ks = IN.os.map((o, k) => k).sort((a, b) => (IN.os[b].data || '').localeCompare(IN.os[a].data || ''));
       C(`Inspecoes_${C.al}.csv`,
         ['Alimentador', 'OS', 'Equipe', 'Execução', 'Criticidade', 'ELEMENTO', 'ABRANGÊNCIA', 'Montante da ABRANGÊNCIA', 'Trechos',
@@ -422,7 +466,22 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
     }, `Planilha (CSV para o Excel) com as ${IN.os.length} inspeções`);
   }
 
+  // ---------- carga ----------
+  const AL = window.__al || null;                       // montagem em fatias (alimentador.js); sem ela, tudo de uma vez, como antes
   poeDetalhe();
   desenha();
-  pinta();
+  if (!AL || !btn || st.ligado) pinta();
+  else {
+    // Inspeção desligada: o botão, a legenda e o bloco ficam como o pinta() os deixaria (apagado, escondidos); os dados e
+    // o conteúdo do bloco entram no tempo livre, um passo por folga do navegador, com a página já pronta
+    card.hidden = true;
+    btn.setAttribute('aria-pressed', 'false');
+    if (maplg) maplg.hidden = true;
+    (async () => {
+      await AL.pronto;
+      while (passo < PASSOS.length) { await AL.ocioso(); if (passo < PASSOS.length) PASSOS[passo++](); }
+      await AL.ocioso();
+      if (!pintou) pinta();
+    })().catch(e => console.error(e));
+  }
 })();

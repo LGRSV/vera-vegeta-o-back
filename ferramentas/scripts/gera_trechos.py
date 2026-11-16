@@ -817,8 +817,13 @@ TEMA = ("<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}
         "document.documentElement.dataset.theme=t==='claro'?'light':'dark'})()</script>")
 
 
-def casca(titulo, corpo, raiz, rodape='', sem_rodape=False):
-    return (f'<!doctype html>\n<html lang="pt-BR"><head><meta charset="utf-8">\n'
+# Página inicial aberta direto vai para a tela nova (central/); #mapa/<nível> vira ?nivel=<nível>#mapa.
+# Mesmo script que está publicado em teste/index.html: sem ele aqui, a próxima geração desfaria o desvio.
+TOPO_CENTRAL = "<script>/* tela inicial nova (central/): aberta direto, esta página vai para lá. Dentro do quadro da tela nova, fica como está. */\n(function () {\n  var W = window, L = location;\n  function paraCasca() {\n    var q = L.search.replace(/([?&])classico=1&?/, '$1').replace(/[?&]$/, ''), h = L.hash, n = /^#mapa\\/(.+)$/.exec(h);\n    /* nível do mapa (#mapa/norte/...): a casca usa só #mapa, então o nível vai como ?nivel= */\n    if (n) { q = (q ? q + '&' : '?') + 'nivel=' + n[1]; h = '#mapa'; }\n    L.replace('central/' + q + h);\n  }\n  if (W.top === W) { document.documentElement.style.display = 'none'; paraCasca(); return; }\n})();</script>\n"
+
+
+def casca(titulo, corpo, raiz, rodape='', sem_rodape=False, topo=''):
+    return (f'<!doctype html>\n<html lang="pt-BR"><head><meta charset="utf-8">\n{topo}'
             f'<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
             f'<meta name="robots" content="noindex, nofollow">\n<title>{html.escape(titulo)}</title>\n'
             f'{TEMA}\n'
@@ -859,9 +864,48 @@ def ultima_limpeza(lp, al):
     return max(ds) if ds else None
 
 
+def chi_h(o):
+    """Consumidor·hora da ocorrência: o chi por passo da Crítica (critica.ocorrencias). Ocorrência gravada antes
+    do campo chi: consumidores × maior duração, que superestima (cerca de 2× em mai/2026); resumo_nae conta essas."""
+    if o.get('chi') is not None:
+        return o['chi']
+    return (o.get('cons') or 0) * (o.get('dur') or 0) / 60
+
+
+def resumo_nae(dados):
+    """Totais das NAE dos alimentadores publicados para o resumo do processamento e o relatório: consumidor·hora,
+    ocorrências sem chi por passo (estimado), acima de 24 h (long), momentâneas (mom) e em dia crítico (dc)."""
+    oc = [o for c in dados if c['validacao']['status'] != 'falha' for o in (c.get('nae') or {}).get('oc', [])]
+    # sem a marca (gravada antes): pela duração, que já vinha no JSON
+    longas = [o for o in oc if (o['long'] if 'long' in o else (o.get('dur') or 0) > critica.LONGA_MIN)]
+    return dict(n=len(oc), chi=round(sum(map(chi_h, oc))), sem_chi=sum(1 for o in oc if o.get('chi') is None),
+                long=len(longas), long_chi=round(sum(map(chi_h, longas))), long_max=max((o['dur'] for o in longas), default=0),
+                mom=sum(1 for o in oc if o.get('mom')), dc=sum(1 for o in oc if o.get('dc')))
+
+
+def texto_resumo_nae(r):
+    mil = lambda x: f'{x:,}'.replace(',', '.')       # separador de milhar do português
+    t = (f'NAE: {r["n"]} ocorrência(s) · {mil(r["chi"])} consumidor·hora · acima de 24 h: {r["long"]} '
+         f'({mil(r["long_chi"])} cons·h, maior {mil(r["long_max"])} min) · momentâneas: {r["mom"]} · '
+         f'em dia crítico: {r["dc"]}')
+    if r['sem_chi']:
+        t += (f' · {r["sem_chi"]} sem chi por passo (cons × maior duração, estimado; momentâneas e dia crítico só '
+              'nas reprocessadas)')
+    return t
+
+
 def nae_por_municipio(dados):
     """NAE de cada município (código IBGE → ocorrências): cada ocorrência conta no município onde o trecho dela tem mais
     rede; sem trecho, no município onde o alimentador tem mais rede (mesma ideia do polo em ranking_polos)."""
+    nae = {}
+    for (cod, _), n in nae_municipio_alimentador(dados).items():
+        nae[cod] = nae.get(cod, 0) + n
+    return nae
+
+
+def nae_municipio_alimentador(dados):
+    """(código IBGE, alimentador) → ocorrências, com a mesma regra de nae_por_municipio. É o `nm` de cada alimentador no
+    mapa: a NAE dele dentro do município, em vez da do alimentador inteiro."""
     nae = {}
     for c in dados:
         if c['validacao']['status'] == 'falha':
@@ -876,7 +920,8 @@ def nae_por_municipio(dados):
         for o in (c.get('nae') or {}).get('oc', []):
             cod = do_t.get(o.get('trecho')) or principal
             if cod:
-                nae[cod] = nae.get(cod, 0) + 1
+                k = (cod, c['alimentador'])
+                nae[k] = nae.get(k, 0) + 1
     return nae
 
 
@@ -917,7 +962,10 @@ def mapa_e_ranking(saida, dados, man):
     por_cod = {m['cod']: m for m in man['municipios']}
     cfg = json.loads((PKG / 'site' / 'polos.json').read_text(encoding='utf-8'))
     polo_de = {cod: p for p in cfg['polos'] for cod in p['municipios']}
-    nae_mun = nae_por_municipio(dados)
+    nae_ma = nae_municipio_alimentador(dados)
+    nae_mun = {}
+    for (cod, _), n in nae_ma.items():
+        nae_mun[cod] = nae_mun.get(cod, 0) + n
     nae_al = {c['alimentador']: len((c.get('nae') or {}).get('oc', [])) for c in dados if c['validacao']['status'] != 'falha'}
     muns = []
     for g in geo['muns']:
@@ -927,7 +975,8 @@ def mapa_e_ranking(saida, dados, man):
             g = dict(g, reg=polo_de[g['cod']]['regional'], polo=polo_de[g['cod']]['nome'])
         if m:
             g = dict(g, nome=m['nome'], slug=m['slug'], als=[dict(cod=a['cod'], se=a['se_nome'], m=a['m_no_municipio'],
-                                                                  n=nae_al.get(a['cod'], 0)) for a in m['alimentadores']])
+                                                                  n=nae_al.get(a['cod'], 0), nm=nae_ma.get((g['cod'], a['cod']), 0))
+                                                             for a in m['alimentadores']])
         muns.append(g)
     (saida / 'assets' / 'mapa-municipios-dados.js').write_text(
         'window.MUN=' + json.dumps(dict(w=geo['w'], h=geo['h'], muns=muns,
@@ -947,7 +996,8 @@ def mapa_e_ranking(saida, dados, man):
             al=c['alimentador'], se=c['se_nome'] or c.get('se') or '',
             nae=len(oc), col=sum(1 for o in oc if o.get('col')),
             cons=sum(o.get('cons') or 0 for o in oc),
-            chi=round(sum((o.get('cons') or 0) * (o.get('dur') or 0) for o in oc) / 60),
+            chi=round(sum(map(chi_h, oc))),             # por passo; sem o campo chi, estimado (chi_h)
+            long=sum(1 for o in oc if o.get('long')),
             km=round(c['resumo']['extensao_m'] / 1000, 4),      # NAE/100 km com a extensão inteira (a tela arredonda)
             ult_limpeza=ultima_limpeza(le_js(saida / 'alimentadores' / c['alimentador'] / 'limpeza.js'),
                                        c['alimentador']),   # limpeza.js de scripts/limpeza_faixa.py (sem ele: None)
@@ -1098,13 +1148,13 @@ def ranking_polos(saida, dados, man):
         principais[al] = principal
         mun_t = {t['nome']: {k: m for k, m in (t.get('municipios') or {}).items() if k != 'None'} for t in ts}   # 'None': fora do TO
         polo_t = {n: polo_de.get(max(mm, key=mm.get)) if mm else None for n, mm in mun_t.items()}
-        nae = {}                                        # polo → [NAE, consumidores, consumidor×min, NAE sem trecho]
+        nae = {}                                        # polo → [NAE, consumidores, consumidor·hora, NAE sem trecho]
         for o in (c.get('nae') or {}).get('oc', []):
             meses.add(o['mes'])
             x = nae.setdefault(polo_t.get(o.get('trecho')) or principal, [0, 0, 0, 0])
             x[0] += 1
             x[1] += o.get('cons') or 0
-            x[2] += (o.get('cons') or 0) * (o.get('dur') or 0)
+            x[2] += chi_h(o)
             x[3] += 0 if o.get('trecho') else 1
         limp = {}                                       # polo → classe → data da última limpeza ('' = sem) → metros
         limp_t = {}                                     # trecho → data da última limpeza ('' = sem) → metros
@@ -1124,21 +1174,21 @@ def ranking_polos(saida, dados, man):
                 if polo_de.get(v[8]):
                     q = limp.setdefault(polo_de[v[8]], {}).setdefault(classe(ts[v[4]]['nome']), {})
                     q[dt] = q.get(dt, 0) + v[5]
-        por_t = {}                                      # trecho → [NAE, consumidores, consumidor×min]
+        por_t = {}                                      # trecho → [NAE, consumidores, consumidor·hora]
         # NAE de todos os ativos do trecho: as deste alimentador e as de outro cujo ativo hoje está aqui ('ext')
         for o in (c.get('nae') or {}).get('oc', []) + (c.get('nae') or {}).get('ext', []):
             if o.get('trecho'):
                 x = por_t.setdefault(o['trecho'], [0, 0, 0])
                 x[0] += 1
                 x[1] += o.get('cons') or 0
-                x[2] += (o.get('cons') or 0) * (o.get('dur') or 0)
+                x[2] += chi_h(o)
         for t in ts:
             if t['nome'] in por_t:
                 n, mm = por_t[t['nome']], mun_t[t['nome']]
                 mun = max(mm, key=mm.get) if mm else None
                 trechos_p[polo_t.get(t['nome']) or principal].append(dict(
                     al=al, t=t['nome'], se=c['se_nome'] or c.get('se') or '', mun=mun, m=slug_mun.get(mun), km=round(t['ext_m'], 1), nae=n[0],
-                    cons=n[1], chi=round(n[2] / 60),
+                    cons=n[1], chi=round(n[2]),
                     lp={classe(t['nome']): {d: round(m) for d, m in sorted(limp_t.get(t['nome'], {}).items())}} if limp_t else {}))
         for p in sorted(set(km) | set(nae)):
             if km.get(p, 0) < MIN_M and p not in nae:
@@ -1147,7 +1197,7 @@ def ranking_polos(saida, dados, man):
             muns = sorted((cod for cod in mun_km if polo_de.get(cod) == p and mun_km[cod] >= MIN_M), key=lambda k: -mun_km[k])
             linhas[p].append(dict(
                 al=al, se=c['se_nome'] or c.get('se') or '', km=round(km.get(p, 0), 1), km_total=round(c['resumo']['extensao_m'], 1),
-                nae=n[0], cons=n[1], chi=round(n[2] / 60), sem=n[3], muns=muns,
+                nae=n[0], cons=n[1], chi=round(n[2]), sem=n[3], muns=muns,
                 m=next((slug_mun[k] for k in muns if k in slug_mun), None),
                 lp={cl: {d: round(m) for d, m in sorted(ds.items())} for cl, ds in sorted(limp.get(p, {}).items())}))
     dados_js = dict(meses=[min(meses), max(meses)] if meses else [], regra=regra, equipes=equipes, fonte=cfg['fonte'],
@@ -1259,6 +1309,8 @@ def indice_ativos(saida, dados):
             papel = (f'no {t}' + (f' (a {d:g} m da rede)' if d > 5 else '')) if t else f'fora da rede do site ({d:g} m)'
             nomes.setdefault(chave_ativo(nome), {})[nome] = tipo
             idx.setdefault(chave_ativo(nome), []).append([al, tipo, t or '', papel, lat, lon])
+    for cod, tipo in reguladores_no_indice(saida, idx, nomes):
+        print(f'  regulador {cod} já está no índice como {tipo}: não duplicado')
     pasta = saida / 'dados' / 'ativos'
     if pasta.exists():
         shutil.rmtree(pasta)
@@ -1269,6 +1321,71 @@ def indice_ativos(saida, dados):
         grava_json(pasta / f'{f}.json', d)
     sugestoes_ativos(saida, nomes)
     return idx
+
+
+def reguladores_no_indice(saida, idx, nomes):
+    """Reguladores de tensão (dados/reguladores.json, de scripts/reguladores.py) no índice de ativos e nas sugestões, com o
+    tipo 'Regulador'. Código que já está no índice com outro tipo não é duplicado. Devolve [(código, tipo que já estava)]
+    dos que ficaram de fora; sem o arquivo, não faz nada."""
+    arq = saida / 'dados' / 'reguladores.json'
+    if not arq.exists():
+        return []
+    ja = []
+    for r in json.loads(arq.read_text(encoding='utf-8')):
+        k = chave_ativo(r['codigo'])
+        antes = idx.get(k)
+        if antes and antes[0][1] != 'Regulador':
+            ja.append((r['codigo'], antes[0][1]))
+            continue
+        if not r['alimentador']:
+            continue
+        nomes.setdefault(k, {})[r['codigo']] = 'Regulador'
+        idx[k] = [[r['alimentador'], 'Regulador', r['trecho'], r['papel'], r['lat'], r['lon']]]
+    return ja
+
+
+class _IndiceEmDisco(dict):
+    """idx que consulta o índice já gravado (dados/ativos/<fatia>.json) em vez de montá-lo: get(k) acha o que está no disco."""
+
+    def __init__(self, saida):
+        super().__init__()
+        self.saida, self.fatias = saida, {}
+
+    def get(self, k, padrao=None):
+        if k in self:
+            return self[k]
+        f = fatia(k)
+        if f not in self.fatias:
+            arq = self.saida / 'dados' / 'ativos' / f'{f}.json'
+            self.fatias[f] = json.loads(arq.read_text(encoding='utf-8')) if arq.exists() else {}
+        return self.fatias[f].get(k, padrao)
+
+
+def acrescenta_reguladores(saida):
+    """Põe os reguladores (dados/reguladores.json) no índice já gravado sem refazê-lo: só os arquivos de dados/ativos e de
+    dados/ativos-pref que ganham código são regravados, com a mesma regra de indice_ativos (reguladores_no_indice,
+    fatia, pref_texto). O que já estava fica igual. Devolve (novos, [(código, tipo que já estava)])."""
+    idx, nomes = _IndiceEmDisco(saida), {}
+    ja = reguladores_no_indice(saida, idx, nomes)
+    por = {}
+    for k, v in idx.items():
+        por.setdefault(fatia(k), {})[k] = v
+    for f, novos in por.items():
+        arq = saida / 'dados' / 'ativos' / f'{f}.json'
+        d = json.loads(arq.read_text(encoding='utf-8')) if arq.exists() else {}
+        d.update(novos)
+        grava_json(arq, {k: d[k] for k in sorted(d)})
+    pref = {}
+    for k, ns in nomes.items():
+        if len(k) >= 3:
+            pref.setdefault(k[:2], {}).update(ns)
+    for f, ns in pref.items():
+        arq = saida / 'dados' / 'ativos-pref' / f'{f}.json'
+        d = json.loads(arq.read_text(encoding='utf-8')) if arq.exists() else {}
+        todos = set(d.get('Regulador', '').split()) | set(ns)
+        d['Regulador'] = pref_texto({'Regulador': todos})['Regulador']
+        grava_json(arq, {t: d[t] for t in sorted(d)})
+    return len(idx), ja
 
 
 TRAFOS = ('TR', 'ET', 'EP')      # tipos de transformador no índice de ativos
@@ -1398,8 +1515,13 @@ def sugestoes_ativos(saida, nomes):
         for nome, tipo in ns.items():
             g.setdefault(tipo, []).append(nome)
     for f, d in por.items():
-        grava_json(pasta / f'{f}.json', {t: ' '.join(sorted(set(v))) for t, v in sorted(d.items())})
+        grava_json(pasta / f'{f}.json', pref_texto(d))
     return len(por)
+
+
+def pref_texto(d):
+    """Conteúdo de um arquivo de dados/ativos-pref: tipo → códigos ordenados, separados por espaço."""
+    return {t: ' '.join(sorted(set(v))) for t, v in sorted(d.items())}
 
 
 def nae_resumo(c):
@@ -1517,10 +1639,10 @@ def interface(saida, malha=None):
              '<div class="mt-dica" aria-hidden="true"></div></div></div>\n'
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
              + visoes +                                                # outras visões do mapa (atualiza_bases.py → gera_visoes.js)
-             '<script src="assets/mapa-municipios.js"></script>\n'
-             '<script src="assets/busca-ativo.js"></script>\n'
-             '<script src="assets/mapa-raiox.js"></script>')        # zoom → tela cheia e raio-X (Ctrl+X) no mapa
-    (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True),   # página inicial sem rodapé (pedido do usuário)
+             '<script src="assets/mapa-municipios.js?v=20261110"></script>\n'
+             '<script src="assets/busca-ativo.js?v=20261110"></script>\n'
+             '<script src="assets/mapa-raiox.js?v=20261110"></script>')        # zoom → tela cheia e raio-X (Ctrl+X) no mapa
+    (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True, topo=TOPO_CENTRAL),   # página inicial sem rodapé (pedido do usuário)
                                       encoding='utf-8')
     (saida / '.nojekyll').touch()
     relatorio(saida, dados, man)
@@ -1534,9 +1656,29 @@ def relatorio(saida, dados, man, sem_kml=()):
            'Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |\n'
            '|' + '---|' * 18)
     por = {c['alimentador']: c for c in dados}
+    excecao = [c for c in dados if c['alimentador'] in SEM_CHAVES]
+    # maior trecho de cada alimentador dividido por exceção: é o que torna a NAE por trecho e os km vencidos pouco confiáveis
+    maior = {c['alimentador']: max(c['trechos'], key=lambda t: t['ext_m']) for c in excecao if c.get('trechos')}
+    nomes = sorted(SEM_CHAVES)
+    lista = ', '.join(nomes[:-1]) + ' e ' + nomes[-1]
+    faixa = (f' (de {km(min(t["ext_m"] for t in maior.values()))} km a {km(max(t["ext_m"] for t in maior.values()))} km '
+             'num só trecho)' if maior else '')
+    aviso_exc = (f'ATENÇÃO, divididos por exceção: {lista} vieram do GIS sem as chaves fechadas, então foram divididos pelos '
+                 'religadores dos by-pass NA e pelas chaves das OS (aprovado em 16/10/2026). Têm poucos trechos e muito longos'
+                 f'{faixa}: a NAE por trecho e os km vencidos deles não são confiáveis. Estão marcados "(exceção)" nas tabelas '
+                 'e na seção "Divididos por exceção".')
     md = ['# Relatório de validação · trechos por município', '',
           f'Amostra de {PASSO_M} m por vão; alimentador entra no município com ≥ {MIN_M} m. NAE = ocorrências da Crítica '
-          '(coletivas e individuais) associadas a um trecho ou não.', '']
+          '(coletivas e individuais) associadas a um trecho ou não.', '',
+          aviso_exc, '',
+          'O total de cada município soma o alimentador inteiro (trechos, extensão e NAE de toda a rede, também a de '
+          'outros municípios); só a coluna "No município (km)" é a parte do município. Por isso a soma dos municípios '
+          'passa do total geral.', '']
+    rn = resumo_nae(dados)
+    md += ['## NAE', '', '- ' + texto_resumo_nae(rn),
+           '- Consumidor·hora = soma por passo de manobra (consumidores × duração do passo). Acima de 24 h, momentâneas '
+           '(< 3 min) e dia crítico ficam na NAE, marcadas (long, mom, dc); o DEC e o FEC pelo PRODIST não contam as '
+           'duas últimas.', '']
     geral = dict(n=0, trechos=0, m=0, mm=0)
     for m in man['municipios']:
         md += [f'## {m["nome"]}', '', cab]
@@ -1545,13 +1687,14 @@ def relatorio(saida, dados, man, sem_kml=()):
             c = por[a['cod']]
             r, v = c['resumo'], c['validacao']
             na, nn = nae_resumo(c)
-            md.append(f'| {m["nome"]} | {c["polo"]} | {c["se"]} | {c["alimentador"]} | {r["trechos"]} | {r["T1"]["n"]} | '
+            exc = ' (exceção)' if c['alimentador'] in SEM_CHAVES else ''     # dividido por exceção (SEM_CHAVES)
+            md.append(f'| {m["nome"]} | {c["polo"]} | {c["se"]} | {c["alimentador"]}{exc} | {r["trechos"]} | {r["T1"]["n"]} | '
                       f'{r["T2"]["n"]} | {r["T3"]["n"]} | {km(r["extensao_m"])} | {km(a["m_no_municipio"])} | '
                       f'{r["religadores"]} | {r["fusiveis"]} | {na} | {nn} | {c["topologia"]["pontos_sem_ligacao"]} | '
                       f'{len(c["continuidades_estimadas"])} | {len(v["avisos"])} | {v["status"]} |')
             for k, x in (('n', 1), ('trechos', r['trechos']), ('m', r['extensao_m']), ('mm', a['m_no_municipio'])):
                 tot[k] += x
-        md += [f'| **Total {m["nome"]}** | | | {tot["n"]} alimentadores | {tot["trechos"]} | | | | {km(tot["m"])} | '
+        md += [f'| **Total {m["nome"]} (alimentadores inteiros)** | | | {tot["n"]} alimentadores | {tot["trechos"]} | | | | {km(tot["m"])} | '
                f'{km(tot["mm"])} | | | | | | | | |', '']
         for k in ('n', 'trechos', 'mm'):
             geral[k] += tot[k]
@@ -1559,11 +1702,24 @@ def relatorio(saida, dados, man, sem_kml=()):
     md += ['## Total geral', '', f'- Municípios: {len(man["municipios"])}',
            f'- Alimentadores processados sem falha: {len(ok)} ({km(sum(c["resumo"]["extensao_m"] for c in ok))} km, '
            f'{sum(c["resumo"]["trechos"] for c in ok)} trechos)', '']
+    md += ['## Divididos por exceção (sem chaves fechadas no GIS)', '']
+    md += [f'- **{c["alimentador"]}** ({c["validacao"]["status"]}): '
+           + (f'{c["resumo"]["trechos"]} trechos para {km(c["resumo"]["extensao_m"])} km'
+              + (f'; maior trecho {maior[c["alimentador"]]["nome"]} com {km(maior[c["alimentador"]]["ext_m"])} km'
+                 if c['alimentador'] in maior else '')
+              if c.get('resumo') else 'não processado') for c in excecao] or ['- nenhum nesta rodada']
+    md += ['']
     md += ['## Avisos por alimentador', '']
     for c in dados:
         v = c['validacao']
-        if v['avisos'] or v['criticas']:
-            md.append(f'- **{c["alimentador"]}** ({v["status"]}): ' + '; '.join(v['criticas'] + v['avisos']))
+        av = list(v['avisos'])
+        # o aviso "GIS sem as chaves" só sai com mais de 50 km por trecho: o dividido por exceção abaixo disso também é dito
+        if c['alimentador'] in maior and not any('GIS sem as chaves' in a for a in av):
+            t = maior[c['alimentador']]
+            av.insert(0, f'dividido por exceção (GIS sem as chaves fechadas: {c["resumo"]["trechos"]} trechos para '
+                         f'{km(c["resumo"]["extensao_m"])} km, o maior com {km(t["ext_m"])} km)')
+        if av or v['criticas']:
+            md.append(f'- **{c["alimentador"]}** ({v["status"]}): ' + '; '.join(v['criticas'] + av))
     md += ['', '## Não processados', '']
     falhas = [f'- {c["alimentador"]}: {"; ".join(c["validacao"]["criticas"])}' for c in dados if c['validacao']['status'] == 'falha']
     sem_mun = [f'- {c["alimentador"]}: nenhum município com ≥ {MIN_M} m' for c in dados
@@ -1571,8 +1727,15 @@ def relatorio(saida, dados, man, sem_kml=()):
     md += falhas + sem_mun + [f'- {al}: sem KML do Daimon na pasta informada' for al in sorted(sem_kml)] or ['- nenhum']
     texto = '\n'.join(md) + '\n'
     (saida / 'relatorio.md').write_text(texto, encoding='utf-8')
-    corpo = migalhas('./', 'Relatório') + '<pre class="relatorio">' + \
-            html.escape(texto) + '</pre>'
+    # no html, o aviso dos divididos por exceção vira caixa no topo e as linhas deles ficam marcadas
+    pre = '\n'.join(f'<mark class="exc">{html.escape(l)}</mark>' if l.startswith('|') and '(exceção)' in l else html.escape(l)
+                    for l in texto.split('\n'))
+    caixa = ('<style>.exc-topo{border:1px solid var(--line);border-left:4px solid var(--aviso);background:var(--paper);'
+             'border-radius:var(--r1,6px);padding:var(--s3,12px) var(--s4,16px);margin:0 0 var(--s4,16px);font-size:var(--t-sm,13px);'
+             'line-height:1.5;color:var(--fg)}.exc-topo b{color:var(--aviso)}'
+             '.relatorio mark.exc{background:color-mix(in srgb,var(--aviso) 22%,transparent);color:inherit}</style>'
+             f'<div class="exc-topo" role="note"><b>Atenção, divididos por exceção:</b> {html.escape(aviso_exc.split(": ", 1)[1])}</div>')
+    corpo = migalhas('./', 'Relatório') + caixa + '<pre class="relatorio">' + pre + '</pre>'
     (saida / 'relatorio.html').write_text(casca('Relatório de validação', corpo, ''), encoding='utf-8')
 
 
@@ -1709,6 +1872,7 @@ def main(argv=None):
     ok = validar_saida(saida)
     print(f'{len(man["municipios"])} município(s) · {sum(c["validacao"]["status"] != "falha" for c in dados)} alimentador(es) '
           f'nas páginas · relatório em {saida / "relatorio.md"}')
+    print(texto_resumo_nae(resumo_nae(dados)))
     return 0 if ok else 1
 
 

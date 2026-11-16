@@ -56,11 +56,13 @@
   // visão do mapa (mapa-municipios.js: NAE, Manutenção, Inspeção…): os números e a ordem da lista seguem a métrica escolhida;
   // na NAE (visao() = null) ficam os de antes. Regional, polo e alimentador: soma dos municípios (como nos cartões do mapa)
   const vis = () => (mapa() && mapa().visao ? mapa().visao() : null);
+  // na densidade (NAE por 100 km) o grupo não é a soma das densidades: v.grupo soma NAE e km e divide; o alimentador é o inteiro
   const valor = x => {
     const v = vis();
     if (!v) return x.nae || 0;
     const ms = x.slug !== undefined ? [x] : x.polos ? muns.filter(m => m.reg === x.nome) : x.se !== undefined ? null : x.muns;
-    return ms ? ms.reduce((s, m) => s + v.mun(m.cod), 0) : x.muns.reduce((s, m) => s + v.al(x.cod, m.cod), 0);
+    if (ms) return v.grupo ? v.grupo(ms.map(m => m.cod)) : ms.reduce((s, m) => s + v.mun(m.cod), 0);
+    return v.alTot ? v.alTot(x.cod) : x.muns.reduce((s, m) => s + v.al(x.cod, m.cod), 0);
   };
   const porNae = (a, b) => valor(b) - valor(a);
   const mais = () => (vis() ? vis().mais : 'NAE');
@@ -96,7 +98,14 @@
     al: (a, n, k) => ({ s: { al: a.cod }, tipo: 'al', t: realce(a.cod, k), c: `${realce(a.se, n)} · ${plural(a.muns.length, 'município', 'municípios')} · ${kmTxt(a.m)}`, nae: valor(a) }),
     // alimentador do município aberto (a lista que ficava ao lado do mapa): miniatura da rede, código e NAE (sem km e SE,
     // pedido do usuário); o que está em foco no mapa fica marcado
-    almun: (a, m, foco) => ({ s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: vis() ? vis().al(a.cod, m.cod) : a.n || 0, c: foco ? 'Em foco no mapa' : '' }),
+    // número: NAE do alimentador neste município (regra aprovada) quando os dados trazem; sem isso, a do alimentador todo,
+    // dito na linha de baixo (só é a do município quando ele não passa por outro)
+    almun: (a, m, foco) => {
+      const v = vis(), x = mapa() && mapa().alNoMun ? mapa().alNoMun(a.cod, m.cod) : { n: a.n || 0, tot: a.n || 0, todo: true };
+      const quem = v ? (v.dens ? 'no alimentador todo' : '') : x.todo ? `NAE do alimentador todo (${plural(AL[a.cod] ? AL[a.cod].muns.length : 1, 'município', 'municípios')})` :
+        x.n !== x.tot ? `neste município, de ${nf(x.tot)} no alimentador` : '';
+      return { s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: v ? v.al(a.cod, m.cod) : x.n, c: [foco ? 'Em foco no mapa' : '', esc(quem)].filter(Boolean).join(' · ') };
+    },
     ativo: ([c, tipo], k) => ({ s: { ativo: c }, tipo: 'ativo', t: realce(c, k), c: esc(TIPO[tipo] || 'Chave ' + tipo) }),
     os: txt => ({ s: { os: txt }, tipo: 'os', t: `OS ${esc(txt)}`, c: 'buscar nas bases de faixa, inspeção, manutenção e executadas' }),
     uc: (k, hits) => ({ s: { uc: k }, tipo: 'uc', t: `UC ${esc(k)}`,
@@ -119,7 +128,7 @@
           (it.nae != null ? `<i class="so-n">${vis() ? vis().num(it.nae) : nf(it.nae)}<span class="vh"> ${vis() ? vis().un : 'NAE'}</span></i>` : '') + '</li>';
       }).join('')).join('');
     res.className = classe;
-    res.innerHTML = `<ul class="sug" role="listbox" aria-label="Resultados">${html}</ul>${rodape}`;
+    res.innerHTML = (html ? `<ul class="sug" role="listbox" aria-label="Resultados">${html}</ul>` : '') + rodape;
     q.setAttribute('aria-expanded', 'true');
     marca(-1);
     // miniatura da rede de cada alimentador (a mesma que o mapa desenha, dados/redes/)
@@ -149,6 +158,7 @@
     const o = res.querySelector(`#ativo-sug-${i}`);
     if (o) { q.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } else q.removeAttribute('aria-activedescendant');
     const s = sug[i];
+    if (mapa() && mapa().prepara) mapa().prepara(s && (s.almun || s.al));   // mouse parado no alimentador: a página dele começa a vir
     if (s && s.almun) { previa(null); realceAl(s.almun); }   // alimentador do município aberto: a rede dele acende no mapa
     else { realceAl(null); previa(alvoMapa(s)); }
   };
@@ -158,7 +168,7 @@
   function atalhos() {
     pedido++;
     const nv = nivel(), m = porCod[nv.mun];
-    if (m) mostra([[`Alimentadores de ${m.nome} · ${m.als.length}`, m.als.slice().sort((a, b) => b.m - a.m)
+    if (m) mostra([[`Alimentadores de ${m.nome} · ${m.als.length} · município: ${vis() ? vis().txt(valor(m)) : nf(m.nae) + ' NAE'}`, m.als.slice().sort((a, b) => b.m - a.m)
       .map(a => item.almun({ ...a, se: (AL[a.cod] || {}).se || a.se }, m, a.cod === nv.al))]], '', 'lista-mun');
     else if (nv.pol && POL[nv.pol]) mostra([[`Municípios do polo ${nv.pol}`, POL[nv.pol].muns.slice().sort(porNae).map(x => item.mun(x))],
       [`Alimentadores com mais ${mais()} no polo ${nv.pol}`, topAls(x => x.polo === nv.pol)]]);
@@ -195,8 +205,55 @@
   const ORDEM = ['DJ', '79', '03', '33', '02', '40', '41', 'SEC', 'FTR', '88', 'TR', 'ET', 'EP', 'poste'];
   const peso = t => { const i = ORDEM.indexOf(t); return i < 0 ? ORDEM.length - 1.5 : i; };
   // regional e polo: pelo nome, ou pela palavra "regional"/"polo" (ex.: "reg" lista as três regionais)
+  // códigos de um tipo no arquivo de sugestão; o disjuntor vem como "DJ LD01001037 DJ LD01002037 …" (o nome tem espaço)
+  const codigos = (tipo, lista) => tipo === 'DJ' ? (lista.match(/DJ\s+\S+/g) || []) : lista.split(' ');
+  const achaPref = (d, k) => {
+    const r = [];
+    if (d) Object.entries(d).forEach(([tipo, lista]) => codigos(tipo, lista).forEach(c => { if (chave(c).startsWith(k)) r.push([c, tipo]); }));
+    return r.sort((a, b) => (chave(b[0]) === k) - (chave(a[0]) === k) || peso(a[1]) - peso(b[1]) || a[0].length - b[0].length || a[0].localeCompare(b[0]));
+  };
+  // nome do tipo de ativo (a partir de 4 letras, com ou sem acento, singular ou plural). arq: arquivos de sugestão do tipo (poucos
+  // ativos: mostra o grupo); sem arq, o tipo tem muitos ativos e só diz como o código começa; zero: o site não tem o tipo nos dados
+  const TIPOS = [
+    { nomes: ['religador'], nome: 'Religador', arq: [['79', '79']], ini: '79' },
+    { nomes: ['disjuntor'], exato: 'dj', nome: 'Disjuntor', arq: [['DJ', 'DJ']], ini: 'DJ e o código do alimentador, como DJ LD03010004' },
+    { nomes: ['tripsaver'], nome: 'Trip saver', arq: [['40', '40'], ['41', '41']], ini: '40 ou 41' },
+    { nomes: ['fusivel'], nome: 'Fusível', ini: '03 ou 33' },
+    { nomes: ['transformador', 'trafo'], nome: 'Transformador', ini: '57, 56, 53 ou 51 (na maioria)' },
+    { nomes: ['chave'], nome: 'Chave', ini: '02' },
+    { nomes: ['chavefaca'], nome: 'Chave faca', ini: '88' },
+    { nomes: ['poste'], nome: 'Poste', ini: null },
+    { nomes: ['regulador', 'reguladordetensao'], nome: 'Regulador', arq: [['58', 'Regulador']], ini: '58', zero: true },   // zero: sem o tipo nos dados, diz que hoje são 0
+    { nomes: ['capacitor'], nome: 'Capacitor', zero: true }
+  ];
+  function tiposDe(n) {
+    const c = n.replace(/\s+/g, '');
+    if (!/^[a-z]+$/.test(c)) return [];
+    const base = c.replace(/eis$/, 'el').replace(/(es|s)$/, '');
+    return TIPOS.filter(t => c === t.exato || (c.length >= 4 && t.nomes.some(x => x.startsWith(c) || (base.length >= 4 && x.startsWith(base)))));
+  }
+  async function tipoBloco(ts) {
+    const blocos = [], rod = [];
+    for (const t of ts) {
+      if (t.zero && !t.arq) { rod.push(`<b>${t.nome}</b>: o site ainda não tem esse tipo de equipamento nos dados (hoje são 0).`); continue; }
+      if (!t.arq) {
+        rod.push(`<b>${t.nome}</b>: ${t.ini ? `digite o código; começa com ${t.ini}` : 'digite o número do poste'}. Ou abra o alimentador e busque lá.`);
+        continue;
+      }
+      const ds = await Promise.all(t.arq.map(([f]) => baixa('ativos-pref/' + f)));
+      const lista = [];
+      t.arq.forEach(([, tipo], i) => { if (ds[i] && ds[i][tipo]) codigos(tipo, ds[i][tipo]).forEach(c => lista.push([c, tipo])); });
+      if (!lista.length) {
+        rod.push(t.zero ? `<b>${t.nome}</b>: o site ainda não tem esse tipo de equipamento nos dados (hoje são 0).` : `<b>${t.nome}</b>: digite o código; começa com ${t.ini}.`);
+        continue;
+      }
+      blocos.push([`${t.nome} · ${nf(lista.length)} no estado`, lista.slice(0, 6).map(a => item.ativo(a, ''))]);
+      rod.push(`<b>${t.nome}</b>: o código começa com ${t.ini}. Continue digitando para ver os outros.`);
+    }
+    return { blocos, rodape: rod.map(r => `<p class="sug-mais">${r}</p>`).join('') };
+  }
   const bateNome = (kw, nome, n) => n.length >= 2 && (semAcento(nome).includes(n) || (n.length >= 3 && kw.startsWith(n)) || semAcento(kw + ' ' + nome).startsWith(n));
-  async function sugere() {
+  async function sugere(forcar) {
     const txt = q.value.trim(), k = chave(txt), meu = ++pedido, n = semAcento(txt), K = txt.toUpperCase().replace(/[^0-9A-Z]/g, ''), kl = K.toLowerCase();
     if (!txt) { if (document.activeElement === q) atalhos(); else fecha(); return; }
     const nv = nivel();
@@ -214,13 +271,14 @@
       const [d, du] = await Promise.all([k.length >= 3 ? baixa('ativos-pref/' + k.slice(0, 2)) : null, kUC ? baixa('uc/' + fatia(kUC)) : null]);
       if (meu !== pedido) return;                   // já digitaram outra coisa
       if (du && du[kUC]) ucs = [item.uc(kUC, du[kUC])];
-      if (d) Object.entries(d).forEach(([tipo, lista]) => lista.split(' ').forEach(c => { if (chave(c).startsWith(k)) achados.push([c, tipo]); }));
-      achados.sort((a, b) => (chave(b[0]) === k) - (chave(a[0]) === k) || peso(a[1]) - peso(b[1]) || a[0].length - b[0].length || a[0].localeCompare(b[0]));
+      achados = achaPref(d, k);
     }
+    if (meu !== pedido) return;
+    const tipos = tiposDe(n), tp = tipos.length ? await tipoBloco(tipos) : null;
     if (meu !== pedido) return;
     const kOS = chaveOS(txt);
     const at = achados.slice(0, rs.length || ps.length || ms.length || as.length ? 6 : 12);
-    if (!kOS && !ucs.length && !rs.length && !ps.length && !ms.length && !as.length && !at.length) {
+    if (!kOS && !ucs.length && !rs.length && !ps.length && !ms.length && !as.length && !at.length && !tp) {
       const per = soUC(txt) && kUC ? await periodoUC() : null;
       if (meu !== pedido) return;
       fechaSug();
@@ -230,9 +288,11 @@
       return;
     }
     mostra([['OS', kOS ? [item.os(txt)] : []], ['UC', ucs], ['Regionais', rs.map(r => item.reg(r, n))], ['Polos', ps.map(p => item.polo(p, n))],
-      ['Municípios', ms.map(m => item.mun(m, n))], ['Alimentadores', as.map(a => item.al(a, n, kl))], ['Ativos', at.map(a => item.ativo(a, kl))]],
-    achados.length > at.length ? `<p class="sug-mais">e mais ${(achados.length - at.length).toLocaleString('pt-BR')} ativos: continue digitando</p>` : '');
+      ['Municípios', ms.map(m => item.mun(m, n))], ['Alimentadores', as.map(a => item.al(a, n, kl))], ['Ativos', at.map(a => item.ativo(a, kl))], ...(tp ? tp.blocos : [])],
+    (forcar && achados.length > 1 ? `<p class="sug-mais">${nf(achados.length)} ativos começam com <b>${esc(txt)}</b>: escolha um ou continue digitando</p>` :
+      achados.length > at.length ? `<p class="sug-mais">e mais ${(achados.length - at.length).toLocaleString('pt-BR')} ativos: continue digitando</p>` : '') + (tp ? tp.rodape : ''));
     sugDe = txt;
+    if (forcar) { const i = sug.findIndex(o => o.ativo); if (i >= 0) marca(i); }   // Enter sem código exato: lista aberta, 1º ativo marcado
     if (enterDepois === txt) { enterDepois = null; if (!enter()) envia(); }   // ativo na lista: busca o código digitado
   }
   const envia = () => form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
@@ -259,30 +319,50 @@
     e.preventDefault();
     marca(e.key === 'ArrowDown' ? Math.min(sug.length - 1, marcado + 1) : Math.max(0, marcado - 1));
   });
-  res.addEventListener('mousedown', e => { if (e.target.closest('.sug-op, .ir-mapa')) e.preventDefault(); });   // o campo não perde o foco
-  res.addEventListener('mouseover', e => { const o = e.target.closest('.sug-op'); if (o && +o.dataset.i !== marcado) marca(+o.dataset.i); });
+  res.addEventListener('mousedown', e => { if (e.target.closest('.sug-op, .ir-mapa, .res-ponto')) e.preventDefault(); });   // o campo não perde o foco
+  res.addEventListener('pointerdown', e => {           // dedo (ou botão) no alimentador do município: os dados dele já vêm
+    const o = e.target.closest('.sug-op'), s = o && sug[+o.dataset.i];
+    if (s && (s.almun || s.al) && mapa() && mapa().prepara) mapa().prepara(s.almun || s.al, true);
+  });
+  // realce ao passar o mouse; com o dedo não: no iPhone, mudar a tela no 'passar por cima' do toque faz o Safari usar o
+  // 1º toque só para isso e pedir um 2º para abrir (o toque no alimentador tem de abrir a página dele direto)
+  res.addEventListener('pointerover', e => { if (e.pointerType !== 'mouse') return; const o = e.target.closest('.sug-op'); if (o && +o.dataset.i !== marcado) marca(+o.dataset.i); });
   res.addEventListener('click', e => {
     const o = e.target.closest('.sug-op');
     if (o) { escolhe(+o.dataset.i); return; }
     const b = e.target.closest('.ir-mapa');
-    if (b) vaiNoMapa({ al: b.dataset.al });
+    if (b) { vaiNoMapa({ al: b.dataset.al }); return; }
+    const r = e.target.closest('.res-ponto'), h = r && listaAtivos[+r.dataset.i];
+    if (h) irAoAtivo(h.hit, h.txt);
   });
   let indoAl = null;                                     // a caminho de um alimentador: a lista do município não abre no meio
-  function vaiNoMapa(alvo) {
+  function vaiNoMapa(alvo, ponto) {
     q.value = '';
     fecha();
     if (lupa) { q.hidden = true; lupa.setAttribute('aria-expanded', 'false'); }   // escolheu: o campo fecha, fica o olho
     q.blur();
     indoAl = alvo.al || null;
-    Promise.resolve(mapa().vai(alvo)).finally(() => { indoAl = null; });
+    Promise.resolve(ponto ? mapa().ponto(ponto) : mapa().vai(alvo)).finally(() => { indoAl = null; });
+  }
+  // ativo no mapa principal: o mapa abre o alimentador, aproxima no ponto e mostra o marcador e o cartão (ARGOS_MAPA.ponto).
+  // hit: [alimentador, tipo, trecho, papel, lat, lon] do índice dados/ativos; sem o mapa (página antiga), a lista abre a página como antes
+  const podePonto = al => !!(mapa() && mapa().ponto && AL[al]);
+  const ondeDe = (tipo, t, papel) => tipo === 'poste' ? (papel ? 'Trechos ' + papel : t ? 'Trecho ' + t : '') : (papel ? papel[0].toUpperCase() + papel.slice(1) : '');
+  const hrefAtivo = ([al, , t, , lat, lon], txt) => P.url(`alimentadores/${encodeURIComponent(al)}/?${t ? 't=' + encodeURIComponent(t) + '&' : ''}a=${encodeURIComponent(txt)}${lat != null && lat !== '' ? `&ll=${lat},${lon}` : ''}`);
+  let listaAtivos = [];
+  function irAoAtivo(hit, txt) {
+    const [al, tipo, t, papel, lat, lon] = hit, cod = txt.toUpperCase();
+    vaiNoMapa({ al }, { al, ll: lat != null && lat !== '' && lon != null && lon !== '' ? [lat, lon] : null, titulo: `${TIPO[tipo] || 'Chave ' + tipo} ${cod}`,
+      linhas: [[al, t].filter(Boolean).join(' · '), ondeDe(tipo, t, papel)], href: hrefAtivo(hit, txt), alvo: P.alvo });
   }
   function escolhe(i) {
     const s = sug[i];
     if (!s) return;
     if (s.os) { buscaOS(s.os); return; }
     if (s.uc) { buscaUC(s.uc); return; }
-    // alimentador do município aberto: 1 toque abre o painel dele (passar o mouse ou marcar com as setas acende a rede)
-    if (s.almun) { fecha(); P.abre(`alimentadores/${encodeURIComponent(s.almun)}/`); return; }
+    // alimentador (da lista do município aberto ou achado pela busca): 1 toque abre o mapa dele, o de satélite com Faixa,
+    // Inspeção e Manutenção (passar o mouse ou marcar com as setas só acende a rede no mapa principal)
+    if (s.almun || s.al) { fecha(); P.abre(`alimentadores/${encodeURIComponent(s.almun || s.al)}/`); return; }
     if (s.ativo) {
       q.value = s.ativo;
       fechaSug();
@@ -359,6 +439,13 @@
     if (d === null) { res.innerHTML = '<p>Não foi possível carregar o índice. Confira a internet e tente de novo.</p>'; return; }
     const hits = d[k] || [], ucHits = (du && du[kUC]) || [];
     if (!hits.length && !ucHits.length) {
+      if (k.length >= 3) {                          // não é código exato: ativos que começam com o texto
+        const mais = achaPref(await baixa('ativos-pref/' + k.slice(0, 2)), k).filter(a => chave(a[0]) !== k);
+        if (meu !== pedido) return;
+        if (mais.length === 1) { q.value = mais[0][0]; setTimeout(envia); return; }
+        if (mais.length > 1) { sugere(true); return; }
+      }
+      if (tiposDe(semAcento(txt)).length) { sugere(true); return; }   // nome de tipo de ativo
       const per = soUC(txt) && kUC ? await periodoUC() : null;
       if (meu !== pedido) return;
       res.innerHTML = per !== null ? ucNao(kUC, per) : `<p><b>${esc(txt)}</b> não foi encontrado. Confira o código: a busca é pelo código ` +
@@ -368,12 +455,16 @@
     }
     const uc = ucHits.length ? ucBloco(kUC, ucHits) : '';
     if (!hits.length) { res.innerHTML = uc; return; }
+    if (hits.length === 1 && !ucHits.length && podePonto(hits[0][0])) { res.innerHTML = ''; irAoAtivo(hits[0], txt); return; }   // um só: direto ao ativo
+    listaAtivos = hits.map(hit => ({ hit, txt }));
     res.innerHTML = uc + `<p>${hits.length === 1 ? '1 resultado' : hits.length + ' resultados'} para <b>${esc(txt)}</b>${uc ? ' (ativos)' : ''}:</p><ul>` +
-      hits.map(([al, tipo, t, papel, lat, lon]) => {
-        const onde = tipo === 'poste' ? (papel ? 'Trechos ' + esc(papel) : 'Trecho ' + esc(t)) : esc(papel[0] ? papel[0].toUpperCase() + papel.slice(1) : '');
-        return `<li class="res-li"><a href="${esc(P.url(`alimentadores/${encodeURIComponent(al)}/?${t ? 't=' + encodeURIComponent(t) + '&' : ''}a=${encodeURIComponent(txt)}&ll=${lat},${lon}`))}"${P.alvo}>` +
-          `<b>${t ? esc(t) + ' · ' : ''}${esc(al)}</b><span>${esc(TIPO[tipo] || 'Chave ' + tipo)} ${esc(txt)}${AL[al] ? ' · ' + esc(AL[al].se) : ''}</span>` +
-          (onde ? `<span>${onde}</span>` : '') + '<span class="ir">Abrir no mapa do alimentador →</span></a>' + botaoMapa(al) + '</li>';
+      hits.map((hit, i) => {
+        const [al, tipo, t, papel] = hit, onde = esc(ondeDe(tipo, t, papel));
+        const corpo = `<b>${t ? esc(t) + ' · ' : ''}${esc(al)}</b><span>${esc(TIPO[tipo] || 'Chave ' + tipo)} ${esc(txt)}${AL[al] ? ' · ' + esc(AL[al].se) : ''}</span>` +
+          (onde ? `<span>${onde}</span>` : '');
+        if (podePonto(al)) return `<li class="res-li com-ponto"><button type="button" class="res-ponto" data-i="${i}">${corpo}<span class="ir">Ir ao ativo no mapa →</span></button>` +
+          `<a class="res-al" href="${esc(hrefAtivo(hit, txt))}"${P.alvo}>Abrir no mapa do alimentador →</a></li>`;
+        return `<li class="res-li"><a href="${esc(hrefAtivo(hit, txt))}"${P.alvo}>${corpo}<span class="ir">Abrir no mapa do alimentador →</span></a>${botaoMapa(al)}</li>`;
       }).join('') + '</ul>';
   });
 

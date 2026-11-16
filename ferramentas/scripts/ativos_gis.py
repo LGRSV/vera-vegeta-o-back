@@ -87,12 +87,13 @@ def grade_de(vaos):
     return g
 
 
-def vao_mais_perto(vaos, lon, lat, grade):
-    """(índice do vão, distância em m) do vão mais próximo; procura em anéis da grade até achar ou passar de LIM_M."""
+def vao_mais_perto(vaos, lon, lat, grade, aneis=4):
+    """(índice do vão, distância em m) do vão mais próximo; procura em anéis da grade até achar ou passar de LIM_M
+    (aneis: quantos anéis ao todo; scripts/reguladores.py aumenta para achar a rede mais próxima quando está longe)."""
     k = math.cos(math.radians(lat))
     gx, gy = int(lon // CELULA), int(lat // CELULA)
     melhor = (None, float('inf'))
-    for r in range(0, 4):                          # anel r: até ~r*220 m; para quando o achado já é mais perto
+    for r in range(0, aneis):                      # anel r: até ~r*220 m; para quando o achado já é mais perto
         anel = {(gx + dx, gy + dy) for dx in range(-r, r + 1) for dy in range(-r, r + 1) if max(abs(dx), abs(dy)) == r}
         for i in {i for c in anel for i in grade.get(c, ())}:
             ax, ay, bx, by = vaos[i][0] * k, vaos[i][1], vaos[i][2] * k, vaos[i][3]

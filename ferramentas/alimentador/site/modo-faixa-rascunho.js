@@ -35,7 +35,9 @@
   const np = new Int32Array(V.length), off = new Int32Array(V.length + 1);
   V.forEach((v, i) => { np[i] = Math.max(1, Math.ceil(v[8] / PASSO)); off[i + 1] = off[i] + np[i]; });
   const sel = new Set(), marca = new Uint8Array(off[V.length]), undo = [], redo = [];
-  const vaoDe = new Int32Array(off[V.length]); V.forEach((_, i) => vaoDe.fill(i, off[i], off[i + 1]));   // pedaço → vão
+  // pedaço → vão: ~460 mil pedaços num alimentador grande, montado na 1ª vez que o modo pede (não na carga da página)
+  let vaoDeT = null;
+  const vaoDe = q => { if (!vaoDeT) { vaoDeT = new Int32Array(off[V.length]); V.forEach((_, i) => vaoDeT.fill(i, off[i], off[i + 1])); } return vaoDeT[q]; };
   // pontos da linha: um poste ou um ponto de um vão, de 5 em 5 m: {i: vão, q: 0..np[i]} (q = 0 e q = np[i] são os postes)
   const mpp = i => V[i][8] / np[i];                                // metros por pedaço do vão i
   const llPt = p => { const v = V[p.i], t = p.q / np[p.i]; return [v[0] + (v[2] - v[0]) * t, v[1] + (v[3] - v[1]) * t]; };
@@ -44,7 +46,7 @@
   const igual = (a, b) => !!a && !!b && chavePt(a) === chavePt(b);
   // pedaços do vão i entre os pontos q0 e q1, na ordem de q0 para q1
   const pedacos = (i, q0, q1) => { const r = []; if (q1 >= q0) for (let q = q0; q < q1; q++) r.push(off[i] + q); else for (let q = q0 - 1; q >= q1; q--) r.push(off[i] + q); return r; };
-  const metrosDe = qs => qs.reduce((t, q) => t + mpp(vaoDe[q]), 0);
+  const metrosDe = qs => qs.reduce((t, q) => t + mpp(vaoDe(q)), 0);
   // pontinhos entre os postes (pedido do usuário: "ainda mais pontinhos"): de quantos em quantos pedaços de ~5 m, para
   // ficarem a pelo menos PX_PT px um do outro no zoom atual (de perto, um a cada 5 m). O clique e as alças param neles.
   const PX_PT = () => matchMedia('(pointer:coarse)').matches ? 20 : 12;
@@ -54,8 +56,8 @@
   function segsDe(qs) {                                           // pedaços → segmentos para desenhar (um por vão)
     const r = [];
     for (let k = 0; k < qs.length;) {
-      const i = vaoDe[qs[k]]; let lo = qs[k], hi = qs[k], j = k + 1;
-      while (j < qs.length && vaoDe[qs[j]] === i) { lo = Math.min(lo, qs[j]); hi = Math.max(hi, qs[j]); j++; }
+      const i = vaoDe(qs[k]); let lo = qs[k], hi = qs[k], j = k + 1;
+      while (j < qs.length && vaoDe(qs[j]) === i) { lo = Math.min(lo, qs[j]); hi = Math.max(hi, qs[j]); j++; }
       r.push([llPt({ i, q: lo - off[i] }), llPt({ i, q: hi - off[i] + 1 })]); k = j;
     }
     return r;
@@ -64,7 +66,8 @@
   // postes: as pontas dos vãos (D.vaos[i][6] e [7], com as coordenadas de cada ponta); G = postes dos vãos escolhidos e seus
   // vizinhos; ini = início ({i: vão, q: 0..np[i]}, poste ou ponto do vão) à espera do fim; arv = caminhos mais curtos a
   // partir de ini; sob = ponto sob o mouse
-  const pos = new Map(); V.forEach(v => { pos.set(v[6], [v[0], v[1]]); pos.set(v[7], [v[2], v[3]]); });
+  let posT = null;                                              // montado na 1ª vez que os postes são desenhados (não na carga da página)
+  const pos = () => { if (!posT) { posT = new Map(); V.forEach(v => { posT.set(v[6], [v[0], v[1]]); posT.set(v[7], [v[2], v[3]]); }); } return posT; };
   let G = null, ini = null, arv = null, sob = null;
   const toque = e => (e && e.pointerType) ? e.pointerType !== 'mouse' : matchMedia('(pointer:coarse)').matches;
 
@@ -77,7 +80,7 @@
     for (let k = 0; k < lista.length; k++) { const v = V[lista[k]]; a[k * 4] = mx(v[1], s); a[k * 4 + 1] = my(v[0], s); a[k * 4 + 2] = mx(v[3], s); a[k * 4 + 3] = my(v[2], s); }
     return a;
   };
-  const TODOS = V.map((_, i) => i);
+  let TODOS = null;                                              // todos os vãos (0, 1, 2…): montado no 1º toque no mapa com o modo ligado
   const abs = e => { const lp = map.containerPointToLayerPoint(map.mouseEventToContainerPoint(e)), o = map.getPixelOrigin(); return [lp.x + o.x, lp.y + o.y]; };
   const d2 = (px, py, a, k) => {
     const x1 = a[k * 4], y1 = a[k * 4 + 1], dx = a[k * 4 + 2] - x1, dy = a[k * 4 + 3] - y1, l = dx * dx + dy * dy;
@@ -89,7 +92,7 @@
     const y1 = a[k * 4 + 1], y2 = a[k * 4 + 3]; return (y1 < py - R && y2 < py - R) || (y1 > py + R && y2 > py + R);
   };
   const vaoPerto = (px, py, tol) => {
-    const a = todosP || (todosP = projeta(TODOS)); let m = tol * tol, r = -1;
+    const a = todosP || (todosP = projeta(TODOS || (TODOS = V.map((_, i) => i)))); let m = tol * tol, r = -1;
     for (let k = 0; k < V.length; k++) { if (fora(a, k, px, py, tol)) continue; const d = d2(px, py, a, k); if (d <= m) { m = d; r = k; } }
     return r;
   };
@@ -138,7 +141,7 @@
       g.fillStyle = '#e2e8f0'; g.fill(); g.lineWidth = 1.2; g.strokeStyle = '#0b1220'; g.stroke();
       g.beginPath();
       for (const p of grafo().keys()) {                          // um ponto por célula de Q px: não empilha onde há muitos
-        const [la, lo] = pos.get(p), x = mx(lo, s) - o.x + F, y = my(la, s) - o.y + F;
+        const [la, lo] = pos().get(p), x = mx(lo, s) - o.x + F, y = my(la, s) - o.y + F;
         if (x < -R || y < -R || x > w + R || y > h + R) continue;
         const k = Math.floor(x / Q) * 65536 + Math.floor(y / Q); if (usado.has(k)) continue; usado.add(k);
         g.moveTo(x + R, y); g.arc(x, y, R, 0, 2 * Math.PI);
