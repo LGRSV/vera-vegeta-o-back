@@ -15,7 +15,8 @@
 name: Focos de calor
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    # a cada 10 min, fora do minuto cheio (o GitHub atrasa ou pula as rodadas marcadas no início da hora)
+    - cron: '3-59/10 * * * *'
   workflow_dispatch:
     inputs:
       gh_pages:
