@@ -1,0 +1,196 @@
+# Focos de calor perto da rede (visão "Queimadas" do ARGOS). Roda a cada 10 min:
+#   1. ferramentas/scripts/focos.py (INPE 10 min + FIRMS) refaz teste/dados/focos/agora.json;
+#   2. grava agora.json no ramo "focos" (ramo órfão de um commit só, refeito a cada rodada: não cresce). O mapa lê
+#      https://raw.githubusercontent.com/<dono>/<repositório>/focos/agora.json;
+#   3. na primeira rodada de cada hora, copia agora.json para teste/dados/focos/ do gh-pages (reserva se a rede
+#      bloquear o raw) e, uma vez por dia (primeira rodada da hora a partir das 09 UTC), atualiza o histórico
+#      (resumo.json e al/) com o CSV mensal do INPE do mês e os VIIRS/MODIS do agora.json até o "gerado" dele menos
+#      12 h (margem para o foco que o satélite entrega atrasado), sem mexer nos incêndios da Crítica. Os pontos de al/ vão até o mesmo corte das contagens (agora_somado_ate): uma rodada
+#      por dia basta, a tela soma por cima o agora.json atual.
+# Se as duas fontes caírem, focos.py sai com erro e nada é gravado (fica o agora.json anterior). Se o histórico do dia
+# falhar, o histórico gravado fica como estava e a cópia de agora.json segue. Se o ramo focos falhar, a cópia no
+# gh-pages e o histórico seguem (são a reserva) e a rodada termina vermelha no fim.
+# Chave do FIRMS: segredo FIRMS_MAP_KEY (sem ele, CSVs públicos). Como ligar e ver os registros: docs/focos-rotina.md
+# do smartled. Os scripts vêm de ferramentas/ do gh-pages (scripts/atualiza_bases.py --copia-ferramentas).
+name: Focos de calor
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    inputs:
+      gh_pages:
+        description: 'Copiar agora.json para o gh-pages nesta rodada (mesmo fora da primeira rodada da hora)'
+        type: boolean
+        default: false
+      historico:
+        description: 'Atualizar o histórico (resumo.json e al/) nesta rodada, mesmo que já tenha rodado hoje'
+        type: boolean
+        default: false
+permissions:
+  contents: write   # ramo focos e gh-pages
+  pages: write      # pede a publicação do site depois de gravar no gh-pages
+  actions: write    # apaga os caches antigos desta rotina
+concurrency:
+  group: focos
+  cancel-in-progress: false
+jobs:
+  focos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUTF8: '1'
+    steps:
+      - name: Site (gh-pages, só o necessário)
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /ferramentas/scripts/*.py
+            /ferramentas/alimentador/*.py
+            /teste/manifesto.json
+            /teste/dados/tocantins.js
+            /teste/dados/alimentadores/
+            /teste/dados/focos/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Bibliotecas
+        run: pip install --quiet --disable-pip-version-check "numpy<3" "shapely>=2,<3"
+      - name: O que esta rodada faz
+        id: plano
+        env:
+          FORCA_COPIA: ${{ inputs.gh_pages }}
+          FORCA_HIST: ${{ inputs.historico }}
+        run: |
+          python - <<'EOF'
+          import datetime as dt, json, os
+          from pathlib import Path
+          agora = dt.datetime.now(dt.timezone.utc)
+          pasta = Path('site/teste/dados/focos')
+          def gerado(nome):
+              try:
+                  return json.loads((pasta / nome).read_text(encoding='utf-8')).get('gerado') or ''
+              except (OSError, ValueError):
+                  return ''
+          # primeira rodada da hora: o agora.json do gh-pages é de outra hora
+          copia = gerado('agora.json')[:13] != agora.strftime('%Y-%m-%dT%H') or os.environ.get('FORCA_COPIA') == 'true'
+          # histórico: uma vez por dia, a partir das 09 UTC, numa primeira rodada da hora (se falhar, tenta na hora seguinte)
+          tem = (pasta / 'resumo.json').exists()
+          hist = tem and (os.environ.get('FORCA_HIST') == 'true'
+                          or (copia and agora.hour >= 9 and gerado('resumo.json')[:10] < agora.strftime('%Y-%m-%d')))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"copia={'sim' if copia else 'nao'}\nhistorico={'sim' if hist else 'nao'}\n")
+          print(f"agora.json no gh-pages: {gerado('agora.json') or 'nenhum'}; resumo.json: "
+                f"{gerado('resumo.json') or 'nenhum (rode antes a carga completa do histórico)'}")
+          print(f"copia para o gh-pages: {'sim' if copia else 'não'}; histórico do dia: {'sim' if hist else 'não'}")
+          EOF
+      - name: Cache dos arquivos baixados (INPE e FIRMS)
+        uses: actions/cache/restore@v4
+        with:
+          path: cache
+          key: focos-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: focos-cache-
+      - name: Focos agora (INPE + FIRMS)
+        id: focos
+        env:
+          FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
+        run: |
+          python site/ferramentas/scripts/focos.py site/teste --cache cache --ramo focos
+          python - <<'EOF'
+          import json
+          a = json.load(open('site/teste/dados/focos/agora.json', encoding='utf-8'))
+          assert isinstance(a.get('focos'), list) and a.get('gerado'), 'agora.json sem focos ou sem gerado'
+          EOF
+      - name: Guarda o cache
+        uses: actions/cache/save@v4
+        with:
+          path: cache
+          key: focos-cache-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Ramo focos (agora.json, um commit só)
+        id: ramo
+        continue-on-error: true   # a cópia no gh-pages e o histórico seguem; o último passo deixa a rodada vermelha
+        run: |
+          cd site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          G=$(python -c "import json; print(json.load(open('teste/dados/focos/agora.json'))['gerado'])")
+          B=$(git hash-object -w teste/dados/focos/agora.json)
+          L=$(printf '%s\n' '# Ramo de dados: focos de calor agora' '' \
+            'Feito a cada 10 min pela rotina .github/workflows/focos.yml (ramo main): um commit só, refeito a cada rodada' \
+            '(force push). Não editar; o mapa do ARGOS lê agora.json daqui.' | git hash-object -w --stdin)
+          T=$(printf '100644 blob %s\tLEIA-ME.md\n100644 blob %s\tagora.json\n' "$L" "$B" | git mktree)
+          C=$(git commit-tree "$T" -m "focos: agora ${G:11:5} UTC")
+          for _ in 1 2 3; do
+            if git push -q -f origin "$C:refs/heads/focos"; then echo "Ramo focos: agora.json de $G."; exit 0; fi
+            sleep 10
+          done
+          echo "Não consegui gravar o ramo focos."; exit 1
+      - name: Histórico do dia (CSV mensal do INPE; os incêndios da Crítica ficam)
+        id: hist
+        if: steps.plano.outputs.historico == 'sim'
+        continue-on-error: true
+        run: |
+          H="$RUNNER_TEMP/historico"
+          rm -rf "$H"; mkdir -p "$H/dados"
+          ln -s "$GITHUB_WORKSPACE/site/teste/dados/alimentadores" "$H/dados/alimentadores"
+          ln -s "$GITHUB_WORKSPACE/site/teste/dados/tocantins.js" "$H/dados/tocantins.js"
+          ln -s "$GITHUB_WORKSPACE/site/teste/manifesto.json" "$H/manifesto.json"
+          cp -r site/teste/dados/focos "$H/dados/focos"
+          python site/ferramentas/scripts/focos_historico.py --site "$H" --atualiza-inpe
+          python - "$H/dados/focos/resumo.json" <<'EOF'
+          import json, sys
+          r = json.load(open(sys.argv[1], encoding='utf-8'))
+          assert r.get('meses') and r.get('al'), 'resumo.json sem meses ou sem alimentadores'
+          EOF
+          # deu certo: troca no site o que o histórico grava (resumo.json, al/...), menos o agora.json
+          for f in "$H"/dados/focos/*; do
+            n=$(basename "$f")
+            [ "$n" = agora.json ] && continue
+            rm -rf "site/teste/dados/focos/$n"
+            cp -r "$f" "site/teste/dados/focos/$n"
+          done
+      - name: gh-pages (agora.json da hora e histórico do dia)
+        id: publica
+        if: steps.plano.outputs.copia == 'sim' || steps.hist.outcome == 'success'
+        env:
+          HIST: ${{ steps.hist.outcome }}
+        run: |
+          cd site
+          G=$(python -c "import json; print(json.load(open('teste/dados/focos/agora.json'))['gerado'])")
+          MSG="focos: agora ${G:11:5} UTC"
+          [ "$HIST" = success ] && MSG="$MSG; histórico do dia"
+          git add -A teste/dados/focos
+          if git diff --cached --quiet; then echo "Nada mudou em teste/dados/focos/."; exit 0; fi
+          git commit -q -m "$MSG"
+          for _ in 1 2 3; do
+            if git pull -q --rebase origin gh-pages && git push -q origin HEAD:gh-pages; then
+              echo "gh-pages: $MSG"; echo "publicado=sim" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep 10
+          done
+          echo "Não consegui gravar no gh-pages (outra publicação ao mesmo tempo?)"; exit 1
+      - name: Pede a publicação do site
+        if: steps.publica.outputs.publicado == 'sim'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh api -X POST "repos/$REPO/pages/builds" > /dev/null || echo "(a publicação do GitHub Pages segue pelo envio)"
+      - name: Falhou o ramo focos
+        if: steps.ramo.outcome == 'failure'
+        run: |
+          echo "O ramo focos não foi gravado nesta rodada (a cópia no gh-pages seguiu). Veja o passo 'Ramo focos'."
+          exit 1
+      - name: Apaga caches antigos (ficam os 3 mais novos)
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh cache list --key focos-cache- --sort created_at --order desc --limit 100 --json id --jq '.[3:][].id' \
+            | xargs -r -n1 gh cache delete
