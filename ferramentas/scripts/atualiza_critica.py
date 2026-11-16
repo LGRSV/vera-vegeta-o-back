@@ -111,7 +111,8 @@ def no_formato(o):
     """Ocorrência de critica.ocorrencias() no formato do site (o mesmo de trechos.dados_mapa)."""
     return dict(mes=o['mes'], dia=f"{o['abert'][8:10]}/{o['abert'][5:7]} {o['abert'][11:16]}", col=o['coletiva'],
                 abr=o['abr'], ativo=None, prob=o['prob'], causa=o['causa'], sub=o['sub'], prog=o['programada'],
-                cons=o['cons'], dur=o['dur'], chi=round(o['chi'], 1), mom=o['mom'], dc=o['dc'], long=o['long'], trecho=None, fora=None, regra=None, dist_m=None, _cand=[o['prob'], o['inter']])
+                cons=o['cons'], dur=o['dur'], chi=round(o['chi'], 1), mom=o['mom'], dc=o['dc'], long=o['long'],
+                dec_conj=round(o['dec_conj'], 6), fec_conj=round(o['fec_conj'], 6), trecho=None, fora=None, regra=None, dist_m=None, _cand=[o['prob'], o['inter']])
 
 
 def abertura(o):

@@ -9,8 +9,9 @@ O tipo vem da pasta do arquivo:
   bases/executadas/ OS_STATUS_Executadas (.zip com o .txt; o .txt sozinho passa do limite de envio do GitHub)
 O que roda, na ordem: Crítica (atualiza_critica.py), limpeza (limpeza_faixa.py sem o acervo de KMZ: OS já publicada
 mantém a posição), inspeção (inspecao.py), manutenção da inspeção (manutencao.py), manutenção executada
-(executadas.py); depois a interface (gera_trechos --so-interface), o NAE/100 km da mesma rede
-(teste/ferramentas/nae_rede.py) e a validação dos arquivos. Grava dados/bases.json (o que o menu mostra: data da última
+(executadas.py); depois a interface (gera_trechos --so-interface), a Priorização (com Crítica: ocorrências e DEC/FEC
+por trecho, priorizacao_indicadores.py; com Crítica ou limpeza: OS por trecho, priorizacao_os.py), o NAE/100 km da
+mesma rede (teste/ferramentas/nae_rede.py) e a validação dos arquivos. Grava dados/bases.json (o que o menu mostra: data da última
 atualização, enviado ou processado, e o período de cada base). Qualquer erro sai com código 1 e a automação não publica nada.
 
 Uso:
@@ -42,7 +43,8 @@ MES = re.compile(r'(?<!\d)(0[1-9]|1[0-2])[-_.](20\d\d)(?!\d)')
 # o que a automação precisa (pasta ferramentas/ do gh-pages): os scripts e a parte do pacote alimentador que eles usam
 FERRAMENTAS = {
     'scripts': ['gera_trechos.py', 'atualiza_critica.py', 'ativos_gis.py', 'inspecao.py', 'limpeza_faixa.py',
-                'manutencao.py', 'executadas.py', 'atualiza_bases.py', 'ativos_js.py', 'divisas.py', 'gera_visoes.js', 'ucs_trechos.py'],
+                'manutencao.py', 'executadas.py', 'atualiza_bases.py', 'ativos_js.py', 'divisas.py', 'gera_visoes.js', 'ucs_trechos.py',
+                'priorizacao_indicadores.py', 'priorizacao_os.py'],
     'alimentador': ['__init__.py', 'critica.py', 'daimon.py', 'gerar_trechos.py', 'regras.py', 'trechos.py',
                     'mapa_trechos.html', 'site_indice.html', 'leaflet/leaflet.css', 'leaflet/leaflet.js',
                     'leaflet/LICENSE', 'site/*'],
@@ -204,6 +206,7 @@ def atualiza(site, arquivos, hoje=None):
                 print(f"{r['manutencao']} OS de manutenção (MC e MP) · {r['em_paginas']} no site · {r['situacao']}")
                 feitos['executadas'] = [a]
     roda('Páginas e rankings', gt.main, ['--saida', str(site), '--so-interface'])
+    priorizacao(site, feitos)
     print('\n== NAE/100 km da mesma rede', flush=True)
     nae_rede(site)
     print('\n== Visões do mapa inicial (Manutenção, Inspeção, Insp→manut, Limpeza)', flush=True)
@@ -214,6 +217,24 @@ def atualiza(site, arquivos, hoje=None):
     for t in TIPOS:
         print(f"  {NOMES[t]}: {json.dumps({k: v for k, v in est[t].items() if k != 'nome'}, ensure_ascii=False)}")
     return feitos
+
+
+def priorizacao(site, feitos):
+    """Priorização (assets/priorizacao-dados.js e dados/decfec-trechos.js): com Crítica, as ocorrências e o DEC/FEC de
+    cada trecho pela NAE dos alimentadores; com Crítica ou limpeza, as OS de limpeza de cada trecho pelo mapa."""
+    if not (Path(site) / 'assets' / 'priorizacao-dados.js').exists():
+        return
+    if 'critica' in feitos:
+        import priorizacao_indicadores
+        r = roda('Priorização: ocorrências e DEC/FEC por trecho', priorizacao_indicadores.main, str(site))
+        print(f"{r['trechos']} trechos · {len(r['acrescidos'])} acrescidos · oc até {r['oc_ate'][1]} · DEC/FEC: "
+              f"{json.dumps(r['decfec'], ensure_ascii=False)}")
+        if r['sem_trecho']:
+            print(f"ocorrências em trecho que não está no mapa (ficam fora): {r['sem_trecho'][:10]}")
+    if 'critica' in feitos or 'limpeza' in feitos:
+        import priorizacao_os
+        r = roda('Priorização: OS de limpeza por trecho', priorizacao_os.main, str(site))
+        print(f"{r['os']} OS · {r['depois']} OS-trecho · {r['de']} a {r['ate']}")
 
 
 def visoes(site):
