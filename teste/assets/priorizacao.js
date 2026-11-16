@@ -1,11 +1,17 @@
 // Priorização de limpeza de faixa e poda (/teste/priorizacao/): motor e tela do Artifact "VERA Priorização de Faixa".
-// Dados: window.DADOS (priorizacao-dados.js).
-// Nota de 0 a 100 = soma de pontos, como numa prova: cada critério dá os pontos da faixa de valor em que o trecho está
-// (NAE, CHI e CI por 100 km, clientes por evento, hierarquia T1/T2/T3, cliente Grupo A e situação da limpeza de faixa).
-// CHI = consumidor·hora interrompido e CI = consumidores interrompidos, em valor absoluto: não são o DEC e o FEC do conjunto.
-// Desde 13/11/2026 (decisão do dono) os dois usam as UCs ligadas a jusante do trecho (planilha UC por trafo) em cada evento
-// coletivo, e não os consumidores registrados na Crítica; evento individual (um consumidor) e trecho fora da planilha continuam
-// com os da Crítica.
+// Dados: window.DADOS (priorizacao-dados.js; ocorrências até D.oc_ate), DECFEC_TRECHOS (dados/decfec-trechos.js: DEC e FEC
+// de cada ocorrência, na ordem de oc, e as expurgadas), LENTE_IMAGEM (dados/lente-imagem.js: nota 1 a 4 por alimentador),
+// SOLICITACOES (dados/solicitacoes-trechos.js: pedidos de limpeza por trecho), UCS_TRECHOS e URBANO_TRECHOS.
+// Nota de 0 a 100 = soma de pontos, como numa prova: cada critério dá os pontos da faixa de valor em que o trecho está.
+// Perfil padrão (decisão do dono em 16/11/2026): premissas do Ranking de faixa (planilha RANKING_FAIXA_APP, 16/11/2026) sem as
+// lentes de Meio Ambiente e de Segurança, reescaladas para somar 100: NAE Vegetação/100 km 33, DEC/100 km 33, FEC/100 km 22 e
+// Lente de imagem 12. Clientes, Hierarquia, Grupo A e Limpeza seguem na tabela de pontos com 0 no padrão (editáveis).
+// DEC e FEC: contribuição das ocorrências do trecho no DEC (horas) e no FEC (interrupções) do conjunto ANEEL, pela Crítica, já
+// sem o que o PRODIST não conta; ocorrência expurgada como situação de emergência vale 0, como no indicador oficial (continua no
+// NAE). Janela de 12 meses (U12M) contada da data de referência. As UCs a jusante só entram no critério Clientes.
+// Regra F5: T1 com a última limpeza efetiva (OS executada cobrindo ≥ 50% do trecho) há mais de P.t1Anos (3) anos, ou sem
+// limpeza efetiva registrada, fica no mínimo P1 e no topo do ranking, entre si pela nota. Solicitações não mudam a nota:
+// marcam o trecho na lista e na ficha e têm filtro próprio (a de trecho criado depois de 07/10 vai para o trecho que o contém).
 // A tabela de pontos de cada perfil soma 100.
 'use strict';
 /* Motor de priorização VERA (teste). Funções puras: recebem dados + tabela de pontos + parâmetros e devolvem o ranking com
@@ -17,9 +23,13 @@ const VERA = (() => {
   // rot: nome das faixas sem valor numérico. A tabela de pontos do perfil tem um número por faixa; zero: o que não pontua.
   const CRIT = [
     { k: 'nae', b: 'his', nome: 'NAE Vegetação/100 km', curto: 'NAE', lim: [20, 40, 60], passo: 0.1, zero: 'nenhuma' },
-    // chaves dec e fec mantidas: as validações gravadas no navegador guardam os pontos com elas
-    { k: 'dec', b: 'his', nome: 'CHI por 100 km (consumidor·hora)', curto: 'CHI', lim: [1000, 10000], passo: 1, zero: 'nenhum', edita: true },
-    { k: 'fec', b: 'his', nome: 'CI por 100 km (consumidores interrompidos)', curto: 'CI', lim: [100, 1000, 10000], passo: 1, zero: 'nenhum', edita: true },
+    // limites de DEC e FEC (editáveis na tela, P.fx): calibrados nas ocorrências de jan a nov/2026 (até 09/11), referência 09/11,
+    // 12 meses, depois da última limpeza e com o piso de 5 km. Ficam abaixo deles cerca de 57% e 91% dos trechos com DEC e
+    // 48%, 83% e 98% dos com FEC. Com a janela de 12 meses cheia os valores sobem (~15%): rever
+    { k: 'dec', b: 'his', nome: 'DEC/100 km', curto: 'DEC', lim: [0.07, 0.8], passo: 0.001, zero: 'nenhum', edita: true },
+    { k: 'fec', b: 'his', nome: 'FEC/100 km', curto: 'FEC', lim: [0.006, 0.06, 0.6], passo: 0.001, zero: 'nenhum', edita: true },
+    // Lente de imagem da planilha (aba Lente de imagem): risco de imagem do alimentador, 1 a 4 (4 = maior); sem lente não pontua
+    { k: 'img', b: 'imp', nome: 'Lente de imagem', curto: 'Lente', rot: ['1', '2', '3', '4'], zero: 'sem dado' },
     { k: 'cli', b: 'imp', nome: 'Clientes (UCs ligadas)', curto: 'Clientes', lim: [10, 100, 1000], passo: 1, inteiro: true },
     { k: 'hier', b: 'imp', nome: 'Hierarquia do trecho', curto: 'Hierarquia', rot: ['T1', 'T2', 'T3'] },
     { k: 'ga', b: 'imp', nome: 'Cliente Grupo A', curto: 'Grupo A', rot: ['tem'], zero: 'não tem ou sem dado' },
@@ -31,19 +41,29 @@ const VERA = (() => {
     { k: 'man', nome: 'Limpeza de faixa', cor: 'var(--c-man)' },
   ];
   // pontos por faixa (inteiros), na ordem das faixas de CRIT; cada perfil soma 100 nos máximos.
-  // Limpeza "sem registro" (nenhuma OS efetiva): metade dos pontos de vencida, porque falta de OS não prova vencimento
+  // Padrão: premissas do Ranking de faixa (planilha RANKING_FAIXA_APP, 16/11/2026). Na planilha a nota é DEC 30% + NAE 30% +
+  // FEC 20% + Lente de imagem 10% + Lente de Meio Ambiente 10%; sem a de Meio Ambiente (e a de Segurança), reescalados: 33, 33,
+  // 22 e 12; os pontos de cada faixa são os do padrão anterior na mesma proporção, arredondados (NAE 5/10/15/20 × 1,65 =
+  // 8/17/25/33, DEC 5/10/15 × 2,2 = 11/22/33, FEC 3/5/8/10 × 2,2 = 7/11/18/22). Clientes, Hierarquia, Grupo A e Limpeza: 0
+  // no padrão (editáveis).
+  // Pré-chuva e Plano climático: os perfis anteriores, mantidos como opção (Lente 0). Neles a limpeza "sem registro" (nenhuma
+  // OS efetiva) vale metade dos pontos de vencida, porque falta de OS não prova vencimento
+  const VERSAO = 'ranking-faixa-2026-11-16';   // gravada nas validações: as anteriores não têm (metodologia de antes de 16/11)
   const PERFIS = {
-    padrao: { nome: 'Padrão', t: { nae: [5, 10, 15, 20], dec: [5, 10, 15], fec: [3, 5, 8, 10], cli: [5, 10, 15, 20], hier: [10, 5, 3], ga: [5], limp: [20, 10, 10] } },
-    prechuva: { nome: 'Pré-chuva (set–nov)', t: { nae: [5, 10, 15, 20], dec: [3, 5, 10], fec: [3, 5, 8, 10], cli: [3, 5, 10, 15], hier: [10, 5, 3], ga: [5], limp: [30, 15, 15] } },
-    clima: { nome: 'Plano climático', t: { nae: [5, 10, 15, 25], dec: [5, 10, 20], fec: [3, 5, 8, 10], cli: [3, 5, 10, 15], hier: [10, 5, 3], ga: [5], limp: [15, 8, 8] } },
+    padrao: { nome: 'Padrão', t: { nae: [8, 17, 25, 33], dec: [11, 22, 33], fec: [7, 11, 18, 22], img: [3, 6, 9, 12], cli: [0, 0, 0, 0], hier: [0, 0, 0], ga: [0], limp: [0, 0, 0] } },
+    prechuva: { nome: 'Pré-chuva (set–nov)', t: { nae: [5, 10, 15, 20], dec: [3, 5, 10], fec: [3, 5, 8, 10], img: [0, 0, 0, 0], cli: [3, 5, 10, 15], hier: [10, 5, 3], ga: [5], limp: [30, 15, 15] } },
+    clima: { nome: 'Plano climático', t: { nae: [5, 10, 15, 25], dec: [5, 10, 20], fec: [3, 5, 8, 10], img: [0, 0, 0, 0], cli: [3, 5, 10, 15], hier: [10, 5, 3], ga: [5], limp: [15, 8, 8] } },
   };
 
-  function parametrosPadrao() {
+  // referência padrão: o último dia com ocorrência nos dados (D.oc_ate, 09/11/2026); a janela de 12 meses (U12M) conta dela
+  function parametrosPadrao(D) {
+    const dd = D || (typeof window !== 'undefined' && window.DADOS) || null;
     return {
-      ref: '2026-10-29', janela: 12, cobEfetiva: 0.5, cobBloqueio: 0.8,
+      ref: (dd && dd.oc_ate) || '2026-11-09', janela: 12, cobEfetiva: 0.5, cobBloqueio: 0.8,
       carencia: { 1: 6, 2: 9, 3: 12 }, ciclo: { 1: 3, 2: 4, 3: 5 }, aVencer: 3,
       lim: { p1: 70, p2: 50, p3: 30 }, planoPolos: [], bonus: 8, pisoKm: 5,
-      fx: Object.fromEntries(CRIT.filter((c) => c.edita).map((c) => [c.k, c.lim.slice()])),   // limites de faixa editáveis (CHI e CI)
+      t1Anos: 3,   // regra F5: T1 sem limpeza efetiva há mais que isso (ou sem registro) vai a P1 e ao topo
+      fx: Object.fromEntries(CRIT.filter((c) => c.edita).map((c) => [c.k, c.lim.slice()])),   // limites de faixa editáveis (DEC e FEC)
     };
   }
 
@@ -52,6 +72,8 @@ const VERA = (() => {
   const nfP = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
   const nfD = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
   const nf4 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 4 });
+  const nf3 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 });
+  const fmtH = (x) => nf4.format(x);   // horas de DEC e interrupções de FEC de cada ocorrência (0,0012)
   const fmtN = (x) => nf0.format(x);
   const fmt1 = (x) => nf1.format(x);
   const fmtP = (x) => nfP.format(x);   // pontos e nota: 0,25 · 1,5 · 7
@@ -62,9 +84,8 @@ const VERA = (() => {
   const qtd = (n, um, muitos) => fmtN(n) + ' ' + (n === 1 ? um : muitos);
   // medida por 100 km como aparece no extrato: cortada (não arredondada) na casa mostrada, para bater com a faixa
   const corta = (x, casas) => Math.floor(x * 10 ** casas + 1e-9) / 10 ** casas;
-  const mostra = (x) => (x >= 100 ? fmtN(corta(x, 0)) : x >= 1 ? fmtD(corta(x, 1)) : x >= 0.01 ? fmtP(corta(x, 2)) : 'menos de 0,01');
+  const mostra = (x) => (x >= 100 ? fmtN(corta(x, 0)) : x >= 1 ? fmtD(corta(x, 1)) : x >= 0.01 ? fmtP(corta(x, 2)) : x >= 0.001 ? nf3.format(corta(x, 3)) : 'menos de 0,001');
   const meses = (n) => n + (n === 1 ? ' mês' : ' meses');
-  const bruto = (x) => (x < 0.01 ? 'menos de 0,01' : x < 100 ? fmtP(x) : fmtD(x));
 
   function quantil(arr, q) {
     if (!arr.length) return 0;
@@ -86,38 +107,76 @@ const VERA = (() => {
   function rotFaixa(c, j, P) {
     if (c.k === 'limp' && j === 1) return 'vence em até ' + meses(P.aVencer);
     if (c.rot) return c.rot[j];
-    const L = limDe(c, P), f = (x) => (c.passo < 1 ? fmtD(x) : c.edita ? nf4.format(x) : fmtN(x));
+    // limites editáveis (DEC e FEC) com até 4 casas; NAE com 1 casa; contagens inteiras
+    const L = limDe(c, P), f = (x) => (c.edita ? nf4.format(x) : c.passo < 1 ? fmtD(x) : fmtN(x));
     if (j === 0) return c.inteiro ? '1 a ' + f(L[0] - 1) : 'menos de ' + f(L[0]);
-    // limite editado que não é inteiro: "a menos de" (o padrão mostra "1.000 a 9.999", como na versão publicada)
-    if (c.edita && j < L.length && !Number.isInteger(L[j])) return f(L[j - 1]) + ' a menos de ' + f(L[j]);
+    if (c.edita && j < L.length) return f(L[j - 1]) + ' a menos de ' + f(L[j]);   // qualquer limite editado, sem "0,0599"
     if (j < L.length) return f(L[j - 1]) + ' a ' + f(Math.round((L[j] - c.passo) * 10) / 10);
     return f(L[j - 1]) + ' ou mais';
   }
   const maxDe = (T, k) => Math.max(0, ...T[k]);
   const notaMax = (T) => CRIT.reduce((s, c) => s + maxDe(T, c.k), 0);
-  // desempate entre notas iguais: mais ocorrências por 100 km, depois mais consumidor·hora por 100 km, depois o trecho mais longo
-  const cmpNota = (a, b) => b.score - a.score || b.f.n100 - a.f.n100 || b.f.chi100 - a.f.chi100 || b.t.km - a.t.km;
+  // desempate entre notas iguais: mais ocorrências por 100 km, depois mais DEC por 100 km, depois o trecho mais longo
+  const cmpNota = (a, b) => b.score - a.score || b.f.n100 - a.f.n100 || b.f.dec100 - a.f.dec100 || b.t.km - a.t.km;
 
   function preparar(D) {
     const d0 = Date.parse(D.d0 + 'T00:00:00Z');
-    const ctx = { D, d0, alims: D.alims, muns: D.muns, ucs: (typeof window !== 'undefined' && window.UCS_TRECHOS && window.UCS_TRECHOS.al) || (typeof UCS_TRECHOS !== 'undefined' && UCS_TRECHOS.al) || null,
+    const W = typeof window !== 'undefined' ? window : {};
+    const ctx = { D, d0, alims: D.alims, muns: D.muns, ucs: (W.UCS_TRECHOS && W.UCS_TRECHOS.al) || (typeof UCS_TRECHOS !== 'undefined' && UCS_TRECHOS.al) || null,
       // fração urbana por trecho (dados/urbano-trechos.js); sem o arquivo, null
-      urb: (typeof window !== 'undefined' && window.URBANO_TRECHOS && window.URBANO_TRECHOS.al) || null,
-      urbCorte: (typeof window !== 'undefined' && window.URBANO_TRECHOS && window.URBANO_TRECHOS.corte) || 0.5 };
+      urb: (W.URBANO_TRECHOS && W.URBANO_TRECHOS.al) || null,
+      urbCorte: (W.URBANO_TRECHOS && W.URBANO_TRECHOS.corte) || 0.5,
+      // DEC e FEC de cada ocorrência (dados/decfec-trechos.js) e as expurgadas como situação de emergência; sem o arquivo, null
+      dfc: (W.DECFEC_TRECHOS && W.DECFEC_TRECHOS.al) || null,
+      exp: (W.DECFEC_TRECHOS && W.DECFEC_TRECHOS.expurgo) || {},
+      // Lente de imagem por alimentador (dados/lente-imagem.js) e solicitações por trecho (dados/solicitacoes-trechos.js)
+      img: (W.LENTE_IMAGEM && W.LENTE_IMAGEM.al) || null,
+      sol: (W.SOLICITACOES && W.SOLICITACOES.al) || null,
+      // alimentadores divididos por exceção em 16/10/2026 (GIS sem as chaves fechadas), já pela segmentação de hoje (alerta Q5)
+      excecao: new Set(D.excecao || []) };
+    // solicitações por trecho do DADOS: a de um trecho criado depois da segmentação do DADOS (D.sobe: trecho de hoje → trecho
+    // do DADOS que o contém) vai para esse trecho, com o nome pedido em `de`
+    ctx.solT = null;
+    if (ctx.sol) {
+      const sobe = D.sobe || {};
+      ctx.solT = {};
+      for (const [al, tr] of Object.entries(ctx.sol)) {
+        for (const [n, l] of Object.entries(tr)) {
+          if (!Array.isArray(l)) continue;
+          const p = (sobe[al] && sobe[al][n]) || n, dest = (ctx.solT[al] = ctx.solT[al] || {});
+          dest[p] = (dest[p] || []).concat(p === n ? l : l.map((x) => Object.assign({}, x, { de: n })));
+        }
+      }
+    }
     ctx.osInicio = Math.round((Date.parse(D.os_inicio + 'T00:00:00Z') - d0) / DIA);
     ctx.kmClasse = { 1: D.estat.km_T1, 2: D.estat.km_T2, 3: D.estat.km_T3 };
-    // período que a Crítica cobre (meses de D.saz): do 1º dia do primeiro mês ao último dia do último mês
+    // período que a Crítica cobre: do 1º dia do primeiro mês de D.saz até D.oc_ate (último dia com dado; nov/2026 vai até
+    // 09/11) ou, sem ele, até o último dia do último mês de D.saz
     const ms = Object.keys(D.saz).sort(), [ua, um] = ms[ms.length - 1].split('-').map(Number);
     ctx.ocIni = Math.round((Date.parse(ms[0] + '-01T00:00:00Z') - d0) / DIA);
-    ctx.ocFim = Math.round((Date.UTC(ua, um, 0) - d0) / DIA);
+    ctx.ocFim = D.oc_ate ? Math.round((Date.parse(D.oc_ate + 'T00:00:00Z') - d0) / DIA) : Math.round((Date.UTC(ua, um, 0) - d0) / DIA);
+    let desal = 0;
     ctx.trechos = D.trechos.map((t, i) => {
-      const a = D.alims[t.a];
+      const a = D.alims[t.a], al = a[0];
+      // DEC/FEC: a lista do trecho tem de ter o tamanho de oc (mesma ordem); fora disso (arquivo de outra versão) fica sem dado
+      let dfc = null;
+      if (ctx.dfc) {
+        const x = ctx.dfc[al] && ctx.dfc[al][t.n];
+        dfc = x && x.length === t.oc.length ? x : (t.oc.length && desal++, []);
+      }
+      const ex = dfc && dfc.length && ctx.exp[al] && ctx.exp[al][t.n];
+      const lente = ctx.img ? ctx.img[al] : undefined, sol = ctx.solT && ctx.solT[al] && ctx.solT[al][t.n];
       return Object.assign(t, {
-        i, al: a[0], se: a[2], reg: a[3] || 'Sem regional', polo: a[4] || 'Sem polo', equipe: a[4] || '',
-        urb: ctx.urb ? (ctx.urb[a[0]] && ctx.urb[a[0]][t.n]) || 0 : null,
-        mun: t.mu >= 0 ? D.muns[t.mu] : '—', id: a[0] + ' · ' + t.n,
+        i, al, se: a[2], reg: a[3] || 'Sem regional', polo: a[4] || 'Sem polo', equipe: a[4] || '',
+        urb: ctx.urb ? (ctx.urb[al] && ctx.urb[al][t.n]) || 0 : null,
+        mun: t.mu >= 0 ? D.muns[t.mu] : '—', id: al + ' · ' + t.n,
+        dfc, exp: ex ? new Set(ex) : null,
+        lente: Number.isInteger(lente) && lente >= 1 && lente <= 4 ? lente : null,
+        // solicitações do trecho, da mais recente para a mais antiga
+        sol: Array.isArray(sol) && sol.length ? sol.slice().sort((p, q) => String(q.criado || '').localeCompare(String(p.criado || ''))) : null,
       });
     });
+    ctx.dfcDesal = desal;   // trechos com DEC/FEC desalinhado de oc (deve ser 0)
     return ctx;
   }
   const diaDe = (ctx, iso) => Math.round((Date.parse(iso + 'T00:00:00Z') - ctx.d0) / DIA);
@@ -130,15 +189,27 @@ const VERA = (() => {
     return d.getUTCFullYear() * 12 + d.getUTCMonth();
   };
 
-  // período de ocorrências que a nota enxerga na referência: a janela de P.janela meses cortada pelo que a Crítica tem.
-  // lacuna: meses entre o fim da Crítica e a referência, que o histórico recente (F1 de 90 dias, NAE, CHI, CI) não vê
+  // período de ocorrências que a nota enxerga na referência: a janela de P.janela meses (U12M) cortada pelo que a Crítica tem.
+  // lacuna: [primeiro, último dia] entre o fim da Crítica e a referência, que o histórico recente (F1 de 90 dias, NAE, DEC, FEC)
+  // não vê; vazia quando a referência está dentro dos dados. cob: a cobertura em meses ("jan a nov/2026, até 09/11").
+  // avisos: notas sobre meses da janela (set/2026: registros expurgados como situação de emergência na Crítica)
   const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const AVISOS = [
+    { ini: '2026-09-01', fim: '2026-09-30', txt: 'set/2026: 3.363 registros da Crítica expurgados como situação de emergência; a NAE desse mês pode estar menor.' },
+  ];
   function periodo(ctx, P) {
     const ref = diaDe(ctx, P.ref), ini = Math.max(ctx.ocIni, Math.ceil(ref - P.janela * 30.44)), fim = Math.min(ctx.ocFim, ref);
-    const m0 = mesDe(ctx, ini), m1 = mesDe(ctx, fim), lac = [];
-    for (let m = mesDe(ctx, ctx.ocFim) + 1; m <= mesDe(ctx, ref); m++) lac.push(MES[m % 12]);
-    const txt = fim < ini ? 'nenhuma ocorrência na janela' : dataDe(ctx, ini).slice(0, 5) + ' a ' + dataDe(ctx, fim) + ' (' + meses(m1 - m0 + 1) + ')';
-    return { ini, fim, txt, fimTxt: dataDe(ctx, ctx.ocFim), lacuna: ref > ctx.ocFim ? lac : [] };
+    const m0 = mesDe(ctx, ini), m1 = mesDe(ctx, fim), vazio = fim < ini;
+    const txt = vazio ? 'nenhuma ocorrência na janela' : dataDe(ctx, ini).slice(0, 5) + ' a ' + dataDe(ctx, fim) + ' (' + meses(m1 - m0 + 1) + ')';
+    let cob = 'nenhuma ocorrência na janela';
+    if (!vazio) {
+      const di = dataDe(ctx, ini), df = dataDe(ctx, fim), mi = MES[m0 % 12], mf = MES[m1 % 12], ai = Math.floor(m0 / 12), af = Math.floor(m1 / 12);
+      const fimMes = mesDe(ctx, fim + 1) !== m1;   // fim é o último dia do mês
+      cob = (m0 === m1 ? mf : mi + (ai !== af ? '/' + ai : '') + ' a ' + mf) + '/' + af +
+        (di.slice(0, 2) !== '01' ? ', desde ' + di.slice(0, 5) : '') + (fimMes ? '' : ', até ' + df.slice(0, 5));
+    }
+    const avisos = vazio ? [] : AVISOS.filter((a) => diaDe(ctx, a.ini) <= fim && diaDe(ctx, a.fim) >= ini && diaDe(ctx, a.ini) <= ctx.ocFim).map((a) => a.txt);
+    return { ini, fim, txt, cob, avisos, fimTxt: dataDe(ctx, ctx.ocFim), lacuna: ref > ctx.ocFim ? [dataDe(ctx, ctx.ocFim + 1), dataDe(ctx, ref)] : [] };
   }
 
   // abertura de disjuntor (T1) ou religador (T2) do trecho, ou abrangência do DJ: o defeito está em ponto não identificado da zona
@@ -156,43 +227,47 @@ const VERA = (() => {
         if (d > ref) continue;
         if (s === 1) {
           if (f >= P.cobEfetiva && (ult === null || d > ult)) ult = d;
-          if (!parcial || d > parcial.d) parcial = { d, f };
+          if (f >= 0.01 && (!parcial || d > parcial.d)) parcial = { d, f };   // OS sem cobertura no trecho (0%) não é "parcial"
           if (f >= P.cobBloqueio && ref - d <= P.carencia[t.c] * 30.44 && (!bloq || d > bloq.d)) bloq = { d, cod, f };
         } else if (f >= 0.3 && (!cart || f > cart.f)) cart = { d, cod, f };
       }
-      // NAE, CHI e CI contam só as ocorrências da janela depois da última limpeza efetiva: as de antes já foram tratadas.
+      // NAE, DEC e FEC contam só as ocorrências da janela depois da última limpeza efetiva: as de antes já foram tratadas.
       // Clientes por evento, meses com evento e eventos nos últimos 90 dias (regras F1 e F4) usam a janela inteira.
-      // CHI e CI: cada evento coletivo conta as UCs ligadas a jusante do trecho (jus, planilha UC por trafo), quem um evento no
-      // trecho deixa sem energia; evento individual (um consumidor, ramal de ligação) e trecho fora da planilha (jus null) usam os
-      // consumidores registrados na Crítica. nUc e nInd: eventos que contam por UC e individuais pela Crítica (texto da ficha)
-      const ucAl = ctx.ucs && ctx.ucs[t.al], ucT = ucAl ? ucAl[t.n] : null, jus = ucT ? ucT[1] : null;
-      let n = 0, chi = 0, ci = 0, nJan = 0, n90 = 0, posBloq = 0, cliMax = 0, nUc = 0, nInd = 0;
+      // DEC e FEC: a contribuição de cada ocorrência no DEC (horas) e no FEC (interrupções) do conjunto ANEEL, pela Crítica
+      // (t.dfc, mesma ordem de t.oc). Expurgada como situação de emergência (t.exp): 0, como no indicador oficial (nExp).
+      // null = ocorrência não achada na Crítica: conta 0 e entra em nSem ("sem dado")
+      const dfc = t.dfc, exp = t.exp;
+      let n = 0, dec = 0, fec = 0, nSem = 0, nExp = 0, nJan = 0, n90 = 0, posBloq = 0, cliMax = 0;
       const meses = new Set(), usadas = [];
-      for (const [d, cons, dur, col, rg] of t.oc) {
+      for (let ix = 0; ix < t.oc.length; ix++) {
+        const [d, cons, dur, col, rg] = t.oc[ix];
         const age = ref - d;
         if (age < 0 || age > janela) continue;
         const pre = ult !== null && d < ult;
+        const ex = !!(exp && exp.has(ix)), x = dfc && !ex ? dfc[ix] || null : null;
         if (!pre) {
-          const porUc = jus !== null && !!col, c = porUc ? jus : cons;
-          n++; chi += (c * dur) / 60; ci += c;
-          if (porUc) nUc++; else if (jus !== null) nInd++;
+          n++;
+          if (ex) nExp++;
+          else if (x) { dec += x[0]; fec += x[1]; } else if (dfc) nSem++;
         }
         nJan++;
         if (age <= 90) n90++;
         if (bloq && d >= bloq.d) posBloq++;
         meses.add(mesDe(ctx, d));
         if (cons > cliMax) cliMax = cons;
-        usadas.push({ d, cons, dur, col, rg, pre });
+        usadas.push({ d, cons, dur, col, rg, pre, ex, dh: ex ? 0 : x ? x[0] : null, fc: ex ? 0 : x ? x[1] : null });
       }
-      return { ult, parcial, bloq, cart, n, chi, ci, jus, nUc, nInd, nJan, n90, posBloq, meses: meses.size, cliMax, usadas };
+      return { ult, parcial, bloq, cart, n, dec, fec, nSem, nExp, nJan, n90, posBloq, meses: meses.size, cliMax, usadas };
     });
     // por 100 km do trecho. Trecho mais curto que P.pisoKm (padrão 5 km) conta como P.pisoKm: a mediana dos trechos tem 0,21 km e,
     // sem esse mínimo, um trecho curtinho com uma só ocorrência passaria o tronco
     const kmConta = (t) => Math.max(P.pisoKm, t.km);
     F.forEach((f, i) => {
       const km = kmConta(ctx.trechos[i]);
-      f.n100 = (f.n * 100) / km; f.chi100 = (f.chi * 100) / km; f.ci100 = (f.ci * 100) / km;
+      f.n100 = (f.n * 100) / km; f.dec100 = (f.dec * 100) / km; f.fec100 = (f.fec * 100) / km;
     });
+    // DEC e FEC sem dado: sem o arquivo por ocorrência, ou com todas as ocorrências que contam não achadas na Crítica
+    const semDfc = (f, t) => !ctx.dfc || (f.n > 0 && f.nSem === f.n) || (t.oc.length > 0 && t.dfc && !t.dfc.length);
 
     // 2. referência da rodada, calculada sobre a rede toda (não muda com filtro): clientes típicos de cada classe, para trecho sem evento
     const med = { cli: {} };
@@ -219,10 +294,13 @@ const VERA = (() => {
 
       // valor de cada critério no trecho: x (medida), j (faixa; -1 = não pontua), st (real, est = estimado, falta = sem dado).
       // O texto do extrato (dado e obs) só é montado quando a ficha ou a justificativa pede (textos), para a abertura ser rápida
+      const sem = semDfc(f, t);
       const v = {
         nae: { x: f.n100, st: 'real' },
-        dec: { x: f.chi100, st: 'real' },
-        fec: { x: f.ci100, st: 'real' },
+        dec: { x: f.dec100, st: sem ? 'falta' : 'real' },
+        fec: { x: f.fec100, st: sem ? 'falta' : 'real' },
+        // Lente de imagem do alimentador (1 a 4): a faixa é a própria nota; sem lente, sem dado (não pontua)
+        img: t.lente ? { x: t.lente, j: t.lente - 1, st: 'real' } : { x: 0, j: -1, st: 'falta' },
         cli: uc ? { x: uc[1], st: 'real', uc } : ucAl ? { x: 0, st: 'falta', fora: true }
           : f.cliMax > 0 ? { x: f.cliMax, st: 'real' } : { x: med.cli[t.c], st: 'est' },
         hier: { j: t.c - 1, st: 'real' },
@@ -262,6 +340,16 @@ const VERA = (() => {
         status = 'Em carteira';
         regras.push({ id: 'B2', tipo: 'bloqueio', txt: 'OS aberta ' + f.cart.cod + ' já cobre ' + pct(f.cart.f) + ' do trecho' });
       }
+      // F5 (Ranking de faixa, 16/11/2026): T1 com a última limpeza efetiva (OS executada cobrindo ≥ P.cobEfetiva do trecho) há
+      // mais de P.t1Anos anos da referência, ou sem limpeza efetiva registrada, fica no mínimo P1 e vai ao topo do ranking (entre
+      // si, pela nota). OS parcial (abaixo de P.cobEfetiva) não conta como limpeza efetiva; o texto diz a última, se houver.
+      // T1 com menos de 0,5 km (o corte do Q4) é sinalizado: pode não ter faixa a limpar (a regra não tem piso de km)
+      const topo = t.c === 1 && (f.ult === null || ref - f.ult > P.t1Anos * 365.25);
+      if (topo) {
+        piso = 1;
+        const curto = t.km < 0.5 ? '; trecho de ' + fmtN(t.km * 1000) + ' m: confirmar se há faixa a limpar' : '';
+        regras.push({ id: 'F5', tipo: 'piso', txt: (f.ult === null ? 'T1 sem limpeza efetiva registrada (nenhuma OS executada cobrindo ≥ ' + pct(P.cobEfetiva) + ' do trecho' + (f.parcial ? '; a última parcial, em ' + dataDe(ctx, f.parcial.d) + ', cobriu ' + pct(f.parcial.f) : '') + ')' : 'T1 com a última limpeza efetiva em ' + dataDe(ctx, f.ult) + ', há mais de ' + fmtP(P.t1Anos) + (P.t1Anos === 1 ? ' ano' : ' anos')) + ': mínimo P1 e topo do ranking' + curto });
+      }
       if (t.c === 1 && (f.meses >= 3 || f.n90 >= 2)) {
         piso = 1;
         regras.push({ id: 'F1', tipo: 'piso', txt: 'T1 com recorrência (' + meses(f.meses) + ' com evento, ' + f.n90 + ' nos últimos 90 dias' + (per.lacuna.length ? ', com a Crítica só até ' + per.fimTxt : '') + '): mínimo P1 e análise de causa' });
@@ -279,10 +367,12 @@ const VERA = (() => {
       if (confR < 0.6 && faixa <= 2) regras.push({ id: 'Q1', tipo: 'alerta', txt: 'Confiança ' + fmt1(10 * confR) + ' de 10: confirmar em inspeção antes de programar' });
       if (t.km < 0.5 && f.nJan > 0) regras.push({ id: 'Q4', tipo: 'alerta', txt: 'Trecho curto (' + fmtN(t.km * 1000) + ' m) com ' + qtd(f.nJan, 'ocorrência', 'ocorrências') + ': confirmar o local da falha antes de programar' });
       if (t.cf === 'revisar') regras.push({ id: 'Q3', tipo: 'alerta', txt: 'Segmentação deste trecho está marcada para revisão no cadastro' });
-      return { t, f, v, pts, situacao, limpeza, score, segs, bonus, CH, UA, conf: confR, faixa, fScore, piso, fila, status, regras };
+      if (ctx.excecao.has(t.al)) regras.push({ id: 'Q5', tipo: 'alerta', txt: 'Alimentador dividido por exceção em 16/10/2026 (GIS sem as chaves fechadas): poucos trechos e longos, a NAE por trecho é pouco confiável; confirmar em campo' });
+      return { t, f, v, pts, situacao, limpeza, score, segs, bonus, CH, UA, conf: confR, faixa, fScore, piso, fila, status, regras, topo };
     });
     const ordemStatus = { 'Elegível': 0, 'Em carteira': 1, 'Executado recentemente': 2 };
-    const ranked = res.slice().sort((a, b) => ordemStatus[a.status] - ordemStatus[b.status] || a.faixa - b.faixa || cmpNota(a, b));
+    // T1 da regra F5 antes de todos os demais (dentro da mesma situação), depois faixa e nota
+    const ranked = res.slice().sort((a, b) => ordemStatus[a.status] - ordemStatus[b.status] || b.topo - a.topo || a.faixa - b.faixa || cmpNota(a, b));
     let k = 0;
     for (const r of ranked) r.pos = r.status === 'Elegível' ? ++k : null;
     return { res, ranked, med, ref, M, Mtot, per };
@@ -298,6 +388,10 @@ const VERA = (() => {
       : f.parcial ? 'nenhuma limpeza cobrindo ≥ ' + pct(P.cobEfetiva) + ' do trecho desde ' + dataDe(ctx, ctx.osInicio) + ' (última parcial em ' + dataDe(ctx, f.parcial.d) + ', ' + pct(f.parcial.f) + ')'
       : 'nenhuma OS de limpeza executada desde ' + dataDe(ctx, ctx.osInicio);
     const ciclo = 'ciclo T' + t.c + ' = ' + P.ciclo[t.c] + ' anos';
+    // DEC e FEC: o que não conta (expurgada, sem dado) vai junto do extrato
+    const notas = [f.nExp ? qtd(f.nExp, 'expurgada (situação de emergência): não conta', 'expurgadas (situação de emergência): não contam') + ' no DEC/FEC' : '',
+      f.nSem ? qtd(f.nSem, 'ocorrência sem dado na Crítica conta 0', 'ocorrências sem dado na Crítica contam 0') : ''].filter(Boolean);
+    const semD = v.dec.st === 'falta', obsDF = (ind) => (!ctx.dfc || !f.n ? '' : ['contribuição das ocorrências no ' + ind + ' do conjunto ANEEL, pela Crítica', ...notas].join(' · '));
     const cli = v.cli.uc ? qtd(v.cli.uc[1], 'UC ligada', 'UCs ligadas') + ' nos trafos do trecho e a jusante' + (v.cli.uc[1] !== v.cli.uc[0] ? ' (' + fmtN(v.cli.uc[0]) + ' nos do próprio trecho)' : '')
       : v.cli.fora ? 'sem dado: trecho fora da planilha UC por trafo'
       : v.cli.st === 'real' ? qtd(f.cliMax, 'cliente', 'clientes') + ' no maior evento'
@@ -306,14 +400,10 @@ const VERA = (() => {
       nae: [f.n ? qtd(f.n, 'ocorrência', 'ocorrências') + ' em ' + kmTxt + ' = ' + mostra(f.n100) + ' por 100 km' : 'nenhuma ocorrência',
         [prot ? fmtN(prot) + ' de ' + fmtN(f.n) + ' por disjuntor ou religador: defeito em ponto desconhecido da zona' : '',
           antes ? qtd(antes, 'ocorrência anterior', 'ocorrências anteriores') + ' à última limpeza não ' + (antes === 1 ? 'conta' : 'contam') : ''].filter(Boolean).join(' · ')],
-      dec: [f.chi > 0 ? bruto(f.chi) + ' consumidor·hora = ' + mostra(f.chi100) + ' por 100 km' : 'nenhum consumidor·hora',
-        f.n ? (f.jus === null ? 'consumidores da Crítica × duração (trecho fora da planilha de UC)'
-          : [f.nUc ? qtd(f.jus, 'UC', 'UCs') + ' a jusante × duração de cada evento' + (f.nInd ? ' coletivo' : '') : '',
-            f.nInd ? (f.nUc ? '' : 'consumidores da Crítica × duração: ') + qtd(f.nInd, 'evento individual', 'eventos individuais') + (f.nUc ? ' pela Crítica' : '') : ''].filter(Boolean).join('; ')) : ''],
-      fec: [f.ci > 0 ? qtd(f.ci, 'consumidor interrompido', 'consumidores interrompidos') + ' = ' + mostra(f.ci100) + ' por 100 km' : 'nenhum consumidor interrompido',
-        f.n ? (f.jus === null ? 'consumidores registrados na Crítica (trecho fora da planilha de UC)'
-          : [f.nUc ? qtd(f.nUc, f.nInd ? 'evento coletivo' : 'evento', f.nInd ? 'eventos coletivos' : 'eventos') + ' × ' + qtd(f.jus, 'UC', 'UCs') + ' a jusante' : '',
-            f.nInd ? qtd(f.nInd, 'evento individual', 'eventos individuais') + ' pela Crítica' : ''].filter(Boolean).join(' + ')) : ''],
+      dec: [!ctx.dfc ? 'sem dado: DEC por ocorrência não carregado' : semD && f.n ? 'sem dado na Crítica' : f.dec > 0 ? fmtH(f.dec) + ' h de DEC do conjunto = ' + mostra(f.dec100) + ' por 100 km' : f.n ? 'nenhuma contribuição no DEC' : 'nenhuma ocorrência', obsDF('DEC')],
+      fec: [!ctx.dfc ? 'sem dado: FEC por ocorrência não carregado' : semD && f.n ? 'sem dado na Crítica' : f.fec > 0 ? fmtH(f.fec) + ' interrupções de FEC do conjunto = ' + mostra(f.fec100) + ' por 100 km' : f.n ? 'nenhuma contribuição no FEC' : 'nenhuma ocorrência', obsDF('FEC')],
+      img: [t.lente ? 'nota ' + t.lente + ' de 4 no ' + t.al : ctx.img ? 'sem dado: alimentador sem Lente de imagem na planilha' : 'sem dado: Lente de imagem não carregada',
+        t.lente ? 'risco de imagem do alimentador (planilha RANKING_FAIXA_APP, aba Lente de imagem); 4 = maior' : ''],
       cli: [cli, ''],
       hier: ['T' + t.c + (t.c === 1 ? ' (tronco)' : ' (ramal)'), ''],
       ga: [v.ga.j === 0 ? 'tem (marcado neste teste)' : 'sem dado na base', ''],
@@ -328,12 +418,18 @@ const VERA = (() => {
     partes.push(t.id + ' (T' + t.c + ', ' + fmtKm(t.km) + ' km, ' + t.mun + ', regional ' + t.reg + ', polo ' + t.polo + ').');
     partes.push('Prioridade P' + r.faixa + ' com nota ' + fmtP(r.score) + ' de ' + fmtP(notaMax(T)) + '.');
     if (r.faixa < r.fScore) partes.push('A nota sozinha daria P' + r.fScore + '; a faixa subiu por regra.');
-    const lin = CRIT.filter((c) => r.pts[c.k] > 0).map((c) => c.curto + ' ' + fmtP(r.pts[c.k]) + ' (' + rotFaixa(c, r.v[c.k].j, P) + (r.v[c.k].st === 'est' && c.k === 'cli' ? ', típico de T' + t.c : '') + ')');
+    const lin = CRIT.filter((c) => r.pts[c.k] > 0).map((c) => c.curto + ' ' + fmtP(r.pts[c.k]) + ' (' + (c.k === 'img' ? 'nota ' : '') + rotFaixa(c, r.v[c.k].j, P) + (r.v[c.k].st === 'est' && c.k === 'cli' ? ', típico de T' + t.c : '') + ')');
     if (r.bonus > 0) lin.push('plano climático ' + fmtP(r.bonus));
     partes.push(lin.length ? 'Pontos: ' + lin.join('; ') + '.' : 'Nenhum critério pontuou.');
     const per = periodo(ctx, P), X = textos(ctx, r, P);
-    if (f.nJan) partes.push('Histórico: ' + qtd(f.nJan, 'ocorrência', 'ocorrências') + ' por vegetação de ' + per.txt + ', em ' + qtd(f.meses, 'mês', 'meses diferentes') + (X.prot ? '; ' + fmtN(X.prot) + ' por disjuntor ou religador' : '') + (f.nJan > f.n ? '; ' + qtd(f.nJan - f.n, 'anterior', 'anteriores') + ' à última limpeza, fora do NAE, CHI e CI' : '') + '.');
+    if (f.nJan) partes.push('Histórico: ' + qtd(f.nJan, 'ocorrência', 'ocorrências') + ' por vegetação de ' + per.txt + ', em ' + qtd(f.meses, 'mês', 'meses diferentes') + (X.prot ? '; ' + fmtN(X.prot) + ' por disjuntor ou religador' : '') + (f.nJan > f.n ? '; ' + qtd(f.nJan - f.n, 'anterior', 'anteriores') + ' à última limpeza, fora do NAE, DEC e FEC' : '') + '.');
     else partes.push('Histórico: nenhuma ocorrência por vegetação de ' + per.txt + '.');
+    if (f.nExp) partes.push(qtd(f.nExp, 'ocorrência expurgada', 'ocorrências expurgadas') + ' como situação de emergência: ' + (f.nExp === 1 ? 'não conta no DEC/FEC (conta no NAE).' : 'não contam no DEC/FEC (contam no NAE).'));
+    if (f.nSem) partes.push(qtd(f.nSem, 'ocorrência sem dado', 'ocorrências sem dado') + ' de DEC e FEC na Crítica (contam 0).');
+    if (t.sol) {
+      const s0 = t.sol[0];
+      partes.push('Solicitações: ' + fmtN(t.sol.length) + (s0.criado ? ', a mais recente em ' + s0.criado.split('-').reverse().join('/') : '') + (s0.prio ? ' (' + s0.prio + ')' : '') + '.');
+    }
     const uc = r.v.cli.uc;
     if (r.v.cli.fora) partes.push('Impacto: sem dado de UCs (trecho fora da planilha UC por trafo).');
     else if (uc) partes.push('Impacto: ' + qtd(uc[1], 'UC ligada', 'UCs ligadas') + ' nos trafos do trecho e a jusante' + (f.cliMax ? '; maior evento da Crítica: ' + qtd(f.cliMax, 'cliente', 'clientes') : '') + '.');
@@ -419,7 +515,7 @@ const VERA = (() => {
     return { total, totalH, linhas, n: res.length };
   }
 
-  return { CRIT, BLOCOS, PERFIS, parametrosPadrao, preparar, avaliar, textos, periodo, deProtecao, justificar, pacotes, retroativo, faixaDe, rotFaixa, maxDe, notaMax, dataDe, diaDe, fmtN, fmt1, fmtP, fmtD, fmtKm, pct, qtd };
+  return { CRIT, BLOCOS, PERFIS, VERSAO, parametrosPadrao, preparar, avaliar, textos, periodo, deProtecao, justificar, pacotes, retroativo, faixaDe, rotFaixa, maxDe, notaMax, dataDe, diaDe, fmtN, fmt1, fmtP, fmtD, fmtH, fmtKm, pct, qtd };
 })();
 if (typeof module !== 'undefined') module.exports = VERA;
 
@@ -429,19 +525,26 @@ if (typeof module !== 'undefined') module.exports = VERA;
   const V = VERA, D = window.DADOS, ctx = V.preparar(D);   // window.UCS_TRECHOS (dados/ucs-trechos.js) alimenta os clientes por trecho
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const { fmtN, fmt1, fmtP, fmtD, fmtKm, pct, qtd } = V;
+  const { fmtN, fmt1, fmtP, fmtD, fmtH, fmtKm, pct, qtd } = V;
+  // validações gravadas no navegador: a chave é a mesma desde o início. As anteriores a 16/11/2026 não têm a versão da
+  // metodologia (nem a Lente de imagem nos pontos); só a decisão, o motivo, a data e a nota são lidos de volta, e o que vier
+  // estragado é ignorado
   const CHAVE_VAL = 'vera-prior-validacoes';
   let validacoes = {};
-  try { validacoes = JSON.parse(localStorage.getItem(CHAVE_VAL) || '{}') || {}; } catch (e) { validacoes = {}; }
+  try {
+    const x = JSON.parse(localStorage.getItem(CHAVE_VAL) || '{}');
+    validacoes = x && typeof x === 'object' && !Array.isArray(x) ? x : {};
+  } catch (e) { validacoes = {}; }
+  const valDe = (id) => { const v = validacoes[id]; return v && typeof v === 'object' && typeof v.decisao === 'string' ? v : null; };
   const salvarVal = () => { try { localStorage.setItem(CHAVE_VAL, JSON.stringify(validacoes)); } catch (e) {} };
 
   const clonaT = (t) => JSON.parse(JSON.stringify(t));
-  // tabela editada: pontos diferentes do perfil ou limites de faixa (CHI e CI) diferentes do padrão
-  const editada = () => JSON.stringify(S.T) !== JSON.stringify(V.PERFIS[S.perfil].t) || JSON.stringify(S.P.fx) !== JSON.stringify(V.parametrosPadrao().fx);
+  // tabela editada: pontos diferentes do perfil ou limites de faixa (DEC e FEC) diferentes do padrão
+  const editada = () => JSON.stringify(S.T) !== JSON.stringify(V.PERFIS[S.perfil].t) || JSON.stringify(S.P.fx) !== JSON.stringify(V.parametrosPadrao(D).fx);
   const S = {
-    perfil: 'padrao', T: clonaT(V.PERFIS.padrao.t), P: V.parametrosPadrao(),
+    perfil: 'padrao', T: clonaT(V.PERFIS.padrao.t), P: V.parametrosPadrao(D),
     flags: { ga: new Set(), plano: new Set() },
-    f: { reg: 'todos', polo: 'todos', mun: 'todos', busca: '', tipo: 'todos', zona: 'todos', faixa: null, ocultos: false },
+    f: { reg: 'todos', polo: 'todos', mun: 'todos', busca: '', tipo: 'todos', zona: 'todos', sol: 'todos', faixa: null, ocultos: false },
     out: null, sel: null,
     pk: { polo: 'NORTE', raio: 10, cap: 20, limAprov: 30, scoreMin: 30, fator: 1.4, max: 12 },
   };
@@ -454,11 +557,11 @@ if (typeof module !== 'undefined') module.exports = VERA;
   // ---------- controles ----------
   const perfilSel = $('#perfil');
   for (const [k, p] of Object.entries(V.PERFIS)) perfilSel.add(new Option(p.nome, k));
+  // o padrão segue a planilha do Ranking de faixa; os perfis sazonais ficam como opção
   function dicaPerfil() {
-    const m = Number(S.P.ref.slice(5, 7));
-    const sug = m >= 9 && m <= 11 ? 'Pré-chuva (set–nov)' : 'Padrão';
-    $('#perfil-dica').textContent = 'Sugerido para ' + S.P.ref.split('-').reverse().join('/') + ': ' + sug + '.';
-    $('#pz-tit').title = 'Limpeza de faixa · referência ' + S.P.ref.split('-').reverse().join('/');
+    const m = Number(S.P.ref.slice(5, 7)), refBr = S.P.ref.split('-').reverse().join('/');
+    $('#perfil-dica').textContent = 'Padrão: premissas do Ranking de faixa (planilha RANKING_FAIXA_APP, 16/11/2026). Pré-chuva e Plano climático são opções' + (m >= 9 && m <= 11 ? '; ' + refBr + ' está no pré-chuva.' : '.');
+    $('#pz-tit').title = 'Limpeza de faixa · referência ' + refBr;
   }
   $('#ref').value = S.P.ref;
   const regSel = $('#f-reg'), poloSel = $('#f-polo');
@@ -489,19 +592,23 @@ if (typeof module !== 'undefined') module.exports = VERA;
   const corGrupo = (c) => V.BLOCOS.find((b) => b.k === c.b).cor;
   const pontos = (p) => fmtP(p) + (p > 0 && p < 2 ? ' ponto' : ' pontos');
   // como cada critério é medido: uma linha abaixo do nome, na tabela de pontos
-  const per = () => V.periodo(ctx, S.P).txt;   // período real das ocorrências (Crítica), não a janela nominal de 12 meses
+  const per = () => V.periodo(ctx, S.P).txt;   // período real das ocorrências (Crítica) dentro da janela de 12 meses
+  // critério com 0 em todas as faixas (no padrão: Clientes, Hierarquia, Grupo A e Limpeza): fica na tabela, editável
+  const zero = (k) => (V.maxDe(S.T, k) > 0 ? '' : ' Nesta tabela vale 0: fora da nota, mas editável.');
+  const semDF = ctx.dfc ? '' : ' Base de DEC e FEC por ocorrência não carregada: o critério fica sem dado.';
   const REGRA = {
-    nae: () => 'Ocorrências por vegetação de ' + per() + ' depois da última limpeza, por 100 km do trecho. Trecho com menos de ' + fmtD(S.P.pisoKm) + ' km conta como ' + fmtD(S.P.pisoKm) + ' km: cada ocorrência vale ' + fmtD(100 / S.P.pisoKm) + '.',
-    dec: () => 'CHI: consumidor·hora interrompido nessas ocorrências, com as UCs ligadas a jusante do trecho (planilha UC por trafo) × a duração de cada uma, por 100 km do trecho. Evento individual (um consumidor) e trecho fora da planilha usam os consumidores da Crítica. Valor absoluto, não é o DEC do conjunto.',
-    fec: () => 'CI: consumidores interrompidos nessas ocorrências, contando em cada uma as UCs ligadas a jusante do trecho (planilha UC por trafo), por 100 km do trecho. Evento individual (um consumidor) e trecho fora da planilha usam os consumidores da Crítica. Valor absoluto, não é o FEC do conjunto.',
+    nae: () => 'Ocorrências por vegetação de ' + per() + ' depois da última limpeza, por 100 km do trecho. Trecho com menos de ' + fmtD(S.P.pisoKm) + ' km conta como ' + fmtD(S.P.pisoKm) + ' km: cada ocorrência vale ' + fmtD(100 / S.P.pisoKm) + '.' + zero('nae'),
+    dec: () => 'Contribuição das ocorrências no DEC do conjunto ANEEL (horas), pela Crítica: soma, nas ocorrências de ' + per() + ' depois da última limpeza, das horas que cada uma pesa no DEC, por 100 km do trecho. O que o PRODIST não conta (momentânea, dia crítico etc.) e a expurgada como situação de emergência entram com 0; ocorrência sem dado na Crítica conta 0 e o extrato avisa.' + semDF + zero('dec'),
+    fec: () => 'Contribuição das ocorrências no FEC do conjunto ANEEL (interrupções), pela Crítica: soma, nas mesmas ocorrências, das interrupções que cada uma pesa no FEC, por 100 km do trecho. Momentânea, dia crítico e expurgada (situação de emergência) entram com 0.' + semDF + zero('fec'),
+    img: () => 'Risco de imagem do alimentador, de 1 a 4 (4 = maior), da planilha do Ranking de faixa (aba Lente de imagem): vale para todos os trechos do alimentador. Alimentador sem lente fica sem dado (0 pontos).' + (ctx.img ? '' : ' Lente de imagem não carregada.') + zero('img'),
     cli: () => {
       const m = S.out && S.out.med.cli;
-      if (ctx.ucs) return 'UCs ligadas nos transformadores do trecho e dos trechos que saem dele (planilha UC por trafo): quem um evento no trecho pode deixar sem energia. Alimentador fora da planilha usa os clientes do maior evento de ' + per() + ', e trecho sem evento, o típico da classe. Trecho que não está na planilha do alimentador fica sem dado (0 pontos).';
-      return 'Clientes desligados no maior evento de ' + per() + '. Trecho sem evento, ou só com eventos sem clientes registrados, usa o típico da classe' + (m ? ' (T1 ' + fmtN(m[1]) + ', T2 ' + fmtN(m[2]) + ', T3 ' + fmtN(m[3]) + ')' : '') + '.';
+      if (ctx.ucs) return 'UCs ligadas nos transformadores do trecho e dos trechos que saem dele (planilha UC por trafo): quem um evento no trecho pode deixar sem energia. Alimentador fora da planilha usa os clientes do maior evento de ' + per() + ', e trecho sem evento, o típico da classe. Trecho que não está na planilha do alimentador fica sem dado (0 pontos).' + zero('cli');
+      return 'Clientes desligados no maior evento de ' + per() + '. Trecho sem evento, ou só com eventos sem clientes registrados, usa o típico da classe' + (m ? ' (T1 ' + fmtN(m[1]) + ', T2 ' + fmtN(m[2]) + ', T3 ' + fmtN(m[3]) + ')' : '') + '.' + zero('cli');
     },
-    hier: () => 'Classe do trecho: tronco (T1) ou ramal (T2, T3).',
-    ga: () => 'Cliente Grupo A (média tensão) no trecho. Ainda não há cadastro na base: só pontua quando marcado na ficha do trecho, então hoje a nota máxima alcançável é ' + fmtP(V.notaMax(S.T) - V.maxDe(S.T, 'ga')) + '.',
-    limp: () => 'Última limpeza efetiva + ciclo da classe (T1 ' + S.P.ciclo[1] + ', T2 ' + S.P.ciclo[2] + ', T3 ' + S.P.ciclo[3] + ' anos; regra interna, sem estudo de crescimento publicado). Sem registro: nenhuma OS executada cobrindo ≥ 50% do trecho desde ' + V.dataDe(ctx, ctx.osInicio) + '; não há data de vencimento.',
+    hier: () => 'Classe do trecho: tronco (T1) ou ramal (T2, T3).' + zero('hier'),
+    ga: () => 'Cliente Grupo A (média tensão) no trecho. Ainda não há cadastro na base: só pontua quando marcado na ficha do trecho' + (V.maxDe(S.T, 'ga') > 0 ? ', então hoje a nota máxima alcançável é ' + fmtP(V.notaMax(S.T) - V.maxDe(S.T, 'ga')) + '.' : '; a regra F2 (mínimo P2) vale do mesmo jeito.') + zero('ga'),
+    limp: () => 'Última limpeza efetiva + ciclo da classe (T1 ' + S.P.ciclo[1] + ', T2 ' + S.P.ciclo[2] + ', T3 ' + S.P.ciclo[3] + ' anos; regra interna, sem estudo de crescimento publicado). Sem registro: nenhuma OS executada cobrindo ≥ 50% do trecho desde ' + V.dataDe(ctx, ctx.osInicio) + '; não há data de vencimento. O T1 com a última limpeza efetiva há mais de ' + fmtP(S.P.t1Anos) + (S.P.t1Anos === 1 ? ' ano' : ' anos') + ', ou sem limpeza efetiva registrada, vai ao topo pela regra F5 (OS parcial não conta).' + zero('limp'),
   };
   // tabela de pontos: uma linha por critério, com os pontos de cada faixa de valor editáveis
   function desenharPontos() {
@@ -510,7 +617,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
         const rot = V.rotFaixa(c, j, S.P);
         return '<label class="fx"><span>' + esc(rot) + '</span><input type="number" data-k="' + c.k + '" data-j="' + j + '" min="0" max="100" step="0.5" value="' + p + '" aria-label="' + esc(c.nome + ', ' + rot + ': pontos') + '"></label>';
       }).join('');
-      // CHI e CI: os limites que separam as faixas também são editáveis
+      // DEC e FEC: os limites que separam as faixas também são editáveis
       const lim = c.edita ? '<div class="pt-lim"><span>Limites das faixas</span>' + (S.P.fx[c.k]).map((x, j) =>
         '<input type="number" data-lim="' + c.k + '" data-j="' + j + '" min="0" step="any" value="' + x + '" aria-label="' + esc(c.nome + ': limite ' + (j + 1) + ' (começo da faixa ' + (j + 2) + ')') + '">').join('') + '</div>' : '';
       return '<div class="pt-crit"><div class="pt-nome"><span class="amostra" style="background:' + corGrupo(c) + '"></span><b>' + esc(c.nome) + '</b><span class="pt-max" id="max-' + c.k + '"></span>' +
@@ -525,7 +632,8 @@ if (typeof module !== 'undefined') module.exports = VERA;
     const tot = V.notaMax(S.T), ok = Math.abs(tot - 100) < 1e-6;
     for (const c of V.CRIT) $('#max-' + c.k).textContent = 'até ' + pontos(V.maxDe(S.T, c.k));
     $('#nota-max').textContent = fmtP(tot);
-    $('#pt-exemplo').textContent = 'por exemplo, 1 a 9 clientes vale ' + pontos(S.T.cli[0]) + ' e 10 a 99 clientes vale ' + pontos(S.T.cli[1]);
+    const cN = V.CRIT[0];   // NAE: o critério de maior peso no padrão
+    $('#pt-exemplo').textContent = 'por exemplo, NAE de ' + V.rotFaixa(cN, 1, S.P) + ' por 100 km vale ' + pontos(S.T.nae[1]) + ' e de ' + V.rotFaixa(cN, 2, S.P) + ' vale ' + pontos(S.T.nae[2]);
     $('#pt-total').classList.toggle('alerta', !ok);
     const av = $('#aviso-pontos');
     av.hidden = ok;
@@ -537,6 +645,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
     $('#p-bonus').value = S.P.bonus;
     for (const k of ['p1', 'p2', 'p3']) if (document.activeElement !== $('#c-' + k)) $('#c-' + k).value = S.P.lim[k];
     $('#p-piso').value = S.P.pisoKm;
+    $('#p-t1').value = S.P.t1Anos;
     for (const [k, v] of Object.entries(S.pk)) { const el = $('#pk-' + ({ limAprov: 'aprov', scoreMin: 'min' }[k] || k)); if (el) el.value = v; }
   }
   // três números de um campo de texto ("6 / 9 / 12", "7,5/5/3"); null se não forem três números
@@ -594,6 +703,8 @@ if (typeof module !== 'undefined') module.exports = VERA;
   $('#f-tipo').addEventListener('change', (e) => { S.f.tipo = e.target.value; renderRanking(); });
   $('#f-zona').addEventListener('change', (e) => { S.f.zona = e.target.value; renderRanking(); });
   if (!temUrb) { const z = $('#f-zona'); z.disabled = true; z.title = 'Sem a base de área urbanizada (dados/urbano-trechos.js): filtro indisponível'; $('#aviso-zona').hidden = false; }
+  $('#f-sol').addEventListener('change', (e) => { S.f.sol = e.target.value; renderRanking(); });
+  if (!ctx.sol) { const z = $('#f-sol'); z.disabled = true; z.title = 'Sem a base de solicitações (dados/solicitacoes-trechos.js): filtro indisponível'; }
   munSel.addEventListener('change', () => { S.f.mun = munSel.value; renderRanking(); });
   let tmrBusca = null;
   $('#f-busca').addEventListener('input', (e) => { S.f.busca = e.target.value.trim().toUpperCase(); clearTimeout(tmrBusca); tmrBusca = setTimeout(renderRanking, 160); });
@@ -605,6 +716,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
     preencherParams();
   });
   numParam('#p-piso', (v) => { S.P.pisoKm = Math.min(50, Math.max(0.5, v)); atualizarRegras(); });
+  numParam('#p-t1', (v) => { S.P.t1Anos = Math.min(20, Math.max(0.5, v)); atualizarRegras(); });
   numParam('#p-avenc', (v) => { S.P.aVencer = Math.min(12, Math.max(1, Math.round(v))); desenharPontos(); });
   numParam('#p-cob', (v) => { S.P.cobBloqueio = Math.min(1, Math.max(0.1, v)); });
   numParam('#p-bonus', (v) => { S.P.bonus = Math.max(0, v); });
@@ -633,14 +745,16 @@ if (typeof module !== 'undefined') module.exports = VERA;
     });
   }
 
-  // linha fixa acima da lista: referência, perfil e a data de cada base, e o aviso da lacuna da Crítica
+  // linha fixa acima da lista: referência, perfil, cobertura das ocorrências e a data de cada base; abaixo, os avisos da
+  // Crítica (lacuna entre o fim dos dados e a referência, set/2026 com registros expurgados como situação de emergência)
   function linhaRef() {
     const pe = V.periodo(ctx, S.P), refBr = V.dataDe(ctx, V.diaDe(ctx, S.P.ref));
     $('#pz-ref').innerHTML = ['Referência <b>' + refBr + '</b>', 'Tabela <b>' + esc(V.PERFIS[S.perfil].nome) + (editada() ? ' editada' : '') + '</b>',
-      'Ocorrências <b>' + pe.txt + '</b>', 'OS de <b>' + (osData || '—') + '</b>', 'Trechos de <b>' + segData + '</b>'].map((x) => '<span>' + x + '</span>').join('');
+      'NAE e DEC/FEC <b>' + esc(pe.cob) + '</b>', 'OS de <b>' + (osData || '—') + '</b>', 'Trechos de <b>' + segData + '</b>'].map((x) => '<span>' + x + '</span>').join('');
     const lac = pe.lacuna, el = $('#pz-lacuna');
-    el.hidden = !lac.length;
-    if (lac.length) el.textContent = 'As ocorrências param em ' + pe.fimTxt + ': os critérios de histórico recente (NAE, CHI, CI, F1 de 90 dias e F4) não enxergam ' + (lac.length > 1 ? lac.slice(0, -1).join(', ') + ' e ' + lac[lac.length - 1] : lac[0]) + '. Sem evento recente pode ser falta de dado.';
+    const avisos = (lac.length ? ['As ocorrências param em ' + pe.fimTxt + ': os critérios de histórico recente (NAE, DEC, FEC, F1 de 90 dias e F4) não enxergam ' + (lac[0] === lac[1] ? lac[0] : 'de ' + lac[0] + ' a ' + lac[1]) + '. Sem evento recente pode ser falta de dado.'] : []).concat(pe.avisos);
+    el.hidden = !avisos.length;
+    el.textContent = avisos.join(' ');
   }
 
   // ---------- ranking ----------
@@ -661,6 +775,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
       if (f.mun !== 'todos' && t.mun !== f.mun) return false;
       if (f.tipo === 'tronco' ? t.c !== 1 : f.tipo === 'ramal' ? t.c === 1 : f.tipo !== 'todos' && t.c !== Number(f.tipo)) return false;
       if (temUrb && f.zona !== 'todos' && (t.urb >= ctx.urbCorte) !== (f.zona === 'urbano')) return false;
+      if (ctx.sol && f.sol !== 'todos' && !!t.sol !== (f.sol === 'com')) return false;
       if (f.busca && !t.id.toUpperCase().includes(f.busca)) return false;
       if (!semFaixa && f.faixa && r.faixa !== f.faixa) return false;
       return true;
@@ -669,12 +784,16 @@ if (typeof module !== 'undefined') module.exports = VERA;
   // a lista desenha PASSO linhas por vez e diz quantas mostra: desenhar os milhares de trechos de uma vez trava a página
   const PASSO = 100;
   let mostrar = PASSO, listaAtual = [];
+  // marca discreta abaixo do trecho: T1 no topo pela regra F5 e solicitações de limpeza (planilha do Ranking de faixa).
+  // "Efetiva" = OS executada cobrindo ≥ 50% do trecho; com OS só parcial, a marca diz (a ficha lista as OS)
+  const marcaF5 = (r) => (r.f.ult === null ? 'T1 sem limpeza efetiva registrada' + (r.f.parcial ? ' (só OS parcial)' : '') : 'T1 com limpeza efetiva há mais de ' + fmtP(S.P.t1Anos) + (S.P.t1Anos === 1 ? ' ano' : ' anos'));
   function linha(r) {
     const t = r.t;
     const mv = r.mov === 'novo' ? '<span class="mov sobe">novo</span>' : r.mov > 0 ? '<span class="mov sobe">▲ ' + r.mov + '</span>' : r.mov < 0 ? '<span class="mov desce">▼ ' + -r.mov + '</span>' : '';
+    const marcas = [r.topo ? marcaF5(r) : '', t.sol ? qtd(t.sol.length, 'solicitação', 'solicitações') : ''].filter(Boolean);
     return '<tr data-i="' + t.i + '" tabindex="0"' + (S.sel === t.i ? ' class="sel"' : '') + '>' +
       '<td class="r num muted">' + (r.pos ?? '—') + mv + '</td>' +
-      '<td><span class="trecho-id">' + esc(t.id) + '</span></td>' +
+      '<td><span class="trecho-id">' + esc(t.id) + '</span>' + (marcas.length ? '<span class="sub pz-marca">' + esc(marcas.join(' · ')) + '</span>' : '') + '</td>' +
       '<td>' + FAIXA(r.faixa) + '</td><td>' + barra(r) + '</td></tr>';
   }
   function rodapeLista() {
@@ -714,8 +833,12 @@ if (typeof module !== 'undefined') module.exports = VERA;
   $('#copiar').addEventListener('click', (e) => {
     const todos = filtrar(false), lista = todos.slice(0, 500);
     const q = (s) => '"' + String(s).replace(/"/g, '""') + '"';
-    const linhas = ['posicao;trecho;classe;regional;polo;municipio;km;nota;faixa;' + V.CRIT.map((c) => 'pontos_' + ({ dec: 'chi', fec: 'ci', hier: 'hierarquia', ga: 'grupo_a', limp: 'limpeza', cli: 'clientes' }[c.k] || c.k)).join(';') + ';pontos_plano;situacao;regras;justificativa'];
-    for (const r of lista) linhas.push([r.pos ?? '', q(r.t.id), 'T' + r.t.c, q(r.t.reg), q(r.t.polo), q(r.t.mun), fmtKm(r.t.km), fmtP(r.score), 'P' + r.faixa, ...V.CRIT.map((c) => fmtP(r.pts[c.k])), fmtP(r.bonus), q(r.status), q(r.regras.map((g) => g.id).join(' ')), q(V.justificar(ctx, r, S.P, S.T))].join(';'));
+    const linhas = ['posicao;trecho;classe;regional;polo;municipio;km;nota;faixa;' + V.CRIT.map((c) => 'pontos_' + ({ img: 'lente_imagem', hier: 'hierarquia', ga: 'grupo_a', limp: 'limpeza', cli: 'clientes' }[c.k] || c.k)).join(';') + ';pontos_plano;situacao;regras;lente_imagem;solicitacoes;ultima_solicitacao;justificativa'];
+    for (const r of lista) {
+      const sl = r.t.sol, s0 = sl ? sl[0] : null;
+      linhas.push([r.pos ?? '', q(r.t.id), 'T' + r.t.c, q(r.t.reg), q(r.t.polo), q(r.t.mun), fmtKm(r.t.km), fmtP(r.score), 'P' + r.faixa, ...V.CRIT.map((c) => fmtP(r.pts[c.k])), fmtP(r.bonus), q(r.status), q(r.regras.map((g) => g.id).join(' ')),
+        r.t.lente || '', sl ? sl.length : 0, q(s0 ? [s0.criado ? s0.criado.split('-').reverse().join('/') : '', s0.prio, s0.os].filter(Boolean).join(' · ') : ''), q(V.justificar(ctx, r, S.P, S.T))].join(';'));
+    }
     const txt = linhas.join('\n'), btn = e.currentTarget;
     const ok = () => { btn.textContent = 'Copiado: ' + fmtN(lista.length) + ' de ' + qtd(todos.length, 'linha', 'linhas'); setTimeout(() => { btn.textContent = 'Copiar ranking (CSV)'; }, 2500); };
     const falha = () => {
@@ -754,30 +877,51 @@ if (typeof module !== 'undefined') module.exports = VERA;
     }).join('') + (r.bonus > 0 ? '<tr><td>Plano climático</td><td>bônus da regra A1</td><td class="r num"><b>+' + fmtP(r.bonus) + '</b></td></tr>' : '') +
       '<tr class="total"><td colspan="2">Nota</td><td class="r num"><b>' + fmtP(r.score) + '</b><span class="sub">/' + fmtP(V.notaMax(S.T)) + '</span></td></tr>';
     const Lm = S.P.lim, pisos = r.regras.filter((g) => g.tipo === 'piso').map((g) => g.id).join(', ');
-    const porque = r.faixa < r.fScore ? 'P' + r.faixa + ' pela regra ' + pisos + '; a nota sozinha daria P' + r.fScore
-      : 'P' + r.faixa + ': ' + ['nota ' + fmtP(Lm.p1) + ' ou mais', 'nota de ' + fmtP(Lm.p2) + ' a ' + fmtP(Lm.p1), 'nota de ' + fmtP(Lm.p3) + ' a ' + fmtP(Lm.p2), 'nota abaixo de ' + fmtP(Lm.p3)][r.faixa - 1];
+    const porque = (r.faixa < r.fScore ? 'P' + r.faixa + ' pela regra ' + pisos + '; a nota sozinha daria P' + r.fScore
+      : 'P' + r.faixa + ': ' + ['nota ' + fmtP(Lm.p1) + ' ou mais', 'nota de ' + fmtP(Lm.p2) + ' a ' + fmtP(Lm.p1), 'nota de ' + fmtP(Lm.p3) + ' a ' + fmtP(Lm.p2), 'nota abaixo de ' + fmtP(Lm.p3)][r.faixa - 1]) +
+      (r.topo ? '; no topo do ranking pela regra F5' : '');
     const ocs = f.usadas.slice().sort((a, b) => b.d - a.d);
     // associação: chave de início do trecho (disjuntor no T1, religador no T2, fusível no T3), vão mais próximo do ativo
     // ou abrangência do DJ. † = defeito em ponto desconhecido da zona de proteção
     const rgNome = (o) => o.rg === 1 ? 'vão mais próximo' : o.rg === 2 ? 'abrangência do disjuntor †' : ['', 'disjuntor do trecho †', 'religador do trecho †', 'fusível do trecho'][t.c];
     const curta = ocs.filter((o) => o.dur < 3).length;
-    const evOc = ocs.length ? '<div class="lista-ev"><table class="tab-mini"><thead><tr><th>Data</th><th class="r">Consum.</th><th class="r">Min</th><th>Tipo</th><th>Associação</th><th>Conta</th></tr></thead><tbody>' +
-      ocs.map((o) => '<tr><td class="num">' + V.dataDe(ctx, o.d) + '</td><td class="r num">' + fmtN(o.cons) + '</td><td class="r num">' + fmtN(o.dur) + (o.dur < 3 ? ' ‡' : '') + '</td><td>' + (o.col ? 'coletiva' : 'individual') + '</td><td>' + rgNome(o) + '</td><td>' + (o.pre ? 'não *' : 'sim') + '</td></tr>').join('') +
+    // DEC (h) e FEC de cada ocorrência: § = expurgada como situação de emergência (0, decisão de 16/11/2026); — = sem dado
+    const dfTxt = (o, k) => (o.ex ? '0 §' : o[k] === null ? '—' : fmtH(o[k]));
+    const evOc = ocs.length ? '<div class="lista-ev"><table class="tab-mini"><thead><tr><th>Data</th><th class="r">Consum.</th><th class="r">Min</th><th>Tipo</th><th>Associação</th><th>Conta</th><th class="r">DEC (h)</th><th class="r">FEC</th></tr></thead><tbody>' +
+      ocs.map((o) => '<tr><td class="num">' + V.dataDe(ctx, o.d) + '</td><td class="r num">' + fmtN(o.cons) + '</td><td class="r num">' + fmtN(o.dur) + (o.dur < 3 ? ' ‡' : '') + '</td><td>' + (o.col ? 'coletiva' : 'individual') + '</td><td>' + rgNome(o) + '</td><td>' + (o.pre ? 'não *' : 'sim') + '</td><td class="r num">' + dfTxt(o, 'dh') + '</td><td class="r num">' + dfTxt(o, 'fc') + '</td></tr>').join('') +
       '</tbody></table></div>' +
-      (f.jus !== null && f.nUc ? '<p class="dica">CHI e CI contam ' + qtd(f.jus, 'UC ligada', 'UCs ligadas') + ' a jusante do trecho em cada evento coletivo; a coluna Consum. é o registrado na Crítica' + (f.nInd ? ', que vale nos individuais' : '') + '.</p>' : '') +
+      '<p class="dica">DEC (h) e FEC: o que a ocorrência pesa no DEC e no FEC do conjunto ANEEL, pela Crítica' + (ctx.dfc ? (ocs.some((o) => !o.ex && o.dh === null) ? '; “—” = ocorrência não achada na Crítica (conta 0, sem dado)' : '') : '; base de DEC e FEC por ocorrência não carregada') + '.</p>' +
+      (ocs.some((o) => o.ex) ? '<p class="dica">§ expurgada (situação de emergência): não conta no DEC/FEC.</p>' : '') +
       (ocs.some((o) => V.deProtecao(t, o)) ? '<p class="dica">† abertura de disjuntor ou religador: o defeito está em algum ponto da zona protegida, não necessariamente neste trecho.</p>' : '') +
-      (curta ? '<p class="dica">‡ interrupção de menos de 3 minutos (o PRODIST não conta no DEC e FEC); aqui ainda entra no NAE, CHI e CI.</p>' : '') +
-      (ocs.some((o) => o.pre) ? '<p class="dica">* anterior à última limpeza efetiva: não conta no NAE, CHI e CI.</p>' : '') : '<p class="dica">Nenhuma ocorrência por vegetação em ' + esc(V.periodo(ctx, S.P).txt) + '.</p>';
+      (curta ? '<p class="dica">‡ interrupção de menos de 3 minutos (o PRODIST não conta no DEC e FEC); aqui ainda entra no NAE (no DEC e no FEC vale 0).</p>' : '') +
+      (ocs.some((o) => o.pre) ? '<p class="dica">* anterior à última limpeza efetiva: não conta no NAE, DEC e FEC.</p>' : '') : '<p class="dica">Nenhuma ocorrência por vegetação em ' + esc(V.periodo(ctx, S.P).txt) + '.</p>';
+    // solicitações de limpeza do trecho (planilha do Ranking de faixa, aba Base de solicitações), da mais recente para a mais antiga
+    const dBr = (x) => (x ? x.split('-').reverse().join('/') : 'sem data');
+    const sitOs = (x) => (x.os ? 'OS ' + x.os + (x.sit ? ' · ' + x.sit.toLowerCase() : '') : 'sem OS');
+    // como o pedido foi ligado a este trecho: pelo ativo (início, chave irmã, dentro do trecho, fim, descrição); pedido feito
+    // para outra classe ou para um trecho criado depois da segmentação do Priorizador (que aqui está dentro deste) é explicado
+    const COMO = { 'ativo inicial (no trecho)': 'ativo inicial, que fica dentro dele', 'ativo na descrição': 'ativo citado na descrição' };
+    const cl = 'T' + t.c, ligTxt = (x) => {
+      const como = x.como ? COMO[x.como] || x.como : '';
+      if (x.de) return 'pedido para o ' + x.de + ', trecho criado depois de ' + dBr(D.gerado).slice(0, 5) + ' que aqui está dentro deste ' + cl + (como ? ' (ligado pelo ' + como + ')' : '');
+      if (x.cls && x.cls !== cl) return 'pedido como ' + x.cls + ' e ligado a este ' + cl + (como ? ' pelo ' + como : '');
+      return como ? 'ligada pelo ' + como : '';
+    };
+    const evSol = t.sol ? '<ul class="regras sol-lista">' + t.sol.map((x) => '<li><span class="chip' + (x.prio === 'Emergencial' ? ' corr' : '') + '">' + esc(x.prio || 'sem prioridade') + '</span><span><b>' + dBr(x.criado) + '</b> · ' +
+      esc([x.dep, x.cls && x.cls === cl && !x.de ? 'pedido como ' + x.cls : '', typeof x.km === 'number' ? fmtD(x.km) + ' km' : '', sitOs(x)].filter(Boolean).join(' · ')) +
+      (x.obs ? '<span class="sub">' + esc(x.obs) + '</span>' : '') +
+      '<span class="sub">' + esc(['nº ' + x.n + ' da planilha', ligTxt(x), x.al_planilha ? 'na planilha: ' + x.al_planilha : ''].filter(Boolean).join(' · ')) + '</span></span></li>').join('') + '</ul>' : '';
     const sitN = { 1: 'executada', 2: 'criada', 3: 'reprogramar', 9: 'outra' };
     const evOs = t.os.length ? '<div class="lista-ev"><table class="tab-mini"><thead><tr><th>Data</th><th>OS</th><th>Situação</th><th class="r">Cobertura</th></tr></thead><tbody>' +
       t.os.slice().sort((a, b) => b[0] - a[0]).map((o) => '<tr><td class="num">' + V.dataDe(ctx, o[0]) + '</td><td class="mono">' + esc(o[3]) + '</td><td>' + sitN[o[1]] + '</td><td class="r num">' + pct(o[2]) + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="dica">Nenhuma OS de limpeza de faixa associada.</p>';
-    const val = validacoes[t.id];
+    const val = valDe(t.id);
     gav.innerHTML =
       '<div class="g-cab"><div class="g-topo"><div><h2 id="g-titulo">' + esc(t.id) + '</h2></div><button class="fechar" type="button" id="fechar">Fechar</button></div>' +
-      '<div class="chips"><a class="botao g-mapa" href="../alimentadores/' + encodeURIComponent(t.al) + '/?t=' + encodeURIComponent(t.n) + '">Ver no mapa</a><span class="chip">' + fmtKm(t.km) + ' km</span><span class="chip">' + esc(t.reg) + (t.polo !== 'Sem polo' ? ' · ' + esc(POLO_NOME[t.polo] || t.polo) : '') + '</span><span class="chip">' + esc(t.mun) + '</span>' + (r.status !== 'Elegível' ? '<span class="chip estado">' + esc(r.status) + '</span>' : '') + '</div></div>' +
+      '<div class="chips"><a class="botao g-mapa" href="../alimentadores/' + encodeURIComponent(t.al) + '/?t=' + encodeURIComponent(t.n) + '">Ver no mapa</a><span class="chip">' + fmtKm(t.km) + ' km</span><span class="chip">' + esc(t.reg) + (t.polo !== 'Sem polo' ? ' · ' + esc(POLO_NOME[t.polo] || t.polo) : '') + '</span><span class="chip">' + esc(t.mun) + '</span>' + (t.sol ? '<span class="chip">' + qtd(t.sol.length, 'solicitação', 'solicitações') + '</span>' : '') + (r.status !== 'Elegível' ? '<span class="chip estado">' + esc(r.status) + '</span>' : '') + '</div></div>' +
       '<div class="g-nota"><span class="rot">Nota</span><b>' + fmtP(r.score) + '</b><span class="de">/' + fmtP(V.notaMax(S.T)) + '</span>' + FAIXA(r.faixa) + '<span class="por">' + esc(porque) + '</span></div>' +
       '<section><h3>De onde vem a nota</h3><div class="tabela-wrap"><table class="tab-mini extrato"><thead><tr><th>Critério</th><th>No trecho</th><th class="r">Pontos</th></tr></thead><tbody>' + extrato + '</tbody></table></div></section>' +
       (r.regras.length ? '<section><h3>Regras</h3><ul class="regras" style="margin-top:8px">' + r.regras.map((g) => '<li><span class="chip ' + g.tipo + '">' + g.id + '</span><span>' + esc(g.txt) + '</span></li>').join('') + '</ul></section>' : '') +
+      (t.sol ? '<details class="g-mais" open><summary>Solicitações (' + t.sol.length + ')</summary>' + evSol + '<p class="dica">Pedidos de limpeza da planilha do Ranking de faixa: não mudam a nota.</p></details>' : '') +
       '<details class="g-mais"><summary>Testar exceções</summary><div class="excecoes">' +
       '<label><input type="checkbox" id="x-ga"' + (S.flags.ga.has(t.i) ? ' checked' : '') + '> Há cliente Grupo A no trecho</label>' +
       '<label><input type="checkbox" id="x-plano"' + (S.flags.plano.has(t.i) ? ' checked' : '') + '> Incluir este trecho no plano climático</label></div></details>' +
@@ -787,9 +931,12 @@ if (typeof module !== 'undefined') module.exports = VERA;
       [['Aprovado', 'Aprovar'], ['Adiado', 'Adiar'], ['Rejeitado', 'Rejeitar']].map(([d, rot]) => '<button type="button" class="botao" data-dec="' + d + '" aria-pressed="' + Boolean(val && val.decisao === d) + '">' + rot + '</button>').join('') + '</div>' +
       '<div class="campo"><label for="v-motivo">Motivo</label><select id="v-motivo"><option>Confirmo a prioridade</option><option>Executado e não registrado</option><option>Sem acesso ou autorização</option><option>Aguardar inspeção</option><option>Dado incorreto</option><option>Outro</option></select></div>' +
       '<div class="campo"><label for="v-obs">Observação</label><input type="text" id="v-obs" value="' + esc(val ? val.obs : '') + '"></div>' +
-      '<p class="val-reg">' + (val ? esc(val.decisao + ' em ' + val.quando + ' · ' + val.motivo + ' · nota ' + fmtP(val.escala === 'soma' ? val.score * 10 : val.score) + '/100 · metodologia ' + val.perfil) : '') + '</p></div></details>';
-    gav.querySelectorAll('details.g-mais').forEach((d, j) => { if (abertos[j]) d.open = true; });
-    if (val) $('#v-motivo').value = val.motivo;
+      '<p class="val-reg">' + (val ? esc([val.decisao + ' em ' + (val.quando || '—'), val.motivo, typeof val.score === 'number' ? 'nota ' + fmtP(val.escala === 'soma' ? val.score * 10 : val.score) + '/100' : '',
+        'metodologia ' + (val.perfil || '—') + (val.metodologia ? '' : ' (anterior a 16/11/2026)')].filter(Boolean).join(' · ')) : '') + '</p></div></details>';
+    // recálculo do mesmo trecho: cada seção volta como estava (aberta ou fechada)
+    const dets = gav.querySelectorAll('details.g-mais');
+    if (abertos.length === dets.length) dets.forEach((d, j) => { d.open = !!abertos[j]; });
+    if (val && val.motivo) $('#v-motivo').value = val.motivo;
     if (gaveta.matches && !manter) { gav.classList.add('aberta'); fundo.hidden = false; $('#fechar').focus(); }
     $('#fechar').addEventListener('click', fecharFicha);
     $('#x-ga').addEventListener('change', (e) => { e.target.checked ? S.flags.ga.add(t.i) : S.flags.ga.delete(t.i); recalcular(); });
@@ -798,8 +945,8 @@ if (typeof module !== 'undefined') module.exports = VERA;
       const motivo = $('#v-motivo').value, obs = $('#v-obs').value;
       if (pend) recalcular();
       const rr = S.out.res[i], Pp = S.P;
-      validacoes[t.id] = { decisao: b.dataset.dec, motivo, obs, quando: new Date().toLocaleString('pt-BR'), score: Math.round(rr.score * 100) / 100, escala: 'soma100', perfil: V.PERFIS[S.perfil].nome + (editada() ? ' com pontos editados' : ''), pontos: clonaT(S.T),
-        parametros: clonaT({ ref: Pp.ref, lim: Pp.lim, carencia: Pp.carencia, ciclo: Pp.ciclo, aVencer: Pp.aVencer, cobBloqueio: Pp.cobBloqueio, pisoKm: Pp.pisoKm, bonus: Pp.bonus, planoPolos: Pp.planoPolos, fx: Pp.fx }),
+      validacoes[t.id] = { decisao: b.dataset.dec, motivo, obs, quando: new Date().toLocaleString('pt-BR'), score: Math.round(rr.score * 100) / 100, escala: 'soma100', metodologia: V.VERSAO, perfil: V.PERFIS[S.perfil].nome + (editada() ? ' com pontos editados' : ''), pontos: clonaT(S.T),
+        parametros: clonaT({ ref: Pp.ref, lim: Pp.lim, carencia: Pp.carencia, ciclo: Pp.ciclo, aVencer: Pp.aVencer, cobBloqueio: Pp.cobBloqueio, pisoKm: Pp.pisoKm, bonus: Pp.bonus, planoPolos: Pp.planoPolos, fx: Pp.fx, t1Anos: Pp.t1Anos }),
         excecoes: { grupoA: S.flags.ga.has(t.i), plano: S.flags.plano.has(t.i) } };
       salvarVal(); abrirFicha(i, true); renderRanking(true);
     }));
@@ -827,10 +974,26 @@ if (typeof module !== 'undefined') module.exports = VERA;
   // ---------- dados e validação ----------
   const E = D.estat, dBr = (s) => s.split('-').reverse().join('/');
   const segData = dBr(D.gerado), osData = D.os_gerado ? dBr(D.os_gerado) : null, ocFim = V.dataDe(ctx, ctx.ocFim);
+  // números das bases novas (DEC/FEC por ocorrência, Lente de imagem, solicitações), contados nos próprios arquivos
+  const WD = window.DECFEC_TRECHOS, WL = window.LENTE_IMAGEM, WS = window.SOLICITACOES;
+  const nb = { oc: 0, nul: 0, exp: 0, alL: 0, solT: 0, solN: 0, solForaT: 0, solForaN: 0, solSobe: 0 };
+  for (const t of ctx.trechos) {
+    nb.oc += t.oc.length;
+    if (t.dfc) for (let ix = 0; ix < t.oc.length; ix++) { if (t.exp && t.exp.has(ix)) nb.exp++; else if (!t.dfc[ix]) nb.nul++; }
+    if (t.sol) { nb.solT++; nb.solN += t.sol.length; nb.solSobe += t.sol.filter((x) => x.de).length; }
+  }
+  nb.alL = D.alims.filter((a) => ctx.img && Number.isInteger(ctx.img[a[0]])).length;
+  if (ctx.solT) {
+    const ids = new Set(ctx.trechos.map((t) => t.id));
+    for (const [al, tr] of Object.entries(ctx.solT)) for (const [n, l] of Object.entries(tr)) if (!ids.has(al + ' · ' + n)) { nb.solForaT++; nb.solForaN += l.length; }
+  }
+  const exc = D.excecao || [], excTxt = exc.length ? exc.slice(0, -1).join(', ') + (exc.length > 1 ? ' e ' : '') + exc[exc.length - 1] : '';
+  const gerBr = (o) => (o && o.gerado ? dBr(o.gerado) : '—');
   $('#fontes').innerHTML = [
     '<b>' + fmtN(D.alims.length) + '</b> alimentadores · ' + fmtN(E.T1 + E.T2 + E.T3) + ' trechos da segmentação de <b>' + segData + '</b>',
     'Crítica <b>' + V.dataDe(ctx, ctx.ocIni) + ' a ' + ocFim + '</b> · ' + fmtN(Object.values(D.saz).reduce((a, b) => a + b, 0)) + ' ocorrências por vegetação',
     'OS de limpeza desde <b>' + D.os_inicio.split('-').reverse().slice(1).join('/') + '</b>' + (osData ? ', situação de <b>' + osData + '</b>' : ''),
+    'Ranking de faixa <b>' + gerBr(WL || WS) + '</b> · Lente de imagem e ' + (WS ? fmtN(WS.total) : '—') + ' solicitações',
   ].map((s) => '<li>' + s + '</li>').join('');
   // datas das bases nos textos fixos da metodologia e das premissas (lidas dos dados, não escritas à mão)
   const perDados = V.dataDe(ctx, ctx.ocIni) + ' a ' + ocFim + ', ' + Object.keys(D.saz).length + ' meses';
@@ -839,20 +1002,24 @@ if (typeof module !== 'undefined') module.exports = VERA;
   document.querySelectorAll('.js-os').forEach((el) => { el.textContent = osData || '—'; });
   const kmTot = E.km_T1 + E.km_T2 + E.km_T3;
   $('#tab-fontes').innerHTML = [
-    ['Rede (GIS processado no protótipo /teste/)', 'Segmentação de ' + segData + ' (não regerada aqui; os trechos do mapa podem ter mudado depois): ' + fmtN(D.alims.length) + ' alimentadores, ' + fmtN(E.T1) + ' T1, ' + fmtN(E.T2) + ' T2, ' + fmtN(E.T3) + ' T3, ' + fmtN(kmTot) + ' km', 'Classe, extensão, município, polo, centro do trecho'],
-    ['Crítica (causa árvore)', fmtN(Object.values(D.saz).reduce((a, b) => a + b, 0)) + ' ocorrências de ' + V.dataDe(ctx, ctx.ocIni) + ' a ' + ocFim + '; ' + fmtN(D.nae_fora) + ' sem trecho associado', 'NAE, CHI (consumidor·hora interrompido), CI (consumidores interrompidos)'],
+    ['Rede (GIS processado no protótipo /teste/)', 'Segmentação de ' + segData + ' (não regerada aqui; os trechos do mapa podem ter mudado depois)' + (exc.length ? ', com ' + excTxt + ' (divididos por exceção em 16/10/2026) já pela segmentação de hoje' : '') + ': ' + fmtN(D.alims.length) + ' alimentadores, ' + fmtN(E.T1) + ' T1, ' + fmtN(E.T2) + ' T2, ' + fmtN(E.T3) + ' T3, ' + fmtN(kmTot) + ' km', 'Classe, extensão, município, polo, centro do trecho'],
+    ['Crítica (causa árvore)', fmtN(Object.values(D.saz).reduce((a, b) => a + b, 0)) + ' ocorrências de ' + V.dataDe(ctx, ctx.ocIni) + ' a ' + ocFim + '; ' + fmtN(D.nae_fora) + ' sem trecho associado. Jan–mar/2026: extração anterior ao expurgo', 'NAE Vegetação'],
+    ['DEC e FEC por ocorrência (Crítica, conjunto ANEEL)', WD ? fmtN(nb.oc) + ' ocorrências dos trechos, de ' + V.dataDe(ctx, ctx.ocIni) + ' a ' + ocFim + ': ' + fmtN(nb.exp) + ' expurgadas como situação de emergência (valem 0) e ' + fmtN(nb.nul) + ' sem dado na Crítica (contam 0). Jan–mar/2026 pela Crítica refeita depois do expurgo; gerado em ' + gerBr(WD) : 'Não carregado (dados/decfec-trechos.js)', 'DEC/100 km e FEC/100 km'],
+    ['Lente de imagem (planilha RANKING_FAIXA_APP, aba Lente de imagem)', WL ? fmtN(Object.keys(WL.al).length) + ' alimentadores com nota de 1 a 4 (4 = maior risco); ' + fmtN(D.alims.length - nb.alL) + ' dos ' + fmtN(D.alims.length) + ' deste recorte sem nota' : 'Não carregada (dados/lente-imagem.js)', 'Lente de imagem'],
+    ['Solicitações de limpeza (planilha RANKING_FAIXA_APP, aba Base de solicitações)', WS ? fmtN(WS.total) + ' pedidos de 2023 a 2026; ' + fmtN(WS.no_site) + ' ligados a um trecho, ' + fmtN(nb.solN) + ' deles em ' + fmtN(nb.solT) + ' trechos desta lista' + (nb.solSobe ? ' (' + fmtN(nb.solSobe) + ' feitos para trecho criado depois de ' + segData.slice(0, 5) + ', no trecho que o contém)' : '') + (nb.solForaN ? ' e ' + fmtN(nb.solForaN) + ' em ' + fmtN(nb.solForaT) + ' trechos fora do recorte' : '') + '; ' + fmtN((WS.sem_trecho || []).length) + ' sem trecho' : 'Não carregadas (dados/solicitacoes-trechos.js)', 'Marca na lista, ficha e filtro; fora da nota'],
     ['OS de limpeza de faixa', (D.os_fonte || 'Planilha de OS') + ' desde ' + D.os_inicio.split('-').reverse().join('/') + (D.os_fonte ? ', cobertura pelos vãos do mapa' : ', cobertura por vão estimada pela descrição'), 'Última limpeza, carência, OS abertas'],
     ['Inspeções do app de campo', fmtN(D.insp_total) + ' registros (jul–ago/2026), ' + fmtN(D.insp_casadas) + ' ligados a um poste da rede MT', 'Fora do score: não há medição de distância confiável'],
     ['Sem fonte na base', 'Grupo A e essenciais, classe de vegetação, produtividade por tipo de equipe, disponibilidade de equipes, plano climático, emergências do centro de operação', 'Marcação manual no teste ou parâmetro'],
   ].map((l) => '<tr><td>' + l[0] + '</td><td>' + l[1] + '</td><td>' + l[2] + '</td></tr>').join('');
-  $('#recorte').textContent = 'Recorte do teste: ' + fmtN(D.trechos.length) + ' trechos (todos os T1 e T2 e os T3 com ocorrência, OS ou inspeção). Ficaram de fora ' + fmtN(D.fora_recorte.n) + ' T3 (' + fmtN(D.fora_recorte.km) + ' km) sem nenhum desses sinais.';
+  $('#recorte').textContent = 'Recorte do teste: ' + fmtN(D.trechos.length) + ' trechos (todos os T1 e T2 e os T3 com ocorrência, OS, inspeção ou solicitação). Ficaram de fora ' + fmtN(D.fora_recorte.n) + ' T3 (' + fmtN(D.fora_recorte.km) + ' km) sem nenhum desses sinais.';
+  // T3 fora do recorte: sem ocorrência nem limpeza registrada, clientes típicos de T3, classe T3 e a Lente do alimentador
   function textoRecorte() {
     const C = Object.fromEntries(V.CRIT.map((c) => [c.k, c])), tip = S.out.med.cli[3], jc = V.faixaDe(C.cli, tip);
-    const nota = (S.T.limp[2] || 0) + (jc >= 0 ? S.T.cli[jc] || 0 : 0) + (S.T.hier[2] || 0), L = S.P.lim;
-    const p = nota >= L.p1 ? 1 : nota >= L.p2 ? 2 : nota >= L.p3 ? 3 : 4;
-    const faixaP = (x) => (x >= L.p1 ? 1 : x >= L.p2 ? 2 : x >= L.p3 ? 3 : 4), comBonus = nota + Math.max(0, Math.min(S.P.bonus, 100 - nota));
-    $('#recorte-real').textContent = ' No sistema real eles entram: sem limpeza registrada, a limpeza conta como sem registro e, com os clientes típicos de T3 e a classe T3, a nota fica ' + fmtP(nota) + ' (P' + p + ') na tabela de pontos atual' +
-      (S.P.planoPolos.length && comBonus > nota ? '; nos polos do plano climático, ' + fmtP(comBonus) + ' (P' + faixaP(comBonus) + ').' : '.');
+    const nota = (S.T.limp[2] || 0) + (jc >= 0 ? S.T.cli[jc] || 0 : 0) + (S.T.hier[2] || 0), L = S.P.lim, nMax = nota + V.maxDe(S.T, 'img');
+    const faixaP = (x) => (x >= L.p1 ? 1 : x >= L.p2 ? 2 : x >= L.p3 ? 3 : 4), comBonus = nMax + Math.max(0, Math.min(S.P.bonus, 100 - nMax));
+    const fx = faixaP(nota) === faixaP(nMax) ? 'P' + faixaP(nota) : 'P' + faixaP(nota) + ' a P' + faixaP(nMax);
+    $('#recorte-real').textContent = ' No sistema real eles entram: sem ocorrência e sem limpeza registrada, com os clientes típicos de T3, a classe T3 e a Lente de imagem do alimentador, a nota fica ' + (nMax > nota ? 'de ' + fmtP(nota) + ' a ' + fmtP(nMax) : fmtP(nota)) + ' (' + fx + ') na tabela de pontos atual' +
+      (S.P.planoPolos.length && comBonus > nMax ? '; nos polos do plano climático, até ' + fmtP(comBonus) + ' (P' + faixaP(comBonus) + ').' : '.');
   }
   $('#qualidade').innerHTML = [
     'A distância à MT “0” aparece junto com distância à AT “0” em quase todos os registros, então foi lida como “não informado”. O formulário precisa separar “contato” de “não se aplica”.',
@@ -863,10 +1030,19 @@ if (typeof module !== 'undefined') module.exports = VERA;
     'A OS não traz o traçado; a cobertura é estimada pelos ativos citados e pelos km da descrição.',
     'Nenhuma das 2.615 OS de limpeza informa o tipo de equipe (manual ou mecanizada) nem o tipo de vegetação. Só 267 trazem a categoria do defeito (galhos em contato, obstruindo a faixa, projeção de queda, dificultando acesso) com a severidade.',
     'Ocorrências com abrangência DJ caem no T1 inteiro; em T1 muito curto o local real da falha é incerto (alerta Q4).',
-  ].map((s) => '<li>' + esc(s) + '</li>').join('');
+    'set/2026: 3.363 registros da Crítica expurgados como situação de emergência; a NAE desse mês pode estar menor.',
+    'Jan–mar/2026: a NAE é a da extração anterior ao expurgo; na Crítica refeita, ' + (WD ? fmtN(nb.exp) : 'parte') + ' dessas ocorrências estão expurgadas como situação de emergência e valem 0 no DEC e no FEC (continuam no NAE).',
+    WS ? (nb.solForaN ? fmtN(nb.solForaN) + ' solicitações (' + fmtN(nb.solForaT) + ' trechos) caem em trecho fora do recorte e não aparecem na lista; ' : '') + fmtN((WS.sem_trecho || []).length) + ' solicitações não foram ligadas a um trecho (ativo não achado, sem código ou alimentador fora do site).' : '',
+    exc.length ? excTxt + ' foram divididos por exceção em 16/10/2026 (GIS sem as chaves fechadas): poucos trechos e longos, a NAE por trecho é pouco confiável (alerta Q5).' : '',
+  ].filter(Boolean).map((s) => '<li>' + esc(s) + '</li>').join('');
 
   function grafSaz() {
     const meses = Object.keys(D.saz), vals = meses.map((m) => D.saz[m]);
+    // último mês incompleto (D.oc_ate antes do fim do mês): barra clara e "até dd/mm"
+    const ult = meses[meses.length - 1], [ua, um] = ult.split('-').map(Number);
+    const parc = D.oc_ate && D.oc_ate < new Date(Date.UTC(ua, um, 0)).toISOString().slice(0, 10) ? meses.length - 1 : -1;
+    const ateTxt = parc >= 0 ? ' (até ' + dBr(D.oc_ate).slice(0, 5) + ')' : '';
+    const ago = D.saz['2026-08'];
     const NOMES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
     const W = 640, H = 240, ml = 44, mr = 12, mt = 26, mb = 30, max = 1200, iw = W - ml - mr, ih = H - mt - mb, bw = iw / vals.length;
     const y = (v) => mt + ih - (v / max) * ih;
@@ -874,14 +1050,15 @@ if (typeof module !== 'undefined') module.exports = VERA;
     for (const g of [0, 300, 600, 900, 1200]) s += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y(g) + '" y2="' + y(g) + '"></line><text x="' + (ml - 6) + '" y="' + (y(g) + 4) + '" text-anchor="end">' + fmtN(g) + '</text>';
     vals.forEach((v, j) => {
       const x = ml + j * bw + bw * 0.18, w = bw * 0.64, h = mt + ih - y(v);
-      s += '<rect class="b" data-j="' + j + '" x="' + x.toFixed(1) + '" y="' + y(v).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3"></rect>';
+      s += '<rect class="b" data-j="' + j + '" x="' + x.toFixed(1) + '" y="' + y(v).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3"' + (j === parc ? ' fill-opacity="0.45"' : '') + '></rect>';
       s += '<rect data-j="' + j + '" x="' + (ml + j * bw).toFixed(1) + '" y="' + mt + '" width="' + bw.toFixed(1) + '" height="' + ih + '" fill="transparent"></rect>';
       s += '<text x="' + (ml + j * bw + bw / 2).toFixed(1) + '" y="' + (H - 10) + '" text-anchor="middle">' + NOMES[Number(meses[j].slice(5)) - 1] + '</text>';
       if (j === 0 || j === vals.length - 1) s += '<text class="rotv" x="' + (ml + j * bw + bw / 2).toFixed(1) + '" y="' + (y(v) - 6).toFixed(1) + '" text-anchor="middle">' + fmtN(v) + '</text>';
     });
     s += '</svg>';
     const el = $('#graf-saz');
-    el.innerHTML = '<h3 style="margin-bottom:8px">Ocorrências por vegetação por mês · Crítica 2026</h3>' + s + '<div class="valores">' + meses.map((m, j) => '<span>' + NOMES[Number(m.slice(5)) - 1] + ' ' + fmtN(vals[j]) + '</span>').join('') + '</div><p class="dica" style="margin-top:6px">Janeiro tem ' + fmt1(vals[0] / vals[vals.length - 1]) + ' vezes as ocorrências de agosto: o fim do período chuvoso concentra o risco.</p>';
+    el.innerHTML = '<h3 style="margin-bottom:8px">Ocorrências por vegetação por mês · Crítica 2026</h3>' + s + '<div class="valores">' + meses.map((m, j) => '<span>' + NOMES[Number(m.slice(5)) - 1] + ' ' + fmtN(vals[j]) + (j === parc ? ateTxt : '') + '</span>').join('') + '</div><p class="dica" style="margin-top:6px">' +
+      (ago ? 'Janeiro tem ' + fmt1(vals[0] / ago) + ' vezes as ocorrências de agosto: o fim do período chuvoso concentra o risco. ' : '') + (parc >= 0 ? NOMES[um - 1] + '/' + ua + ' vai só' + ateTxt.replace(/[()]/g, '') + '. ' : '') + 'Em set/2026, 3.363 registros da Crítica foram expurgados como situação de emergência: a barra pode estar menor.</p>';
     const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; el.appendChild(tip);
     const svg = el.querySelector('svg');
     svg.addEventListener('mousemove', (e) => {
@@ -889,7 +1066,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
       svg.querySelectorAll('rect.b').forEach((b) => b.classList.toggle('hover', r && b.dataset.j === r.dataset.j));
       if (!r) { tip.hidden = true; return; }
       const j = Number(r.dataset.j), tot = vals.reduce((a, b) => a + b, 0);
-      tip.textContent = NOMES[Number(meses[j].slice(5)) - 1] + '/2026 · ' + fmtN(vals[j]) + ' ocorrências · ' + pct(vals[j] / tot) + ' do período';
+      tip.textContent = NOMES[Number(meses[j].slice(5)) - 1] + '/2026' + (j === parc ? ateTxt : '') + ' · ' + fmtN(vals[j]) + ' ocorrências · ' + pct(vals[j] / tot) + ' do período';
       const box = el.getBoundingClientRect(); tip.hidden = false;
       tip.style.left = Math.min(e.clientX - box.left + 12, box.width - tip.offsetWidth - 8) + 'px'; tip.style.top = (e.clientY - box.top - 34) + 'px';
     });
@@ -908,7 +1085,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
         const x = l[k];
         return '<tr>' + (j === 0 ? '<td rowspan="3" class="num"><b>' + fmtN(l.q * 100) + '%</b><span class="sub">' + fmtN(x.n) + ' trechos</span></td>' : '') + '<td>' + (k === 'score' ? '<b>' + nomes[k] + '</b>' : nomes[k]) + '</td><td class="r num">' + fmt1(x.oc * 100) + '%</td><td class="r num">' + fmt1(x.chi * 100) + '%</td><td class="r num">' + fmt1(x.km * 100) + '%</td><td class="r num">' + fmt1(x.km ? x.chi / x.km : 0) + '</td></tr>';
       }).join('')).join('');
-      $('#retro-nota').textContent = fmtN(rt.total) + ' ocorrências e ' + fmtN(rt.totalH) + ' consumidor·hora entre 01/05 e 31/08/2026 nos ' + fmtN(rt.n) + ' trechos do recorte. A última coluna mostra quanto consumidor·hora futuro cada % de extensão priorizada captou (1,0 = igual ao acaso por km). Limites: só 4 meses de janela futura, limpezas feitas no meio do período e associação aproximada da falha ao trecho.';
+      $('#retro-nota').textContent = fmtN(rt.total) + ' ocorrências e ' + fmtN(rt.totalH) + ' consumidor·hora (real, não é critério da nota) entre 01/05 e 31/08/2026 nos ' + fmtN(rt.n) + ' trechos do recorte. A última coluna mostra quanto consumidor·hora futuro cada % de extensão priorizada captou (1,0 = igual ao acaso por km). Limites: só 4 meses de janela futura, limpezas feitas no meio do período e associação aproximada da falha ao trecho.';
       // a nota só vale como método se captar mais que a contagem simples; enquanto não captar, a tela diz que é experimental
       const l1 = rt.linhas[0], pior = l1.score.oc < l1.nae.oc;
       const av = $('#retro-aviso');

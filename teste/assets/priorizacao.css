@@ -373,3 +373,9 @@ td.r, th.r { text-align: right }
 .pt-lim{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2);font-size:12.5px;color:var(--muted)}
 .pt-lim input{width:84px;padding:6px 8px;border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--bg);color:var(--fg)}
 @media (max-width:860px){.pt-lim input{font-size:16px;min-height:40px}}
+
+/* ====== Ranking de faixa (16/11/2026): marca na linha (regra F5, solicitações) e lista de solicitações na ficha ====== */
+.pz-centro .sub.pz-marca{margin-top:2px;font-size:12px;line-height:1.35;color:var(--accent-ink)}
+.sol-lista{margin:0}
+.sol-lista>li>span:last-child{min-width:0}
+.sol-lista .sub{white-space:normal;margin-top:2px}

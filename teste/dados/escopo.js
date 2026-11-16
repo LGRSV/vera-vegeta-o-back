@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.2",
+ "versao": "2.3",
  "atualizado": "2026-11-16",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -161,8 +161,9 @@ window.ARGOS_ESCOPO = {
    {"t": "Enviar os arquivos da Crítica de set e out/2026 (o site vai até ago/2026)", "st": "ok", "d": "2026-11-15", "obs": "Enviados pelo menu com nov/2026 até 09/11."},
    {"t": "Processar e publicar a NAE de set e out/2026", "st": "ok", "d": "2026-11-16", "obs": "Com nov/2026 até 09/11. A carga automática de 15/11 usou as ferramentas de 30/10 e foi refeita com as atuais."},
    {"t": "Regra do alimentador reclassificado no script da Crítica: o PS01112193 (Campos Lindos) entra no LD03105019, sem trecho", "st": "ok", "d": "2026-11-09"},
-   {"t": "Enviar as Críticas de jan a out/2026 para reprocessar a NAE: alimentador reclassificado (5 NAE de mai/2026 fora do site) e consumidor·hora por passo de manobra", "st": "bloq", "desde": "2026-11-09", "prazo": "2026-11-13", "resp": "proj", "obs": "Decisão de 09/11: aplicar em todos os meses de uma vez, quando os arquivos chegarem."},
-   {"t": "Rotina mensal: Crítica do mês anterior carregada até o dia 10 (primeira: nov/2026)", "st": "pend", "prazo": "2026-12-10", "resp": "proj"}
+   {"t": "Enviar as Críticas de jan a out/2026 para reprocessar a NAE: alimentador reclassificado (5 NAE de mai/2026 fora do site) e consumidor·hora por passo de manobra", "st": "bloq", "desde": "2026-11-09", "prazo": "2026-11-13", "resp": "proj", "obs": "Decisão de 09/11: aplicar em todos os meses de uma vez, quando os arquivos chegarem. Jan a mar chegaram em 16/11 já com o expurgo (932 NAE viraram situação de emergência): por decisão de 16/11 a NAE de jan a mar fica a do site e esses arquivos servem só ao DEC/FEC."},
+   {"t": "Rotina mensal: Crítica do mês anterior carregada até o dia 10 (primeira: nov/2026)", "st": "pend", "prazo": "2026-12-10", "resp": "proj"},
+   {"t": "Nova extração da Crítica de nov/2026: o arquivo enviado tem exatamente 4.000 linhas (provável corte na exportação)", "st": "pend", "prazo": "2026-12-10", "resp": "proj", "obs": "Set/2026 tem 3.363 registros expurgados como situação de emergência: a NAE desse mês pode estar menor (decisão de 16/11: manter e avisar)."}
   ]},
 
   {"id": "4.1", "frente": "faixa", "titulo": "OS de limpeza de faixa no mapa", "itens": [
@@ -195,11 +196,13 @@ window.ARGOS_ESCOPO = {
    {"t": "Nota de 0 a 100 pela soma de pontos de cada critério", "st": "ok", "d": "2026-10-28"},
    {"t": "Clientes pelas UCs ligadas e OS de limpeza pelo OS status de 29/10", "st": "ok", "d": "2026-10-29"},
    {"t": "CHI e CI pelas UCs ligadas a jusante do trecho em cada evento, no lugar dos consumidores registrados na Crítica (decisão de 13/11)", "st": "ok", "d": "2026-11-13"},
-   {"t": "Filtros Regional, Polo, Tronco/Ramal e Urbano/Rural (área urbanizada do IBGE 2022), cortes P1–P3 à vista, pontos e limites editáveis e botão Ver no mapa na ficha", "st": "ok", "d": "2026-11-15"}
+   {"t": "Filtros Regional, Polo, Tronco/Ramal e Urbano/Rural (área urbanizada do IBGE 2022), cortes P1–P3 à vista, pontos e limites editáveis e botão Ver no mapa na ficha", "st": "ok", "d": "2026-11-15"},
+   {"t": "Premissas do Ranking de faixa (planilha RANKING_FAIXA_APP): nota com NAE 33, DEC 33, FEC 22 e Lente de imagem 12; T1 sem limpeza efetiva há mais de 3 anos no topo (regra F5); solicitações do aplicativo com marca, ficha e filtro", "st": "ok", "d": "2026-11-16", "obs": "Decisões de 16/11: sem as lentes de Meio Ambiente e Segurança, pesos reescalados para 100; clientes, hierarquia, Grupo A e limpeza com 0 no perfil padrão."}
   ]},
   {"id": "6.2", "frente": "prio", "titulo": "Validação e atualização", "itens": [
-   {"t": "DEC/100 e FEC/100 do conjunto ANEEL pela Crítica no lugar do CHI e do CI (pronto; falta a Crítica de jan a mar/2026 para publicar)", "st": "bloq", "desde": "2026-11-14", "prazo": "2026-11-21", "resp": "proj", "obs": "Os arquivos de jan, fev e mar/2026 passam de 10 MB e não baixam do Drive: mandar na conversa. Com abr a ago só, 47% das ocorrências ficariam sem DEC/FEC."},
-   {"t": "Atualizar as ocorrências do Priorizador (referência de 07/10/2026) com a Crítica nova", "st": "pend", "prazo": "2026-11-20", "resp": "dev", "obs": "Depende da Crítica de set e out/2026."},
+   {"t": "DEC/100 e FEC/100 do conjunto ANEEL pela Crítica no lugar do CHI e do CI", "st": "ok", "d": "2026-11-16", "obs": "Crítica de jan a mar/2026 recebida em 16/11, já com o expurgo: as 812 ocorrências expurgadas como situação de emergência entram com DEC/FEC zero e continuam na NAE."},
+   {"t": "Atualizar as ocorrências do Priorizador (referência de 07/10/2026) com a Crítica nova", "st": "ok", "d": "2026-11-16", "obs": "Jan a nov/2026, até 09/11; OS de limpeza pelo OS status de 15/11."},
+   {"t": "Decidir a regra F5 para T1 com limpeza só parcial no mapa ou só na aba T1 da planilha (27 casos) e para T1 muito curto", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
    {"t": "Validar a tabela de pontos e o ranking com os polos", "st": "pend", "prazo": "2026-12-11", "resp": "proj"}
   ]},
 
