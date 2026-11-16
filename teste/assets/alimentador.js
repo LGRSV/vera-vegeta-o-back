@@ -220,10 +220,26 @@ function atualizaNae() {
   desenhaLista($('busca').value);
   multi.length ? detalheVarios(multi) : sel ? detalhe(TR[sel]) : resumo();
   marcaNae(multi.length ? multi : sel ? [sel] : null);
+  refazRotulos();
+}
+// rótulo do trecho: o nome, a NAE (bolinha vermelha) e o que outra camada põe ao lado (window.__rotuloExtra(nome): HTML ou
+// ''; a Queimadas, assets/focos.js, põe a bolinha laranja com os focos). Com algo a mais o rótulo fica por cima dos rótulos
+// das chaves (zIndexOffset acima dos 500 do DJ e do religador e dos 950 da NAE no ativo); o T3 aparece também de longe
+// quando o HTML a mais pede (data-longe: os trechos com mais focos), como o de NAE
+const extraRot = n => (window.__rotuloExtra ? window.__rotuloExtra(n) || '' : '');
+// (data-z no HTML a mais: quanto ele sobe entre os rótulos com algo a mais; a Queimadas põe os de mais focos por cima)
+const zRot = (t, x) => x ? 960 + Math.min(1000, +((/data-z="(\d+)"/.exec(x) || [])[1] || 0)) : t.tipo === 'fusivel' ? 0 : 400;
+// a camada que mudou o que põe nos rótulos chama window.__refazRotulos(): o conteúdo, a ordem e os T3 que aparecem
+function refazRotulos() {
   const c = contagem();
-  Object.entries(rotulos).forEach(([n, m]) => { const el = m.getElement(); if (el) { el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : ''); el.firstChild.classList.toggle('oc', !!c[n]); } });
+  Object.entries(rotulos).forEach(([n, m]) => {
+    const el = m.getElement(), x = extraRot(n);
+    if (el) { el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : '') + x; el.firstChild.classList.toggle('oc', !!c[n]); el.firstChild.classList.toggle('fo', !!x); el.firstChild.classList.toggle('fo-l', x.includes('data-longe')); }
+    if (TR[n]) m.setZIndexOffset(zRot(TR[n], x));
+  });
   rotulosT3();
 }
+window.__refazRotulos = refazRotulos;
 $('ind').addEventListener('change', atualizaNae);
 // lista dos meses: marcar "Todos" volta a todos; marcar um mês a partir de todos fica só ele; todos marcados um a um = todos
 function marcaMeses() {
@@ -656,7 +672,8 @@ function vaoPerto(vs, ll) {
 }
 // rótulos: T1/T2 sempre; T3 só de perto e só os que estão na tela (mais leve em alimentador grande)
 function rotulo(t, c) {
-  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${escolhido(t.nome) ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}</div>`}), zIndexOffset: t.tipo === 'fusivel' ? 0 : 400})
+  const x = extraRot(t.nome);
+  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${escolhido(t.nome) ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}${x ? ' fo' : ''}${x.includes('data-longe') ? ' fo-l' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}${x}</div>`}), zIndexOffset: zRot(t, x)})
     .bindTooltip(`${esc(t.inicio)} → ${esc(fimTxt(t))}`, {direction: 'top'})
     .on('click', e => { L.DomEvent.stopPropagation(e); clique(t.nome, e.originalEvent, false); }).addTo(map);
   rotulos[t.nome] = m;
@@ -681,7 +698,7 @@ function rotulosT3() {
   const perto = map.getZoom() >= 15.5, b = map.getBounds().pad(0.2), c = contagem();
   D.trechos.forEach(t => {
     if (t.tipo !== 'fusivel') return;
-    const ver = visivel.T3 && (escolhido(t.nome) || c[t.nome] || (perto && b.contains(t.rotulo)));
+    const ver = visivel.T3 && (escolhido(t.nome) || c[t.nome] || extraRot(t.nome) || (perto && b.contains(t.rotulo)));
     if (ver && !rotulos[t.nome]) rotulo(t, c);
     else if (!ver && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; }
   });
@@ -950,7 +967,7 @@ if (typeof L === 'undefined') {
       estado();
       for (const t of D.trechos) {
         if (t.tipo !== 'fusivel') continue;
-        if (visivel.T3 && !rotulos[t.nome] && (escolhido(t.nome) || c[t.nome] || (perto && b.contains(t.rotulo)))) rotulo(t, c);
+        if (visivel.T3 && !rotulos[t.nome] && (escolhido(t.nome) || c[t.nome] || extraRot(t.nome) || (perto && b.contains(t.rotulo)))) rotulo(t, c);
         if (AL.cheia()) { await AL.cede(); estado(); }
       }
       await comeco(AL.cede);

@@ -678,7 +678,7 @@ def ativos_interface(saida):
     (a / 'alimentador.js').write_text('const D = window.D;\n' + js, encoding='utf-8')
     for f in ('extras.js', 'municipios.js', 'chaves.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
               'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js', 'lupa-painel.js', 'ativos-zoom.js', 'mapa-raiox.js',
-              'croqui-rascunho.js', 'polo-rota.js', 'modo-faixa-rascunho.js', 'argos.png'):
+              'croqui-rascunho.js', 'polo-rota.js', 'modo-faixa-rascunho.js', 'argos.png', 'focos.js', 'focos.css'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
     return modelo
@@ -724,6 +724,11 @@ def pacote_trechos(destino):
     return destino
 
 
+# ?v= dos assets da página inicial e da Queimadas: trocar quando o arquivo muda (o navegador guarda a versão anterior)
+V_MAPA = '20261116'
+V_FOCOS = '20261116'
+
+
 def pagina_alimentador(modelo, c):
     al = c['alimentador']
     cdn = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/'
@@ -739,7 +744,8 @@ def pagina_alimentador(modelo, c):
             ('Chaves 88 não aparecem.', 'Chaves que não dividem trecho (88, faca e outras) só aparecem com o mapa de perto.')]:
         assert h.count(x) == 1, x[:50]
         h = h.replace(x, y)
-    h = re.sub(r'<style>\n.*?</style>', '<link rel="stylesheet" href="../../assets/alimentador.css">', h, count=1, flags=re.S)
+    h = re.sub(r'<style>\n.*?</style>', '<link rel="stylesheet" href="../../assets/alimentador.css">\n'
+               f'<link rel="stylesheet" href="../../assets/focos.css?v={V_FOCOS}">', h, count=1, flags=re.S)
     h = re.sub(r'<script>\nconst D = %%DADOS%%;\n.*?</script>',
                '<script src="dados.js"></script>\n<script src="../../assets/alimentador.js"></script>\n'
                '<script src="../../assets/extras.js"></script>\n'
@@ -758,6 +764,9 @@ def pagina_alimentador(modelo, c):
                '<script src="../../assets/manutencao.js"></script>\n'
                # OS de manutenção executadas nos ativos: executadas.js do alimentador vem de scripts/executadas.py
                '<script src="executadas.js"></script>\n<script src="../../assets/executadas.js"></script>\n'
+               # Queimadas (focos de calor e incêndios da Crítica): lê dados/focos/ (scripts/focos.py e focos_historico.py);
+               # antes de lupa-painel.js, que copia o botão das camadas para a fileira do alto do mapa
+               f'<script src="../../assets/focos.js?v={V_FOCOS}"></script>\n'
                '<script src="../../assets/telacheia.js"></script>\n'
                # croqui de limpeza de faixa (o modelo, assets/croqui-modelo.js, só carrega quando pedido)
                '<script src="../../assets/croqui.js"></script>\n<script src="../../assets/menu.js"></script>\n'
@@ -822,12 +831,12 @@ TEMA = ("<script>(function(){var t;try{t=localStorage.getItem('tema')}catch(e){}
 TOPO_CENTRAL = "<script>/* tela inicial nova (central/): aberta direto, esta página vai para lá. Dentro do quadro da tela nova, fica como está. */\n(function () {\n  var W = window, L = location;\n  function paraCasca() {\n    var q = L.search.replace(/([?&])classico=1&?/, '$1').replace(/[?&]$/, ''), h = L.hash, n = /^#mapa\\/(.+)$/.exec(h);\n    /* nível do mapa (#mapa/norte/...): a casca usa só #mapa, então o nível vai como ?nivel= */\n    if (n) { q = (q ? q + '&' : '?') + 'nivel=' + n[1]; h = '#mapa'; }\n    L.replace('central/' + q + h);\n  }\n  if (W.top === W) { document.documentElement.style.display = 'none'; paraCasca(); return; }\n})();</script>\n"
 
 
-def casca(titulo, corpo, raiz, rodape='', sem_rodape=False, topo=''):
+def casca(titulo, corpo, raiz, rodape='', sem_rodape=False, topo='', estilos=''):
     return (f'<!doctype html>\n<html lang="pt-BR"><head><meta charset="utf-8">\n{topo}'
             f'<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
             f'<meta name="robots" content="noindex, nofollow">\n<title>{html.escape(titulo)}</title>\n'
             f'{TEMA}\n'
-            f'{FONTES}<link rel="stylesheet" href="{raiz}assets/site.css"></head><body><div class="wrap">\n{corpo}\n'
+            f'{FONTES}<link rel="stylesheet" href="{raiz}assets/site.css">{estilos}</head><body><div class="wrap">\n{corpo}\n'
             + ('' if sem_rodape else f'<footer class="rodape">{rodape}<p><a href="{raiz}relatorio.html">Relatório de validação</a> · '
                f'<a href="{raiz}manifesto.json">manifesto.json</a></p></footer>\n') + '</div>\n'
             '<script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value'
@@ -1639,10 +1648,13 @@ def interface(saida, malha=None):
              '<div class="mt-dica" aria-hidden="true"></div></div></div>\n'
              '<script src="assets/mapa-municipios-dados.js"></script>\n'
              + visoes +                                                # outras visões do mapa (atualiza_bases.py → gera_visoes.js)
-             '<script src="assets/mapa-municipios.js?v=20261110"></script>\n'
-             '<script src="assets/busca-ativo.js?v=20261110"></script>\n'
+             # visão Queimadas (focos de calor): antes do mapa, que lê window.ARGOS_VIS_EXTRA ao montar o seletor de visão
+             f'<script src="assets/focos.js?v={V_FOCOS}"></script>\n'
+             f'<script src="assets/mapa-municipios.js?v={V_MAPA}"></script>\n'
+             f'<script src="assets/busca-ativo.js?v={V_MAPA}"></script>\n'
              '<script src="assets/mapa-raiox.js?v=20261110"></script>')        # zoom → tela cheia e raio-X (Ctrl+X) no mapa
-    (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True, topo=TOPO_CENTRAL),   # página inicial sem rodapé (pedido do usuário)
+    (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True, topo=TOPO_CENTRAL,   # página inicial sem rodapé (pedido do usuário)
+                                            estilos=f'<link rel="stylesheet" href="assets/focos.css?v={V_FOCOS}">'),
                                       encoding='utf-8')
     (saida / '.nojekyll').touch()
     relatorio(saida, dados, man)

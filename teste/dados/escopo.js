@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.5",
+ "versao": "2.6",
  "atualizado": "2026-11-16",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -69,7 +69,7 @@ window.ARGOS_ESCOPO = {
   ["carteira", "carteira|empreiteira"],
   ["prio", "priorização|priorizador"],
   ["qualidade", "pontos de melhoria|usabilidade"],
-  ["plataforma", "escopo|tela inicial|central/|shift\\+k|versão anterior|escolha da versão|apresentação|atualiza(r|ção)( automática)? d[ae]s? bases|atualização automática|bases\\.json|ferramentas|raiz abre|cópia congelada|design novo|script kml|para rodar no computador|cache do python|validador"],
+  ["mapa", "queimadas|focos de calor"], ["plataforma", "escopo|tela inicial|central/|shift\\+k|versão anterior|escolha da versão|apresentação|atualiza(r|ção)( automática)? d[ae]s? bases|atualização automática|bases\\.json|ferramentas|raiz abre|cópia congelada|design novo|script kml|para rodar no computador|cache do python|validador"],
   ["faixa", "croqui"],
   ["rede", "trafos do gis|acervo gis|kmz_google_earth2|fusível|religador|mapa de trechos"],
   ["mapa", "mapa inicial|página inicial|busca|lupa|olho|legenda|bandeirinha|raio-x|polos|regiona|satélite|voo fluido|rótulos|índice com mapa|cartão preto|^tela cheia|painel do alimentador|município abre|visão do município|filtro de município"],
@@ -94,6 +94,7 @@ window.ARGOS_ESCOPO = {
   {"d": "2026-11-09", "t": "Escopo e acompanhamento do projeto (página, Excel e Word)."},
   {"d": "2026-11-09", "t": "Levantamento de qualidade por agentes: 111 pontos de melhoria; DEC e FEC do Mapa de podas corrigidos."},
   {"d": "2026-11-10", "t": "Rodada de correções em 11 módulos: 75 pontos de melhoria trabalhados, 41 corrigidos e conferidos, 20 parciais e 13 que dependem de base nova."},
+  {"d": "2026-11-16", "t": "Visão Queimadas: focos de calor do INPE e do FIRMS perto da rede e incêndios da Crítica no mapa."},
   {"d": "2026-11-16", "t": "Priorizador no modelo da planilha do Ranking de faixa, com NAE, DEC e FEC por trecho refeitos a cada Crítica enviada pelo menu."}
  ],
  "entregas": [
@@ -146,6 +147,11 @@ window.ARGOS_ESCOPO = {
    {"t": "Data das fotos de satélite na legenda", "st": "ok", "d": "2026-10-23"},
    {"t": "Habilitar a Map Tiles API no projeto da chave do Google (a chave enviada responde 404)", "st": "bloq", "desde": "2026-10-30", "prazo": "2026-11-13", "resp": "proj"},
    {"t": "Inserir a chave do Google, testar e publicar o satélite de melhor qualidade", "st": "pend", "prazo": "2026-11-17", "resp": "dev", "obs": "Depende do item anterior."}
+  ]},
+  {"id": "2.5", "frente": "mapa", "titulo": "Queimadas (focos de calor e incêndios)", "itens": [
+   {"t": "Visão Queimadas no Mapa da rede: focos de calor do INPE e do FIRMS perto da rede (sob a rede, até 1 km, até 5 km) em 24 h, 7 dias, 30 dias e 12 meses, com pontos ao vivo, cartão do foco e Histórico e filtros", "st": "ok", "d": "2026-11-16", "obs": "Contagens só com VIIRS e MODIS; GOES, METOP e MSG só como ponto ao vivo. Histórico de dez/2025 a nov/2026."},
+   {"t": "Queimadas no mapa do alimentador: focos por trecho, painel com números e gráfico e os incêndios da Crítica (subcausa Incêndio e achados pelo texto), sem o texto livre", "st": "ok", "d": "2026-11-16", "obs": "Crítica de mai a nov/2026 (nov até 09/11): 123 registros. O ponto do incêndio é o equipamento que abriu; o fogo pode estar a jusante."},
+   {"t": "Rotina do GitHub a cada 10 min: focos ao vivo no ramo focos, cópia no site de hora em hora e histórico uma vez por dia", "st": "ok", "d": "2026-11-16", "obs": "Primeira rodada em 16/11 às 18:45. Sem a chave do FIRMS (MAP_KEY) a rotina lê os arquivos públicos do FIRMS."}
   ]},
 
   {"id": "3.1", "frente": "nae", "titulo": "NAE por trecho a partir da Crítica", "itens": [
