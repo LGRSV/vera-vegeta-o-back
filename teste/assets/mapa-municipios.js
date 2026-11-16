@@ -178,7 +178,11 @@
     // km somados OS a OS: o mesmo vão limpo duas vezes conta duas (não é extensão distinta de rede)
     { id: 'limpeza', nome: 'Limpeza de faixa', curto: 'Limpeza', un: 'km', mais: 'km de limpeza (acumulado)', sem: 'Sem limpeza', o: 'km limpos somados OS a OS (com repetição)', c: 3,
       per: () => `acumulado com repetição · base de ${dataBr(fv('limpeza').gerado) || 'data não informada'}` }
-  ].filter(v => v.c === undefined || (MV && (v.faixas = MV.faixas[(MV.campos || [])[v.c]])));
+  ].filter(v => v.c === undefined || (MV && (v.faixas = MV.faixas[(MV.campos || [])[v.c]])))
+    // visões de outros scripts carregados antes deste (window.ARGOS_VIS_EXTRA; ex.: Queimadas, assets/focos.js): o próprio
+    // objeto traz os números (mun(m), al(m, a)), as faixas (que ele troca e pede refaz()), o período e, se quiser, controles a
+    // mais na legenda (leg(): HTML dentro de .mt-leg-x, que não recolhe a legenda) e liga(sim) ao entrar e sair da visão
+    .concat((window.ARGOS_VIS_EXTRA || []).filter(v => v && v.id && v.mun && v.al && v.faixas).map(v => { v.ext = true; return v; }));
   let V = VIS.find(v => v.id === new URLSearchParams(location.search).get('v')) || VIS[0];
   FAIXAS = V.faixas;
   const kmMun = m => m.als ? kmTot(m) / 1000 : 0;
@@ -186,23 +190,23 @@
   const alKm = {}, alMuns = {};
   M.muns.forEach(m => (m.als || []).forEach(a => { alKm[a.cod] = (alKm[a.cod] || 0) + a.m / 1000; alMuns[a.cod] = (alMuns[a.cod] || 0) + 1; }));
   const dens = (n, k) => k >= KM_MIN ? n / k * 100 : 0;
-  const vMun = m => V.dens ? dens(m.nae || 0, kmMun(m)) : V.c === undefined ? m.nae || 0 : (MV.muns[m.cod] || {})[MV.campos[V.c]] || 0;
+  const vMun = m => V.ext ? V.mun(m) || 0 : V.dens ? dens(m.nae || 0, kmMun(m)) : V.c === undefined ? m.nae || 0 : (MV.muns[m.cod] || {})[MV.campos[V.c]] || 0;
   // NAE do alimentador DENTRO do município (regra aprovada): a.nm quando os dados trazem (mesma regra de nae_por_municipio
   // em gera_trechos.py); sem ele, só se sabe a do alimentador inteiro, que é a do município quando ele não passa por outro.
   // todo: o número é do alimentador inteiro (a tela avisa)
   const naeAl = a => a.nm !== undefined ? { n: a.nm || 0, tot: a.n || 0, todo: false } : { n: a.n || 0, tot: a.n || 0, todo: alMuns[a.cod] > 1 };
-  const vAl = (m, a) => V.dens ? dens(a.n || 0, alKm[a.cod] || 0) : V.c === undefined ? naeAl(a).n : ((((MV.muns[m.cod] || {}).als || {})[a.cod] || [])[V.c] || 0);
+  const vAl = (m, a) => V.ext ? V.al(m, a) || 0 : V.dens ? dens(a.n || 0, alKm[a.cod] || 0) : V.c === undefined ? naeAl(a).n : ((((MV.muns[m.cod] || {}).als || {})[a.cod] || [])[V.c] || 0);
   // texto do alimentador no município: deixa claro quando o número é do alimentador todo (e não só deste município)
   const txtAl = (m, a) => {
     if (V.dens) return `${txtV(vAl(m, a))} no alimentador todo`;
-    if (V.c !== undefined) return txtV(vAl(m, a));
+    if (V.c !== undefined || V.ext) return txtV(vAl(m, a)) + (V.ext && V.quemAl ? ' ' + V.quemAl(m, a) : '');
     const x = naeAl(a);
     return x.todo ? `${numV(x.n)} NAE no alimentador todo` : a.nm !== undefined && x.n !== x.tot ? `${numV(x.n)} NAE aqui (de ${numV(x.tot)} no alimentador)` : `${numV(x.n)} NAE`;
   };
   // número (selo) e linha de baixo do alimentador na caixa do município: km aqui e, quando for o caso, de quem é o número
   const rotAl = (m, a) => {
-    const todo = V.dens || (V.c === undefined && naeAl(a).todo);
-    return `<i>${txtV(vAl(m, a))}</i><em>${km(a.m)} aqui${todo ? ' · número do alimentador todo' : ''}</em>`;
+    const todo = V.dens || (V.c === undefined && !V.ext && naeAl(a).todo), q = V.ext && V.quemAl ? V.quemAl(m, a) : '';
+    return `<i>${txtV(vAl(m, a))}</i><em>${km(a.m)} aqui${todo ? ' · número do alimentador todo' : q ? ' · ' + esc(q) : ''}</em>`;
   };
   // soma de um grupo de municípios na visão; na densidade, NAE somada sobre km somados (não a soma das densidades)
   const somaV = ms => {
@@ -214,18 +218,19 @@
   // número da visão (km com 1 casa até 100 km) e com a unidade ("36 NAE", "12 OS", "34,5 km", "12,3 NAE/100 km")
   const numV = n => V.dens ? NF1.format(n || 0) : V.un !== 'km' ? NF0.format(n || 0) : !n ? '0' : n < 50 ? '<0,1' :   // 15 a 49 m não viram 0,0 km
     (n < 1e5 ? NF1 : NFk).format(n / 1000);
-  const txtV = n => `${numV(n)} ${V.un}`;
+  const txtV = n => `${numV(n)} ${V.un1 && n === 1 ? V.un1 : V.un}`;   // un1: singular da visão de fora ("1 foco")
   const kmF = l => NF0.format(l / 1000);
   const rotFaixa = i => i === 0 ? V.sem : V.dens ? (i === 1 ? `até ${FAIXAS[2]} por 100 km` : i === FAIXAS.length - 1 ? `${FAIXAS[i]} ou mais por 100 km` : `${FAIXAS[i]} a ${FAIXAS[i + 1]} por 100 km`) :
     V.un === 'km' ? (i === 1 ? `até ${kmF(FAIXAS[2])} km` : i === FAIXAS.length - 1 ? `${kmF(FAIXAS[i])} km ou mais` : `${kmF(FAIXAS[i])} a ${kmF(FAIXAS[i + 1])} km`) :
-    (i === FAIXAS.length - 1 ? `${NF0.format(FAIXAS[i])}${V.un === 'OS' ? ' OS' : ''} ou mais` : `${NF0.format(FAIXAS[i])} a ${NF0.format(FAIXAS[i + 1] - 1)}${V.un === 'OS' ? ' OS' : ''}`);
+    (i === FAIXAS.length - 1 ? `${NF0.format(FAIXAS[i])}${V.un === 'OS' || V.ext ? ' ' + V.un : ''} ou mais` :
+      `${NF0.format(FAIXAS[i])}${FAIXAS[i + 1] - 1 > FAIXAS[i] ? ' a ' + NF0.format(FAIXAS[i + 1] - 1) : ''}${V.un === 'OS' || V.ext ? ' ' + (V.un1 && FAIXAS[i + 1] - 1 === 1 ? V.un1 : V.un) : ''}`);
   // texto das faixas na rampa: inteiro (l: "11–30", c: só o começo) ou km/densidade ("10–25", "até 10"; c: ">0")
   const rotRampa = (i, curto) => {
     const l = FAIXAS[i], ult = i === FAIXAS.length - 1, f = V.un === 'km' ? kmF : n => NF0.format(n);
     if (i === 0) return '0';
     if (ult) return f(l) + '+';
     if (V.un === 'km' || V.dens) return curto ? (i === 1 ? '>0' : f(l)) : i === 1 ? 'até ' + f(FAIXAS[2]) : f(l) + '–' + f(FAIXAS[i + 1]);
-    return curto ? f(l) : f(l) + '–' + f(FAIXAS[i + 1] - 1);
+    return curto || FAIXAS[i + 1] - 1 <= l ? f(l) : f(l) + '–' + f(FAIXAS[i + 1] - 1);   // faixa de um valor só: "1", não "1–1"
   };
   // municípios agrupados por polo (o grupo é o que se afasta ao abrir a regional), com o contorno do polo no fim do grupo
   const grp = {};
@@ -301,7 +306,8 @@
       `<em aria-hidden="true"><span class="mt-f-l">${rotRampa(i)}</span><span class="mt-f-c">${rotRampa(i, true)}</span></em>` +
       `<span class="vh">${rotFaixa(i)}</span></span>`).join('') + '</div>' +
       // período e base da visão, sempre à vista (as visões têm períodos diferentes)
-      `<small class="mt-regs-p" style="flex:1 0 100%;margin:0;white-space:normal">${esc(V.per ? V.per() : '')}</small>`;
+      `<small class="mt-regs-p" style="flex:1 0 100%;margin:0;white-space:normal">${esc(V.per ? V.per() : '')}</small>` +
+      (V.leg ? `<div class="mt-leg-x">${V.leg()}</div>` : '');
     leg.querySelector('.mt-regs-m').innerHTML = FAIXAS.map((l, i) => `<i class="nae-${i}"></i>`).join('');
     leg.querySelector('.mt-regs-o').textContent = V.curto;
     ajustaTitulo();
@@ -402,7 +408,7 @@
   }
   if (leg) {                                            // clique em qualquer ponto dela, ou arrastar: para cima esconde, para baixo mostra
     let y0 = null, arrastou = false;
-    leg.addEventListener('pointerdown', e => { if (!e.button && menu.hidden) { y0 = e.clientY; arrastou = false; } });
+    leg.addEventListener('pointerdown', e => { if (!e.button && menu.hidden && !e.target.closest('.mt-leg-x')) { y0 = e.clientY; arrastou = false; } });
     document.addEventListener('pointermove', e => {      // no documento: a orelhinha é pequena e o arrasto sai dela
       if (y0 === null) return;
       const dy = e.clientY - y0;
@@ -412,7 +418,7 @@
     document.addEventListener('pointercancel', () => { y0 = null; });
     leg.addEventListener('click', e => {
       if (arrastou) { arrastou = false; return; }
-      if (e.target.closest('.mt-vis-menu')) return;    // o menu trata os cliques dele
+      if (e.target.closest('.mt-vis-menu') || e.target.closest('.mt-leg-x')) return;    // o menu (e os controles da visão) tratam os cliques deles
       if (!menu.hidden) { fechaMenu(); return; }       // menu aberto: clicar na legenda (rampa, orelhinha, título) só fecha o menu
       const bt = e.target.closest('.mt-vis-b') || (!legAberta && VIS.length > 1 ? legBt : null);   // título, ou a orelhinha recolhida: menu das visões
       if (bt) { if (menu.hidden) abreMenu(bt); else fechaMenu(); return; }
@@ -503,7 +509,7 @@
   function bandeiras(cards, ms, troca, refaz) {
     const c = caixa.getBoundingClientRect(), noMapa = mascara(ms), ctm = svg.getScreenCTM(), linhas = [];
     let feitos = [];
-    try { feitos = [tc, volta].filter(o => o && o.offsetParent).map(o => rel(o.getBoundingClientRect())); } catch (e) { /* ainda montando */ }
+    try { feitos = [tc, volta].filter(o => o && o.offsetParent).concat(ocupas()).map(o => rel(o.getBoundingClientRect())); } catch (e) { /* ainda montando */ }
     const tam = cards.map(k => [k.e.offsetWidth, k.e.offsetHeight]);   // lidos todos antes de mexer em qualquer cartão
     cards.forEach((k, i) => {
       const [w, h] = tam[i], b = planta(contorno(k, 90, ctm, c), w, h, noMapa, feitos, c.width, c.height);
@@ -528,6 +534,9 @@
   // (e sem sair da caixa do mapa: o número de outra visão pode ser mais largo)
   // Devolve false se algum cartão ficou batendo em outro (ou na seta, na tela cheia, ou saiu por cima): aí quem chamou
   // procura lugar de novo com o tamanho de agora (só nesse caso; senão o lugar não muda)
+  // o que outros scripts põem sobre o mapa (classe mt-ocupa: a caixa da Queimadas, presa no canto da janela) também é
+  // obstáculo para os cartões e os nomes
+  const ocupas = () => [...caixa.querySelectorAll('.mt-ocupa')].filter(o => !o.hidden && o.getClientRects().length);
   function reancora(cards) {
     const tam = cards.map(k => [k.e.offsetWidth, k.e.offsetHeight]), CW = caixa.clientWidth, R = [];
     cards.forEach((k, i) => {
@@ -538,7 +547,7 @@
       R.push({ left: x, top: y, right: x + w, bottom: y + h });
     });
     let obst = [];
-    try { obst = [tc, volta].filter(o => o && o.offsetParent).map(o => rel(o.getBoundingClientRect())); } catch (e) { /* ainda montando */ }
+    try { obst = [tc, volta].filter(o => o && o.offsetParent).concat(ocupas()).map(o => rel(o.getBoundingClientRect())); } catch (e) { /* ainda montando */ }
     const bateu = (a, b) => a.left < b.right + 2 && a.right + 2 > b.left && a.top < b.bottom + 2 && a.bottom + 2 > b.top;
     return !R.some((a, i) => a.top < 2 || R.some((b, j) => j > i && bateu(a, b)) || obst.some(o => bateu(a, o)));
   }
@@ -767,6 +776,7 @@
     agendaRede();
     if (verP) { verP = false; mostraPonto(); }
     setTimeout(solta, 0);
+    document.dispatchEvent(new CustomEvent('argos-pouso', { detail: { reg, pol, mun, al: alf } }));
   }
   const volta = document.createElement('button');
   volta.type = 'button';
@@ -1055,7 +1065,7 @@
       '<g class="mt-redes-f"></g><g class="mt-redes-d" clip-path="url(#mt-corte)"></g>';
     camada.style.transform = tr(mdesl[cod]);
     grp[pol].append(camada);
-    const als = m.als.slice().sort((a, b) => b.m - a.m);
+    const als = m.als.slice().sort((a, b) => (V.ordenaAls ? vAl(m, b) - vAl(m, a) : 0) || b.m - a.m);   // Queimadas: pelo número de focos
     trilhaMun();
     legAl.setAttribute('aria-label', `Alimentadores de ${m.nome}`);
     legAl.hidden = !!window.ARGOS_BUSCA;                // com a busca da barra, a lista abre embaixo da logo (busca-ativo.js)
@@ -1319,6 +1329,7 @@
     folgaRot = FOLGA_ROT();                                     // uma vez por cálculo (matchMedia a cada comparação custava ~120 ms)
     const celular = matchMedia('(max-width:860px)').matches, ocupado = [];   // seta de voltar (e a legenda, se estiver no mapa) também entram na conta
     [caixa.contains(leg) ? leg : null, volta, tc].forEach(o => { if (o && o.offsetParent) ocupado.push(o.getBoundingClientRect()); });
+    ocupas().forEach(o => ocupado.push(o.getBoundingClientRect()));
     const livre = { left: Math.max(r.left, c0.left) + 2, top: Math.max(r.top, c0.top) + 2, right: Math.min(r.right, c0.right) - 2, bottom: Math.min(r.bottom, c0.bottom) - 2 };
     const pt = svg.createSVGPoint(), u = Math.max(v[2] / r.width, v[3] / r.height);   // unidades do mapa por pixel de tela
     const aTela = (x, y) => { pt.x = x; pt.y = y; return pt.matrixTransform(ctm); };
@@ -1577,9 +1588,11 @@
   // troca a visão (menu da legenda): cor dos municípios, legenda e os números do nível aberto (cartões das regionais, dos
   // polos e dos municípios, trilha, caixa dos alimentadores), sem voo nem recarga. A URL guarda a escolha (?v=, o resto
   // dela fica); a busca da barra (busca-ativo.js) ouve 'argos-visao'.
-  function visao(id) {
+  // forca: a mesma visão de novo, com números e faixas novos (refaz(): a visão de outro script trocou período ou filtro)
+  function visao(id, forca) {
     const nv = VIS.find(v => v.id === id);
-    if (!nv || nv === V) return;
+    if (!nv || (nv === V && !forca)) return;
+    const antes = V;
     V = nv;
     FAIXAS = V.faixas;
     M.muns.forEach(m => {
@@ -1602,8 +1615,13 @@
       if (V === VIS[0]) u.searchParams.delete('v'); else u.searchParams.set('v', V.id);
       history.replaceState(history.state, '', u.href);
     } catch (e) { /* sem history (cópia em sandbox): vale só nesta visita */ }
+    if (antes !== V) { if (antes.liga) antes.liga(false); marcaVis(); if (V.liga) V.liga(true); }
     document.dispatchEvent(new CustomEvent('argos-visao', { detail: { v: V.id } }));
   }
+  // a visão aberta fica no #mapa-to (data-visao): o CSS de cada visão (cores da rampa) e os scripts dela se guiam por ele
+  function marcaVis() { alvo.dataset.visao = V.id; }
+  marcaVis();
+  if (V.liga) setTimeout(() => V.liga(true), 0);     // aberta pelo endereço (?v=): depois dos outros scripts da página
 
   // ---------- ponte com a busca da barra (busca-ativo.js) ----------
   // vai({reg}|{polo}|{cod}|{al}): o mapa anda até lá pelo mesmo caminho dos cliques (regional › polo › município ›
@@ -1903,7 +1921,8 @@
     const alDe = (al, cod) => (porCod[cod] && porCod[cod].als.find(x => x.cod === al)) || { cod: al };
     return V === VIS[0] ? null : { id: V.id, nome: V.nome, un: V.un, mais: V.mais, num: numV, txt: txtV, dens: !!V.dens,
       mun: cod => porCod[cod] ? vMun(porCod[cod]) : 0, al: (al, cod) => porCod[cod] ? vAl(porCod[cod], alDe(al, cod)) : 0,
-      grupo: cods => somaV(cods.map(c => porCod[c]).filter(Boolean)),
+      grupo: cods => somaV(cods.map(c => porCod[c]).filter(Boolean)), ordena: !!V.ordenaAls,
+      quem: V.ext && V.quemAl ? (al, cod) => porCod[cod] ? V.quemAl(porCod[cod], alDe(al, cod)) : '' : null,
       alTot: V.dens ? al => { const m = M.muns.find(x => x.als && x.als.some(a => a.cod === al)); return m ? vAl(m, alDe(al, m.cod)) : 0; } : null };
   };
 
@@ -1994,6 +2013,16 @@
   }
   // NAE do alimentador no município para a lista da busca: {n, tot, todo} (todo: o número é do alimentador inteiro)
   const alNoMun = (al, cod) => { const m = porCod[cod], a = m && m.als.find(x => x.cod === al); return a ? naeAl(a) : null; };
+  // ponto (lat, lon) do município cod no mapa, já com o afastamento do nível aberto (unidades do svg); null se o município
+  // não aparece neste nível (outra regional, outro polo; com o município aberto, só ele). Para desenhar por cima do mapa
+  // (focos da visão Queimadas) depois do pouso ('argos-pouso')
+  const projeta = (lat, lon, cod) => {
+    const m = porCod[cod];
+    if (!m || !reg || m.reg !== reg || (pol && m.polo !== pol) || (mun && cod !== mun) || !isFinite(lat) || !isFinite(lon)) return null;
+    const d = pol ? soma(desl[pol] || [0, 0], mdesl[cod] || [0, 0]) : desl[m.polo] || [0, 0];
+    return [projX(lon) + d[0], projY(lat) + d[1]];
+  };
   window.ARGOS_MAPA = { nivel: () => ({ reg, pol, mun, al: alf }), vai, ponto, previa, rede: redeDe, realceAl: al => { if (mun) realceAl(al); }, visao: visaoApi,
-    alNoMun, prepara: queroAl };
+    alNoMun, prepara: queroAl, refaz: () => visao(V.id, true), projeta, svg, caixa, voando: () => !!anima,
+    abreAl: al => abreAl(al), url: pag, fechaPonto: () => limpaPonto() };
 })();

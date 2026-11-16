@@ -1038,7 +1038,14 @@
       fila.className = 'lp-cams';
       fila.setAttribute('role', 'group');
       fila.setAttribute('aria-label', 'Camadas do mapa');
-      fila.innerHTML = bts.map((b, i) => `<button type="button" data-i="${i}" aria-pressed="${b.getAttribute('aria-pressed') === 'true'}" title="${esc(b.title)}">${esc(b.textContent.trim())}</button>`).join('');
+      // no celular estreito (até 480 px) "Manutenção" vira "Manut." para as 5 camadas (com Queimadas) caberem em 390 px; o
+      // nome inteiro fica no aria-label e no texto do computador
+      const CURTO = { 'Manutenção': 'Manut.' };
+      fila.innerHTML = bts.map((b, i) => {
+        const t = b.textContent.trim(), c = CURTO[t];
+        return `<button type="button" data-i="${i}" aria-pressed="${b.getAttribute('aria-pressed') === 'true'}" title="${esc(b.title)}"${c ? ` aria-label="${esc(t)}"` : ''}>` +
+          (c ? `<span class="lp-cl">${esc(t)}</span><span class="lp-cc" aria-hidden="true">${esc(c)}</span>` : esc(t)) + '</button>';
+      }).join('');
       const copia = () => bts.forEach((b, i) => fila.children[i].setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') === 'true')));
       new MutationObserver(copia).observe(camL, { subtree: true, attributes: true, attributeFilter: ['aria-pressed'] });
       fila.addEventListener('click', e => { const x = e.target.closest('button[data-i]'); if (x) { e.stopPropagation(); bts[+x.dataset.i].click(); } });
@@ -1177,6 +1184,9 @@
     '@media (pointer:coarse){.lp-cams button{min-height:40px}}' +
     '.lp-cams button:hover{background:var(--vidro-hover)}.lp-cams button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}' +
     '.lp-cams button[aria-pressed=true]{background:var(--accent);color:var(--on-accent)}' +
+    // celular estreito: menos folga e o nome curto, para Faixa | Inspeção | Insp→manut | Manut. | Queimadas caberem sem rolar
+    '.lp-cams .lp-cc{display:none}' +
+    '@media (max-width:480px){.mapbox>.lp-cams{gap:0}.lp-cams button{padding:0 6px}.lp-cams .lp-cl{display:none}.lp-cams .lp-cc{display:inline}}' +
     '.mapbox.fx-modo>.lp-cams{display:none}';
   document.head.append(s);
 })();

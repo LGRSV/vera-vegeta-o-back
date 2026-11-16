@@ -1,0 +1,203 @@
+/* Queimadas (assets/focos.js): visão do mapa principal e camada do mapa do alimentador. Tokens do ARGOS (site.css e
+   alimentador.css têm os mesmos nomes). */
+:root{
+  /* mapa de calor por município (6 classes, de "sem" ao vinho): igual nos dois temas, como a NAE */
+  --fo0:#f4f1ec; --fo1:#fde4c4; --fo2:#fbb478; --fo3:#f07f3c; --fo4:#cf4520; --fo5:#8a1c3b;
+  /* faixas da rede no gráfico (sequencial: a mais perto é a de mais contraste com o fundo) */
+  --fo-sob:#a3123a; --fo-1km:#e0531a; --fo-5km:#d99a2b;
+  /* idade do foco ao vivo */
+  --fo-a0:#dc2626; --fo-a1:#f97316; --fo-a2:#fde3c0; --fo-a2-borda:#7c2d12;
+  --fo-bolha:#c2410c;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fo-sob:#ffa47e;--fo-1km:#e8591a;--fo-5km:#a3381a}}
+:root[data-theme="dark"]{--fo-sob:#ffa47e;--fo-1km:#e8591a;--fo-5km:#a3381a}
+
+/* ---------- mapa principal: cores da visão ---------- */
+#mapa-to[data-visao="queimadas"] .mun.nae-0{fill:var(--fo0)}#mapa-to[data-visao="queimadas"] .mun.nae-1{fill:var(--fo1)}
+#mapa-to[data-visao="queimadas"] .mun.nae-2{fill:var(--fo2)}#mapa-to[data-visao="queimadas"] .mun.nae-3{fill:var(--fo3)}
+#mapa-to[data-visao="queimadas"] .mun.nae-4{fill:var(--fo4)}#mapa-to[data-visao="queimadas"] .mun.nae-5{fill:var(--fo5)}
+#mapa-to[data-visao="queimadas"] .mt-regs .nae-0{background:var(--fo0)}#mapa-to[data-visao="queimadas"] .mt-regs .nae-1{background:var(--fo1)}
+#mapa-to[data-visao="queimadas"] .mt-regs .nae-2{background:var(--fo2)}#mapa-to[data-visao="queimadas"] .mt-regs .nae-3{background:var(--fo3)}
+#mapa-to[data-visao="queimadas"] .mt-regs .nae-4{background:var(--fo4)}#mapa-to[data-visao="queimadas"] .mt-regs .nae-5{background:var(--fo5)}
+
+/* controles a mais na legenda (período, distância e a leitura das fontes) */
+#mapa-to .mt-leg-x{display:grid;gap:6px;justify-items:center;white-space:normal}
+.fo-seg{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:2px;padding:2px;border-radius:var(--r2);background:var(--hover);max-width:100%}
+.fo-seg button{min-height:30px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--muted);font:600 var(--t-xs)/1 var(--f-body);white-space:nowrap;cursor:pointer}
+.fo-seg button:hover{color:var(--fg)}
+.fo-seg button[aria-pressed=true]{background:var(--seg-on,var(--paper));color:var(--fg);box-shadow:var(--sh1)}
+.fo-seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+@media (pointer:coarse){.fo-seg button{min-height:36px}}
+.fo-selo{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0 6px;margin:0;font:500 var(--t-xs)/1.35 var(--f-body);color:var(--muted);font-variant-numeric:tabular-nums;text-align:center}
+.fo-ponto{flex:none;width:8px;height:8px;border-radius:50%;background:var(--line-forte);box-shadow:0 0 0 2px color-mix(in srgb,var(--line-forte) 25%,transparent)}
+.fo-ponto.ok{background:#16a34a;box-shadow:0 0 0 2px rgb(22 163 74 / .25)}
+.fo-ponto.velho{background:#d97706;box-shadow:0 0 0 2px rgb(217 119 6 / .25)}
+.fo-ponto.parado{background:#dc2626;box-shadow:0 0 0 2px rgb(220 38 38 / .25)}
+
+/* caixa do canto: atraso, foco mais novo, idade dos pontos e o Histórico */
+/* no computador fica no canto de baixo da janela (o mapa do estado é mais alto que a tela) */
+.fo-caixa{position:fixed;left:16px;bottom:16px;z-index:6;max-height:calc(100% - 32px);overflow-y:auto;display:grid;gap:6px;width:min(290px,calc(100% - 16px));padding:var(--s3);border:1px solid var(--line);border-radius:var(--r2);
+  background:color-mix(in srgb,var(--paper) 94%,transparent);box-shadow:var(--sh2);color:var(--fg);font:var(--t-xs)/1.4 var(--f-body)}
+.fo-caixa[hidden]{display:none}
+.fo-caixa p{margin:0}.fo-caixa b{font-weight:600}
+.fo-caixa .fo-dica{color:var(--muted)}
+.fo-idades{display:flex;flex-wrap:wrap;gap:4px 12px}
+.fo-idades span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.fo-idades i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 3px rgb(0 0 0 / .25)}
+.fo-idades i.fo-a0{background:var(--fo-a0)}.fo-idades i.fo-a1{background:var(--fo-a1)}.fo-idades i.fo-a2{background:var(--fo-a2);box-shadow:0 0 0 2px var(--fo-a2-borda)}
+.fo-hist-b{justify-self:start;min-height:36px;padding:0 var(--s3);border:1px solid var(--line-forte);border-radius:var(--r1);background:var(--paper);color:var(--fg);font:600 var(--t-xs)/1 var(--f-body);cursor:pointer}
+.fo-hist-b:hover{background:var(--hover)}.fo-hist-b:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+@media (pointer:coarse){.fo-hist-b{min-height:40px}}
+.voando .fo-caixa{opacity:.35}
+.fo-caixa-f{display:grid;gap:4px;justify-items:start}
+/* ícone da chama: fora do tamanho do mapa (.mt-mapa svg) */
+svg.fo-chama{display:inline-block;min-height:0;max-height:none;max-width:none;margin:0;overflow:visible}
+/* celular: a caixa vai para baixo do mapa (fora da tela cheia), sem cobrir o mapa */
+@media (max-width:860px){
+  #mapa-to:not(.mt-cheia):not(:fullscreen) .fo-caixa{position:relative;left:auto;bottom:auto;width:auto;max-height:none;margin:var(--s2) 0 0;box-shadow:none}
+  #mapa-to:is(.mt-cheia,:fullscreen) .fo-caixa{left:8px;bottom:8px;width:calc(100% - 16px);max-height:40%}
+}
+
+/* pontos ao vivo no mapa (svg): tamanho fixo na tela; somem no voo e voltam no pouso */
+.fo-pts path{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke;cursor:pointer;pointer-events:stroke}
+.fo-pts .fo-anel{stroke:#fff;stroke-width:13px}
+.fo-pts .fo-anel:hover{stroke:var(--foco-mapa,#fde047)}
+.fo-pts .fo-p{stroke-width:8px}
+.fo-pts .fo-p.fo-a0{stroke:var(--fo-a0)}.fo-pts .fo-p.fo-a1{stroke:var(--fo-a1)}.fo-pts .fo-p.fo-a2{stroke:var(--fo-a2-borda);stroke-width:9px}
+.fo-pts .fo-p.fo-a2{filter:none}
+.voando .fo-pts{display:none}
+.nivel-mun .fo-pts .fo-p{stroke-width:10px}.nivel-mun .fo-pts .fo-anel{stroke-width:15px}
+
+/* cartão do foco */
+.fo-cartao,.fo-c{display:grid;gap:3px;font:400 var(--t-sm)/1.4 var(--f-body);color:var(--fg)}
+.fo-cartao{position:absolute;z-index:9;width:max-content;max-width:min(320px,calc(100% - 16px));padding:10px 40px 12px 14px;border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--paper);box-shadow:0 10px 24px -8px rgb(0 0 0 / .45)}
+/* celular: preso no pé da tela (em cima ficam a busca e a lista do município), acima da barra da lupa */
+.fo-cartao.topo{position:fixed;left:8px;right:8px;top:auto;bottom:8px;z-index:35;width:auto;max-width:none;max-height:70%;overflow-y:auto}
+.fo-cartao:focus,.fo-cartao:focus-visible{outline:none}
+.fo-c-t{display:flex;align-items:center;gap:6px;font:700 var(--t-base)/1.25 var(--f-display)}
+.fo-c-t .fo-chama{width:15px;height:15px;fill:var(--fo-bolha);flex:none}
+.fo-cartao span,.fo-c span{color:var(--muted)}
+.fo-c-n{font-size:var(--t-xs)}
+.fo-fx{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:2px;vertical-align:-1px}
+.fo-c-a{justify-self:start;margin-top:4px;padding:0;border:0;background:none;color:var(--accent);font:600 var(--t-sm) var(--f-body);text-decoration:none;cursor:pointer}
+.fo-c-a:hover{text-decoration:underline}
+.fo-x{position:absolute;top:4px;right:4px;width:32px;height:32px;border:0;border-radius:var(--r1);background:transparent;color:var(--muted);font:500 20px/1 var(--f-body);cursor:pointer}
+.fo-x:hover{background:var(--hover);color:var(--fg)}.fo-x:focus-visible{outline:2px solid var(--accent)}
+
+/* Histórico e filtros: painel à direita (no celular, a tela toda) */
+.fo-hist{position:fixed;top:0;right:0;bottom:0;z-index:60;display:grid;grid-template-rows:auto minmax(0,1fr);width:min(440px,100%);background:var(--paper);color:var(--fg);
+  border-left:1px solid var(--line);box-shadow:-12px 0 32px -12px rgb(0 0 0 / .45);font:var(--t-sm)/1.45 var(--f-body)}
+.fo-hist[hidden]{display:none}
+.fo-h-cab{position:relative;padding:var(--s4) 48px var(--s3) var(--s4);border-bottom:1px solid var(--line)}
+.fo-h-cab h2,.fo-top-c h2{margin:0;font:700 var(--t-xl)/1.1 var(--f-display)}
+.fo-h-cab h2 small,.fo-top-c h2 small{display:block;margin-top:var(--s1);font:500 var(--t-xs)/1.4 var(--f-body);color:var(--muted)}
+.fo-h-cab .fo-x{top:12px;right:8px}
+.fo-h-c{overflow-y:auto;overscroll-behavior:contain;padding:var(--s3) var(--s4) var(--s5);display:grid;gap:var(--s3);align-content:start}
+.fo-h-f{display:grid;gap:6px}
+.fo-h-r{font:700 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.fo-h-f .fo-seg,.fo-card .fo-seg{justify-content:flex-start;justify-self:start}
+.fo-h-sel{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.fo-h-sel label,.fo-int label{display:grid;gap:2px;font-size:var(--t-xs);color:var(--muted);min-width:0}
+.fo-h-sel select,.fo-int input{min-height:36px;width:100%;min-width:0;padding:0 var(--s2);border:1px solid var(--line-forte);border-radius:var(--r1);background:var(--paper);color:var(--fg);font:var(--t-sm) var(--f-body)}
+.fo-h-sel select:disabled{opacity:.55}
+.fo-h-sel select:focus-visible,.fo-int input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.fo-int{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+@media (max-width:640px){.fo-h-sel select,.fo-int input{min-height:44px;font-size:16px}}
+.fo-hist h3,.fo-card h3{margin:var(--s2) 0 0;font:700 var(--t-base) var(--f-display)}
+.fo-hist h3 small{font:400 var(--t-xs) var(--f-body);color:var(--muted)}
+.fo-per{margin:0;font-size:var(--t-xs);color:var(--muted)}
+.fo-carrega{margin:0;color:var(--muted);font-size:var(--t-sm)}
+.fo-nota{margin:0;font-size:var(--t-xs);color:var(--muted)}
+.fo-h-res{display:grid;gap:var(--s3);min-width:0}
+html.fo-hist-aberto .fo-caixa{visibility:hidden}
+
+/* números (4 cartõezinhos) */
+.fo-nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s2)}
+.fo-nums>div{display:grid;gap:2px;align-content:start;padding:var(--s2);border:1px solid var(--line);border-radius:var(--r1);min-width:0}
+.fo-nums b{font:700 var(--t-lg)/1.1 var(--f-mono);font-variant-numeric:tabular-nums}
+.fo-nums span{font-size:11.5px;line-height:1.25;color:var(--muted);overflow-wrap:anywhere}
+.fo-nums small{font-size:inherit}
+@media (max-width:420px){.fo-nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* gráfico (svg do tamanho do espaço: nada cortado) */
+.fo-g{position:relative;display:grid;gap:4px;min-width:0}
+.fo-g-cab{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 10px}
+.fo-g-cab>b{font:700 var(--t-base) var(--f-display)}
+.fo-g-leg{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:var(--t-xs);color:var(--muted)}
+.fo-g-leg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.fo-g-leg i{width:10px;height:10px;border-radius:2px}
+.fo-g svg{display:block;overflow:visible}
+.fo-g-l{stroke:var(--line);stroke-width:1}.fo-g-0{stroke:var(--line-forte);stroke-width:1}
+.fo-g-t{fill:var(--muted);font:500 10.5px var(--f-mono)}
+.fo-g-sob,.fo-g-leg i.fo-g-sob,i.fo-g-sob{fill:var(--fo-sob);background:var(--fo-sob)}
+.fo-g-1km,.fo-g-leg i.fo-g-1km,i.fo-g-1km{fill:var(--fo-1km);background:var(--fo-1km)}
+.fo-g-5km,.fo-g-leg i.fo-g-5km,i.fo-g-5km{fill:var(--fo-5km);background:var(--fo-5km)}
+.fo-g-h{fill:transparent}
+.fo-g-b.on .fo-g-h{fill:var(--hover)}
+.fo-g-tip{position:absolute;top:22px;z-index:2;max-width:100%;padding:4px 8px;border:1px solid var(--line);border-radius:var(--r1);background:var(--paper);color:var(--fg);
+  box-shadow:var(--sh1);font:500 var(--t-xs)/1.35 var(--f-body);pointer-events:none}
+
+/* listas (alimentadores ou trechos com mais focos; incêndios) */
+.fo-top{margin:0;padding:0;list-style:none;display:grid;counter-reset:fo}
+.fo-top li{display:flex;align-items:center;gap:var(--s2);min-height:36px;border-bottom:1px solid var(--line);counter-increment:fo}
+.fo-top li::before{content:counter(fo);flex:none;width:20px;font:500 var(--t-xs) var(--f-mono);color:var(--muted)}
+.fo-top li>span,.fo-top li>button{flex:1;min-width:0;font:600 var(--t-sm) var(--f-mono);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fo-top li>button{min-height:36px;padding:0;border:0;background:none;color:var(--accent);cursor:pointer}
+.fo-top li>button:hover{text-decoration:underline}.fo-top li>button:focus-visible{outline:2px solid var(--accent)}
+.fo-top li>b{font:500 var(--t-xs) var(--f-mono);color:var(--muted);white-space:nowrap}
+.fo-inc-l{margin:0;padding:0;list-style:none;display:grid;gap:var(--s1)}
+.fo-inc-l li,.fo-inc-l li>button{display:grid;gap:1px;padding:6px var(--s2);border-left:3px solid var(--fo5);border-radius:0 var(--r1) var(--r1) 0;
+  background:color-mix(in srgb,var(--fg) 4%,transparent);font-size:var(--t-xs);color:var(--muted)}
+.fo-inc-l li:has(>button){padding:0;border:0;background:none}
+.fo-inc-l li>button{width:100%;text-align:left;cursor:pointer;border-top:0;border-right:0;border-bottom:0;font-family:var(--f-body)}
+.fo-inc-l li>button:hover:not(:disabled){background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.fo-inc-l li>button:disabled{cursor:default}
+.fo-inc-l b{font:600 var(--t-xs) var(--f-mono);color:var(--fg)}
+
+/* ---------- mapa do alimentador ---------- */
+.ctl-card .ctl-fogo{background-image:linear-gradient(90deg,var(--fo2),var(--fo3),var(--fo4),var(--fo5));background-repeat:no-repeat;background-size:100% 3px;background-position:0 100%}
+.ctl-card .ctl-fogo[aria-pressed=false]{opacity:.6;text-decoration:line-through;background-image:none;box-shadow:inset 0 -3px 0 #5a636a}
+/* bolinha do rótulo do trecho (o mesmo modelo da bolinha vermelha da NAE), com a chama */
+.lb .fo-n{display:inline-flex;align-items:center;gap:2px;margin-left:5px;padding:0 5px 0 3px;border-radius:8px;background:var(--fo-bolha);color:#fff;font:700 11px/16px var(--f-mono);vertical-align:1px}
+.lb .fo-n .fo-chama{width:11px;height:11px;fill:#fff;flex:none}
+.lb.fo{box-shadow:0 1px 4px rgb(0 0 0 / .55)}
+/* rótulo com NAE e foco numa linha só (nome, NAE, focos): a regra .oc da lista de ocorrências (display:grid) pegava o
+   rótulo .lb.oc e empilhava as bolinhas em 3 linhas, a de baixo coberta pelos rótulos vizinhos */
+.lb.oc.fo{display:block}
+/* rótulo de T3 com foco coberto por outro com mais focos (focos.js, colisao): some até o zoom separar (e sai do Tab) */
+.leaflet-marker-icon:has(>.lb.fo-sob){visibility:hidden!important}
+/* incêndio da Crítica: losango vinho com a chama (o equipamento que abriu) */
+.fo-inc{position:relative;width:22px;height:22px;display:grid;place-items:center;transform:translate(-50%,-50%);border-radius:5px;background:var(--fo5);border:2px solid #fff;box-shadow:0 0 0 1.5px #0b0f14,0 2px 6px #0009;cursor:pointer}
+.fo-inc .fo-chama{width:14px;height:14px;fill:#fff}
+.fo-inc b{position:absolute;left:13px;top:-11px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:#0b0f14;color:#fff;font:700 10.5px/16px var(--f-mono);text-align:center;box-shadow:0 0 0 1.5px #fff}
+.fo-pop .fo-hr{margin:8px 0;border:0;border-top:1px solid #0002}
+.fo-inc-i{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:4px;background:var(--fo5)}
+.fo-inc-i .fo-chama{width:11px;height:11px;fill:#fff}
+.fo-c-t .fo-inc-i .fo-chama{fill:#fff;width:11px;height:11px}
+/* legenda compacta no mapa (vidro, como as outras camadas) */
+.fo-lg{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;padding:6px var(--s2);background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);
+  border:1px solid var(--vidro-borda);border-radius:var(--r2);box-shadow:var(--sh-vidro);font:var(--t-xs)/1.2 var(--f-body);max-width:100%}
+.mapbox>.fo-lg{position:absolute;left:12px;bottom:28px;z-index:800;max-width:calc(100% - 24px)}
+.fo-lg[hidden]{display:none}
+.fo-lg>b{font-weight:700;margin-right:2px}
+.fo-lg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.fo-lg i{width:10px;height:10px;border-radius:50%;flex:none}
+.fo-lg i.fo-a0{background:var(--fo-a0);box-shadow:0 0 0 2px #fff}.fo-lg i.fo-a1{background:var(--fo-a1);box-shadow:0 0 0 2px #fff}
+.fo-lg i.fo-a2{background:var(--fo-a2);box-shadow:0 0 0 2px var(--fo-a2-borda)}
+.fo-lg i.fo-inc-i{width:14px;height:14px;border-radius:3px;box-shadow:0 0 0 1.5px #fff}
+.fo-lg i.fo-inc-i .fo-chama{width:10px;height:10px}
+@media (max-width:640px){.fo-lg>b{display:none}.fo-lg{gap:2px 8px;padding:4px 8px}}
+/* balão do foco e do incêndio */
+.fo-pop .leaflet-popup-content{margin:10px 12px;font:13px/1.45 var(--f-body)}
+.fo-pop .fo-c{color:#1b2024}.fo-pop .fo-c span{color:#5a636a}.fo-pop .fo-c-a{color:#b8431f}
+/* bloco no painel */
+.panel>.fo-card{border:0;box-shadow:none;background:none;border-radius:0;padding:var(--s5) 0 0;border-top:1px solid var(--line);display:grid;gap:var(--s3);min-width:0}
+.panel>.fo-card[hidden]{display:none}
+.fo-card .fo-selo{justify-content:flex-start;text-align:left}
+.fo-card .fo-seg button{min-height:36px}
+.fo-lg em{font-style:normal}
+/* com a Faixa ou a Inspeção ligadas, os rótulos dos trechos somem de longe (limpeza.js, inspecao.js); os com mais focos ficam */
+#map.longe .lb.fo-l{display:block!important}
+#map.longe .leaflet-marker-icon:has(>.lb.fo-l:not(.fo-sob)){display:block!important;visibility:visible!important}
+.fo-caixa.curta{width:auto;max-width:min(290px,calc(100% - 16px))}

@@ -288,8 +288,8 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 .lb{font:700 13px/1 var(--f-display);color:#fff;background:rgba(0,0,0,.66);border-left:4px solid var(--c);padding:4px 7px;border-radius:3px;white-space:nowrap;cursor:pointer}
 .lb.fus{font-size:11.5px;padding:3px 5px;border-left-width:3px}
 #map.longe .lb.fus{display:none}
-#map.longe .lb.fus.sel,#map.longe .lb.fus.oc{display:block}
-#map.longe .leaflet-marker-icon:has(>.lb.fus:not(.sel):not(.oc)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
+#map.longe .lb.fus.sel,#map.longe .lb.fus.oc,#map.longe .lb.fus.fo-l{display:block}
+#map.longe .leaflet-marker-icon:has(>.lb.fus:not(.sel):not(.oc):not(.fo-l)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
 .lb.sel{outline:2px solid #fde047}
 .lb .n{display:inline-block;margin-left:5px;padding:0 5px;border-radius:8px;background:#b91c1c;color:#fff;font:700 11px/16px var(--f-mono)}
 /* chaves de início e fim do trecho selecionado */

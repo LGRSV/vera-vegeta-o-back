@@ -42,7 +42,8 @@ MES = re.compile(r'(?<!\d)(0[1-9]|1[0-2])[-_.](20\d\d)(?!\d)')
 # o que a automação precisa (pasta ferramentas/ do gh-pages): os scripts e a parte do pacote alimentador que eles usam
 FERRAMENTAS = {
     'scripts': ['gera_trechos.py', 'atualiza_critica.py', 'ativos_gis.py', 'inspecao.py', 'limpeza_faixa.py',
-                'manutencao.py', 'executadas.py', 'atualiza_bases.py', 'ativos_js.py', 'divisas.py', 'gera_visoes.js', 'ucs_trechos.py'],
+                'manutencao.py', 'executadas.py', 'atualiza_bases.py', 'ativos_js.py', 'divisas.py', 'gera_visoes.js', 'ucs_trechos.py',
+                'focos.py', 'focos_historico.py'],   # focos: rotina .github/workflows/focos.yml (ramo main do site)
     'alimentador': ['__init__.py', 'critica.py', 'daimon.py', 'gerar_trechos.py', 'regras.py', 'trechos.py',
                     'mapa_trechos.html', 'site_indice.html', 'leaflet/leaflet.css', 'leaflet/leaflet.js',
                     'leaflet/LICENSE', 'site/*'],
@@ -61,8 +62,10 @@ def copia_ferramentas(destino):
                 shutil.copyfile(f, alvo)
     (destino / 'LEIA-ME.md').write_text(
         '# Ferramentas da atualização automática\n\nCópia dos scripts que a automação `.github/workflows/'
-        'atualiza-bases.yml` roda quando chega um arquivo em `bases/`. Não editar aqui: a cópia é refeita a cada '
-        'publicação (`scripts/atualiza_bases.py --copia-ferramentas`).\n', encoding='utf-8')
+        'atualiza-bases.yml` roda quando chega um arquivo em `bases/` e que a rotina dos focos de calor '
+        '(`.github/workflows/focos.yml`, no ramo main, a cada 10 min) roda: `focos.py` e `focos_historico.py`. '
+        'Não editar aqui: a cópia é refeita a cada publicação (`scripts/atualiza_bases.py --copia-ferramentas`).\n',
+        encoding='utf-8')
 
 
 def tipo_de(caminho):

@@ -102,7 +102,7 @@
     // dito na linha de baixo (só é a do município quando ele não passa por outro)
     almun: (a, m, foco) => {
       const v = vis(), x = mapa() && mapa().alNoMun ? mapa().alNoMun(a.cod, m.cod) : { n: a.n || 0, tot: a.n || 0, todo: true };
-      const quem = v ? (v.dens ? 'no alimentador todo' : '') : x.todo ? `NAE do alimentador todo (${plural(AL[a.cod] ? AL[a.cod].muns.length : 1, 'município', 'municípios')})` :
+      const quem = v ? (v.dens ? 'no alimentador todo' : v.quem ? v.quem(a.cod, m.cod) : '') : x.todo ? `NAE do alimentador todo (${plural(AL[a.cod] ? AL[a.cod].muns.length : 1, 'município', 'municípios')})` :
         x.n !== x.tot ? `neste município, de ${nf(x.tot)} no alimentador` : '';
       return { s: { almun: a.cod }, tipo: 'al', mini: a.cod, foco, t: esc(a.cod), nae: v ? v.al(a.cod, m.cod) : x.n, c: [foco ? 'Em foco no mapa' : '', esc(quem)].filter(Boolean).join(' · ') };
     },
@@ -168,7 +168,9 @@
   function atalhos() {
     pedido++;
     const nv = nivel(), m = porCod[nv.mun];
-    if (m) mostra([[`Alimentadores de ${m.nome} · ${m.als.length} · município: ${vis() ? vis().txt(valor(m)) : nf(m.nae) + ' NAE'}`, m.als.slice().sort((a, b) => b.m - a.m)
+    // a visão que pede (Queimadas: ordena) põe os alimentadores do município em ordem do número dela; as outras, por km aqui
+    const v = vis(), ordem = v && v.ordena ? (a, b) => v.al(b.cod, m && m.cod) - v.al(a.cod, m && m.cod) || b.m - a.m : (a, b) => b.m - a.m;
+    if (m) mostra([[`Alimentadores de ${m.nome} · ${m.als.length} · município: ${vis() ? vis().txt(valor(m)) : nf(m.nae) + ' NAE'}`, m.als.slice().sort(ordem)
       .map(a => item.almun({ ...a, se: (AL[a.cod] || {}).se || a.se }, m, a.cod === nv.al))]], '', 'lista-mun');
     else if (nv.pol && POL[nv.pol]) mostra([[`Municípios do polo ${nv.pol}`, POL[nv.pol].muns.slice().sort(porNae).map(x => item.mun(x))],
       [`Alimentadores com mais ${mais()} no polo ${nv.pol}`, topAls(x => x.polo === nv.pol)]]);
