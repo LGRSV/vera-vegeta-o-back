@@ -7,46 +7,43 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
-<link rel="stylesheet" href="../assets/priorizacao.css?v=202611161900"></head><body><div class="wrap">
+<link rel="stylesheet" href="../assets/priorizacao.css?v=202611162330"></head><body><div class="wrap">
 <header class="cab"><h1><b>ARGOS</b> <span>PRIORIZAÇÃO</span></h1><a class="cab-link" href="../">Mapa</a></header>
 <div class="pz-app">
 <div class="pz" id="pz">
   <div class="pz-topo">
     <div class="pz-barra" role="search" aria-label="Filtros dos trechos">
       <input class="busca pz-busca" type="search" id="f-busca" placeholder="Buscar trecho" aria-label="Buscar trecho" autocomplete="off" enterkeyhint="search">
-      <label class="pz-f"><span class="rot">Regional</span><select id="f-reg"></select></label>
-      <label class="pz-f"><span class="rot">Polo</span><select id="f-polo"></select></label>
-      <label class="pz-f"><span class="rot">Tronco ou ramal</span><select id="f-tipo">
-        <option value="todos">Todos</option><option value="tronco">Tronco (T1)</option><option value="ramal">Ramal (T2 e T3)</option><option value="2">Ramal T2</option><option value="3">Ramal T3</option></select></label>
-      <label class="pz-f"><span class="rot">Urbano ou rural</span><select id="f-zona">
-        <option value="todos">Todos</option><option value="urbano">Urbano</option><option value="rural">Rural</option></select></label>
-      <label class="pz-f"><span class="rot">Solicitação</span><select id="f-sol">
-        <option value="todos">Todas</option><option value="com">Com solicitação</option><option value="sem">Sem solicitação</option></select></label>
+      <div class="pz-f ms" data-f="reg"><span class="rot" id="ms-reg-rot">Regional</span><button type="button" class="ms-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="ms-reg-rot ms-reg-val"><span class="ms-val" id="ms-reg-val">Todas</span></button><div class="ms-pop" role="group" aria-labelledby="ms-reg-rot" hidden></div></div>
+      <div class="pz-f ms" data-f="polo"><span class="rot" id="ms-polo-rot">Polo</span><button type="button" class="ms-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="ms-polo-rot ms-polo-val"><span class="ms-val" id="ms-polo-val">Todos</span></button><div class="ms-pop" role="group" aria-labelledby="ms-polo-rot" hidden></div></div>
+      <div class="pz-f ms" data-f="cls"><span class="rot" id="ms-cls-rot">Classe</span><button type="button" class="ms-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="ms-cls-rot ms-cls-val"><span class="ms-val" id="ms-cls-val">Todas</span></button><div class="ms-pop" role="group" aria-labelledby="ms-cls-rot" hidden></div></div>
+      <div class="pz-f ms" data-f="zona"><span class="rot" id="ms-zona-rot">Urbano ou rural</span><button type="button" class="ms-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="ms-zona-rot ms-zona-val"><span class="ms-val" id="ms-zona-val">Todos</span></button><div class="ms-pop" role="group" aria-labelledby="ms-zona-rot" hidden></div></div>
+      <div class="pz-f ms" data-f="sol"><span class="rot" id="ms-sol-rot">Solicitação do app</span><button type="button" class="ms-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="ms-sol-rot ms-sol-val"><span class="ms-val" id="ms-sol-val">Todas</span></button><div class="ms-pop" role="group" aria-labelledby="ms-sol-rot" hidden></div></div>
+      <div class="pz-f ms" data-f="mun"><span class="rot" id="ms-mun-rot">Município</span><button type="button" class="ms-btn" aria-haspopup="true" aria-expanded="false" aria-labelledby="ms-mun-rot ms-mun-val"><span class="ms-val" id="ms-mun-val">Todos</span></button><div class="ms-pop" role="group" aria-labelledby="ms-mun-rot" hidden></div></div>
+      <fieldset class="pz-crit"><legend class="rot">Critérios opcionais</legend>
+        <label class="pz-chk"><input type="checkbox" id="u-cli"> Clientes</label>
+        <label class="pz-chk"><input type="checkbox" id="u-ga"> Grupo A</label>
+      </fieldset>
       <fieldset class="pz-cortes"><legend class="rot">Nota mínima da faixa</legend>
-        <label><span class="faixa f1"><span class="ponto"></span>P1</span><input type="number" id="c-p1" min="0" max="100" step="1" inputmode="decimal" aria-label="Nota mínima de P1"></label>
-        <label><span class="faixa f2"><span class="ponto"></span>P2</span><input type="number" id="c-p2" min="0" max="100" step="1" inputmode="decimal" aria-label="Nota mínima de P2"></label>
-        <label><span class="faixa f3"><span class="ponto"></span>P3</span><input type="number" id="c-p3" min="0" max="100" step="1" inputmode="decimal" aria-label="Nota mínima de P3"></label>
+        <label><span class="faixa f1"><span class="ponto"></span>P1</span><input type="number" id="c-p1" min="0" max="50" step="0.1" inputmode="decimal" aria-label="Nota mínima de P1"></label>
+        <label><span class="faixa f2"><span class="ponto"></span>P2</span><input type="number" id="c-p2" min="0" max="50" step="0.1" inputmode="decimal" aria-label="Nota mínima de P2"></label>
+        <label><span class="faixa f3"><span class="ponto"></span>P3</span><input type="number" id="c-p3" min="0" max="50" step="0.1" inputmode="decimal" aria-label="Nota mínima de P3"></label>
         <span class="pz-p4">P4: abaixo de P3</span>
       </fieldset>
-      <button type="button" class="pz-prem-btn" id="prem-btn" aria-expanded="false" aria-controls="sec-premissas">Pontos e limites</button>
+      <button type="button" class="pz-prem-btn" id="prem-btn" aria-expanded="false" aria-controls="sec-premissas">Pesos</button>
     </div>
     <p class="pz-aviso" id="aviso-zona" role="note" hidden>Filtro urbano ou rural indisponível: a base de área urbanizada (IBGE 2022) não carregou.</p>
-    <section class="pz-prem" id="sec-premissas" aria-label="Pontos de cada critério e limites das faixas" hidden>
+    <section class="pz-prem" id="sec-premissas" aria-label="Pesos da nota" hidden>
       <div class="prem-corpo">
-        <p class="dica">A <b>nota</b> do trecho vai de 0 a 100 e é a <b>soma dos pontos</b> dos critérios. Cada critério dá pontos conforme o valor no trecho: <span id="pt-exemplo">por exemplo, NAE de 20 a 39,9 por 100 km vale 17 pontos e de 40 a 59,9 vale 25 pontos</span>. O padrão segue as premissas do Ranking de faixa (planilha RANKING_FAIXA_APP, 16/11/2026), sem as lentes de Meio Ambiente e de Segurança. Os pontos podem ser mudados; os máximos devem somar 100.</p>
-        <div class="pontos" id="pontos"></div>
-        <div class="pt-rodape"><div class="pt-total" id="pt-total"><span>Nota máxima</span><b id="nota-max">100</b></div><p class="aviso-pontos" id="aviso-pontos" role="status" hidden></p><button class="botao" id="restaurar" type="button">Restaurar padrão</button></div>
+        <p class="pz-formula" id="formula"></p>
+        <div class="pontos" id="pesos"></div>
+        <div class="pt-rodape"><button class="botao" id="restaurar" type="button">Restaurar planilha</button></div>
         <div class="pt-limites">
-          <h3>Limites conhecidos da conta</h3>
+          <h3>Como a conta funciona</h3>
           <ul>
-            <li><b>Premissas da planilha, por faixa.</b> O padrão usa os pesos do Ranking de faixa (NAE 30%, DEC 30%, FEC 20%, Lente de imagem 10%) sem a Lente de Meio Ambiente nem a de Segurança, reescalados para 33, 33, 22 e 12. A planilha soma os valores crus; aqui cada critério dá pontos por faixa de valor. Clientes, Hierarquia, Grupo A e Limpeza ficam com 0 no padrão e podem ser ligados na tabela.</li>
-            <li><b>Mesmo evento em três critérios.</b> NAE, DEC e FEC saem das mesmas ocorrências: um trecho com evento soma pontos três vezes pelo mesmo fato, e um sem evento fica só com a Lente de imagem.</li>
-            <li><b>Mínimo de 5 km no cálculo por 100 km</b> (padrão, editável em Opções). A maior parte dos trechos tem menos de 5 km e, para eles, a taxa é só a contagem × 20. Um trecho longo com várias ocorrências pode levar menos pontos que um curto com uma. A ficha mostra a contagem e a extensão reais. Decisão pendente.</li>
-            <li><b>DEC e FEC são os do conjunto.</b> O critério soma quanto cada ocorrência do trecho pesa no DEC (horas) e no FEC (interrupções) do conjunto ANEEL, pela Crítica. O que o PRODIST não conta (momentânea de menos de 3 minutos, dia crítico etc.) e a ocorrência expurgada como situação de emergência entram com 0, como no indicador oficial; ocorrência não achada na Crítica também conta 0 (a ficha avisa).</li>
-            <li><b>Limites de faixa do DEC e do FEC.</b> Padrão: DEC por 100 km 0,07 e 0,8 h; FEC por 100 km 0,006, 0,06 e 0,6. Calibrados nas ocorrências de jan a nov/2026 (até 09/11); com 12 meses cheios os valores sobem e os limites devem ser revistos. Editáveis na tabela de pontos.</li>
-            <li><b>Lente de imagem por alimentador.</b> A nota de 1 a 4 da planilha vale para todos os trechos do alimentador; alimentador sem nota fica sem dado.</li>
-            <li><b>Histórico de 12 meses incompleto.</b> A janela é de 12 meses (U12M) contada da referência, mas a Crítica nos dados vai de <span class="js-periodo">jan a nov/2026</span>. Jan–mar: NAE da extração anterior ao expurgo; set/2026 tem 3.363 registros expurgados como situação de emergência na Crítica, então a NAE desse mês pode estar menor.</li>
-            <li><b>Bases congeladas.</b> Trechos da segmentação de <span class="js-seg">07/10/2026</span> e OS de <span class="js-os">29/10/2026</span>; as duas não podem ser regeradas nesta página.</li>
+            <li><b>Mesma conta da planilha</b> (RANKING_FAIXA_APP, coluna Ranking2), sem as lentes de Meio Ambiente e de Segurança. NAE, DEC e FEC entram com o valor do trecho, sem dividir por km: trecho longo acumula mais.</li>
+            <li><b>DEC e FEC do conjunto ANEEL</b>, pela Crítica, nas ocorrências dos últimos 12 meses (<span class="js-periodo">jan a nov/2026</span>) depois da última limpeza efetiva. Refeitos sozinhos a cada Crítica enviada pelo menu.</li>
+            <li><b>Clientes e Grupo A</b> ficam desmarcados no padrão. Grupo A ainda não tem cadastro: marcado, o trecho marcado na ficha fica no mínimo P2 (regra F2).</li>
           </ul>
         </div>
       </div>
@@ -77,15 +74,9 @@
     <div class="opcoes">
       <div class="col">
       <div class="campo">
-        <label for="perfil">Tabela de pontos</label>
-        <select id="perfil"></select>
-        <p class="dica" id="perfil-dica"></p>
-      </div>
-      <div class="campo">
         <label for="ref">Data de referência</label>
         <input type="date" id="ref" min="2026-01-31" max="2027-12-31">
       </div>
-      <div class="campo"><label for="f-mun">Município</label><select id="f-mun"></select></div>
       <div class="campo"><span class="rot">Situação</span>
         <div class="chk">
           <label><input type="checkbox" id="f-ocultos"> Mostrar executados e em carteira</label>
@@ -95,15 +86,14 @@
       </div>
       <div class="col"><h3>Parâmetros</h3>
         <div class="param"><label for="p-avenc">Janela "a vencer" (meses)</label><input type="number" id="p-avenc" min="1" max="12" step="1"></div>
-        <div class="param"><label for="p-piso">Extensão mínima no cálculo por 100 km (km)</label><input type="number" id="p-piso" min="0.5" max="50" step="0.5"></div>
         <div class="param"><label for="p-t1">T1 no topo (F5): sem limpeza efetiva há mais de (anos)</label><input type="number" id="p-t1" min="0.5" max="20" step="0.5"></div>
         <div class="param"><label for="p-cob">Cobertura mínima para bloquear (fração)</label><input type="number" id="p-cob" min="0.1" max="1" step="0.05"></div>
         <div class="param"><label for="p-car">Carência T1 / T2 / T3 (meses) · confirmada</label><input type="text" id="p-car"></div>
       </div>
       <div class="col"><h3>Plano climático</h3>
-        <p class="dica" style="margin-top:8px">Regionais incluídas num plano especial (ex.: El Niño, ventos, pré-chuva) ganham pontos extras na nota.</p>
+        <p class="dica" style="margin-top:8px">Regionais incluídas num plano especial (ex.: El Niño, ventos, pré-chuva) somam um bônus na nota.</p>
         <div class="chk" id="plano-polos" style="margin-top:8px"></div>
-        <div class="param"><label for="p-bonus">Bônus (pontos na nota)</label><input type="number" id="p-bonus" min="0" max="100" step="1"></div>
+        <div class="param"><label for="p-bonus">Bônus (soma na nota)</label><input type="number" id="p-bonus" min="0" max="10" step="0.1"></div>
       </div>
     </div>
   </details>
@@ -117,7 +107,7 @@
       <div class="campo"><label for="pk-raio">Raio de agrupamento (km)</label><input type="number" id="pk-raio" min="1" max="60" step="1"></div>
       <div class="campo"><label for="pk-cap">Capacidade por pacote (km de faixa)</label><input type="number" id="pk-cap" min="2" max="200" step="1"></div>
       <div class="campo"><label for="pk-aprov">Aproveitamento máximo (%)</label><input type="number" id="pk-aprov" min="0" max="100" step="5"></div>
-      <div class="campo"><label for="pk-min">Nota mínima para agregar</label><input type="number" id="pk-min" min="0" max="100" step="5"></div>
+      <div class="campo"><label for="pk-min">Nota mínima para agregar</label><input type="number" id="pk-min" min="0" max="20" step="0.1"></div>
       <div class="campo"><label for="pk-fator">Fator de estrada</label><input type="number" id="pk-fator" min="1" max="3" step="0.1"></div>
       <div class="campo"><label for="pk-max">Pacotes</label><input type="number" id="pk-max" min="1" max="60" step="1"></div>
     </div>
@@ -132,7 +122,7 @@
 <div class="doc">
   <section>
     <h2>Ideia central</h2>
-    <p>A prioridade de um trecho combina duas perguntas diferentes: <b>quanto custa uma falha aqui</b> (criticidade histórica: impacto e histórico) e <b>quão perto ela está de acontecer</b> (urgência atual: ciclo de limpeza e plano climático). Cada critério dá pontos conforme o valor do trecho e a nota, de 0 a 100, é a soma dos pontos. Depois, regras explícitas bloqueiam o que não deve entrar, garantem pisos para exceções e separam as filas (emergencial, corretiva, preventiva, programada). Por último, o agrupamento operacional organiza a execução sem mudar a ordem entre faixas.</p>
+    <p>A prioridade de um trecho combina duas perguntas diferentes: <b>quanto custa uma falha aqui</b> (criticidade histórica: impacto e histórico) e <b>quão perto ela está de acontecer</b> (urgência atual: ciclo de limpeza e plano climático). Cada critério entra com o valor do trecho multiplicado por um peso, como na planilha do Ranking de faixa, e a nota é a soma. Depois, regras explícitas bloqueiam o que não deve entrar, garantem pisos para exceções e separam as filas (emergencial, corretiva, preventiva, programada). Por último, o agrupamento operacional organiza a execução sem mudar a ordem entre faixas.</p>
   </section>
 
   <section>
@@ -163,11 +153,11 @@
         <tr><td class="mono">B2</td><td>Bloqueio</td><td>OS aberta cobrindo ≥ 30% do trecho</td><td>Mostrado como “em carteira”; não duplica</td></tr>
         <tr><td class="mono">B3</td><td>Bloqueio</td><td>Autorização ambiental ou acesso pendente</td><td>Aguardando liberação (sem fonte no teste)</td></tr>
         <tr><td class="mono">F1</td><td>Piso</td><td>T1 com evento em ≥ 3 meses da janela ou ≥ 2 nos últimos 90 dias</td><td>Mínimo P1 e análise de causa</td></tr>
-        <tr><td class="mono">F2</td><td>Piso</td><td>Clientes Grupo A no trecho</td><td>Mínimo P2</td></tr>
+        <tr><td class="mono">F2</td><td>Piso</td><td>Clientes Grupo A no trecho (com Grupo A marcado no topo)</td><td>Mínimo P2</td></tr>
         <tr><td class="mono">F3</td><td>Piso</td><td>Inspeção válida com vegetação a ≤ 50 cm da MT (≥ 3 pontos: P1; 1–2 pontos: P2)</td><td>Fila corretiva. Desligada: não há medição de distância</td></tr>
         <tr><td class="mono">F4</td><td>Piso</td><td>Evento em ≥ 4 meses da janela, qualquer classe</td><td>Mínimo P2</td></tr>
-        <tr><td class="mono">F5</td><td>Piso e ordem</td><td>T1 sem limpeza nos últimos 3 anos da referência (Ranking de faixa). Conta como limpeza uma OS executada cobrindo ≥ 50% do trecho ou OS executadas no período que, somadas, cubram ≥ 50%. T1 com menos de 0,5 km fica fora (alerta Q6)</td><td>Mínimo P1 e topo do ranking, acima dos demais; entre si, pela nota</td></tr>
-        <tr><td class="mono">A1</td><td>Aumento</td><td>Trecho em plano climático aprovado</td><td>+8 pontos (parâmetro) e reserva de capacidade</td></tr>
+        <tr><td class="mono">F5</td><td>Piso e ordem</td><td>T1 sem limpeza nos últimos 3 anos da referência (Ranking de faixa). Conta como limpeza uma OS executada cobrindo ≥ 50% do trecho ou OS executadas no período que, somadas, cubram ≥ 50%. T1 com menos de 0,5 km fica fora (alerta Q6)</td><td>+3 na nota (como na planilha), mínimo P1 e topo do ranking, acima dos demais; entre si, pela nota</td></tr>
+        <tr><td class="mono">A1</td><td>Aumento</td><td>Trecho em plano climático aprovado</td><td>+0,3 na nota (parâmetro) e reserva de capacidade</td></tr>
         <tr><td class="mono">Q1, Q3, Q4, Q5, Q6</td><td>Alerta</td><td>Confiança &lt; 6 de 10 em P1/P2, segmentação a revisar, trecho &lt; 0,5 km com ocorrência, alimentador dividido por exceção (GIS sem as chaves fechadas), T1 com menos de 0,5 km sem limpeza nos últimos 3 anos (fora da F5)</td><td>Confirmar em campo antes de programar</td></tr>
       </tbody>
     </table></div>
@@ -175,47 +165,42 @@
   </section>
 
   <section>
-    <h2>3. Nota de 0 a 100: soma de pontos</h2>
-    <p>Como numa prova: cada critério dá pontos conforme o valor do trecho e a nota é a soma. O perfil padrão segue as premissas do Ranking de faixa (planilha RANKING_FAIXA_APP, 16/11/2026), sem as lentes de Meio Ambiente e de Segurança, e soma 100 pontos; a gestão pode mudar os pontos em Pontos e limites, no topo da página.</p>
+    <h2>3. Nota: a conta da planilha</h2>
+    <p>Mesma conta da coluna Ranking2 da planilha do Ranking de faixa (RANKING_FAIXA_APP), sem as lentes de Meio Ambiente e de Segurança: cada critério entra com o valor do trecho multiplicado pelo peso. Os pesos podem ser mudados em Pesos, no topo da página.</p>
     <div class="tabela-wrap"><table>
-      <thead><tr><th>Critério</th><th>Medida</th><th>Valor no trecho: pontos</th><th class="r">Máximo</th></tr></thead>
+      <thead><tr><th>Critério</th><th>Valor no trecho</th><th class="r">Peso</th></tr></thead>
       <tbody>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> NAE Vegetação por 100 km</td><td>ocorrências por vegetação nos últimos 12 meses (Crítica <span class="js-periodo">jan a nov/2026</span>), depois da última limpeza, por 100 km do trecho</td><td>menos de 20: 8 · 20 a 39,9: 17 · 40 a 59,9: 25 · 60 ou mais: 33</td><td class="r num">33</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> DEC por 100 km</td><td>contribuição dessas ocorrências no DEC do conjunto ANEEL, pela Crítica (horas), por 100 km; expurgada como situação de emergência vale 0</td><td>menos de 0,07: 11 · 0,07 a menos de 0,8: 22 · 0,8 ou mais: 33 (limites editáveis)</td><td class="r num">33</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-his)"></span> FEC por 100 km</td><td>contribuição dessas ocorrências no FEC do conjunto ANEEL, pela Crítica (interrupções), por 100 km; expurgada vale 0</td><td>menos de 0,006: 7 · 0,006 a menos de 0,06: 11 · 0,06 a menos de 0,6: 18 · 0,6 ou mais: 22 (limites editáveis)</td><td class="r num">22</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Lente de imagem</td><td>risco de imagem do alimentador, de 1 a 4 (planilha do Ranking de faixa, aba Lente de imagem); sem nota não pontua</td><td>1: 3 · 2: 6 · 3: 9 · 4: 12</td><td class="r num">12</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Clientes (UCs ligadas)</td><td>UCs ligadas nos transformadores do trecho e dos que saem dele (planilha UC por trafo)</td><td>0 no padrão (editável por faixa: 1 a 9, 10 a 99, 100 a 999, 1.000 ou mais)</td><td class="r num">0</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Hierarquia do trecho</td><td>classe do trecho: tronco (T1) ou ramal (T2, T3)</td><td>0 no padrão (editável)</td><td class="r num">0</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Cliente Grupo A</td><td>cliente de média tensão no trecho</td><td>0 no padrão (editável); a regra F2 continua valendo</td><td class="r num">0</td></tr>
-        <tr><td><span class="amostra" style="background:var(--c-man)"></span> Limpeza de faixa</td><td>última limpeza efetiva + ciclo (T1 3 anos, T2 4 anos, T3 5 anos)</td><td>0 no padrão (editável); o T1 vencido vai ao topo pela regra F5</td><td class="r num">0</td></tr>
-        <tr><td colspan="3"><b>Nota máxima</b></td><td class="r num"><b>100</b></td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> NAE Vegetação</td><td>ocorrências por vegetação nos últimos 12 meses (Crítica <span class="js-periodo">jan a nov/2026</span>), depois da última limpeza</td><td class="r num">0,3</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> DEC</td><td>horas que essas ocorrências pesam no DEC do conjunto ANEEL, pela Crítica; expurgada como situação de emergência vale 0</td><td class="r num">0,3</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-his)"></span> FEC</td><td>interrupções que elas pesam no FEC do conjunto ANEEL, pela Crítica; expurgada vale 0</td><td class="r num">0,2</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Lente de imagem</td><td>nota do alimentador, de 1 a 4 (aba Lente de imagem da planilha); sem nota vale 0</td><td class="r num">0,1</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-man)"></span> T1 sem limpeza (F5)</td><td>T1 sem limpeza efetiva nos últimos 3 anos, com 0,5 km ou mais</td><td class="r num">+3</td></tr>
+        <tr><td><span class="amostra" style="background:var(--c-imp)"></span> Clientes (opcional)</td><td>UCs ligadas nos trafos do trecho e a jusante (planilha UC por trafo), por mil; só com Clientes marcado no topo</td><td class="r num">0,3</td></tr>
       </tbody>
     </table></div>
-    <p>Na planilha, a nota é DEC 30% + NAE 30% + FEC 20% + Lente de imagem 10% + Lente de Meio Ambiente 10%, com os valores crus e o DEC e o FEC da empresa. Aqui ficam NAE, DEC, FEC e Lente de imagem, reescalados para somar 100 (33, 33, 22 e 12), com pontos por faixa de valor (os do padrão anterior na mesma proporção, arredondados) e o DEC e o FEC do conjunto nos últimos 12 meses. O “+3” do T1 com mais de 3 anos sem limpeza virou a regra F5.</p>
-    <p>Valor zero (nenhuma ocorrência, nenhuma contribuição no DEC ou no FEC, alimentador sem lente) não dá ponto. O valor que cai exatamente num limite já é da faixa de cima: NAE de 40 por 100 km dá 25. Faixas (padrão, editáveis no topo da página): P1 com nota 70 ou mais, P2 de 50 a 70, P3 de 30 a 50, P4 abaixo de 30. Os perfis anteriores ficam como opção, somam 100 e são versionados: <b>pré-chuva (set–nov)</b> dá até 30 pontos à limpeza vencida; <b>plano climático</b> dá até 25 ao NAE e 20 ao DEC; nos dois a Lente de imagem vale 0. No Tocantins o período chuvoso vai de outubro a abril; a própria Crítica de 2026 mostra janeiro com 2,5 vezes as ocorrências por vegetação de agosto.</p>
+    <p>Faixas (padrão, editáveis no topo): P1 com nota 3 ou mais, P2 de 1,2 a 3, P3 de 0,6 a 1,2, P4 abaixo de 0,6. Grupo A (opcional, sem cadastro): o trecho marcado na ficha fica no mínimo P2 (F2). Na planilha o DEC e o FEC são da empresa e o período é outro; aqui são os do conjunto, pela Crítica, nos últimos 12 meses. No Tocantins o período chuvoso vai de outubro a abril; a própria Crítica de 2026 mostra janeiro com 2,5 vezes as ocorrências por vegetação de agosto.</p>
   </section>
 
   <section>
     <h2>4. Como cada valor é medido</h2>
     <ul>
       <li><b>Últimos 12 meses, depois da última limpeza.</b> NAE, DEC e FEC contam as ocorrências por vegetação dos 12 meses antes da referência (U12M, como na planilha; a Crítica nos dados vai de <span class="js-periodo">jan a nov/2026</span>) que aconteceram depois da última limpeza efetiva (OS executada cobrindo pelo menos 50% do trecho). As anteriores já foram tratadas pela limpeza e não contam; continuam valendo para as regras de recorrência F1 e F4.</li>
-      <li><b>Por 100 km.</b> As três medidas (ocorrências, horas de DEC e interrupções de FEC) são contadas no próprio trecho (a unidade que a equipe executa), divididas pela extensão dele e multiplicadas por 100, para comparar trechos de tamanhos diferentes. Trecho com menos de 5 km (editável em Opções) conta como 5 km: a mediana dos trechos tem 0,21 km e, sem esse mínimo, um trecho curtinho com uma só ocorrência passaria o tronco. Com 5 km, cada ocorrência vale 20 por 100 km: 1, 2 e 3 ocorrências dão 20, 40 e 60, o começo das faixas de 17, 25 e 33 pontos. Trecho curto com evento atribuído pela abrangência do DJ recebe o alerta Q4.</li>
+      <li><b>Sem dividir pela extensão.</b> As três medidas (ocorrências, horas de DEC e interrupções de FEC) são as do próprio trecho, a unidade que a equipe executa, como na planilha: um trecho longo acumula mais. Trecho curto com evento atribuído pela abrangência do DJ recebe o alerta Q4.</li>
       <li><b>Expurgo de situação de emergência.</b> Ocorrência que a Crítica expurgou como situação de emergência continua no NAE e vale 0 no DEC e no FEC, como no indicador oficial; a ficha marca cada uma.</li>
       <li><b>Lente de imagem.</b> Nota do alimentador de 1 a 4 (4 = maior risco de imagem, cidades grandes), a mesma para todos os trechos dele.</li>
-      <li><b>Solicitações.</b> Os pedidos de limpeza da planilha (aba Base de solicitações) ficam ligados ao trecho pelo ativo inicial, pelo ativo final ou pelo ativo citado na descrição; o pedido para um trecho criado depois da segmentação do Priorizador aparece no trecho que o contém. Não mudam a nota: aparecem na lista, na ficha e no filtro Solicitação.</li>
-      <li><b>Clientes (UCs ligadas).</b> Soma das UCs ligadas nos transformadores do trecho e dos trechos que saem dele, pela planilha de UC por trafo: o que um evento no trecho pode deixar sem energia. A limpeza não muda quantos clientes o trecho alimenta. Alimentador fora da planilha usa o maior número de clientes desligados num evento do período da Crítica, e trecho sem evento, o típico da classe. Trecho que não está na planilha do seu alimentador fica sem dado e não pontua.</li>
-      <li><b>Faixas por valor.</b> As faixas do DEC e do FEC seguem limites próprios, calibrados em jan a nov/2026 e editáveis na tabela de pontos; Clientes sobe de faixa a cada 10 vezes. Um valor extremo ganha só o máximo do critério e não domina a nota.</li>
-      <li><b>Grupo A.</b> Ainda não há cadastro na base: o critério só pontua quando marcado (no teste, pela ficha do trecho; 0 no perfil padrão), e a regra F2 garante mínimo P2.</li>
-      <li><b>Limpeza sem registro.</b> Trecho sem OS executada cobrindo pelo menos 50% dele desde o início das OS não tem data de vencimento: fica como sem registro. No padrão a limpeza não dá ponto; o T1 sem limpeza efetiva registrada, ou com a última limpeza efetiva há mais de 3 anos, vai ao topo pela regra F5 (para ela contam também as OS executadas nos últimos 3 anos que, somadas, cubram pelo menos 50%; T1 com menos de 0,5 km fica fora). Nos perfis Pré-chuva e Plano climático, sem registro vale metade de vencida.</li>
-      <li><b>Empate.</b> Entre notas iguais vem antes o trecho com mais ocorrências por 100 km, depois o de mais DEC por 100 km, depois o mais longo.</li>
+      <li><b>Solicitações.</b> Os pedidos de limpeza da planilha (aba Base de solicitações) ficam ligados ao trecho pelo ativo inicial, pelo ativo final ou pelo ativo citado na descrição; o pedido para um trecho criado depois da segmentação do Priorizador aparece no trecho que o contém. Não mudam a nota: aparecem com uma bandeira na lista, na ficha e no filtro Solicitação do app.</li>
+      <li><b>Clientes (UCs ligadas, opcional).</b> Soma das UCs ligadas nos transformadores do trecho e dos trechos que saem dele, pela planilha de UC por trafo: o que um evento no trecho pode deixar sem energia. A limpeza não muda quantos clientes o trecho alimenta. Alimentador fora da planilha usa o maior número de clientes desligados num evento do período da Crítica, e trecho sem evento, o típico da classe. Trecho que não está na planilha do seu alimentador fica sem dado e não pontua.</li>
+      <li><b>Grupo A.</b> Ainda não há cadastro na base: com Grupo A marcado no topo, o trecho marcado na ficha fica no mínimo P2 (regra F2).</li>
+      <li><b>Limpeza sem registro.</b> Trecho sem OS executada cobrindo pelo menos 50% dele desde o início das OS não tem data de vencimento: fica como sem registro. A limpeza só entra na nota pelo T1: sem limpeza efetiva registrada, ou com a última há mais de 3 anos, ele soma 3 e vai ao topo pela regra F5 (para ela contam também as OS executadas nos últimos 3 anos que, somadas, cubram pelo menos 50%; T1 com menos de 0,5 km fica fora).</li>
+      <li><b>Empate.</b> Entre notas iguais vem antes o trecho com mais ocorrências, depois o de mais DEC, depois o mais longo.</li>
       <li><b>Referência fixa por rodada.</b> Os típicos por classe são calculados sobre a rede inteira e gravados na rodada; filtrar a tela não muda nenhuma nota.</li>
-      <li><b>Confiança.</b> Parte da nota máxima que vem de dado real: valor estimado (clientes típicos, limpeza sem registro) conta metade e critério sem dado (Grupo A, trecho fora da planilha de UC, alimentador sem Lente de imagem, DEC e FEC sem dado na Crítica) não conta. Abaixo de 6 de 10 em P1 ou P2 gera o alerta Q1.</li>
+      <li><b>Confiança.</b> Parte dos pesos que vem de dado real: valor estimado (clientes típicos) conta metade e critério sem dado (trecho fora da planilha de UC, alimentador sem Lente de imagem, DEC e FEC sem dado na Crítica) não conta. Abaixo de 6 de 10 em P1 ou P2 gera o alerta Q1.</li>
     </ul>
   </section>
 
   <section>
     <h2>5. Criticidade histórica × urgência atual</h2>
-    <p><b>CH</b> (pontos de impacto + histórico) muda devagar e é recalculada a cada Crítica mensal. <b>UA</b> (pontos da limpeza de faixa + plano climático) muda com cada OS concluída ou plano aprovado. A vegetação medida em campo entra aqui quando houver medição de distância. O extrato da ficha mostra os pontos de cada critério separados, e a API também.</p>
+    <p><b>CH</b> (parcelas de impacto + histórico) muda devagar e é recalculada a cada Crítica mensal. <b>UA</b> (+3 do T1 da F5 + plano climático) muda com cada OS concluída ou plano aprovado. A vegetação medida em campo entra aqui quando houver medição de distância. O extrato da ficha mostra a parcela de cada critério separada, e a API também.</p>
     <div class="matriz">
       <div class="eixo"></div><div class="eixo">UA baixa</div><div class="eixo">UA alta</div>
       <div class="eixo">CH alta</div><div><b>Inspecionar e monitorar.</b> Trecho importante, mas limpo há pouco ou sem sinal atual.</div><div><b>Executar primeiro.</b> Impacto alto e risco presente.</div>
@@ -240,7 +225,7 @@
     <div class="tabela-wrap"><table>
       <thead><tr><th>Caso</th><th>Tratamento</th><th>Por quê</th></tr></thead>
       <tbody>
-        <tr><td>T3 com cliente Grupo A</td><td>F2: piso P2, além dos pontos do critério Grupo A</td><td>O ramal é pequeno, mas a falha atinge um cliente de alto impacto</td></tr>
+        <tr><td>T3 com cliente Grupo A</td><td>F2: piso P2 (com Grupo A marcado no topo)</td><td>O ramal é pequeno, mas a falha atinge um cliente de alto impacto</td></tr>
         <tr><td>Pouco histórico e vegetação muito próxima</td><td>Hoje não há medição de distância: a regra F3 fica desligada e o trecho entra pelo ciclo vencido</td><td>A regra volta quando houver inspeção com distância confiável</td></tr>
         <tr><td>T1 com alta recorrência</td><td>F1: piso P1 e análise de causa. Se reincide após limpeza recente (L2), investigar árvore fora da faixa, poda insuficiente ou falha de outra natureza antes de repetir o serviço</td><td>Repetir o mesmo serviço sem resultado gasta equipe e não reduz o DEC</td></tr>
         <tr><td>Plano climático ou ação emergencial</td><td>Emergencial vai para a fila E1. Plano climático soma bônus (A1) e reserva parte da capacidade</td><td>A reserva evita que o plano consuma toda a equipe e pare o preventivo</td></tr>
@@ -250,7 +235,7 @@
 
   <section>
     <h2>8. Ganho operacional</h2>
-    <p>Depois do ranking, o sistema monta pacotes. O líder de cada pacote é o próximo trecho elegível; vizinhos dentro do raio entram até a capacidade da equipe. Trechos de faixa inferior entram só como aproveitamento, até 30% da capacidade e com nota mínima de 30. A ordem entre pacotes segue a faixa e a nota do líder. Cada pacote mostra a eficiência (km de faixa por km de deslocamento), que ajuda a escolher entre pacotes da mesma faixa sem mudar a faixa.</p>
+    <p>Depois do ranking, o sistema monta pacotes. O líder de cada pacote é o próximo trecho elegível; vizinhos dentro do raio entram até a capacidade da equipe. Trechos de faixa inferior entram só como aproveitamento, até 30% da capacidade e com nota mínima de 0,6. A ordem entre pacotes segue a faixa e a nota do líder. Cada pacote mostra a eficiência (km de faixa por km de deslocamento), que ajuda a escolher entre pacotes da mesma faixa sem mudar a faixa.</p>
     <p><b>Capacidade depende da vegetação.</b> A produtividade da equipe manual e da mecanizada muda com a vegetação do trecho, então a capacidade é medida em equipe-dia, não em km. Cada trecho recebe uma classe de vegetação; a classe indica o tipo de equipe e o esforço = km ÷ produtividade(tipo de equipe, classe). O pacote é fechado pela agenda da equipe (equipe-dias disponíveis), e o deslocamento também consome dias. A tabela de produtividade começa com os valores da operação e depois é recalibrada pelo histórico de OS (km executado ÷ dias entre início e fim, por tipo de equipe e classe). Trecho sem classe usa a produtividade mais baixa e fica marcado para classificar na próxima inspeção.</p>
   </section>
 
@@ -266,7 +251,7 @@
         <tr><td class="mono">os_cobertura</td><td>os_id, trecho_id, metros, fracao, metodo, confianca, tipo_servico, status, data_execucao</td></tr>
         <tr><td class="mono">inspecao_ponto</td><td>inspecao_id, trecho_id, poste, dist_mt_cm, dist_bt_cm, situacao (medido, contato, não se aplica), especie, altura, dap, fotos</td></tr>
         <tr><td class="mono">plano_especial / plano_trecho</td><td>tipo, vigencia, bonus, reserva_capacidade, aprovado_por</td></tr>
-        <tr><td class="mono">metodologia</td><td>versao, perfil, pontos jsonb, parametros jsonb, regras jsonb, limiares, aprovada_por, vigencia</td></tr>
+        <tr><td class="mono">metodologia</td><td>versao, pesos jsonb, parametros jsonb, regras jsonb, limiares, aprovada_por, vigencia</td></tr>
         <tr><td class="mono">rodada_priorizacao</td><td>id, metodologia_versao, data_referencia, tipo (simulação, oficial), hash_insumos, referencias jsonb (clientes típicos por classe), criada_por</td></tr>
         <tr><td class="mono">score_trecho</td><td>rodada_id, trecho_id, score, ch, ua, confianca, faixa_score, faixa_final, fila, status, componentes jsonb, regras jsonb, justificativa, evidencias jsonb</td></tr>
         <tr><td class="mono">pacote / pacote_trecho</td><td>rodada_id, lider_id, equipe_id, km, deslocamento_estimado, aproveitamento</td></tr>
@@ -284,8 +269,8 @@
         <tr><td class="mono">POST /priorizacao/rodadas</td><td>Cria rodada oficial ou simulação (job)</td></tr>
         <tr><td class="mono">GET /priorizacao/rodadas/{id}/ranking</td><td>Ranking filtrado por regional, polo, município, classe, urbano ou rural, faixa, fila</td></tr>
         <tr><td class="mono">GET /priorizacao/rodadas/{id}/trechos/{trecho}</td><td>Componentes, regras, evidências e justificativa</td></tr>
-        <tr><td class="mono">POST /priorizacao/simulacoes</td><td>Testa pontos e parâmetros sem gravar rodada oficial</td></tr>
-        <tr><td class="mono">GET, POST /metodologias</td><td>Versões da tabela de pontos e das regras; nova versão exige aprovação</td></tr>
+        <tr><td class="mono">POST /priorizacao/simulacoes</td><td>Testa pesos e parâmetros sem gravar rodada oficial</td></tr>
+        <tr><td class="mono">GET, POST /metodologias</td><td>Versões dos pesos e das regras; nova versão exige aprovação</td></tr>
         <tr><td class="mono">GET /priorizacao/rodadas/{id}/pacotes</td><td>Pacotes por polo, raio e capacidade</td></tr>
         <tr><td class="mono">POST /validacoes</td><td>Aprovar, adiar ou rejeitar com motivo</td></tr>
         <tr><td class="mono">POST /planos-execucao</td><td>Gera plano a partir de pacotes validados; congela</td></tr>
@@ -298,7 +283,7 @@
 
   <section>
     <h2>10. Justificativa registrada</h2>
-    <p>Cada linha de <span class="mono">score_trecho</span> guarda: valor medido, faixa de valor e pontos de cada critério; regras aplicadas com código e texto; ids das ocorrências, OS e inspeções usadas, com datas; versão da metodologia e hash dos insumos. O texto é montado por modelo fixo (sem texto livre gerado), igual ao da ficha deste teste. Qualquer gestor reproduz o número a partir dos dados gravados.</p>
+    <p>Cada linha de <span class="mono">score_trecho</span> guarda: valor medido, peso e parcela de cada critério; regras aplicadas com código e texto; ids das ocorrências, OS e inspeções usadas, com datas; versão da metodologia e hash dos insumos. O texto é montado por modelo fixo (sem texto livre gerado), igual ao da ficha deste teste. Qualquer gestor reproduz o número a partir dos dados gravados.</p>
   </section>
 
   <section>
@@ -314,7 +299,7 @@
         <tr><td><span class="passo-n">6</span> Plano de execução</td><td>Pacotes por equipe e período dentro da capacidade, com reserva para corretivas e plano climático; plano aprovado congela</td><td>Planejamento</td></tr>
         <tr><td><span class="passo-n">7</span> Execução</td><td>OS com trecho e vãos; app de campo registra início, fim, extensão e fotos</td><td>Equipe</td></tr>
         <tr><td><span class="passo-n">8</span> Conclusão</td><td>Fiscal confere a cobertura; trecho entra em carência e é recalculado</td><td>Fiscal</td></tr>
-        <tr><td><span class="passo-n">9</span> Retorno</td><td>Ocorrências depois da limpeza medem eficácia e calibram os pontos</td><td>Analista</td></tr>
+        <tr><td><span class="passo-n">9</span> Retorno</td><td>Ocorrências depois da limpeza medem eficácia e calibram os pesos</td><td>Analista</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -323,7 +308,7 @@
     <h2>12. Roadmap</h2>
     <div class="fases">
       <div class="fase"><h3>Fase 1 · MVP por regras</h3><ul><li>Filas, bloqueios B1/B2, pisos F1–F4</li><li>Ordem por faixa, classe, NAE de 12 meses e ciclo</li><li>Justificativa por regra</li><li>Fontes: GIS, Crítica, OS</li><li>Saída: lista P1–P4 por polo validada pelo supervisor</li></ul></div>
-      <div class="fase"><h3>Fase 2 · Nota por pontos e histórico</h3><ul><li>Nota de 0 a 100 com os 8 critérios, CH e UA</li><li>Rodadas e metodologias versionadas</li><li>Grupo A e, quando houver, medição de vegetação</li><li>Pacotes, plano de execução e conclusão</li><li>Teste retroativo a cada versão da tabela de pontos</li></ul></div>
+      <div class="fase"><h3>Fase 2 · Nota ponderada e histórico</h3><ul><li>Nota ponderada da planilha, CH e UA</li><li>Rodadas e metodologias versionadas</li><li>Grupo A e, quando houver, medição de vegetação</li><li>Pacotes, plano de execução e conclusão</li><li>Teste retroativo a cada versão dos pesos</li></ul></div>
       <div class="fase"><h3>Fase 3 · Previsão e rotas</h3><ul><li>Modelo de probabilidade de falha por trecho: histórico, tempo desde a poda, espécie e altura, chuva, vento, descargas, vegetação por satélite</li><li>Prioridade = risco previsto × impacto</li><li>Rotas e alocação de equipes com capacidade e prazo</li><li>Entra só se superar o score da fase 2 no teste retroativo</li></ul></div>
     </div>
   </section>
@@ -345,7 +330,7 @@
   </section>
   <section>
     <h2>Teste retroativo</h2>
-    <p>O ranking é recalculado só com o que se sabia em 30/04/2026 e comparado com as ocorrências de maio a agosto. Usa as premissas e os parâmetros atuais. “Cons·h” é o consumidor·hora real das ocorrências futuras (medida de conferência, não é critério da nota).</p>
+    <p>O ranking é recalculado só com o que se sabia em 30/04/2026 e comparado com as ocorrências de maio a agosto. Usa os pesos e os parâmetros atuais. “Cons·h” é o consumidor·hora real das ocorrências futuras (medida de conferência, não é critério da nota).</p>
     <div class="tabela-wrap"><table>
       <thead><tr><th>Topo</th><th>Ordenação</th><th class="r">Ocorr. futuras</th><th class="r">Cons·h futuro</th><th class="r">Extensão</th><th class="r">Cons·h ÷ km</th></tr></thead>
       <tbody id="tab-retro"><tr><td colspan="6" class="vazio">Calculando…</td></tr></tbody>
@@ -362,13 +347,13 @@
 </footer>
 </div>
 <!-- defer: a página pinta o esqueleto enquanto os 3,5 MB de dados chegam -->
-<script defer src="../assets/priorizacao-dados.js?v=202611162100"></script>
+<script defer src="../assets/priorizacao-dados.js?v=202611162330"></script>
 <script defer src="../dados/ucs-trechos.js?v=202610292330"></script>
 <script defer src="../dados/urbano-trechos.js?v=202611151200"></script>
-<script defer src="../dados/decfec-trechos.js?v=202611162100"></script>
+<script defer src="../dados/decfec-trechos.js?v=202611162330"></script>
 <script defer src="../dados/lente-imagem.js?v=202611161900"></script>
 <script defer src="../dados/solicitacoes-trechos.js?v=202611161900"></script>
-<script defer src="../assets/priorizacao.js?v=202611161745"></script>
+<script defer src="../assets/priorizacao.js?v=202611162330"></script>
 </div>
 <script src="../assets/menu.js"></script>
 </body></html>

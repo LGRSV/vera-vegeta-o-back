@@ -17,7 +17,9 @@ Onde cai cada ocorrência:
 Consumidor·hora (chi) é a soma, passo a passo, de consumidores × duração do passo; cons × dur (maior passo) dobrava o
 número. Cada ocorrência leva as marcas mom (todos os passos momentâneos, < 3 min: COD_TEMP_MIN_HDE = AN1), dc (passo
 em dia crítico: STA_CALC_IND_HDE = C) e long (mais de 24 h); nenhuma sai da NAE, as telas decidem. DEC e FEC pelo
-PRODIST (sem momentâneas e sem dia crítico), para conferir com o oficial: prodist().
+PRODIST (sem momentâneas e sem dia crítico), para conferir com o oficial: prodist(). Cada ocorrência leva também
+dec_conj e fec_conj: o que ela pesa no DEC (h) e no FEC do conjunto ANEEL (QTD_IDEC_CONJ, QTD_IFEC_CONJ), somado só
+nos passos que o PRODIST conta (sem momentâneo e sem dia crítico); são os critérios DEC e FEC da Priorização.
 O número da UC (consumidor) não entra nas ocorrências; a busca por UC do site guarda à parte só UC → transformador
 (scripts/atualiza_critica.py, dados/uc/).
 """
@@ -46,7 +48,7 @@ RECLASSIFICADOS = {'PS01112193': 'LD03105019'}      # Campos Lindos, conjunto Bi
 # colunas guardadas de cada linha (o resto do arquivo não é usado)
 CAMPOS = PASSO + ('ABRANGÊNCIA', 'COD_ELE_REDE_PROBLEMA', 'COD_ELE_REDE_INTERROMPIDO', 'QTD_CONS_INTER_FAT', 'DURACAO',
                   'DES_CAUSA_INTER_CAU', 'DES_SUB_CAUSA_INTER_SCR', 'QTD_IFEC_ALIM', 'QTD_IDEC_ALIM', 'COD_ALIMENTADOR',
-                  'COD_TEMP_MIN_HDE', 'STA_CALC_IND_HDE', 'QTD_IDEC_ETO', 'QTD_IFEC_ETO')
+                  'COD_TEMP_MIN_HDE', 'STA_CALC_IND_HDE', 'QTD_IDEC_ETO', 'QTD_IFEC_ETO', 'QTD_IDEC_CONJ', 'QTD_IFEC_CONJ')
 
 LONGA_MIN = 24 * 60        # ocorrência acima de 24 h: provável registro não fechado; marcada (long), não tirada
 
@@ -158,13 +160,16 @@ def ocorrencias(linhas):
                 inter=d['COD_ELE_INTERROMPIDO'].strip(), inter_tipo=d['COD_ELE_REDE_INTERROMPIDO'].strip(),
                 causa=d['DES_CAUSA_INTER_CAU'].strip().capitalize(), sub=d['DES_SUB_CAUSA_INTER_SCR'].strip().capitalize(),
                 programada=_programada(d['DES_CAUSA_INTER_CAU']), cons=0, chi=0.0, dur=0, fec=0.0, dec=0.0,
-                mom=True, dc=False)
+                mom=True, dc=False, dec_conj=0.0, fec_conj=0.0)
         c = int(_num(d['QTD_CONS_INTER_FAT']))
         o['cons'] += c
         o['chi'] += c * _num(d['DURACAO']) / 60
         o['dur'] = max(o['dur'], int(_num(d['DURACAO'])))
         o['fec'] += _num(d['QTD_IFEC_ALIM'])
         o['dec'] += _num(d['QTD_IDEC_ALIM'])
+        if not momentanea(d) and not dia_critico(d):   # DEC e FEC do conjunto pelo PRODIST, passo a passo
+            o['dec_conj'] += _num(d.get('QTD_IDEC_CONJ') or '')
+            o['fec_conj'] += _num(d.get('QTD_IFEC_CONJ') or '')
         o['mom'] = o['mom'] and momentanea(d)      # momentânea só se todos os passos forem
         o['dc'] = o['dc'] or dia_critico(d)
     for o in oc.values():

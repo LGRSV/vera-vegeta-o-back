@@ -202,6 +202,7 @@ def dados_mapa(nos, res, interrupcoes=None, nomes_fixos=None):
             mes=o['mes'], dia=f"{o['abert'][8:10]}/{o['abert'][5:7]} {o['abert'][11:16]}", col=o['coletiva'], abr=o['abr'],
             ativo=o['ativo'], prob=o['prob'], causa=o['causa'], sub=o['sub'], prog=o['programada'], cons=o['cons'], dur=o['dur'],
             chi=round(o['chi'], 1), mom=o['mom'], dc=o['dc'], long=o['long'],
+            dec_conj=round(o.get('dec_conj', 0.0), 6), fec_conj=round(o.get('fec_conj', 0.0), 6),
             trecho=o['trecho'], fora=o.get('fora'), regra=o.get('regra'), dist_m=o.get('dist_m')) for o in interrupcoes])
     return ts, dados
 

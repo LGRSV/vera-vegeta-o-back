@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.5",
+ "versao": "2.6",
  "atualizado": "2026-11-16",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -15,7 +15,7 @@ window.ARGOS_ESCOPO = {
   "objetivos": [
    "Mostrar a rede de média tensão do Tocantins dividida em trechos (T1, T2, T3), do estado até o trecho.",
    "Localizar em cada trecho as ocorrências de vegetação (NAE) e as OS de limpeza de faixa, inspeção, manutenção e poda.",
-   "Indicar onde agir primeiro: ranking de NAE, nota de 0 a 100 por trecho e situação da poda por quadra.",
+   "Indicar onde agir primeiro: ranking de NAE, nota por trecho no modelo da planilha do Ranking de faixa e situação da poda por quadra.",
    "Acompanhar contratos, metas e orçamento da manutenção em um só lugar.",
    "Reduzir o trabalho manual de campo e escritório, como o croqui de limpeza de faixa."
   ],
@@ -54,7 +54,7 @@ window.ARGOS_ESCOPO = {
   {"id": "nae", "nome": "NAE de vegetação", "pagina": "index.html", "objetivo": "Ocorrências de árvore e eucalipto da Crítica por trecho, mês e ranking."},
   {"id": "faixa", "nome": "Limpeza de faixa", "pagina": "index.html", "objetivo": "OS de limpeza no mapa, vencimento por trecho e croqui pronto para baixar."},
   {"id": "insp", "nome": "Inspeção e manutenção", "pagina": "index.html", "objetivo": "Inspeções executadas, OS geradas por elas e manutenções feitas em cada ativo."},
-  {"id": "prio", "nome": "Priorizador", "pagina": "priorizacao/", "objetivo": "Nota de 0 a 100 por trecho e faixas P1 a P4 para ordenar a limpeza."},
+  {"id": "prio", "nome": "Priorizador", "pagina": "priorizacao/", "objetivo": "Nota por trecho no modelo da planilha do Ranking de faixa e faixas P1 a P4 para ordenar a limpeza."},
   {"id": "carteira", "nome": "Carteira de faixa", "pagina": "carteira/", "objetivo": "Contratos, medições e avanço das obras por empreiteira, polo e regional."},
   {"id": "painel", "nome": "Painel gerencial", "pagina": "painel/", "objetivo": "Metas e realizado de inspeção, estruturas, para-raio, linha viva e melhoria."},
   {"id": "podas", "nome": "Mapa de podas", "pagina": "podas/", "objetivo": "Situação da poda por quadra em Palmas, Araguaína e Gurupi."},
@@ -94,7 +94,8 @@ window.ARGOS_ESCOPO = {
   {"d": "2026-11-09", "t": "Escopo e acompanhamento do projeto (página, Excel e Word)."},
   {"d": "2026-11-09", "t": "Levantamento de qualidade por agentes: 111 pontos de melhoria; DEC e FEC do Mapa de podas corrigidos."},
   {"d": "2026-11-10", "t": "Rodada de correções em 11 módulos: 75 pontos de melhoria trabalhados, 41 corrigidos e conferidos, 20 parciais e 13 que dependem de base nova."},
-  {"d": "2026-11-16", "t": "Visão Queimadas: focos de calor do INPE e do FIRMS perto da rede e incêndios da Crítica no mapa."}
+  {"d": "2026-11-16", "t": "Visão Queimadas: focos de calor do INPE e do FIRMS perto da rede e incêndios da Crítica no mapa."},
+  {"d": "2026-11-16", "t": "Priorizador no modelo da planilha do Ranking de faixa, com NAE, DEC e FEC por trecho refeitos a cada Crítica enviada pelo menu."}
  ],
  "entregas": [
   {"id": "1.1", "frente": "rede", "titulo": "Regras de divisão em trechos", "itens": [
@@ -203,13 +204,15 @@ window.ARGOS_ESCOPO = {
    {"t": "Clientes pelas UCs ligadas e OS de limpeza pelo OS status de 29/10", "st": "ok", "d": "2026-10-29"},
    {"t": "CHI e CI pelas UCs ligadas a jusante do trecho em cada evento, no lugar dos consumidores registrados na Crítica (decisão de 13/11)", "st": "ok", "d": "2026-11-13"},
    {"t": "Filtros Regional, Polo, Tronco/Ramal e Urbano/Rural (área urbanizada do IBGE 2022), cortes P1–P3 à vista, pontos e limites editáveis e botão Ver no mapa na ficha", "st": "ok", "d": "2026-11-15"},
-   {"t": "Premissas do Ranking de faixa (planilha RANKING_FAIXA_APP): nota com NAE 33, DEC 33, FEC 22 e Lente de imagem 12; T1 sem limpeza efetiva há mais de 3 anos no topo (regra F5); solicitações do aplicativo com marca, ficha e filtro", "st": "ok", "d": "2026-11-16", "obs": "Decisões de 16/11: sem as lentes de Meio Ambiente e Segurança, pesos reescalados para 100; clientes, hierarquia, Grupo A e limpeza com 0 no perfil padrão."}
+   {"t": "Premissas do Ranking de faixa (planilha RANKING_FAIXA_APP): nota com NAE 33, DEC 33, FEC 22 e Lente de imagem 12; T1 sem limpeza efetiva há mais de 3 anos no topo (regra F5); solicitações do aplicativo com marca, ficha e filtro", "st": "ok", "d": "2026-11-16", "obs": "Decisões de 16/11: sem as lentes de Meio Ambiente e Segurança, pesos reescalados para 100; clientes, hierarquia, Grupo A e limpeza com 0 no perfil padrão."},
+   {"t": "Nota no modelo da planilha (0,3 × NAE + 0,3 × DEC + 0,2 × FEC + 0,1 × Lente de imagem, sem dividir por km, e +3 no T1 da F5); faixas P1 3, P2 1,2 e P3 0,6; Clientes e Grupo A marcáveis; filtros de seleção múltipla (Regional, Polo, Classe com T2 tronco e T2 ramal, Urbano/rural, Solicitação, Município e P1–P4); bandeira nos trechos com solicitação do app", "st": "ok", "d": "2026-11-16", "obs": "Decisões de 16/11: mesma conta da coluna Ranking2 da planilha (conferida nos 730 pedidos), sem as lentes de Meio Ambiente e Segurança; Clientes (0,3 por mil UCs) e Grupo A (mínimo P2) desligados no padrão. Com os dados de hoje: P1 225, P2 293, P3 2.469 e P4 14.771 trechos elegíveis."}
   ]},
   {"id": "6.2", "frente": "prio", "titulo": "Validação e atualização", "itens": [
    {"t": "DEC/100 e FEC/100 do conjunto ANEEL pela Crítica no lugar do CHI e do CI", "st": "ok", "d": "2026-11-16", "obs": "Crítica de jan a mar/2026 recebida em 16/11, já com o expurgo: as 812 ocorrências expurgadas como situação de emergência entram com DEC/FEC zero e continuam na NAE."},
    {"t": "Atualizar as ocorrências do Priorizador (referência de 07/10/2026) com a Crítica nova", "st": "ok", "d": "2026-11-16", "obs": "Jan a nov/2026, até 09/11; OS de limpeza pelo OS status de 15/11."},
    {"t": "Regra F5: OS executadas nos últimos 3 anos que, somadas, cobrem ≥ 50% do T1 contam como limpeza; T1 com menos de 0,5 km fica fora (alerta Q6)", "st": "ok", "d": "2026-11-16", "obs": "Decisão de 16/11: a data da aba T1 da planilha não entra; cortes P1–P3 seguem 70/50/30. T1 no topo: 268 → 225."},
-   {"t": "Validar a tabela de pontos e o ranking com os polos", "st": "pend", "prazo": "2026-12-11", "resp": "proj"}
+   {"t": "NAE, DEC e FEC por trecho do Priorizador refeitos sozinhos a cada Crítica enviada pelo menu, e as OS de limpeza a cada Crítica ou limpeza", "st": "ok", "d": "2026-11-16", "obs": "A leitura da Crítica passa a gravar o DEC e o FEC do conjunto de cada ocorrência (scripts priorizacao_indicadores.py e priorizacao_os.py na automação). Conferido reprocessando a Crítica de set a nov/2026: nenhuma diferença."},
+   {"t": "Validar os pesos e o ranking com os polos", "st": "pend", "prazo": "2026-12-11", "resp": "proj"}
   ]},
 
   {"id": "7.1", "frente": "carteira", "titulo": "Carteira por empreiteira", "itens": [
@@ -322,8 +325,8 @@ window.ARGOS_ESCOPO = {
   ]},
   {"id": "12.4", "frente": "qualidade", "titulo": "Regras a confirmar depois das correções", "itens": [
    {"t": "Mapa de podas: como contar a linha viva das OS sem equipe informada", "st": "pend", "prazo": "2026-11-20", "resp": "proj", "obs": "Hoje aparecem à parte (\"sem equipe\"). O prefixo LV do número da OS só coincide com equipe de linha viva em 65% a 70% dos casos conferíveis."},
-   {"t": "Priorizador: peso do trecho sem registro de limpeza (10 dos 20 pontos; 8 de 15 no Plano climático)", "st": "pend", "prazo": "2026-11-20", "resp": "proj", "obs": "Com esse peso, P1 passou de 204 para 43 trechos e P2 de 1.274 para 565."},
-   {"t": "Priorizador: mesmo evento contando em NAE, CHI e CI, piso de 5 km e interrupções de menos de 3 min", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
+   {"t": "Priorizador: peso do trecho sem registro de limpeza (10 dos 20 pontos; 8 de 15 no Plano climático)", "st": "ok", "d": "2026-11-16", "obs": "Resolvido pelo modelo da planilha (16/11): a limpeza só entra na nota pelo +3 do T1 da regra F5."},
+   {"t": "Priorizador: mesmo evento contando em NAE, CHI e CI, piso de 5 km e interrupções de menos de 3 min", "st": "ok", "d": "2026-11-16", "obs": "Resolvido pelo modelo da planilha (16/11): NAE, DEC e FEC somados como na planilha, sem dividir por km (sem piso); a interrupção de menos de 3 min conta no NAE e vale 0 no DEC e no FEC."},
    {"t": "Ocorrências acima de 24 h (553 de jan a ago/2026): limitar a duração, tirar do consumidor·hora ou só avisar", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
    {"t": "NAE com ou sem as interrupções momentâneas e as de dia crítico (as marcas já ficam gravadas no reprocessamento)", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
    {"t": "Ocorrência em religador ou disjuntor: ratear pela zona protegida ou só rotular como zona do equipamento", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
@@ -344,7 +347,7 @@ window.ARGOS_ESCOPO = {
   {"id": "inspecao", "nome": "Base de inspeção", "origem": "BASE INSPEÇÃO.xlsx", "usa": ["insp", "mapa"], "ritmo": "mensal", "como": "Menu Atualizar bases, pasta bases/inspecao/."},
   {"id": "podas", "nome": "OS de poda de árvore (OS status)", "origem": "1 - OS_STATUS.parquet, esquema MC - Poda de árvore", "usa": ["podas"], "ritmo": "mensal", "como": "Script mapa_podas.py com o OS status novo."},
   {"id": "ucs", "nome": "UCs ligadas por transformador", "origem": "uc_por_trafo.csv", "usa": ["prio", "rede"], "ritmo": "demanda", "como": "Script ucs_trechos.py com a planilha nova."},
-  {"id": "prio", "nome": "Dados do Priorizador", "origem": "Rede do GIS, Crítica, OS de limpeza e inspeções", "usa": ["prio"], "ritmo": "mensal", "como": "Refeito depois de cada Crítica nova."},
+  {"id": "prio", "nome": "Dados do Priorizador", "origem": "Rede do GIS, Crítica, OS de limpeza e inspeções", "usa": ["prio"], "ritmo": "mensal", "como": "Refeito sozinho a cada Crítica enviada pelo menu (ocorrências, DEC e FEC) e a cada Crítica ou limpeza (OS)."},
   {"id": "carteira", "nome": "Medições e acompanhamento da carteira", "origem": "Base medição.xlsx e ACOMPANHAMENTO DE LIMPEZA DE FAIXA 2026.xlsx", "usa": ["carteira"], "ritmo": "mensal", "como": "Envio das duas planilhas para reprocessar a página."},
   {"id": "painel", "nome": "Realizado do Painel gerencial", "origem": "Exportações do BI Manutenção", "usa": ["painel"], "ritmo": "mensal", "como": "Exportação do BI e reprocessamento da página (fonte em decisão)."},
   {"id": "orcamento", "nome": "Orçamento e realizado por SIGCO", "origem": "curva.xlsx, Capex 2027 a 2029 e Qtd_2026.xlsx", "usa": ["orcamento"], "ritmo": "mensal", "como": "Planilhas novas e reprocessamento da página."},
@@ -369,7 +372,7 @@ window.ARGOS_ESCOPO = {
    ["gis_para_daimon.py", "Converte a exportação do GIS por camadas para o formato lido pelo gerador", "KMZ_GOOGLE_EARTH2", "KML por subestação"],
    ["gera_trechos.py", "Divide os alimentadores em trechos, cruza com municípios e gera páginas, KMZ e relatório", "KML da rede, Crítica, malha do IBGE", "dados/alimentadores/*.json e páginas"],
    ["refaz_trechos.py", "Refaz a divisão em trechos só com o JSON do site depois de mudar uma regra", "JSON do site", "JSON e páginas"],
-   ["atualiza_critica.py", "Coloca a Crítica nova nos trechos sem refazer a rede", "Critica*.txt", "NAE nos JSON e busca por UC"],
+   ["atualiza_critica.py", "Coloca a Crítica nova nos trechos sem refazer a rede", "Critica*.txt", "NAE, DEC e FEC do conjunto nos JSON e busca por UC"],
    ["atualiza_bases.py", "Roteia o arquivo enviado para o script certo (é o que a automação roda)", "Pasta bases/", "Dados do site e bases.json"],
    ["limpeza_faixa.py", "Liga cada OS de limpeza aos vãos do trecho e calcula o vencimento", "OS status (.parquet)", "alimentadores/<AL>/limpeza.js"],
    ["carteira_parciais.py", "Agrupa as OS parciais na OS mãe para a carteira", "limpeza.js dos alimentadores", "Obras da carteira"],
@@ -378,7 +381,8 @@ window.ARGOS_ESCOPO = {
    ["executadas.py", "OS de manutenção executadas (MC e MP) por ativo", "OS status", "alimentadores/<AL>/executadas.js"],
    ["ativos_gis.py", "Transformadores do GIS nos trechos e NAE que estava sem trecho", "Transformadores.kmz", "Trafos e NAE nos JSON"],
    ["ucs_trechos.py", "UCs ligadas por trecho", "uc_por_trafo.csv", "dados/ucs-trechos.js"],
-   ["priorizacao_os.py", "Troca as OS de limpeza do Priorizador pelas do mapa", "limpeza.js dos alimentadores", "assets/priorizacao-dados.js"],
+   ["priorizacao_indicadores.py", "Refaz as ocorrências, o DEC e o FEC de cada trecho do Priorizador pela NAE dos alimentadores (roda a cada Crítica do menu)", "JSON dos alimentadores", "assets/priorizacao-dados.js e dados/decfec-trechos.js"],
+   ["priorizacao_os.py", "Troca as OS de limpeza do Priorizador pelas do mapa (roda a cada Crítica ou limpeza do menu)", "limpeza.js dos alimentadores", "assets/priorizacao-dados.js"],
    ["conjuntos.py", "Consumidores de cada conjunto elétrico e conjunto de cada alimentador (denominador do DEC e do FEC)", "Uma Crítica", "dados/conjuntos.json"],
    ["mapa_podas.py", "Situação da poda por quadra, pontos das OS e NAE no perímetro urbano", "OS status, setores do IBGE, Crítica", "dados/podas.js"],
    ["gera_visoes.js", "Visões do mapa inicial (Manutenção, Inspeção, Insp→manut, Limpeza)", "Dados dos alimentadores", "assets/mapa-municipios-visoes.js"],
@@ -408,13 +412,13 @@ window.ARGOS_ESCOPO = {
     "No croqui, limpeza leve é a Expedita e pesada é a Convencional."
    ]},
    {"titulo": "Priorizador", "itens": [
-    "A nota do trecho vai de 0 a 100 e é a soma dos pontos de cada critério: NAE, CHI e CI por 100 km, clientes (UCs ligadas), cliente do Grupo A, hierarquia do trecho e limpeza de faixa.",
-    "CHI e CI são o consumidor·hora e os consumidores interrompidos das ocorrências do trecho, não o DEC e o FEC da ANEEL.",
-    "Faixas pela nota: P1 com 70 ou mais, P2 com 50 ou mais, P3 com 30 ou mais e P4 abaixo disso.",
-    "Pisos: T1 com evento em 3 meses ou mais do período, ou 2 ou mais nos últimos 90 dias, é no mínimo P1 (F1); trecho com cliente do Grupo A é no mínimo P2 (F2); evento em 4 meses ou mais é no mínimo P2 (F4).",
-    "Trecho em plano climático aprovado soma 8 pontos à nota (parâmetro). Há três tabelas de pontos: Padrão, Pré-chuva e Plano climático.",
-    "Trecho sem registro de limpeza leva 10 dos 20 pontos do critério no perfil Padrão (editável nas Premissas), menos que o vencido.",
-    "As ocorrências contam no período que a Crítica cobre (hoje jan a ago/2026) e só as posteriores à última limpeza efetiva do trecho."
+    "A nota do trecho é a da planilha do Ranking de faixa (coluna Ranking2) sem as lentes de Meio Ambiente e Segurança: 0,3 × NAE + 0,3 × DEC + 0,2 × FEC + 0,1 × Lente de imagem, com os valores do próprio trecho (sem dividir por km); o T1 sem limpeza efetiva há mais de 3 anos soma 3 (regra F5). Pesos editáveis na tela.",
+    "DEC e FEC são quanto as ocorrências do trecho pesam no DEC e no FEC do conjunto ANEEL, pela Crítica, sem momentâneas, dia crítico e expurgo de situação de emergência.",
+    "Faixas pela nota: P1 com 3 ou mais, P2 com 1,2 ou mais, P3 com 0,6 ou mais e P4 abaixo disso (editáveis).",
+    "Critérios opcionais, desmarcados no padrão: Clientes (0,3 por mil UCs ligadas a jusante) e Grupo A (trecho marcado na ficha fica no mínimo P2, F2; ainda sem cadastro).",
+    "Pisos: T1 da F5 é no mínimo P1 e vai ao topo; T1 com evento em 3 meses ou mais do período, ou 2 ou mais nos últimos 90 dias, é no mínimo P1 (F1); evento em 4 meses ou mais é no mínimo P2 (F4).",
+    "Trecho em plano climático aprovado soma 0,3 à nota (parâmetro).",
+    "As ocorrências contam nos últimos 12 meses que a Crítica cobre (hoje jan a nov/2026) e só as posteriores à última limpeza efetiva do trecho; são refeitas sozinhas a cada Crítica enviada pelo menu."
    ]},
    {"titulo": "Mapa de podas", "itens": [
     "Situação da quadra: crítica (OS de poda urgente ou emergencial pendente, ou NAE dentro da quadra nos últimos 6 meses da Crítica sem poda executada em 6 meses), pendente (OS de poda aberta), executada (poda nos últimos 6 meses) ou sem poda recente.",
