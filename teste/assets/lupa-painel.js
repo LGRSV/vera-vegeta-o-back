@@ -5,7 +5,7 @@
 // fora (campo vazio) fecha e voltam o olho e T1 T2 T3. Escolher um trecho ou um resultado também fecha.
 // - Olho (ou o campo vazio com foco): lista suspensa com as classes T1, T2 e T3 (trechos, km e NAE no período). Tocar na
 //   classe abre os trechos dela (maior NAE primeiro); tocar num trecho escolhe ele no mapa. O olho de cada classe mostra ou
-//   esconde a classe no mapa. Embaixo, as camadas do Menu (Faixa, Inspeção, Insp→manut, Manutenção).
+//   esconde a classe no mapa. Embaixo, as camadas do Menu (NAE, Faixa, Inspeção, Insp→manut, Manutenção, Queimadas).
 //   Classes e camadas usam os próprios botões de alimentador.js e extras.js (os T1 T2 T3 são os bloquinhos ao lado do
 //   olho; os do Menu ficam escondidos): a lógica é a mesma.
 // - Filtros: menu suspenso com o município e os meses do NAE (os mesmos controles de extras.js e alimentador.js, só mudam de
@@ -1027,8 +1027,9 @@
     cls.querySelectorAll('button[data-c]').forEach(b => { b.hidden = !D.trechos.some(t => classe(t.nome) === b.dataset.c); algum = algum || !b.hidden; });
     if (algum) lupa.after(cls);
   }
-  // camadas sempre à vista: Faixa | Inspeção | Insp→manut | Manutenção numa fileira no alto do mapa, embaixo do olho e do
-  // T1 T2 T3 (antes ficavam só dentro do olho). Cada botão aciona o do Menu (a mesma lógica de cada camada) e copia o estado
+  // camadas sempre à vista: NAE | Faixa | Inspeção | Insp→manut | Manutenção | Queimadas numa fileira no alto do mapa,
+  // embaixo do olho e do T1 T2 T3 (antes ficavam só dentro do olho). Cada botão aciona o do Menu (a mesma lógica de cada
+  // camada) e copia o estado
   const camL = document.getElementById('ctl-camadas');
   let fila = null;
   if (caixaMapa && camL) {
@@ -1038,9 +1039,10 @@
       fila.className = 'lp-cams';
       fila.setAttribute('role', 'group');
       fila.setAttribute('aria-label', 'Camadas do mapa');
-      // no celular estreito (até 480 px) "Manutenção" vira "Manut." para as 5 camadas (com Queimadas) caberem em 390 px; o
-      // nome inteiro fica no aria-label e no texto do computador
-      const CURTO = { 'Manutenção': 'Manut.' };
+      // na tela estreita (até 540 px) "Inspeção" vira "Insp." e "Manutenção" vira "Manut." para as 6 camadas (de NAE a
+      // Queimadas) caberem em 390 px (e entre 481 e 540, onde os nomes inteiros não cabem); o nome inteiro fica no
+      // aria-label e no texto do computador
+      const CURTO = { 'Inspeção': 'Insp.', 'Manutenção': 'Manut.' };
       fila.innerHTML = bts.map((b, i) => {
         const t = b.textContent.trim(), c = CURTO[t];
         return `<button type="button" data-i="${i}" aria-pressed="${b.getAttribute('aria-pressed') === 'true'}" title="${esc(b.title)}"${c ? ` aria-label="${esc(t)}"` : ''}>` +
@@ -1184,9 +1186,10 @@
     '@media (pointer:coarse){.lp-cams button{min-height:40px}}' +
     '.lp-cams button:hover{background:var(--vidro-hover)}.lp-cams button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}' +
     '.lp-cams button[aria-pressed=true]{background:var(--accent);color:var(--on-accent)}' +
-    // celular estreito: menos folga e o nome curto, para Faixa | Inspeção | Insp→manut | Manut. | Queimadas caberem sem rolar
+    // tela estreita: menos folga e o nome curto, para NAE | Faixa | Insp. | Insp→manut | Manut. | Queimadas caberem sem rolar
+    // (os nomes inteiros pedem ~443 px: de 541 px em diante cabem com folga)
     '.lp-cams .lp-cc{display:none}' +
-    '@media (max-width:480px){.mapbox>.lp-cams{gap:0}.lp-cams button{padding:0 6px}.lp-cams .lp-cl{display:none}.lp-cams .lp-cc{display:inline}}' +
+    '@media (max-width:540px){.mapbox>.lp-cams{gap:0}.lp-cams button{padding:0 5px}.lp-cams .lp-cl{display:none}.lp-cams .lp-cc{display:inline}}' +
     '.mapbox.fx-modo>.lp-cams{display:none}';
   document.head.append(s);
 })();
