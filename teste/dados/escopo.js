@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.8",
+ "versao": "2.9",
  "atualizado": "2026-11-17",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -289,7 +289,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Excel de acompanhamento e Word do escopo gerados da mesma fonte", "st": "ok", "d": "2026-11-09"},
    {"t": "Regra de atualizar o escopo a cada publicação (script e instrução no repositório)", "st": "ok", "d": "2026-11-09"},
    {"t": "Confirmar os prazos propostos dos itens abertos", "st": "pend", "prazo": "2026-11-13", "resp": "proj"},
-   {"t": "Aba Ideias no Escopo: cadastro de ideias, melhorias e erros com login, comentários e situação acompanhada pelo dono do projeto", "st": "ok", "d": "2026-11-17"}
+   {"t": "Aba Ideias no Escopo: qualquer pessoa cadastra ideias, melhorias e erros e comenta só com o nome; a situação é acompanhada pelo dono do projeto (com login)", "st": "ok", "d": "2026-11-17"}
   ]},
 
   {"id": "12.1", "frente": "qualidade", "titulo": "Levantamento de qualidade", "itens": [
