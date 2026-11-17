@@ -14,8 +14,11 @@
 # do smartled. Os scripts vêm de ferramentas/ do gh-pages (scripts/atualiza_bases.py --copia-ferramentas).
 name: Focos de calor
 on:
+  # O ritmo de 10 min vem da corrente: cada rodada espera completar 10 min desde o seu início e dispara a seguinte
+  # (último passo). O agendamento abaixo é a reserva: o GitHub só o liga quando a linha do cron é alterada por alguém
+  # do repositório (um commit feito pelo app do Claude não liga). Rodadas a mais se juntam pelo concurrency: fica
+  # uma rodando e uma na fila, e a corrente segue com uma só. Parar: Actions → Focos de calor → Disable workflow.
   schedule:
-    # a cada 10 min, fora do minuto cheio (o GitHub atrasa ou pula as rodadas marcadas no início da hora)
     - cron: '3-59/10 * * * *'
   workflow_dispatch:
     inputs:
@@ -37,11 +40,14 @@ concurrency:
 jobs:
   focos:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       PYTHONUTF8: '1'
     steps:
+      - name: Início (para a próxima rodada sair 10 min depois)
+        id: inicio
+        run: echo "t=$(date +%s)" >> "$GITHUB_OUTPUT"
       - name: Site (gh-pages, só o necessário)
         uses: actions/checkout@v4
         with:
@@ -195,3 +201,19 @@ jobs:
         run: |
           gh cache list --key focos-cache- --sort created_at --order desc --limit 100 --json id --jq '.[3:][].id' \
             | xargs -r -n1 gh cache delete
+      - name: Próxima rodada (corrente de 10 min)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          INICIO: ${{ steps.inicio.outputs.t }}
+        run: |
+          espera=600                              # sem a hora do início: espera os 10 min inteiros
+          if [ -n "$INICIO" ]; then espera=$(( 600 - ($(date +%s) - INICIO) )); fi
+          if [ "$espera" -gt 600 ]; then espera=600; fi
+          if [ "$espera" -gt 0 ]; then echo "Espera ${espera} s"; sleep "$espera"; fi
+          for _ in 1 2 3; do
+            if gh workflow run focos.yml --ref main; then echo "Próxima rodada pedida."; exit 0; fi
+            sleep 15
+          done
+          echo "Não consegui pedir a próxima rodada: a corrente parou (o agendamento, se ligado, segue)."; exit 1
