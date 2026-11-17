@@ -1,4 +1,4 @@
-{"gerado":"2026-11-17T04:00Z","janela_h":84,"ramo":"focos","fontes":{"inpe":{"ultimo_arquivo":"2026-11-17T04:00Z","arquivos":457,"ultimo_foco":"2026-11-17T03:40Z"},"firms":{"modo":"csv","atualizado":"2026-11-17T03:46Z","arquivos":["J1_VIIRS_C2_South_America_7d.csv","J2_VIIRS_C2_South_America_7d.csv","MODIS_C6_1_South_America_7d.csv"],"ultimo_foco":"2026-11-16T23:50Z"}},"faixas":{"sob":"Sob a rede: o pixel do satélite cobre a rede (até 200 m no VIIRS, 500 m no MODIS, 1 km no GOES)","1km":"Até 1 km da rede","5km":"De 1 a 5 km da rede"},"sensores":{"AQUA":"MODIS, pixel de 1 km","GOES-19":"geoestacionário, pixel de 2 a 4 km","METOP-C":"AVHRR, pixel de 1,1 km","NOAA-20":"VIIRS, pixel de 375 m","NOAA-21":"VIIRS, pixel de 375 m","TERRA":"MODIS, pixel de 1 km"},"contagem":{"to":419,"sob":119,"1km":135,"5km":133},"focos":[
+{"gerado":"2026-11-17T05:01Z","janela_h":84,"ramo":"focos","fontes":{"inpe":{"ultimo_arquivo":"2026-11-17T05:00Z","arquivos":463,"ultimo_foco":"2026-11-17T04:40Z"},"firms":{"modo":"csv","atualizado":"2026-11-17T04:46Z","arquivos":["J1_VIIRS_C2_South_America_7d.csv","J2_VIIRS_C2_South_America_7d.csv","MODIS_C6_1_South_America_7d.csv"],"ultimo_foco":"2026-11-16T23:50Z"}},"faixas":{"sob":"Sob a rede: o pixel do satélite cobre a rede (até 200 m no VIIRS, 500 m no MODIS, 1 km no GOES)","1km":"Até 1 km da rede","5km":"De 1 a 5 km da rede"},"sensores":{"AQUA":"MODIS, pixel de 1 km","GOES-19":"geoestacionário, pixel de 2 a 4 km","METOP-C":"AVHRR, pixel de 1,1 km","NOAA-20":"VIIRS, pixel de 375 m","NOAA-21":"VIIRS, pixel de 375 m","TERRA":"MODIS, pixel de 1 km"},"contagem":{"to":412,"sob":119,"1km":134,"5km":133},"focos":[
 [-11.14795,-48.45663,"2026-11-15T17:11Z","NOAA-21","IF",736,"LD02072001","T3-GS","1km",7.6,"1709807"],
 [-11.33165,-49.72485,"2026-11-15T17:11Z","NOAA-21","IF",3335,"LD01035052","T3-KM","5km",3.2,"1711902"],
 [-11.3318,-49.72766,"2026-11-15T17:11Z","NOAA-21","IF",3351,"LD01035052","T3-KM","5km",6.5,"1711902"],
@@ -384,6 +384,5 @@
 [-9.33561,-49.01814,"2026-11-13T17:04Z","NOAA-20","F",2075,"LD02050008","T3-AHS","5km",5.5,"1707207"],
 [-9.34134,-49.00921,"2026-11-13T17:04Z","NOAA-20","F",1225,"LD02050008","T3-AGD","5km",3.0,"1707207"],
 [-9.79141,-48.02674,"2026-11-13T17:04Z","NOAA-20","F",1002,"LD03059122","T3-AVT","5km",10.7,"1721109"],
-[-9.79506,-48.02613,"2026-11-13T17:04Z","NOAA-20","F",665,"LD03059122","T3-AVT","1km",10.7,"1721109"],
-[-8.93314,-48.64161,"2026-11-13T16:07Z","NOAA-21","F",631,"LD04038009","T3-TN","1km",6.1,"1716703"]
+[-9.79506,-48.02613,"2026-11-13T17:04Z","NOAA-20","F",665,"LD03059122","T3-AVT","1km",10.7,"1721109"]
 ]}
