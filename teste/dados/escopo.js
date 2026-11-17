@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.7",
+ "versao": "2.8",
  "atualizado": "2026-11-17",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -276,7 +276,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Executadas, manutenção, limpeza e podas pelo OS status (.parquet)", "st": "ok", "d": "2026-10-29"},
    {"t": "Cópia das ferramentas da atualização automática em dia com o código do site", "st": "ok", "d": "2026-11-16", "obs": "A carga de 15/11 rodou com a cópia de 30/10 e voltou o /teste/ a 30/10; refeita no mesmo dia 16/11."},
    {"t": "Definir o calendário mensal de cargas (dia e responsável por base)", "st": "pend", "prazo": "2026-11-20", "resp": "proj"},
-   {"t": "Carga do OS status de nov/2026 (o atual é de 29/10/2026)", "st": "pend", "prazo": "2026-11-30", "resp": "proj"}
+   {"t": "Carga do OS status de nov/2026 (base de 16/11/2026, execuções até 15/11)", "st": "ok", "d": "2026-11-16"}
   ]},
   {"id": "11.3", "frente": "plataforma", "titulo": "Publicação e uso", "itens": [
    {"t": "ARGOS para rodar no computador, sem internet (pacote local)", "st": "ok", "d": "2026-10-21"},
@@ -288,7 +288,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Página de escopo com andamento, bases e histórico de mudanças", "st": "ok", "d": "2026-11-09"},
    {"t": "Excel de acompanhamento e Word do escopo gerados da mesma fonte", "st": "ok", "d": "2026-11-09"},
    {"t": "Regra de atualizar o escopo a cada publicação (script e instrução no repositório)", "st": "ok", "d": "2026-11-09"},
-   {"t": "Confirmar os prazos propostos dos itens abertos", "st": "pend", "prazo": "2026-11-13", "resp": "proj"}
+   {"t": "Confirmar os prazos propostos dos itens abertos", "st": "pend", "prazo": "2026-11-13", "resp": "proj"},
+   {"t": "Aba Ideias no Escopo: cadastro de ideias, melhorias e erros com login, comentários e situação acompanhada pelo dono do projeto", "st": "ok", "d": "2026-11-17"}
   ]},
 
   {"id": "12.1", "frente": "qualidade", "titulo": "Levantamento de qualidade", "itens": [
