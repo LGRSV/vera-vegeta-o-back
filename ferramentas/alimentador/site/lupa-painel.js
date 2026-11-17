@@ -5,7 +5,7 @@
 // fora (campo vazio) fecha e voltam o olho e T1 T2 T3. Escolher um trecho ou um resultado também fecha.
 // - Olho (ou o campo vazio com foco): lista suspensa com as classes T1, T2 e T3 (trechos, km e NAE no período). Tocar na
 //   classe abre os trechos dela (maior NAE primeiro); tocar num trecho escolhe ele no mapa. O olho de cada classe mostra ou
-//   esconde a classe no mapa. Embaixo, as camadas do Menu (Faixa, Inspeção, Insp→manut, Manutenção).
+//   esconde a classe no mapa. Embaixo, as camadas do Menu (NAE, Faixa, Inspeção, Insp→manut, Manutenção, Queimadas).
 //   Classes e camadas usam os próprios botões de alimentador.js e extras.js (os T1 T2 T3 são os bloquinhos ao lado do
 //   olho; os do Menu ficam escondidos): a lógica é a mesma.
 // - Filtros: menu suspenso com o município e os meses do NAE (os mesmos controles de extras.js e alimentador.js, só mudam de
@@ -900,11 +900,22 @@
   let pino = null;                                       // marcador da chave, ativo ou poste escolhido (sai no próximo ou ao tocar no mapa)
   const tiraPino = () => { if (pino) { pino.remove(); pino = null; } };
   if (comMapa) map.on('click', tiraPino);
-  function vaiPonto(ll, tag, cod) {
+  // tr: o trecho do ativo (a faixa usa quando o ativo não está nas listas da página). Com o modo Limpeza de faixa na página
+  // (modo-faixa-rascunho.js) e o ativo achado na rede, o pino traz o "Faixa a partir daqui": abre o modo com a faixa do
+  // ativo até o fim do trecho dele, pendente de Leve ou Pesada. Sem nada a jusante (fim de linha), só "Fim do T3-…", sem botão
+  function vaiPonto(ll, tag, cod, tr) {
     tiraPino();
     if (!comMapa || !ll) return;
+    const FX = window.__faixa, fx = FX && FX.doAtivo && FX.faixa && FX.faixa({ cod, ll, tr }), vai = fx && fx.pedacos > 0;
     pino = L.marker(ll, { interactive: false, keyboard: false, zIndexOffset: 1000,
-      icon: L.divIcon({ className: '', iconSize: null, html: `<div class="ie ativo"><em>${esc(tag)}</em>${esc(cod)}</div>` }) }).addTo(map);
+      icon: L.divIcon({ className: '', iconSize: null, html: `<div class="ie ativo"><em>${esc(tag)}</em>${esc(cod)}` +
+        (vai ? `<button type="button" class="lp-fx" title="Abre a Limpeza de faixa com a faixa daqui até o fim do ${esc(fx.trecho)}">Faixa a partir daqui</button>` :
+          fx ? `<span class="lp-fx-fim">Fim do ${esc(fx.trecho)}</span>` : '') + '</div>' }) }).addTo(map);
+    const b = vai && pino.getElement() && pino.getElement().querySelector('.lp-fx');
+    if (b) {
+      L.DomEvent.disableClickPropagation(b);              // o clique não chega no mapa (que tiraria o pino) nem arrasta
+      b.addEventListener('click', e => { e.preventDefault(); tiraPino(); FX.doAtivo({ cod, ll, tr }); });
+    }
     map.setView(ll, Math.max(map.getZoom(), 17));
   }
   const ligaClasse = nome => { const c = classe(nome); if (!visivel(c) && btCls(c)) btCls(c).click(); };
@@ -946,11 +957,11 @@
     else if (r.tipo === 'at') {
       tr = trDoAtivo(r.a);
       sel(tr, !r.a.ll);                                  // sem o ponto da chave: enquadra o trecho
-      vaiPonto(r.a.ll, 'ATIVO', r.a.cod);
+      vaiPonto(r.a.ll, 'ATIVO', r.a.cod, tr);
     } else if (r.tipo === 'po') {
       tr = D.trechos[r.v[4]].nome;
       sel(tr, false, r.v);
-      vaiPonto(pontaDo(r.v, r.p), 'POSTE', r.p);
+      vaiPonto(pontaDo(r.v, r.p), 'POSTE', r.p, tr);
     } else {
       tr = detOS(r.o).tr;
       sel(tr, false);
@@ -1027,8 +1038,9 @@
     cls.querySelectorAll('button[data-c]').forEach(b => { b.hidden = !D.trechos.some(t => classe(t.nome) === b.dataset.c); algum = algum || !b.hidden; });
     if (algum) lupa.after(cls);
   }
-  // camadas sempre à vista: Faixa | Inspeção | Insp→manut | Manutenção numa fileira no alto do mapa, embaixo do olho e do
-  // T1 T2 T3 (antes ficavam só dentro do olho). Cada botão aciona o do Menu (a mesma lógica de cada camada) e copia o estado
+  // camadas sempre à vista: NAE | Faixa | Inspeção | Insp→manut | Manutenção | Queimadas numa fileira no alto do mapa,
+  // embaixo do olho e do T1 T2 T3 (antes ficavam só dentro do olho). Cada botão aciona o do Menu (a mesma lógica de cada
+  // camada) e copia o estado
   const camL = document.getElementById('ctl-camadas');
   let fila = null;
   if (caixaMapa && camL) {
@@ -1038,9 +1050,10 @@
       fila.className = 'lp-cams';
       fila.setAttribute('role', 'group');
       fila.setAttribute('aria-label', 'Camadas do mapa');
-      // no celular estreito (até 480 px) "Manutenção" vira "Manut." para as 5 camadas (com Queimadas) caberem em 390 px; o
-      // nome inteiro fica no aria-label e no texto do computador
-      const CURTO = { 'Manutenção': 'Manut.' };
+      // na tela estreita (até 540 px) "Inspeção" vira "Insp." e "Manutenção" vira "Manut." para as 6 camadas (de NAE a
+      // Queimadas) caberem em 390 px (e entre 481 e 540, onde os nomes inteiros não cabem); o nome inteiro fica no
+      // aria-label e no texto do computador
+      const CURTO = { 'Inspeção': 'Insp.', 'Manutenção': 'Manut.' };
       fila.innerHTML = bts.map((b, i) => {
         const t = b.textContent.trim(), c = CURTO[t];
         return `<button type="button" data-i="${i}" aria-pressed="${b.getAttribute('aria-pressed') === 'true'}" title="${esc(b.title)}"${c ? ` aria-label="${esc(t)}"` : ''}>` +
@@ -1146,6 +1159,12 @@
     'border-top:1px solid var(--line);font-size:var(--t-xs);color:var(--muted)}' +
     '.lp-sug .lp-vazio b{font-family:var(--f-mono);color:var(--fg)}' +
     '.barra-busca.lp-sugindo>.ativo-hit{display:none}' +   // a lista já mostra os achados do índice de ativos
+    // "Faixa a partir daqui" no pino do ativo ou poste escolhido (o pino não recebe o ponteiro; o botão sim)
+    '.ie .lp-fx{pointer-events:auto;margin-left:3px;padding:4px 8px;border:0;border-radius:3px;background:var(--accent);color:var(--on-accent);' +
+    'font:700 11px/1 var(--f-body);white-space:nowrap;cursor:pointer}.ie .lp-fx:hover{filter:brightness(1.12)}' +
+    '.ie .lp-fx:focus-visible{outline:2px solid var(--accent);outline-offset:2px}@media (pointer:coarse){.ie .lp-fx{padding:8px 10px;font-size:12px}}' +
+    // ativo no fim do trecho (nada a jusante): no lugar do botão, só o aviso, apagado
+    '.ie .lp-fx-fim{margin-left:3px;padding-left:6px;border-left:1px solid #c9cdd1;color:#5a636a;font:600 11px/1 var(--f-body)}' +
     // nome do trecho na prévia do mapa (o visual do .lb de alimentador.css, sem a classe: a Faixa esconde os .lb de longe)
     '.lp-lb{font:700 13px/1 var(--f-display);color:#fff;background:rgba(0,0,0,.72);border-left:4px solid var(--c);padding:4px 7px;border-radius:3px;' +
     'white-space:nowrap;pointer-events:none;outline:2px solid var(--accent)}' +
@@ -1184,9 +1203,10 @@
     '@media (pointer:coarse){.lp-cams button{min-height:40px}}' +
     '.lp-cams button:hover{background:var(--vidro-hover)}.lp-cams button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}' +
     '.lp-cams button[aria-pressed=true]{background:var(--accent);color:var(--on-accent)}' +
-    // celular estreito: menos folga e o nome curto, para Faixa | Inspeção | Insp→manut | Manut. | Queimadas caberem sem rolar
+    // tela estreita: menos folga e o nome curto, para NAE | Faixa | Insp. | Insp→manut | Manut. | Queimadas caberem sem rolar
+    // (os nomes inteiros pedem ~443 px: de 541 px em diante cabem com folga)
     '.lp-cams .lp-cc{display:none}' +
-    '@media (max-width:480px){.mapbox>.lp-cams{gap:0}.lp-cams button{padding:0 6px}.lp-cams .lp-cl{display:none}.lp-cams .lp-cc{display:inline}}' +
+    '@media (max-width:540px){.mapbox>.lp-cams{gap:0}.lp-cams button{padding:0 5px}.lp-cams .lp-cl{display:none}.lp-cams .lp-cc{display:inline}}' +
     '.mapbox.fx-modo>.lp-cams{display:none}';
   document.head.append(s);
 })();

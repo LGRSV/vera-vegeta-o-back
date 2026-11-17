@@ -9,6 +9,7 @@ relatório de validação. Determinístico: as mesmas entradas geram os mesmos a
     python scripts/gera_trechos.py --saida <pasta do site> --validar           só confere dados e páginas já gerados
     python scripts/gera_trechos.py --saida <pasta do site> --so-interface      refaz páginas, índice e relatório
     python scripts/gera_trechos.py --saida <pasta do site> --comparar <clone gh-pages publicado>
+    python scripts/gera_trechos.py --saida <pasta do site> --vizinhos [<destino>]   só dados/vizinhos/, dos dados.js
 
 Sem --malha, baixa a malha municipal do Tocantins da API do IBGE na 1ª vez e guarda em --cache.
 Com --so-interface, as divisas no mapa do alimentador (municipios.js) saem da malha de --malha ou do --cache; baixa
@@ -678,7 +679,7 @@ def ativos_interface(saida):
     (a / 'alimentador.js').write_text('const D = window.D;\n' + js, encoding='utf-8')
     for f in ('extras.js', 'municipios.js', 'chaves.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
               'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js', 'lupa-painel.js', 'ativos-zoom.js', 'mapa-raiox.js',
-              'croqui-rascunho.js', 'polo-rota.js', 'modo-faixa-rascunho.js', 'argos.png', 'focos.js', 'focos.css'):
+              'croqui-rascunho.js', 'polo-rota.js', 'modo-faixa-rascunho.js', 'argos.png', 'focos.js', 'focos.css', 'vizinhos.js'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
     return modelo
@@ -748,6 +749,8 @@ def pagina_alimentador(modelo, c):
                f'<link rel="stylesheet" href="../../assets/focos.css?v={V_FOCOS}">', h, count=1, flags=re.S)
     h = re.sub(r'<script>\nconst D = %%DADOS%%;\n.*?</script>',
                '<script src="dados.js"></script>\n<script src="../../assets/alimentador.js"></script>\n'
+               # alimentadores vizinhos por baixo da rede, os que entram na tela: dados/vizinhos/ (vizinhos_mapa, aqui)
+               '<script src="../../assets/vizinhos.js"></script>\n'
                '<script src="../../assets/extras.js"></script>\n'
                # divisas dos municípios em tracejado: municipios.js do alimentador sai da interface, com a malha
                # divisas.js do alimentador e dados/tocantins.js (contorno do estado) saem de scripts/divisas.py
@@ -1068,6 +1071,171 @@ def redes_mapa(saida, dados):
         grava_json(pasta / f'{c["alimentador"]}.json', dict(
             d=''.join('M' + 'L'.join(f'{f(x)},{f(y)}' for x, y in ln) for ln in xy),
             b=[min(xs), min(ys), max(xs), max(ys)]))
+
+
+# ---------------------------------------------------------------- alimentadores vizinhos no mapa do alimentador
+
+# dados/vizinhos/: a rede dos outros alimentadores, que o mapa do alimentador desenha por baixo da dele quando aparecem
+# na tela (assets/vizinhos.js). Só a forma, por classe: os vãos encadeados em linhas, simplificados (Douglas–Peucker) em
+# dois níveis e codificados em polyline (o do Google: [lat, lon] × 1e5, ~1 m). Por alimentador, três arquivos de texto:
+#   <AL>.1.txt  T1 e T2, grosso (de longe)      <AL>.2.txt  T3, grosso (aproximando)      <AL>.3.txt  T1, T2 e T3, fino (de perto)
+# Cada arquivo tem uma linha de texto por classe (T1, T2 e T3, nessa ordem; a que o arquivo não leva fica vazia) e nela
+# as linhas da rede, separadas por espaço. Cada ponto é a diferença do anterior, também de uma linha para a seguinte e de
+# uma classe para a outra (o 1º do arquivo é a diferença de 0, 0).
+# indice.json: {"v": 1, "als": {AL: [sul, oeste, norte, leste, versão, bytes do .1, do .2, do .3]}}. A versão (8 hex dos
+# três arquivos) vai no endereço (?v=): o navegador baixa de novo só o que mudou.
+VIZ_TOL = (10, 1)          # m do Douglas–Peucker: grosso (até o zoom 15, onde 1 pixel tem ~5 m) e fino
+VIZ_MIN = 20               # m: no grosso fica de fora a linha mais curta que isso (de longe, menos de 1 pixel)
+VIZ_ARQ = re.compile(r'^[A-Za-z0-9_-]+\.[123]\.txt$')
+
+
+def _poli(n):
+    """Inteiro → texto do polyline do Google (5 bits por caractere, de '?' a '~')."""
+    n = ~(n << 1) if n < 0 else n << 1
+    s = ''
+    while n >= 0x20:
+        s += chr((0x20 | (n & 0x1f)) + 63)
+        n >>= 5
+    return s + chr(n + 63)
+
+
+def _trilhas(segs, fixos):
+    """Vãos ((lon, lat), (lon, lat)) → linhas: cada uma começa numa ponta (ou derivação) e segue pelo vão mais reto a cada
+    derivação, até não haver vão livre; cada vão entra uma vez. Devolve [(pontos, índices que o Douglas–Peucker mantém)]:
+    as derivações da rede inteira (`fixos`, de todas as classes) ficam, e as linhas de classes diferentes se encontram."""
+    viz = {}
+    for p, q in segs:
+        if p != q:
+            viz.setdefault(p, set()).add(q)
+            viz.setdefault(q, set()).add(p)
+    usados, out = set(), []
+
+    def curva(a, b, c):                              # -cosseno da volta em b (a mais reta é a menor)
+        ux, uy, vx, vy = (b[0] - a[0]) * KX, (b[1] - a[1]) * KY, (c[0] - b[0]) * KX, (c[1] - b[1]) * KY
+        return -(ux * vx + uy * vy) / ((math.hypot(ux, uy) * math.hypot(vx, vy)) or 1)
+    for p0 in sorted(viz, key=lambda p: (len(viz[p]) != 1, p)):     # pontas primeiro
+        while True:
+            livres = sorted(q for q in viz[p0] if (p0, q) not in usados)
+            if not livres:
+                break
+            linha = [p0, livres[0]]
+            usados |= {(p0, livres[0]), (livres[0], p0)}
+            while True:
+                a, b = linha[-2], linha[-1]
+                livres = [c for c in viz[b] if (b, c) not in usados]
+                if not livres:
+                    break
+                c = min(livres, key=lambda c: (curva(a, b, c), c))
+                usados |= {(b, c), (c, b)}
+                linha.append(c)
+            out.append((linha, {0, len(linha) - 1} | {i for i, p in enumerate(linha) if p in fixos}))
+    return out
+
+
+def _codifica(secoes, tol, minimo):
+    """Linhas de cada classe → texto do arquivo (ver acima), com o Douglas–Peucker de `tol` m entre os pontos mantidos.
+    Devolve também os pontos gravados ([lat, lon] × 1e5), para a caixa do índice."""
+    la0 = lo0 = 0
+    partes, todos = [], []
+    for linhas in secoes:
+        sec = []
+        for linha, fixos in linhas:
+            if minimo and sum(math.hypot((b[0] - a[0]) * KX, (b[1] - a[1]) * KY) for a, b in zip(linha, linha[1:])) < minimo:
+                continue
+            idx = sorted(fixos)
+            pts = [linha[0]]
+            for i, j in zip(idx, idx[1:]):
+                pts += _dp(linha[i:j + 1], tol)[1:]
+            q = [(round(y * 1e5), round(x * 1e5)) for x, y in pts]
+            q = q[:1] + [p for a, p in zip(q, q[1:]) if p != a]
+            if len(q) < 2:
+                continue
+            s = ''
+            for la, lo in q:
+                s += _poli(la - la0) + _poli(lo - lo0)
+                la0, lo0 = la, lo
+            sec.append(s)
+            todos += q
+        partes.append(' '.join(sec))
+    return '\n'.join(partes), todos
+
+
+def rede_vizinho(segs):
+    """{'T1': [((lon, lat), (lon, lat)), ...], 'T2': ..., 'T3': ...} → ([texto do .1, do .2, do .3], [sul, oeste, norte,
+    leste]); sem rede, (None, None)."""
+    grau = {}
+    for p, q in {(min(p, q), max(p, q)) for ss in segs.values() for p, q in ss if p != q}:
+        grau[p] = grau.get(p, 0) + 1
+        grau[q] = grau.get(q, 0) + 1
+    fixos = {p for p, g in grau.items() if g != 2}
+    tr = {c: _trilhas(segs.get(c, ()), fixos) for c in CLASSES}
+    grosso, fino = VIZ_TOL
+    t1, _ = _codifica([tr['T1'], tr['T2'], []], grosso, VIZ_MIN)
+    t2, _ = _codifica([[], [], tr['T3']], grosso, VIZ_MIN)
+    t3, pts = _codifica([tr['T1'], tr['T2'], tr['T3']], fino, 0)
+    if not pts:
+        return None, None
+    las, los = [p[0] for p in pts], [p[1] for p in pts]
+    return [t1, t2, t3], [min(las) / 1e5, min(los) / 1e5, max(las) / 1e5, max(los) / 1e5]
+
+
+def _por_classe(trechos, vaos, lonlat):
+    cl = [classe(t['nome']) if classe(t['nome']) in CLASSES else 'T3' for t in trechos]
+    segs = {}
+    for v in vaos:
+        a, b = ((v[0], v[1]), (v[2], v[3])) if lonlat else ((v[1], v[0]), (v[3], v[2]))
+        segs.setdefault(cl[v[4]], []).append((a, b))
+    return segs
+
+
+def vizinhos_dos_dados(dados):
+    """A rede de cada alimentador publicado (dados/alimentadores/<AL>.json, vãos em [lon, lat])."""
+    for c in dados:
+        if c['validacao']['status'] != 'falha':
+            yield c['alimentador'], _por_classe(c['trechos'], c['vaos'], True)
+
+
+def vizinhos_das_paginas(saida):
+    """A rede de cada página de alimentador do site (alimentadores/<AL>/dados.js, vãos em [lat, lon])."""
+    for p in sorted((saida / 'alimentadores').glob('*/dados.js')):
+        if (p.parent / 'index.html').exists():
+            d = le_js(p)
+            if d and d.get('vaos'):
+                yield p.parent.name, _por_classe(d['trechos'], d['vaos'], False)
+
+
+def vizinhos_mapa(saida, redes, destino=None):
+    """Grava dados/vizinhos/ (em `destino`, se dado; senão em `saida`): os três arquivos de cada alimentador e o índice;
+    apaga os de alimentador que saiu. Só regrava o arquivo que mudou. Devolve o índice."""
+    pasta = Path(destino or saida) / 'dados' / 'vizinhos'
+    pasta.mkdir(parents=True, exist_ok=True)
+    als, feitos = {}, set()
+    for al, segs in redes:
+        textos, caixa = rede_vizinho(segs)
+        if not textos:
+            continue
+        bs = [t.encode('utf-8') for t in textos]
+        for k, b in enumerate(bs, 1):
+            arq = pasta / f'{al}.{k}.txt'
+            if not arq.exists() or arq.read_bytes() != b:
+                arq.write_bytes(b)
+            feitos.add(arq.name)
+        als[al] = [*caixa, hashlib.sha1(b'\0'.join(bs)).hexdigest()[:8], *map(len, bs)]
+    for p in pasta.iterdir():
+        if VIZ_ARQ.match(p.name) and p.name not in feitos:
+            p.unlink()
+    grava_json(pasta / 'indice.json', dict(v=1, als=dict(sorted(als.items()))))
+    return als
+
+
+def resumo_vizinhos(als):
+    """Texto curto: alimentadores, tamanho total (grosso e fino) e o maior arquivo."""
+    tam = lambda b: f'{b / 1e6:.1f} MB'.replace('.', ',') if b >= 1e6 else f'{math.ceil(b / 1e3)} KB'
+    g = sum(a[5] + a[6] for a in als.values())
+    f = sum(a[7] for a in als.values())
+    n, al, k = max(((a[5 + k], al, k + 1) for al, a in als.items() for k in range(3)), default=(0, '-', 0))
+    return (f'{len(als)} alimentador(es) · {tam(g + f)} (grosso {tam(g)}, fino {tam(f)}) · '
+            f'maior arquivo: {al}.{k}.txt com {tam(n)}')
 
 
 def polo_principal(c, polo_de):
@@ -1620,6 +1788,7 @@ def interface(saida, malha=None):
                            rodape=f'<p>Malha do IBGE, amostra a cada {PASSO_M}&nbsp;m; mínimo de {MIN_M}&nbsp;m.</p>'), encoding='utf-8')
     vb = mapa_e_ranking(saida, dados, man)
     redes_mapa(saida, dados)
+    vizinhos_mapa(saida, vizinhos_dos_dados(dados))
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
     indice_uc(saida, indice_ativos(saida, dados), {c['alimentador'] for c in dados if c['validacao']['status'] != 'falha'})
@@ -1848,6 +2017,9 @@ def main(argv=None):
     g.add_argument('--validar', action='store_true', help='só confere o que já foi gerado')
     g.add_argument('--so-interface', action='store_true', help='só refaz páginas, índice e relatório')
     g.add_argument('--comparar', help='compara com as páginas publicadas nesta pasta (clone do gh-pages)')
+    g.add_argument('--vizinhos', nargs='?', const='', metavar='DESTINO',
+                   help='só refaz dados/vizinhos/ (rede dos alimentadores vizinhos) a partir dos dados.js das páginas de '
+                        '--saida; grava em DESTINO/dados/vizinhos/ (sem DESTINO, na própria --saida)')
     a = ap.parse_args(argv)
     saida = Path(a.saida)
     if a.validar:
@@ -1858,6 +2030,9 @@ def main(argv=None):
         return 0 if validar_saida(saida) else 1
     if a.comparar:
         comparar(saida, a.comparar)
+        return 0
+    if a.vizinhos is not None:
+        print('vizinhos: ' + resumo_vizinhos(vizinhos_mapa(saida, vizinhos_das_paginas(saida), a.vizinhos or None)))
         return 0
     fontes = Fontes(a)
     malha = carregar_malha(a.malha, a.cache)

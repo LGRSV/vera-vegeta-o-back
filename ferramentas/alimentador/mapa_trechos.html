@@ -299,10 +299,16 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 .lb{font:700 13px/1 var(--f-display);color:#fff;background:rgba(0,0,0,.66);border-left:4px solid var(--c);padding:4px 7px;border-radius:3px;white-space:nowrap;cursor:pointer}
 .lb.fus{font-size:11.5px;padding:3px 5px;border-left-width:3px}
 #map.longe .lb.fus{display:none}
-#map.longe .lb.fus.sel,#map.longe .lb.fus.oc,#map.longe .lb.fus.fo-l{display:block}
-#map.longe .leaflet-marker-icon:has(>.lb.fus:not(.sel):not(.oc):not(.fo-l)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
+#map.longe .lb.fus.sel,#map.longe .lb.fus.oc,#map.longe .lb.fus.fo-l,#map.longe .lb.fus.fixo{display:block}
+#map.longe .leaflet-marker-icon:has(>.lb.fus:not(.sel):not(.oc):not(.fo-l):not(.fixo)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
 .lb.sel{outline:2px solid #fde047}
 .lb .n{display:inline-block;margin-left:5px;padding:0 5px;border-radius:8px;background:#b91c1c;color:#fff;font:700 11px/16px var(--f-mono)}
+/* NAE desligado (botão NAE do Menu Camadas, só no site): a rede como ela é, sem os rótulos dos trechos. Ficam o do trecho
+   escolhido, os que outra camada completa (.fo: Queimadas) e os fixos (.fixo: os trechos escolhidos no modo Limpeza de
+   faixa). display:none no ícone: fora do Tab e da conta de cada quadro do zoom */
+#map.sem-nae .leaflet-marker-icon:has(>.lb:not(.sel):not(.fo):not(.fixo)){display:none}
+.ctl-card .ctl-nae{background-image:linear-gradient(90deg,var(--alerta),var(--alerta));background-repeat:no-repeat;background-size:100% 3px;background-position:0 100%}
+.ctl-card .ctl-nae[aria-pressed=false]{opacity:.6;text-decoration:line-through;background-image:none;box-shadow:inset 0 -3px 0 #5a636a}
 /* chaves de início e fim do trecho selecionado */
 .ie{display:inline-flex;gap:5px;align-items:center;transform:translate(-50%,calc(-100% - 9px));font:600 12px/1 var(--f-mono);background:#fbfbf9;color:#1b2024;border:2px solid #1b2024;border-radius:4px;padding:3px 6px 3px 3px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.5)}
 .ie em{font-style:normal;font-size:10.5px;letter-spacing:.05em;padding:2px 4px;border-radius:2px;color:#fff;background:#15803d}
@@ -573,7 +579,7 @@ const raizAl = location.pathname.includes('/alimentadores/') ? '../' : null;   /
 function listaOc(os, comTrecho) {
   return `<ul class="oc">${os.map(o => `<li class="${o.col ? 'col' : ''}"><span class="q">${comTrecho ? `<b>${esc(o.trecho)}</b> · ` : ''}${esc(o.dia)} · ${!o.col ? '1 consumidor · trafo ' + esc(o.ativo) : esc(ABR[o.abr] || o.abr) + ' ' + esc(o.prob || o.ativo) + (o.prob && o.prob !== o.ativo ? ' · trafo ' + esc(o.ativo) : '')}</span><br>` +
     `${esc(o.sub || o.causa)}${o.prog ? ' · <b>programada</b>' : ''} · ${o.cons} cons. · ${o.dur} min` +
-    (o.lonlat && map ? ` · <button type="button" class="ir" data-ll="${o.lonlat[1]},${o.lonlat[0]}">ver no mapa</button>` : '') +
+    (o.lonlat && map ? ` · <button type="button" class="ir" data-ll="${o.lonlat[1]},${o.lonlat[0]}" data-at="${esc(o.ativo)}">ver no mapa</button>` : '') +
     // DJ e religador: o ativo é a proteção que abriu, não o ponto do defeito (regra aprovada: marca, não tira da conta)
     (o.abr === 'DJ' ? '<br><b>atuou o disjuntor</b>: o defeito está em algum ponto depois dele' : o.abr === 'RL' ? '<br><b>atuou o religador</b>: o defeito está em algum ponto depois dele' : '') +
     (o.de ? `<br><b>registrada no ${raizAl ? `<a href="${raizAl}${encodeURIComponent(o.de)}/">${esc(o.de)}</a>` : esc(o.de)}</b> (a Crítica conta lá; o ativo hoje fica aqui)` : '') +
@@ -590,8 +596,14 @@ function blocoNae(nome, l) {
 function atualizaNae() {
   desenhaLista($('busca').value);
   multi.length ? detalheVarios(multi) : sel ? detalhe(TR[sel]) : resumo();
-  marcaNae(multi.length ? multi : sel ? [sel] : null);
+  marcaNaeVis();
   refazRotulos();
+}
+// marcadores de NAE dos trechos escolhidos que estão à vista: com a classe escondida (T1 T2 T3) a seleção fica, sem eles
+// no mapa (como em mostraClasses)
+function marcaNaeVis() {
+  const v = (multi.length ? multi : sel ? [sel] : []).filter(n => visivel[classeDe(n)]);
+  marcaNae(v.length ? v : null);
 }
 // rótulo do trecho: o nome, a NAE (bolinha vermelha) e o que outra camada põe ao lado (window.__rotuloExtra(nome): HTML ou
 // ''; a Queimadas, assets/focos.js, põe a bolinha laranja com os focos). Com algo a mais o rótulo fica por cima dos rótulos
@@ -600,12 +612,46 @@ function atualizaNae() {
 const extraRot = n => (window.__rotuloExtra ? window.__rotuloExtra(n) || '' : '');
 // (data-z no HTML a mais: quanto ele sobe entre os rótulos com algo a mais; a Queimadas põe os de mais focos por cima)
 const zRot = (t, x) => x ? 960 + Math.min(1000, +((/data-z="(\d+)"/.exec(x) || [])[1] || 0)) : t.tipo === 'fusivel' ? 0 : 400;
+// NAE no mapa (botão NAE, o 1º do Menu Camadas e da fileira do alto; só no site): desligado, o mapa mostra a rede como ela
+// é: somem os rótulos dos trechos (o nome e a bolinha vermelha: CSS #map.sem-nae), os T3 que aparecem de longe só por
+// terem NAE e os marcadores de NAE nos ativos (marcaNae). Ficam as linhas, os equipamentos e o rótulo do trecho escolhido
+// (sem a bolinha), e a Queimadas segue pondo os dela; o painel não muda. Começa desligado e lembra a escolha (localStorage);
+// fora do site (sem o Menu) fica ligado, como sempre foi
+const NAE_SITE = document.documentElement.classList.contains('al-site');
+let naeMapa = !NAE_SITE || (() => { try { return localStorage.getItem('nae-mapa') === '1'; } catch (e) { return false; } })();
+const contaMapa = () => naeMapa ? contagem() : {};       // a NAE dos rótulos do mapa: nenhuma com o botão desligado
+// rótulo fixo: com o NAE desligado, o nome dos trechos escolhidos no modo Limpeza de faixa aparece (sem a bolinha), como o
+// do trecho escolhido do jeito normal (modo-faixa-rascunho.js define window.__rotuloFixo e chama window.__refazRotulos);
+// com o NAE ligado nada muda
+const rotFixo = n => !naeMapa && !!(window.__rotuloFixo && window.__rotuloFixo(n));
+$('map').classList.toggle('sem-nae', !naeMapa);
+let btNae = null;
+function ligaNae(on) {
+  naeMapa = on;
+  try { localStorage.setItem('nae-mapa', on ? '1' : '0'); } catch (e) { /* sem localStorage: vale só nesta página */ }
+  $('map').classList.toggle('sem-nae', !on);
+  if (btNae) btNae.setAttribute('aria-pressed', String(on));
+  marcaNaeVis();
+  refazRotulos();
+}
+// extras.js chama ao montar o Menu, antes de as outras camadas (Faixa, Inspeção…) porem os seus botões
+window.__naeBotao = l2 => {
+  if (btNae || !map || !l2) return;
+  const c = document.createElement('div');
+  c.className = 'ctl-card';
+  c.innerHTML = `<button type="button" class="ctl-nae" aria-pressed="${naeMapa}" title="Mostrar ou esconder os rótulos dos trechos e a NAE no mapa">NAE</button>`;
+  l2.prepend(c);
+  btNae = c.firstChild;
+  btNae.addEventListener('click', () => ligaNae(!naeMapa));
+};
+// sem o botão (extras.js antigo ainda no cache do navegador): a NAE fica ligada, como antes
+if (NAE_SITE) AL.dom.then(() => { if (!btNae && !naeMapa && map) { naeMapa = true; $('map').classList.remove('sem-nae'); refazRotulos(); } });
 // a camada que mudou o que põe nos rótulos chama window.__refazRotulos(): o conteúdo, a ordem e os T3 que aparecem
 function refazRotulos() {
-  const c = contagem();
+  const c = contaMapa();
   Object.entries(rotulos).forEach(([n, m]) => {
     const el = m.getElement(), x = extraRot(n);
-    if (el) { el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : '') + x; el.firstChild.classList.toggle('oc', !!c[n]); el.firstChild.classList.toggle('fo', !!x); el.firstChild.classList.toggle('fo-l', x.includes('data-longe')); }
+    if (el) { el.firstChild.innerHTML = esc(n) + (c[n] ? `<span class="n">${c[n]}</span>` : '') + x; el.firstChild.classList.toggle('oc', !!c[n]); el.firstChild.classList.toggle('fo', !!x); el.firstChild.classList.toggle('fo-l', x.includes('data-longe')); el.firstChild.classList.toggle('fixo', rotFixo(n)); }
     if (TR[n]) m.setZIndexOffset(zRot(TR[n], x));
   });
   rotulosT3();
@@ -910,7 +956,13 @@ $('det').addEventListener('click', e => {
   const v = e.target.closest('[data-ll]');               // ocorrência da lista: vai até o ativo no mapa
   if (v) {
     if (!map) return;
-    map.setView(v.dataset.ll.split(',').map(Number), 18);
+    const ll = v.dataset.ll.split(',').map(Number);
+    map.setView(ll, 18);
+    // NAE desligado: sem o marcador vermelho no ativo, um pino (o do ativo da busca) mostra qual é; sai na próxima escolha,
+    // ao tocar no mapa e ao ligar o NAE (marcaNae)
+    if (pinoAt) { pinoAt.remove(); pinoAt = null; }        // um pino só: o novo "ver no mapa" tira o anterior
+    if (!naeMapa) pinoAt = L.marker(ll, {interactive: false, keyboard: false, zIndexOffset: 1000,
+      icon: L.divIcon({className: '', iconSize: null, html: `<div class="ie ativo"><em>ATIVO</em>${esc(v.dataset.at || '')}</div>`})}).addTo(map);
     const r = $('map').getBoundingClientRect();          // o mapa fica fixo no alto: só rola se ele estiver fora da tela
     if (r.bottom < 0 || r.top > innerHeight) $('map').scrollIntoView({block: 'nearest'});
     return;
@@ -1002,10 +1054,11 @@ try {
 } catch (e) { /* fica como propriedade comum */ }
 function avisaSel(nomes) { const f = window.__onSel; if (f) f(nomes); }
 // ativos com NAE nos trechos escolhidos: um marcador vermelho por ativo, com quantas NAE teve (mês e filtro da tela)
-let naeMarcas = null;
+let naeMarcas = null, pinoAt = null;                   // pinoAt: o ativo do "ver no mapa" com o NAE desligado
 function marcaNae(nomes) {
   if (naeMarcas) { naeMarcas.remove(); naeMarcas = null; }
-  if (!map || !NAE || !nomes) return;
+  if (pinoAt) { pinoAt.remove(); pinoAt = null; }
+  if (!map || !NAE || !nomes || !naeMapa) return;          // NAE desligado no mapa: sem os marcadores
   const g = {};
   doTrecho().forEach(o => { if (o.lonlat && nomes.includes(o.trecho)) { const k = o.ativo + '|' + o.trecho; (g[k] = g[k] || {o, n: 0, de: new Set()}).n++; if (o.de) g[k].de.add(o.de); } });
   naeMarcas = L.layerGroup(Object.values(g).map(({o, n, de}) => L.marker([o.lonlat[1], o.lonlat[0]], {zIndexOffset: 950, keyboard: false,
@@ -1044,7 +1097,7 @@ function vaoPerto(vs, ll) {
 // rótulos: T1/T2 sempre; T3 só de perto e só os que estão na tela (mais leve em alimentador grande)
 function rotulo(t, c) {
   const x = extraRot(t.nome);
-  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${escolhido(t.nome) ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}${x ? ' fo' : ''}${x.includes('data-longe') ? ' fo-l' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}${x}</div>`}), zIndexOffset: zRot(t, x)})
+  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${escolhido(t.nome) ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}${x ? ' fo' : ''}${x.includes('data-longe') ? ' fo-l' : ''}${rotFixo(t.nome) ? ' fixo' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}${x}</div>`}), zIndexOffset: zRot(t, x)})
     .bindTooltip(`${esc(t.inicio)} → ${esc(fimTxt(t))}`, {direction: 'top'})
     .on('click', e => { L.DomEvent.stopPropagation(e); clique(t.nome, e.originalEvent, false); }).addTo(map);
   rotulos[t.nome] = m;
@@ -1054,7 +1107,7 @@ function mostraClasses() {
   Object.entries(linhas).forEach(([n, [l]]) => { const v = visivel[classeDe(n)]; if (v && !map.hasLayer(l)) l.addTo(map); else if (!v && map.hasLayer(l)) l.remove(); });
   D.trechos.forEach(t => { if (t.tipo === 'fusivel') return;
     const v = visivel[classeDe(t.nome)];
-    if (v && !rotulos[t.nome]) rotulo(t, contagem()); else if (!v && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; } });
+    if (v && !rotulos[t.nome]) rotulo(t, contaMapa()); else if (!v && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; } });
   if (visivel.T3 && !map.hasLayer(fusMarcas)) fusMarcas.addTo(map); else if (!visivel.T3) fusMarcas.remove();
   rotulosT3();
   const esc_ = (multi.length ? multi : sel ? [sel] : []), vis = esc_.filter(n => visivel[classeDe(n)]);
@@ -1066,10 +1119,10 @@ function mostraClasses() {
 }
 function rotulosT3() {
   if (!map) return;
-  const perto = map.getZoom() >= 15.5, b = map.getBounds().pad(0.2), c = contagem();
+  const perto = map.getZoom() >= 15.5, b = map.getBounds().pad(0.2), c = contaMapa();
   D.trechos.forEach(t => {
     if (t.tipo !== 'fusivel') return;
-    const ver = visivel.T3 && (escolhido(t.nome) || c[t.nome] || extraRot(t.nome) || (perto && b.contains(t.rotulo)));
+    const ver = visivel.T3 && (escolhido(t.nome) || c[t.nome] || extraRot(t.nome) || rotFixo(t.nome) || (perto && b.contains(t.rotulo)));
     if (ver && !rotulos[t.nome]) rotulo(t, c);
     else if (!ver && rotulos[t.nome]) { rotulos[t.nome].remove(); delete rotulos[t.nome]; }
   });
@@ -1327,18 +1380,18 @@ if (typeof L === 'undefined') {
         L.marker([a.lat, a.lon], {icon: L.divIcon({className: '', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500})
           .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'}).addTo(map);
       });
-      let c = contagem();
+      let c = contaMapa();
       D.trechos.forEach(t => { if (t.tipo !== 'fusivel' && visivel[classeDe(t.nome)] && !rotulos[t.nome]) rotulo(t, c); });
       // até aqui tudo saiu em sequência, na frente dos scripts seguintes; o quadro que vem agora (pedido no começo deste
       // script, por isso também na frente deles) mostra o tronco. Daqui em diante, um pouco por quadro
       await AL.cede();
       // rótulos de T3: os mesmos que rotulosT3() põe (escolhido, com NAE, ou de perto e na tela)
       let perto, b;
-      const estado = () => { c = contagem(); perto = map.getZoom() >= 15.5; b = map.getBounds().pad(0.2); };
+      const estado = () => { c = contaMapa(); perto = map.getZoom() >= 15.5; b = map.getBounds().pad(0.2); };
       estado();
       for (const t of D.trechos) {
         if (t.tipo !== 'fusivel') continue;
-        if (visivel.T3 && !rotulos[t.nome] && (escolhido(t.nome) || c[t.nome] || extraRot(t.nome) || (perto && b.contains(t.rotulo)))) rotulo(t, c);
+        if (visivel.T3 && !rotulos[t.nome] && (escolhido(t.nome) || c[t.nome] || extraRot(t.nome) || rotFixo(t.nome) || (perto && b.contains(t.rotulo)))) rotulo(t, c);
         if (AL.cheia()) { await AL.cede(); estado(); }
       }
       await comeco(AL.cede);

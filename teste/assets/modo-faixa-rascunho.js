@@ -17,6 +17,11 @@
 // Atalhos: Ctrl+M liga/desliga · L leve · P pesada · B apagar · Ctrl+Z desfaz · Esc tira o poste inicial (de novo: solta a
 // ferramenta; de novo: sai). Abre em tela cheia (PC e celular) e só existe nela: sair da tela cheia sai do modo (o
 // escolhido e o marcado ficam guardados). Celular: tocar no poste inicial e no final; 2 dedos dão zoom.
+// Faixa a partir do ativo (pedido do usuário): a ferramenta "Do ativo" (A) marca do ativo até o fim do trecho dele — a rede a
+// jusante, no mesmo trecho (com as derivações dele), parando nos religadores e fusíveis que abrem outros trechos. Clicar
+// no ativo (DJ, religador, fusível, chave, transformador) ou num ponto da linha, ou digitar o código ou o poste no campo ao
+// lado; com Leve ou Pesada escolhido marca na hora, sem, a faixa fica tracejada (pendente) esperando L ou P. A busca do
+// olho (lupa-painel.js) abre o modo assim pelo "Faixa a partir daqui"; ?modo=faixa&de=<código> também.
 // Roda depois de alimentador.js (window.__map, window.D). Os km são a soma dos vãos (D.vaos[i][8], metros).
 (function () {
   const map = window.__map, D = window.D, L = window.L, box = document.querySelector('.mapbox');
@@ -121,7 +126,7 @@
       L.DomUtil.setPosition(c, m.containerPointToLayerPoint([-F, -F]));
       c.width = w * r; c.height = h * r; c.style.width = w + 'px'; c.style.height = h + 'px';
       const z = m.getZoom();
-      if (!ativo || (ferr === null && !arrasto) || !sel.size || z < 13) return;   // longe demais: os postes viram uma linha só
+      if (!ativo || (ferr === null && !doAt && !arrasto) || !sel.size || z < 13) return;   // longe demais: os postes viram uma linha só
       const g = c.getContext('2d'), s = 256 * Math.pow(2, z), o = m.getPixelBounds().min, R = z >= 17 ? 3.5 : z >= 15 ? 3 : 2.5, Q = 2 * R + 3, usado = new Set();
       g.setTransform(r, 0, 0, r, 0, 0);
       // pontinhos no meio dos vãos (menores e mais claros que os postes), nos pontos onde o clique e as alças param
@@ -156,10 +161,23 @@
   const mIni = L.circleMarker([0, 0], Object.assign({}, cima, { radius: 8, color: '#fff', weight: 3, opacity: 0, fillOpacity: 0 }));
   const mSob = L.circleMarker([0, 0], Object.assign({}, cima, { radius: 10, color: '#fff', weight: 2.5, opacity: 0, fillOpacity: 0 }));
   const tIni = L.tooltip({ permanent: true, direction: 'top', offset: [0, -11], className: 'fx-ini-tt', interactive: false }).setContent('Início');
+  // a faixa de um ativo à espera de Leve ou Pesada: tracejada em branco, com o começo e o km
+  const lPendF = L.polyline([], Object.assign({}, cima, { color: '#0b1220', weight: 10, opacity: .8 }));
+  const lPend = L.polyline([], Object.assign({}, cima, { color: '#fff', weight: 5, opacity: 1, dashArray: '9 7', lineCap: 'butt' }));
+  const mPend = L.circleMarker([0, 0], Object.assign({}, cima, { radius: 8, color: '#0b1220', weight: 3, fillColor: '#fff', opacity: 0, fillOpacity: 0 }));
+  const tPend = L.tooltip({ permanent: true, direction: 'top', offset: [0, -11], className: 'fx-ini-tt', interactive: false });
+  function desenhaPend() {
+    const on = ativo && !!pend;
+    lPendF.setLatLngs(on ? pend.segs : []); lPend.setLatLngs(on ? pend.segs : []);
+    if (!on) { mPend.setStyle({ opacity: 0, fillOpacity: 0 }); tPend.remove(); return; }
+    const ll = llPt(pend.P);
+    mPend.setLatLng(ll).setStyle({ opacity: 1, fillOpacity: 1 });
+    tPend.setLatLng(ll).setContent(`${pend.cod || 'Ponto'} · ${metros(pend.m)}`); if (!map.hasLayer(tPend)) tPend.addTo(map);
+  }
   // alças nas pontas dos pedaços marcados (arrastar encurta ou estica): marcadores de verdade, que recebem o ponteiro
   map.createPane('faixa-a').style.zIndex = 660;                 // acima dos ícones de chave/DJ (600) e dos rótulos (650)
   const lAlcas = L.layerGroup();
-  const camadas = [lHover, lCas, lSem, lLeve, lPes, lPostes, lPrevF, lPrev, mIni, mSob, lAlcas];
+  const camadas = [lHover, lCas, lSem, lLeve, lPes, lPostes, lPendF, lPend, lPrevF, lPrev, mPend, mIni, mSob, lAlcas];
   const corF = () => ferr === 'apagar' ? '#94a3b8' : COR[ALVO[ferr]] || '#fff';
   let quadro = 0;
   const agenda = () => { if (!quadro) quadro = requestAnimationFrame(() => { quadro = 0; desenha(); ui(); }); };
@@ -211,11 +229,17 @@
   }
 
   // ---------- escolha dos trechos ----------
+  // nome dos trechos escolhidos no mapa: com o NAE desligado (sem os rótulos dos trechos) alimentador.js mostra o rótulo
+  // deles (window.__rotuloFixo), como o do trecho escolhido do jeito normal; com o NAE ligado nada muda
+  const idxDe = new Map(T.map((t, i) => [t.nome, i]));
+  window.__rotuloFixo = n => ativo && sel.has(idxDe.get(n));
+  const rotulosSel = () => { if (mc.classList.contains('sem-nae') && window.__refazRotulos) window.__refazRotulos(); };
   function muda() {
     selV = []; [...sel].sort((a, b) => a - b).forEach(t => vaosDe[t].forEach(i => selV.push(i))); selP = null;
     G = null; arv = null; if (ini !== null && !sel.has(V[ini.i][4])) ini = null;   // o início saiu da escolha (desfazer)
-    if (!sel.size) ferr = null;
-    aplicaFerr(); agenda();
+    if (pend && !sel.has(pend.t)) { pend = null; desenhaPend(); }
+    if (!sel.size && !doAt) ferr = null;                           // com o "Do ativo" o Leve/Pesada escolhido fica (o trecho entra sozinho)
+    aplicaFerr(); agenda(); rotulosSel();
   }
 
   // ---------- caminho entre dois postes, só pelos vãos escolhidos ----------
@@ -227,8 +251,9 @@
   };
   // Dijkstra a partir de um ou mais postes com distância inicial (peso = metros do vão): distância e de onde veio (poste,
   // vão) cada poste alcançado. Um ponto no meio do vão sai pelas duas pontas do vão, cada uma com o pedaço até ela.
-  function arvoreDe(fontes, o) {
-    const g = grafo(), dist = new Map(), prev = new Map(), h = [];
+  // gg: outro grafo (o de um trecho só, na faixa a partir do ativo); sem ele, o dos trechos escolhidos
+  function arvoreDe(fontes, o, gg) {
+    const g = gg || grafo(), dist = new Map(), prev = new Map(), h = [];
     const pop = () => {
       const top = h[0], fim = h.pop();
       if (h.length) { h[0] = fim; for (let i = 0; ;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < h.length && h[l][0] < h[m][0]) m = l; if (r < h.length && h[r][0] < h[m][0]) m = r; if (m === i) break; [h[i], h[m]] = [h[m], h[i]]; i = m; } }
@@ -268,15 +293,20 @@
     if (rec.size) { guarda({ m: rec }); agenda(); }
     return rec.size;
   }
-  // desfazer: cada alteração é um item — um caminho marcado ({m: pedaço → marca de antes}) ou um trecho escolhido/tirado ({t})
+  // desfazer: cada alteração é um item — um caminho marcado ({m: pedaço → marca de antes}), um trecho escolhido/tirado ({t})
+  // ou a faixa de um ativo com o trecho dela, que entrou na escolha junto ({m, t})
   const guarda = a => { undo.push(a); if (undo.length > 500) undo.shift(); redo.length = 0; };
   function troca(de, para) {
     const a = de.pop(); if (!a) return false;
-    if (a.m) { const volta = new Map(); a.m.forEach((antes, q) => { volta.set(q, marca[q]); marca[q] = antes; }); para.push({ m: volta }); agenda(); }
-    else { sel.has(a.t) ? sel.delete(a.t) : sel.add(a.t); para.push(a); muda(); }   // escolher/tirar desfaz a si mesmo
+    const b = {};
+    if (a.m) { const volta = new Map(); a.m.forEach((antes, q) => { volta.set(q, marca[q]); marca[q] = antes; }); b.m = volta; }
+    if (a.t !== undefined) { sel.has(a.t) ? sel.delete(a.t) : sel.add(a.t); b.t = a.t; }   // escolher/tirar desfaz a si mesmo
+    para.push(b);
+    if (b.t !== undefined) muda(); else agenda();
     return true;
   }
-  const desfaz = () => ini !== null ? (tiraIni(), true) : troca(undo, redo), refaz = () => troca(redo, undo);   // poste inicial à espera: desfazer tira só ele
+  // faixa pendente ou poste inicial à espera: desfazer tira só ele
+  const desfaz = () => pend ? (tiraPend(), true) : ini !== null ? (tiraIni(), true) : troca(undo, redo), refaz = () => { tiraPend(); return troca(redo, undo); };
   function totais() {
     let le = 0, pe = 0, s = 0;
     for (const i of selV) {
@@ -286,6 +316,229 @@
     return { leve: le, pesada: pe, falta: s };
   }
 
+  // ---------- faixa a partir do ativo (ferramenta "Do ativo", A) ----------
+  // Do ativo até o fim do trecho dele: os vãos a jusante (longe do início do trecho, inicio_poste) dentro do mesmo trecho,
+  // pela árvore do trecho; os trechos filhos (que começam nos religadores e fusíveis do caminho) não entram. Ativo que abre
+  // um trecho (DJ, religador, fusível, chave 02, trip saver) vale o trecho que começa nele (o trecho todo); chave,
+  // transformador ou poste no meio: do poste dele para jusante; um ponto no meio do vão: dele, com o resto do vão.
+  // doAt: a ferramenta ligada (Leve, Pesada ou nenhum escolhido); pend: a faixa à espera de Leve ou Pesada; sobA: o ativo
+  // (ou ponto) sob o mouse. Um ativo achado é {P: ponto da linha onde a faixa começa, t: trecho, cod, nome}
+  let doAt = false, pend = null, sobA = null;
+  const norm = s => String(s ?? '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+  const TIPO = { DJ: 'Disjuntor', '79': 'Religador', '03': 'Fusível', '33': 'Fusível', SEC: 'Fusível', FTR: 'Fusível', '02': 'Chave',
+    '40': 'Trip saver', '41': 'Trip saver', '88': 'Chave', '80': 'Chave faca', Capacitor: 'Banco de capacitor', Regulador: 'Regulador' };
+  const nomeDe = (tipo, cod) => /^DJ\b/.test(cod) ? cod : `${tipo} ${cod}`;
+  // árvore de cada trecho a partir do início dele (montada na 1ª vez que se pede): distância (m) e vão de chegada de cada
+  // poste, filhos de cada poste e os vãos fora da árvore (laço; não acontece nos dados de hoje)
+  const arvT = new Map();
+  function arvTrecho(t) {
+    let a = arvT.get(t); if (a) return a;
+    const g = new Map(), ad = (x, y, i) => { let l = g.get(x); if (!l) g.set(x, l = []); l.push([y, i]); };
+    for (const i of vaosDe[t]) { ad(V[i][6], V[i][7], i); ad(V[i][7], V[i][6], i); }
+    a = { dist: new Map(), prev: new Map(), filhos: new Map(), raiz: null, fora: [] };
+    // a raiz é o poste do início; sem ele nos vãos (ou num pedaço solto do trecho), a ponta mais perto do ponto de início
+    const longe = p => { const ll = pos().get(p); return (ll[0] - T[t].inicio_lat) ** 2 + (ll[1] - T[t].inicio_lon) ** 2; };
+    let r = g.has(T[t].inicio_poste) ? T[t].inicio_poste : null;
+    while (a.dist.size < g.size) {
+      if (r === null) { let m = Infinity; for (const p of g.keys()) if (!a.dist.has(p)) { const d = longe(p); if (r === null || d < m) { m = d; r = p; } } }
+      const b = arvoreDe([[r, 0]], null, g);
+      b.dist.forEach((d, p) => a.dist.set(p, d)); b.prev.forEach((x, p) => a.prev.set(p, x));
+      if (a.raiz === null) a.raiz = r;
+      r = null;
+    }
+    a.prev.forEach(([u, i], w) => { let l = a.filhos.get(u); if (!l) a.filhos.set(u, l = []); l.push([w, i]); });
+    const naArv = i => (a.prev.get(V[i][6]) || [])[1] === i || (a.prev.get(V[i][7]) || [])[1] === i;
+    a.fora = vaosDe[t].filter(i => !naArv(i));
+    arvT.set(t, a); return a;
+  }
+  // a faixa de P ({i, q}) até o fim do trecho do vão i: pedaços (de P para longe), metros e segmentos para desenhar
+  function jusante(P) {
+    const t = V[P.i][4], a = arvTrecho(t), qs = [], segs = [];
+    let m = 0, raiz = posteDe(P);
+    const vao = (i, q0, q1) => {                                   // os pedaços do vão i de q0 a q1
+      if (q0 === q1) return;
+      qs.push(...pedacos(i, q0, q1));
+      m += Math.abs(q1 - q0) === np[i] ? V[i][8] : Math.abs(q1 - q0) * mpp(i);
+      segs.push([llPt({ i, q: q0 }), llPt({ i, q: q1 })]);
+    };
+    if (raiz === null) {                                            // no meio do vão: o resto dele, até a ponta de baixo
+      const v = V[P.i], p7 = a.prev.get(v[7]), p6 = a.prev.get(v[6]);
+      const desce7 = p7 && p7[1] === P.i ? true : p6 && p6[1] === P.i ? false : !(a.dist.get(v[7]) < a.dist.get(v[6]));
+      vao(P.i, P.q, desce7 ? np[P.i] : 0); raiz = desce7 ? v[7] : v[6];
+    }
+    const dentro = new Set([raiz]), pilha = [raiz];               // a árvore do trecho abaixo da raiz
+    while (pilha.length) {
+      const u = pilha.pop();
+      for (const [w, i] of a.filhos.get(u) || []) { const ida = V[i][6] === u; vao(i, ida ? 0 : np[i], ida ? np[i] : 0); dentro.add(w); pilha.push(w); }
+    }
+    for (const i of a.fora) if (i !== P.i && dentro.has(V[i][6]) && dentro.has(V[i][7])) vao(i, 0, np[i]);
+    return { qs, m, segs };
+  }
+  let cacheF = null;                                              // a última faixa calculada (o mouse parado no mesmo ponto)
+  const faixaDe = A => { const k = chavePt(A.P); if (!cacheF || cacheF.k !== k) cacheF = { k, f: jusante(A.P) }; return cacheF.f; };
+  // pontos da linha: o poste p num vão (do trecho t, se dado); o início do trecho t (o trecho todo)
+  let vaoDoPoste = null;
+  function ptDoPoste(p, t) {
+    if (!vaoDoPoste) { vaoDoPoste = new Map(); V.forEach((v, i) => [v[6], v[7]].forEach(s => { const k = String(s); let l = vaoDoPoste.get(k); if (!l) vaoDoPoste.set(k, l = []); l.push(i); })); }
+    const l = vaoDoPoste.get(String(p)); if (!l) return null;
+    const i = t === undefined ? l[0] : l.find(j => V[j][4] === t);
+    return i === undefined ? null : { i, q: String(V[i][6]) === String(p) ? 0 : np[i] };
+  }
+  const inicioDe = t => vaosDe[t].length ? ptDoPoste(arvTrecho(t).raiz, t) : null;
+  const iniPoste = new Map(); T.forEach((t, i) => { const k = String(t.inicio_poste); if (vaosDe[i].length && !iniPoste.has(k)) iniPoste.set(k, i); });
+  // num poste onde começa um trecho (a fronteira: o religador ou fusível que fica nele), vale o trecho que começa ali
+  const noPoste = P => { const p = posteDe(P), t = p === null ? undefined : iniPoste.get(String(p)); return t !== undefined && t !== V[P.i][4] ? inicioDe(t) || P : P; };
+  const poste = P => { const p = posteDe(P); return { P, t: V[P.i][4], cod: p === null ? '' : String(p), nome: p === null ? 'Ponto da linha' : 'Poste ' + p }; };
+  // o poste mais perto de ll (o ativo fica num poste): a ponta mais perto do vão mais perto, nos vãos do trecho t (ou em
+  // todos); d: distância até a linha (m)
+  function perto(ll, t) {
+    const k = Math.cos(ll[0] * Math.PI / 180), x = ll[1] * k, y = ll[0];
+    let b = -1, m = Infinity;
+    const testa = i => {
+      const v = V[i], ax = v[1] * k, ay = v[0], dx = v[3] * k - ax, dy = v[2] - ay, l = dx * dx + dy * dy;
+      let s = l ? ((x - ax) * dx + (y - ay) * dy) / l : 0; s = s < 0 ? 0 : s > 1 ? 1 : s;
+      const d = (ax + s * dx - x) ** 2 + (ay + s * dy - y) ** 2; if (d < m) { m = d; b = i; }
+    };
+    if (t >= 0) vaosDe[t].forEach(testa); else for (let i = 0; i < V.length; i++) testa(i);
+    if (b < 0) return null;
+    const v = V[b], d0 = (v[0] - y) ** 2 + ((v[1] - ll[1]) * k) ** 2, d1 = (v[2] - y) ** 2 + ((v[3] - ll[1]) * k) ** 2;
+    return { P: { i: b, q: d0 <= d1 ? 0 : np[b] }, d: Math.sqrt(m) * 111320 };
+  }
+  // ativos que o clique e o campo acham: DJ e religadores, fusíveis, chaves (chaves.js) e, com o ativos.js, transformadores
+  // e equipamentos. z: zoom em que o mapa mostra o ativo (o clique só pega os que estão à vista); t: trecho dele (-1: o do
+  // vão mais perto)
+  let ATV = null, atvComA = false, ATVz = null;
+  function ativosLista() {
+    if (ATV && (atvComA || !window.ATIVOS)) return ATV;
+    const tDe = n => n != null && idxDe.has(n) ? idxDe.get(n) : -1, A = window.ATIVOS, l = [];
+    const poe = (cod, tipo, lat, lon, t, z, p) => { if (cod != null && isFinite(lat) && isFinite(lon)) l.push({ cod: String(cod), k: norm(cod), tipo, ll: [+lat, +lon], t, z, p }); };
+    (D.principais || []).forEach(a => poe(a.nome, TIPO[a.t] || 'Religador', a.lat, a.lon, -1, 0, a.poste));
+    (D.fusiveis || []).forEach(a => poe(a.nome, TIPO[a.t] || 'Fusível', a.lat, a.lon, tDe(a.trecho), 0));
+    (window.CHAVES || []).forEach(c => poe(c[0], TIPO[c[1]] || 'Chave', c[2], c[3], -1, 15.5));
+    if (A) {
+      (A.tr || []).forEach(a => poe(a[0], 'Transformador', a[1], a[2], tDe(a[3]), 16));
+      (A.eq || []).forEach(a => poe(a[0], TIPO[a[1]] || 'Equipamento', a[2], a[3], tDe(a[4]), 16));
+    }
+    ATV = l; atvComA = !!A; ATVz = null;
+    return ATV;
+  }
+  // o ativos.js do alimentador (transformadores): o mesmo pedido da busca e do ativos-zoom.js (window.__ativosCarga)
+  const cargaAtivos = () => window.ATIVOS ? Promise.resolve(window.ATIVOS) : (window.__ativosCarga || (window.__ativosCarga = new Promise(res => {
+    const s = document.createElement('script');
+    s.src = 'ativos.js';
+    s.onload = () => res(window.ATIVOS || { tr: [], eq: [] });
+    s.onerror = () => res({ tr: [], eq: [] });
+    document.head.append(s);
+  })));
+  const doInicio = (t, cod, nome) => { const P = inicioDe(t); return P && { P, t, cod, nome }; };
+  function alvoDe(x) {                                           // ativo da lista → ponto da linha, uma vez só
+    if (x.A !== undefined) return x.A;
+    const ti = iniDe().get(x.k);
+    let P = null;
+    if (ti !== undefined && T[ti].inicio !== undefined && norm(T[ti].inicio) === x.k) P = inicioDe(ti);   // abre um trecho
+    else if (x.p != null) P = ptDoPoste(x.p) && noPoste(ptDoPoste(x.p));
+    else {
+      const r = perto(x.ll, x.t);
+      if (r && (x.t >= 0 || r.d <= 150)) {
+        P = r.P;
+        // chave sem trecho no poste onde começa outro trecho (a chave é da linha de cima): o vão do trecho pai, se houver
+        const p = posteDe(P), t = V[P.i][4], pai = T[t].pai != null ? idxDe.get(T[t].pai) : undefined;
+        if (x.t < 0 && p !== null && iniPoste.get(String(p)) === t && pai !== undefined) P = ptDoPoste(p, pai) || P;
+      }
+    }
+    return (x.A = P ? { P, t: V[P.i][4], cod: x.cod, nome: nomeDe(x.tipo, x.cod) } : null);
+  }
+  // código (ou nome) do início de cada trecho e nome do trecho → trecho
+  let iniDeT = null;
+  const iniDe = () => {
+    if (!iniDeT) { iniDeT = new Map(); T.forEach((t, i) => { if (vaosDe[i].length) [t.inicio, t.nome].forEach(c => { const k = norm(c); if (k && !iniDeT.has(k)) iniDeT.set(k, i); }); }); }
+    return iniDeT;
+  };
+  let postesN = null;
+  // código digitado, da busca ou do link (x: código ou {cod, ll, tr}) → ativo achado na rede, ou null
+  function acha(x) {
+    if (x == null) return null;
+    if (typeof x !== 'object') x = { cod: x };
+    const c = norm(x.cod);
+    if (c) {
+      for (const a of ativosLista()) if (a.k === c) { const A = alvoDe(a); if (A) return A; }
+      const ti = iniDe().get(c);
+      if (ti !== undefined) return norm(T[ti].nome) === c ? doInicio(ti, T[ti].nome, 'Início do ' + T[ti].nome) : doInicio(ti, String(T[ti].inicio), nomeDe(TIPO[T[ti].inicio_tipo] || 'Ativo', String(T[ti].inicio)));
+      if (!postesN) { postesN = new Map(); for (const p of pos().keys()) { const k = norm(p); if (k && !postesN.has(k)) postesN.set(k, p); } }
+      const p = postesN.get(c), P = p !== undefined && ptDoPoste(p);
+      if (P) return poste(noPoste(P));
+    }
+    const ll = Array.isArray(x.ll) ? x.ll.map(Number) : null;
+    if (ll && isFinite(ll[0]) && isFinite(ll[1])) {               // código desconhecido: o ponto dele (da busca), no trecho dado
+      const t = x.tr != null && idxDe.has(x.tr) ? idxDe.get(x.tr) : -1, r = perto(ll, t);
+      if (r && (t >= 0 || r.d <= 150)) return { P: r.P, t: V[r.P.i][4], cod: x.cod ? String(x.cod) : '', nome: x.cod ? 'Ativo ' + x.cod : 'Ponto da linha' };
+    }
+    return null;
+  }
+  // o ativo (ou ponto da linha) sob o ponteiro: o ícone do DJ/religador ou da chave; senão o ativo à vista mais perto (até
+  // R px); senão o ponto da linha (poste ou pontinho), em qualquer trecho
+  function alvoEm(e) {
+    const el = e.target && e.target.closest ? e.target.closest('.at, .ch-m') : null;
+    if (el) { const s = el.querySelector(el.classList.contains('at') ? 'span' : 'b'), A = s && acha(s.textContent); if (A) return A; }
+    const [x, y] = abs(e), R = toque(e) ? 18 : 10, z = map.getZoom(), lst = ativosLista();
+    if (!ATVz || ATVz.z !== z) {
+      const s = 256 * Math.pow(2, z), a = new Float64Array(lst.length * 2);
+      lst.forEach((o, k) => { a[2 * k] = mx(o.ll[1], s); a[2 * k + 1] = my(o.ll[0], s); });
+      ATVz = { z, a };
+    }
+    let b = null, m = R * R;
+    for (let k = 0; k < lst.length; k++) {
+      if (lst[k].z > z) continue;
+      const dx = ATVz.a[2 * k] - x, dy = ATVz.a[2 * k + 1] - y, d = dx * dx + dy * dy;
+      if (d <= m) { const A = alvoDe(lst[k]); if (A) { m = d; b = A; } }
+    }
+    if (b) return b;
+    const P = pontoEm(x, y, TOL(e), IMA(e), true);
+    return P && poste(noPoste(P));
+  }
+  // marca a faixa com alvo (1 leve, 2 pesada); novo: o trecho entra na escolha junto (uma alteração só para o desfazer)
+  function marcaFaixa(A, F, alvo, novo) {
+    const rec = new Map();
+    for (const q of F.qs) if (marca[q] !== alvo) { rec.set(q, marca[q]); marca[q] = alvo; }
+    if (novo) sel.add(A.t);
+    if (rec.size || novo) guarda(novo ? { m: rec, t: A.t } : { m: rec });
+    if (novo) muda(); else agenda();
+    aviso(rec.size ? `${alvo === 1 ? 'Leve' : 'Pesada'}: ${metros(F.m)}, de ${A.nome} até o fim do ${T[A.t].nome}.` : 'Essa faixa já estava assim.', 'var(--fg)');
+  }
+  // faixa pendente: o trecho dela entra na escolha (contorno branco) enquanto espera; cancelada, ele sai de novo
+  function poePend(A, F) {
+    const novo = pend && pend.t === A.t ? pend.novo : !sel.has(A.t);
+    if (pend && pend.t !== A.t) tiraPend();
+    pend = Object.assign({}, A, F, { novo });
+    if (novo && !sel.has(A.t)) { sel.add(A.t); muda(); }
+    desenhaPend(); calaAviso(); ui();
+  }
+  function tiraPend() {
+    if (!pend) return;
+    const p = pend; pend = null;
+    if (p.novo && sel.has(p.t)) { sel.delete(p.t); muda(); }
+    desenhaPend(); ui();
+  }
+  // usa o ativo: com Leve ou Pesada escolhido (e sem pendente: pede), marca; senão a faixa fica pendente
+  function usaAtivo(A, pendente) {
+    const F = faixaDe(A), alvo = pendente ? 0 : ALVO[ferr] || 0;
+    if (!F.qs.length) { aviso(`Nada a jusante: ${A.nome} fica no fim do ${T[A.t].nome}.`); return false; }
+    if (alvo) {
+      const mesmo = pend && pend.t === A.t, novo = mesmo ? pend.novo : !sel.has(A.t);
+      if (mesmo) pend.novo = false;                               // o trecho fica: entra na alteração da marca
+      tiraPend(); marcaFaixa(A, F, alvo, novo);
+    }
+    else poePend(A, F);
+    return true;
+  }
+  function setAt(on) {
+    if (on === doAt) return;
+    doAt = on;
+    // desligado sem trecho escolhido, o Leve/Pesada também sai (a regra do muda): senão o clique não escolhe trecho nenhum
+    if (on) { ini = null; if (ferr === 'apagar') ferr = null; cargaAtivos(); } else { tiraPend(); if (!sel.size) ferr = null; }
+    aplicaFerr();
+  }
+
   // ---------- interface: aviso no alto (escolher trechos) e o painel mínimo (depois de escolher) ----------
   const css = document.createElement('style');
   css.textContent = `
@@ -293,7 +546,14 @@
 .fx-pill span{overflow:hidden;text-overflow:ellipsis}
 .fx-pill [hidden]{display:none!important}
 .fx-pill button,.fx-dash button{font:inherit;color:inherit;cursor:pointer}
+.fx-pill .fx-pat{flex:none;display:flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1.5px solid var(--line);border-radius:999px;background:none;font-weight:700}
+.fx-pat:hover{background:var(--hover)}.fx-pat:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.fx-pat svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fx-pat small{font:600 11px var(--f-mono);color:var(--muted)}
+@media (pointer:coarse){.fx-pill .fx-pat{min-height:36px}}
+@media (max-width:700px){.fx-pill{left:68px;right:12px;transform:none;max-width:none}.fx-pill>span{flex:1;white-space:normal;line-height:1.25}}
 .fx-modo:not(.fx-tem) .fx-pill{display:flex}
+.fx-modo:has(>.barra-busca:not(.lp-fechada)) .fx-pill{display:none}
 .fx-dash{position:absolute;left:12px;bottom:28px;z-index:1002;width:min(320px,calc(100% - 24px));display:none;gap:8px;padding:10px;border-radius:16px;background:var(--paper);color:var(--fg);border:1px solid var(--line);box-shadow:var(--sh2);font:500 13px/1.3 var(--f-body)}
 .fx-modo.fx-tem .fx-dash{display:grid}
 .fx-modo .ctl-lgs,.fx-modo .tc-canto,.fx-modo .limp-chip{display:none!important}
@@ -314,6 +574,16 @@
 .fx-croqui{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent)!important;font-weight:700!important}
 .fx-croqui:disabled{opacity:.6;cursor:default}
 .fx-croqui svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fx-at{display:flex;gap:8px;min-width:0}
+.fx-dash .fx-atb{flex:none;display:flex;align-items:center;gap:6px;min-height:38px;padding:0 12px;border:1.5px solid var(--line);border-radius:12px;background:none;font-weight:700}
+.fx-atb:hover{background:var(--hover)}.fx-atb[aria-pressed=true]{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.fx-atb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fx-at input{flex:1;min-width:0;min-height:38px;box-sizing:border-box;padding:0 10px;border:1.5px solid var(--line);border-radius:12px;background:none;color:var(--fg);font:500 13px var(--f-mono)}
+.fx-at input::placeholder{color:var(--muted);font-family:var(--f-body)}.fx-at input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+@media (pointer:coarse){.fx-at input{font-size:16px}}
+.fx-tools.fx-pede .fx-t{border-color:var(--c)}
+@media (prefers-reduced-motion:no-preference){.fx-tools.fx-pede .fx-t{animation:fx-pede 1.4s ease-in-out infinite}}
+@keyframes fx-pede{50%{box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 40%,transparent)}}
 .fx-ferr .leaflet-tooltip:not(.fx-ini-tt){display:none!important}
 .fx-ferr .leaflet-interactive{cursor:inherit!important}
 .leaflet-tooltip.fx-ini-tt{padding:1px 7px;border:0;border-radius:6px;background:var(--c,#fff);color:#0b1220;font:700 11px var(--f-body);box-shadow:0 1px 4px #0009}
@@ -334,11 +604,16 @@
     desfaz: '<svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>',
     refaz: '<svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/></svg>',
     apagar: '<svg viewBox="0 0 24 24"><path d="M4 16l9-10 7 6-6 7H8zM10 19h10"/></svg>',
-    baixa: '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>'
+    baixa: '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+    ativo: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><path d="M9 12h11M16 8l4 4-4 4"/></svg>'
   };
   const pill = document.createElement('div');
   pill.className = 'fx-pill'; pill.setAttribute('role', 'status');
-  pill.innerHTML = `<span>${matchMedia('(pointer:coarse)').matches ? 'Toque nos trechos da faixa' : 'Clique nos trechos da limpeza de faixa'}</span>` +
+  // "Do ativo" também aqui: sem trecho escolhido o painel (com o botão dele) não aparece, e no celular não há a tecla A
+  const grosso = matchMedia('(pointer:coarse)').matches;
+  pill.innerHTML = `<span>${grosso ? 'Toque nos trechos' : 'Clique nos trechos da limpeza de faixa'}</span>` +
+    `<button type="button" class="fx-pat" id="fx-ativo2" aria-pressed="false" title="Do ativo (A): ${grosso ? 'toque' : 'clique'} num ativo ou num ponto da linha; a faixa vai dali até o fim do trecho">` +
+    `${SVG.ativo}Do ativo${grosso ? '' : ' <small>A</small>'}</button>` +
     `<button type="button" class="fx-ic" id="fx-refaz2" title="Refazer (Ctrl+Y)" aria-label="Refazer" hidden>${SVG.refaz}</button>` +
     `<button type="button" class="fx-ic fx-x" title="Sair (Esc)" aria-label="Sair do modo limpeza de faixa">✕</button>`;
   const dash = document.createElement('div');
@@ -351,6 +626,10 @@
 <div class="fx-tools">
   <button type="button" class="fx-t" data-f="leve" aria-pressed="false" style="--c:${COR[1]}" title="Leve (L): ligue e clique no início e no fim (poste ou qualquer ponto da linha)"><i></i><span>Leve</span><b id="fx-L">0,00 <small>km</small></b></button>
   <button type="button" class="fx-t" data-f="pesada" aria-pressed="false" style="--c:${COR[2]}" title="Pesada (P): ligue e clique no início e no fim (poste ou qualquer ponto da linha)"><i></i><span>Pesada</span><b id="fx-P">0,00 <small>km</small></b></button>
+</div>
+<div class="fx-at">
+  <button type="button" class="fx-atb" id="fx-ativo" aria-pressed="false" title="Do ativo (A): clique num ativo ou num ponto da linha; a faixa vai dali até o fim do trecho">${SVG.ativo}<span>Do ativo</span></button>
+  <input id="fx-cod" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go" placeholder="Código ou poste" aria-label="Código do ativo ou número do poste (Enter: a faixa dali até o fim do trecho)">
 </div>
 <div class="fx-barra" id="fx-barra" aria-hidden="true"></div>
 <p class="fx-dica-p" id="fx-dica-p"></p>
@@ -367,19 +646,23 @@
   let tAviso = 0;
   function ui() {
     const t = totais(), tot = t.leve + t.pesada + t.falta, n = sel.size;
-    box.classList.toggle('fx-tem', ativo && n > 0);
+    box.classList.toggle('fx-tem', ativo && (n > 0 || doAt));        // "Do ativo" ligado: o painel fica, mesmo sem trecho
     pill.querySelector('#fx-refaz2').hidden = !redo.length;          // desfez até tirar o último trecho: refazer pela pílula
-    if (!n) return;
-    $('fx-info').innerHTML = `<b>${n} trecho${n > 1 ? 's' : ''}</b> · ${km(tot)} km<br>falta marcar ${km(t.falta)} km`;
+    if (!n && !doAt) return;
+    $('fx-info').innerHTML = n ? `<b>${n} trecho${n > 1 ? 's' : ''}</b> · ${km(tot)} km<br>falta marcar ${km(t.falta)} km` : '<b>Nenhum trecho</b><br>o do ativo entra sozinho';
     $('fx-L').innerHTML = `${km(t.leve)} <small>km</small>`; $('fx-P').innerHTML = `${km(t.pesada)} <small>km</small>`;
     $('fx-barra').innerHTML = tot ? `<span style="width:${t.leve / tot * 100}%;background:${COR[1]}"></span><span style="width:${t.pesada / tot * 100}%;background:${COR[2]}"></span>` : '';
-    $('fx-desfaz').disabled = !undo.length && ini === null; $('fx-refaz').disabled = !redo.length;
+    $('fx-desfaz').disabled = !undo.length && ini === null && !pend; $('fx-refaz').disabled = !redo.length;
     dash.querySelectorAll('.fx-t').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === ferr)));
-    $('fx-apagar').setAttribute('aria-pressed', String(ferr === 'apagar'));
+    $('fx-apagar').setAttribute('aria-pressed', String(ferr === 'apagar')); $('fx-apagar').disabled = !n;   // sem trecho (só o "Do ativo"): nada a apagar
+    $('fx-ativo').setAttribute('aria-pressed', String(doAt));
+    dash.querySelector('.fx-tools').classList.toggle('fx-pede', !!pend);   // faixa pendente: Leve e Pesada pedem a escolha
     if (tAviso) return;
     const cq = toque() ? 'Toque' : 'Clique';
     const temMarca = t.leve + t.pesada > 0;
-    $('fx-dica-p').textContent = ferr ? (ini === null ? `${cq} no início (num poste ou num pontinho da linha) e depois no fim.` :
+    $('fx-dica-p').textContent = doAt ? (pend ? `${pend.nome} até o fim do ${T[pend.t].nome}: ${metros(pend.m)}. ${toque() ? 'Toque em Leve ou Pesada.' : 'Leve (L) ou Pesada (P)?'}` :
+      `${cq} num ativo ou num ponto da linha: a faixa vai dali até o fim do trecho` + (ferr ? ` (${nomeF()}).` : ', depois Leve ou Pesada.')) :
+      ferr ? (ini === null ? `${cq} no início (num poste ou num pontinho da linha) e depois no fim.` :
       `Agora ${cq.toLowerCase()} no fim${toque() ? ' (no início de novo cancela).' : '. Esc cancela o início.'}`) +
       (map.getZoom() < 15 ? ' Aproxime para acertar o ponto.' : '') :
       `${cq} em outro trecho para somar, ou ligue Leve ou Pesada.` + (temMarca ? ' Arraste as bolinhas nas pontas para ajustar.' : '');
@@ -392,22 +675,30 @@
 
   // ---------- ferramentas ----------
   function aplicaFerr() {
-    if (!ferr) ini = null;                                         // soltar a ferramenta tira o poste inicial
+    if (!ferr || doAt) ini = null;                                 // soltar a ferramenta tira o poste inicial
     calaAviso();
-    box.classList.toggle('fx-ferr', ativo && !!ferr);
-    mc.style.cursor = ativo && !ferr ? 'pointer' : '';
-    sob = null; bDica.style.display = 'none'; lHover.setLatLngs([]);
+    box.classList.toggle('fx-ferr', ativo && (!!ferr || doAt));
+    mc.style.cursor = ativo && !ferr && !doAt ? 'pointer' : '';
+    sob = null; sobA = null; bDica.style.display = 'none'; lHover.setLatLngs([]);
     ponta(); ui(); agenda();
   }
-  const setFerr = f => { ferr = ferr === f ? null : f; aplicaFerr(); };   // tocar de novo solta: volta a escolher trechos
+  // tocar de novo solta: volta a escolher trechos. Com a faixa de um ativo pendente, Leve ou Pesada marca ela (e fica
+  // escolhido para os próximos ativos); Apagar solta o "Do ativo"
+  const setFerr = f => {
+    if (pend && ALVO[f]) { const p = pend; pend = null; ferr = f; aplicaFerr(); desenhaPend(); marcaFaixa(p, p, ALVO[f], p.novo); return; }
+    if (f === 'apagar' && doAt) { doAt = false; tiraPend(); }
+    ferr = ferr === f ? null : f; aplicaFerr();
+  };
 
   // com Leve/Pesada/Apagar ligado: o clique cai numa linha escolhida (até TOL px dela): no poste, se está perto dele (ÍMÃ
   // px), senão no ponto da linha, de 5 em 5 m; o 1º é o início, o 2º o fim (marca o caminho entre os dois); clicar de novo
   // no início o tira. Arrastar move o mapa.
   const TOL = e => toque(e) ? 24 : 14, IMA = e => toque(e) ? 16 : 9;
-  function pontoEm(px, py, tol, ima) {
-    const a = selP || (selP = projeta(selV)), t2 = tol * tol; let b = null, m = Infinity, pp = null, mp = Infinity;
-    for (let k = 0; k < selV.length; k++) {
+  // tudo: em qualquer vão (a ferramenta "Do ativo"), não só nos dos trechos escolhidos
+  function pontoEm(px, py, tol, ima, tudo) {
+    const lst = tudo ? TODOS || (TODOS = V.map((_, i) => i)) : selV;
+    const a = tudo ? todosP || (todosP = projeta(lst)) : selP || (selP = projeta(selV)), t2 = tol * tol; let b = null, m = Infinity, pp = null, mp = Infinity;
+    for (let k = 0; k < lst.length; k++) {
       if (fora(a, k, px, py, tol)) continue;
       const x1 = a[k * 4], y1 = a[k * 4 + 1], x2 = a[k * 4 + 2], y2 = a[k * 4 + 3], dx = x2 - x1, dy = y2 - y1, l = dx * dx + dy * dy;
       let t = l ? ((px - x1) * dx + (py - y1) * dy) / l : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
@@ -415,18 +706,25 @@
       if (d > t2) continue;
       if (d < m) { m = d; b = { k, t }; }
       const d0 = (x1 - px) ** 2 + (y1 - py) ** 2, d1 = (x2 - px) ** 2 + (y2 - py) ** 2;   // os postes das pontas deste vão
-      if (d0 < mp) { mp = d0; pp = { i: selV[k], q: 0 }; }
-      if (d1 < mp) { mp = d1; pp = { i: selV[k], q: np[selV[k]] }; }
+      if (d0 < mp) { mp = d0; pp = { i: lst[k], q: 0 }; }
+      if (d1 < mp) { mp = d1; pp = { i: lst[k], q: np[lst[k]] }; }
     }
     if (!b) return null;
     if (pp && mp <= ima * ima) return pp;                           // perto de um poste: o poste mais perto
-    return { i: selV[b.k], q: naGrade(selV[b.k], b.t) };            // senão o pontinho mais perto
+    return { i: lst[b.k], q: naGrade(lst[b.k], b.t) };              // senão o pontinho mais perto
   }
   const metros = m => m < 1000 ? `${Math.round(m)} m` : `${km(m)} km`;
   const nomeF = () => ({ leve: 'Leve', pesada: 'Pesada' })[ferr];
   // desenha o início, o anel no ponto sob o mouse e a prévia do caminho entre eles; devolve esse caminho
   function ponta() {
     const on = ativo && ferr !== null, c = corF(), some = { opacity: 0, fillOpacity: 0 };
+    if (ativo && doAt) {                                           // "Do ativo": o anel no começo da faixa sob o mouse e a prévia dela
+      mIni.setStyle(some); tIni.remove();
+      const F = sobA ? faixaDe(sobA) : null;
+      if (sobA) mSob.setLatLng(llPt(sobA.P)).setStyle({ opacity: 1, fillOpacity: .5, fillColor: c }); else mSob.setStyle(some);
+      lPrevF.setLatLngs(F ? F.segs : []); lPrev.setStyle({ color: c }).setLatLngs(F ? F.segs : []);
+      return F;
+    }
     if (on && ini !== null) {
       mIni.setLatLng(llPt(ini)).setStyle({ opacity: 1, fillOpacity: 1, fillColor: c });
       tIni.setLatLng(llPt(ini)); if (!map.hasLayer(tIni)) tIni.addTo(map);
@@ -472,24 +770,46 @@
       k ? `${metros(k.m)} · clique para ${f ? 'marcar ' + f : 'apagar'}` : 'Sem caminho pelos trechos escolhidos';
     bDica.style.cssText = `display:block;left:${Math.min(e.clientX - r.left + 14, r.width - 230)}px;top:${e.clientY - r.top + 16}px`;
   }
+  // "Do ativo" com o mouse: o ativo (ou ponto) onde o clique vai cair, a prévia tracejada da faixa dele e o km
+  function pairaA(e) {
+    if (!ativo || !doAt || arrasto) return;
+    sobA = alvoEm(e);
+    const F = ponta(), f = nomeF(); mc.style.cursor = sobA ? 'pointer' : '';
+    if (!sobA) { bDica.style.display = 'none'; return; }
+    const r = box.getBoundingClientRect(), tn = T[sobA.t].nome;
+    bDica.textContent = !F.qs.length ? `${sobA.nome} · fim do ${tn}: nada a jusante` :
+      `${sobA.nome} · ${metros(F.m)} até o fim do ${tn} · clique ${f ? 'para marcar ' + f : 'e escolha Leve ou Pesada'}`;
+    bDica.style.cssText = `display:block;left:0;top:${e.clientY - r.top + 16}px`;
+    bDica.style.left = Math.max(4, Math.min(e.clientX - r.left + 14, r.width - bDica.offsetWidth - 8)) + 'px';
+  }
+  const tiraSob = () => { if (sob !== null || sobA) { sob = null; sobA = null; ponta(); bDica.style.display = 'none'; } };
   let pm = 0;
   mc.addEventListener('pointermove', e => {
-    if (!ativo || !ferr || e.pointerType !== 'mouse' || pm) return;
-    if (e.buttons) { if (sob !== null) { sob = null; ponta(); bDica.style.display = 'none'; } return; }   // arrastando o mapa
-    pm = requestAnimationFrame(() => { pm = 0; paira(e); });
+    if (!ativo || !(ferr || doAt) || e.pointerType !== 'mouse' || pm) return;
+    if (e.buttons) { tiraSob(); return; }                          // arrastando o mapa
+    pm = requestAnimationFrame(() => { pm = 0; doAt ? pairaA(e) : paira(e); });
   });
-  map.on('movestart zoomstart', () => { if (sob !== null) { sob = null; ponta(); bDica.style.display = 'none'; } });
+  map.on('movestart zoomstart', tiraSob);
+  // clique (ou toque) com o "Do ativo": a faixa do ativo ou do ponto
+  function clicaAtivo(e) {
+    calaAviso();
+    const A = alvoEm(e);
+    if (!A) { aviso(`${toque(e) ? 'Toque' : 'Clique'} num ativo ou na linha.`); return; }
+    usaAtivo(A);
+    if (!toque(e)) pairaA(e);
+  }
 
   // escolher trechos (e, com a ferramenta, os postes): o clique é tomado antes do Leaflet (que selecionaria o trecho do
   // jeito normal do painel); depois de arrastar o mapa não conta
   let down = null, mov = 0;
   mc.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; }, true);
   mc.addEventListener('click', e => {
-    if (!ativo || e.target.closest('.leaflet-control, .leaflet-popup')) return;
+    if (!ativo || e.target.closest('.leaflet-control, .leaflet-popup, .lp-fx')) return;   // .lp-fx: "Faixa a partir daqui" do pino da busca
     e.stopPropagation();
     if (e.target.closest('.fx-alca')) return;                       // a alça trata o próprio clique (comecaArrasto)
     cancelAnimationFrame(mov); mov = 0;                             // toque: o mousemove de compatibilidade não reacende a dica
     if (map.dragging.moved() || (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6)) return;
+    if (doAt) return clicaAtivo(e);
     if (ferr) return clicaPoste(e);
     const [x, y] = abs(e), k = vaoPerto(x, y, toque(e) ? 22 : 12);
     if (k < 0) return;
@@ -499,7 +819,7 @@
   }, true);
   mc.addEventListener('dblclick', e => { if (ativo) e.stopPropagation(); }, true);
   mc.addEventListener('mousemove', e => {                         // passar o mouse: o trecho acende, com nome e km
-    if (!ativo || ferr || mov || arrasto || (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents)) return;
+    if (!ativo || ferr || doAt || mov || arrasto || (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents)) return;
     mov = requestAnimationFrame(() => {
       mov = 0;
       const [x, y] = abs(e), k = vaoPerto(x, y, 12);
@@ -510,7 +830,7 @@
       bDica.style.cssText = `display:block;left:${Math.min(e.clientX - r.left + 14, r.width - 200)}px;top:${e.clientY - r.top + 16}px`;
     });
   });
-  mc.addEventListener('mouseleave', () => { lHover.setLatLngs([]); bDica.style.display = 'none'; if (sob !== null) { sob = null; ponta(); } });
+  mc.addEventListener('mouseleave', () => { lHover.setLatLngs([]); bDica.style.display = 'none'; tiraSob(); });
 
   // ---------- alças: arrastar a ponta de um pedaço marcado pela linha ----------
   // Para dentro do pedaço encurta (tira a marca do que ficou para trás); para fora estica (marca até onde soltar, cobrindo a
@@ -593,7 +913,8 @@
     if (!a.mexeu) {
       // só clicou, com a ferramenta: vale o ponto sob o ponteiro (a alça é grande e pode cobrir um poste vizinho); bem no
       // centro da alça, a ponta dela
-      if (e.type === 'pointerup' && ferr) {
+      if (e.type === 'pointerup' && doAt) clicaAtivo(e);
+      else if (e.type === 'pointerup' && ferr) {
         const [x, y] = abs(e), h = map.project(llPt(a.E), map.getZoom());
         const p = Math.hypot(h.x - x, h.y - y) <= 7 ? a.E : pontoEm(x, y, TOL(e), IMA(e)) || a.E;
         clicaPonto({ i: p.i, q: p.q }, e);
@@ -609,12 +930,20 @@
   }
 
   // ---------- botões ----------
-  pill.addEventListener('click', e => { if (e.target.closest('.fx-x')) desliga(); else if (e.target.closest('#fx-refaz2')) refaz(); });
+  pill.addEventListener('click', e => {
+    if (e.target.closest('.fx-x')) desliga(); else if (e.target.closest('#fx-refaz2')) refaz();
+    else if (e.target.closest('#fx-ativo2')) {                  // liga o "Do ativo": o painel aparece (a pílula some)
+      const foco = document.activeElement === e.target.closest('#fx-ativo2');
+      setAt(true);
+      if (foco && !toque()) $('fx-ativo').focus({ preventScroll: true }); else resgata();
+    }
+  });
   dash.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.classList.contains('fx-x')) return desliga();
     if (b.dataset.f) return setFerr(b.dataset.f);
     if (b.id === 'fx-apagar') return setFerr('apagar');
+    if (b.id === 'fx-ativo') return setAt(!doAt);
     if (b.id === 'fx-desfaz') return desfaz();
     if (b.id === 'fx-refaz') return refaz();
     if (b.id === 'fx-croqui') return croqui();
@@ -657,7 +986,8 @@
     if (ativo) return;
     ativo = true;
     // 1) visualização normal dos trechos: desliga as camadas (Faixa, Inspeção…) e guarda quais eram, para religar ao sair
-    camadasDesligadas = [...document.querySelectorAll('#ctl-camadas .ctl-card > button')].filter(b => b.getAttribute('aria-pressed') === 'true');
+    // (a NAE fica como está: ela é o rótulo dos trechos, parte da visualização normal)
+    camadasDesligadas = [...document.querySelectorAll('#ctl-camadas .ctl-card > button')].filter(b => b.getAttribute('aria-pressed') === 'true' && !b.classList.contains('ctl-nae'));
     camadasDesligadas.forEach(b => b.click());
     map.closePopup();
     if (window.__limpar) window.__limpar();                      // sem o trecho escolhido do jeito normal por baixo
@@ -672,15 +1002,16 @@
     if (kb && kb.lock) kb.lock(['Escape']).catch(() => {});
     camadas.forEach(l => l.addTo(map));
     map.doubleClickZoom.disable();
-    ferr = null; ini = null;
+    ferr = null; ini = null; doAt = false; pend = null; sobA = null;
     selV = []; [...sel].sort((a, b) => a - b).forEach(t => vaosDe[t].forEach(i => selV.push(i))); selP = null;
-    desenha(); aplicaFerr(); resgata();
+    desenha(); desenhaPend(); aplicaFerr(); resgata(); rotulosSel();
   }
   function desliga() {
     if (!ativo) return;
-    cancelaArrasto(); ativo = false; ferr = null; ini = null; sob = null; lAlcas.clearLayers();
+    tiraPend();                                                   // a faixa pendente some (o que foi marcado fica guardado)
+    cancelaArrasto(); ativo = false; ferr = null; ini = null; sob = null; doAt = false; sobA = null; lAlcas.clearLayers(); rotulosSel();
     box.classList.remove('fx-modo', 'fx-tem', 'fx-ferr'); mc.style.cursor = '';
-    camadas.forEach(l => l.remove()); tIni.remove();
+    camadas.forEach(l => l.remove()); tIni.remove(); tPend.remove();
     if (kb && kb.unlock) kb.unlock();
     map.dragging.enable(); map.doubleClickZoom.enable();
     bDica.style.display = 'none';
@@ -713,7 +1044,7 @@
       if (document.querySelector('.mapbox>.barra-busca:not(.lp-fechada)') || [...document.querySelectorAll('.lp-drop,.lp-fdrop,.lp-sug,#mes-lista')].some(x => !x.hidden && x.getClientRects().length)) return;
       e.preventDefault(); e.stopImmediatePropagation();
       if (document.body.classList.contains('tc-gaveta') && window.__gaveta) window.__gaveta(false);
-      else if (ini !== null) tiraIni(); else if (ferr) { ferr = null; aplicaFerr(); } else desliga();
+      else if (pend) tiraPend(); else if (ini !== null) tiraIni(); else if (ferr || doAt) { ferr = null; doAt = false; aplicaFerr(); } else desliga();
       return;
     }
     if (editavel(e.target)) return;
@@ -723,16 +1054,63 @@
       return;
     }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-    const f = { l: 'leve', p: 'pesada', b: 'apagar' }[e.key.toLowerCase()];
-    if (f && sel.size) { e.preventDefault(); setFerr(f); }
+    const k = e.key.toLowerCase();
+    if (k === 'a') { e.preventDefault(); if (!e.repeat) setAt(!doAt); return; }   // "Do ativo": também sem trecho escolhido (o do ativo entra)
+    const f = { l: 'leve', p: 'pesada', b: 'apagar' }[k];
+    if (f && (sel.size || (doAt && f !== 'apagar'))) { e.preventDefault(); setFerr(f); }
   }, true);
+
+  // ---------- "Do ativo" pelo código, pela busca do olho e pelo link ----------
+  // mostra a faixa inteira fora do painel (no PC à direita dele; no celular, acima)
+  function enquadra(segs) {
+    if (!segs || !segs.length) return;
+    const b = L.latLngBounds(segs.flat());
+    requestAnimationFrame(() => {
+      const mr = box.getBoundingClientRect(), dr = dash.getBoundingClientRect(), lado = dr.width && mr.width - dr.width > 420;
+      map.fitBounds(b, { paddingTopLeft: [lado ? dr.right - mr.left + 24 : 24, 64], paddingBottomRight: [24, !lado && dr.height ? mr.bottom - dr.top + 16 : 24], maxZoom: 17 });
+    });
+  }
+  // código digitado no campo (Enter): como um clique no ativo (com Leve ou Pesada escolhido marca; sem, fica pendente)
+  async function vaiCodigo(txt) {
+    txt = String(txt || '').trim(); if (!txt) return false;
+    let A = acha(txt);
+    if (!A && !window.ATIVOS) { await cargaAtivos(); A = acha(txt); }   // transformador: o ativos.js ainda não tinha chegado
+    if (!ativo) return false;
+    if (!A) { aviso(`Não achei ${txt} neste alimentador.`); return false; }
+    setAt(true);
+    const ok = usaAtivo(A);
+    if (ok) enquadra(faixaDe(A).segs);
+    return ok;
+  }
+  const campo = $('fx-cod');
+  // achou: o campo esvazia (o código fica no começo da faixa) e o foco vai para o mapa, para o L e o P valerem em seguida
+  campo.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.isComposing) return;
+    e.preventDefault();
+    vaiCodigo(campo.value).then(ok => { if (!ok) return; campo.value = ''; if (document.activeElement === campo) mc.focus({ preventScroll: true }); });
+  });
+  // busca do olho ("Faixa a partir daqui") e link: liga o modo com a faixa do ativo pendente, pedindo Leve ou Pesada.
+  // x: código ou {cod, ll, tr} (ll e tr valem para o ativo que não está nas listas da página)
+  async function doAtivo(x) {
+    if (!ativo) liga();
+    if (!ativo) return false;
+    setAt(true);
+    let A = acha(x);
+    if (!A && !window.ATIVOS) { await cargaAtivos(); A = acha(x); }
+    if (!ativo) return false;
+    if (!A) { aviso('Esse ativo não está na rede deste alimentador.'); return false; }
+    if (!usaAtivo(A, true)) return false;
+    enquadra(pend.segs);
+    return true;
+  }
 
   // entrada pelo menu ☰ (Croqui de limpeza de faixa, menu.js): a página do alimentador com ?modo=faixa (ou a faixa-rascunho.html
   // de antes, com o aviso no alto) já abre no modo; o botão do aviso ([data-faixa-abre]) também liga. Sem gesto do usuário a tela cheia do navegador é
   // recusada e o mapa cobre a janela (telacheia.js), com o mesmo modo.
   document.querySelectorAll('[data-faixa-abre]').forEach(b => b.addEventListener('click', () => liga()));
   if (/[?&]modo=faixa(&|$)/.test(location.search)) {
-    const vai = () => setTimeout(() => { if (!ativo) liga(); }, 0);
+    const de = new URLSearchParams(location.search).get('de');   // ?modo=faixa&de=<código>: já com a faixa do ativo
+    const vai = () => setTimeout(() => { if (de) doAtivo(de); else if (!ativo) liga(); }, 0);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', vai); else vai();
   }
 
@@ -745,5 +1123,11 @@
     b.parentNode.prepend(b);
   }
 
-  window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length, inicio: () => ini };
+  // acha: o ativo na rede ({trecho, cod, nome}) ou null (a busca do olho só mostra o "Faixa a partir daqui" quando acha);
+  // faixa: a faixa do ativo até o fim do trecho (testes)
+  const resumo = A => A && { trecho: T[A.t].nome, cod: A.cod, nome: A.nome, ponto: chavePt(A.P) };
+  window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length, inicio: () => ini,
+    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt,
+    faixa: x => { const A = acha(x), F = A && faixaDe(A); return A && Object.assign(resumo(A), { m: F.m, pedacos: F.qs.length, vaos: F.segs.length }); },
+    pendente: () => pend && Object.assign(resumo(pend), { m: pend.m, pedacos: pend.qs.length }) };
 })();

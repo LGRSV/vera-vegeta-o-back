@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.10",
+ "versao": "2.11",
  "atualizado": "2026-11-17",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -141,7 +141,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Visões do mapa inicial: Manutenção, Inspeção, Insp→manut e Limpeza de faixa", "st": "ok", "d": "2026-10-15"},
    {"t": "Painel do alimentador com divisas dos municípios, ativos de perto e filtro de município", "st": "ok", "d": "2026-10-15"},
    {"t": "Raio-X da rede com a NAE do alimentador", "st": "ok", "d": "2026-10-21"},
-   {"t": "Botão NAE no mapa do alimentador (o 1º das camadas): abre com a rede limpa, sem os nomes dos trechos e sem a NAE; ligado, fica como antes e o site lembra a escolha", "st": "ok", "d": "2026-11-17", "obs": "Desligado, ficam as linhas, os equipamentos e as caixinhas das chaves; o trecho escolhido mostra só o nome e o painel não muda. No celular, Inspeção aparece como Insp. para a fileira caber."}
+   {"t": "Botão NAE no mapa do alimentador (o 1º das camadas): abre com a rede limpa, sem os nomes dos trechos e sem a NAE; ligado, fica como antes e o site lembra a escolha", "st": "ok", "d": "2026-11-17", "obs": "Desligado, ficam as linhas, os equipamentos e as caixinhas das chaves; o trecho escolhido mostra só o nome e o painel não muda. No celular, Inspeção aparece como Insp. para a fileira caber."},
+   {"t": "Alimentadores vizinhos no mapa do alimentador: a rede dos outros que aparecem na tela, mais apagada e sem rótulos, carregada sozinha ao afastar ou arrastar", "st": "ok", "d": "2026-11-17", "obs": "De longe T1 e T2, mais perto o T3 e de perto o desenho fino. Tocar num vizinho mostra o código e \"Abrir alimentador\"."}
   ]},
   {"id": "2.4", "frente": "mapa", "titulo": "Imagem de satélite", "itens": [
    {"t": "Satélite sem falhas de imagem ao aproximar", "st": "ok", "d": "2026-10-07"},
@@ -185,7 +186,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Modo Limpeza de faixa: escolher trechos e pintar leve ou pesada, com o km ao vivo", "st": "ok", "d": "2026-10-15"},
    {"t": "Croqui nos 322 alimentadores, com início e fim em qualquer ponto da linha", "st": "ok", "d": "2026-10-23"},
    {"t": "KMZ do croqui e do trecho selecionado", "st": "ok", "d": "2026-10-26"},
-   {"t": "Deslocamento calculado pela rota até a base do polo", "st": "ok", "d": "2026-10-29"}
+   {"t": "Deslocamento calculado pela rota até a base do polo", "st": "ok", "d": "2026-10-29"},
+   {"t": "Faixa a partir do ativo no modo Limpeza de faixa: escolher um ativo (no mapa, pelo código ou pela busca, em \"Faixa a partir daqui\") marca dele até o fim do trecho, como Leve ou Pesada", "st": "ok", "d": "2026-11-17", "obs": "Vale para DJ, religador, fusível, chave, transformador, poste ou um ponto da linha; para nos religadores e fusíveis seguintes. Ativo no fim da linha aparece na busca como \"Fim do trecho\"."}
   ]},
 
   {"id": "5.1", "frente": "insp", "titulo": "Inspeção visual no mapa", "itens": [
