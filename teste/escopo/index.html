@@ -90,6 +90,9 @@
 .c-id,.c-resp,.c-usa,.c-rit,.c-ha,.c-sit{display:none}.tab td small.so-cel{display:block}.hist li{grid-template-columns:1fr;gap:4px}
   .cont{margin-left:0;flex-basis:100%}
 }
+/* título: volta à tela inicial */
+header.cab h1 .cab-home{display:flex;flex-direction:column;align-items:center;color:inherit;text-decoration:none;border-radius:var(--r1)}
+header.cab h1 .cab-home:hover span{color:var(--accent)}
 /* ideias (escopo/ideias.js) */
 .id-login{max-width:380px;display:grid;gap:var(--s3);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s4);background:var(--paper)}
 .id-login h2{font:700 var(--t-lg)/1.2 var(--f-display);margin:0}.id-login p{margin:0;color:var(--muted);font-size:var(--t-sm)}
@@ -117,7 +120,7 @@
 @media print{.abas,.baixar,.filtros,.mnu{display:none!important}.aba[hidden]{display:block}body{background:#fff}}
 </style>
 </head><body><div class="wrap w">
-<header class="cab"><h1><b>ARGOS</b> <span>ESCOPO</span></h1><a class="cab-link" href="../">Mapa</a></header>
+<header class="cab"><h1><a class="cab-home" href="../central/" target="_top" title="Voltar à tela inicial" aria-label="ARGOS Escopo: voltar à tela inicial"><b>ARGOS</b> <span>ESCOPO</span></a></h1><a class="cab-link" href="../">Mapa</a></header>
 <p class="pos" id="pos"></p>
 <nav class="abas" aria-label="Seções do escopo"><div class="seg" id="abas">
   <button type="button" data-aba="resumo">Resumo</button>

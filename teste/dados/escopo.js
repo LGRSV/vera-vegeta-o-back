@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.9",
+ "versao": "2.10",
  "atualizado": "2026-11-17",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -268,7 +268,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Apresentação do ARGOS no menu", "st": "ok", "d": "2026-10-15"},
    {"t": "Tela inicial nova, com os módulos em cartões e o dock", "st": "ok", "d": "2026-10-30"},
    {"t": "Tela inicial nova como única versão; Shift+K também nela", "st": "ok", "d": "2026-11-09"},
-   {"t": "Atalho para a Programação de obras no menu e na tela inicial", "st": "ok", "d": "2026-11-16"}
+   {"t": "Atalho para a Programação de obras no menu e na tela inicial", "st": "ok", "d": "2026-11-16"},
+   {"t": "Título ARGOS do Escopo leva de volta à tela inicial", "st": "ok", "d": "2026-11-17"}
   ]},
   {"id": "11.2", "frente": "plataforma", "titulo": "Atualização das bases", "itens": [
    {"t": "Envio de arquivo pelo menu Atualizar bases, com processamento automático", "st": "ok", "d": "2026-10-13"},
