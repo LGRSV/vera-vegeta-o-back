@@ -211,16 +211,11 @@
   }
 
   // ---------- escolha dos trechos ----------
-  // nome dos trechos escolhidos no mapa: com o NAE desligado (sem os rótulos dos trechos) alimentador.js mostra o rótulo
-  // deles (window.__rotuloFixo), como o do trecho escolhido do jeito normal; com o NAE ligado nada muda
-  const idxDe = new Map(T.map((t, i) => [t.nome, i]));
-  window.__rotuloFixo = n => ativo && sel.has(idxDe.get(n));
-  const rotulosSel = () => { if (mc.classList.contains('sem-nae') && window.__refazRotulos) window.__refazRotulos(); };
   function muda() {
     selV = []; [...sel].sort((a, b) => a - b).forEach(t => vaosDe[t].forEach(i => selV.push(i))); selP = null;
     G = null; arv = null; if (ini !== null && !sel.has(V[ini.i][4])) ini = null;   // o início saiu da escolha (desfazer)
     if (!sel.size) ferr = null;
-    aplicaFerr(); agenda(); rotulosSel();
+    aplicaFerr(); agenda();
   }
 
   // ---------- caminho entre dois postes, só pelos vãos escolhidos ----------
@@ -662,8 +657,7 @@
     if (ativo) return;
     ativo = true;
     // 1) visualização normal dos trechos: desliga as camadas (Faixa, Inspeção…) e guarda quais eram, para religar ao sair
-    // (a NAE fica como está: ela é o rótulo dos trechos, parte da visualização normal)
-    camadasDesligadas = [...document.querySelectorAll('#ctl-camadas .ctl-card > button')].filter(b => b.getAttribute('aria-pressed') === 'true' && !b.classList.contains('ctl-nae'));
+    camadasDesligadas = [...document.querySelectorAll('#ctl-camadas .ctl-card > button')].filter(b => b.getAttribute('aria-pressed') === 'true');
     camadasDesligadas.forEach(b => b.click());
     map.closePopup();
     if (window.__limpar) window.__limpar();                      // sem o trecho escolhido do jeito normal por baixo
@@ -680,11 +674,11 @@
     map.doubleClickZoom.disable();
     ferr = null; ini = null;
     selV = []; [...sel].sort((a, b) => a - b).forEach(t => vaosDe[t].forEach(i => selV.push(i))); selP = null;
-    desenha(); aplicaFerr(); resgata(); rotulosSel();
+    desenha(); aplicaFerr(); resgata();
   }
   function desliga() {
     if (!ativo) return;
-    cancelaArrasto(); ativo = false; ferr = null; ini = null; sob = null; lAlcas.clearLayers(); rotulosSel();
+    cancelaArrasto(); ativo = false; ferr = null; ini = null; sob = null; lAlcas.clearLayers();
     box.classList.remove('fx-modo', 'fx-tem', 'fx-ferr'); mc.style.cursor = '';
     camadas.forEach(l => l.remove()); tIni.remove();
     if (kb && kb.unlock) kb.unlock();

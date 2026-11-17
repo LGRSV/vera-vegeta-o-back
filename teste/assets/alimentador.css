@@ -288,16 +288,10 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 .lb{font:700 13px/1 var(--f-display);color:#fff;background:rgba(0,0,0,.66);border-left:4px solid var(--c);padding:4px 7px;border-radius:3px;white-space:nowrap;cursor:pointer}
 .lb.fus{font-size:11.5px;padding:3px 5px;border-left-width:3px}
 #map.longe .lb.fus{display:none}
-#map.longe .lb.fus.sel,#map.longe .lb.fus.oc,#map.longe .lb.fus.fo-l,#map.longe .lb.fus.fixo{display:block}
-#map.longe .leaflet-marker-icon:has(>.lb.fus:not(.sel):not(.oc):not(.fo-l):not(.fixo)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
+#map.longe .lb.fus.sel,#map.longe .lb.fus.oc,#map.longe .lb.fus.fo-l{display:block}
+#map.longe .leaflet-marker-icon:has(>.lb.fus:not(.sel):not(.oc):not(.fo-l)){visibility:hidden}   /* escondido também sai do Tab (sem foco invisível) */
 .lb.sel{outline:2px solid #fde047}
 .lb .n{display:inline-block;margin-left:5px;padding:0 5px;border-radius:8px;background:#b91c1c;color:#fff;font:700 11px/16px var(--f-mono)}
-/* NAE desligado (botão NAE do Menu Camadas, só no site): a rede como ela é, sem os rótulos dos trechos. Ficam o do trecho
-   escolhido, os que outra camada completa (.fo: Queimadas) e os fixos (.fixo: os trechos escolhidos no modo Limpeza de
-   faixa). display:none no ícone: fora do Tab e da conta de cada quadro do zoom */
-#map.sem-nae .leaflet-marker-icon:has(>.lb:not(.sel):not(.fo):not(.fixo)){display:none}
-.ctl-card .ctl-nae{background-image:linear-gradient(90deg,var(--alerta),var(--alerta));background-repeat:no-repeat;background-size:100% 3px;background-position:0 100%}
-.ctl-card .ctl-nae[aria-pressed=false]{opacity:.6;text-decoration:line-through;background-image:none;box-shadow:inset 0 -3px 0 #5a636a}
 /* chaves de início e fim do trecho selecionado */
 .ie{display:inline-flex;gap:5px;align-items:center;transform:translate(-50%,calc(-100% - 9px));font:600 12px/1 var(--f-mono);background:#fbfbf9;color:#1b2024;border:2px solid #1b2024;border-radius:4px;padding:3px 6px 3px 3px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.5)}
 .ie em{font-style:normal;font-size:10.5px;letter-spacing:.05em;padding:2px 4px;border-radius:2px;color:#fff;background:#15803d}

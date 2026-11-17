@@ -2,27 +2,27 @@
 
 Amostra de 20 m por vão; alimentador entra no município com ≥ 100 m. NAE = ocorrências da Crítica (coletivas e individuais) associadas a um trecho ou não.
 
-ATENÇÃO, divididos por exceção: AL01102271, LD01414015 e LD02424015 vieram do GIS sem as chaves fechadas, então foram divididos pelos religadores dos by-pass NA e pelas chaves das OS (aprovado em 16/10/2026). Têm poucos trechos e muito longos (de 134,4 km a 372,6 km num só trecho): a NAE por trecho e os km vencidos deles não são confiáveis. Estão marcados "(exceção)" nas tabelas e na seção "Divididos por exceção".
+ATENÇÃO, divididos por exceção: AL01102271, LD01414015 e LD02424015 vieram do GIS sem as chaves fechadas, então foram divididos pelos religadores dos by-pass NA e pelas chaves das OS (aprovado em 16/10/2026). Têm poucos trechos e muito longos (de 30,3 km a 68,2 km num só trecho): a NAE por trecho e os km vencidos deles não são confiáveis. Estão marcados "(exceção)" nas tabelas e na seção "Divididos por exceção".
 
 O total de cada município soma o alimentador inteiro (trechos, extensão e NAE de toda a rede, também a de outros municípios); só a coluna "No município (km)" é a parte do município. Por isso a soma dos municípios passa do total geral.
 
 ## NAE
 
-- NAE: 7281 ocorrência(s) · 3.923.930 consumidor·hora · acima de 24 h: 748 (919.798 cons·h, maior 21.663 min) · momentâneas: 14 · em dia crítico: 188 · 5543 sem chi por passo (cons × maior duração, estimado; momentâneas e dia crítico só nas reprocessadas)
+- NAE: 6778 ocorrência(s) · 3.669.180 consumidor·hora · acima de 24 h: 707 (857.969 cons·h, maior 21.663 min) · momentâneas: 14 · em dia crítico: 188 · 5040 sem chi por passo (cons × maior duração, estimado; momentâneas e dia crítico só nas reprocessadas)
 - Consumidor·hora = soma por passo de manobra (consumidores × duração do passo). Acima de 24 h, momentâneas (< 3 min) e dia crítico ficam na NAE, marcadas (long, mom, dc); o DEC e o FEC pelo PRODIST não contam as duas últimas.
 
 ## Abreulândia
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Abreulândia | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 350,8 | 13 | 552 | 42 | 15 | 0 | 0 | 1 | aviso |
-| Abreulândia | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 147,9 | 16 | 1370 | 111 | 24 | 0 | 0 | 6 | aviso |
+| Abreulândia | CENTRO | SE-2PR0 | LD05062013 | 565 | 1 | 12 | 552 | 880,3 | 350,8 | 12 | 552 | 12 | 3 | 2 | 0 | 4 | aviso |
+| Abreulândia | CENTRO | SE-2MRN | LD02050008 | 1393 | 1 | 14 | 1378 | 2.010,7 | 147,9 | 14 | 1378 | 40 | 1 | 0 | 0 | 4 | aviso |
 | Abreulândia | CENTRO | SE-2CSR | LD03414149 | 659 | 1 | 10 | 648 | 1.150,1 | 82,8 | 10 | 648 | 65 | 1 | 0 | 0 | 4 | aviso |
 | Abreulândia | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 82,3 | 8 | 723 | 41 | 0 | 0 | 0 | 4 | aviso |
 | Abreulândia | CENTRO | SE-2BRR | AL01017017 | 162 | 1 | 0 | 161 | 183,7 | 14,8 | 0 | 161 | 6 | 1 | 0 | 0 | 2 | aviso |
 | Abreulândia | CENTRO | SE-2PR0 | LD04062013 | 1079 | 1 | 8 | 1070 | 1.191,9 | 11,3 | 8 | 1070 | 54 | 11 | 0 | 0 | 6 | aviso |
 | Abreulândia | CENTRO | SE-2MRN | LD01050008 | 507 | 1 | 7 | 499 | 591,8 | 7,2 | 7 | 499 | 28 | 0 | 0 | 0 | 4 | aviso |
-| **Total Abreulândia (alimentadores inteiros)** | | | 7 alimentadores | 5092 | | | | 7.191,6 | 697,0 | | | | | | | | |
+| **Total Abreulândia (alimentadores inteiros)** | | | 7 alimentadores | 5097 | | | | 7.196,9 | 697,0 | | | | | | | | |
 
 ## Aguiarnópolis
 
@@ -115,9 +115,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Araguacema | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 900,2 | 8 | 723 | 41 | 0 | 0 | 0 | 4 | aviso |
 | Araguacema | NORTE | SE-2CLM | LD03022033 | 63 | 1 | 4 | 58 | 173,7 | 62,5 | 4 | 58 | 2 | 3 | 0 | 0 | 2 | aviso |
 | Araguacema | CENTRO | SE-2AGC | AL01007055 | 45 | 1 | 1 | 43 | 28,9 | 28,8 | 1 | 43 | 4 | 1 | 0 | 0 | 5 | aviso |
-| Araguacema | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 22,2 | 16 | 1370 | 111 | 24 | 0 | 0 | 6 | aviso |
+| Araguacema | CENTRO | SE-2MRN | LD02050008 | 1393 | 1 | 14 | 1378 | 2.010,7 | 22,2 | 14 | 1378 | 40 | 1 | 0 | 0 | 4 | aviso |
 | Araguacema | NORTE | SE-2CLM | LD02022033 | 1019 | 1 | 9 | 1009 | 1.375,2 | 6,5 | 9 | 1009 | 83 | 0 | 0 | 0 | 6 | aviso |
-| **Total Araguacema (alimentadores inteiros)** | | | 5 alimentadores | 3246 | | | | 4.771,5 | 1.020,3 | | | | | | | | |
+| **Total Araguacema (alimentadores inteiros)** | | | 5 alimentadores | 3252 | | | | 4.776,8 | 1.020,3 | | | | | | | | |
 
 ## Araguaçu
 
@@ -155,8 +155,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Araguaína | NORTE | SE-2AR0 | AL03010004 | 62 | 1 | 3 | 58 | 16,8 | 16,8 | 3 | 58 | 1 | 0 | 0 | 0 | 0 | ok |
 | Araguaína | NORTE | SE-2AR3 | AL06103004 | 27 | 1 | 1 | 25 | 16,1 | 16,1 | 1 | 25 | 0 | 0 | 0 | 0 | 2 | aviso |
 | Araguaína | NORTE | SE-2AR3 | AL01103004 | 35 | 1 | 2 | 32 | 15,9 | 15,9 | 2 | 32 | 1 | 1 | 0 | 0 | 0 | ok |
-| Araguaína | NORTE | SE-2AR0 | AL04010004 | 55 | 1 | 3 | 51 | 15,1 | 15,1 | 3 | 51 | 1 | 0 | 0 | 0 | 0 | ok |
-| Araguaína | NORTE | SE-2AR0 | AL02010004 | 53 | 1 | 1 | 51 | 14,1 | 14,1 | 1 | 51 | 0 | 0 | 0 | 0 | 2 | aviso |
+| Araguaína | NORTE | SE-2AR0 | AL04010004 | 57 | 1 | 4 | 52 | 15,1 | 15,1 | 4 | 52 | 1 | 0 | 0 | 0 | 0 | ok |
+| Araguaína | NORTE | SE-2AR0 | AL02010004 | 55 | 1 | 3 | 51 | 14,1 | 14,1 | 3 | 51 | 0 | 0 | 2 | 0 | 3 | aviso |
 | Araguaína | NORTE | SE-2AR3 | AL03103004 | 16 | 1 | 1 | 14 | 13,3 | 13,3 | 1 | 14 | 4 | 0 | 0 | 0 | 2 | aviso |
 | Araguaína | NORTE | SE-2AR0 | AL07010004 | 11 | 1 | 0 | 10 | 12,9 | 12,9 | 0 | 10 | 1 | 1 | 0 | 0 | 1 | aviso |
 | Araguaína | NORTE | SE-2AR0 | LD06010004 | 4 | 1 | 0 | 3 | 11,1 | 11,1 | 0 | 3 | 0 | 0 | 0 | 0 | 1 | aviso |
@@ -167,7 +167,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Araguaína | NORTE | SE-2BIE | LD04105019 | 344 | 1 | 0 | 343 | 380,3 | 5,4 | 0 | 343 | 31 | 0 | 0 | 0 | 2 | aviso |
 | Araguaína | NORTE | SE-2ARM | AL01006040 | 113 | 1 | 1 | 111 | 107,9 | 5,3 | 1 | 111 | 24 | 0 | 0 | 0 | 4 | aviso |
 | Araguaína | NORTE | SE-2AR2 | AL01096004 | 1 | 1 | 0 | 0 | 1,2 | 1,2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Araguaína (alimentadores inteiros)** | | | 33 alimentadores | 7562 | | | | 8.012,0 | 2.152,8 | | | | | | | | |
+| **Total Araguaína (alimentadores inteiros)** | | | 33 alimentadores | 7566 | | | | 8.012,0 | 2.152,8 | | | | | | | | |
 
 ## Araguanã
 
@@ -184,13 +184,13 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Araguatins | NORTE | SE-2ATN | LD03109039 | 480 | 1 | 6 | 473 | 523,7 | 459,9 | 6 | 473 | 122 | 0 | 0 | 0 | 4 | aviso |
 | Araguatins | NORTE | SE-2ATN | LD02109039 | 484 | 1 | 6 | 477 | 489,8 | 445,4 | 6 | 477 | 148 | 1 | 0 | 0 | 7 | aviso |
 | Araguatins | NORTE | SE-2ATN | AL03109039 | 286 | 1 | 2 | 283 | 301,9 | 301,9 | 2 | 283 | 68 | 0 | 0 | 0 | 3 | aviso |
-| Araguatins | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 143,2 | 10 | 877 | 218 | 12 | 0 | 0 | 6 | aviso |
+| Araguatins | NORTE | SE-2AGT | LD03014045 | 908 | 1 | 11 | 896 | 937,1 | 143,2 | 11 | 896 | 44 | 0 | 0 | 0 | 4 | aviso |
 | Araguatins | NORTE | SE-2AN2 | LD03005098 | 1004 | 1 | 15 | 988 | 1.161,4 | 64,7 | 15 | 988 | 214 | 1 | 0 | 0 | 4 | aviso |
 | Araguatins | NORTE | SE-2BRT | AL01019068 | 75 | 1 | 0 | 74 | 80,0 | 56,8 | 0 | 74 | 16 | 1 | 0 | 0 | 2 | aviso |
 | Araguatins | NORTE | SE-2AXX | AL01016065 | 289 | 1 | 3 | 285 | 276,1 | 40,7 | 3 | 285 | 105 | 1 | 0 | 0 | 2 | aviso |
 | Araguatins | NORTE | SE-2ATN | AL01109039 | 49 | 1 | 2 | 46 | 34,7 | 34,7 | 2 | 46 | 9 | 0 | 0 | 0 | 1 | aviso |
 | Araguatins | NORTE | SE-2ATN | AL02109039 | 43 | 1 | 2 | 40 | 26,6 | 26,6 | 2 | 40 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Araguatins (alimentadores inteiros)** | | | 9 alimentadores | 3598 | | | | 3.810,3 | 1.573,9 | | | | | | | | |
+| **Total Araguatins (alimentadores inteiros)** | | | 9 alimentadores | 3618 | | | | 3.831,3 | 1.573,9 | | | | | | | | |
 
 ## Arapoema
 
@@ -220,13 +220,13 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Augustinópolis | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 211,1 | 10 | 877 | 218 | 12 | 0 | 0 | 6 | aviso |
+| Augustinópolis | NORTE | SE-2AGT | LD03014045 | 908 | 1 | 11 | 896 | 937,1 | 216,0 | 11 | 896 | 44 | 0 | 0 | 0 | 4 | aviso |
 | Augustinópolis | NORTE | SE-2AGT | LD02014045 | 233 | 1 | 2 | 230 | 231,5 | 53,9 | 2 | 230 | 16 | 15 | 0 | 0 | 1 | aviso |
 | Augustinópolis | NORTE | SE-2AGT | AL01014045 | 18 | 1 | 1 | 16 | 16,4 | 16,4 | 1 | 16 | 1 | 0 | 0 | 0 | 2 | aviso |
 | Augustinópolis | NORTE | SE-2AGT | AL02014045 | 25 | 1 | 2 | 22 | 15,1 | 15,1 | 2 | 22 | 0 | 1 | 0 | 0 | 2 | aviso |
 | Augustinópolis | NORTE | SE-2ATN | LD03109039 | 480 | 1 | 6 | 473 | 523,7 | 14,3 | 6 | 473 | 122 | 0 | 0 | 0 | 4 | aviso |
 | Augustinópolis | NORTE | SE-2AGT | LD01014045 | 364 | 1 | 3 | 360 | 350,6 | 3,6 | 3 | 360 | 101 | 43 | 0 | 0 | 2 | aviso |
-| **Total Augustinópolis (alimentadores inteiros)** | | | 6 alimentadores | 2008 | | | | 2.053,3 | 314,3 | | | | | | | | |
+| **Total Augustinópolis (alimentadores inteiros)** | | | 6 alimentadores | 2028 | | | | 2.074,4 | 319,2 | | | | | | | | |
 
 ## Aurora do Tocantins
 
@@ -265,19 +265,19 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Bandeirantes do Tocantins | NORTE | SE-2NVO | LD01054060 | 406 | 1 | 8 | 397 | 562,1 | 220,4 | 8 | 397 | 19 | 10 | 0 | 0 | 5 | aviso |
 | Bandeirantes do Tocantins | NORTE | SE-2CLN | AL05020023 | 438 | 1 | 3 | 434 | 528,6 | 167,1 | 3 | 434 | 13 | 0 | 0 | 0 | 3 | aviso |
 | Bandeirantes do Tocantins | NORTE | SE-2BNS | LD05454153 | 55 | 1 | 0 | 54 | 130,9 | 106,7 | 0 | 54 | 1 | 0 | 0 | 0 | 2 | aviso |
-| Bandeirantes do Tocantins | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 23,7 | 8 | 348 | 9 | 8 | 0 | 0 | 4 | aviso |
+| Bandeirantes do Tocantins | NORTE | SE-2BNS | LD03020023 | 361 | 1 | 9 | 351 | 406,1 | 23,7 | 9 | 351 | 1 | 0 | 0 | 0 | 4 | aviso |
 | Bandeirantes do Tocantins | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 16,5 | 16 | 1316 | 56 | 0 | 0 | 0 | 6 | aviso |
 | Bandeirantes do Tocantins | NORTE | SE-2BNS | LD02010153 | 963 | 1 | 12 | 950 | 1.259,0 | 14,1 | 12 | 951 | 60 | 3 | 0 | 0 | 7 | aviso |
 | Bandeirantes do Tocantins | NORTE | SE-2CLN | AL01020023 | 130 | 1 | 3 | 126 | 116,6 | 13,0 | 3 | 126 | 6 | 0 | 0 | 0 | 4 | aviso |
-| **Total Bandeirantes do Tocantins (alimentadores inteiros)** | | | 7 alimentadores | 3682 | | | | 4.629,9 | 561,4 | | | | | | | | |
+| **Total Bandeirantes do Tocantins (alimentadores inteiros)** | | | 7 alimentadores | 3686 | | | | 4.635,7 | 561,4 | | | | | | | | |
 
 ## Barra do Ouro
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Barra do Ouro | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 373,5 | 13 | 777 | 72 | 7 | 0 | 0 | 6 | aviso |
+| Barra do Ouro | NORTE | SE-2BIE | LD03105019 | 794 | 1 | 15 | 778 | 1.600,1 | 374,2 | 15 | 778 | 18 | 5 | 0 | 0 | 4 | aviso |
 | Barra do Ouro | NORTE | SE-2ITC | AL01042078 | 213 | 1 | 4 | 208 | 611,4 | 62,5 | 4 | 208 | 20 | 1 | 0 | 0 | 1 | aviso |
-| **Total Barra do Ouro (alimentadores inteiros)** | | | 2 alimentadores | 1004 | | | | 2.208,7 | 436,0 | | | | | | | | |
+| **Total Barra do Ouro (alimentadores inteiros)** | | | 2 alimentadores | 1007 | | | | 2.211,6 | 436,7 | | | | | | | | |
 
 ## Barrolândia
 
@@ -295,22 +295,22 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Bernardo Sayão | NORTE | SE-2BNS | LD01010153 | 722 | 1 | 7 | 714 | 696,7 | 274,7 | 7 | 714 | 29 | 0 | 0 | 0 | 7 | aviso |
-| Bernardo Sayão | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 165,1 | 8 | 348 | 9 | 8 | 0 | 0 | 4 | aviso |
+| Bernardo Sayão | NORTE | SE-2BNS | LD03020023 | 361 | 1 | 9 | 351 | 406,1 | 165,4 | 9 | 351 | 1 | 0 | 0 | 0 | 4 | aviso |
 | Bernardo Sayão | NORTE | SE-2CLN | AL05020023 | 438 | 1 | 3 | 434 | 528,6 | 61,3 | 3 | 434 | 13 | 0 | 0 | 0 | 3 | aviso |
 | Bernardo Sayão | NORTE | SE-2BNS | LD02010153 | 963 | 1 | 12 | 950 | 1.259,0 | 25,2 | 12 | 951 | 60 | 3 | 0 | 0 | 7 | aviso |
 | Bernardo Sayão | NORTE | SE-2BNS | AL01010153 | 6 | 1 | 0 | 5 | 5,9 | 5,9 | 0 | 5 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Bernardo Sayão | NORTE | SE-2BNS | LD05454153 | 55 | 1 | 0 | 54 | 130,9 | 2,7 | 0 | 54 | 1 | 0 | 0 | 0 | 2 | aviso |
 | Bernardo Sayão | NORTE | SE-2BNS | LD04444153 | 2 | 1 | 0 | 1 | 1,1 | 1,1 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Bernardo Sayão (alimentadores inteiros)** | | | 7 alimentadores | 2543 | | | | 3.022,6 | 536,0 | | | | | | | | |
+| **Total Bernardo Sayão (alimentadores inteiros)** | | | 7 alimentadores | 2547 | | | | 3.028,3 | 536,3 | | | | | | | | |
 
 ## Bom Jesus do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Bom Jesus do Tocantins | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 288,9 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
-| Bom Jesus do Tocantins |  | SE-2PAI | LD01414015 (exceção) | 10 | 1 | 3 | 6 | 563,6 | 202,5 | 3 | 6 | 1 | 4 | 0 | 0 | 6 | aviso |
+| Bom Jesus do Tocantins | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 289,8 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
+| Bom Jesus do Tocantins |  | SE-2PAI | LD01414015 (exceção) | 347 | 1 | 5 | 341 | 564,7 | 202,9 | 5 | 341 | 3 | 0 | 0 | 0 | 5 | aviso |
 | Bom Jesus do Tocantins | NORTE | SE-2PDA | AL02065015 | 46 | 1 | 2 | 43 | 40,4 | 34,3 | 2 | 43 | 4 | 0 | 2 | 0 | 4 | aviso |
-| **Total Bom Jesus do Tocantins (alimentadores inteiros)** | | | 3 alimentadores | 1406 | | | | 3.362,4 | 525,6 | | | | | | | | |
+| **Total Bom Jesus do Tocantins (alimentadores inteiros)** | | | 3 alimentadores | 1753 | | | | 3.377,7 | 526,9 | | | | | | | | |
 
 ## Brasilândia do Tocantins
 
@@ -337,11 +337,11 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Buriti do Tocantins | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 90,1 | 10 | 877 | 218 | 12 | 0 | 0 | 6 | aviso |
+| Buriti do Tocantins | NORTE | SE-2AGT | LD03014045 | 908 | 1 | 11 | 896 | 937,1 | 90,2 | 11 | 896 | 44 | 0 | 0 | 0 | 4 | aviso |
 | Buriti do Tocantins | NORTE | SE-2BRT | AL01019068 | 75 | 1 | 0 | 74 | 80,0 | 23,2 | 0 | 74 | 16 | 1 | 0 | 0 | 2 | aviso |
 | Buriti do Tocantins | NORTE | SE-2ATN | LD02109039 | 484 | 1 | 6 | 477 | 489,8 | 17,4 | 6 | 477 | 148 | 1 | 0 | 0 | 7 | aviso |
 | Buriti do Tocantins | NORTE | SE-2BRT | AL02019068 | 25 | 1 | 0 | 24 | 31,3 | 4,9 | 0 | 24 | 14 | 1 | 0 | 0 | 2 | aviso |
-| **Total Buriti do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 1472 | | | | 1.517,2 | 135,6 | | | | | | | | |
+| **Total Buriti do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 1492 | | | | 1.538,2 | 135,7 | | | | | | | | |
 
 ## Cachoeirinha
 
@@ -355,8 +355,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Campos Lindos | NORTE | SE-3CMA | PS01112193 | 397 | 1 | 9 | 387 | 694,1 | 694,0 | 9 | 387 | 0 | 0 | 0 | 0 | 3 | aviso |
-| Campos Lindos | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 177,5 | 13 | 777 | 72 | 7 | 0 | 0 | 6 | aviso |
-| **Total Campos Lindos (alimentadores inteiros)** | | | 2 alimentadores | 1188 | | | | 2.291,5 | 871,5 | | | | | | | | |
+| Campos Lindos | NORTE | SE-2BIE | LD03105019 | 794 | 1 | 15 | 778 | 1.600,1 | 177,5 | 15 | 778 | 18 | 5 | 0 | 0 | 4 | aviso |
+| **Total Campos Lindos (alimentadores inteiros)** | | | 2 alimentadores | 1191 | | | | 2.294,3 | 871,5 | | | | | | | | |
 
 ## Cariri do Tocantins
 
@@ -370,9 +370,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Cariri do Tocantins | SUL | SE-2GUR | LD01040003 | 14 | 1 | 3 | 10 | 25,9 | 22,4 | 3 | 10 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Cariri do Tocantins | SUL | SE-2FGR | AL01033047 | 240 | 1 | 2 | 237 | 318,8 | 21,1 | 2 | 237 | 20 | 0 | 0 | 0 | 4 | aviso |
 | Cariri do Tocantins | SUL | SE-2CAR | AL01085042 | 26 | 1 | 0 | 25 | 16,4 | 16,4 | 0 | 25 | 1 | 0 | 0 | 0 | 1 | aviso |
-| Cariri do Tocantins | SUL | SE-2GP3 | AL05020003 | 43 | 1 | 2 | 40 | 44,9 | 1,5 | 2 | 40 | 1 | 0 | 0 | 0 | 1 | aviso |
+| Cariri do Tocantins | SUL | SE-2GP3 | AL05020003 | 42 | 1 | 1 | 40 | 44,8 | 1,5 | 1 | 40 | 0 | 0 | 2 | 0 | 6 | aviso |
 | Cariri do Tocantins | SUL | SE-2FRM | LD02036052 | 1018 | 1 | 18 | 999 | 1.355,2 | 1,1 | 18 | 999 | 63 | 0 | 0 | 0 | 5 | aviso |
-| **Total Cariri do Tocantins (alimentadores inteiros)** | | | 10 alimentadores | 3400 | | | | 4.425,7 | 542,2 | | | | | | | | |
+| **Total Cariri do Tocantins (alimentadores inteiros)** | | | 10 alimentadores | 3399 | | | | 4.425,7 | 542,2 | | | | | | | | |
 
 ## Carmolândia
 
@@ -385,9 +385,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Carrasco Bonito | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 82,7 | 10 | 877 | 218 | 12 | 0 | 0 | 6 | aviso |
+| Carrasco Bonito | NORTE | SE-2AGT | LD03014045 | 908 | 1 | 11 | 896 | 937,1 | 82,8 | 11 | 896 | 44 | 0 | 0 | 0 | 4 | aviso |
 | Carrasco Bonito | NORTE | SE-2AGT | LD02014045 | 233 | 1 | 2 | 230 | 231,5 | 13,1 | 2 | 230 | 16 | 15 | 0 | 0 | 1 | aviso |
-| **Total Carrasco Bonito (alimentadores inteiros)** | | | 2 alimentadores | 1121 | | | | 1.147,6 | 95,8 | | | | | | | | |
+| **Total Carrasco Bonito (alimentadores inteiros)** | | | 2 alimentadores | 1141 | | | | 1.168,7 | 96,0 | | | | | | | | |
 
 ## Caseara
 
@@ -402,10 +402,10 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Centenário | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 404,7 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
-| Centenário |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 53,1 | 8 | 22 | 4 | 3 | 0 | 0 | 6 | aviso |
-| Centenário |  | SE-2PAI | LD01414015 (exceção) | 10 | 1 | 3 | 6 | 563,6 | 33,9 | 3 | 6 | 1 | 4 | 0 | 0 | 6 | aviso |
-| **Total Centenário (alimentadores inteiros)** | | | 3 alimentadores | 1391 | | | | 4.994,7 | 491,7 | | | | | | | | |
+| Centenário | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 410,0 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
+| Centenário |  | SE-2PAI | LD02424015 (exceção) | 713 | 1 | 12 | 700 | 1.684,3 | 53,1 | 12 | 700 | 4 | 0 | 0 | 0 | 6 | aviso |
+| Centenário |  | SE-2PAI | LD01414015 (exceção) | 347 | 1 | 5 | 341 | 564,7 | 33,9 | 5 | 341 | 3 | 0 | 0 | 0 | 5 | aviso |
+| **Total Centenário (alimentadores inteiros)** | | | 3 alimentadores | 2420 | | | | 5.021,6 | 497,0 | | | | | | | | |
 
 ## Chapada da Natividade
 
@@ -422,8 +422,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Chapada de Areia | CENTRO | SE-2PR0 | LD03062013 | 821 | 1 | 7 | 813 | 1.071,2 | 308,5 | 7 | 813 | 55 | 2 | 0 | 0 | 4 | aviso |
-| Chapada de Areia | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 0,4 | 13 | 552 | 42 | 15 | 0 | 0 | 1 | aviso |
-| **Total Chapada de Areia (alimentadores inteiros)** | | | 2 alimentadores | 1387 | | | | 1.951,5 | 308,9 | | | | | | | | |
+| Chapada de Areia | CENTRO | SE-2PR0 | LD05062013 | 565 | 1 | 12 | 552 | 880,3 | 0,4 | 12 | 552 | 12 | 3 | 2 | 0 | 4 | aviso |
+| **Total Chapada de Areia (alimentadores inteiros)** | | | 2 alimentadores | 1386 | | | | 1.951,5 | 308,9 | | | | | | | | |
 
 ## Colinas do Tocantins
 
@@ -435,11 +435,11 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Colinas do Tocantins | NORTE | SE-2CLN | AL06020023 | 73 | 1 | 2 | 70 | 42,6 | 40,1 | 2 | 70 | 7 | 2 | 0 | 0 | 3 | aviso |
 | Colinas do Tocantins | NORTE | SE-2NVO | LD01054060 | 406 | 1 | 8 | 397 | 562,1 | 36,5 | 8 | 397 | 19 | 10 | 0 | 0 | 5 | aviso |
 | Colinas do Tocantins | NORTE | SE-2CLN | AL02020023 | 53 | 1 | 1 | 51 | 33,5 | 29,4 | 1 | 51 | 1 | 0 | 0 | 0 | 3 | aviso |
-| Colinas do Tocantins | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 20,8 | 8 | 348 | 9 | 8 | 0 | 0 | 4 | aviso |
-| Colinas do Tocantins | NORTE | SE-2CLN | LD01020023 | 335 | 1 | 6 | 328 | 599,5 | 14,1 | 6 | 328 | 32 | 0 | 0 | 0 | 4 | aviso |
+| Colinas do Tocantins | NORTE | SE-2BNS | LD03020023 | 361 | 1 | 9 | 351 | 406,1 | 24,6 | 9 | 351 | 1 | 0 | 0 | 0 | 4 | aviso |
+| Colinas do Tocantins | NORTE | SE-2CLN | LD01020023 | 349 | 1 | 8 | 340 | 620,1 | 23,5 | 8 | 340 | 11 | 0 | 0 | 0 | 2 | aviso |
 | Colinas do Tocantins | NORTE | SE-2CLN | AL04020023 | 7 | 1 | 0 | 6 | 12,4 | 12,4 | 0 | 6 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Colinas do Tocantins | NORTE | SE-2CLN | AL03020023 | 3 | 1 | 0 | 2 | 11,3 | 11,3 | 0 | 2 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Colinas do Tocantins (alimentadores inteiros)** | | | 10 alimentadores | 3135 | | | | 3.939,3 | 601,1 | | | | | | | | |
+| **Total Colinas do Tocantins (alimentadores inteiros)** | | | 10 alimentadores | 3153 | | | | 3.965,7 | 614,2 | | | | | | | | |
 
 ## Colméia
 
@@ -453,8 +453,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Colméia | NORTE | SE-2CLM | LD03022033 | 63 | 1 | 4 | 58 | 173,7 | 51,8 | 4 | 58 | 2 | 3 | 0 | 0 | 2 | aviso |
 | Colméia | NORTE | SE-2CLM | AL01022033 | 40 | 1 | 1 | 38 | 22,4 | 22,4 | 1 | 38 | 5 | 0 | 0 | 0 | 4 | aviso |
 | Colméia | NORTE | SE-2ITP | AL01044024 | 54 | 1 | 1 | 52 | 57,5 | 1,3 | 1 | 52 | 18 | 0 | 0 | 0 | 4 | aviso |
-| Colméia | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 0,9 | 16 | 1370 | 111 | 24 | 0 | 0 | 6 | aviso |
-| **Total Colméia (alimentadores inteiros)** | | | 9 alimentadores | 4973 | | | | 6.684,5 | 858,2 | | | | | | | | |
+| Colméia | CENTRO | SE-2MRN | LD02050008 | 1393 | 1 | 14 | 1378 | 2.010,7 | 0,9 | 14 | 1378 | 40 | 1 | 0 | 0 | 4 | aviso |
+| **Total Colméia (alimentadores inteiros)** | | | 9 alimentadores | 4979 | | | | 6.689,7 | 858,2 | | | | | | | | |
 
 ## Combinado
 
@@ -481,9 +481,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Couto Magalhães | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 413,0 | 16 | 1316 | 56 | 0 | 0 | 0 | 6 | aviso |
 | Couto Magalhães | NORTE | SE-2CTM | AL01024113 | 119 | 1 | 2 | 116 | 164,5 | 164,5 | 2 | 116 | 8 | 0 | 0 | 0 | 1 | aviso |
 | Couto Magalhães | NORTE | SE-2BNS | LD01010153 | 722 | 1 | 7 | 714 | 696,7 | 82,8 | 7 | 714 | 29 | 0 | 0 | 0 | 7 | aviso |
-| Couto Magalhães | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 50,2 | 8 | 348 | 9 | 8 | 0 | 0 | 4 | aviso |
+| Couto Magalhães | NORTE | SE-2BNS | LD03020023 | 361 | 1 | 9 | 351 | 406,1 | 50,2 | 9 | 351 | 1 | 0 | 0 | 0 | 4 | aviso |
 | Couto Magalhães | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 15,2 | 8 | 723 | 41 | 0 | 0 | 0 | 4 | aviso |
-| **Total Couto Magalhães (alimentadores inteiros)** | | | 5 alimentadores | 3263 | | | | 4.082,2 | 725,6 | | | | | | | | |
+| **Total Couto Magalhães (alimentadores inteiros)** | | | 5 alimentadores | 3267 | | | | 4.088,0 | 725,6 | | | | | | | | |
 
 ## Cristalândia
 
@@ -542,22 +542,22 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Divinópolis do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 1079 | 1 | 8 | 1070 | 1.191,9 | 745,7 | 8 | 1070 | 54 | 11 | 0 | 0 | 6 | aviso |
-| Divinópolis do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 178,3 | 13 | 552 | 42 | 15 | 0 | 0 | 1 | aviso |
+| Divinópolis do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 565 | 1 | 12 | 552 | 880,3 | 178,3 | 12 | 552 | 12 | 3 | 2 | 0 | 4 | aviso |
 | Divinópolis do Tocantins | CENTRO | SE-2CSR | LD03414149 | 659 | 1 | 10 | 648 | 1.150,1 | 177,5 | 10 | 648 | 65 | 1 | 0 | 0 | 4 | aviso |
 | Divinópolis do Tocantins | CENTRO | SE-2BRR | AL01017017 | 162 | 1 | 0 | 161 | 183,7 | 0,5 | 0 | 161 | 6 | 1 | 0 | 0 | 2 | aviso |
-| **Total Divinópolis do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2466 | | | | 3.405,9 | 1.102,0 | | | | | | | | |
+| **Total Divinópolis do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2465 | | | | 3.405,9 | 1.102,0 | | | | | | | | |
 
 ## Dois Irmãos do Tocantins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Dois Irmãos do Tocantins | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 1.536,2 | 16 | 1370 | 111 | 24 | 0 | 0 | 6 | aviso |
+| Dois Irmãos do Tocantins | CENTRO | SE-2MRN | LD02050008 | 1393 | 1 | 14 | 1378 | 2.010,7 | 1.540,2 | 14 | 1378 | 40 | 1 | 0 | 0 | 4 | aviso |
 | Dois Irmãos do Tocantins | CENTRO | SE-2MRN | LD01050008 | 507 | 1 | 7 | 499 | 591,8 | 88,2 | 7 | 499 | 28 | 0 | 0 | 0 | 4 | aviso |
-| Dois Irmãos do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 53,8 | 13 | 552 | 42 | 15 | 0 | 0 | 1 | aviso |
+| Dois Irmãos do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 565 | 1 | 12 | 552 | 880,3 | 53,8 | 12 | 552 | 12 | 3 | 2 | 0 | 4 | aviso |
 | Dois Irmãos do Tocantins | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 23,1 | 8 | 723 | 41 | 0 | 0 | 0 | 4 | aviso |
 | Dois Irmãos do Tocantins | CENTRO | SE-2BRR | AL01017017 | 162 | 1 | 0 | 161 | 183,7 | 1,7 | 0 | 161 | 6 | 1 | 0 | 0 | 2 | aviso |
 | Dois Irmãos do Tocantins | NORTE | SE-2CLM | LD02022033 | 1019 | 1 | 9 | 1009 | 1.375,2 | 0,3 | 9 | 1009 | 83 | 0 | 0 | 0 | 6 | aviso |
-| **Total Dois Irmãos do Tocantins (alimentadores inteiros)** | | | 6 alimentadores | 4373 | | | | 6.224,8 | 1.703,3 | | | | | | | | |
+| **Total Dois Irmãos do Tocantins (alimentadores inteiros)** | | | 6 alimentadores | 4378 | | | | 6.230,1 | 1.707,2 | | | | | | | | |
 
 ## Dueré
 
@@ -570,17 +570,17 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Dueré | SUL | SE-2FRM | AL02036052 | 157 | 1 | 1 | 155 | 153,8 | 18,7 | 1 | 155 | 9 | 0 | 0 | 0 | 3 | aviso |
 | Dueré | SUL | SE-2DGU | AL01041003 | 143 | 1 | 1 | 141 | 76,4 | 12,4 | 1 | 141 | 10 | 0 | 0 | 0 | 3 | aviso |
 | Dueré | CENTRO | SE-SLC | LD02047073 | 472 | 1 | 8 | 463 | 813,9 | 5,5 | 8 | 463 | 8 | 4 | 0 | 0 | 6 | aviso |
-| Dueré | SUL | SE-2GP3 | AL05020003 | 43 | 1 | 2 | 40 | 44,9 | 1,9 | 2 | 40 | 1 | 0 | 0 | 0 | 1 | aviso |
+| Dueré | SUL | SE-2GP3 | AL05020003 | 42 | 1 | 1 | 40 | 44,8 | 1,9 | 1 | 40 | 0 | 0 | 2 | 0 | 6 | aviso |
 | Dueré | SUL | SE-2FRM | LD03036052 | 77 | 1 | 1 | 75 | 174,2 | 1,9 | 1 | 75 | 7 | 0 | 0 | 0 | 4 | aviso |
-| **Total Dueré (alimentadores inteiros)** | | | 9 alimentadores | 2855 | | | | 3.942,4 | 1.162,1 | | | | | | | | |
+| **Total Dueré (alimentadores inteiros)** | | | 9 alimentadores | 2854 | | | | 3.942,4 | 1.162,1 | | | | | | | | |
 
 ## Esperantina
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Esperantina | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 236,8 | 10 | 877 | 218 | 12 | 0 | 0 | 6 | aviso |
+| Esperantina | NORTE | SE-2AGT | LD03014045 | 908 | 1 | 11 | 896 | 937,1 | 237,5 | 11 | 896 | 44 | 0 | 0 | 0 | 4 | aviso |
 | Esperantina | NORTE | SE-2ATN | LD02109039 | 484 | 1 | 6 | 477 | 489,8 | 14,6 | 6 | 477 | 148 | 1 | 0 | 0 | 7 | aviso |
-| **Total Esperantina (alimentadores inteiros)** | | | 2 alimentadores | 1372 | | | | 1.405,8 | 251,5 | | | | | | | | |
+| **Total Esperantina (alimentadores inteiros)** | | | 2 alimentadores | 1392 | | | | 1.426,9 | 252,2 | | | | | | | | |
 
 ## Fátima
 
@@ -611,10 +611,10 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Filadélfia | NORTE | SE-2BIE | LD01105019 | 328 | 1 | 3 | 324 | 456,7 | 354,5 | 3 | 324 | 19 | 0 | 0 | 0 | 3 | aviso |
 | Filadélfia | NORTE | SE-2BIE | LD02105019 | 260 | 1 | 2 | 257 | 549,7 | 261,5 | 2 | 257 | 30 | 1 | 0 | 0 | 1 | aviso |
 | Filadélfia | NORTE | SE-2BIE | LD04105019 | 344 | 1 | 0 | 343 | 380,3 | 242,3 | 0 | 343 | 31 | 0 | 0 | 0 | 2 | aviso |
-| Filadélfia | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 146,6 | 13 | 777 | 72 | 7 | 0 | 0 | 6 | aviso |
+| Filadélfia | NORTE | SE-2BIE | LD03105019 | 794 | 1 | 15 | 778 | 1.600,1 | 148,7 | 15 | 778 | 18 | 5 | 0 | 0 | 4 | aviso |
 | Filadélfia |  | SE-2BIE | LD05105019 | 4 | 1 | 0 | 3 | 36,9 | 36,9 | 0 | 3 | 0 | 0 | 0 | 0 | 2 | aviso |
 | Filadélfia | NORTE | SE-2FLD | AL01034019 | 29 | 1 | 0 | 28 | 22,2 | 22,2 | 0 | 28 | 1 | 0 | 0 | 0 | 1 | aviso |
-| **Total Filadélfia (alimentadores inteiros)** | | | 6 alimentadores | 1756 | | | | 3.043,1 | 1.064,0 | | | | | | | | |
+| **Total Filadélfia (alimentadores inteiros)** | | | 6 alimentadores | 1759 | | | | 3.045,9 | 1.066,1 | | | | | | | | |
 
 ## Formoso do Araguaia
 
@@ -638,19 +638,19 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Goianorte | NORTE | SE-2CLM | LD02022033 | 1019 | 1 | 9 | 1009 | 1.375,2 | 757,9 | 9 | 1009 | 83 | 0 | 0 | 0 | 6 | aviso |
 | Goianorte | NORTE | SE-2CLM | LD03022033 | 63 | 1 | 4 | 58 | 173,7 | 59,4 | 4 | 58 | 2 | 3 | 0 | 0 | 2 | aviso |
 | Goianorte | CENTRO | SE-2CSR | LD01434149 | 732 | 1 | 8 | 723 | 1.188,3 | 37,8 | 8 | 723 | 41 | 0 | 0 | 0 | 4 | aviso |
-| Goianorte | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 35,4 | 16 | 1370 | 111 | 24 | 0 | 0 | 6 | aviso |
+| Goianorte | CENTRO | SE-2MRN | LD02050008 | 1393 | 1 | 14 | 1378 | 2.010,7 | 35,4 | 14 | 1378 | 40 | 1 | 0 | 0 | 4 | aviso |
 | Goianorte | NORTE | SE-2GU2 | LD04038009 | 603 | 1 | 5 | 597 | 744,2 | 25,3 | 5 | 597 | 123 | 0 | 0 | 0 | 7 | aviso |
-| **Total Goianorte (alimentadores inteiros)** | | | 5 alimentadores | 3804 | | | | 5.486,9 | 915,7 | | | | | | | | |
+| **Total Goianorte (alimentadores inteiros)** | | | 5 alimentadores | 3810 | | | | 5.492,1 | 915,7 | | | | | | | | |
 
 ## Goiatins
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Goiatins | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 883,6 | 13 | 777 | 72 | 7 | 0 | 0 | 6 | aviso |
+| Goiatins | NORTE | SE-2BIE | LD03105019 | 794 | 1 | 15 | 778 | 1.600,1 | 883,6 | 15 | 778 | 18 | 5 | 0 | 0 | 4 | aviso |
 | Goiatins | NORTE | SE-2ITC | AL01042078 | 213 | 1 | 4 | 208 | 611,4 | 539,7 | 4 | 208 | 20 | 1 | 0 | 0 | 1 | aviso |
 | Goiatins | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 87,6 | 14 | 954 | 69 | 17 | 0 | 0 | 4 | aviso |
-| Goiatins | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 13,5 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
-| **Total Goiatins (alimentadores inteiros)** | | | 4 alimentadores | 3323 | | | | 6.446,6 | 1.524,5 | | | | | | | | |
+| Goiatins | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 13,6 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
+| **Total Goiatins (alimentadores inteiros)** | | | 4 alimentadores | 3336 | | | | 6.463,6 | 1.524,5 | | | | | | | | |
 
 ## Guaraí
 
@@ -678,8 +678,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Gurupi | SUL | SE-2GP2 | AL01113003 | 98 | 1 | 1 | 96 | 87,8 | 87,8 | 1 | 96 | 11 | 0 | 0 | 0 | 2 | aviso |
 | Gurupi | SUL | SE-2DGU | AL01041003 | 143 | 1 | 1 | 141 | 76,4 | 64,0 | 1 | 141 | 10 | 0 | 0 | 0 | 3 | aviso |
 | Gurupi | SUL | SE-2GP3 | AL03020003 | 62 | 1 | 2 | 59 | 45,3 | 45,3 | 2 | 59 | 3 | 0 | 0 | 0 | 0 | ok |
-| Gurupi | SUL | SE-2GP2 | AL04113003 | 66 | 1 | 4 | 61 | 43,9 | 43,9 | 4 | 61 | 7 | 0 | 0 | 0 | 3 | aviso |
-| Gurupi | SUL | SE-2GP3 | AL05020003 | 43 | 1 | 2 | 40 | 44,9 | 41,4 | 2 | 40 | 1 | 0 | 0 | 0 | 1 | aviso |
+| Gurupi | SUL | SE-2GP2 | AL04113003 | 65 | 1 | 3 | 61 | 43,9 | 43,9 | 3 | 61 | 1 | 0 | 0 | 0 | 1 | aviso |
+| Gurupi | SUL | SE-2GP3 | AL05020003 | 42 | 1 | 1 | 40 | 44,8 | 41,4 | 1 | 40 | 0 | 0 | 2 | 0 | 6 | aviso |
 | Gurupi | SUL | SE-2GUR | LD02040003 | 577 | 1 | 9 | 567 | 835,2 | 25,0 | 9 | 567 | 72 | 1 | 0 | 0 | 6 | aviso |
 | Gurupi | SUL | SE-2GUR | AL06040003 | 117 | 1 | 1 | 115 | 114,2 | 24,4 | 1 | 115 | 10 | 1 | 0 | 0 | 3 | aviso |
 | Gurupi | SUL | SE-2GP2 | AL02113003 | 47 | 1 | 1 | 45 | 22,8 | 22,8 | 1 | 45 | 1 | 0 | 0 | 0 | 4 | aviso |
@@ -691,7 +691,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Gurupi | SUL | SE-2GUR | AL03040003 | 27 | 1 | 1 | 25 | 8,0 | 8,0 | 1 | 25 | 2 | 2 | 0 | 0 | 2 | aviso |
 | Gurupi | SUL | SE-2GUR | AL02040003 | 12 | 1 | 0 | 11 | 6,0 | 6,0 | 0 | 11 | 1 | 0 | 0 | 0 | 1 | aviso |
 | Gurupi | SUL | SE-2GUR | LD01040003 | 14 | 1 | 3 | 10 | 25,9 | 3,5 | 3 | 10 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Gurupi (alimentadores inteiros)** | | | 19 alimentadores | 3437 | | | | 4.081,2 | 1.242,2 | | | | | | | | |
+| **Total Gurupi (alimentadores inteiros)** | | | 19 alimentadores | 3435 | | | | 4.081,2 | 1.242,2 | | | | | | | | |
 
 ## Ipueiras
 
@@ -705,10 +705,10 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Itacajá | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 611,3 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
+| Itacajá | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 612,7 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
 | Itacajá | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 289,3 | 14 | 954 | 69 | 17 | 0 | 0 | 4 | aviso |
 | Itacajá | NORTE | SE-2ITC | AL01042078 | 213 | 1 | 4 | 208 | 611,4 | 9,2 | 4 | 208 | 20 | 1 | 0 | 0 | 1 | aviso |
-| **Total Itacajá (alimentadores inteiros)** | | | 3 alimentadores | 2532 | | | | 4.849,3 | 909,7 | | | | | | | | |
+| **Total Itacajá (alimentadores inteiros)** | | | 3 alimentadores | 2542 | | | | 4.863,5 | 911,1 | | | | | | | | |
 
 ## Itaguatins
 
@@ -726,9 +726,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Itapiratins | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 471,8 | 14 | 954 | 69 | 17 | 0 | 0 | 4 | aviso |
-| Itapiratins | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 68,7 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
-| Itapiratins | NORTE | SE-2BIE | LD03105019 | 791 | 1 | 13 | 777 | 1.597,3 | 16,1 | 13 | 777 | 72 | 7 | 0 | 0 | 6 | aviso |
-| **Total Itapiratins (alimentadores inteiros)** | | | 3 alimentadores | 3110 | | | | 5.835,2 | 556,6 | | | | | | | | |
+| Itapiratins | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 68,7 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
+| Itapiratins | NORTE | SE-2BIE | LD03105019 | 794 | 1 | 15 | 778 | 1.600,1 | 16,1 | 15 | 778 | 18 | 5 | 0 | 0 | 4 | aviso |
+| **Total Itapiratins (alimentadores inteiros)** | | | 3 alimentadores | 3123 | | | | 5.852,2 | 556,6 | | | | | | | | |
 
 ## Itaporã do Tocantins
 
@@ -754,8 +754,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Juarina | NORTE | SE-2BNS | LD01010153 | 722 | 1 | 7 | 714 | 696,7 | 302,4 | 7 | 714 | 29 | 0 | 0 | 0 | 7 | aviso |
-| Juarina | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 4,2 | 8 | 348 | 9 | 8 | 0 | 0 | 4 | aviso |
-| **Total Juarina (alimentadores inteiros)** | | | 2 alimentadores | 1079 | | | | 1.097,1 | 306,6 | | | | | | | | |
+| Juarina | NORTE | SE-2BNS | LD03020023 | 361 | 1 | 9 | 351 | 406,1 | 4,2 | 9 | 351 | 1 | 0 | 0 | 0 | 4 | aviso |
+| **Total Juarina (alimentadores inteiros)** | | | 2 alimentadores | 1083 | | | | 1.102,8 | 306,6 | | | | | | | | |
 
 ## Lagoa da Confusão
 
@@ -802,9 +802,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Lizarda |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 380,4 | 8 | 22 | 4 | 3 | 0 | 0 | 6 | aviso |
-| Lizarda | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 76,2 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
-| **Total Lizarda (alimentadores inteiros)** | | | 2 alimentadores | 1381 | | | | 4.431,0 | 456,6 | | | | | | | | |
+| Lizarda |  | SE-2PAI | LD02424015 (exceção) | 713 | 1 | 12 | 700 | 1.684,3 | 380,5 | 12 | 700 | 4 | 0 | 0 | 0 | 6 | aviso |
+| Lizarda | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 77,9 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
+| **Total Lizarda (alimentadores inteiros)** | | | 2 alimentadores | 2073 | | | | 4.456,9 | 458,4 | | | | | | | | |
 
 ## Luzinópolis
 
@@ -818,10 +818,10 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Marianópolis do Tocantins | CENTRO | SE-2CSR | LD03414149 | 659 | 1 | 10 | 648 | 1.150,1 | 450,9 | 10 | 648 | 65 | 1 | 0 | 0 | 4 | aviso |
-| Marianópolis do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 226,9 | 13 | 552 | 42 | 15 | 0 | 0 | 1 | aviso |
+| Marianópolis do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 565 | 1 | 12 | 552 | 880,3 | 226,9 | 12 | 552 | 12 | 3 | 2 | 0 | 4 | aviso |
 | Marianópolis do Tocantins | CENTRO | SE-2CRI | LD01025012 | 672 | 1 | 8 | 663 | 1.231,5 | 53,2 | 8 | 663 | 42 | 2 | 0 | 0 | 4 | aviso |
 | Marianópolis do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 1079 | 1 | 8 | 1070 | 1.191,9 | 42,4 | 8 | 1070 | 54 | 11 | 0 | 0 | 6 | aviso |
-| **Total Marianópolis do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2976 | | | | 4.453,7 | 773,4 | | | | | | | | |
+| **Total Marianópolis do Tocantins (alimentadores inteiros)** | | | 4 alimentadores | 2975 | | | | 4.453,8 | 773,4 | | | | | | | | |
 
 ## Mateiros
 
@@ -849,25 +849,25 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Miracema do Tocantins | CENTRO | SE-2MIR | AL02048007 | 105 | 1 | 2 | 102 | 82,7 | 82,7 | 2 | 102 | 14 | 0 | 0 | 0 | 1 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 371 | 1 | 1 | 369 | 369,3 | 62,3 | 1 | 369 | 14 | 1 | 0 | 0 | 3 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2LUZ | AL02101271 | 342 | 1 | 3 | 338 | 274,1 | 57,1 | 3 | 338 | 11 | 0 | 0 | 0 | 2 | aviso |
-| Miracema do Tocantins | CENTRO | SE-2LUI | AL01102271 (exceção) | 19 | 1 | 3 | 15 | 384,4 | 52,3 | 3 | 15 | 5 | 4 | 0 | 0 | 3 | aviso |
+| Miracema do Tocantins | CENTRO | SE-2LUI | AL01102271 (exceção) | 313 | 1 | 5 | 307 | 384,6 | 52,3 | 5 | 307 | 2 | 0 | 0 | 0 | 4 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2BRR | AL01017017 | 162 | 1 | 0 | 161 | 183,7 | 26,1 | 0 | 161 | 6 | 1 | 0 | 0 | 2 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2MRN | LD03050008 | 391 | 1 | 4 | 386 | 512,8 | 24,3 | 4 | 386 | 31 | 2 | 0 | 0 | 2 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2MIR | AL01048007 | 32 | 1 | 1 | 30 | 16,4 | 16,4 | 1 | 30 | 5 | 0 | 0 | 0 | 4 | aviso |
 | Miracema do Tocantins | CENTRO | SE-2MRN | LD04050008 | 7 | 1 | 0 | 6 | 18,6 | 13,9 | 0 | 6 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Miracema do Tocantins (alimentadores inteiros)** | | | 11 alimentadores | 2846 | | | | 3.358,2 | 1.501,0 | | | | | | | | |
+| **Total Miracema do Tocantins (alimentadores inteiros)** | | | 11 alimentadores | 3140 | | | | 3.358,4 | 1.501,0 | | | | | | | | |
 
 ## Miranorte
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Miranorte | CENTRO | SE-2MRN | LD02050008 | 1387 | 1 | 16 | 1370 | 2.005,5 | 262,9 | 16 | 1370 | 111 | 24 | 0 | 0 | 6 | aviso |
+| Miranorte | CENTRO | SE-2MRN | LD02050008 | 1393 | 1 | 14 | 1378 | 2.010,7 | 264,2 | 14 | 1378 | 40 | 1 | 0 | 0 | 4 | aviso |
 | Miranorte | CENTRO | SE-2MRN | LD03050008 | 391 | 1 | 4 | 386 | 512,8 | 152,0 | 4 | 386 | 31 | 2 | 0 | 0 | 2 | aviso |
 | Miranorte | CENTRO | SE-2MRN | LD01050008 | 507 | 1 | 7 | 499 | 591,8 | 83,2 | 7 | 499 | 28 | 0 | 0 | 0 | 4 | aviso |
 | Miranorte | CENTRO | SE-2MRN | AL01050008 | 88 | 1 | 1 | 86 | 72,6 | 72,6 | 1 | 86 | 2 | 0 | 0 | 0 | 4 | aviso |
 | Miranorte | CENTRO | SE-2MRN | AL02050008 | 43 | 1 | 1 | 41 | 31,5 | 31,5 | 1 | 41 | 4 | 0 | 0 | 0 | 3 | aviso |
 | Miranorte | CENTRO | SE-2MRN | LD05050008 | 675 | 1 | 9 | 665 | 651,2 | 19,8 | 9 | 665 | 70 | 2 | 0 | 0 | 4 | aviso |
 | Miranorte | CENTRO | SE-2MRN | LD04050008 | 7 | 1 | 0 | 6 | 18,6 | 4,7 | 0 | 6 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Miranorte (alimentadores inteiros)** | | | 7 alimentadores | 3098 | | | | 3.884,0 | 626,8 | | | | | | | | |
+| **Total Miranorte (alimentadores inteiros)** | | | 7 alimentadores | 3104 | | | | 3.889,3 | 628,0 | | | | | | | | |
 
 ## Monte do Carmo
 
@@ -875,14 +875,14 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Monte do Carmo | CENTRO | SE-2MTC | LD01051035 | 580 | 1 | 5 | 574 | 891,6 | 672,1 | 5 | 574 | 92 | 0 | 0 | 0 | 5 | aviso |
 | Monte do Carmo | CENTRO | SE-2PNA | AL03072001 | 435 | 1 | 3 | 431 | 511,6 | 352,7 | 3 | 431 | 47 | 0 | 0 | 0 | 3 | aviso |
-| Monte do Carmo | CENTRO | SE-2MTC | AL01051035 | 95 | 1 | 0 | 94 | 196,6 | 196,6 | 0 | 94 | 28 | 1 | 0 | 0 | 1 | aviso |
+| Monte do Carmo | CENTRO | SE-2MTC | AL01051035 | 104 | 1 | 2 | 101 | 212,2 | 212,2 | 2 | 101 | 8 | 0 | 0 | 0 | 3 | aviso |
 | Monte do Carmo | CENTRO | SE-2PA2 | LD02059122 | 1803 | 1 | 24 | 1778 | 2.138,3 | 172,2 | 24 | 1778 | 211 | 1 | 0 | 0 | 6 | aviso |
 | Monte do Carmo | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 83,4 | 18 | 1054 | 86 | 11 | 0 | 0 | 4 | aviso |
 | Monte do Carmo | CENTRO | SE-2SJO | LD01100001 | 371 | 1 | 6 | 364 | 243,5 | 24,2 | 6 | 364 | 75 | 2 | 0 | 0 | 5 | aviso |
 | Monte do Carmo | CENTRO | SE-2PNA | AL06072001 | 206 | 1 | 3 | 202 | 204,5 | 20,3 | 3 | 202 | 27 | 1 | 0 | 0 | 1 | aviso |
 | Monte do Carmo | CENTRO | SE-2PNA | LD01072001 | 199 | 1 | 3 | 195 | 154,0 | 14,4 | 3 | 195 | 26 | 2 | 0 | 0 | 2 | aviso |
 | Monte do Carmo | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 13,5 | 28 | 1494 | 101 | 4 | 0 | 0 | 7 | aviso |
-| **Total Monte do Carmo (alimentadores inteiros)** | | | 9 alimentadores | 6285 | | | | 9.316,6 | 1.549,2 | | | | | | | | |
+| **Total Monte do Carmo (alimentadores inteiros)** | | | 9 alimentadores | 6294 | | | | 9.332,2 | 1.564,8 | | | | | | | | |
 
 ## Monte Santo do Tocantins
 
@@ -891,9 +891,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 1079 | 1 | 8 | 1070 | 1.191,9 | 347,5 | 8 | 1070 | 54 | 11 | 0 | 0 | 6 | aviso |
 | Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD03062013 | 821 | 1 | 7 | 813 | 1.071,2 | 156,2 | 7 | 813 | 55 | 2 | 0 | 0 | 4 | aviso |
 | Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 371 | 1 | 1 | 369 | 369,3 | 35,3 | 1 | 369 | 14 | 1 | 0 | 0 | 3 | aviso |
-| Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 33,2 | 13 | 552 | 42 | 15 | 0 | 0 | 1 | aviso |
+| Monte Santo do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 565 | 1 | 12 | 552 | 880,3 | 33,2 | 12 | 552 | 12 | 3 | 2 | 0 | 4 | aviso |
 | Monte Santo do Tocantins | CENTRO | SE-2PR0 | AL05062013 | 142 | 1 | 4 | 137 | 94,6 | 6,2 | 4 | 137 | 12 | 0 | 0 | 0 | 7 | aviso |
-| **Total Monte Santo do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 2979 | | | | 3.607,2 | 578,3 | | | | | | | | |
+| **Total Monte Santo do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 2978 | | | | 3.607,2 | 578,3 | | | | | | | | |
 
 ## Muricilândia
 
@@ -936,8 +936,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Nova Olinda | NORTE | SE-2AR0 | LD03010004 | 1997 | 1 | 20 | 1976 | 2.299,4 | 53,9 | 20 | 1976 | 655 | 1 | 0 | 0 | 4 | aviso |
 | Nova Olinda | NORTE | SE-2AR2 | AL02096004 | 285 | 1 | 3 | 281 | 264,3 | 51,2 | 3 | 281 | 84 | 8 | 0 | 0 | 2 | aviso |
 | Nova Olinda |  | SE-2NVO | AL03054060 | 2 | 1 | 0 | 1 | 1,9 | 1,9 | 0 | 1 | 0 | 0 | 0 | 0 | 2 | aviso |
-| Nova Olinda | NORTE | SE-2CLN | LD01020023 | 335 | 1 | 6 | 328 | 599,5 | 0,3 | 6 | 328 | 32 | 0 | 0 | 0 | 4 | aviso |
-| **Total Nova Olinda (alimentadores inteiros)** | | | 7 alimentadores | 3767 | | | | 4.595,2 | 926,3 | | | | | | | | |
+| **Total Nova Olinda (alimentadores inteiros)** | | | 6 alimentadores | 3432 | | | | 3.995,7 | 926,0 | | | | | | | | |
 
 ## Nova Rosalândia
 
@@ -996,8 +995,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Palmas |  | SE-2PA3 | AL10097122 | 75 | 1 | 3 | 71 | 71,3 | 71,3 | 3 | 71 | 2 | 0 | 0 | 0 | 1 | aviso |
 | Palmas | CENTRO | SE-2PA2 | AL10059122 | 161 | 1 | 2 | 158 | 68,3 | 68,3 | 2 | 158 | 6 | 0 | 0 | 0 | 1 | aviso |
 | Palmas | CENTRO | SE-2TQ2 | AL04099059 | 104 | 1 | 1 | 102 | 59,0 | 59,0 | 1 | 102 | 18 | 0 | 0 | 0 | 2 | aviso |
-| Palmas | CENTRO | SE-2PA4 | AL06060122 | 93 | 1 | 2 | 90 | 52,1 | 52,1 | 2 | 90 | 11 | 0 | 0 | 0 | 0 | ok |
-| Palmas | CENTRO | SE-2TQ2 | AL06099059 | 61 | 1 | 0 | 60 | 44,7 | 44,7 | 0 | 60 | 6 | 0 | 0 | 0 | 3 | aviso |
+| Palmas | CENTRO | SE-2PA4 | AL06060122 | 90 | 1 | 3 | 86 | 52,1 | 52,1 | 3 | 86 | 1 | 0 | 0 | 0 | 1 | aviso |
+| Palmas | CENTRO | SE-2TQ2 | AL06099059 | 62 | 1 | 1 | 60 | 44,7 | 44,7 | 1 | 60 | 2 | 0 | 0 | 0 | 2 | aviso |
 | Palmas | CENTRO | SE-2PA3 | AL08097122 | 42 | 1 | 1 | 40 | 37,8 | 37,8 | 1 | 40 | 7 | 0 | 0 | 0 | 2 | aviso |
 | Palmas | CENTRO | SE-2PA3 | AL07097122 | 38 | 1 | 1 | 36 | 37,3 | 37,3 | 1 | 36 | 15 | 1 | 0 | 0 | 2 | aviso |
 | Palmas | CENTRO | SE-2PA4 | AL11060122 | 27 | 1 | 3 | 23 | 36,1 | 36,1 | 3 | 23 | 1 | 1 | 0 | 0 | 0 | ok |
@@ -1035,13 +1034,13 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Palmas | CENTRO | SE-2PNA | AL03072001 | 435 | 1 | 3 | 431 | 511,6 | 9,9 | 3 | 431 | 47 | 0 | 0 | 0 | 3 | aviso |
 | Palmas | CENTRO | SE-2TQ2 | AL03099059 | 1 | 1 | 0 | 0 | 3,1 | 3,1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | aviso |
 | Palmas | CENTRO | SE-2PA4 | AL01060122 | 1 | 1 | 0 | 0 | 2,0 | 2,0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
-| **Total Palmas (alimentadores inteiros)** | | | 47 alimentadores | 6904 | | | | 6.790,3 | 2.477,8 | | | | | | | | |
+| **Total Palmas (alimentadores inteiros)** | | | 47 alimentadores | 6902 | | | | 6.790,3 | 2.477,8 | | | | | | | | |
 
 ## Palmeirante
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Palmeirante | NORTE | SE-2CLN | LD01020023 | 335 | 1 | 6 | 328 | 599,5 | 576,1 | 6 | 328 | 32 | 0 | 0 | 0 | 4 | aviso |
+| Palmeirante | NORTE | SE-2CLN | LD01020023 | 349 | 1 | 8 | 340 | 620,1 | 587,8 | 8 | 340 | 11 | 0 | 0 | 0 | 2 | aviso |
 | Palmeirante | NORTE | SE-2BIE | LD02105019 | 260 | 1 | 2 | 257 | 549,7 | 288,1 | 2 | 257 | 30 | 1 | 0 | 0 | 1 | aviso |
 | Palmeirante | NORTE | SE-2NVO | AL01054060 | 670 | 1 | 10 | 659 | 798,0 | 127,2 | 10 | 659 | 45 | 0 | 0 | 0 | 4 | aviso |
 | Palmeirante | NORTE | SE-2NVO | LD01054060 | 406 | 1 | 8 | 397 | 562,1 | 98,0 | 8 | 397 | 19 | 10 | 0 | 0 | 5 | aviso |
@@ -1049,7 +1048,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Palmeirante | NORTE | SE-2CLN | AL02020023 | 53 | 1 | 1 | 51 | 33,5 | 4,2 | 1 | 51 | 1 | 0 | 0 | 0 | 3 | aviso |
 | Palmeirante | NORTE | SE-2CLN | AL06020023 | 73 | 1 | 2 | 70 | 42,6 | 2,5 | 2 | 70 | 7 | 2 | 0 | 0 | 3 | aviso |
 | Palmeirante | NORTE | SE-2CLN | AL01020023 | 130 | 1 | 3 | 126 | 116,6 | 1,3 | 3 | 126 | 6 | 0 | 0 | 0 | 4 | aviso |
-| **Total Palmeirante (alimentadores inteiros)** | | | 8 alimentadores | 3260 | | | | 4.334,4 | 1.172,6 | | | | | | | | |
+| **Total Palmeirante (alimentadores inteiros)** | | | 8 alimentadores | 3274 | | | | 4.355,1 | 1.184,3 | | | | | | | | |
 
 ## Palmeiras do Tocantins
 
@@ -1075,7 +1074,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | AL03062013 | 509 | 1 | 5 | 503 | 520,7 | 229,8 | 5 | 503 | 30 | 0 | 0 | 0 | 2 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2LUI | AL01102271 (exceção) | 19 | 1 | 3 | 15 | 384,4 | 150,2 | 3 | 15 | 5 | 4 | 0 | 0 | 3 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2LUI | AL01102271 (exceção) | 313 | 1 | 5 | 307 | 384,6 | 150,3 | 5 | 307 | 2 | 0 | 0 | 0 | 4 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | LD03062013 | 821 | 1 | 7 | 813 | 1.071,2 | 143,6 | 7 | 813 | 55 | 2 | 0 | 0 | 4 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | LD02062013 | 371 | 1 | 1 | 369 | 369,3 | 114,9 | 1 | 369 | 14 | 1 | 0 | 0 | 3 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | LD01062013 | 204 | 1 | 1 | 202 | 187,0 | 103,3 | 1 | 202 | 11 | 1 | 0 | 0 | 4 | aviso |
@@ -1084,11 +1083,11 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | AL02062013 | 43 | 1 | 2 | 40 | 28,1 | 28,1 | 2 | 40 | 2 | 2 | 0 | 0 | 3 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | AL04062013 | 59 | 1 | 2 | 56 | 23,1 | 23,1 | 2 | 56 | 2 | 0 | 0 | 0 | 2 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR0 | LD04062013 | 1079 | 1 | 8 | 1070 | 1.191,9 | 20,9 | 8 | 1070 | 54 | 11 | 0 | 0 | 6 | aviso |
-| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 12,0 | 13 | 552 | 42 | 15 | 0 | 0 | 1 | aviso |
+| Paraíso do Tocantins | CENTRO | SE-2PR0 | LD05062013 | 565 | 1 | 12 | 552 | 880,3 | 12,0 | 12 | 552 | 12 | 3 | 2 | 0 | 4 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR2 | LD02004013 | 25 | 1 | 0 | 24 | 11,5 | 11,5 | 0 | 24 | 2 | 0 | 0 | 0 | 1 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2PR2 | LD01004013 | 1 | 1 | 0 | 0 | 5,2 | 5,2 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Paraíso do Tocantins | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 3,0 | 11 | 907 | 54 | 3 | 0 | 0 | 6 | aviso |
-| **Total Paraíso do Tocantins (alimentadores inteiros)** | | | 14 alimentadores | 4884 | | | | 5.961,5 | 1.018,5 | | | | | | | | |
+| **Total Paraíso do Tocantins (alimentadores inteiros)** | | | 14 alimentadores | 5177 | | | | 5.961,7 | 1.018,5 | | | | | | | | |
 
 ## Paranã
 
@@ -1117,13 +1116,13 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Pedro Afonso |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 365,9 | 8 | 22 | 4 | 3 | 0 | 0 | 6 | aviso |
-| Pedro Afonso |  | SE-2PAI | LD01414015 (exceção) | 10 | 1 | 3 | 6 | 563,6 | 327,3 | 3 | 6 | 1 | 4 | 0 | 0 | 6 | aviso |
+| Pedro Afonso |  | SE-2PAI | LD02424015 (exceção) | 713 | 1 | 12 | 700 | 1.684,3 | 366,4 | 12 | 700 | 4 | 0 | 0 | 0 | 6 | aviso |
+| Pedro Afonso |  | SE-2PAI | LD01414015 (exceção) | 347 | 1 | 5 | 341 | 564,7 | 328,0 | 5 | 341 | 3 | 0 | 0 | 0 | 5 | aviso |
 | Pedro Afonso | NORTE | SE-2PDA | LD02065015 | 44 | 1 | 1 | 42 | 36,9 | 36,9 | 1 | 42 | 6 | 24 | 0 | 0 | 3 | aviso |
-| Pedro Afonso | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 27,3 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
+| Pedro Afonso | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 27,3 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
 | Pedro Afonso | NORTE | SE-2PDA | AL01065015 | 194 | 1 | 4 | 189 | 214,1 | 25,3 | 4 | 189 | 14 | 2 | 0 | 0 | 2 | aviso |
 | Pedro Afonso | NORTE | SE-2PDA | AL02065015 | 46 | 1 | 2 | 43 | 40,4 | 6,1 | 2 | 43 | 4 | 0 | 2 | 0 | 4 | aviso |
-| **Total Pedro Afonso (alimentadores inteiros)** | | | 6 alimentadores | 1675 | | | | 5.286,0 | 788,8 | | | | | | | | |
+| **Total Pedro Afonso (alimentadores inteiros)** | | | 6 alimentadores | 2704 | | | | 5.312,9 | 790,0 | | | | | | | | |
 
 ## Peixe
 
@@ -1146,9 +1145,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Pequizeiro | NORTE | SE-2CLM | LD02022033 | 1019 | 1 | 9 | 1009 | 1.375,2 | 254,1 | 9 | 1009 | 83 | 0 | 0 | 0 | 6 | aviso |
 | Pequizeiro | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 149,3 | 16 | 1316 | 56 | 0 | 0 | 0 | 6 | aviso |
-| Pequizeiro | NORTE | SE-2BNS | LD03020023 | 357 | 1 | 8 | 348 | 400,3 | 136,4 | 8 | 348 | 9 | 8 | 0 | 0 | 4 | aviso |
+| Pequizeiro | NORTE | SE-2BNS | LD03020023 | 361 | 1 | 9 | 351 | 406,1 | 138,0 | 9 | 351 | 1 | 0 | 0 | 0 | 4 | aviso |
 | Pequizeiro | NORTE | SE-2CLN | AL05020023 | 438 | 1 | 3 | 434 | 528,6 | 107,8 | 3 | 434 | 13 | 0 | 0 | 0 | 3 | aviso |
-| **Total Pequizeiro (alimentadores inteiros)** | | | 4 alimentadores | 3147 | | | | 3.936,5 | 647,5 | | | | | | | | |
+| **Total Pequizeiro (alimentadores inteiros)** | | | 4 alimentadores | 3151 | | | | 3.942,2 | 649,1 | | | | | | | | |
 
 ## Pindorama do Tocantins
 
@@ -1181,11 +1180,11 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Pium | CENTRO | SE-2CRI | LD02025012 | 88 | 1 | 1 | 86 | 115,6 | 82,9 | 1 | 86 | 5 | 1 | 0 | 0 | 3 | aviso |
 | Pium |  | SE-SLC | LD04047073 | 179 | 1 | 2 | 176 | 209,4 | 71,6 | 2 | 176 | 0 | 0 | 0 | 0 | 4 | aviso |
 | Pium |  | SE-2PIU | AL01068014 | 48 | 1 | 1 | 46 | 48,0 | 48,0 | 1 | 46 | 4 | 0 | 0 | 0 | 3 | aviso |
-| Pium | CENTRO | SE-2PR0 | LD05062013 | 566 | 1 | 13 | 552 | 880,3 | 25,0 | 13 | 552 | 42 | 15 | 0 | 0 | 1 | aviso |
+| Pium | CENTRO | SE-2PR0 | LD05062013 | 565 | 1 | 12 | 552 | 880,3 | 25,0 | 12 | 552 | 12 | 3 | 2 | 0 | 4 | aviso |
 | Pium |  | SE-3STZ | LD01926241 | 6 | 1 | 0 | 5 | 23,4 | 19,3 | 0 | 5 | 0 | 0 | 0 | 0 | 4 | aviso |
 | Pium | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 18,5 | 11 | 907 | 54 | 3 | 0 | 0 | 6 | aviso |
 | Pium | CENTRO | SE-2NRS | AL01056046 | 117 | 1 | 1 | 115 | 100,9 | 1,7 | 1 | 115 | 7 | 0 | 0 | 0 | 3 | aviso |
-| **Total Pium (alimentadores inteiros)** | | | 10 alimentadores | 3888 | | | | 5.604,1 | 1.449,3 | | | | | | | | |
+| **Total Pium (alimentadores inteiros)** | | | 10 alimentadores | 3887 | | | | 5.604,1 | 1.449,3 | | | | | | | | |
 
 ## Ponte Alta do Bom Jesus
 
@@ -1206,9 +1205,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Ponte Alta do Tocantins | CENTRO | SE-1UI1 | LD03046026 | 1523 | 1 | 28 | 1494 | 3.095,9 | 1.035,7 | 28 | 1494 | 101 | 4 | 0 | 0 | 7 | aviso |
 | Ponte Alta do Tocantins | CENTRO | SE-2PA2 | LD02059122 | 1803 | 1 | 24 | 1778 | 2.138,3 | 293,3 | 24 | 1778 | 211 | 1 | 0 | 0 | 6 | aviso |
 | Ponte Alta do Tocantins | SUL | SE-2AL2 | LD06002091 | 280 | 1 | 4 | 275 | 499,0 | 102,8 | 4 | 275 | 17 | 0 | 0 | 0 | 4 | aviso |
-| Ponte Alta do Tocantins | CENTRO | SE-2PTA | AL01069026 | 1 | 1 | 0 | 0 | 39,4 | 39,4 | 0 | 0 | 4 | 3 | 0 | 0 | 3 | aviso |
+| Ponte Alta do Tocantins | CENTRO | SE-2PTA | AL01069026 | 39 | 1 | 1 | 37 | 39,4 | 39,4 | 1 | 37 | 3 | 2 | 0 | 0 | 3 | aviso |
 | Ponte Alta do Tocantins | CENTRO | SE-2MTC | LD01051035 | 580 | 1 | 5 | 574 | 891,6 | 5,4 | 5 | 574 | 92 | 0 | 0 | 0 | 5 | aviso |
-| **Total Ponte Alta do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 4187 | | | | 6.664,2 | 1.476,6 | | | | | | | | |
+| **Total Ponte Alta do Tocantins (alimentadores inteiros)** | | | 5 alimentadores | 4225 | | | | 6.664,3 | 1.476,7 | | | | | | | | |
 
 ## Porto Alegre do Tocantins
 
@@ -1230,7 +1229,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Porto Nacional | CENTRO | SE-2LUZ | AL03101271 | 289 | 1 | 2 | 286 | 240,5 | 240,5 | 2 | 286 | 22 | 1 | 0 | 0 | 3 | aviso |
 | Porto Nacional | CENTRO | SE-2LUZ | AL02101271 | 342 | 1 | 3 | 338 | 274,1 | 217,0 | 3 | 338 | 11 | 0 | 0 | 0 | 2 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | AL06072001 | 206 | 1 | 3 | 202 | 204,5 | 184,2 | 3 | 202 | 27 | 1 | 0 | 0 | 1 | aviso |
-| Porto Nacional | CENTRO | SE-2LUI | AL01102271 (exceção) | 19 | 1 | 3 | 15 | 384,4 | 181,9 | 3 | 15 | 5 | 4 | 0 | 0 | 3 | aviso |
+| Porto Nacional | CENTRO | SE-2LUI | AL01102271 (exceção) | 313 | 1 | 5 | 307 | 384,6 | 182,0 | 5 | 307 | 2 | 0 | 0 | 0 | 4 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | LD02072001 | 1073 | 1 | 18 | 1054 | 1.880,6 | 162,7 | 18 | 1054 | 86 | 11 | 0 | 0 | 4 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | AL03072001 | 435 | 1 | 3 | 431 | 511,6 | 149,0 | 3 | 431 | 47 | 0 | 0 | 0 | 3 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | LD01072001 | 199 | 1 | 3 | 195 | 154,0 | 139,6 | 3 | 195 | 26 | 2 | 0 | 0 | 2 | aviso |
@@ -1243,12 +1242,12 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Porto Nacional | CENTRO | SE-2PNA | AL01072001 | 44 | 1 | 4 | 39 | 27,4 | 27,4 | 4 | 39 | 3 | 0 | 0 | 0 | 0 | ok |
 | Porto Nacional | CENTRO | SE-2LUI | AL02102271 | 5 | 1 | 0 | 4 | 17,4 | 17,4 | 0 | 4 | 0 | 0 | 0 | 0 | 1 | aviso |
 | Porto Nacional | CENTRO | SE-2PNA | AL02072001 | 42 | 1 | 1 | 40 | 16,0 | 16,0 | 1 | 40 | 1 | 0 | 0 | 0 | 4 | aviso |
-| Porto Nacional | CENTRO | SE-2DPN | AL01071001 | 1 | 1 | 0 | 0 | 12,8 | 12,8 | 0 | 0 | 2 | 2 | 0 | 0 | 3 | aviso |
+| Porto Nacional | CENTRO | SE-2DPN | AL01071001 | 30 | 1 | 1 | 28 | 12,8 | 12,8 | 1 | 28 | 2 | 0 | 0 | 0 | 2 | aviso |
 | Porto Nacional |  | SE-2SJO | LD03434001 | 44 | 1 | 1 | 42 | 32,8 | 7,5 | 1 | 42 | 4 | 0 | 0 | 0 | 4 | aviso |
 | Porto Nacional | CENTRO | SE-2FTM | AL01032044 | 74 | 1 | 1 | 72 | 92,7 | 7,4 | 1 | 72 | 5 | 1 | 0 | 0 | 3 | aviso |
 | Porto Nacional | CENTRO | SE-2BRR | AL02017017 | 235 | 1 | 3 | 231 | 273,1 | 5,3 | 3 | 231 | 4 | 1 | 0 | 0 | 2 | aviso |
 | Porto Nacional | CENTRO | SE-2NRS | LD01056046 | 919 | 1 | 11 | 907 | 1.109,8 | 3,8 | 11 | 907 | 54 | 3 | 0 | 0 | 6 | aviso |
-| **Total Porto Nacional (alimentadores inteiros)** | | | 24 alimentadores | 5925 | | | | 7.073,8 | 2.698,8 | | | | | | | | |
+| **Total Porto Nacional (alimentadores inteiros)** | | | 24 alimentadores | 6248 | | | | 7.074,1 | 2.698,9 | | | | | | | | |
 
 ## Praia Norte
 
@@ -1256,9 +1255,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Praia Norte | NORTE | SE-2AGT | LD01014045 | 364 | 1 | 3 | 360 | 350,6 | 154,7 | 3 | 360 | 101 | 43 | 0 | 0 | 2 | aviso |
 | Praia Norte | NORTE | SE-2AGT | LD02014045 | 233 | 1 | 2 | 230 | 231,5 | 39,4 | 2 | 230 | 16 | 15 | 0 | 0 | 1 | aviso |
-| Praia Norte | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 16,2 | 10 | 877 | 218 | 12 | 0 | 0 | 6 | aviso |
+| Praia Norte | NORTE | SE-2AGT | LD03014045 | 908 | 1 | 11 | 896 | 937,1 | 16,3 | 11 | 896 | 44 | 0 | 0 | 0 | 4 | aviso |
 | Praia Norte | NORTE | SE-2AXX | AL01016065 | 289 | 1 | 3 | 285 | 276,1 | 14,6 | 3 | 285 | 105 | 1 | 0 | 0 | 2 | aviso |
-| **Total Praia Norte (alimentadores inteiros)** | | | 4 alimentadores | 1774 | | | | 1.774,3 | 224,9 | | | | | | | | |
+| **Total Praia Norte (alimentadores inteiros)** | | | 4 alimentadores | 1794 | | | | 1.795,4 | 225,0 | | | | | | | | |
 
 ## Presidente Kennedy
 
@@ -1282,8 +1281,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Recursolândia | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 699,5 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
-| **Total Recursolândia (alimentadores inteiros)** | | | 1 alimentadores | 1350 | | | | 2.758,4 | 699,5 | | | | | | | | |
+| Recursolândia | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 704,0 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
+| **Total Recursolândia (alimentadores inteiros)** | | | 1 alimentadores | 1360 | | | | 2.772,6 | 704,0 | | | | | | | | |
 
 ## Riachinho
 
@@ -1316,17 +1315,17 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Rio Sono | CENTRO | SE-2PA2 | LD01059122 | 909 | 1 | 14 | 894 | 1.652,7 | 853,7 | 14 | 894 | 55 | 0 | 0 | 0 | 5 | aviso |
-| Rio Sono |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 778,8 | 8 | 22 | 4 | 3 | 0 | 0 | 6 | aviso |
+| Rio Sono |  | SE-2PAI | LD02424015 (exceção) | 713 | 1 | 12 | 700 | 1.684,3 | 790,0 | 12 | 700 | 4 | 0 | 0 | 0 | 6 | aviso |
 | Rio Sono | CENTRO | SE-2RSN | AL01074070 | 29 | 1 | 0 | 28 | 55,2 | 54,0 | 0 | 28 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Rio Sono (alimentadores inteiros)** | | | 3 alimentadores | 969 | | | | 3.380,5 | 1.686,5 | | | | | | | | |
+| **Total Rio Sono (alimentadores inteiros)** | | | 3 alimentadores | 1651 | | | | 3.392,1 | 1.697,6 | | | | | | | | |
 
 ## Sampaio
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Sampaio | NORTE | SE-2AGT | LD02014045 | 233 | 1 | 2 | 230 | 231,5 | 125,1 | 2 | 230 | 16 | 15 | 0 | 0 | 1 | aviso |
-| Sampaio | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 26,0 | 10 | 877 | 218 | 12 | 0 | 0 | 6 | aviso |
-| **Total Sampaio (alimentadores inteiros)** | | | 2 alimentadores | 1121 | | | | 1.147,6 | 151,1 | | | | | | | | |
+| Sampaio | NORTE | SE-2AGT | LD03014045 | 908 | 1 | 11 | 896 | 937,1 | 41,2 | 11 | 896 | 44 | 0 | 0 | 0 | 4 | aviso |
+| **Total Sampaio (alimentadores inteiros)** | | | 2 alimentadores | 1141 | | | | 1.168,7 | 166,2 | | | | | | | | |
 
 ## Sandolândia
 
@@ -1351,8 +1350,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Santa Maria do Tocantins | NORTE | SE-2PDA | LD01065015 | 1350 | 1 | 17 | 1332 | 2.758,4 | 568,3 | 17 | 1332 | 46 | 1 | 0 | 0 | 6 | aviso |
-| **Total Santa Maria do Tocantins (alimentadores inteiros)** | | | 1 alimentadores | 1350 | | | | 2.758,4 | 568,3 | | | | | | | | |
+| Santa Maria do Tocantins | NORTE | SE-2PDA | LD01065015 | 1360 | 1 | 19 | 1340 | 2.772,6 | 568,7 | 19 | 1340 | 17 | 0 | 0 | 0 | 2 | aviso |
+| **Total Santa Maria do Tocantins (alimentadores inteiros)** | | | 1 alimentadores | 1360 | | | | 2.772,6 | 568,7 | | | | | | | | |
 
 ## Santa Rita do Tocantins
 
@@ -1433,9 +1432,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 
 | Município | Polo | SE | Alimentador | Trechos | T1 | T2 | T3 | Extensão (km) | No município (km) | RL | Fusíveis | NAE assoc. | NAE não assoc. | Pontos sem ligação | Contin. estimadas | Avisos | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| São Sebastião do Tocantins | NORTE | SE-2AGT | LD03014045 | 888 | 1 | 10 | 877 | 916,1 | 110,0 | 10 | 877 | 218 | 12 | 0 | 0 | 6 | aviso |
+| São Sebastião do Tocantins | NORTE | SE-2AGT | LD03014045 | 908 | 1 | 11 | 896 | 937,1 | 110,0 | 11 | 896 | 44 | 0 | 0 | 0 | 4 | aviso |
 | São Sebastião do Tocantins | NORTE | SE-2BRT | AL02019068 | 25 | 1 | 0 | 24 | 31,3 | 26,4 | 0 | 24 | 14 | 1 | 0 | 0 | 2 | aviso |
-| **Total São Sebastião do Tocantins (alimentadores inteiros)** | | | 2 alimentadores | 913 | | | | 947,4 | 136,4 | | | | | | | | |
+| **Total São Sebastião do Tocantins (alimentadores inteiros)** | | | 2 alimentadores | 933 | | | | 968,5 | 136,4 | | | | | | | | |
 
 ## São Valério
 
@@ -1525,10 +1524,10 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Tocantínia | CENTRO | SE-2PA2 | LD03059122 | 1342 | 1 | 12 | 1329 | 1.080,6 | 335,0 | 12 | 1329 | 94 | 2 | 0 | 0 | 4 | aviso |
 | Tocantínia | CENTRO | SE-2TCN | AL01082006 | 125 | 1 | 2 | 122 | 208,0 | 208,0 | 2 | 122 | 5 | 0 | 0 | 0 | 1 | aviso |
-| Tocantínia |  | SE-2PAI | LD02424015 (exceção) | 31 | 1 | 8 | 22 | 1.672,6 | 93,3 | 8 | 22 | 4 | 3 | 0 | 0 | 6 | aviso |
+| Tocantínia |  | SE-2PAI | LD02424015 (exceção) | 713 | 1 | 12 | 700 | 1.684,3 | 93,3 | 12 | 700 | 4 | 0 | 0 | 0 | 6 | aviso |
 | Tocantínia | CENTRO | SE-2MRN | LD05050008 | 675 | 1 | 9 | 665 | 651,2 | 43,6 | 9 | 665 | 70 | 2 | 0 | 0 | 4 | aviso |
 | Tocantínia | CENTRO | SE-2RSN | AL01074070 | 29 | 1 | 0 | 28 | 55,2 | 1,2 | 0 | 28 | 0 | 0 | 0 | 0 | 2 | aviso |
-| **Total Tocantínia (alimentadores inteiros)** | | | 5 alimentadores | 2202 | | | | 3.667,5 | 681,2 | | | | | | | | |
+| **Total Tocantínia (alimentadores inteiros)** | | | 5 alimentadores | 2884 | | | | 3.679,2 | 681,2 | | | | | | | | |
 
 ## Tocantinópolis
 
@@ -1556,8 +1555,8 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Tupiratins | NORTE | SE-2GU2 | LD03038009 | 969 | 1 | 14 | 954 | 1.479,5 | 322,8 | 14 | 954 | 69 | 17 | 0 | 0 | 4 | aviso |
 | Tupiratins | NORTE | SE-2CLN | LD02020023 | 1333 | 1 | 16 | 1316 | 1.632,3 | 29,7 | 16 | 1316 | 56 | 0 | 0 | 0 | 6 | aviso |
-| Tupiratins | NORTE | SE-2CLN | LD01020023 | 335 | 1 | 6 | 328 | 599,5 | 8,9 | 6 | 328 | 32 | 0 | 0 | 0 | 4 | aviso |
-| **Total Tupiratins (alimentadores inteiros)** | | | 3 alimentadores | 2637 | | | | 3.711,3 | 361,4 | | | | | | | | |
+| Tupiratins | NORTE | SE-2CLN | LD01020023 | 349 | 1 | 8 | 340 | 620,1 | 8,9 | 8 | 340 | 11 | 0 | 0 | 0 | 2 | aviso |
+| **Total Tupiratins (alimentadores inteiros)** | | | 3 alimentadores | 2651 | | | | 3.732,0 | 361,4 | | | | | | | | |
 
 ## Wanderlândia
 
@@ -1581,13 +1580,13 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 ## Total geral
 
 - Municípios: 139
-- Alimentadores processados sem falha: 327 (94.974,0 km, 71793 trechos)
+- Alimentadores processados sem falha: 327 (95.072,4 km, 73238 trechos)
 
 ## Divididos por exceção (sem chaves fechadas no GIS)
 
-- **AL01102271** (aviso): 19 trechos para 384,4 km; maior trecho T2 com 134,4 km
-- **LD01414015** (aviso): 10 trechos para 563,6 km; maior trecho T2-B com 285,7 km
-- **LD02424015** (aviso): 31 trechos para 1.672,6 km; maior trecho T2-A com 372,6 km
+- **AL01102271** (aviso): 313 trechos para 384,6 km; maior trecho T2-B com 30,3 km
+- **LD01414015** (aviso): 347 trechos para 564,7 km; maior trecho T2-C com 68,2 km
+- **LD02424015** (aviso): 713 trechos para 1.684,3 km; maior trecho T2-H com 61,2 km
 
 ## Avisos por alimentador
 
@@ -1637,7 +1636,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **AL01048007** (aviso): trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300046007; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300111007; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01049010** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01050008** (aviso): trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300931008; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0300023008; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01051035** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01051035** (aviso): trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3368142035; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01052028** (aviso): trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300036028; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01053090** (aviso): 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310007129, 0300013129, 0300211129
 - **AL01054060** (aviso): 17 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-C, T2-D, T2-E; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3352671060, 3319797060; Mais de um religador pode ser o 2º do tronco; escolhido 7962638060 (mais rede depois dele). Outros candidatos: 7955882060, 7954476060.
@@ -1654,9 +1653,9 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **AL01066094** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01067094** (aviso): 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300030094, 0300019094
 - **AL01068014** (aviso): sem arquivo de postes: nós sem número de poste; trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01069026** (aviso): 1% da rede fora da árvore do DJ (4 de 762 vãos); 4 trecho(s) fechavam laço e ficaram fora da árvore: 2604763, 3656411, 3663791, 38136422; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01069026** (aviso): trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300001026; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01070027** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01071001** (aviso): 1% da rede fora da árvore do DJ (2 de 284 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: 35624541, 56256224; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL01071001** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01073034** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01074070** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01075116** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
@@ -1676,13 +1675,13 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **AL01098118** (aviso): 7601 m fora da malha municipal do Tocantins; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01099059** (aviso): 0% da rede fora da árvore do DJ (1 de 2570 vãos); trechos a revisar: T2-A, T2-B; 1 trecho(s) fechavam laço e ficaram fora da árvore: 3186349; Mais de um religador pode ser o 2º do tronco; escolhido 7937505059 (mais rede depois dele). Outros candidatos: 7933766059.
 - **AL01101271** (aviso): 0% da rede fora da árvore do DJ (1 de 1215 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: 3640834; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL01102271** (aviso): dividido por exceção (GIS sem as chaves fechadas: 19 trechos para 384,4 km, o maior com 134,4 km); 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (10 de 4897 vãos); 10 trecho(s) fechavam laço e ficaram fora da árvore: 3070680, 3661015, 3661698, 3661705, 3661708, 25361195, 37886214, 41776649, 47096680, 56256261
+- **AL01102271** (aviso): dividido por exceção (GIS sem as chaves fechadas: 313 trechos para 384,6 km, o maior com 30,3 km); 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-C; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0304242001; Mais de um religador pode ser o 2º do tronco; escolhido 7942460001 (mais rede depois dele). Outros candidatos: 7954704001.
 - **AL01109039** (aviso): 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3302856039, 3350864039
 - **AL01113003** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL01114007** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL02003036** (aviso): 19 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0320680036, 0345678036; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL02003097** (aviso): 637 m fora da malha municipal do Tocantins; sem arquivo de postes: nós sem número de poste; trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0363570097; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL02010004** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL02010004** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 0% da rede fora da árvore do DJ (1 de 827 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.
 - **AL02014045** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL02017017** (aviso): 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0320187017, 0301591007
 - **AL02019068** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
@@ -1749,10 +1748,10 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **AL04097122** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL04099059** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL04103004** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL04113003** (aviso): trechos a revisar: T2-B, T2-C; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3361314003; Mais de um religador pode ser o 2º do tronco; escolhido 7937109003 (mais rede depois dele). Outros candidatos: 7956777003.
+- **AL04113003** (aviso): 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3361314003
 - **AL04244003** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL05010004** (aviso): 0% da rede fora da árvore do DJ (1 de 925 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: 66273603
-- **AL05020003** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m)
+- **AL05020003** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 1439 vãos); trechos a revisar: T2; 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL05020023** (aviso): 26 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; Mais de um religador pode ser o 2º do tronco; escolhido 7913341063 (mais rede depois dele). Outros candidatos: 7931904063.
 - **AL05040003** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL05040004** (aviso): sem arquivo de postes: nós sem número de poste; trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
@@ -1766,9 +1765,10 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **AL06010004** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL06020023** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL06040003** (aviso): 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06060122** (aviso): 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0306366122, 0301460122, 0202148122, 0302147122
 - **AL06072001** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m)
 - **AL06097122** (aviso): trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0302561122; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0304545122; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **AL06099059** (aviso): 0% da rede fora da árvore do DJ (1 de 1574 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: 12083757; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
+- **AL06099059** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL06103004** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL07010004** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **AL07059122** (aviso): trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
@@ -1797,7 +1797,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **LD01010153** (aviso): 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 8259 vãos); trechos a revisar: T2-A, T2-B; 2 trecho(s) fechavam laço e ficaram fora da árvore: 31342535, 39805437; 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300347153, 3300526154, 0300004154, 0300587154; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300006154; Mais de um religador pode ser o 2º do tronco; escolhido 7930265153 (mais rede depois dele). Outros candidatos: 7900347153.
 - **LD01010256** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD01014045** (aviso): 19 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0301011131, 0300269131, 3300269131, 0300348131
-- **LD01020023** (aviso): 6 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300496155, 0360552155, 3313785155; Mais de um religador pode ser o 2º do tronco; escolhido 7952841155 (mais rede depois dele). Outros candidatos: 7950004155.
+- **LD01020023** (aviso): 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300496155, 0360552155, 3313785155
 - **LD01025012** (aviso): 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-B, T2-C; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300189012, 0301656014, 0301626014, 0300564014, 0310044014, 0301696014, 0300514014; Mais de um religador pode ser o 2º do tronco; escolhido 7919265012 (mais rede depois dele). Outros candidatos: 7951887110.
 - **LD01027074** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD01028074** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3326122263, 3300001263; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3326126263
@@ -1813,7 +1813,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **LD01057189** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD01059122** (aviso): 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-G; 6 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300377070, 0310141070, 0300187092, 3320083092, 0300168092, 3327606070; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0310135070; Mais de um religador pode ser o 2º do tronco; escolhido 7900578083 (mais rede depois dele). Outros candidatos: 7907536092.
 - **LD01062013** (aviso): 9 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 0304607054; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
-- **LD01065015** (aviso): 53 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 31744 vãos); trechos a revisar: T2-A, T2-B, T2-C; 1 trecho(s) fechavam laço e ficaram fora da árvore: 3661213; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300311104, 0347575104, 0300231078, 3310054195, 3300001227, 0300030227, 3329600227; Mais de um religador pode ser o 2º do tronco; escolhido 7925621104 (mais rede depois dele). Outros candidatos: 7900171018, 7900371104.
+- **LD01065015** (aviso): 53 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300311104, 0347575104, 0300231078, 3310054195, 3300001227, 0300030227, 3329600227
 - **LD01066094** (aviso): 32 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-C, T2-D, T2-E, T2-F; 10 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3350496094, 3320236094, 0300864094, 3300001270, 0310003270, 3300608094, 0310324094, 3302545094, 3310325094, 0310327094; Mais de um religador pode ser o 2º do tronco; escolhido 7900388094 (mais rede depois dele). Outros candidatos: 7957021094, 7900474148, 7920851094.
 - **LD01072001** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3320261001
 - **LD01076103** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0301137088
@@ -1825,7 +1825,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **LD01105019** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 5722 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: 2555877, 45868736
 - **LD01107074** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD01110005** (aviso): 8 vão(s) na divisa entre municípios (medidos por amostragem de 20 m)
-- **LD01414015** (aviso): sem arquivo de postes: nós sem número de poste; 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (10 de 6524 vãos); GIS sem as chaves fechadas: divisão pelos religadores dos by-pass NA e pelas chaves das OS (56 km por trecho, 10 trechos para 563.6 km); 10 trecho(s) fechavam laço e ficaram fora da árvore: 2962607, 3658335, 3658342, 3658355, 3659159, 53958525, 55757695, 55972495, 55981004, 56242879; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0345794005
+- **LD01414015** (aviso): dividido por exceção (GIS sem as chaves fechadas: 347 trechos para 564,7 km, o maior com 68,2 km); sem arquivo de postes: nós sem número de poste; 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; 8 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300287015, 0310196015, 0310090015, 0300536015, 3300749015, 3310007015, 0301082015, 3310125015; Mais de um religador pode ser o 2º do tronco; escolhido 7936096015 (mais rede depois dele). Outros candidatos: 7957466015.
 - **LD01414027** (aviso): 5525 m fora da malha municipal do Tocantins; 10 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3363973027, 3310049027, 3300270027, 414r078
 - **LD01434149** (aviso): 12 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 13713 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: 36099747; 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3346158149, 3300183055, 3300564055, 3300057055
 - **LD01926241** (aviso): 4133 m fora da malha municipal do Tocantins; sem arquivo de postes: nós sem número de poste; 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
@@ -1846,7 +1846,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **LD02038009** (aviso): 20 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0300565009, 0310146048, 3300001048; 1 1ª(s) chave(s) fusível(is) depois do religador do tronco não abrem T3 (o tronco segue como T2): 3300178048
 - **LD02040003** (aviso): 12 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 9279 vãos); trechos a revisar: T2-A, T2-B; 1 trecho(s) fechavam laço e ficaram fora da árvore: 61507297; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0301302003, 3320036076, 3320001076; Mais de um religador pode ser o 2º do tronco; escolhido 7928246076 (mais rede depois dele). Outros candidatos: 7908192003.
 - **LD02047073** (aviso): 27 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 9073 vãos); trechos a revisar: T2-B, T2-D; 1 trecho(s) fechavam laço e ficaram fora da árvore: 22747889; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300620073, 0336325073, 0310076110, 3300384110, 3346696073, 3300185110, 0310195110; Mais de um religador pode ser o 2º do tronco; escolhido 7947962110 (mais rede depois dele). Outros candidatos: 7919385073.
-- **LD02050008** (aviso): 26 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 22545 vãos); trechos a revisar: T2-A, T2-B, T2-C, T2-D, T2-E; 1 trecho(s) fechavam laço e ficaram fora da árvore: 2944264; 18 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300328008, 3310593075, 4048345008, 3300624075, 4000301008, 0300648075, 0301247075, 0300727008, 0300637075, 3322432008, 0300264075, 0358705075, 3310063075, 3310003075, 0301249075, 0310348075, 0301224075, 3300122055; Mais de um religador pode ser o 2º do tronco; escolhido 7930429075 (mais rede depois dele). Outros candidatos: 7900939008, 79032320, 7958743075, 7958740075.
+- **LD02050008** (aviso): 26 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B, T2-C; 18 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300328008, 3310593075, 4048345008, 4000301008, 0300648075, 0300727008, 0301247075, 3322432008, 0300264075, 3310297075, 3310063075, 0308599075, 0300002075, 3310003075, 0301249075, 0310348075, 0301224075, 3300122055; Mais de um religador pode ser o 2º do tronco; escolhido 7930429075 (mais rede depois dele). Outros candidatos: 7900939008, 79032320.
 - **LD02059122** (aviso): 56 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (3 de 27757 vãos); trechos a revisar: T2-B, T2-C, T2-D, T2-F; 3 trecho(s) fechavam laço e ficaram fora da árvore: 3662740, 51141819, 12167844; 11 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3306200059, 3306015059, 3303092059, 3300029059, 3341544122, 0362378240, 3300107151, 0341730059, 0300650026, 3300164196, 3310020196; Mais de um religador pode ser o 2º do tronco; escolhido 7923925059 (mais rede depois dele). Outros candidatos: 7937535059, 7955910059, 7961675122.
 - **LD02062013** (aviso): 35 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD02065015** (aviso): trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300718015; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
@@ -1860,14 +1860,14 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **LD02109039** (aviso): 12282 m fora da malha municipal do Tocantins; 14 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 6373 vãos); trechos a revisar: T2-C, T2-D; 2 trecho(s) fechavam laço e ficaram fora da árvore: 3669167, 29924994; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3326555039, 3330558039, 0306093639, 3310123039, 3301064039; Mais de um religador pode ser o 2º do tronco; escolhido 7901064039 (mais rede depois dele). Outros candidatos: 7957817039.
 - **LD02110005** (aviso): 352 m fora da malha municipal do Tocantins; 44 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3327852005, 0327854005, 414r023, 0320001051, 3320045051; Mais de um religador pode ser o 2º do tronco; escolhido 7932028020 (mais rede depois dele). Outros candidatos: 7936769005.
 - **LD02414027** (aviso): sem arquivo de postes: nós sem número de poste; 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 5956 vãos); trechos a revisar: T2-D, T2-E; 1 trecho(s) fechavam laço e ficaram fora da árvore: 3378605; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3355260038, 0300024038, 3301204038; Mais de um religador pode ser o 2º do tronco; escolhido 7933694038 (mais rede depois dele). Outros candidatos: 7963511038.
-- **LD02424015** (aviso): 1013 m fora da malha municipal do Tocantins; sem arquivo de postes: nós sem número de poste; 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (27 de 19818 vãos); GIS sem as chaves fechadas: divisão pelos religadores dos by-pass NA e pelas chaves das OS (54 km por trecho, 31 trechos para 1672.6 km); 27 trecho(s) fechavam laço e ficaram fora da árvore: 2951098, 3004389, 3080448, 3474275, 3639318, 3658339, 3658353, 3658357, 3658743, 3659140
+- **LD02424015** (aviso): dividido por exceção (GIS sem as chaves fechadas: 713 trechos para 1.684,3 km, o maior com 61,2 km); 993 m fora da malha municipal do Tocantins; sem arquivo de postes: nós sem número de poste; 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 20640 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: 3616141; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310231015, 0352757015, 0363312015, 3300345070, 3300098082
 - **LD02424149** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD03002091** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD03005098** (aviso): 53 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 14854 vãos); 1 trecho(s) fechavam laço e ficaram fora da árvore: 12042966; 2 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300021119, 3310007119
 - **LD03010004** (aviso): 55 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-C, T2-E, T2-F, T2-G; 9 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310031056, 3310062159, 0310069159, 3300705058, 0300458159, 3300663058, 0302818058, 0300517058, 0357436004; Mais de um religador pode ser o 2º do tronco; escolhido 7925150058 (mais rede depois dele). Outros candidatos: 7930281056, 7925880056, 7900558159.
 - **LD03010021** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-B, T2-C, T2-D; 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310016021, 3300025021, 3300296021, 0300491021; Mais de um religador pode ser o 2º do tronco; escolhido 7948471021 (mais rede depois dele). Outros candidatos: 7956993021, 7956992021.
-- **LD03014045** (aviso): 51 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 12193 vãos); trechos a revisar: T2-C, T2-E; 2 trecho(s) fechavam laço e ficaram fora da árvore: 3661939, 12106339; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300071045, 3300086045, 3322962068, 4020010134, 0300390134; Mais de um religador pode ser o 2º do tronco; escolhido 7900005068 (mais rede depois dele). Outros candidatos: 7929383045.
-- **LD03020023** (aviso): 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B, T2-D; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310116153, 0300730111, 3356325111; Mais de um religador pode ser o 2º do tronco; escolhido 7900581153 (mais rede depois dele). Outros candidatos: 7957882153, 7955839063.
+- **LD03014045** (aviso): 55 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-C, T2-E; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300071045, 4100734045, 3300086045, 0350864133, 3322962068, 4020010134, 0300390134; Mais de um religador pode ser o 2º do tronco; escolhido 7924920068 (mais rede depois dele). Outros candidatos: 7929383045.
+- **LD03020023** (aviso): 13 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B, T2-D; 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310116153, 0368923063, 0300730111, 3356325111; Mais de um religador pode ser o 2º do tronco; escolhido 7900581153 (mais rede depois dele). Outros candidatos: 7957882153, 7955839063.
 - **LD03022033** (aviso): 3 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0324980033
 - **LD03028074** (aviso): 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3354436074; Mais de um religador pode ser o 2º do tronco; escolhido 7954440074 (mais rede depois dele). Outros candidatos: 7933585074.
 - **LD03036052** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300995052; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
@@ -1878,7 +1878,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **LD03059122** (aviso): 43 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 15314 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: 3448822, 12093128; 6 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3320275122, 3305584122, 415049, 0300223010, 3310222010, 3300359083
 - **LD03062013** (aviso): 32 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0362064013, 0300922014, 3300547014; Mais de um religador pode ser o 2º do tronco; escolhido 7926089013 (mais rede depois dele). Outros candidatos: 7901771014.
 - **LD03072001** (aviso): 1 vão(s) na divisa entre municípios (medidos por amostragem de 20 m)
-- **LD03105019** (aviso): 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 18298 vãos); trechos a revisar: T2-B, T2-C, T2-D; 1 trecho(s) fechavam laço e ficaram fora da árvore: 36868529; 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300538019, 3301253077, 03ARG18077, 0300009077; Mais de um religador pode ser o 2º do tronco; escolhido 7924897265 (mais rede depois dele). Outros candidatos: 7900181265, 7910039265.
+- **LD03105019** (aviso): 16 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-B, T2-F; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300538019, 0300001265, 3301253077, 0344196077, 0300009077; Mais de um religador pode ser o 2º do tronco; escolhido 7952853077 (mais rede depois dele). Outros candidatos: 7965648265.
 - **LD03109039** (aviso): 15 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-A, T2-B; 4 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3310095039, 0301801039, 0302108039, 3301038039; Mais de um religador pode ser o 2º do tronco; escolhido 7925425039 (mais rede depois dele). Outros candidatos: 7925419039.
 - **LD03414027** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD03414149** (aviso): 12 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-B, T2-C, T2-D, T2-E; 7 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 0327188149, 3300119149, 0327176086, 3344542086, 0300079086, 0346934084, 0300641086; Mais de um religador pode ser o 2º do tronco; escolhido 7946214086 (mais rede depois dele). Outros candidatos: 7900567149, 7946687086, 7925562149.
@@ -1898,7 +1898,7 @@ O total de cada município soma o alimentador inteiro (trechos, extensão e NAE 
 - **LD05028074** (aviso): 28 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-B, T2-C, T2-D; 3 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3398000074, 3310109074, 3300037147; Mais de um religador pode ser o 2º do tronco; escolhido 7929657074 (mais rede depois dele). Outros candidatos: 7908206074, 7911644074.
 - **LD05047073** (aviso): Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD05050008** (aviso): 11 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (2 de 8574 vãos); 2 trecho(s) fechavam laço e ficaram fora da árvore: 46959278, 57338051; 5 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 415R048, 3300128007, 0310000007, 0300885007, 0310040007
-- **LD05062013** (aviso): 18 vão(s) na divisa entre municípios (medidos por amostragem de 20 m)
+- **LD05062013** (aviso): 2 ponto(s) sem ligação com o DJ (fora da classificação); 18 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); 0% da rede fora da árvore do DJ (1 de 11295 vãos); 2 ponto(s) sem ligação com o DJ depois de abrir as chaves NA; ficaram de fora.
 - **LD05105019** (aviso): sem arquivo de postes: nós sem número de poste; Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD05454153** (aviso): 2 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); Alimentador sem 2º religador: o tronco seguiu o lado com mais rede T1/T2 e parou antes de chave 03.
 - **LD06002091** (aviso): 5 vão(s) na divisa entre municípios (medidos por amostragem de 20 m); trechos a revisar: T2-B, T2-C; 1 chave(s) 03/33/02 com religador depois tratada(s) como seccionamento (não mudam a zona; entram na lista do bloco): 3300432091; Mais de um religador pode ser o 2º do tronco; escolhido 7942038091 (mais rede depois dele). Outros candidatos: 7964815091.

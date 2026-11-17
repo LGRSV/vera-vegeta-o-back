@@ -310,11 +310,10 @@
   // sem os botões + e − do mapa (pedido do painel): o zoom fica no gesto de pinça, na roda do mouse e no duplo clique
   if (window.__map && window.__map.zoomControl) window.__map.removeControl(window.__map.zoomControl);
 
-  // canto superior esquerdo do mapa: o card T1 T2 T3 e, à direita dele, o "Menu" das camadas (três barras) com NAE
-  // (alimentador.js), Faixa (limpeza.js), Inspeção (inspecao.js), Insp→manut (manutencao.js), Manutenção (executadas.js) e
-  // Queimadas (focos.js). As legendas das camadas ligadas ficam no canto inferior esquerdo (.ctl-lgs, no fim deste arquivo).
-  // Devolve a lista do menu (criada na 1ª chamada), onde cada camada põe o seu card; sem o card das classes (mapa não
-  // carregou), devolve null.
+  // canto superior esquerdo do mapa: o card T1 T2 T3 e, à direita dele, o "Menu" das camadas (três barras) com Faixa
+  // (limpeza.js), Inspeção (inspecao.js), Insp→manut (manutencao.js) e Manutenção (executadas.js). As legendas das camadas
+  // ligadas ficam no canto inferior esquerdo (.ctl-lgs, no fim deste arquivo). Devolve a lista do menu (criada na 1ª chamada), onde cada camada
+  // põe o seu card; sem o card das classes (mapa não carregou), devolve null.
   // O Tela cheia fica no canto inferior direito (telacheia.js), com o mesmo card (.ctl-card).
   window.__ctlMapa = function () {
     const cls = document.getElementById('classes');
@@ -356,7 +355,6 @@
       topo.className = 'ctl-topo';
       topo.append(cls, cam);
       dir.append(topo);
-      if (window.__naeBotao) window.__naeBotao(l);       // NAE (alimentador.js) é a 1ª camada: antes das que os scripts seguintes põem
     }
     return dir.querySelector('.ctl-l2');
   };
