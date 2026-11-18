@@ -680,7 +680,8 @@ def ativos_interface(saida):
     (a / 'alimentador.js').write_text('const D = window.D;\n' + js, encoding='utf-8')
     for f in ('extras.js', 'municipios.js', 'chaves.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
               'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js', 'lupa-painel.js', 'ativos-zoom.js', 'mapa-raiox.js',
-              'croqui-rascunho.js', 'polo-rota.js', 'modo-faixa-rascunho.js', 'argos.png', 'focos.js', 'focos.css', 'vizinhos.js'):
+              'croqui-rascunho.js', 'polo-rota.js', 'modo-faixa-rascunho.js', 'argos.png', 'focos.js', 'focos.css', 'vizinhos.js',
+              'visao-tocantins.js'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
     return modelo
@@ -749,13 +750,18 @@ def pagina_alimentador(modelo, c):
     h = re.sub(r'<style>\n.*?</style>', '<link rel="stylesheet" href="../../assets/alimentador.css">\n'
                f'<link rel="stylesheet" href="../../assets/focos.css?v={V_FOCOS}">', h, count=1, flags=re.S)
     h = re.sub(r'<script>\nconst D = %%DADOS%%;\n.*?</script>',
+               # dados/tocantins.js (contorno do estado, scripts/divisas.py) antes do mapa: o satélite já abre sem pedir os
+               # quadros de fora do TO; depois, a máscara (fora do estado, escuro) e o traçado das divisas
+               '<script src="../../dados/tocantins.js"></script>\n'
                '<script src="dados.js"></script>\n<script src="../../assets/alimentador.js"></script>\n'
                # alimentadores vizinhos por baixo da rede, os que entram na tela: dados/vizinhos/ (vizinhos_mapa, aqui)
                '<script src="../../assets/vizinhos.js"></script>\n'
+               # o Tocantins inteiro de longe (dados/vizinhos/estado.txt), a máscara fora do estado e o botão Tocantins
+               '<script src="../../assets/visao-tocantins.js"></script>\n'
                '<script src="../../assets/extras.js"></script>\n'
                # divisas dos municípios em tracejado: municipios.js do alimentador sai da interface, com a malha
-               # divisas.js do alimentador e dados/tocantins.js (contorno do estado) saem de scripts/divisas.py
-               '<script src="divisas.js"></script>\n<script src="../../dados/tocantins.js"></script>\n'
+               # divisas.js do alimentador sai de scripts/divisas.py
+               '<script src="divisas.js"></script>\n'
                '<script src="../../assets/municipios.js"></script>\n'
                # chaves que não dividem trecho (88, faca…): chaves.js do alimentador sai da interface, dos dados do site
                '<script src="chaves.js"></script>\n<script src="../../assets/chaves.js"></script>\n'
@@ -1094,12 +1100,19 @@ def redes_mapa(saida, dados):
 # mesmas linhas (as do .4 e depois as do .5), com os itens na mesma ordem, separados por tabulação: o código (DJ,
 # religador, transformador) ou o tipo, um espaço e o código (os outros).
 # indice.json: {"v": 2, "als": {AL: [sul, oeste, norte, leste, versão, bytes do .1, do .2, do .3, versão dos
-# equipamentos, bytes do .4, do .5]}}. Cada versão (8 hex dos arquivos dela) vai no endereço (?v=): o navegador baixa de
-# novo só o que mudou. Sem equipamentos: versão '' e 0 bytes (e nenhum .4, .5 ou .6).
+# equipamentos, bytes do .4, do .5]}, "estado": [versão, bytes do estado.txt]}. Cada versão (8 hex dos arquivos dela) vai
+# no endereço (?v=): o navegador baixa de novo só o que mudou. Sem equipamentos: versão '' e 0 bytes (e nenhum .4, .5 ou .6).
+# estado.txt: o T1 e o T2 de todos os alimentadores num arquivo só, bem simplificado (ESTADO_TOL), para o mapa do
+# alimentador mostrar o Tocantins inteiro de longe (assets/visao-tocantins.js, abaixo do zoom em que os vizinhos entram).
+# Uma linha de texto por alimentador: o código, uma tabulação, as linhas do T1 (separadas por espaço), outra tabulação e
+# as do T2. Polyline com 4 casas ([lat, lon] × 1e4, ~11 m: de longe 1 pixel tem mais de 300 m); cada ponto é a diferença
+# do anterior, também de uma linha, classe e alimentador para o seguinte (o 1º do arquivo é a diferença de 0, 0).
 VIZ_TOL = (10, 1)          # m do Douglas–Peucker: grosso (até o zoom 15, onde 1 pixel tem ~5 m) e fino
 VIZ_MIN = 20               # m: no grosso fica de fora a linha mais curta que isso (de longe, menos de 1 pixel)
 VIZ_ARQ = re.compile(r'^[A-Za-z0-9_-]+\.[1-6]\.txt$')
 VIZ_EQ = ('DRfgc', 'te')   # grupos do .4 e do .5: D DJ, R religador, f fusível, g fusível SEC/FTR, c chave; t transformador, e outro
+ESTADO_TOL = 150          # m do Douglas–Peucker do estado.txt (no zoom 9, onde os vizinhos entram, 1 pixel tem ~300 m)
+ESTADO_MIN = 400          # m: a linha mais curta que isso fica de fora (de longe, nem um pixel)
 
 
 def _poli(n):
@@ -1190,6 +1203,33 @@ def rede_vizinho(segs):
         return None, None
     las, los = [p[0] for p in pts], [p[1] for p in pts]
     return [t1, t2, t3], [min(las) / 1e5, min(los) / 1e5, max(las) / 1e5, max(los) / 1e5]
+
+
+def estado_txt(redes):
+    """[(AL, {'T1': [((lon, lat), (lon, lat)), ...], 'T2': ...}), ...] → texto do estado.txt (ver acima): por alimentador,
+    T1 e T2 encadeados em linhas, só as pontas fixas (de longe a derivação não aparece), Douglas–Peucker de ESTADO_TOL m."""
+    la0 = lo0 = 0
+    out = []
+    for al, segs in sorted(redes, key=lambda x: x[0]):
+        cls = []
+        for c in ('T1', 'T2'):
+            sec = []
+            for linha, _ in _trilhas(segs.get(c, ()), set()):
+                if sum(math.hypot((b[0] - a[0]) * KX, (b[1] - a[1]) * KY) for a, b in zip(linha, linha[1:])) < ESTADO_MIN:
+                    continue
+                q = [(round(y * 1e4), round(x * 1e4)) for x, y in _dp(linha, ESTADO_TOL)]
+                q = q[:1] + [p for a, p in zip(q, q[1:]) if p != a]
+                if len(q) < 2:
+                    continue
+                t = ''
+                for la, lo in q:
+                    t += _poli(la - la0) + _poli(lo - lo0)
+                    la0, lo0 = la, lo
+                sec.append(t)
+            cls.append(' '.join(sec))
+        if any(cls):
+            out.append(al + '\t' + '\t'.join(cls))
+    return ''.join(x + '\n' for x in out)
 
 
 def _por_classe(trechos, vaos, lonlat):
@@ -1293,11 +1333,12 @@ def vizinhos_das_paginas(saida):
 
 def vizinhos_mapa(saida, redes, destino=None):
     """Grava dados/vizinhos/ (em `destino`, se dado; senão em `saida`): os arquivos de cada alimentador (rede e
-    equipamentos) e o índice; apaga os de alimentador que saiu. Só regrava o arquivo que mudou. `redes`: (AL, rede) ou
-    (AL, rede, equipamentos); sem os equipamentos, eles saem da página do alimentador em `saida`. Devolve o índice."""
+    equipamentos), o estado.txt (T1 e T2 de todos, para a visão do Tocantins inteiro) e o índice; apaga os de alimentador
+    que saiu. Só regrava o arquivo que mudou. `redes`: (AL, rede) ou (AL, rede, equipamentos); sem os equipamentos, eles
+    saem da página do alimentador em `saida`. Devolve o índice dos alimentadores."""
     pasta = Path(destino or saida) / 'dados' / 'vizinhos'
     pasta.mkdir(parents=True, exist_ok=True)
-    als, feitos = {}, set()
+    als, feitos, t12 = {}, set(), []
 
     def grava(nome, b):
         arq = pasta / nome
@@ -1308,6 +1349,7 @@ def vizinhos_mapa(saida, redes, destino=None):
         textos, caixa = rede_vizinho(segs)
         if not textos:
             continue
+        t12.append((al, {c: segs.get(c, ()) for c in ('T1', 'T2')}))
         bs = [t.encode('utf-8') for t in textos]
         for k, b in enumerate(bs, 1):
             grava(f'{al}.{k}.txt', b)
@@ -1321,7 +1363,9 @@ def vizinhos_mapa(saida, redes, destino=None):
     for p in pasta.iterdir():
         if VIZ_ARQ.match(p.name) and p.name not in feitos:
             p.unlink()
-    grava_json(pasta / 'indice.json', dict(v=2, als=dict(sorted(als.items()))))
+    est = estado_txt(t12).encode('utf-8')
+    grava('estado.txt', est)
+    grava_json(pasta / 'indice.json', dict(v=2, als=dict(sorted(als.items())), estado=[hashlib.sha1(est).hexdigest()[:8], len(est)]))
     return als
 
 
@@ -1340,9 +1384,11 @@ def resumo_vizinhos(als, pasta=None):
     def maior(ks):
         n, al, k = max((x for x in tams if x[2] in ks), default=(0, '-', 0))
         return f'{al}.{k}.txt com {tam(n)}' if n else 'nenhum'
+    est = (Path(pasta) / 'estado.txt').stat().st_size if pasta and (Path(pasta) / 'estado.txt').exists() else None
     return (f'{len(als)} alimentador(es) · {tam(g + f + eq + cod)} (rede: grosso {tam(g)}, fino {tam(f)}; equipamentos '
             f'{tam(eq)}' + (f', códigos {tam(cod)}' if pasta else '') + f') · maior arquivo: {maior((1, 2, 3, 4, 5, 6))}; '
-            f'dos equipamentos: {maior((4, 5))}' + (f'; dos códigos: {maior((6,))}' if pasta else ''))
+            f'dos equipamentos: {maior((4, 5))}' + (f'; dos códigos: {maior((6,))}' if pasta else '') +
+            (f' · estado inteiro (estado.txt): {tam(est)}' if est is not None else ''))
 
 
 def polo_principal(c, polo_de):

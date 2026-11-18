@@ -5,6 +5,9 @@
 // Sem a malha (MUNICIPIOS null), nada aparece.
 // Com window.TOCANTINS (dados/tocantins.js, scripts/divisas.py) o contorno do estado inteiro sai com o traço da divisa do
 // TO, completo (não só o pedaço perto da rede); os lados `uf` dos municípios só evitam o tracejado repetido.
+// De longe (abaixo do zoom 10) as divisas, o traço-ponto do estado e os nomes saem do mapa: ali a máscara do Tocantins
+// (visao-tocantins.js: fora do estado, escuro) faz a borda com o próprio recorte, e na visão do estado inteiro ficam só a
+// rede e o recorte. Do zoom 10 em diante (sem a máscara) tudo fica como antes, com o traço-ponto.
 // Para não pesar no zoom e no arrasto (era o que mais travava o mapa): as divisas vão num canvas próprio (no zoom o
 // navegador só estica a imagem; o SVG tracejado era redesenhado a cada quadro); os nomes só são calculados depois que o
 // mapa para, em pedaços pequenos (um município por vez, cancelados se o mapa voltar a mexer), com o teste de dentro do
@@ -63,8 +66,19 @@
       if (l.getLatLngs().length) ls.push(l);
       await vez();
     }
-    L.layerGroup(ls).addTo(map);
+    divisas = L.layerGroup(ls);
+    perto();
   })().catch(e => console.error(e));
+  // de longe (abaixo de PERTO) as divisas e o contorno do estado saem do mapa (e o canvas delas não é refeito a cada
+  // parada); de perto, voltam. PERTO é o zoom em que a máscara do Tocantins sai (visao-tocantins.js, MASCARA_ATE)
+  const PERTO = 10;
+  let divisas = null;
+  function perto() {
+    if (!divisas) return;
+    const v = map.getZoom() >= PERTO;
+    if (v && !map.hasLayer(divisas)) divisas.addTo(map); else if (!v && map.hasLayer(divisas)) divisas.remove();
+  }
+  map.on('zoomend', perto);
   if (AL) AL.espera(tracado);                             // a página só fica pronta com as divisas no mapa
 
   // nome: um ponto de uma grade na tela (longe das bordas) dentro do município, de preferência fora da rede, e o mais
@@ -100,7 +114,7 @@
   const nomes = L.layerGroup().addTo(map);
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const C = 12;                                          // px de cada célula da rede na tela
-  const NOMES_DE = 9;                                    // zoom mínimo para escrever os nomes
+  const NOMES_DE = PERTO;                                // zoom mínimo para escrever os nomes (o mesmo das divisas)
   // células (C px) com a rede embaixo, pelos vãos do alimentador (dados.js), sem ler a imagem do mapa (ler o canvas da
   // rede faz o navegador desenhá-lo sem a placa de vídeo): as pontas dos vãos são projetadas uma vez (zoom 0) e, em cada
   // zoom, só escaladas e deslocadas para a tela

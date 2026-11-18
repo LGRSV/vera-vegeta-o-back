@@ -285,6 +285,10 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 .at{display:flex;align-items:center;gap:4px;white-space:nowrap}
 .at b{display:inline-grid;place-items:center;min-width:28px;height:20px;padding:0 4px;background:#fbfbf9;color:#1b2024;border:2px solid #1b2024;border-radius:3px;font:600 11.5px/1 var(--f-mono)}
 .at span{font:600 11.5px/1 var(--f-mono);color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+/* DJ e religador pelo zoom: de longe (abaixo do 12) não aparecem; do 12 ao 15 só a caixinha do tipo (DJ, 79), no mesmo
+   lugar; o número operativo do 15 em diante. A caixinha fica sempre no ponto (o número vem à direita dela) */
+#map.eq-longe .leaflet-marker-icon.al-at{display:none}
+#map.eq-sem-num .al-at .at span{display:none}
 .lb{font:700 13px/1 var(--f-display);color:#fff;background:rgba(0,0,0,.66);border-left:4px solid var(--c);padding:4px 7px;border-radius:3px;white-space:nowrap;cursor:pointer}
 .lb.fus{font-size:11.5px;padding:3px 5px;border-left-width:3px}
 #map.longe .lb.fus{display:none}

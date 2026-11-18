@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.12",
+ "versao": "2.13",
  "atualizado": "2026-11-18",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -143,7 +143,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Raio-X da rede com a NAE do alimentador", "st": "ok", "d": "2026-10-21"},
    {"t": "Botão NAE no mapa do alimentador (o 1º das camadas): abre com a rede limpa, sem os nomes dos trechos e sem a NAE; ligado, fica como antes e o site lembra a escolha", "st": "ok", "d": "2026-11-17", "obs": "Desligado, ficam as linhas, os equipamentos e as caixinhas das chaves; o trecho escolhido mostra só o nome e o painel não muda. No celular, Inspeção aparece como Insp. para a fileira caber."},
    {"t": "Alimentadores vizinhos no mapa do alimentador: a rede dos outros que aparecem na tela, mais apagada e sem rótulos, carregada sozinha ao afastar ou arrastar", "st": "ok", "d": "2026-11-17", "obs": "De longe T1 e T2, mais perto o T3 e de perto o desenho fino. Tocar num vizinho mostra o código e \"Abrir alimentador\"."},
-   {"t": "Equipamentos dos alimentadores vizinhos de perto: religador, DJ, fusível e chave do zoom 15; transformador e outros do 16, apagados e sem códigos escritos", "st": "ok", "d": "2026-11-18", "obs": "Tocar ou passar o mouse num equipamento mostra o tipo, o código e o alimentador, com \"Abrir alimentador\". Só baixa os dos vizinhos na tela."}
+   {"t": "Equipamentos dos alimentadores vizinhos de perto: religador, DJ, fusível e chave do zoom 15; transformador e outros do 16, apagados e sem códigos escritos", "st": "ok", "d": "2026-11-18", "obs": "Tocar ou passar o mouse num equipamento mostra o tipo, o código e o alimentador, com \"Abrir alimentador\". Só baixa os dos vizinhos na tela."},
+   {"t": "Visão do Tocantins inteiro no mapa do alimentador: T1 e T2 de todos os alimentadores, só o estado (fora escuro) e botão Tocantins com voo suave; números dos equipamentos só de perto", "st": "ok", "d": "2026-11-18", "obs": "DJ e religador aparecem do zoom 12 (só a caixinha) e o número operativo do 15; pontinhos dos fusíveis do 12. Por baixo do satélite, uma imagem mais leve evita os quadrados escuros."}
   ]},
   {"id": "2.4", "frente": "mapa", "titulo": "Imagem de satélite", "itens": [
    {"t": "Satélite sem falhas de imagem ao aproximar", "st": "ok", "d": "2026-10-07"},

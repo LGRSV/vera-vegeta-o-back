@@ -296,6 +296,10 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 .at{display:flex;align-items:center;gap:4px;white-space:nowrap}
 .at b{display:inline-grid;place-items:center;min-width:28px;height:20px;padding:0 4px;background:#fbfbf9;color:#1b2024;border:2px solid #1b2024;border-radius:3px;font:600 11.5px/1 var(--f-mono)}
 .at span{font:600 11.5px/1 var(--f-mono);color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+/* DJ e religador pelo zoom: de longe (abaixo do 12) não aparecem; do 12 ao 15 só a caixinha do tipo (DJ, 79), no mesmo
+   lugar; o número operativo do 15 em diante. A caixinha fica sempre no ponto (o número vem à direita dela) */
+#map.eq-longe .leaflet-marker-icon.al-at{display:none}
+#map.eq-sem-num .al-at .at span{display:none}
 .lb{font:700 13px/1 var(--f-display);color:#fff;background:rgba(0,0,0,.66);border-left:4px solid var(--c);padding:4px 7px;border-radius:3px;white-space:nowrap;cursor:pointer}
 .lb.fus{font-size:11.5px;padding:3px 5px;border-left-width:3px}
 #map.longe .lb.fus{display:none}
@@ -986,6 +990,10 @@ let realcados = null;                                     // trechos em destaque
 const visivel = {T1: true, T2: true, T3: true};
 window.__visivel = visivel;                               // a camada de limpeza segue os botões T1/T2/T3
 let fusMarcas = null;                                     // pontos dos fusíveis: somem junto com o T3          // botões T1 / T2 / T3 sobre o mapa
+// de longe (abaixo do zoom 12) o mapa mostra só as linhas: sem DJ, religador e pontos dos fusíveis; o número operativo do
+// DJ e do religador só do zoom 15 em diante (antes, a caixinha do tipo)
+const Z_EQUIP = 12, Z_NUM = 15;
+let fusLonge = false;                                     // abaixo do Z_EQUIP: os pontos dos fusíveis não são pintados nem tocados
 const classeDe = nome => nome.split('-')[0];          // nome do trecho → [polyline com todos os vãos, vãos]; rótulos no mapa
 let halo = null, marcas = null;
 let fimDe = null, iniDe = null;                            // índices (sem eles cada um dos ~2.000 fusíveis varria todos os trechos), montados no 1º balão
@@ -1128,6 +1136,43 @@ function rotulosT3() {
   });
 }
 
+// o quadro (x, y, z) do satélite toca o Tocantins? Pelo contorno do estado (window.TOCANTINS, dados/tocantins.js: só no
+// site); sem ele, null (o mapa avulso pede todos, como sempre). Em unidades de Mercator (0 a 1), com memória por quadro
+const quadroNoTO = (() => {
+  const TO = Array.isArray(window.TOCANTINS) && window.TOCANTINS[0];
+  if (!TO || TO.length < 3) return null;
+  const P = TO.map(([la, lo]) => [(lo + 180) / 360, 0.5 - Math.log(Math.tan(Math.PI / 4 + la * Math.PI / 360)) / (2 * Math.PI)]);
+  let x0 = 1, y0 = 1, x1 = 0, y1 = 0;
+  P.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); });
+  const dentro = (x, y) => { let d = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const [xa, ya] = P[j], [xb, yb] = P[i]; if ((ya > y) !== (yb > y) && x < xa + (y - ya) * (xb - xa) / (yb - ya)) d = !d; } return d; };
+  // o lado (a, b) do contorno passa pelo retângulo r? (Liang–Barsky)
+  const corta = (ax, ay, bx, by, r) => {
+    let t0 = 0, t1 = 1;
+    const dx = bx - ax, dy = by - ay, ps = [-dx, dx, -dy, dy], qs = [ax - r[0], r[2] - ax, ay - r[1], r[3] - ay];
+    for (let i = 0; i < 4; i++) {
+      const p = ps[i], q = qs[i];
+      if (!p) { if (q < 0) return false; continue; }
+      const t = q / p;
+      if (p < 0) { if (t > t1) return false; if (t > t0) t0 = t; } else { if (t < t0) return false; if (t < t1) t1 = t; }
+    }
+    return true;
+  };
+  const memo = new Map();
+  const toca = r => r[2] >= x0 && r[0] <= x1 && r[3] >= y0 && r[1] <= y1 &&
+    (dentro((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) || P.some((b, i) => corta(P[i ? i - 1 : P.length - 1][0], P[i ? i - 1 : P.length - 1][1], b[0], b[1], r)));
+  const f = c => {
+    const k = c.z + '/' + c.x + '/' + c.y;
+    let v = memo.get(k);
+    if (v === undefined) { const n = Math.pow(2, c.z); memo.set(k, v = toca([c.x / n, c.y / n, (c.x + 1) / n, (c.y + 1) / n])); }
+    return v;
+  };
+  // visao-tocantins.js (a máscara): algum lado do contorno passa pelo retângulo r? O ponto (x, y) está dentro do estado?
+  f.borda = r => P.some((b, i) => corta(P[i ? i - 1 : P.length - 1][0], P[i ? i - 1 : P.length - 1][1], b[0], b[1], r));
+  f.dentro = dentro;
+  return f;
+})();
+window.__quadroNoTO = quadroNoTO;
+
 if (typeof L === 'undefined') {
   $('nolib').hidden = false;
 } else {
@@ -1139,8 +1184,14 @@ if (typeof L === 'undefined') {
   // Com blankTile=false ele responde 404 e o quadro vira a foto do nível de cima ampliada (até 6 níveis acima).
   const SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
   const ATR_SAT = 'Imagem © Esri — Esri, Maxar, Earthstar Geographics';
+  // Site, de longe (quadros até o zoom 9, onde a máscara de visao-tocantins.js deixa o mapa escuro fora do Tocantins): só
+  // os quadros que tocam o estado (dados/tocantins.js, carregado antes deste script); quadro inteiro fora dele nem é
+  // pedido. De perto, todos, como antes (o contorno do estado tem 568 pontos: erra até ~750 m na borda). No voo do botão
+  // Tocantins (visao-tocantins.js) fica quieto: nada de quadros dos zooms do meio do caminho, só os do pouso
   const Satelite = L.TileLayer.extend({
     getTileUrl: c => `${SAT}${c.z}/${c.y}/${c.x}?blankTile=false`,
+    _isValidTile(c) { return L.TileLayer.prototype._isValidTile.call(this, c) && (!quadroNoTO || c.z > 9 || quadroNoTO(c)); },
+    _onMoveEnd() { if (!this._quieto) L.TileLayer.prototype._onMoveEnd.call(this); },
     createTile(c, done) { const t = L.TileLayer.prototype.createTile.call(this, c, done); t._xyz = c; t._k = 0; return t; },
     _tileOnError(done, t, e) {
       const c = t._xyz, k = ++t._k;
@@ -1155,6 +1206,7 @@ if (typeof L === 'undefined') {
   const satelite = new Satelite(SAT + '{z}/{y}/{x}', {
     maxZoom: 19, maxNativeZoom: 18, attribution: ATR_SAT
   }).on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; });   // entra no mapa na 1ª fatia da montagem (montaRede)
+  window.__satelite = satelite;                           // visao-tocantins.js: o fundo (quadros de longe) e o voo
   // Datas das fotos de satélite na legenda, com o que está na tela (pedido do usuário): o próprio World_Imagery tem, por
   // escala, de quando é cada pedaço da foto (camadas "… Resolution Metadata": SRC_DATE e o fornecedor, NICE_DESC). A cada
   // parada do mapa consulta a camada do nível dos quadros mostrados e põe na legenda a data (ou de qual a qual, se a tela
@@ -1207,6 +1259,7 @@ if (typeof L === 'undefined') {
   D.vaos.forEach(v => { sul = Math.min(sul, v[0], v[2]); norte = Math.max(norte, v[0], v[2]); oeste = Math.min(oeste, v[1], v[3]); leste = Math.max(leste, v[1], v[3]); });
   const todos = L.latLngBounds([sul, oeste], [norte, leste]);
   map.fitBounds(todos.pad(0.04));
+  window.__caixaRede = todos;                             // visao-tocantins.js: o voo de volta à vista com que o alimentador abre
   const ren = map.options.renderer;                       // o canvas da rede
   map.addLayer(ren);
   fusMarcas = L.layerGroup().addTo(map);
@@ -1322,9 +1375,14 @@ if (typeof L === 'undefined') {
   // depois das linhas na ordem de desenho. Se o grupo sair e voltar ao mapa antes disso (limpeza.js ao aproximar, botões
   // T1 T2 T3), os que faltam são criados nessa hora: voltam todos juntos para o fim da ordem, como sempre foi
   let iFus = 0, fusAncora, fusVoltou = false;
+  // de longe (fusLonge, abaixo do zoom 12) os pontos ficam no mapa e no lugar deles na ordem de desenho, mas o canvas não
+  // os pinta e o mouse e o toque não os acham: a rede fica só com as linhas, sem tirar e pôr ~2.000 pontos a cada zoom
+  const fusPinta = function () { if (!fusLonge) L.CircleMarker.prototype._updatePath.call(this); };
+  const fusToca = function (p) { return !fusLonge && L.CircleMarker.prototype._containsPoint.call(this, p); };
   function poeFusivel() {
     const a = D.fusiveis[iFus++];
     const m = L.circleMarker([a.lat, a.lon], {radius: 4, color: '#111', weight: 1.5, fillColor: a.t === 'SEC' || a.t === 'FTR' ? '#9ca3af' : '#fff', fillOpacity: 1});
+    m._updatePath = fusPinta; m._containsPoint = fusToca;
     m._al = a;
     m.addEventParent(paiF);
     fusMarcas.addLayer(m);
@@ -1377,7 +1435,7 @@ if (typeof L === 'undefined') {
       marca('al:tronco');
       await AL.segue();
       D.principais.forEach(a => {
-        L.marker([a.lat, a.lon], {icon: L.divIcon({className: '', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500})
+        L.marker([a.lat, a.lon], {icon: L.divIcon({className: 'al-at', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500})
           .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'}).addTo(map);
       });
       let c = contaMapa();
@@ -1415,7 +1473,13 @@ if (typeof L === 'undefined') {
     }
     lv.fim();
   }
-  const zoomClasse = () => $('map').classList.toggle('longe', map.getZoom() < 15.5);
+  // longe: rótulos de T3 e fusíveis só de perto (15,5); eq-longe: sem DJ e religador (abaixo do 12; os pontos dos
+  // fusíveis também não, fusLonge); eq-sem-num: DJ e religador só com a caixinha do tipo, sem o número operativo (abaixo do 15)
+  const zoomClasse = () => {
+    const z = map.getZoom(), c = $('map').classList;
+    c.toggle('longe', z < 15.5); c.toggle('eq-longe', z < Z_EQUIP); c.toggle('eq-sem-num', z < Z_NUM);
+    fusLonge = z < Z_EQUIP;                               // (o canvas é refeito no fim do zoom, logo depois deste aviso)
+  };
   map.on('zoomend', zoomClasse); zoomClasse();
   map.on('moveend', rotulosT3);
   const p1 = montaRede().catch(e => console.error(e));
