@@ -11,6 +11,8 @@ Grava alimentadores/<AL>/ativos.js com window.ATIVOS = {"tr": [[código, lat, lo
     vêm no chaves.js (88, faca 80, passagem 90/31/68); só tipo de 2 dígitos, capacitor, regulador ou chave.
 Os postes não precisam de arquivo: o mapa usa as pontas dos vãos do dados.js, que já estão na página.
 A página só baixa o ativos.js quando o mapa chega perto (zoom 16): abrir o alimentador não fica mais pesado.
+Se o site já tem dados/vizinhos/, refaz também essa pasta (gera_trechos.py --vizinhos): os transformadores e os outros
+equipamentos dos alimentadores vizinhos (<AL>.5.txt e os códigos em <AL>.6.txt) saem do ativos.js das páginas.
 """
 import json
 import re
@@ -48,6 +50,10 @@ def main(site):
         tot['alimentadores'] += 1
         tot['transformadores'] += len(tr)
         tot['outros equipamentos'] += len(out['eq'])
+    if (site / 'dados' / 'vizinhos' / 'indice.json').exists():
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import gera_trechos                               # noqa: E402  (só aqui: o resto do script não precisa dele)
+        tot['alimentadores em dados/vizinhos'] = len(gera_trechos.vizinhos_mapa(site, gera_trechos.vizinhos_das_paginas(site)))
     return dict(tot)
 
 

@@ -9,7 +9,8 @@ relatório de validação. Determinístico: as mesmas entradas geram os mesmos a
     python scripts/gera_trechos.py --saida <pasta do site> --validar           só confere dados e páginas já gerados
     python scripts/gera_trechos.py --saida <pasta do site> --so-interface      refaz páginas, índice e relatório
     python scripts/gera_trechos.py --saida <pasta do site> --comparar <clone gh-pages publicado>
-    python scripts/gera_trechos.py --saida <pasta do site> --vizinhos [<destino>]   só dados/vizinhos/, dos dados.js
+    python scripts/gera_trechos.py --saida <pasta do site> --vizinhos [<destino>]   só dados/vizinhos/, das páginas
+                                                                               (dados.js, chaves.js e ativos.js)
 
 Sem --malha, baixa a malha municipal do Tocantins da API do IBGE na 1ª vez e guarda em --cache.
 Com --so-interface, as divisas no mapa do alimentador (municipios.js) saem da malha de --malha ou do --cache; baixa
@@ -1082,11 +1083,23 @@ def redes_mapa(saida, dados):
 # Cada arquivo tem uma linha de texto por classe (T1, T2 e T3, nessa ordem; a que o arquivo não leva fica vazia) e nela
 # as linhas da rede, separadas por espaço. Cada ponto é a diferença do anterior, também de uma linha para a seguinte e de
 # uma classe para a outra (o 1º do arquivo é a diferença de 0, 0).
-# indice.json: {"v": 1, "als": {AL: [sul, oeste, norte, leste, versão, bytes do .1, do .2, do .3]}}. A versão (8 hex dos
-# três arquivos) vai no endereço (?v=): o navegador baixa de novo só o que mudou.
+# Os equipamentos que o mapa do alimentador mostra (das mesmas fontes que ele, na página: principais e fusíveis do
+# dados.js, chaves.js e ativos.js), em mais três arquivos:
+#   <AL>.4.txt  de perto (zoom 15): DJ, religador, fusível, fusível de seccionamento ou no tronco (SEC, FTR) e chave
+#   <AL>.5.txt  mais perto (zoom 16): transformador e os outros equipamentos
+#   <AL>.6.txt  o tipo e o código de cada um: só para o balão (o vizinhos.js baixa quando o mouse ou o toque chega num)
+# No .4 e no .5, uma linha de texto por grupo (VIZ_EQ, nessa ordem) com os pontos em polyline como acima (diferença do
+# anterior, desde 0, 0 no começo do arquivo), na ordem da curva de Hilbert: um ponto perto do seguinte (diferenças
+# pequenas) e cada bloco de pontos seguidos numa área pequena (o vizinhos.js acha os da tela por blocos). No .6, as
+# mesmas linhas (as do .4 e depois as do .5), com os itens na mesma ordem, separados por tabulação: o código (DJ,
+# religador, transformador) ou o tipo, um espaço e o código (os outros).
+# indice.json: {"v": 2, "als": {AL: [sul, oeste, norte, leste, versão, bytes do .1, do .2, do .3, versão dos
+# equipamentos, bytes do .4, do .5]}}. Cada versão (8 hex dos arquivos dela) vai no endereço (?v=): o navegador baixa de
+# novo só o que mudou. Sem equipamentos: versão '' e 0 bytes (e nenhum .4, .5 ou .6).
 VIZ_TOL = (10, 1)          # m do Douglas–Peucker: grosso (até o zoom 15, onde 1 pixel tem ~5 m) e fino
 VIZ_MIN = 20               # m: no grosso fica de fora a linha mais curta que isso (de longe, menos de 1 pixel)
-VIZ_ARQ = re.compile(r'^[A-Za-z0-9_-]+\.[123]\.txt$')
+VIZ_ARQ = re.compile(r'^[A-Za-z0-9_-]+\.[1-6]\.txt$')
+VIZ_EQ = ('DRfgc', 'te')   # grupos do .4 e do .5: D DJ, R religador, f fusível, g fusível SEC/FTR, c chave; t transformador, e outro
 
 
 def _poli(n):
@@ -1188,54 +1201,148 @@ def _por_classe(trechos, vaos, lonlat):
     return segs
 
 
+def _hilbert(n, x, y):
+    """Posição de (x, y) na curva de Hilbert de um quadrado n × n (n potência de 2)."""
+    d, s = 0, n // 2
+    while s:
+        rx, ry = int(x & s > 0), int(y & s > 0)
+        d += s * s * ((3 * rx) ^ ry)
+        if not ry:
+            if rx:
+                x, y = s - 1 - x, s - 1 - y
+            x, y = y, x
+        s //= 2
+    return d
+
+
+def _num(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def equipamentos_da_pagina(pasta, d=None):
+    """Os equipamentos que o mapa do alimentador mostra, das mesmas fontes que ele (na pasta da página): DJ e religadores
+    (principais do dados.js), fusíveis (fusiveis do dados.js; os SEC e FTR à parte, cinza no mapa), chaves (chaves.js) e
+    transformadores e outros (ativos.js, o que o mapa mostra do zoom 16 em diante). `d`: o dados.js já lido.
+    → {grupo: [(lat, lon, tipo, código), ...]} (grupos de VIZ_EQ)."""
+    pasta = Path(pasta)
+    if d is None:
+        d = le_js(pasta / 'dados.js') or {}
+    eq = {g: [] for g in ''.join(VIZ_EQ)}
+
+    def poe(g, lat, lon, tipo, cod):
+        if _num(lat) and _num(lon):
+            eq[g].append((lat, lon, str(tipo or ''), str(cod or '')))
+    for a in d.get('principais') or []:
+        poe('D' if a.get('t') == 'DJ' else 'R', a.get('lat'), a.get('lon'), a.get('t'), a.get('nome'))
+    for a in d.get('fusiveis') or []:
+        poe('g' if a.get('t') in ('SEC', 'FTR') else 'f', a.get('lat'), a.get('lon'), a.get('t'), a.get('nome'))
+    for c in le_js(pasta / 'chaves.js') or []:
+        poe('c', c[2], c[3], c[1], c[0])
+    at = le_js(pasta / 'ativos.js') or {}
+    for a in at.get('tr') or []:
+        poe('t', a[1], a[2], '', a[0])
+    for a in at.get('eq') or []:
+        poe('e', a[2], a[3], a[1], a[0])
+    return eq
+
+
+def equipamentos_vizinho(eq):
+    """{grupo: [(lat, lon, tipo, código)]} → [texto do .4, do .5, do .6] (ver acima; '' no que não tem nada)."""
+    q = {g: [(round(la * 1e5), round(lo * 1e5), t, c) for la, lo, t, c in its] for g, its in (eq or {}).items()}
+    todos = [p for its in q.values() for p in its]
+    if not todos:
+        return ['', '', '']
+    la0, lo0 = min(p[0] for p in todos), min(p[1] for p in todos)
+    n = 1
+    while n <= max(max(p[0] for p in todos) - la0, max(p[1] for p in todos) - lo0):
+        n *= 2
+    limpa = lambda x: re.sub(r'[\t\n\r]+', ' ', x).strip()
+    arqs, cods = [], []
+    for grupos in VIZ_EQ:
+        la_ = lo_ = 0
+        linhas = []
+        for g in grupos:
+            its = sorted(q.get(g, ()), key=lambda p: (_hilbert(n, p[1] - lo0, p[0] - la0), p[3], p[2]))
+            s = ''
+            for la, lo, _, _ in its:
+                s += _poli(la - la_) + _poli(lo - lo_)
+                la_, lo_ = la, lo
+            linhas.append(s)
+            cods.append('\t'.join(limpa(c) if g in 'DRt' else re.sub(r'\s+', '_', limpa(t)) + ' ' + limpa(c) for _, _, t, c in its))
+        arqs.append('\n'.join(linhas) if any(linhas) else '')
+    return arqs + ['\n'.join(cods)]
+
+
 def vizinhos_dos_dados(dados):
-    """A rede de cada alimentador publicado (dados/alimentadores/<AL>.json, vãos em [lon, lat])."""
+    """A rede de cada alimentador publicado (dados/alimentadores/<AL>.json, vãos em [lon, lat]). Os equipamentos saem da
+    página dele (vizinhos_mapa)."""
     for c in dados:
         if c['validacao']['status'] != 'falha':
             yield c['alimentador'], _por_classe(c['trechos'], c['vaos'], True)
 
 
 def vizinhos_das_paginas(saida):
-    """A rede de cada página de alimentador do site (alimentadores/<AL>/dados.js, vãos em [lat, lon])."""
+    """A rede e os equipamentos de cada página de alimentador do site (alimentadores/<AL>/dados.js, vãos em [lat, lon];
+    chaves.js e ativos.js)."""
     for p in sorted((saida / 'alimentadores').glob('*/dados.js')):
         if (p.parent / 'index.html').exists():
             d = le_js(p)
             if d and d.get('vaos'):
-                yield p.parent.name, _por_classe(d['trechos'], d['vaos'], False)
+                yield p.parent.name, _por_classe(d['trechos'], d['vaos'], False), equipamentos_da_pagina(p.parent, d)
 
 
 def vizinhos_mapa(saida, redes, destino=None):
-    """Grava dados/vizinhos/ (em `destino`, se dado; senão em `saida`): os três arquivos de cada alimentador e o índice;
-    apaga os de alimentador que saiu. Só regrava o arquivo que mudou. Devolve o índice."""
+    """Grava dados/vizinhos/ (em `destino`, se dado; senão em `saida`): os arquivos de cada alimentador (rede e
+    equipamentos) e o índice; apaga os de alimentador que saiu. Só regrava o arquivo que mudou. `redes`: (AL, rede) ou
+    (AL, rede, equipamentos); sem os equipamentos, eles saem da página do alimentador em `saida`. Devolve o índice."""
     pasta = Path(destino or saida) / 'dados' / 'vizinhos'
     pasta.mkdir(parents=True, exist_ok=True)
     als, feitos = {}, set()
-    for al, segs in redes:
+
+    def grava(nome, b):
+        arq = pasta / nome
+        if not arq.exists() or arq.read_bytes() != b:
+            arq.write_bytes(b)
+        feitos.add(nome)
+    for al, segs, *eq in redes:
         textos, caixa = rede_vizinho(segs)
         if not textos:
             continue
         bs = [t.encode('utf-8') for t in textos]
         for k, b in enumerate(bs, 1):
-            arq = pasta / f'{al}.{k}.txt'
-            if not arq.exists() or arq.read_bytes() != b:
-                arq.write_bytes(b)
-            feitos.add(arq.name)
-        als[al] = [*caixa, hashlib.sha1(b'\0'.join(bs)).hexdigest()[:8], *map(len, bs)]
+            grava(f'{al}.{k}.txt', b)
+        eb = [t.encode('utf-8') for t in equipamentos_vizinho(eq[0] if eq else equipamentos_da_pagina(Path(saida) / 'alimentadores' / al))]
+        if any(eb[:2]):
+            for k, b in enumerate(eb, 4):
+                if b:
+                    grava(f'{al}.{k}.txt', b)
+        als[al] = [*caixa, hashlib.sha1(b'\0'.join(bs)).hexdigest()[:8], *map(len, bs),
+                   hashlib.sha1(b'\0'.join(eb)).hexdigest()[:8] if any(eb[:2]) else '', len(eb[0]), len(eb[1])]
     for p in pasta.iterdir():
         if VIZ_ARQ.match(p.name) and p.name not in feitos:
             p.unlink()
-    grava_json(pasta / 'indice.json', dict(v=1, als=dict(sorted(als.items()))))
+    grava_json(pasta / 'indice.json', dict(v=2, als=dict(sorted(als.items()))))
     return als
 
 
-def resumo_vizinhos(als):
-    """Texto curto: alimentadores, tamanho total (grosso e fino) e o maior arquivo."""
+def resumo_vizinhos(als, pasta=None):
+    """Texto curto: alimentadores, tamanho total (grosso e fino da rede; equipamentos e, com a `pasta`, os códigos deles)
+    e o maior arquivo."""
     tam = lambda b: f'{b / 1e6:.1f} MB'.replace('.', ',') if b >= 1e6 else f'{math.ceil(b / 1e3)} KB'
     g = sum(a[5] + a[6] for a in als.values())
     f = sum(a[7] for a in als.values())
-    n, al, k = max(((a[5 + k], al, k + 1) for al, a in als.items() for k in range(3)), default=(0, '-', 0))
-    return (f'{len(als)} alimentador(es) · {tam(g + f)} (grosso {tam(g)}, fino {tam(f)}) · '
-            f'maior arquivo: {al}.{k}.txt com {tam(n)}')
+    eq = sum(a[9] + a[10] for a in als.values())
+    tams = [(a[i], al, k) for al, a in als.items() for i, k in ((5, 1), (6, 2), (7, 3), (9, 4), (10, 5))]
+    if pasta:
+        tams += [((Path(pasta) / f'{al}.6.txt').stat().st_size, al, 6) for al, a in als.items() if a[8]]
+    cod = sum(n for n, _, k in tams if k == 6)
+
+    def maior(ks):
+        n, al, k = max((x for x in tams if x[2] in ks), default=(0, '-', 0))
+        return f'{al}.{k}.txt com {tam(n)}' if n else 'nenhum'
+    return (f'{len(als)} alimentador(es) · {tam(g + f + eq + cod)} (rede: grosso {tam(g)}, fino {tam(f)}; equipamentos '
+            f'{tam(eq)}' + (f', códigos {tam(cod)}' if pasta else '') + f') · maior arquivo: {maior((1, 2, 3, 4, 5, 6))}; '
+            f'dos equipamentos: {maior((4, 5))}' + (f'; dos códigos: {maior((6,))}' if pasta else ''))
 
 
 def polo_principal(c, polo_de):
@@ -2018,8 +2125,9 @@ def main(argv=None):
     g.add_argument('--so-interface', action='store_true', help='só refaz páginas, índice e relatório')
     g.add_argument('--comparar', help='compara com as páginas publicadas nesta pasta (clone do gh-pages)')
     g.add_argument('--vizinhos', nargs='?', const='', metavar='DESTINO',
-                   help='só refaz dados/vizinhos/ (rede dos alimentadores vizinhos) a partir dos dados.js das páginas de '
-                        '--saida; grava em DESTINO/dados/vizinhos/ (sem DESTINO, na própria --saida)')
+                   help='só refaz dados/vizinhos/ (rede e equipamentos dos alimentadores vizinhos) a partir das páginas '
+                        'de --saida (dados.js, chaves.js e ativos.js); grava em DESTINO/dados/vizinhos/ (sem DESTINO, na '
+                        'própria --saida)')
     a = ap.parse_args(argv)
     saida = Path(a.saida)
     if a.validar:
@@ -2032,7 +2140,8 @@ def main(argv=None):
         comparar(saida, a.comparar)
         return 0
     if a.vizinhos is not None:
-        print('vizinhos: ' + resumo_vizinhos(vizinhos_mapa(saida, vizinhos_das_paginas(saida), a.vizinhos or None)))
+        als = vizinhos_mapa(saida, vizinhos_das_paginas(saida), a.vizinhos or None)
+        print('vizinhos: ' + resumo_vizinhos(als, Path(a.vizinhos or saida) / 'dados' / 'vizinhos'))
         return 0
     fontes = Fontes(a)
     malha = carregar_malha(a.malha, a.cache)
