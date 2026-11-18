@@ -1,9 +1,8 @@
 // Alimentadores selecionados no mapa do alimentador (roda depois de visao-tocantins.js, com window.__map, window.__al e o
 // window.__alKit de alimentador.js): até 10 outros alimentadores além do aberto, mostrados como ele. A rede nas cores das
 // classes e opaca, os nomes dos trechos e a NAE (o botão NAE vale para eles), DJ e religadores, fusíveis do zoom 12; tocar
-// num trecho de um deles mostra no painel o mesmo detalhe do aberto, com "No alimentador LD… · Abrir". Mais simples de
-// longe (pedido do usuário): do zoom 12 em diante igual ao aberto; de 9 a 12 sem as linhas muito curtas e os nomes dos T3
-// só do 12; abaixo do 9 só T1 e T2. Camadas (Faixa, Inspeção…), lista de trechos, busca do olho, modo Limpeza de faixa,
+// num trecho de um deles mostra no painel o mesmo detalhe do aberto, com "No alimentador LD… · Abrir". A rede com T1, T2
+// e T3 em qualquer zoom (pedido do usuário); de longe, os nomes dos T3 só do 12 e o desenho com menos pontos. Camadas (Faixa, Inspeção…), lista de trechos, busca do olho, modo Limpeza de faixa,
 // Downloads e croqui continuam só do aberto.
 // Como entram: "Selecionar" no balão de um vizinho (vizinhos.js) e da visão do Tocantins (visao-tocantins.js), ou o menu
 // "Alimentadores" no alto do mapa, à direita (os selecionados, busca pelo código, ✕ para tirar, Ver todos, Tirar todos).
@@ -35,7 +34,7 @@
   const R = L.Browser.retina && !MOVEL ? 2 : 1;          // resolução da imagem (a dos vizinhos)
   const MAXPX = MOVEL ? 1.5e6 : 4e6;                     // px da imagem no máximo (a resolução cai)
   const FOLGA = 0.15;                                    // em volta da vista (fração dela): o arrasto curto não pede imagem nova
-  const Z_LONGE = 9, Z_PERTO = 12, Z_T3 = 15.5;          // abaixo de 9 só T1 e T2; de 12 igual ao aberto; T3 da tela do 15,5
+  const Z_PERTO = 12, Z_T3 = 15.5;                        // de 12 igual ao aberto (nomes dos T3 com NAE, fusíveis); T3 da tela do 15,5
   const esc = K.esc;
   const ux = lon => (lon + 180) / 360, uy = lat => 0.5 - Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) / (2 * Math.PI);
   const lat = y => Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * 180 / Math.PI, lon = x => x * 360 - 180;
@@ -159,19 +158,17 @@
   // estilo cs: tipo (principal 0, ramal 6, fusível 12) + zona (1 a 5 → 0 a 4; outra 5): as cores e os pesos do aberto
   const COR_ST = ['#3b82f6', '#22c55e', '#facc15', '#f97316', '#ef4444', '#d946ef'], PESO_ST = [6, 4.5, 3];
   // as cadeias do alimentador e (já num beginPath) do estilo st na região r (px absolutos do zoom r.z): nível de detalhe
-  // (de perto pula ponto a menos de 0,6 px do anterior; de longe, a menos de 2 px, e tira cadeia de T3 menor que 3 px: no
-  // T1 e no T2, que são poucos, ficaria um tracejado onde a linha se divide em cadeias curtas; abaixo do 9 só T1 e T2) e as
+  // (de perto pula ponto a menos de 0,6 px do anterior; de longe, a menos de 2 px; o T3 em qualquer zoom, como no aberto) e as
   // classes ligadas (op.vis[1..3])
   function tracaRede(ctx, e, lista, r, op) {
     const s = 256 * Math.pow(2, r.z), bx = e.x0 * s - r.x, by = e.y0 * s - r.y, W = r.w + 8, H = r.h + 8, p = e.p, ini = e.ini, cx = e.cx;
-    const perto = r.z >= 12, sk = perto ? 0.6 : 2, so12 = r.z < 9;
+    const perto = r.z >= 12, sk = perto ? 0.6 : 2;
     let algo = false;
     for (let j = 0; j < lista.length; j++) {
       const l = lista[j], c = e.cl[l];
-      if (!op.vis[c] || (so12 && c > 2)) continue;
+      if (!op.vis[c]) continue;
       const a0 = cx[4 * l] * s + bx, b0 = cx[4 * l + 1] * s + by, a1 = cx[4 * l + 2] * s + bx, b1 = cx[4 * l + 3] * s + by;
       if (a0 > W || a1 < -8 || b0 > H || b1 < -8) continue;
-      if (!perto && c > 2 && a1 - a0 < 3 && b1 - b0 < 3) continue;
       const a = ini[l], b = ini[l + 1];
       let lx = p[2 * a] * s + bx, ly = p[2 * a + 1] * s + by;
       ctx.moveTo(lx, ly);
@@ -358,6 +355,10 @@
     realce = L.layerGroup().addTo(map);
     eqs = new Eqs().addTo(map);
     cods = L.layerGroup().addTo(map);
+    // as etiquetas de código só de longe (abaixo do Z_EQUIP), já no começo da animação do zoom
+    const codLonge = z => mc.classList.toggle('sel-cod-longe', z < K.Z_EQUIP);
+    codLonge(map.getZoom());
+    map.on('zoomanim', e => codLonge(e.zoom)); map.on('zoomend', () => codLonge(map.getZoom()));
   }
 
   // A imagem da rede dos selecionados, presa ao mapa: a região que ela tem (_r: canto x, y em px absolutos do zoom z,
@@ -719,7 +720,7 @@
   function alvo(pt, tol) {
     if (!sels.size || map._animatingZoom) return null;
     const z = map.getZoom(), s = 256 * Math.pow(2, z), a = map.containerPointToLayerPoint(pt).add(map.getPixelOrigin());
-    const so12 = z < Z_LONGE, perto = z >= Z_PERTO, fz = fusVisivel(z);
+    const fz = fusVisivel(z);
     const vis = [false, visivel('T1'), visivel('T2'), visivel('T3')];
     let melhor = null, dm = tol * tol;
     if (fz) {                                            // fusível a até 8 px (do centro), como o do aberto
@@ -743,10 +744,9 @@
       const p = g.p, ini = g.ini, cx = g.cx;
       for (let l = 0, nl = ini.length - 1; l < nl; l++) {
         const c = g.cl[l];
-        if (!vis[c] || (so12 && c > 2)) continue;
+        if (!vis[c]) continue;
         const a0 = cx[4 * l] * s, b0 = cx[4 * l + 1] * s, a1 = cx[4 * l + 2] * s, b1 = cx[4 * l + 3] * s;
         if (qx < a0 - tol || qx > a1 + tol || qy < b0 - tol || qy > b1 + tol) continue;
-        if (!perto && c > 2 && a1 - a0 < 3 && b1 - b0 < 3) continue;   // não aparece: não se toca
         for (let k = ini[l]; k < ini[l + 1] - 1; k++) {
           const x1 = p[2 * k] * s, y1 = p[2 * k + 1] * s, dx = p[2 * k + 2] * s - x1, dy = p[2 * k + 3] * s - y1, l2 = dx * dx + dy * dy;
           const f = l2 ? Math.max(0, Math.min(1, ((qx - x1) * dx + (qy - y1) * dy) / l2)) : 0;
@@ -983,7 +983,7 @@
     '.mapbox.fx-modo :is(.leaflet-sel-rede-pane,.leaflet-sel-eq-pane){opacity:.55}.mapbox.fx-modo :is(.leaflet-sel-rotulos-pane,.leaflet-sel-cods-pane,.leaflet-sel-realce-pane,.sel-canto,.sel-lg){display:none}' +
     // o código do alimentador de longe, junto do DJ (abaixo do zoom 12, como o DJ some); os do mesmo lugar, um por linha
     '.sel-cod{display:grid;transform:translate(-50%,calc(-100% - 6px));padding:2px 6px;border-radius:var(--r1);background:var(--vidro);border:1px solid var(--vidro-borda);' +
-    'color:var(--vidro-fg);font:600 11.5px/1.3 var(--f-mono);white-space:nowrap;box-shadow:var(--sh-vidro);pointer-events:none}#map:not(.eq-longe) .sel-cod{display:none}' +
+    'color:var(--vidro-fg);font:600 11.5px/1.3 var(--f-mono);white-space:nowrap;box-shadow:var(--sh-vidro);pointer-events:none}#map:not(.sel-cod-longe) .sel-cod{display:none}' +
     '.sel-cod .sel-mais{font-family:var(--f-body);opacity:.8}' +
     // na coluna das legendas das camadas (extras.js), com alguma ligada: os selecionados ainda não têm camadas
     '.sel-lg{padding:var(--s1) var(--s2);background:var(--vidro);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);border:1px solid var(--vidro-borda);' +
