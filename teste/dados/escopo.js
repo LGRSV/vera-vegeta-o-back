@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.16",
+ "versao": "2.17",
  "atualizado": "2026-11-18",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -148,6 +148,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Satélite sem partes pretas no zoom do mapa do alimentador (roda, pinça, voo do botão Tocantins logo ao abrir e divisa do estado)", "st": "ok", "d": "2026-11-18", "obs": "Onde a imagem nítida ainda está chegando aparece a versão borrada, não o preto. Medido em 14 cenários no PC e no celular: 0 ms de preto dentro do estado."},
    {"t": "Selecionar até 10 outros alimentadores no mapa do alimentador (menu suspenso Alimentadores): rede, nomes dos trechos, NAE e painel como os do aberto", "st": "ok", "d": "2026-11-18", "obs": "Tocar num vizinho mostra Selecionar e Abrir alimentador. Abrir um selecionado leva a seleção junto. T1, T2 e T3 em qualquer zoom (correção de 18/11). Camadas, lista de trechos e downloads seguem só do aberto por enquanto."},
    {"t": "Correção: DJ, religadores e fusíveis do alimentador aberto de volta de longe (somem só na visão do estado inteiro; o número operativo segue de perto)", "st": "ok", "d": "2026-11-18", "obs": "Tinham sumido abaixo do zoom 12 com a visão do Tocantins."},
+   {"t": "Visão satélite do Tocantins no mapa inicial com Ctrl+S (⌘S no Mac): o mapa se dissolve no satélite e aproxima até o estado, com o T1 e o T2 de todos os alimentadores", "st": "ok", "d": "2026-11-18", "obs": "Mouse na linha mostra o alimentador e o clique abre a página dele. Ctrl+S de novo ou Esc volta. No celular ainda não há botão."},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},

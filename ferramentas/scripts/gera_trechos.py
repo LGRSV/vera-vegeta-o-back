@@ -681,7 +681,7 @@ def ativos_interface(saida):
     for f in ('extras.js', 'municipios.js', 'chaves.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
               'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js', 'lupa-painel.js', 'ativos-zoom.js', 'mapa-raiox.js',
               'croqui-rascunho.js', 'polo-rota.js', 'modo-faixa-rascunho.js', 'argos.png', 'focos.js', 'focos.css', 'vizinhos.js',
-              'visao-tocantins.js', 'selecionados.js'):
+              'visao-tocantins.js', 'selecionados.js', 'mapa-sat-to.js'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
     return modelo
@@ -730,6 +730,7 @@ def pacote_trechos(destino):
 # ?v= dos assets da página inicial e da Queimadas: trocar quando o arquivo muda (o navegador guarda a versão anterior)
 V_MAPA = '20261116'
 V_FOCOS = '20261116'
+V_SAT_TO = '20261118'                                      # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
 
 
 def pagina_alimentador(modelo, c):
@@ -1980,7 +1981,8 @@ def interface(saida, malha=None):
              f'<script src="assets/focos.js?v={V_FOCOS}"></script>\n'
              f'<script src="assets/mapa-municipios.js?v={V_MAPA}"></script>\n'
              f'<script src="assets/busca-ativo.js?v={V_MAPA}"></script>\n'
-             '<script src="assets/mapa-raiox.js?v=20261110"></script>')        # zoom → tela cheia e raio-X (Ctrl+X) no mapa
+             '<script src="assets/mapa-raiox.js?v=20261110"></script>\n'     # zoom → tela cheia e raio-X (Ctrl+X) no mapa
+             f'<script src="assets/mapa-sat-to.js?v={V_SAT_TO}"></script>')   # satélite do Tocantins (Ctrl+S); Leaflet só no 1º uso
     (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True, topo=TOPO_CENTRAL,   # página inicial sem rodapé (pedido do usuário)
                                             estilos=f'<link rel="stylesheet" href="assets/focos.css?v={V_FOCOS}">'),
                                       encoding='utf-8')
