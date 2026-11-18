@@ -3,8 +3,9 @@
 // apagadas (sem rótulos, NAE, chaves nem marcadores); painel, NAE, seleção, camadas e modo de faixa continuam só deste.
 // Carrega sozinho: ao afastar ou arrastar o mapa entram os que aparecem na tela (com folga) e saem os que ficaram longe.
 // Aos poucos: de longe só T1 e T2; do zoom 13 (celular: 14) entra o T3; de perto (15; celular: 16) o fino. Os botões
-// T1 T2 T3 do mapa valem também aqui. Aparecem aos poucos (no celular, de uma vez). Passar o mouse mostra o código; tocar
-// num vizinho (fora da rede deste) abre um balão com "Abrir alimentador".
+// T1 T2 T3 do mapa valem também aqui. Aparecem aos poucos (no celular, de uma vez). Passar o mouse mostra o código (e,
+// com a seleção, "Clique para selecionar"); clicar ou tocar num vizinho (fora da rede deste) já o seleciona (abaixo); sem
+// selecionados.js (mapa avulso), abre um balão com "Abrir alimentador".
 // De perto, os equipamentos deles, os mesmos símbolos do alimentador aberto, menores e apagados como a rede, sem códigos
 // escritos: DJ, religador, fusível e chave do zoom 15 em diante; transformador e os outros do 16. Os fusíveis somem com o
 // T3 (como neste). Mouse ou toque num deles: o tipo, o código e o alimentador (o código vem de um arquivo à parte, baixado
@@ -27,8 +28,10 @@
 // Alimentadores selecionados (selecionados.js, window.__alSel): a rede, o DJ, os religadores e os fusíveis deles são
 // desenhados lá, fortes; depois que a rede deles está lá (__alSel.desenha: baixando ou com erro, seguem aqui como vizinhos) eles ficam fora do orçamento e não baixam a rede (.1 .2 .3), só os equipamentos (.4 e .5,
 // primeiro), que selecionados.js pinta por cima da rede deles (pintaEqDe) e que o toque daqui ainda acha (transformador,
-// chave e outro). O balão ganha "Selecionar" (ou "Tirar da seleção"); a linha de um selecionado no ponto tem a vez sobre a
-// linha de um vizinho.
+// chave e outro). Clique na linha de um vizinho: __alSel.seleciona, sem balão (com 10, o aviso de lá); enquanto ele baixa,
+// a linha dele fica realçada aqui (no canvas de cima, como o vizinho sob o mouse, com um contorno claro), até selecionados.js
+// desenhá-lo. Abrir: no menu Alimentadores (↗) ou no painel do trecho dele. O balão de equipamento ganha "Selecionar" (ou
+// "Tirar da seleção"); a linha de um selecionado no ponto tem a vez sobre a linha de um vizinho.
 (function () {
   const map = window.__map, L = window.L, D = window.D, AL = window.__al || null, eu = document.currentScript;
   if (!map || !L || !D || !eu || !/\/assets\/vizinhos\.js(\?|$)/.test(eu.src) || !document.documentElement.classList.contains('al-site')) return;
@@ -68,7 +71,9 @@
 
   const css = document.createElement('style');
   css.textContent = '.leaflet-container.viz-mao{cursor:pointer}.viz-cam canvas{position:absolute;left:0;top:0}' +
-    '.viz-dica{z-index:650;transform:translate(-50%,calc(-100% - 14px));font:600 var(--t-xs) var(--f-mono)}' +
+    // (acima dos controles do mapa, z 1000 e 1001: perto do alto, a dica não fica atrás da fileira das camadas)
+    '.viz-dica{z-index:1002;transform:translate(-50%,calc(-100% - 14px));font:600 var(--t-xs) var(--f-mono)}' +
+    '.viz-dica b{display:block;font:inherit;text-align:center}.viz-dica small{display:block;font:500 11px/1.35 var(--f-body);opacity:.85;text-align:center}' +
     '.viz-popup .leaflet-popup-content{margin:10px 12px;font:13px/1.45 var(--f-body)}' +
     '.viz-pop{display:grid;gap:2px}.viz-pop b{font:600 15px var(--f-mono)}.viz-pop small{color:#5a636a;font-size:12px}' +
     '.viz-pop a{display:inline-flex;align-items:center;min-height:32px;font-weight:600}@media (pointer:coarse){.viz-pop a{min-height:40px}}';
@@ -207,7 +212,7 @@
       tela = { x: o.x + b.min.x, y: o.y + b.min.y, z: this._zoom, s: 256 * Math.pow(2, this._zoom), w: t.x, h: t.y };
       mede(this._ctx.canvas, true);
       mede(this._ctxN.canvas, leva);
-      mede(this._ctxS.canvas, !!sob);
+      mede(this._ctxS.canvas, !!sob || pendentes().length > 0);
       planeja();                                         // quem entra e quem sai com a vista nova, e depois o desenho
       desenha();
       if (chegou.length) setTimeout(depoisDoGesto, 0);
@@ -279,24 +284,31 @@
     pintaEq(ctx, t, fase);
     ctx.globalAlpha = 1;
   }
+  // os selecionados que ainda não estão na imagem de selecionados.js (baixando, ou com erro): realçados aqui, já no clique
+  const pendentes = () => { const S = window.__alSel; return S && S.tem ? desenhados.filter(e => !e.sel && S.tem(e.cod)) : []; };
   // o vizinho sob o mouse, mais forte (linhas mais largas e opacas, e os equipamentos dele), no canvas de cima: entrar ou
-  // sair do realce só pinta esse canvas (um alimentador), não refaz o de baixo
+  // sair do realce só pinta esse canvas (um alimentador), não refaz o de baixo. Também os pendentes (acima), com um
+  // contorno claro por baixo: o retorno do clique que seleciona
   function pintaSob() {
     const ctx = cam._ctxS, t = tela;
     if (!ctx || !t) return;
-    const cv = ctx.canvas;
+    const cv = ctx.canvas, pend = t.z < zMin ? [] : pendentes(), s = sob && t.z >= zMin && desenhados.includes(sob) && !pend.includes(sob) ? sob : null;
     if (!cv.hidden) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); }
-    if (!sob || t.z < zMin || !desenhados.includes(sob)) { cv.hidden = true; return; }
+    if (!s && !pend.length) { cv.hidden = true; return; }
     mede(cv, true);
     ctx.setTransform(R, 0, 0, R, 0, 0);
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = 1;
-    for (const c of ['T3', 'T2', 'T1']) {
-      const g = visivel(c) && sob.vis[c] >= 2 && geoDe(sob, c, t.z);   // os que já estão num dos canvas
-      if (!g) continue;
-      ctx.strokeStyle = COR[c]; ctx.lineWidth = larg(c, t.z) + 1;
-      ctx.beginPath(); traca(ctx, sob, g, t); ctx.stroke();
-    }
-    pintaEq(ctx, t, 3, e => e === sob, 1);
+    const linhas = (e, cor, mais) => {
+      for (const c of ['T3', 'T2', 'T1']) {
+        const g = visivel(c) && e.vis[c] >= 2 && geoDe(e, c, t.z);   // os que já estão num dos canvas
+        if (!g) continue;
+        ctx.strokeStyle = cor || COR[c]; ctx.lineWidth = larg(c, t.z) + mais;
+        ctx.beginPath(); traca(ctx, e, g, t); ctx.stroke();
+      }
+    };
+    for (const e of pend) { linhas(e, 'rgba(255,255,255,.85)', 4); linhas(e, null, 1.5); }
+    if (s) linhas(s, null, 1);
+    pintaEq(ctx, t, 3, e => e === s || pend.includes(e), 1);
     ctx.globalAlpha = 1;
     pinturas.sob++;
   }
@@ -706,11 +718,16 @@
   // com o balão de vizinho aberto, sem o código (ele ficaria por cima do balão)
   const comBalao = () => !!(map._popup && map._popup._map && map._popup.options.className === 'viz-popup');
   let naDica = null;                                     // o alvo que a dica mostra
-  // texto da dica: o código do vizinho; no equipamento, "código · tipo · vizinho" (sem o .6 ainda: "Tipo · vizinho")
+  // texto da dica: o código do vizinho (com a seleção, e embaixo "Clique para selecionar", ou o que __alSel.dica disser);
+  // no equipamento, "código · tipo · vizinho" (sem o .6 ainda: "Tipo · vizinho")
   function textoDica(a) {
     if (!a.q) return a.e.cod;
     const x = sobre(a.e, a.q);
     return x.cod ? `${x.cod} · ${x.nome} · ${a.e.cod}` : `${maiuscula(x.nome)} · ${a.e.cod}`;
+  }
+  function poeDica(a) {
+    const S = window.__alSel, d = !a.q && S && S.dica ? S.dica(a.e.cod) : '';
+    if (d) dica.innerHTML = `<b>${esc(a.e.cod)}</b><small>${esc(d)}</small>`; else dica.textContent = textoDica(a);
   }
   function paira(ev) {
     let a = null, pt = null;
@@ -723,12 +740,14 @@
     const mostra = a && !comBalao();
     naDica = mostra ? a : null;
     if (mostra) {
-      dica.textContent = textoDica(a); dica.style.left = pt.x + 'px'; dica.style.top = pt.y + 'px';
+      poeDica(a); dica.style.left = pt.x + 'px'; dica.style.top = pt.y + 'px';
       if (a.q && !a.e.codsV) codigos(a.e).then(() => { if (mesmo(naDica, a) && !dica.hidden) dica.textContent = textoDica(a); });
     }
     dica.hidden = !mostra;
   }
   let mov = 0, ultimo = null;
+  // a seleção mudou (o clique daqui, o menu, o ✕): o realce dos pendentes e a dica sob o mouse
+  document.addEventListener('al:selecao', () => { pintaSob(); if (naDica && !naDica.q && !dica.hidden) poeDica(naDica); });
   mc.addEventListener('mousemove', e => {
     if (MOVEL || e.buttons || (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents)) return;
     ultimo = e;
@@ -752,14 +771,16 @@
     return x.cod ? `<div class="viz-pop"><b>${esc(x.cod)}</b><small>${esc(maiuscula(x.nome))} · alimentador ${papel} ${al}</small>${abre}</div>`
       : `<div class="viz-pop"><b>${esc(maiuscula(x.nome))}</b><small>Alimentador ${papel} ${al}</small>${abre}</div>`;
   }
-  // clique fora da rede deste (o da rede e o das camadas não chegam ao mapa): o balão do vizinho; o limpar segue igual
+  // clique fora da rede deste (o da rede e o das camadas não chegam ao mapa): na linha do vizinho, já o seleciona (sem
+  // __alSel ou fora do índice dela: o balão); no equipamento, o balão dele. O limpar segue igual
   map.on('click', ev => {
     if (faixa() || !ev.containerPoint) return;
-    const oe = ev.originalEvent || {}, toque = oe.pointerType ? oe.pointerType !== 'mouse' : MOVEL;
+    const oe = ev.originalEvent || {}, toque = oe.pointerType ? oe.pointerType !== 'mouse' : MOVEL, S = window.__alSel;
     const a = alvoEm(ev.containerPoint, toque ? 14 : 7);
     if (!a) return;
-    if (!a.q && window.__alSel && window.__alSel.em(ev.containerPoint, toque ? 16 : 10)) return;   // a linha de um selecionado tem a vez
+    if (!a.q && S && S.em(ev.containerPoint, toque ? 16 : 10)) return;   // a linha de um selecionado tem a vez
     if (a.q) ev._viz = 1;                                // equipamento: o balão dele (a seleção não escolhe a linha embaixo)
+    if (!a.q && S && S.seleciona && S.seleciona(a.e.cod)) { map.closePopup(); return; }   // (o realce vem pelo al:selecao)
     paira(null);
     const pop = L.popup({ className: 'viz-popup', maxWidth: 260, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] })
       .setLatLng(a.q ? ondeEq(a.e, a.q) : ev.latlng).setContent(conteudo(a)).openOn(map);
@@ -789,7 +810,7 @@
     estado: () => ({ indice: IDX ? IDX.length : 0, desenhados: desenhados.map(e => e.cod), entram, selecionados: IDX ? IDX.filter(e => e.sel).map(e => e.cod) : [], niveis: desenhados.map(e => NIVEIS.filter(k => e.d[k]).join('')),
       fino: desenhados.map(e => !!e.fi), gasto, limite: { grosso: ORC_GROSSO, fino: ORC_FINO, desperdicio: DESPERDICIO, eq: ORC_EQ }, zMin,
       pontos, guardados: IDX ? IDX.reduce((t, e) => t + NIVEIS.reduce((u, k) => u + (e.d[k] ? e.d[k].pts : 0), 0), 0) : 0,
-      bytes, voando: voando.size, fila: fila.length, zoom: tela && tela.z, pinturas: { ...pinturas },
+      bytes, voando: voando.size, fila: fila.length, zoom: tela && tela.z, pinturas: { ...pinturas }, pendentes: pendentes().map(e => e.cod),
       chegando: [...voando].filter(([, c]) => c.chega).map(([key]) => key) })
   };
 

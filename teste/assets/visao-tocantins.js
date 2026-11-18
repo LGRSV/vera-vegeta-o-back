@@ -4,7 +4,8 @@
 //   alimentadores (dados/vizinhos/estado.txt, de scripts/gera_trechos.py, estado_txt: ~110 KB, simplificado em 150 m),
 //   apagados e nas cores das classes como os vizinhos, sem rótulos, num canvas próprio abaixo dos vizinhos e da rede deste
 //   (que fica inteira por cima). Dos vizinhos em diante ele fica até eles estarem na tela e então sai aos poucos: sem buraco
-//   nem piscar. Tocar (ou clicar) numa linha de outro alimentador: o balão dos vizinhos (código e "Abrir alimentador").
+//   nem piscar. Tocar (ou clicar) numa linha de outro alimentador já o seleciona (selecionados.js), sem balão; o mouse
+//   mostra o código e "Clique para selecionar". Sem selecionados.js: o balão dos vizinhos (código e "Abrir alimentador").
 // - Só o Tocantins: fora do estado, a cor de fundo do mapa. É uma máscara (o retângulo da vista com o furo do TO) num canvas
 //   acima do satélite e abaixo dos vizinhos, das divisas e da rede, desenhada uma vez por vista (os quadros do satélite não
 //   são recortados um a um); a borda é o próprio recorte, com uma sombra leve para dentro. O satélite nem pede os quadros
@@ -31,8 +32,9 @@
 //   pouso, como no zoom), o satélite nítido espera o pouso (se o fundo já chegou; senão carrega como no voo do Leaflet), e
 //   o worker desenha a máscara e as linhas do estado do trecho seguinte do voo antes de ele chegar.
 // Alimentadores selecionados (selecionados.js, window.__alSel): ficam fora das linhas do estado (lá eles são desenhados
-// fortes), a linha deles no ponto tem a vez sobre a do estado, o balão ganha "Selecionar" e, no voo, o canvas deles some e
-// volta como o dos vizinhos.
+// fortes), a linha deles no ponto tem a vez sobre a do estado e, no voo, o canvas deles some e volta como o dos vizinhos.
+// Enquanto um recém-selecionado baixa, as linhas dele aqui ficam realçadas (opacas, com um contorno claro: forte, no
+// desenho do estado), até selecionados.js desenhá-lo; com 10, o clique não seleciona (o aviso é de lá).
 // Sem o contorno do estado ou fora do site, não faz nada.
 (function () {
   const map = window.__map, L = window.L, D = window.D, AL = window.__al || null, eu = document.currentScript;
@@ -87,10 +89,10 @@
   // as linhas da classe g ({p: [x, y, ...] de Mercator, ini: 1º ponto de cada linha e o fim, cx: caixa de cada linha}) que
   // passam pela região r (px absolutos do zoom r.z, canto x, y), já num beginPath; pontos a menos de 0,6 px do anterior
   // ficam de fora; as dos alimentadores em fora (índices em g.al: os selecionados) também
-  function tracaLinhas(ctx, g, r, fora) {
+  function tracaLinhas(ctx, g, r, fora, so) {
     const s = 256 * Math.pow(2, r.z), bx = -r.x, by = -r.y, p = g.p, ini = g.ini, cx = g.cx, W = r.w + 8, H = r.h + 8;
     for (let l = 0, nl = ini.length - 1; l < nl; l++) {
-      if ((fora && fora.has(g.al[l])) || cx[4 * l] * s + bx > W || cx[4 * l + 2] * s + bx < -8 || cx[4 * l + 1] * s + by > H || cx[4 * l + 3] * s + by < -8) continue;
+      if ((so && !so.has(g.al[l])) || (fora && fora.has(g.al[l])) || cx[4 * l] * s + bx > W || cx[4 * l + 2] * s + bx < -8 || cx[4 * l + 1] * s + by > H || cx[4 * l + 3] * s + by < -8) continue;
       const a = ini[l], b = ini[l + 1];
       let lx = p[2 * a] * s + bx, ly = p[2 * a + 1] * s + by;
       ctx.moveTo(lx, ly);
@@ -102,7 +104,8 @@
     }
   }
   // as linhas do estado (D: {T1, T2}) na região r; op: k (px do canvas por px do mapa), alfa, as classes [{c, cor, larg}]
-  // na ordem de desenho (o tronco por cima) e os alimentadores que ficam de fora (fora: índices)
+  // na ordem de desenho (o tronco por cima), os alimentadores que ficam de fora (fora: índices) e os realçados por cima
+  // (forte: índices; os selecionados que ainda baixam)
   function pintaEstado(ctx, r, D, op) {
     const fora = op.fora && op.fora.length ? new Set(op.fora) : null;
     ctx.setTransform(op.k, 0, 0, op.k, 0, 0);
@@ -110,6 +113,18 @@
     for (const cl of op.cls) {
       ctx.strokeStyle = cl.cor; ctx.lineWidth = cl.larg;
       ctx.beginPath(); tracaLinhas(ctx, D[cl.c], r, fora); ctx.stroke();
+    }
+    if (op.forte && op.forte.length) {
+      const so = new Set(op.forte);
+      ctx.globalAlpha = 1;
+      for (const cl of op.cls) {
+        ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = cl.larg + 4;
+        ctx.beginPath(); tracaLinhas(ctx, D[cl.c], r, fora, so); ctx.stroke();
+      }
+      for (const cl of op.cls) {
+        ctx.strokeStyle = cl.cor; ctx.lineWidth = cl.larg + 1.5;
+        ctx.beginPath(); tracaLinhas(ctx, D[cl.c], r, fora, so); ctx.stroke();
+      }
     }
     ctx.globalAlpha = 1;
   }
@@ -498,7 +513,10 @@
   // os selecionados já desenhados lá (selecionados.js), pelo índice nas linhas do estado: ficam de fora (lá eles são fortes;
   // baixando ou com erro, seguem aqui)
   const foraSel = () => { const S = window.__alSel, l = S && dados ? (S.desenhados ? S.desenhados() : S.lista()) : []; return l.length ? l.map(c => dados.cods.indexOf(c)).filter(i => i >= 0) : []; };
-  const opEstado = z => ({ alfa: ALFA, cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })), fora: foraSel() });   // o tronco por cima
+  // os selecionados que ainda não estão lá (baixando ou com erro): realçados aqui
+  const forteSel = () => { const S = window.__alSel; if (!S || !dados) return []; const d = S.desenhados ? S.desenhados() : []; return S.lista().filter(c => !d.includes(c)).map(c => dados.cods.indexOf(c)).filter(i => i >= 0); };
+  let forteVisto = '';                                   // os realçados do último desenho pedido
+  const opEstado = z => { const forte = forteSel(); forteVisto = forte.join(); return { alfa: ALFA, cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })), fora: foraSel(), forte }; };   // o tronco por cima
   const Estado = Tela.extend({
     options: { pane: 'estado-to' },
     // fim de cada movimento: abaixo dos vizinhos, o estado inteiro (sem esmaecer: os vizinhos saem no mesmo quadro; se a
@@ -580,8 +598,12 @@
     // T1 ou T2 ligado ou desligado: a imagem guardada não vale mais
     cls.addEventListener('click', e => { if (!e.target.closest('button')) return; refaz(); });
   }
-  // (também quando a seleção muda: selecionados.js)
+  // (também quando a seleção muda: selecionados.js, e o al:selecao: o realce de quem entra ou sai enquanto baixa)
   function refaz() { estado.esquece(); if (mostra) estado.desenha(map.getCenter(), map.getZoom(), true); else estado._r = null; }
+  document.addEventListener('al:selecao', () => {
+    if (dados && forteSel().join() !== forteVisto) refaz();
+    if (cod0 && !dica.hidden) poeDica(cod0);
+  });
 
   // ---------- linha de outro alimentador sob o ponto (x, y) do mapa ----------
   function alvoEm(pt, tol) {
@@ -605,7 +627,8 @@
     return al < 0 ? null : dados.cods[al];
   }
   const pode = () => mostra && !voo && !faixa() && map.getZoom() < zm;
-  // o balão dos vizinhos (vizinhos.js): o código e "Abrir alimentador" (aqui pode ser de qualquer lugar do estado)
+  // o balão dos vizinhos (vizinhos.js): o código e "Abrir alimentador" (aqui pode ser de qualquer lugar do estado). Só sem
+  // a seleção (ou fora do índice dela): com ela, o clique já seleciona
   const balao = cod => {
     const a = `<a href="../${encodeURIComponent(cod)}/">Abrir alimentador</a>`, bt = window.__alSel ? window.__alSel.botao(cod) : '';   // "Selecionar" (selecionados.js)
     return `<div class="viz-pop"><b>${esc(cod)}</b><small>Outro alimentador</small>${bt ? `<span class="viz-acoes">${a}${bt}</span>` : a}</div>`;
@@ -615,7 +638,9 @@
     const oe = ev.originalEvent || {}, toque = oe.pointerType ? oe.pointerType !== 'mouse' : MOVEL;
     const cod = alvoEm(ev.containerPoint, toque ? 14 : 7);
     if (!cod) return;
-    if (window.__alSel && window.__alSel.em(ev.containerPoint, toque ? 16 : 10)) return;   // a linha de um selecionado tem a vez
+    const S = window.__alSel;
+    if (S && S.em(ev.containerPoint, toque ? 16 : 10)) return;   // a linha de um selecionado tem a vez
+    if (S && S.seleciona && S.seleciona(cod)) { map.closePopup(); return; }   // (o realce vem pelo al:selecao)
     paira(null);
     L.popup({ className: 'viz-popup', maxWidth: 260, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] })
       .setLatLng(ev.latlng).setContent(balao(cod)).openOn(map);
@@ -625,6 +650,12 @@
   dica.hidden = true;
   dica.setAttribute('aria-hidden', 'true');
   const ren = map.options.renderer;
+  let cod0 = null;                                       // o código que a dica mostra
+  // o código e, com a seleção, embaixo "Clique para selecionar" (ou o que __alSel.dica disser)
+  function poeDica(cod) {
+    const S = window.__alSel, d = S && S.dica ? S.dica(cod) : '';
+    if (d) dica.innerHTML = `<b>${esc(cod)}</b><small>${esc(d)}</small>`; else dica.textContent = cod;
+  }
   function paira(ev) {
     let cod = null, pt = null;
     const alvo = ev && ev.target;
@@ -633,7 +664,8 @@
     if (cod && window.__alSel && window.__alSel.em(pt, 10)) cod = null;   // a linha de um selecionado tem a vez
     mc.classList.toggle('vto-mao', !!cod);
     const mostraDica = cod && !(map._popup && map._popup._map && map._popup.options.className === 'viz-popup');
-    if (mostraDica) { dica.textContent = cod; dica.style.left = pt.x + 'px'; dica.style.top = pt.y + 'px'; }
+    if (mostraDica) { if (cod !== cod0 || dica.hidden) poeDica(cod); dica.style.left = pt.x + 'px'; dica.style.top = pt.y + 'px'; }
+    cod0 = mostraDica ? cod : null;
     dica.hidden = !mostraDica;
   }
   let mov = 0, ultimo = null;
@@ -1024,7 +1056,7 @@
   window.__visaoTO = {
     alterna, noEstado, refaz, voando: () => !!voo, zAbre: () => vistaAl().zoom, zEstado: () => zEst, em: (x, y) => alvoEm(L.point(x, y), 7),
     estado: () => ({ dados: !!dados, linhas: dados ? dados.T1.ini.length + dados.T2.ini.length - 2 : 0, pontos: dados ? dados.pts : 0, mostra,
-      opacidade: +paneE.style.opacity, zMin: zm, zEstado: zEst, mascara: mascara._r && !mascara._c.hidden ? { k: mascara._r.k, w: mascara._r.w, h: mascara._r.h } : null,
+      opacidade: +paneE.style.opacity, forte: forteVisto, zMin: zm, zEstado: zEst, mascara: mascara._r && !mascara._c.hidden ? { k: mascara._r.k, w: mascara._r.w, h: mascara._r.h } : null,
       fundo: fundoPronto(), zFundo: fundoPronto() ? fundo._r.z : null, botao: btTx.textContent, modo: MODO }),
     // a imagem do fundo e os quadros dela (canto de cada um, px da imagem, 256 px): a conta da área sem imagem nos testes
     fundo: () => fundoPronto() ? { el: fundo._c, quadros: fundo._quadros } : null,

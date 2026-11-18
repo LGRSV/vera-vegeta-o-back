@@ -8,7 +8,8 @@
 //   sem animação.
 // - O que mostra: a imagem de satélite (Esri World Imagery, ou a Google com a chave de assets/mapa-satelite.js), só o Tocantins
 //   (fora do estado, a cor escura dos mapas, --mapbg; sem divisas de municípios) e o T1 e o T2 de todos os alimentadores
-//   (dados/vizinhos/estado.txt, o mesmo da visão Tocantins do mapa do alimentador). Passar o mouse numa linha mostra o código
+//   (dados/vizinhos/estado.txt, o mesmo da visão Tocantins do mapa do alimentador; os do índice que não estão nele, só alguns
+//   metros de rede no cadastro, viram um ponto e também contam). Passar o mouse numa linha mostra o código
 //   do alimentador; clicar abre a página dele. Arrastar e zoom livres, com o estado de limite.
 // - Sem quadrados pretos: por baixo do satélite nítido, um fundo com os quadros de longe de todo o estado (um nível só,
 //   baixado antes da animação começar); a animação também espera os quadros da vista de partida.
@@ -79,11 +80,21 @@
     }
     return out;
   }
+  // os alimentadores do índice sem linha no estado.txt (só alguns metros de rede no cadastro, abaixo do mínimo do gerador):
+  // um ponto no centro da caixa deles (pt), para que todos apareçam e se contem
+  const comPontos = (lista, als) => {
+    if (!als) return lista;
+    const tem = new Set(lista.map(a => a.cod));
+    for (const [cod, v] of Object.entries(als)) {
+      if (tem.has(cod) || !Array.isArray(v) || !(v.length >= 4) || v.slice(0, 4).some(x => typeof x !== 'number')) continue;
+      lista.push({ cod, T1: [], T2: [], pt: [(v[0] + v[2]) / 2, (v[1] + v[3]) / 2] });
+    }
+    return lista;
+  };
   const carregaLinhas = () => linhas || (linhas = fetch(RAIZ + 'dados/vizinhos/indice.json')
     .then(r => (r.ok ? r.json() : null))
-    .then(j => (j && j.estado && j.estado[1] ? fetch(`${RAIZ}dados/vizinhos/estado.txt?v=${encodeURIComponent(j.estado[0])}`) : null))
-    .then(r => (r && r.ok ? r.text() : null))
-    .then(t => (t ? decodifica(t) : []))
+    .then(j => (j && j.estado && j.estado[1] ? fetch(`${RAIZ}dados/vizinhos/estado.txt?v=${encodeURIComponent(j.estado[0])}`)
+      .then(r => (r && r.ok ? r.text() : null)).then(t => comPontos(t ? decodifica(t) : [], j.als)) : []))
     .catch(() => []));
 
   // alimentadores do mapa (SE de cada um, para o balão), feito só no primeiro uso
@@ -150,7 +161,7 @@
 
   // ---------- o mapa de satélite (criado no primeiro Ctrl+S) ----------
   let L = null, map = null, caixaSat = null, fundo = null, nitido = null, mascara = null, rend = null, paneL = null;
-  let TO = null, limTO = null, grupos = new Map(), nLinhas = 0, sobre = null;
+  let TO = null, limTO = null, grupos = new Map(), nLinhas = 0, sobre = null, semRede = new Set();
   // a área que o mapa dos municípios mostra agora, no tamanho da caixa: centro, zoom (o mesmo px por grau de longitude) e a
   // correção da altura (o mapa dos municípios é proporcional em graus; o satélite, Mercator)
   function vistaDoSvg() {
@@ -266,6 +277,8 @@
   // linhas: o T1 e o T2 de cada alimentador (polilinhas do Leaflet num canvas, que já sabe o mouse em cima da linha)
   const peso = (c, z) => (c === 'T1' ? 1.7 : 1.15) * (z < 8 ? 1 : z < 10 ? 1.4 : z < 12 ? 1.8 : 2.3);
   function estiloLinha(c, on) {
+    if (c === 'PT') return on ? { radius: 6.5, color: '#ffffff', weight: 2, opacity: 1, fillColor: COR.T1, fillOpacity: 1 }
+      : { radius: 4.5, color: '#ffffff', weight: 1.5, opacity: 0.95, fillColor: COR.T1, fillOpacity: 0.95 };
     const z = map.getZoom();
     return on ? { color: '#ffffff', weight: peso(c, z) + 2.4, opacity: 1 } : { color: COR[c], weight: peso(c, z), opacity: 0.9 };
   }
@@ -273,6 +286,13 @@
     if (!map || nLinhas) return;
     for (const a of lista) {
       const g = [];
+      if (a.pt) {                                        // sem rede no cadastro: um ponto (por cima das linhas: vem no fim da lista)
+        const pt = L.circleMarker(a.pt, Object.assign({ pane: 'st-linhas', renderer: rend, interactive: true, bubblingMouseEvents: false }, estiloLinha('PT')));
+        pt._stCls = 'PT'; pt._stAl = a.cod;
+        pt.on('mouseover', () => realca(a.cod)).on('mouseout', () => { if (sobre === a.cod) realca(null); }).on('click', () => abreAl(a.cod));
+        pt.addTo(map);
+        g.push(pt); semRede.add(a.cod);
+      }
       for (const c of ['T2', 'T1']) {                     // o tronco por cima
         if (!a[c].length) continue;
         const pl = L.polyline(a[c], Object.assign({ pane: 'st-linhas', renderer: rend, interactive: true, bubblingMouseEvents: false, smoothFactor: 1 }, estiloLinha(c)));
@@ -302,7 +322,7 @@
   function mostraBalao(e) {
     if (!sobre || estado !== 'on') { balao.hidden = true; return; }
     const a = infoAl(sobre), r = caixa.getBoundingClientRect(), ev = e.originalEvent;
-    balao.innerHTML = `<b>${esc(sobre)}</b>${a.se ? `<span>${esc(a.se)}</span>` : ''}<span>Clique para abrir</span>`;
+    balao.innerHTML = `<b>${esc(sobre)}</b>${a.se ? `<span>${esc(a.se)}</span>` : ''}${semRede.has(sobre) ? '<span>Sem rede no cadastro (só o ponto)</span>' : ''}<span>Clique para abrir</span>`;
     const x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 14;
     balao.style.left = Math.min(x, r.width - balao.offsetWidth - 6) + 'px';
     balao.style.top = Math.min(y, r.height - 64) + 'px';
@@ -530,6 +550,6 @@
     }
   } catch (e) { /* quadro de outra origem */ }
   // para os testes (scripts/teste_sat_to_tela.js)
-  window.__satTo = { estado: () => estado, mapa: () => map, alterna, abre, fecha, linhas: () => nLinhas, sobre: () => sobre,
+  window.__satTo = { estado: () => estado, mapa: () => map, alterna, abre, fecha, linhas: () => nLinhas, semRede: () => semRede.size, sobre: () => sobre,
     vistaSvg: () => (L ? vistaDoSvg() : null), tempos };
 })();

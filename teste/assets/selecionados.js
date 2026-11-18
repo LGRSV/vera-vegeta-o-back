@@ -4,8 +4,11 @@
 // num trecho de um deles mostra no painel o mesmo detalhe do aberto, com "No alimentador LD… · Abrir". A rede com T1, T2
 // e T3 em qualquer zoom (pedido do usuário); de longe, os nomes dos T3 só do 12 e o desenho com menos pontos. Camadas (Faixa, Inspeção…), lista de trechos, busca do olho, modo Limpeza de faixa,
 // Downloads e croqui continuam só do aberto.
-// Como entram: "Selecionar" no balão de um vizinho (vizinhos.js) e da visão do Tocantins (visao-tocantins.js), ou o menu
-// "Alimentadores" no alto do mapa, à direita (os selecionados, busca pelo código, ✕ para tirar, Ver todos, Tirar todos).
+// Como entram: clique (ou toque) na linha de um vizinho (vizinhos.js) ou do estado (visao-tocantins.js): já seleciona, sem
+// balão (seleciona); a linha fica realçada lá enquanto baixa e o menu mostra o novo; com 10, um aviso curto (avisoVisivel).
+// Clique na linha de um já selecionado: o painel do trecho dele (como antes); tirar, só no ✕ do menu. O balão de equipamento
+// de vizinho segue com "Selecionar" (botao). Ou o menu "Alimentadores" no alto do mapa, à direita (os selecionados, ↗ Abrir,
+// busca pelo código, ✕ para tirar, Ver todos, Tirar todos).
 // O endereço guarda a escolha (?sel=A,B: volta ao recarregar); "Abrir" um selecionado leva os outros junto, e o aberto de
 // agora vira selecionado na página dele.
 // Para não pesar (medido no celular com a CPU 4x mais lenta):
@@ -1033,14 +1036,31 @@
     '.sel-pe{display:flex;gap:var(--s2);justify-content:space-between;margin:var(--s2) var(--s1) var(--s1)}' +
     '.sel-pe button{min-height:40px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);background:var(--paper);color:var(--fg);font:600 var(--t-sm) var(--f-body);cursor:pointer}' +
     '.sel-pe button:hover{background:var(--hover)}.sel-lista :focus-visible{outline:2px solid var(--accent);outline-offset:1px}' +
-    '.sel-vazio{margin:0;padding:var(--s1) var(--s3) var(--s2);color:var(--muted);font-size:var(--t-xs)}';
+    '.sel-vazio{margin:0;padding:var(--s1) var(--s3) var(--s2);color:var(--muted);font-size:var(--t-xs)}' +
+    // o aviso do limite (clique no 11º): no vidro dos controles, abaixo do botão; some sozinho
+    '.sel-aviso{position:absolute;top:calc(100% + 6px);right:0;pointer-events:none}' +
+    '.sel-aviso-t{display:block;width:max-content;max-width:min(300px,calc(100vw - 48px));padding:var(--s2) var(--s3);background:var(--vidro);' +
+    '-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);border:1px solid var(--vidro-borda);border-left:3px solid var(--aviso);' +
+    'border-radius:var(--r2);box-shadow:var(--sh-vidro);font:600 var(--t-sm)/1.35 var(--f-body);animation:sel-aviso-in .18s var(--ease,ease) both;transition:opacity .25s var(--ease,ease)}' +
+    '.sel-aviso-t.sai{opacity:0}@keyframes sel-aviso-in{from{opacity:0;transform:translateY(-4px)}}@media (prefers-reduced-motion:reduce){.sel-aviso-t{animation:none;transition:none}}' +
+    '.sel-lista:not([hidden])~.sel-aviso{display:none}';
   document.head.append(css);
 
   // ---------- menu "Alimentadores" ----------
   const ICONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h7M12 12l4-6h3M12 12l4 6h3M12 12h7"/><circle cx="4.5" cy="12" r="2.2"/><circle cx="19.5" cy="6" r="1.8"/><circle cx="19.5" cy="12" r="1.8"/><circle cx="19.5" cy="18" r="1.8"/></svg>';
   const SETA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 16 8M10 8h6v6"/></svg>';
-  let canto = null, bt = null, lst = null, q = null, sug = null, falado = null, iSug = -1;
+  let canto = null, bt = null, lst = null, q = null, sug = null, falado = null, avisoEl = null, iSug = -1, tAviso = 0;
   const aviso = t => { if (falado) { falado.textContent = ''; setTimeout(() => { falado.textContent = t; }, 30); } };
+  // aviso visível e falado (role=status), logo abaixo do botão do menu; some sozinho (a região fica na página, vazia)
+  function avisoVisivel(t) {
+    if (!avisoEl) return;
+    clearTimeout(tAviso);
+    avisoEl.innerHTML = '';
+    const s = document.createElement('span');
+    s.className = 'sel-aviso-t'; s.textContent = t;
+    avisoEl.append(s);
+    tAviso = setTimeout(() => { s.classList.add('sai'); tAviso = setTimeout(() => { if (s.isConnected) s.remove(); }, 260); }, 4500);
+  }
   function criaMenu() {
     canto = document.createElement('div');
     canto.className = 'sel-canto';
@@ -1051,11 +1071,12 @@
       '<div class="sel-de"><label class="vh" for="sel-q">Adicionar alimentador pelo código</label>' +
       '<input class="sel-q" id="sel-q" type="search" placeholder="Código do alimentador" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-controls="sel-sug">' +
       '<div class="sel-sug" id="sel-sug" role="listbox" aria-label="Alimentadores encontrados"></div><p class="sel-lim" hidden></p></div>' +
-      '<div class="sel-pe"><button type="button" data-todos>Ver todos</button><button type="button" data-tira>Tirar todos</button></div>' +
-      '<p class="vh" aria-live="polite"></p></div>';
+      '<div class="sel-pe"><button type="button" data-todos>Ver todos</button><button type="button" data-tira>Tirar todos</button></div></div>' +
+      // (fora da lista: escondida, ela calaria o aviso) o falado só para o leitor de tela; o visível, com o limite, some sozinho
+      '<p class="vh" aria-live="polite"></p><div class="sel-aviso" role="status" aria-live="polite"></div>';
     box.append(canto);
     bt = canto.querySelector('.sel-bt'); lst = canto.querySelector('.sel-lista'); q = canto.querySelector('.sel-q'); sug = canto.querySelector('.sel-sug');
-    falado = canto.querySelector('[aria-live]');
+    falado = canto.querySelector('p.vh[aria-live]'); avisoEl = canto.querySelector('.sel-aviso');
     L.DomEvent.disableClickPropagation(canto);
     L.DomEvent.disableScrollPropagation(canto);
     canto.addEventListener('click', e => e.stopPropagation());   // o clique não chega ao mapa (que limparia a seleção)
@@ -1180,7 +1201,24 @@
     if (b) map.fitBounds(b.pad(0.04));
   }
 
-  // ---------- balões dos vizinhos e da visão: "Selecionar" ----------
+  // ---------- clique na linha de um vizinho ou do estado (vizinhos.js, visao-tocantins.js): já seleciona ----------
+  // 'entra' (selecionado agora), 'ja' (já estava: baixando ou com erro, que tenta de novo; o pronto o vizinhos.js nem
+  // chama, a linha dele tem a vez), 'limite' (o aviso) ou '' (não é selecionável: o balão de antes)
+  function seleciona(cod) {
+    if (!cod || cod === EU || !valido(cod)) return '';
+    if (sels.has(cod)) { deNovo(cod); return 'ja'; }
+    if (sels.size >= MAX) { avisoVisivel(`Limite de ${MAX} alimentadores: tire um no menu Alimentadores`); return 'limite'; }
+    return poe(cod, false) ? 'entra' : '';
+  }
+  // a 2ª linha da dica do mouse sobre a linha dele ('' sem seleção possível: só o código)
+  function dicaDe(cod) {
+    if (!cod || cod === EU || !valido(cod)) return '';
+    const s = sels.get(cod);
+    if (s) return s.estado === 'erro' ? 'Selecionado · não carregou: clique para tentar de novo' : 'Selecionado · carregando…';
+    return sels.size >= MAX ? `Limite de ${MAX} alimentadores` : 'Clique para selecionar';
+  }
+
+  // ---------- balões de equipamento dos vizinhos (e sem o clique que seleciona): "Selecionar" ----------
   function botao(cod) {
     if (!cod || cod === EU || !valido(cod)) return '';
     if (sels.has(cod)) return `<button type="button" class="viz-sel" data-sel="${esc(cod)}">Tirar da seleção</button>`;
@@ -1222,6 +1260,8 @@
     desenha: cod => { const s = sels.get(cod); return !!(s && s.desenhado); },
     desenhados: () => [...sels.values()].filter(s => s.desenhado).map(s => s.cod),
     botao,
+    seleciona,
+    dica: dicaDe,
     alterna,
     poe: cod => poe(cod, false),
     tira,
