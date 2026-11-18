@@ -1,7 +1,7 @@
 // O Tocantins inteiro no mapa do alimentador (roda logo depois de vizinhos.js, com window.__map, window.__al e o contorno do
 // estado, window.TOCANTINS de dados/tocantins.js, que a página carrega antes do mapa).
 // - De longe (abaixo do zoom em que os vizinhos entram: window.__vizinhos.estado().zMin), o T1 e o T2 de todos os
-//   alimentadores (dados/vizinhos/estado.txt, de scripts/gera_trechos.py, estado_txt: ~70 KB, simplificado em 150 m),
+//   alimentadores (dados/vizinhos/estado.txt, de scripts/gera_trechos.py, estado_txt: ~110 KB, simplificado em 150 m),
 //   apagados e nas cores das classes como os vizinhos, sem rótulos, num canvas próprio abaixo dos vizinhos e da rede deste
 //   (que fica inteira por cima). Dos vizinhos em diante ele fica até eles estarem na tela e então sai aos poucos: sem buraco
 //   nem piscar. Tocar (ou clicar) numa linha de outro alimentador: o balão dos vizinhos (código e "Abrir alimentador").
@@ -11,17 +11,25 @@
 //   inteiros de fora do estado (alimentador.js: window.__quadroNoTO). Só de longe (abaixo do zoom 10, onde municipios.js
 //   tira as divisas e o traço-ponto do estado): o contorno do estado (568 pontos) erra até ~750 m na borda, o que de perto
 //   apareceria; dali em diante o mapa fica como antes (o satélite inteiro e o traço-ponto da divisa do TO).
-// - Sem quadrados escuros: por baixo do satélite nítido, um fundo com os quadros do zoom 8 da mesma imagem (só os do TO,
-//   uns 25, montados numa imagem só), e os do 6 e do 7 (os da vista do estado), baixados aos poucos com o mapa parado
-//   (ficam só na memória e no cache do navegador). No voo e no zoom sempre há imagem (borrada) por baixo enquanto a nítida
-//   chega e entra aos poucos; parado (e no arrasto) de perto ou no estado inteiro, o fundo se esconde.
-// - Botão "Tocantins" (canto de baixo à direita, acima do Tela cheia; escondido no modo Limpeza de faixa): voa até o estado
-//   inteiro e vira "Voltar ao alimentador", que voa de volta à vista com que o alimentador abre. Afastar com o dedo ou a
-//   roda chega na mesma visão: o zoom mínimo do mapa é o do estado inteiro, e ao chegar nele o mapa centra o estado.
-//   O voo é o da página inicial (mapa-municipios.js): a escala muda em progressão geométrica, numa curva suave (sem
-//   animação com prefers-reduced-motion). No voo os canvas só esticam (a rede é refeita no pouso, como no zoom), o satélite
-//   nítido espera o pouso e o fundo cobre o caminho; a camada do estado entra aos poucos no fim da ida e, na volta, é
-//   refeita umas poucas vezes (quando já esticou 3×), na vista daquele quadro; a máscara, quando esticou 2,5×.
+// - As linhas do estado e a máscara são desenhadas num worker (OffscreenCanvas), e a página só troca a imagem pronta.
+//   Medido no celular com a CPU 4× mais lenta: no canvas da página o JS custava pouco (5 a 17 ms), mas o navegador
+//   rasterizava as linhas na pintura seguinte, na thread principal (60 a 95 ms: o tranco no fim de cada passo da pinça e
+//   no meio do voo); no worker a troca custa ~0 ms. Sem worker, desenha na página como antes.
+// - Sem quadrados escuros: por baixo do satélite nítido, um fundo com os quadros de longe da mesma imagem (primeiro os do
+//   zoom 6 do TO, uns 6; depois os do 8, uns 25), montados numa imagem só pelo worker, que baixa também os do zoom da visão
+//   do estado, se for outro (o 7 numa tela grande); começa assim que o alimentador fica pronto (ficam só na memória e no
+//   cache do navegador). No voo e no zoom sempre há imagem (borrada) por baixo enquanto a nítida chega e entra aos poucos;
+//   parado (e no arrasto) de perto ou no estado inteiro, e no zoom para perto com o satélite já carregado, o fundo se
+//   esconde.
+// - Botão "Tocantins" (canto de baixo à direita, acima do Tela cheia; só o ícone no celular e com a gaveta da tela cheia;
+//   escondido no modo Limpeza de faixa): voa até o estado inteiro e vira "Voltar ao alimentador", que voa de volta à vista
+//   com que o alimentador abre. Afastar com o dedo ou a roda chega na mesma visão: o zoom mínimo do mapa é o do estado
+//   inteiro (refeito quando o mapa ou os controles mudam de tamanho), e ao chegar nele o mapa centra o estado. A vista do
+//   estado desconta os controles de cima e não deixa o botão, o Tela cheia e as legendas cobrirem o estado (o estado vai
+//   para o lado, ou fica um pouco menor). O voo é o da página inicial (mapa-municipios.js): a escala muda em progressão
+//   geométrica, numa curva suave (sem animação com prefers-reduced-motion). No voo a rede deste só estica (é refeita no
+//   pouso, como no zoom), o satélite nítido espera o pouso (se o fundo já chegou; senão carrega como no voo do Leaflet), e
+//   o worker desenha a máscara e as linhas do estado do trecho seguinte do voo antes de ele chegar.
 // Sem o contorno do estado ou fora do site, não faz nada.
 (function () {
   const map = window.__map, L = window.L, D = window.D, AL = window.__al || null, eu = document.currentScript;
@@ -41,6 +49,7 @@
   const faixa = () => !!(window.__faixa && window.__faixa.ativo && window.__faixa.ativo());   // modo Limpeza de faixa
   const ux = lon => (lon + 180) / 360, uy = lat => 0.5 - Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) / (2 * Math.PI);
   const PTO = TO.map(([la, lo]) => [ux(lo), uy(la)]);    // o contorno em unidades de Mercator (0 a 1)
+  const PTOf = Float64Array.from([].concat(...PTO));     // (o mesmo, em sequência: para o worker)
   const caixaTO = L.latLngBounds(TO);
   const noTO = window.__quadroNoTO || null;              // alimentador.js: .borda(r) e .dentro(x, y) do contorno
   const mc = map.getContainer(), box = mc.closest('.mapbox') || mc.parentElement;
@@ -50,38 +59,205 @@
     '.leaflet-estado-to-pane{transition:opacity .32s var(--ease,ease)}.leaflet-container.vto-mao{cursor:pointer}' +
     // acima do card Tela cheia (telacheia.js: 28 px do pé e 50 de altura), alinhado à direita com ele
     '.vto-canto{position:absolute;right:12px;bottom:86px;z-index:810}.mapbox.fx-modo .vto-canto{display:none}' +
+    // o ícone (o contorno do estado; na volta, o alvo) e o nome, como o botão Menu das camadas (extras.js)
+    '.ctl-card .vto-bt{gap:var(--s2);padding:0 var(--s3) 0 var(--s2)}' +
+    '.vto-bt svg{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}' +
+    '.vto-bt .vto-uf path{fill:currentColor;fill-opacity:.22}.vto-bt .vto-alvo circle+circle{fill:currentColor}' +
+    '.vto-bt.volta .vto-uf,.vto-bt:not(.volta) .vto-alvo{display:none}' +
     // no voo os rótulos e marcadores (DOM) saem e voltam no pouso, já no lugar (como os nomes no voo da página inicial):
     // fora da página, eles não pesam em cada quadro
     '.vto-voando :is(.leaflet-marker-pane,.leaflet-tooltip-pane,.leaflet-chaves-pane){display:none}' +
     '@keyframes vto-aparece{from{opacity:0}}.vto-pouso :is(.leaflet-marker-pane,.leaflet-tooltip-pane,.leaflet-chaves-pane){animation:vto-aparece .22s var(--ease,ease) both}' +
     '@media (min-width:701px) and (max-width:999px){body.tela-cheia.tc-gaveta .vto-canto{right:calc(min(420px,92vw) + 12px)}}' +
-    // tela estreita: "Voltar ao alimentador" em duas linhas (a coluna das legendas, à esquerda, fica livre)
-    '@media (max-width:480px){.ctl-card .vto-bt{max-width:116px;white-space:normal;text-align:left;line-height:1.15;padding:4px var(--s3)}}';
+    // celular e gaveta da tela cheia por cima do mapa: só o ícone, num card do tamanho do Tela cheia (o nome fica no title e
+    // no aria-label), e a coluna das legendas, à esquerda, não passa por baixo dele
+    '@media (max-width:640px){.ctl-card .vto-bt{width:40px;padding:0;justify-content:center}.vto-tx{display:none}' +
+    '.mapbox:has(>.vto-canto)>.ctl-lgs{max-width:calc(100% - 32px - var(--vto-w,50px))}}' +
+    '@media (min-width:701px) and (max-width:999px){body.tela-cheia.tc-gaveta .ctl-card .vto-bt{width:40px;padding:0;justify-content:center}body.tela-cheia.tc-gaveta .vto-tx{display:none}' +
+    'body.tela-cheia.tc-gaveta .mapbox:has(>.vto-canto)>.ctl-lgs{max-width:calc(100% - min(420px,92vw) - 32px - var(--vto-w,50px))}}';
   document.head.append(css);
   map.createPane('mascara-to').style.zIndex = 250;      // acima do satélite (200); abaixo dos vizinhos (340), divisas (350) e rede (400)
   const paneE = map.createPane('estado-to');
   paneE.style.zIndex = 330;                              // abaixo dos vizinhos
 
+  // ---------- desenho (aqui e no worker: estas funções só usam o que recebem; o worker recebe o código delas) ----------
+  // as linhas da classe g ({p: [x, y, ...] de Mercator, ini: 1º ponto de cada linha e o fim, cx: caixa de cada linha}) que
+  // passam pela região r (px absolutos do zoom r.z, canto x, y), já num beginPath; pontos a menos de 0,6 px do anterior
+  // ficam de fora
+  function tracaLinhas(ctx, g, r) {
+    const s = 256 * Math.pow(2, r.z), bx = -r.x, by = -r.y, p = g.p, ini = g.ini, cx = g.cx, W = r.w + 8, H = r.h + 8;
+    for (let l = 0, nl = ini.length - 1; l < nl; l++) {
+      if (cx[4 * l] * s + bx > W || cx[4 * l + 2] * s + bx < -8 || cx[4 * l + 1] * s + by > H || cx[4 * l + 3] * s + by < -8) continue;
+      const a = ini[l], b = ini[l + 1];
+      let lx = p[2 * a] * s + bx, ly = p[2 * a + 1] * s + by;
+      ctx.moveTo(lx, ly);
+      for (let k = a + 1; k < b; k++) {
+        const x = p[2 * k] * s + bx, y = p[2 * k + 1] * s + by;
+        if (k < b - 1 && x - lx < 0.6 && lx - x < 0.6 && y - ly < 0.6 && ly - y < 0.6) continue;
+        ctx.lineTo(x, y); lx = x; ly = y;
+      }
+    }
+  }
+  // as linhas do estado (D: {T1, T2}) na região r; op: k (px do canvas por px do mapa), alfa e as classes [{c, cor, larg}]
+  // na ordem de desenho (o tronco por cima)
+  function pintaEstado(ctx, r, D, op) {
+    ctx.setTransform(op.k, 0, 0, op.k, 0, 0);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = op.alfa;
+    for (const cl of op.cls) {
+      ctx.strokeStyle = cl.cor; ctx.lineWidth = cl.larg;
+      ctx.beginPath(); tracaLinhas(ctx, D[cl.c], r); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  // o contorno P ([x, y, x, y, ...] de Mercator) em px da região r, recortado num retângulo m px maior que ela
+  // (Sutherland–Hodgman: de perto o estado tem milhões de px)
+  function recorta(P, r, m) {
+    const S = 256 * Math.pow(2, r.z);
+    let pts = [];
+    for (let i = 0; i < P.length; i += 2) pts.push([P[i] * S - r.x, P[i + 1] * S - r.y]);
+    for (const [e, v, l] of [[0, -m, -1], [0, r.w + m, 1], [1, -m, -1], [1, r.h + m, 1]]) {   // lado de dentro: l·(p[e] − v) ≤ 0
+      const q = [];
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i ? i - 1 : pts.length - 1], b = pts[i], da = l * (a[e] - v) <= 0, db = l * (b[e] - v) <= 0;
+        if (da !== db) { const t = (v - a[e]) / (b[e] - a[e]); q.push([a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])]); }
+        if (db) q.push(b);
+      }
+      pts = q;
+      if (!pts.length) break;
+    }
+    return pts;
+  }
+  // a máscara na região r: a cor de fundo (op.cor) fora do contorno P, a borda com uma sombra leve para dentro do estado e
+  // um fio claro no recorte (op.corta: o contorno passa pela região; op.cheia: a região toda fora do estado)
+  function pintaMascara(ctx, r, P, op) {
+    ctx.setTransform(op.k, 0, 0, op.k, 0, 0);
+    ctx.fillStyle = op.cor;
+    ctx.beginPath();
+    ctx.rect(0, 0, r.w, r.h);
+    const pts = op.corta ? recorta(P, r, 24) : [];
+    const contorno = () => { pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath(); };
+    if (pts.length > 2) {
+      contorno();
+      ctx.fill('evenodd');
+      ctx.beginPath(); contorno();
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 9; ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 4; ctx.stroke();
+      ctx.strokeStyle = 'rgba(243,244,244,.32)'; ctx.lineWidth = 1.2; ctx.stroke();
+    } else if (op.cheia) ctx.fill();
+  }
+  // o pintor: desenha os pedidos das camadas (só o último de cada uma, se chegarem vários juntos) e devolve a imagem
+  // (ImageBitmap); baixa os quadros do fundo do satélite (grupos: os de cada zoom; junta: montar a imagem do fundo, senão só
+  // para o cache do navegador), parando enquanto o mapa mexe (menos com pressa: o botão foi tocado antes do fundo chegar)
+  function Pintor(posta) {
+    let D = null, P = null, vez = 0, pausa = false, pressa = false, ativos = 0;
+    const pedidos = new Map(), telas = new Map(), fila = [];
+    const pinta = () => {
+      vez = 0;
+      for (const m of pedidos.values()) {
+        const W = Math.max(1, Math.ceil(m.r.w * m.r.k)), H = Math.max(1, Math.ceil(m.r.h * m.r.k));
+        let oc = telas.get(m.camada);
+        if (!oc || oc.width !== W || oc.height !== H) telas.set(m.camada, oc = new OffscreenCanvas(W, H));
+        const ctx = oc.getContext('2d');
+        if (m.t === 'estado') { if (D) pintaEstado(ctx, m.r, D, m.op); } else if (P) pintaMascara(ctx, m.r, P, m.op);
+        const bm = oc.transferToImageBitmap();
+        posta({ t: 'tela', camada: m.camada, id: m.id, r: m.r, bm }, [bm]);
+      }
+      pedidos.clear();
+    };
+    const junta = g => {
+      const q = g.bms;
+      if (g.falhou || !q.length) { q.forEach(x => x[2].close()); posta({ t: 'fundo', z: g.z, falhou: true }); return; }
+      const xa = Math.min(...q.map(x => x[0])), ya = Math.min(...q.map(x => x[1])), xb = Math.max(...q.map(x => x[0])), yb = Math.max(...q.map(x => x[1]));
+      const w = (xb - xa + 1) * 256, h = (yb - ya + 1) * 256, oc = new OffscreenCanvas(w, h), ctx = oc.getContext('2d'), quadros = [];
+      ctx.fillStyle = g.cor || '#0f1417'; ctx.fillRect(0, 0, w, h);   // onde não há quadro: a cor do mapa (o JPEG não tem transparência)
+      for (const [x, y, bm] of q) { ctx.drawImage(bm, (x - xa) * 256, (y - ya) * 256, 256, 256); quadros.push([(x - xa) * 256, (y - ya) * 256]); bm.close(); }
+      oc.convertToBlob({ type: 'image/jpeg', quality: 0.9 })
+        .then(blob => posta({ t: 'fundo', z: g.z, blob, quadros, r: { x: xa * 256, y: ya * 256, w, h, z: g.z, k: 1 } }), () => posta({ t: 'fundo', z: g.z, falhou: true }));
+    };
+    const bomba = () => {
+      while (fila.length && ativos < (pressa ? 6 : 3) && (!pausa || fila[0][0].pressa)) {   // (os do zoom 6 não param com o mapa mexendo)
+        const [g, q] = fila.shift();
+        ativos++;
+        fetch(q[2], { mode: 'cors', credentials: 'omit' })
+          .then(r => { if (!r.ok) throw new Error(r.status); return g.junta ? r.blob().then(b => createImageBitmap(b)) : r.arrayBuffer().then(() => null); })
+          .then(bm => { if (bm) g.bms.push([q[0], q[1], bm]); }, () => { g.falhou = true; })
+          .then(() => { ativos--; if (!--g.falta && g.junta) junta(g); bomba(); });
+      }
+    };
+    return m => {
+      if (m.t === 'dados') D = m.D;
+      else if (m.t === 'contorno') P = m.P;
+      else if (m.t === 'quadros') {
+        for (const g of m.grupos) { const o = { z: g.z, junta: g.junta, pressa: g.pressa, cor: m.cor, bms: [], falta: g.itens.length, falhou: false }; g.itens.forEach(q => fila.push([o, q])); }
+        bomba();
+      } else if (m.t === 'pausa') { pausa = m.v; bomba(); }
+      else if (m.t === 'pressa') { pressa = true; fila.sort((a, b) => (b[0].pressa ? 1 : 0) - (a[0].pressa ? 1 : 0)); bomba(); }
+      else { pedidos.set(m.camada, m); if (!vez) vez = setTimeout(pinta, 0); }
+    };
+  }
+  // MODO: 'worker' (o pintor num worker), 'pagina' (sem worker: o pintor aqui, com OffscreenCanvas) ou null (navegador sem
+  // OffscreenCanvas: as camadas desenham no canvas da página, na hora, e não há fundo do satélite)
+  const camadas = new Map();                             // id da camada → camada (as imagens que o pintor devolve)
+  let fundoChegou = () => {};
+  const chega = m => {
+    if (m.t === 'tela') { const l = camadas.get(m.camada); if (l) l._chegou(m.id, m.bm, m.r); else m.bm.close(); }
+    else if (m.t === 'fundo') fundoChegou(m);
+  };
+  let MODO = null, PINTOR = null;
+  try {
+    const oc = window.OffscreenCanvas && new OffscreenCanvas(1, 1);
+    if (oc && oc.getContext('2d') && oc.transferToImageBitmap && window.createImageBitmap && document.createElement('canvas').getContext('bitmaprenderer')) {
+      MODO = 'pagina';
+      if (window.Worker) {
+        try {
+          const fonte = `'use strict';\nconst tracaLinhas = ${tracaLinhas};\nconst pintaEstado = ${pintaEstado};\nconst recorta = ${recorta};\n` +
+            `const pintaMascara = ${pintaMascara};\nconst recebe = (${Pintor})((m, t) => postMessage(m, t || []));\nonmessage = e => recebe(e.data);\n`;
+          const url = URL.createObjectURL(new Blob([fonte], { type: 'text/javascript' }));
+          PINTOR = new Worker(url);
+          URL.revokeObjectURL(url);
+          PINTOR.onmessage = e => chega(e.data);
+          // (worker que não sobe: as camadas desenham aqui, na hora; o fundo do satélite fica de fora)
+          PINTOR.onerror = () => { PINTOR = null; camadas.forEach(l => l.esquece()); };
+          MODO = 'worker';
+        } catch (e) { PINTOR = null; }
+      }
+      if (!PINTOR) { const recebe = Pintor(m => setTimeout(() => chega(m), 0)); PINTOR = { postMessage: m => setTimeout(() => recebe(m), 0) }; }
+      PINTOR.postMessage({ t: 'contorno', P: PTOf });
+    }
+  } catch (e) { MODO = null; PINTOR = null; }
+  // desenho na hora, aqui (antes da animação do zoom; worker que caiu)
+  function pintaAqui(m) {
+    const oc = new OffscreenCanvas(Math.max(1, Math.ceil(m.r.w * m.r.k)), Math.max(1, Math.ceil(m.r.h * m.r.k))), ctx = oc.getContext('2d');
+    if (m.t === 'estado') { if (dados) pintaEstado(ctx, m.r, dados, m.op); } else pintaMascara(ctx, m.r, PTOf, m.op);
+    return oc.transferToImageBitmap();
+  }
+
   // ---------- canvas preso ao mapa ----------
-  // Como os canvas do Leaflet (move com o arrasto, estica no zoom), mas sabendo a região que tem desenhada: canto de cima
-  // à esquerda em pixels absolutos do zoom z (x, y), tamanho (w, h, px desse zoom) e resolução k (px do canvas por px da
-  // tela). A cada quadro do zoom (pinça, voo) e no começo da animação do zoom só a transformação (CSS) muda; quem desenha
-  // é a camada filha, quando ela quer (vista: no fim de cada movimento; quadro: a cada quadro do zoom; mexe: no arrasto)
+  // Como os canvas do Leaflet (move com o arrasto, estica no zoom), mas sabendo a região que tem desenhada (_r): canto de
+  // cima à esquerda em pixels absolutos do zoom z (x, y), tamanho (w, h, px desse zoom) e resolução k (px do canvas por px
+  // do mapa). A cada quadro do zoom (pinça, voo) e no começo da animação do zoom só a transformação (CSS) muda; quem
+  // desenha é a camada filha, quando ela quer (vista: no fim de cada movimento; quadro: a cada quadro do zoom; mexe: no
+  // arrasto). O desenho é pedido ao pintor (_p: a região pedida) e entra quando a imagem chega, já no lugar; uma imagem que
+  // chega na animação do zoom espera o fim dela
   const Tela = L.Layer.extend({
     onAdd() {
       this._c = L.DomUtil.create('canvas', 'vto-tela leaflet-zoom-animated', this.getPane());
-      this._ctx = this._c.getContext('2d');
-      this._r = null;
+      this._ctx = this._c.getContext(MODO ? 'bitmaprenderer' : '2d');
+      this._r = this._p = this._guarda = null;
+      this._id = this._vis = 0;
+      camadas.set(L.stamp(this), this);
       this.vista();
     },
-    onRemove() { L.DomUtil.remove(this._c); this._r = null; },
-    getEvents() { return { zoom: this._zoom, move: this.mexe, zoomanim: this._anim, moveend: this._fim, resize: this._fim }; },
+    onRemove() { L.DomUtil.remove(this._c); this._r = this._p = null; camadas.delete(L.stamp(this)); },
+    getEvents() { return { zoom: this._zoom, move: this.mexe, zoomanim: this._anim, zoomend: this._zEnd, moveend: this._fim, resize: this._fim }; },
     _zoom() { this.poe(map.getCenter(), map.getZoom()); this.quadro(); },
     _anim(e) { this.antesDaAnim(e); this.poe(e.center, e.zoom); },
-    // o desenho da vista nova numa tarefa separada, logo depois da do fim do movimento (a da rede e das camadas não fica
-    // mais longa: era o que fazia o quadro lento no fim de cada passo do zoom); até lá fica a imagem de antes, esticada
+    _zEnd() { const g = this._guarda; if (g) { this._guarda = null; this._chegou(...g); } },
+    // o pedido da vista nova numa tarefa separada, logo depois da do fim do movimento (a da rede e das camadas não fica
+    // mais longa); até a imagem nova chegar fica a de antes, esticada
     _fim() { if (!this._t) this._t = setTimeout(() => { this._t = 0; if (this._map && !map._animatingZoom) this.vista(); }, 0); },
-    vista() {}, quadro() {}, mexe() {}, antesDaAnim() {},
+    vista() {}, quadro() {}, mexe() {}, antesDaAnim() {}, _mostrou() {},
     // região da vista (centro c, zoom z) com a folga f (fração da tela de cada lado), em pixels absolutos do zoom zr
     regiao(c, z, f, zr = z) {
       const t = map.getSize(), k = Math.pow(2, zr - z), p = map.project(c, zr), w = t.x * (1 + 2 * f) * k, h = t.y * (1 + 2 * f) * k;
@@ -94,13 +270,14 @@
       const x = Math.min(a.x - t.x * m, v.x), y = Math.min(a.y - t.y * m, v.y), w = Math.max(b.x + t.x * m, v.x + v.w) - x, h = Math.max(b.y + t.y * m, v.y + v.h) - y;
       return w * h * k * k <= maxpx ? { x, y, w, h, z } : null;
     },
-    // a região desenhada cobre a vista (c, z) com a folga f?
-    cobre(c, z, f) {
-      const r = this._r;
+    // a região r cobre a vista (c, z) com a folga f? (cobre: a desenhada; cobreP: a pedida, se houver, senão a desenhada)
+    cobreR(r, c, z, f) {
       if (!r) return false;
       const v = this.regiao(c, z, f, r.z);
       return v.x >= r.x - 0.5 && v.y >= r.y - 0.5 && v.x + v.w <= r.x + r.w + 0.5 && v.y + v.h <= r.y + r.h + 0.5;
     },
+    cobre(c, z, f) { return this.cobreR(this._r, c, z, f); },
+    cobreP(c, z, f) { return this.cobreR(this._p || this._r, c, z, f); },
     // transformação (CSS) para a vista (c, z): a região desenhada no lugar dela, esticada pela razão dos zooms
     poe(c, z) {
       const r = this._r;
@@ -108,90 +285,134 @@
       const s = Math.pow(2, z - r.z), o = map._getNewPixelOrigin(c, z);
       L.DomUtil.setTransform(this._c, L.point(r.x * s - o.x, r.y * s - o.y), s);
     },
-    // desenha a região r (arredondada) com f(ctx, r) e põe o canvas no lugar (k: resolução). O canvas só muda de tamanho
-    // quando a região não cabe nele (ou sobra demais): a região usa o canto de cima à esquerda e o resto fica vazio. Mudar o
-    // tamanho a cada vista custava caro (o navegador refaz o canvas inteiro na 1ª pintura: medido no zoom pela roda)
-    pinta(r, k, f) {
+    // pede o desenho (tipo 'estado' ou 'mascara', com op) da região r (arredondada) com a resolução k: ao pintor (a imagem
+    // chega depois) ou, com ja, na hora (antes da animação do zoom: tem que estar no lugar quando ela começa)
+    pinta(r, k, tipo, op, ja) {
       const x = Math.floor(r.x), y = Math.floor(r.y);
       r = { x, y, w: Math.ceil(r.x + r.w) - x, h: Math.ceil(r.y + r.h) - y, z: r.z, k };
-      const c = this._c, W = Math.max(1, Math.ceil(r.w * k)), H = Math.max(1, Math.ceil(r.h * k));
-      if (c.width < W || c.height < H || c.width * c.height > 2.5 * W * H) { c.width = W; c.height = H; } else this._ctx.clearRect(0, 0, c.width, c.height);
-      c.style.width = c.width / k + 'px'; c.style.height = c.height / k + 'px';
+      const id = ++this._id, m = { t: tipo, camada: L.stamp(this), id, r, op: Object.assign({ k }, op) };
+      if (!MODO) { this._pinta2d(m); return; }
+      if (ja || !PINTOR) { this._chegou(id, pintaAqui(m), r, ja); return; }
+      this._p = r;
+      PINTOR.postMessage(m);
+    },
+    // a imagem do pedido id chegou: entra se for mais nova que a da tela (a que chega na animação do zoom espera o fim dela)
+    // (ja: pintada na hora, antes da animação do zoom: entra já, senão ficaria escondida a animação inteira)
+    _chegou(id, bm, r, ja) {
+      if (!this._map || id <= this._vis) { bm.close(); return; }
+      if (map._animatingZoom && !ja) { if (this._guarda) this._guarda[1].close(); this._guarda = [id, bm, r]; return; }
+      this._vis = id;
+      if (id === this._id) this._p = null;
+      const w = bm.width, h = bm.height;
+      this._ctx.transferFromImageBitmap(bm);
+      this._c.style.width = w / r.k + 'px'; this._c.style.height = h / r.k + 'px';
       this._r = r;
-      const ctx = this._ctx;
-      ctx.setTransform(k, 0, 0, k, 0, 0);
-      f(ctx, r);
+      this._mostrou();
       this.poe(map.getCenter(), map.getZoom());
+    },
+    // sem OffscreenCanvas: no canvas da página, na hora. O canvas só muda de tamanho quando a região não cabe nele (ou sobra
+    // demais): mudar o tamanho a cada vista custava caro (o navegador refaz o canvas inteiro na 1ª pintura)
+    _pinta2d(m) {
+      const c = this._c, r = m.r, W = Math.max(1, Math.ceil(r.w * r.k)), H = Math.max(1, Math.ceil(r.h * r.k)), ctx = this._ctx;
+      if (c.width < W || c.height < H || c.width * c.height > 2.5 * W * H) { c.width = W; c.height = H; }
+      else { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height); }
+      c.style.width = c.width / r.k + 'px'; c.style.height = c.height / r.k + 'px';
+      if (m.t === 'estado') { if (dados) pintaEstado(ctx, r, dados, m.op); } else pintaMascara(ctx, r, PTOf, m.op);
+      this._vis = this._id = m.id; this._p = null; this._r = r;
+      this._mostrou();
+      this.poe(map.getCenter(), map.getZoom());
+    },
+    // esquece o pedido que está no pintor (a imagem dele, quando chegar, não entra)
+    esquece() { this._vis = this._id; this._p = null; if (this._guarda) { this._guarda[1].close(); this._guarda = null; } },
+    // escondida por um tempo: solta a imagem (a memória dela); a próxima vista pede de novo
+    soltaDepois(escondida) {
+      clearTimeout(this._tSolta);
+      this._tSolta = setTimeout(() => {
+        if (!this._map || !escondida() || !this._r) return;
+        this.esquece();
+        if (MODO) { const o = new OffscreenCanvas(1, 1); o.getContext('2d'); this._ctx.transferFromImageBitmap(o.transferToImageBitmap()); }
+        else this._c.width = this._c.height = 0;
+        this._r = null;
+      }, 8000);
+    },
+    // no voo, a cada quadro: a região desenhada (ou a pedida) tem que cobrir a vista deste quadro e a de daqui a 0,1 s, sem
+    // esticar nem encolher demais nelas; senão, a região a pedir: esta vista e a de ~1,2 níveis de zoom adiante juntas, no
+    // zoom do meio delas (fica nítida em todo o trecho). null: a que tem serve
+    trechoDoVoo() {
+      const c = map.getCenter(), z = map.getZoom(), [c1, z1] = voo.adiante(0.1), r = this._p || this._r;
+      const bom = zz => { const f = Math.pow(2, zz - r.z); return !r.k || (f >= 0.6 && f <= 1.7 && r.k / f >= 0.45); };
+      if (r && this.cobreR(r, c, z, 0) && this.cobreR(r, c1, z1, 0) && bom(z) && bom(z1)) return null;
+      const [c2, z2] = voo.passo(1.2), zr = (z + z2) / 2, a = this.regiao(c, z, 0.04, zr), b = this.regiao(c2, z2, 0.04, zr);
+      const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y);
+      return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y, z: zr, zMin: Math.min(z, z2) };
     }
   });
 
   // ---------- máscara: fora do Tocantins, a cor de fundo do mapa ----------
-  const FOLGA_M = 0.25, MAXPX = MOVEL ? 1.2e6 : 3e6;    // folga em volta da vista; px do canvas no máximo (a resolução cai)
-  const MAXPX_ANIM = MOVEL ? 0.8e6 : 1.5e6;              // no começo da animação do zoom (refeita no fim dela, com a resolução certa)
-  const MASCARA_ATE = 10;                                // a máscara só abaixo deste zoom (o satélite recorta até o quadro do 9)
+  const FOLGA_M = 0.25, MAXPX = MOVEL ? 1.2e6 : 2.2e6;  // folga em volta da vista; px do canvas no máximo (a resolução cai)
+  const MAXPX_ANIM = MOVEL ? 0.8e6 : 2e6;                // no voo, na pinça e no começo da animação do zoom
+  const MASCARA_ATE = 10;                                // a máscara só abaixo deste zoom (o satélite recorta até o 9,99)
   let fundoCor = null;
   const corFundo = () => fundoCor || (fundoCor = getComputedStyle(mc).backgroundColor || '#0f1417');
-  // o contorno no canvas da região r: recortado num retângulo um pouco maior que ela (de perto, o estado tem milhões de px)
-  function caminhoTO(ctx, r) {
-    const S = 256 * Math.pow(2, r.z), m = 24;
-    const pts = L.PolyUtil.clipPolygon(PTO.map(([x, y]) => L.point(x * S - r.x, y * S - r.y)), L.bounds([-m, -m], [r.w + m, r.h + m]));
-    pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
-    ctx.closePath();
-    return pts.length;
-  }
   const Mascara = Tela.extend({
     options: { pane: 'mascara-to' },
     vista() {
-      const c = map.getCenter(), z = map.getZoom();
-      if (!this._r || this._r.z !== z || !this.cobre(c, z, 0.08)) this.faz(this.vistaM(c, z));
+      const c = map.getCenter(), z = map.getZoom(), r = this._p || this._r;
+      if (!r || r.z !== z || !this.cobreR(r, c, z, 0.08)) this.faz(this.vistaM(c, z));
     },
     // parado e de longe: o estado inteiro e uma tela em volta (o arrasto não sai dela), com menos resolução se preciso
     // (só um preenchimento e a borda); senão, a vista com folga
-    vistaM(c, z) { return (z < MASCARA_ATE && this.regiaoTO(c, z, 0.6, MAXPX, 1)) || this.regiao(c, z, FOLGA_M); },
-    // pinça e voo: se a vista sai da região desenhada (afastando) ou ela esticou demais (a borda borra), refaz neste quadro
+    vistaM(c, z) { return (z < MASCARA_ATE && this.regiaoTO(c, z, 0.5, MAXPX, 1)) || this.regiao(c, z, FOLGA_M); },
+    // voo: a região do trecho seguinte; pinça: se a vista sai da região (afastando), a vista com folga grande
     quadro() {
       if (map._animatingZoom) return;
       const c = map.getCenter(), z = map.getZoom();
-      // (no voo, também quando esticou demais; na pinça a borda pode borrar até o fim do gesto, como a rede)
-      if (!this._r || (voo && Math.pow(2, z - this._r.z) > 2.5) || !this.cobre(c, z, 0) || (this._c.hidden && z < MASCARA_ATE && this._r.z >= MASCARA_ATE))
-        this.faz(this.regiao(c, z, FOLGA_M));            // no meio do gesto, só a vista (menos para pintar neste quadro)
+      if (voo) { const r = this.trechoDoVoo(); if (r) this.faz(r, r.zMin, MAXPX_ANIM, this._c.hidden || !this.cobre(c, z, 0)); return; }   // (na hora se a vista já saiu da região)
+      if (!this.cobreP(c, z, 0) || (this._c.hidden && z < MASCARA_ATE && (this._p || this._r).z >= MASCARA_ATE))
+        this.faz(this.regiao(c, z, 0.5), z, MAXPX_ANIM);
     },
-    mexe() { if (!map._animatingZoom && !this.cobre(map.getCenter(), map.getZoom(), 0)) this.faz(this.vistaM(map.getCenter(), map.getZoom())); },
-    // animação do zoom (roda, duplo clique, fim da pinça): afastando além da região, refaz antes dela começar com a região
-    // da vista de agora e a do fim juntas (com menos resolução se ficar grande), já no lugar, sem a transição do CSS
+    mexe() { if (!map._animatingZoom && !voo && !this.cobreP(map.getCenter(), map.getZoom(), 0)) this.faz(this.vistaM(map.getCenter(), map.getZoom())); },
+    // animação do zoom (roda, duplo clique, fim da pinça): afastando além da região desenhada, refaz na hora, antes dela
+    // começar, com a região da vista de agora e a do fim juntas (com menos resolução se ficar grande), já no lugar, sem a
+    // transição do CSS
     antesDaAnim(e) {
       if (this.cobre(e.center, e.zoom, 0) && !(this._c.hidden && e.zoom < MASCARA_ATE)) return;
       const c = map.getCenter(), z = map.getZoom(), a = this.regiao(c, z, FOLGA_M), b = this.regiao(e.center, e.zoom, 0.05, z);
       const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), r = { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y, z };
       this._c.style.transition = 'none';
-      this.faz(r, e.zoom, MAXPX_ANIM);
+      this.faz(r, e.zoom, MAXPX_ANIM, true);
       void getComputedStyle(this._c).transform;           // aplica a posição nova sem transição
       this._c.style.transition = '';
     },
-    // (zv: o zoom que vale para mostrar ou não a máscara; na animação do zoom, o do fim dela)
-    faz(r, zv = map.getZoom(), maxpx = MAXPX) {
+    // (zv: o zoom que vale para mostrar ou não a máscara; na animação do zoom, o do fim dela; no voo, o menor do trecho)
+    faz(r, zv = map.getZoom(), maxpx = MAXPX, ja = false) {
       const S = 256 * Math.pow(2, r.z), q = [r.x / S, r.y / S, (r.x + r.w) / S, (r.y + r.h) / S];
-      const perto = zv >= MASCARA_ATE, corta = !perto && (noTO ? noTO.borda(q) : true);
+      const perto = zv >= MASCARA_ATE && !this._segura(), corta = !perto && (noTO ? noTO.borda(q) : true);
       const dentro = perto || (!corta && noTO.dentro((q[0] + q[2]) / 2, (q[1] + q[3]) / 2));
-      this._c.hidden = dentro;                           // de perto, ou a região toda dentro do estado: nada a cobrir
-      if (dentro) { this._r = Object.assign({}, r, { k: 0 }); return; }
+      if (dentro) {                                      // de perto, ou a região toda dentro do estado: nada a cobrir
+        this.esquece();
+        this._r = { x: r.x, y: r.y, w: r.w, h: r.h, z: r.z, k: 0 };
+        if (!this._c.hidden) { this._c.hidden = true; this.soltaDepois(() => this._c.hidden); }
+        return;
+      }
       const k = Math.min(1, Math.sqrt(maxpx / (r.w * r.h)));
-      this.pinta(r, k, (ctx, r) => {
-        ctx.fillStyle = corFundo();
-        ctx.beginPath();
-        ctx.rect(0, 0, r.w, r.h);
-        if (corta && caminhoTO(ctx, r)) {
-          ctx.fill('evenodd');
-          // a borda: sombra leve para dentro do estado e um fio claro no recorte
-          ctx.beginPath();
-          caminhoTO(ctx, r);
-          ctx.lineJoin = 'round';
-          ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 9; ctx.stroke();
-          ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 4; ctx.stroke();
-          ctx.strokeStyle = 'rgba(243,244,244,.32)'; ctx.lineWidth = 1.2; ctx.stroke();
-        } else if (!noTO || !noTO.dentro((q[0] + q[2]) / 2, (q[1] + q[3]) / 2)) ctx.fill();   // toda fora (ou o contorno só encosta)
-      });
-    }
+      this.pinta(r, k, 'mascara', { cor: corFundo(), corta, cheia: !corta && !(noTO && noTO.dentro((q[0] + q[2]) / 2, (q[1] + q[3]) / 2)) }, ja);
+    },
+    // de perto a máscara sai só quando o satélite de fora da vista chegou e entrou (fora do TO não há nível de cima que
+    // segure a imagem: sem isso, ao passar do zoom 10 na divisa, o lado de fora ficava escuro até os quadros chegarem).
+    // No máximo 4 s; map._flyToFrame e não o voo daqui (o let voo vem depois do addTo da máscara)
+    _segura() {
+      const s = window.__satelite;
+      if (this._c.hidden || !s || !s._map) return false;
+      const ocupado = map._flyToFrame || map._animatingZoom || Object.values(s._tiles).some(t => t.current && !t.active);
+      if (!ocupado) { this._t0s = 0; return false; }
+      if (!this._t0s) this._t0s = performance.now();
+      if (performance.now() - this._t0s > 4000) { this._t0s = 0; return false; }
+      clearTimeout(this._tSeg);
+      this._tSeg = setTimeout(() => { if (this._map && !this._c.hidden && map.getZoom() >= MASCARA_ATE) this.faz(this.vistaM(map.getCenter(), map.getZoom())); }, 150);
+      return true;
+    },
+    _mostrou() { this._c.hidden = false; }
   });
   const mascara = new Mascara().addTo(map);
   // tema trocado (Night shift do menu): a cor de fundo muda
@@ -241,15 +462,21 @@
     if (carga) return carga;
     return (carga = fetch(BASE + 'indice.json').then(r => r.ok ? r.json() : null)
       .then(j => j && j.estado && j.estado[1] ? fetch(`${BASE}estado.txt?v=${encodeURIComponent(j.estado[0])}`).then(r => r.ok ? r.text() : null) : null)
-      .then(t => { if (t) { dados = decodifica(t); estado.vista(true); } })
+      .then(t => {
+        if (!t) return;
+        dados = decodifica(t);
+        if (PINTOR) PINTOR.postMessage({ t: 'dados', D: { T1: dados.T1, T2: dados.T2 } });
+        estado.vista(true);
+      })
       .catch(() => { /* sem o arquivo: o estado fica só com a rede deste */ }));
   }
 
   // ---------- camada do estado ----------
-  const FOLGA_E = 0.1, MAXPX_E = MOVEL ? 1.2e6 : 3e6;    // folga; parado, o estado inteiro de uma vez se couber nisso (px do canvas)
+  const FOLGA_E = 0.1, MAXPX_E = MOVEL ? 1.2e6 : 2e6;   // folga; parado, o estado inteiro de uma vez se couber nisso (px do canvas)
+  const MAXPX_E_ANIM = MOVEL ? 0.8e6 : 2e6;              // no voo
   let zm = 9;                                            // zoom em que os vizinhos entram (o deles, quando começam)
   const leZm = () => { const v = window.__vizinhos; if (v && v.estado) zm = v.estado().zMin; return zm; };
-  let mostra = false, esperaViz = 0, voo = null;
+  let mostra = false, esperaViz = 0, voo = null, estado = null;
   // opacidade da camada (no pane): de uma vez (aparecer, no voo) ou aos poucos (sair, quando os vizinhos estão na tela)
   function opacidade(v, suave) {
     const anima = suave && !calmo() && mostra && !v;     // só a saída é aos poucos
@@ -257,35 +484,32 @@
     paneE.style.transition = anima ? '' : 'none';
     paneE.style.opacity = String(v);
     paneE.hidden = !mostra && !anima;
+    if (!mostra && !anima && estado) estado.guarda();
   }
-  paneE.addEventListener('transitionend', () => { if (!mostra) paneE.hidden = true; });
-  opacidade(0, false);
-  // traça as linhas da classe que passam pela região r (já em beginPath); pontos a menos de 0,6 px do anterior ficam de fora
-  function traca(ctx, g, r) {
-    const s = 256 * Math.pow(2, r.z), bx = -r.x, by = -r.y, p = g.p, ini = g.ini, cx = g.cx, W = r.w + 8, H = r.h + 8;
-    for (let l = 0, nl = ini.length - 1; l < nl; l++) {
-      if (cx[4 * l] * s + bx > W || cx[4 * l + 2] * s + bx < -8 || cx[4 * l + 1] * s + by > H || cx[4 * l + 3] * s + by < -8) continue;
-      const a = ini[l], b = ini[l + 1];
-      let lx = p[2 * a] * s + bx, ly = p[2 * a + 1] * s + by;
-      ctx.moveTo(lx, ly);
-      for (let k = a + 1; k < b; k++) {
-        const x = p[2 * k] * s + bx, y = p[2 * k + 1] * s + by;
-        if (k < b - 1 && x - lx < 0.6 && lx - x < 0.6 && y - ly < 0.6 && ly - y < 0.6) continue;
-        ctx.lineTo(x, y); lx = x; ly = y;
-      }
-    }
-  }
+  paneE.addEventListener('transitionend', () => { if (!mostra) { paneE.hidden = true; if (estado) estado.guarda(); } });
+  paneE.style.opacity = '0'; paneE.hidden = true;
+  // no voo: a camada aparece abaixo do zoom em que os vizinhos entram (de 1 nível acima dele até ele), como fora do voo; de
+  // perto (onde, parado, ficam os vizinhos) o estado simplificado em 150 m já sairia do lugar
+  const opVoo = z => Math.max(0, Math.min(1, zm + 1 - z));
+  const opEstado = z => ({ alfa: ALFA, cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })) });   // o tronco por cima
   const Estado = Tela.extend({
     options: { pane: 'estado-to' },
-    // fim de cada movimento: abaixo dos vizinhos, o estado inteiro (já, sem esmaecer: os vizinhos saem no mesmo quadro);
-    // dos vizinhos em diante, se ainda estava na tela, fica (na vista nova) até eles estarem desenhados, e sai aos poucos
+    // fim de cada movimento: abaixo dos vizinhos, o estado inteiro (sem esmaecer: os vizinhos saem no mesmo quadro; se a
+    // imagem da vista ainda não chegou, aparece quando ela chegar); dos vizinhos em diante, se ainda estava na tela, fica
+    // (na vista nova) até eles estarem desenhados, e sai aos poucos
     vista(forca) {
       if (voo) return;
-      const z = map.getZoom();
+      const z = map.getZoom(), c = map.getCenter();
       clearTimeout(esperaViz);
-      if (z < leZm()) { if (dados) { this.desenha(map.getCenter(), z, forca); opacidade(1, false); } return; }
-      if (!mostra) return;
-      this.desenha(map.getCenter(), z, forca);
+      this._quer = false;
+      if (z < leZm()) {
+        if (!dados) return;
+        this.desenha(c, z, forca);
+        if (this.cobre(c, z, 0)) opacidade(1, false); else this._quer = true;
+        return;
+      }
+      if (!mostra) { this.guarda(); return; }
+      this.desenha(c, z, forca);
       const confere = () => {
         const v = window.__vizinhos;
         if (voo || map.getZoom() < zm) return;
@@ -293,34 +517,61 @@
       };
       esperaViz = setTimeout(confere, 0);                // depois do fim de movimento dos vizinhos (que pede o desenho deles)
     },
-    // no voo: na ida (a camada entrando), só a opacidade; na volta (ou já na tela), refeita quando esticou demais
-    quadro() {
-      if (!voo || !dados || !this._r) return;
+    _mostrou() { if (this._quer && !voo && map.getZoom() < zm) opacidade(1, false); this._quer = false; },
+    // fora da tela: perto do zoom dos vizinhos, a região para o zoom para longe (prepara); mais perto, a imagem é solta
+    // depois de um tempo (a memória dela)
+    guarda() {
+      if (voo) return;
       const z = map.getZoom();
-      if (voo.entra) opacidade(Math.max(0, Math.min(1, (2.6 - Math.pow(2, z - voo.z)) / 1.6)), false);
-      else if (mostra && (Math.pow(2, z - this._r.z) > 3 || !this.cobre(map.getCenter(), z, 0))) this.desenha(map.getCenter(), z, true, true);
+      if (z < zm + 1.5) this.prepara(map.getCenter(), z);
+      else if (this._r) this.soltaDepois(() => !mostra && map.getZoom() >= zm + 1.5);
     },
-    // (soVista: no voo, só a vista daquele quadro, menos para pintar nele; parado, o estado inteiro se couber)
-    desenha(c, z, forca, soVista) {
+    // dos vizinhos em diante, perto do zoom deles e com a camada fora da tela: a região da vista de 1 nível abaixo, com
+    // folga, desenhada pelo pintor e guardada escondida. O zoom para longe (roda ou pinça) que passa para baixo dos vizinhos
+    // só a mostra, já no começo (antes, as linhas do resto da vista surgiam de uma vez no fim do zoom); no fim do zoom a
+    // vista é refeita, nítida
+    prepara(c, z) {
+      if (!dados || !MODO || z >= zm + 1.5) return;
+      const zr = zm - 1, r = this._p || this._r;
+      if (r && r.z === zr && this.cobreR(r, c, zr, 0.1)) return;
+      const g = this.regiao(c, zr, 0.35);
+      this.pinta(g, Math.min(R, Math.sqrt(MAXPX_E_ANIM / (g.w * g.h))), 'estado', opEstado(zr));
+    },
+    // a guardada cobre a vista (c, z) abaixo dos vizinhos: entra (sem esmaecer; o canvas dos vizinhos ainda está por cima)
+    entra(c, z) {
+      if (mostra || voo || !dados || z >= zm || !this._r || !this._r.k || !this.cobre(c, z, 0)) return false;
+      opacidade(1, false);
+      return true;
+    },
+    // começo da animação do zoom (roda, duplo clique, fim da pinça): a camada aparece antes de o canvas andar (com a
+    // posição de agora aplicada, para a transição do CSS levá-lo até a do fim)
+    antesDaAnim(e) { if (this.entra(e.center, e.zoom)) void getComputedStyle(this._c).transform; },
+    // no voo: a opacidade pelo zoom e, enquanto ela vale, a região do trecho seguinte; na pinça, a guardada (prepara)
+    quadro() {
+      if (!voo) { this.entra(map.getCenter(), map.getZoom()); return; }
       if (!dados) return;
-      if (!forca && this._r && this._r.z === z && this.cobre(c, z, 0.04)) return;   // a mesma vista (o pouso do voo): já está
-      this.pinta((!soVista && this.regiaoTO(c, z, R, MAXPX_E)) || this.regiao(c, z, FOLGA_E), R, (ctx, r) => {
-        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = ALFA;
-        for (const cl of ['T2', 'T1']) {                 // o tronco por cima
-          if (!visivel(cl)) continue;
-          ctx.strokeStyle = COR[cl]; ctx.lineWidth = larg(cl, r.z);
-          ctx.beginPath(); traca(ctx, dados[cl], r); ctx.stroke();
-        }
-        ctx.globalAlpha = 1;
-      });
+      const z = map.getZoom(), o = opVoo(z);
+      if (o !== +paneE.style.opacity || paneE.hidden !== !o) { mostra = o > 0; paneE.style.transition = 'none'; paneE.style.opacity = String(o); paneE.hidden = !o; }
+      if (o > 0 || opVoo(voo.adiante(0.1)[1]) > 0) {
+        const r = this.trechoDoVoo();
+        if (r) this.pinta(r, Math.min(R, Math.sqrt(MAXPX_E_ANIM / (r.w * r.h))), 'estado', opEstado(r.z));
+      }
+    },
+    // parado: o estado inteiro se couber; senão a vista com folga
+    desenha(c, z, forca) {
+      if (!dados) return;
+      const r = this._p || this._r;
+      if (!forca && r && r.z === z && r.k >= R && this.cobreR(r, c, z, 0.04)) return;   // a mesma vista (o pouso do voo): já está ou vem
+      this.pinta(this.regiaoTO(c, z, R, MAXPX_E, 0.25) || this.regiao(c, z, FOLGA_E), R, 'estado', opEstado(z));
     }
   });
-  const estado = new Estado().addTo(map);
+  estado = new Estado().addTo(map);
   const corBt = c => { const b = document.querySelector(`#classes button[data-c="${c}"]`); return b && b.style.getPropertyValue('--c').trim(); };
   const cls = document.getElementById('classes');
   if (cls) {
     COR.T1 = corBt('T1') || COR.T1; COR.T2 = corBt('T2') || COR.T2;
-    cls.addEventListener('click', e => { if (e.target.closest('button') && mostra) estado.desenha(map.getCenter(), map.getZoom(), true); });
+    // T1 ou T2 ligado ou desligado: a imagem guardada não vale mais
+    cls.addEventListener('click', e => { if (!e.target.closest('button')) return; estado.esquece(); if (mostra) estado.desenha(map.getCenter(), map.getZoom(), true); else estado._r = null; });
   }
 
   // ---------- linha de outro alimentador sob o ponto (x, y) do mapa ----------
@@ -345,8 +596,8 @@
     return al < 0 ? null : dados.cods[al];
   }
   const pode = () => mostra && !voo && !faixa() && map.getZoom() < zm;
-  // o balão dos vizinhos (vizinhos.js): o código e "Abrir alimentador"
-  const balao = cod => `<div class="viz-pop"><b>${esc(cod)}</b><small>Alimentador vizinho</small><a href="../${encodeURIComponent(cod)}/">Abrir alimentador</a></div>`;
+  // o balão dos vizinhos (vizinhos.js): o código e "Abrir alimentador" (aqui pode ser de qualquer lugar do estado)
+  const balao = cod => `<div class="viz-pop"><b>${esc(cod)}</b><small>Outro alimentador</small><a href="../${encodeURIComponent(cod)}/">Abrir alimentador</a></div>`;
   map.on('click', ev => {
     if (!pode() || !ev.containerPoint) return;
     const oe = ev.originalEvent || {}, toque = oe.pointerType ? oe.pointerType !== 'mouse' : MOVEL;
@@ -380,93 +631,82 @@
   mc.addEventListener('mouseleave', () => paira(null));
   map.on('movestart zoomstart', () => paira(null));
 
-  // ---------- fundo do satélite: os quadros do zoom 8 do TO numa imagem só, por baixo ----------
-  // Os quadros do zoom 8 que tocam o estado (uns 25, 256 px cada) juntados uma vez numa imagem só, quando estão todos
-  // baixados, presa ao mapa como os canvas daqui (no zoom e no voo só estica). Medido no zoom pela roda e pela pinça: uma
-  // camada de quadros do Leaflet (25 imagens esticadas até 1.000×) dava quadros lentos a mais no PC, e um canvas, no
-  // celular; a imagem só, nenhum dos dois. Num painel abaixo do satélite (que, nítido, entra por cima aos poucos)
+  // ---------- fundo do satélite: os quadros de longe do TO numa imagem só, por baixo ----------
+  // Os quadros do zoom 6 (e depois os do 8) que tocam o estado, juntados pelo pintor numa imagem só (JPEG), presa ao mapa
+  // como os canvas daqui (no zoom e no voo só estica). Medido no zoom pela roda e pela pinça: uma camada de quadros do
+  // Leaflet (25 imagens esticadas até 1.000×) dava quadros lentos a mais no PC, e um canvas, no celular; a imagem só,
+  // nenhum dos dois. Num painel abaixo do satélite (que, nítido, entra por cima aos poucos)
   const sat = window.__satelite;
-  const Z_FUNDO = 8;
-  let fundo = null;
-  if (sat && noTO) {
+  let fundo = null, vis = () => {};
+  if (sat && noTO && PINTOR) {
     map.createPane('fundo-to').style.zIndex = 150;      // abaixo do satélite (tilePane, 200)
     const Fundo = Tela.extend({
       options: { pane: 'fundo-to' },
-      // uma <img> (não o canvas: ver acima), montada uma vez num canvas fora da página com os quadros
-      onAdd() { this._c = L.DomUtil.create('img', 'vto-tela leaflet-zoom-animated', this.getPane()); this._c.alt = ''; this._c.draggable = false; this._r = null; },
+      onAdd() { this._c = null; this._r = null; },
+      onRemove() { if (this._c) L.DomUtil.remove(this._c); this._c = this._r = null; },
       vista() { if (this._r) this.poe(map.getCenter(), map.getZoom()); },
-      // ims: [[x, y, ImageBitmap ou Image], ...] do zoom 8; a imagem cobre a caixa deles
-      desenha(ims) {
-        const xa = Math.min(...ims.map(q => q[0])), ya = Math.min(...ims.map(q => q[1]));
-        const xb = Math.max(...ims.map(q => q[0])), yb = Math.max(...ims.map(q => q[1]));
-        const r = { x: xa * 256, y: ya * 256, w: (xb - xa + 1) * 256, h: (yb - ya + 1) * 256, z: Z_FUNDO, k: 1 };
-        const cv = document.createElement('canvas'), ctx = cv.getContext('2d'), q = [];
-        cv.width = r.w; cv.height = r.h;
-        for (const [x, y, im] of ims) { ctx.drawImage(im, (x - xa) * 256, (y - ya) * 256, 256, 256); q.push([(x - xa) * 256, (y - ya) * 256]); if (im.close) im.close(); }
-        cv.toBlob(b => {
-          if (!b || !this._c) return;
-          this._c.onload = () => { URL.revokeObjectURL(this._c.src); this._quadros = q; this._r = r; this._c.style.width = r.w + 'px'; this._c.style.height = r.h + 'px'; this.poe(map.getCenter(), map.getZoom()); };
-          this._c.src = URL.createObjectURL(b);
-        }, 'image/jpeg', 0.9);
+      // a imagem nova (já decodificada) no lugar da de antes, com a região r e os quadros (canto de cada um, px da imagem)
+      troca(im, r, quadros) {
+        if (map._animatingZoom) { map.once('zoomend', () => this.troca(im, r, quadros)); return; }
+        if (!this._map || (this._r && this._r.z > r.z)) return;   // (a do zoom 8 já entrou: a do 6 não volta)
+        im.className = 'vto-tela leaflet-zoom-animated';
+        im.style.width = r.w + 'px'; im.style.height = r.h + 'px';
+        if (this._c) { im.style.visibility = this._c.style.visibility; this._c.replaceWith(im); } else this.getPane().append(im);
+        this._c = im; this._r = r; this._quadros = quadros;
+        this.poe(map.getCenter(), map.getZoom());
+        vis();
       }
     });
-    fundo = new Fundo();
+    fundo = new Fundo().addTo(map);
+    fundoChegou = m => {
+      if (!m.blob) return;
+      const im = new Image(), url = URL.createObjectURL(m.blob);
+      im.alt = ''; im.draggable = false; im.decoding = 'async';
+      im.src = url;
+      (im.decode ? im.decode() : new Promise((ok, erro) => { im.onload = ok; im.onerror = erro; }))
+        .then(() => fundo.troca(im, m.r, m.quadros), () => {}).then(() => URL.revokeObjectURL(url));
+    };
     // Parado (e no arrasto) com o estado inteiro na tela ou de perto (zoom 12 em diante), o fundo não faz falta: o satélite
     // nítido cobre a tela (de longe ele guarda o nível de antes até o novo chegar; de perto, como sempre foi). Fica
     // escondido, uma camada a menos para o navegador juntar a cada quadro (só depois de os quadros nítidos da vista
-    // chegarem e entrarem: no pouso do voo eles ainda estão chegando). Volta a cada zoom (roda, pinça, voo), quando
-    // faltariam quadros nas bordas
+    // chegarem e entrarem: no pouso do voo eles ainda estão chegando). Volta a cada zoom para longe (roda, pinça, voo),
+    // quando faltariam quadros nas bordas; no zoom para perto pela roda, com o nível de agora inteiro, o nível de agora
+    // ampliado cobre a tela até o novo chegar: o fundo fica escondido
     const Z_FUNDO_ATE = 12;
     const sobra = () => map.getZoom() >= Z_FUNDO_ATE || map.getBounds().contains(caixaTO);
     let tVis = 0;
-    const vis = () => {
+    vis = () => {
       if (!fundo._c) return;
       clearTimeout(tVis);
       if (!sobra()) { fundo._c.style.visibility = ''; return; }
-      const esconde = () => { clearTimeout(tVis); tVis = setTimeout(() => { if (fundo._c && sobra() && sat._noTilesToLoad()) fundo._c.style.visibility = 'hidden'; }, 400); };
+      const esconde = () => { clearTimeout(tVis); tVis = setTimeout(() => { if (!voo && fundo._c && sobra() && sat._noTilesToLoad()) fundo._c.style.visibility = 'hidden'; }, 400); };
       if (sat._noTilesToLoad()) esconde(); else sat.once('load', esconde);
     };
-    fundo.on('add', vis);
     map.on('moveend', vis);
     map.on('zoomstart', () => { if (fundo._c) { clearTimeout(tVis); fundo._c.style.visibility = ''; } });
   }
-  // os quadros do fundo (zoom 8; ele entra no mapa quando estão todos baixados) e os da vista do estado (6 e 7), dois de
-  // cada vez, com o mapa parado; as imagens ficam na memória enquanto a página está aberta (o cache normal do navegador;
-  // nada é guardado no site). Os do fundo com CORS (o servidor da Esri permite): o canvas onde são juntados pode virar
-  // imagem
+  // os quadros do fundo (zoom 6, depois o 8) e, se for outro, os do zoom que o satélite usa na visão do estado (o 7 numa
+  // tela grande, o 5 no celular deitado; só para o cache), baixados pelo pintor assim que o alimentador fica pronto,
+  // parando enquanto o mapa mexe; as imagens ficam na memória enquanto a página está aberta (o cache normal do navegador;
+  // nada é guardado no site). Com CORS (o servidor da Esri permite): a imagem do fundo é montada com eles
+  let preCarregou = false;
   function preCarrega() {
-    if (!sat || !noTO) return;
-    const fila = [], guarda = [], q8 = [];
-    let n8 = 0;
-    for (const z of [Z_FUNDO, 7, 6]) {
+    if (!fundo || preCarregou || !PINTOR) return;
+    preCarregou = true;
+    const itens = z => {
       const n = Math.pow(2, z), xa = Math.floor(ux(caixaTO.getWest()) * n), xb = Math.floor(ux(caixaTO.getEast()) * n);
-      const ya = Math.floor(uy(caixaTO.getNorth()) * n), yb = Math.floor(uy(caixaTO.getSouth()) * n);
-      for (let y = ya; y <= yb; y++) for (let x = xa; x <= xb; x++) if (noTO({ x, y, z })) { fila.push([x, y, z]); if (z === Z_FUNDO) n8++; }
-    }
-    let ativos = 0, parado = true;
-    const vez = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 1500 }) : setTimeout(f, 50));
-    // (decodificados fora da vez da página, createImageBitmap: desenhar os 25 JPEG direto decodificava todos de uma vez, uma
-    // tarefa de ~140 ms no celular com a CPU 4× mais lenta, medido)
-    const pronto8 = () => {
-      const ok = q8.filter(q => q[2].naturalWidth);
-      if (!fundo || !ok.length) return;
-      const bm = window.createImageBitmap ? Promise.all(ok.map(([x, y, im]) => createImageBitmap(im).then(b => [x, y, b], () => [x, y, im]))) : Promise.resolve(ok);
-      bm.then(qs => { fundo.addTo(map); fundo.desenha(qs); });
+      const ya = Math.floor(uy(caixaTO.getNorth()) * n), yb = Math.floor(uy(caixaTO.getSouth()) * n), q = [];
+      for (let y = ya; y <= yb; y++) for (let x = xa; x <= xb; x++) if (noTO({ x, y, z })) q.push([x, y, sat.getTileUrl({ x, y, z })]);
+      return q;
     };
-    const bomba = () => {
-      while (parado && ativos < 2 && fila.length) {
-        const [x, y, z] = fila.shift(), im = new Image();
-        ativos++;
-        if (z === Z_FUNDO) { im.crossOrigin = 'anonymous'; q8.push([x, y, im]); }
-        im.onload = im.onerror = () => { ativos--; if (z === Z_FUNDO && !--n8) pronto8(); vez(bomba); };
-        im.src = sat.getTileUrl({ x, y, z });
-        guarda.push(im);
-      }
-    };
-    map.on('movestart', () => { parado = false; });
-    map.on('moveend', () => { parado = true; setTimeout(() => vez(bomba), 400); });
-    vez(bomba);
+    const grupos = [{ z: 6, junta: true, pressa: true, itens: itens(6) }, { z: 8, junta: true, itens: itens(8) }], zv = zEst === null ? 6 : Math.round(zEst);
+    if (zv >= 4 && zv <= 9 && zv !== 6 && zv !== 8) grupos.push({ z: zv, junta: false, itens: itens(zv) });
+    PINTOR.postMessage({ t: 'quadros', grupos, cor: corFundo() });   // (a cor do mapa onde falta quadro, não o preto do JPEG)
+    let tPausa = 0;
+    map.on('movestart', () => { clearTimeout(tPausa); if (PINTOR) PINTOR.postMessage({ t: 'pausa', v: true }); });
+    map.on('moveend', () => { clearTimeout(tPausa); tPausa = setTimeout(() => PINTOR && PINTOR.postMessage({ t: 'pausa', v: false }), 300); });
   }
+  const fundoPronto = () => !!(fundo && fundo._c && fundo._r);
 
   // ---------- vistas: o estado inteiro e a do alimentador ----------
   // o estado inteiro: com folga de 16 px e, em cima, a dos controles que ficam por cima do mapa (busca, T1 T2 T3, camadas)
@@ -479,7 +719,71 @@
     });
     return Math.round(Math.min(m.height / 3, Math.max(16, b + 8)));
   }
-  const vistaEstado = () => map._getBoundsCenterZoom(caixaTO, { paddingTopLeft: [16, folgaTopo()], paddingBottomRight: [16, 16] });
+  // os controles de baixo, por cima do mapa (este botão, o Tela cheia e a coluna das legendas), em px do mapa, com 6 de folga
+  function controles() {
+    const m = mc.getBoundingClientRect(), out = [];
+    box.querySelectorAll(':scope>.vto-canto,:scope>.tc-canto,:scope>.ctl-lgs').forEach(el => {
+      if (getComputedStyle(el).display === 'none') return;
+      const r = el.getBoundingClientRect(), w = el === canto ? larguraVolta() : r.width;
+      if (r.width && r.height && r.bottom > m.top && r.top < m.bottom) out.push([r.right - w - m.left - 6, r.top - m.top - 6, r.right - m.left + 6, r.bottom - m.top + 6]);
+    });
+    return out;
+  }
+  // a largura do botão com o nome da volta (o que ele mostra na visão do estado), medida trocando o nome por um instante
+  function larguraVolta() {
+    if (bt.classList.contains('volta')) return canto.offsetWidth;
+    const t = btTx.textContent;
+    btTx.textContent = 'Voltar ao alimentador'; bt.classList.add('volta');
+    const w = canto.offsetWidth;
+    btTx.textContent = t; bt.classList.remove('volta');
+    return w;
+  }
+  // o lado (a, b) passa pelo retângulo q? (Liang–Barsky)
+  const ladoNoRet = (a, b, q) => {
+    let t0 = 0, t1 = 1;
+    const dx = b[0] - a[0], dy = b[1] - a[1], ps = [-dx, dx, -dy, dy], qs = [a[0] - q[0], q[2] - a[0], a[1] - q[1], q[3] - a[1]];
+    for (let i = 0; i < 4; i++) {
+      const p = ps[i], v = qs[i];
+      if (!p) { if (v < 0) return false; continue; }
+      const t = v / p;
+      if (p < 0) { if (t > t1) return false; if (t > t0) t0 = t; } else { if (t < t0) return false; if (t < t1) t1 = t; }
+    }
+    return true;
+  };
+  // na vista (centro c, zoom z), o contorno do estado passa por baixo de algum dos retângulos rs (px do mapa)?
+  function cobreControle(c, z, rs) {
+    const t = map.getSize(), S = 256 * Math.pow(2, z), o = map.project(c, z), ox = o.x - t.x / 2, oy = o.y - t.y / 2;
+    const P = PTO.map(([x, y]) => [x * S - ox, y * S - oy]);
+    const dentro = (x, y) => { let d = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const a = P[j], b = P[i]; if ((a[1] > y) !== (b[1] > y) && x < a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1])) d = !d; } return d; };
+    return rs.some(q => dentro((q[0] + q[2]) / 2, (q[1] + q[3]) / 2) || P.some((b, i) => ladoNoRet(P[i ? i - 1 : P.length - 1], b, q)));
+  }
+  // o zoom e o centro da visão do estado: a conta do Leaflet sem o limite do zoom mínimo de agora (ele pode descer: o mapa
+  // ficou menor) e, se o botão, o Tela cheia ou as legendas cobrirem o estado, o estado mais para um lado (se sobrar
+  // largura) ou até 2 passos de zoom menor; se nada servir, no meio. Guardada até o mapa ou os controles mudarem
+  let vEst = null;
+  function calculaEstado() {
+    const t = map.getSize();
+    if (t.x < 50 || t.y < 50) return null;
+    const tl = L.point(16, folgaTopo()), br = L.point(16, 16), m0 = map.options.minZoom;
+    map.options.minZoom = 0;
+    const v0 = map._getBoundsCenterZoom(caixaTO, { paddingTopLeft: tl, paddingBottomRight: br });
+    map.options.minZoom = m0;
+    if (!isFinite(v0.zoom)) return null;
+    let v = v0;
+    const rs = controles(), passo = map.options.zoomSnap || 0.25;
+    if (rs.length && cobreControle(v0.center, v0.zoom, rs)) {
+      busca: for (let i = 0; i <= 2; i++) {
+        const z = v0.zoom - i * passo, sw = map.project(caixaTO.getSouthWest(), z), ne = map.project(caixaTO.getNorthEast(), z);
+        const meio = sw.add(ne).divideBy(2).add(br.subtract(tl).divideBy(2)), sobra = Math.max(0, t.x - tl.x - br.x - (ne.x - sw.x)) / 2;
+        for (const dx of [0, sobra, -sobra, sobra / 2, -sobra / 2]) {
+          const c = map.unproject(meio.subtract([dx, 0]), z);
+          if (!cobreControle(c, z, rs)) { v = { center: c, zoom: z }; break busca; }
+        }
+      }
+    }
+    return (vEst = v);
+  }
+  const vistaEstado = () => vEst || calculaEstado() || map._getBoundsCenterZoom(caixaTO, {});
   const caixaAl = () => {
     if (window.__caixaRede) return window.__caixaRede;
     let s = 90, w = 180, n = -90, e = -180;
@@ -488,14 +792,20 @@
   };
   const vistaAl = () => map._getBoundsCenterZoom(caixaAl().pad(0.04), {});
   let zEst = null;
-  // o zoom mínimo do mapa é o do estado inteiro (afastar com a roda ou o dedo para nele); muda com o tamanho do mapa
+  // o zoom mínimo do mapa é o do estado inteiro (afastar com a roda ou o dedo para nele); muda com o tamanho do mapa e dos
+  // controles, para cima ou para baixo. Quem estava na visão do estado (girou o celular, saiu da tela cheia) continua nela
   function minimo() {
-    const t = map.getSize();
-    if (t.x < 50 || t.y < 50) return;
-    zEst = vistaEstado().zoom;
-    if (isFinite(zEst) && map.getMinZoom() !== zEst) map.setMinZoom(zEst);
+    if (voo) return;
+    vEst = null;
+    const ant = zEst, v = calculaEstado();
+    if (!v) return;
+    zEst = v.zoom;
+    if (ant !== null && zEst !== ant && Math.abs(map.getZoom() - ant) < 1e-6 && !map._animatingZoom) {
+      map.options.minZoom = Math.min(zEst, map.getZoom());
+      map.setView(v.center, zEst, { animate: false });
+    }
+    if (map.getMinZoom() !== zEst) map.setMinZoom(zEst);
   }
-  minimo();
   const noEstado = () => zEst !== null && map.getZoom() <= zEst + 0.5;
   // afastar com a roda (e o + e − do teclado) até o zoom do estado: o mapa vai para a mesma visão do botão (o estado no meio)
   const limita0 = map._limitCenter;
@@ -528,10 +838,29 @@
     const v = s <= 2 ? '' : String(Math.max(0, (3.5 - s) / 1.5));
     if (paneRede.style.opacity !== v) { paneRede.style.transition = 'none'; paneRede.style.opacity = v; }
   }
-  // fim do voo (pouso ou interrompido): o satélite volta a carregar e os rótulos voltam, aparecendo aos poucos
+  // o satélite nítido espera o pouso (o fundo cobre o caminho); sem o fundo, carrega como no voo do Leaflet
+  const quietaSat = v => { if (sat) { sat._quieto = v; sat.options.updateWhenZooming = !v; } };
+  // no voo, o que tem a nitidez de um nível só e fica preso num retângulo (o nível do satélite de antes do voo, o canvas
+  // dos vizinhos e o das divisas e nomes) sai aos poucos quando encolhe a menos da metade (na ida: era um recorte nítido
+  // encolhendo no meio do fundo borrado); o nível do satélite sai também quando fica mais borrado que o fundo (na volta, o
+  // do estado inteiro esticado). Por baixo fica o fundo, inteiro. Voltam no pouso
+  const paneSat = map.getPane('tilePane'), panesIda = ['vizinhos', 'divisas'].map(n => map.getPane(n)).filter(Boolean);
+  const opPane = (p, o) => { const v = o >= 1 ? '' : String(Math.max(0, o)); if (p.style.opacity !== v) { p.style.transition = 'none'; p.style.opacity = v; } };
+  function apagaNoVoo(z) {
+    const ida = Math.max(0, Math.min(1, (Math.pow(2, z - voo.z0) - 0.3) / 0.3));
+    let o = 1;
+    if (sat && sat._quieto && fundoPronto() && sat._tileZoom !== undefined) {
+      o = Math.max(0, Math.min(1, (Math.pow(2, z - sat._tileZoom) - 0.3) / 0.3));
+      if (sat._tileZoom < fundo._r.z) o = Math.min(o, Math.max(0, Math.min(1, 1 - (z - sat._tileZoom - 0.3) / 0.5)));
+    }
+    opPane(paneSat, o);
+    panesIda.forEach(p => opPane(p, ida));
+  }
+  // fim do voo (pouso ou interrompido): o satélite volta a carregar (antes do fim do movimento: ele pede os quadros da
+  // vista nova) e os rótulos voltam, aparecendo aos poucos, numa tarefa depois (o quadro do pouso fica mais leve)
   let tPouso = 0;
-  function solta() {
-    if (sat) { sat._quieto = false; sat.options.updateWhenZooming = true; }
+  function soltaRotulos() {
+    panesIda.forEach(p => opPane(p, 1));
     mc.classList.remove('vto-voando');
     mc.classList.add('vto-pouso');
     clearTimeout(tPouso);
@@ -545,7 +874,7 @@
   // quem interrompe o voo (arrasto, roda, pinça, outra vista) passa pelo map._stop(): o voo acaba ali, sem pouso
   const para0 = map._stop;
   map._stop = function () {
-    if (voo && this._flyToFrame) { const f = fimVoo; voo = null; fimVoo = null; solta(); redeVolta(); f(); }
+    if (voo && this._flyToFrame) { const f = fimVoo; voo = null; fimVoo = null; quietaSat(false); opPane(paneSat, 1); soltaRotulos(); redeVolta(); f(); }
     return para0.apply(this, arguments);
   };
   // voa até (alvo, zAlvo): a escala muda em progressão geométrica (o zoom anda no mesmo ritmo) e o canto da vista anda
@@ -561,79 +890,117 @@
         const s = reto ? 1 : Math.exp(lr * e), f = reto ? e : (s - 1) / (r - 1);
         return [map.unproject(L.point(x0 + (x1 - x0) * f + w0 * s / 2, y0 + (y1 - y0) * f + h0 * s / 2), 0), z0 + (zAlvo - z0) * e];
       };
-      const dur = Math.min(1800, Math.max(1200, 900 + 150 * Math.abs(zAlvo - z0)));
+      const dur = Math.min(1800, Math.max(1200, 900 + 150 * Math.abs(zAlvo - z0))), t0 = performance.now();
+      const fr = dt => Math.max(0, Math.min(1, (performance.now() + dt - t0) / dur));
       leZm();
-      voo = { z: zAlvo, entra: zAlvo < zm && !mostra && !!dados };
+      voo = {
+        z: zAlvo, z0, paraEstado: zEst !== null && zAlvo <= zEst + 0.5, solto: false,
+        // a vista (centro, zoom) daqui a s segundos; e a primeira, adiante, a dz níveis de zoom da de agora (ou a do pouso)
+        adiante: s => em(curva(fr(s * 1000))),
+        passo: dz => { const z = map.getZoom(), a = fr(0); for (let i = 1; i <= 40; i++) { const u = Math.min(1, a + i * 0.025), v = em(curva(u)); if (u >= 1 || Math.abs(v[1] - z) >= dz) return v; } return em(1); }
+      };
       fimVoo = res;
-      if (sat) { sat._quieto = true; sat.options.updateWhenZooming = false; }   // o satélite nítido espera o pouso; o fundo cobre o caminho
+      if (fundoPronto()) quietaSat(true); else if (PINTOR) PINTOR.postMessage({ t: 'pressa' });
       mc.classList.add('vto-voando');
       clearTimeout(esperaViz);
-      if (voo.entra) { estado.desenha(alvo, zAlvo, true, true); opacidade(0, false); paneE.hidden = false; }   // a ida: pronta na vista do pouso
       rotulo(zAlvo);
       map._moveStart(true, false);
-      let t0 = 0;
       const passo = agora => {
         if (!voo) return;
-        if (!t0) t0 = agora;
-        const tt = Math.min(1, (agora - t0) / dur);
+        const tt = Math.max(0, Math.min(1, (agora - t0) / dur));
         if (tt < 1) {
           map._flyToFrame = requestAnimationFrame(passo);
           const [c, z] = em(curva(tt));
+          if (sat && !voo.solto) {
+            // o fundo chegou no meio do voo: o satélite espera; na volta, a 0,6 nível do pouso ele volta a carregar (os
+            // quadros da vista de pouso estão no cache: o pouso já chega nítido, e não um borrão do fundo esticado)
+            if (zAlvo > z0 && z >= zAlvo - 0.6) { voo.solto = true; quietaSat(false); }
+            else if (!sat._quieto && fundoPronto()) quietaSat(true);
+          }
           map._move(c, z, { flyTo: true });
           redeNoVoo(z);
+          apagaNoVoo(z);
         } else {
           map._flyToFrame = null;
           voo = null; fimVoo = null;
-          solta();
+          quietaSat(false);
+          opPane(paneSat, 1);
           map._move(alvo, zAlvo)._moveEnd(true);
           redeVolta();
+          setTimeout(soltaRotulos, 0);
           res();
         }
       };
       map._flyToFrame = requestAnimationFrame(passo);
     });
   }
+  // no meio do voo, o botão já diz o destino contrário (rotulo): o toque segue o que ele diz
   function alterna() {
-    minimo();
-    const v = noEstado() ? vistaAl() : vistaEstado();
+    let v;
+    if (voo) v = voo.paraEstado ? vistaAl() : vistaEstado();
+    else { minimo(); v = noEstado() ? vistaAl() : vistaEstado(); }
     if (!dados) carrega();
     return voa(v.center, v.zoom);
   }
 
   // ---------- botão ----------
+  // ícones: o contorno do estado (dos pontos de TOCANTINS) e, na volta, um alvo
+  const icone = (() => {
+    let x0 = 1, y0 = 1, x1 = 0, y1 = 0;
+    PTO.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); });
+    const s = 19 / Math.max(x1 - x0, y1 - y0), ox = 12 - (x0 + x1) / 2 * s, oy = 12 - (y0 + y1) / 2 * s, n = Math.max(1, Math.round(PTO.length / 56));
+    return 'M' + PTO.filter((p, i) => i % n === 0).map(([x, y]) => (x * s + ox).toFixed(1) + ' ' + (y * s + oy).toFixed(1)).join('L') + 'Z';
+  })();
   const canto = document.createElement('div');
   canto.className = 'vto-canto ctl-card';
-  canto.innerHTML = '<button type="button" class="vto-bt"></button>';
-  const bt = canto.firstChild;
+  canto.innerHTML = `<button type="button" class="vto-bt"><svg class="vto-uf" viewBox="0 0 24 24" aria-hidden="true"><path d="${icone}"/></svg>` +
+    '<svg class="vto-alvo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg><span class="vto-tx"></span></button>';
+  const bt = canto.firstChild, btTx = bt.querySelector('.vto-tx');
   box.append(canto);
   L.DomEvent.disableClickPropagation(canto);
   canto.addEventListener('click', e => e.stopPropagation());   // o clique não chega ao mapa (que limparia a seleção)
   bt.addEventListener('click', () => { alterna(); });
+  // (sem z: no voo, o destino dele; parado, o zoom de agora)
   function rotulo(z) {
-    const est = zEst !== null && (z === undefined ? map.getZoom() : z) <= zEst + 0.5;
+    const est = zEst !== null && (z === undefined ? (voo ? voo.z : map.getZoom()) : z) <= zEst + 0.5;
     const txt = est ? 'Voltar ao alimentador' : 'Tocantins';
-    if (bt.textContent === txt) return;
-    bt.textContent = txt;
+    if (btTx.textContent === txt) return;
+    btTx.textContent = txt;
+    bt.classList.toggle('volta', est);
     bt.title = est ? `Voltar à vista do alimentador ${EU}` : 'Ver o Tocantins inteiro';
+    bt.setAttribute('aria-label', est ? `Voltar ao alimentador ${EU}` : 'Ver o Tocantins inteiro');
   }
+  minimo();
   rotulo();
   map.on('moveend', () => { if (!voo) rotulo(); });
   map.on('resize', () => { minimo(); rotulo(); });
   // afastou até o estado inteiro com o dedo (a pinça não passa pelo _limitCenter): a mesma visão do botão
   map.on('zoomend', () => {
-    if (voo || zEst === null || map.getZoom() > zEst + 1e-6 || map.getBounds().contains(caixaTO)) return;
-    map.panTo(vistaEstado().center, { animate: !calmo(), duration: 0.45 });
+    if (voo || zEst === null || map.getZoom() > zEst + 1e-6) return;
+    const c = vistaEstado().center;
+    if (map.latLngToContainerPoint(c).distanceTo(map.latLngToContainerPoint(map.getCenter())) < 8) return;
+    map.panTo(c, { animate: !calmo(), duration: 0.45 });
   });
 
   // ---------- começo: depois da rede deste inteira no mapa e do painel (a carga da página não muda) ----------
   const depois = AL ? Promise.all([AL.rede, AL.pronto]) : Promise.resolve();
   depois.then(() => {
     leZm();
-    minimo();                                            // com os controles de cima do mapa já no lugar (folga da vista do estado)
+    minimo();                                            // com os controles do mapa já no lugar (as folgas da vista do estado)
     rotulo();
+    preCarrega();
+    // os controles mudam de tamanho (camadas ligadas: as legendas; a barra de camadas que se arruma depois): a vista do
+    // estado e o zoom mínimo de novo, uma vez por quadro
+    if (window.ResizeObserver) {
+      let q = 0;
+      const ro = new ResizeObserver(() => {
+        box.style.setProperty('--vto-w', canto.offsetWidth + 'px');
+        if (!q) q = requestAnimationFrame(() => { q = 0; minimo(); rotulo(); });
+      });
+      box.querySelectorAll(':scope>.vto-canto,:scope>.tc-canto,:scope>.ctl-lgs,:scope>.barra-busca,:scope>.lp-cams,#classes,.ctl-cam').forEach(el => ro.observe(el));
+    }
     const vez = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 200));
     vez(() => { carrega().then(() => vez(() => { leZm(); estado.vista(true); })); });
-    setTimeout(() => vez(preCarrega), 1200);
   });
 
   // para os testes e as medidas
@@ -641,8 +1008,12 @@
     alterna, noEstado, voando: () => !!voo, zAbre: () => vistaAl().zoom, zEstado: () => zEst, em: (x, y) => alvoEm(L.point(x, y), 7),
     estado: () => ({ dados: !!dados, linhas: dados ? dados.T1.ini.length + dados.T2.ini.length - 2 : 0, pontos: dados ? dados.pts : 0, mostra,
       opacidade: +paneE.style.opacity, zMin: zm, zEstado: zEst, mascara: mascara._r && !mascara._c.hidden ? { k: mascara._r.k, w: mascara._r.w, h: mascara._r.h } : null,
-      fundo: !!(fundo && fundo._map && fundo._r), botao: bt.textContent }),
+      fundo: fundoPronto(), zFundo: fundoPronto() ? fundo._r.z : null, botao: btTx.textContent, modo: MODO }),
     // a imagem do fundo e os quadros dela (canto de cada um, px da imagem, 256 px): a conta da área sem imagem nos testes
-    fundo: () => fundo && fundo._map && fundo._r ? { el: fundo._c, quadros: fundo._quadros } : null
+    fundo: () => fundoPronto() ? { el: fundo._c, quadros: fundo._quadros } : null,
+    // a visão do estado e os controles que ela evita (px do mapa)
+    vistaEstado: () => { const v = vistaEstado(); return { c: [v.center.lat, v.center.lng], z: v.zoom, controles: controles() }; },
+    // as camadas (medidas)
+    _camadas: { estado, mascara, fundo }
   };
 })();

@@ -1184,14 +1184,23 @@ if (typeof L === 'undefined') {
   // Com blankTile=false ele responde 404 e o quadro vira a foto do nível de cima ampliada (até 6 níveis acima).
   const SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
   const ATR_SAT = 'Imagem © Esri — Esri, Maxar, Earthstar Geographics';
-  // Site, de longe (quadros até o zoom 9, onde a máscara de visao-tocantins.js deixa o mapa escuro fora do Tocantins): só
-  // os quadros que tocam o estado (dados/tocantins.js, carregado antes deste script); quadro inteiro fora dele nem é
-  // pedido. De perto, todos, como antes (o contorno do estado tem 568 pontos: erra até ~750 m na borda). No voo do botão
-  // Tocantins (visao-tocantins.js) fica quieto: nada de quadros dos zooms do meio do caminho, só os do pouso
+  // Site, de longe (mapa abaixo do zoom 10, onde a máscara de visao-tocantins.js deixa o mapa escuro fora do Tocantins;
+  // do 9,5 ao 9,99 os quadros já são os do 10): só os quadros que tocam o estado (dados/tocantins.js, carregado antes deste
+  // script); quadro inteiro fora dele nem é pedido. De perto, todos, como antes (o contorno do estado tem 568 pontos: erra
+  // até ~750 m na borda). No voo do botão Tocantins (visao-tocantins.js) fica quieto: nada de quadros dos zooms do meio do
+  // caminho, só os do pouso
   const Satelite = L.TileLayer.extend({
     getTileUrl: c => `${SAT}${c.z}/${c.y}/${c.x}?blankTile=false`,
-    _isValidTile(c) { return L.TileLayer.prototype._isValidTile.call(this, c) && (!quadroNoTO || c.z > 9 || quadroNoTO(c)); },
+    _isValidTile(c) { return L.TileLayer.prototype._isValidTile.call(this, c) && (!quadroNoTO || this._map.getZoom() >= 10 || quadroNoTO(c)); },
     _onMoveEnd() { if (!this._quieto) L.TileLayer.prototype._onMoveEnd.call(this); },
+    // Leaflet 1.9: no zoomanim o mapa ainda está no zoom de antes; com o nível novo a mais de 1 dele, o _update voltava ao
+    // nível de antes e podava os quadros da tela (quadros pretos na roda rápida e no zoom > 1 nível): usa o zoom do destino
+    _update(c) {
+      const m = this._map;
+      if (!m || !m._animatingZoom || m._animateToZoom === undefined) return L.TileLayer.prototype._update.call(this, c);
+      const g = m.getZoom; m.getZoom = () => m._animateToZoom;
+      try { return L.TileLayer.prototype._update.call(this, c); } finally { m.getZoom = g; }
+    },
     createTile(c, done) { const t = L.TileLayer.prototype.createTile.call(this, c, done); t._xyz = c; t._k = 0; return t; },
     _tileOnError(done, t, e) {
       const c = t._xyz, k = ++t._k;

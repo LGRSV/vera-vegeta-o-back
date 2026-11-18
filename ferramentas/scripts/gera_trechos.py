@@ -1112,7 +1112,10 @@ VIZ_MIN = 20               # m: no grosso fica de fora a linha mais curta que is
 VIZ_ARQ = re.compile(r'^[A-Za-z0-9_-]+\.[1-6]\.txt$')
 VIZ_EQ = ('DRfgc', 'te')   # grupos do .4 e do .5: D DJ, R religador, f fusível, g fusível SEC/FTR, c chave; t transformador, e outro
 ESTADO_TOL = 150          # m do Douglas–Peucker do estado.txt (no zoom 9, onde os vizinhos entram, 1 pixel tem ~300 m)
-ESTADO_MIN = 400          # m: a linha mais curta que isso fica de fora (de longe, nem um pixel)
+ESTADO_MIN = 60           # m: a linha mais curta que isso fica de fora. Não mais: a rede urbana é feita de pedaços curtos
+                          # (entre derivações) que, juntos, aparecem de longe; com 400 m o T1 de 4,8 km do AL04040004
+                          # ficava com 17% e 21 alimentadores ficavam de fora (com 60 m, 14, que só têm uns metros de
+                          # T1: o DJ e o 1º equipamento); o arquivo passa de ~72 KB para ~110 KB
 
 
 def _poli(n):
