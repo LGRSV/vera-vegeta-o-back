@@ -24,6 +24,11 @@
 // tela; os que chegam entram juntos e de uma vez, por cima do que já está no canvas (sem refazê-lo). O vizinho sob o
 // mouse fica mais forte num canvas à parte (mudar o realce não refaz o de baixo). Começa depois que a rede deste está
 // inteira no mapa (__al.rede): a carga da página não muda.
+// Alimentadores selecionados (selecionados.js, window.__alSel): a rede, o DJ, os religadores e os fusíveis deles são
+// desenhados lá, fortes; depois que a rede deles está lá (__alSel.desenha: baixando ou com erro, seguem aqui como vizinhos) eles ficam fora do orçamento e não baixam a rede (.1 .2 .3), só os equipamentos (.4 e .5,
+// primeiro), que selecionados.js pinta por cima da rede deles (pintaEqDe) e que o toque daqui ainda acha (transformador,
+// chave e outro). O balão ganha "Selecionar" (ou "Tirar da seleção"); a linha de um selecionado no ponto tem a vez sobre a
+// linha de um vizinho.
 (function () {
   const map = window.__map, L = window.L, D = window.D, AL = window.__al || null, eu = document.currentScript;
   if (!map || !L || !D || !eu || !/\/assets\/vizinhos\.js(\?|$)/.test(eu.src) || !document.documentElement.classList.contains('al-site')) return;
@@ -149,7 +154,7 @@
   const comT3 = z => z >= Z_T3 && visivel('T3');
   // classe c do alimentador e no zoom z: o fino de perto; senão o grosso; senão o que houver
   function geoDe(e, c, z) {
-    if (c === 'T3' && !comT3(z)) return null;
+    if (e.sel || (c === 'T3' && !comT3(z))) return null;   // (a rede de um selecionado é desenhada em selecionados.js)
     const g = c === 'T3' ? e.d[2] : e.d[1];
     if (z >= Z_FINO && e.d[3]) return e.d[3][c];
     return g ? g[c] : e.d[3] ? e.d[3][c] : null;
@@ -159,7 +164,7 @@
   const geo = (e, c, z) => c[0] === 'E' ? eqDe(e, +c[1], z) : geoDe(e, c, z);
   // níveis que faltam no zoom z (fino: se cabe no orçamento do fino)
   function falta(e, z, fino) {
-    if (e.d[3]) return [];
+    if (e.d[3] || e.sel) return [];
     if (fino && z >= Z_FINO && !e.erro[3]) return [3];
     const k = [];
     if (!e.d[1] && !e.erro[1]) k.push(1);
@@ -356,7 +361,7 @@
       if (ehFusivel(gr) && !visivel('T3')) continue;
       const k = NIVEL[gr], sp = S[gr];
       for (const e of desenhados) {
-        if (e.vis['E' + k] !== fase || (quais && !quais(e, k))) continue;
+        if (e.sel || e.vis['E' + k] !== fase || (quais && !quais(e, k))) continue;   // (os de um selecionado: pintaEqDe)
         const dd = eqDe(e, k, t.z), g = dd && dd.g[gr];
         if (!g) continue;
         const bx = e.x0 * s - t.x, by = e.y0 * s - t.y, p = g.p, cx = g.cx, n = p.length / 2;
@@ -371,6 +376,27 @@
           }
         }
         if (base && m) (naTelaEq[e.cod] = naTelaEq[e.cod] || {})[gr] = m;
+      }
+    }
+  }
+  // os transformadores, chaves e outros do selecionado cod, fortes, no canvas ctx de selecionados.js (já na resolução R; t:
+  // a região dele, como a tela daqui). DJ, religadores e fusíveis ficam com selecionados.js
+  function pintaEqDe(ctx, t, cod) {
+    const e = IDX && IDX.find(x => x.cod === cod);
+    if (!e || t.z < Z_EQ[4]) return;
+    const S = simbolos(), s = t.s, W = t.w, H = t.h, bx = e.x0 * s - t.x, by = e.y0 * s - t.y;
+    ctx.globalAlpha = 1;
+    for (const gr of 'tec') {                            // na ordem de ORDEM
+      const sp = S[gr], dd = eqDe(e, NIVEL[gr], t.z), g = dd && dd.g[gr];
+      if (!g) continue;
+      const p = g.p, cx = g.cx, n = p.length / 2;
+      for (let b = 0, nb = cx.length / 4; b < nb; b++) {
+        if (cx[4 * b] * s + bx > W + 2 || cx[4 * b + 2] * s + bx < -24 || cx[4 * b + 1] * s + by > H + 2 || cx[4 * b + 3] * s + by < -18) continue;
+        for (let i = b * BLOCO, f = Math.min(n, i + BLOCO); i < f; i++) {
+          const x = p[2 * i] * s + bx - sp.ax, y = p[2 * i + 1] * s + by - sp.ay;
+          if (x > W || y > H || x + sp.w < 0 || y + sp.h < 0) continue;
+          ctx.drawImage(sp.c, Math.round(x * R) / R, Math.round(y * R) / R, sp.w, sp.h);
+        }
       }
     }
   }
@@ -445,11 +471,15 @@
     const naTela = [x0, y0, x1, y1], meio = [mx - w / 4, my - h / 4, mx + w / 4, my + h / 4];
     tick++;
     let entra = [];
-    const quer = new Map();
+    const quer = new Map(), S = window.__alSel;
+    IDX.forEach(e => { e.sel = !!(S && (S.desenha ? S.desenha(e.cod) : S.tem(e.cod))); });   // (baixando ou com erro: segue como vizinho)
     if (z >= zMin) {
       // os que cruzam a tela (com folga), pela rede à vista (a do meio conta duas vezes): o tamanho do grosso × a parte
-      // dele na tela. Entram até o orçamento de bytes; o fino, até o dele
-      const t3 = comT3(z), cand = IDX.filter(e => cruza(e, FOLGA) && Math.max(e.x1 - e.x0, e.y1 - e.y0) * s >= 3);   // menor que 3 px: nem aparece
+      // dele na tela. Entram até o orçamento de bytes; o fino, até o dele. Os selecionados entram antes, sem a rede (só os
+      // equipamentos) e fora do orçamento dela
+      entra = IDX.filter(e => e.sel && cruza(e, FOLGA));
+      entra.forEach(e => { e.fi = false; });
+      const t3 = comT3(z), cand = IDX.filter(e => !e.sel && cruza(e, FOLGA) && Math.max(e.x1 - e.x0, e.y1 - e.y0) * s >= 3);   // menor que 3 px: nem aparece
       cand.forEach(e => { e.fr = fracEm(e, naTela); e.sc = (e.b[0] + (t3 ? e.b[1] : 0)) * (e.fr + fracEm(e, meio)); });
       cand.sort((a, b) => b.sc - a.sc || dist(a) - dist(b) || (a.cod < b.cod ? -1 : 1));
       let bg = 0, bf = 0;
@@ -525,7 +555,7 @@
     e.d[k] = k >= 4 ? decodificaEq(txt, e, k) : decodifica(txt, e);
     pontos += e.d[k].pts; bytes += txt.length;
     poda();
-    if (k >= 4) agendaEq();
+    if (k >= 4) { agendaEq(); if (e.sel && window.__alSel && window.__alSel.eqMudou) window.__alSel.eqMudou(e.cod); }
     else if (!ESMAECE || CAM.some((c, i) => antes[i] && geo(e, c, z) !== antes[i])) redesenhaJunto();
     else if (tela && fases(tela.z)) levaLogo();
   }
@@ -602,6 +632,7 @@
       const gr = ORDEM[o], k = NIVEL[gr], sp = S[gr];
       if (ehFusivel(gr) && !visivel('T3')) continue;
       for (const e of desenhados) {
+        if (e.sel && 'DRfg'.includes(gr)) continue;      // (os de um selecionado são de selecionados.js)
         const dd = eqDe(e, k, z), g = dd && dd.g[gr];
         if (!g) continue;
         const qx = a.x - e.x0 * s, qy = a.y - e.y0 * s, p = g.p, cx = g.cx, n = p.length / 2, M = 24 + tol;
@@ -686,6 +717,7 @@
     const alvo = ev && ev.target;
     if (ev && !faixa() && !map.dragging.moving() && alvo && (alvo === mc || alvo.tagName === 'CANVAS') && !alvo.classList.contains('leaflet-interactive')
       && !(ren && ren._hoveredLayer)) a = alvoEm(pt = map.mouseEventToContainerPoint(ev), 7);
+    if (a && !a.q && window.__alSel && window.__alSel.em(pt, 10)) a = null;   // a linha de um selecionado tem a vez
     const v = a && a.e;
     if (v !== sob) { sob = v; mc.classList.toggle('viz-mao', !!v); pintaSob(); }
     const mostra = a && !comBalao();
@@ -709,13 +741,16 @@
     const g = e.d[q.k].g[q.gr], x = g.p[2 * q.i] + e.x0, y = g.p[2 * q.i + 1] + e.y0;
     return L.latLng(Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * 180 / Math.PI, x * 360 - 180);
   };
-  // balão: o vizinho (código e "Abrir alimentador"); no equipamento, o código dele, o tipo e o vizinho
+  // balão: o vizinho (código e "Abrir alimentador"); no equipamento, o código dele, o tipo e o vizinho (ou "selecionado",
+  // se ele está na seleção: selecionados.js)
   function conteudo(a) {
-    const al = esc(a.e.cod), url = '../' + encodeURIComponent(a.e.cod) + '/', abre = `<a href="${url}">Abrir alimentador</a>`;
-    if (!a.q) return `<div class="viz-pop"><b>${al}</b><small>Alimentador vizinho</small>${abre}</div>`;
+    const al = esc(a.e.cod), url = '../' + encodeURIComponent(a.e.cod) + '/', S = window.__alSel, bt = S ? S.botao(a.e.cod) : '';
+    const abre = bt ? `<span class="viz-acoes"><a href="${url}">Abrir alimentador</a>${bt}</span>` : `<a href="${url}">Abrir alimentador</a>`;
+    const papel = S && S.tem(a.e.cod) ? 'selecionado' : 'vizinho';
+    if (!a.q) return `<div class="viz-pop"><b>${al}</b><small>Alimentador ${papel}</small>${abre}</div>`;
     const x = sobre(a.e, a.q);
-    return x.cod ? `<div class="viz-pop"><b>${esc(x.cod)}</b><small>${esc(maiuscula(x.nome))} · alimentador vizinho ${al}</small>${abre}</div>`
-      : `<div class="viz-pop"><b>${esc(maiuscula(x.nome))}</b><small>Alimentador vizinho ${al}</small>${abre}</div>`;
+    return x.cod ? `<div class="viz-pop"><b>${esc(x.cod)}</b><small>${esc(maiuscula(x.nome))} · alimentador ${papel} ${al}</small>${abre}</div>`
+      : `<div class="viz-pop"><b>${esc(maiuscula(x.nome))}</b><small>Alimentador ${papel} ${al}</small>${abre}</div>`;
   }
   // clique fora da rede deste (o da rede e o das camadas não chegam ao mapa): o balão do vizinho; o limpar segue igual
   map.on('click', ev => {
@@ -723,6 +758,8 @@
     const oe = ev.originalEvent || {}, toque = oe.pointerType ? oe.pointerType !== 'mouse' : MOVEL;
     const a = alvoEm(ev.containerPoint, toque ? 14 : 7);
     if (!a) return;
+    if (!a.q && window.__alSel && window.__alSel.em(ev.containerPoint, toque ? 16 : 10)) return;   // a linha de um selecionado tem a vez
+    if (a.q) ev._viz = 1;                                // equipamento: o balão dele (a seleção não escolhe a linha embaixo)
     paira(null);
     const pop = L.popup({ className: 'viz-popup', maxWidth: 260, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] })
       .setLatLng(a.q ? ondeEq(a.e, a.q) : ev.latlng).setContent(conteudo(a)).openOn(map);
@@ -746,7 +783,10 @@
       return r;
     },
     naTelaEq: () => naTelaEq,
-    estado: () => ({ indice: IDX ? IDX.length : 0, desenhados: desenhados.map(e => e.cod), entram, niveis: desenhados.map(e => NIVEIS.filter(k => e.d[k]).join('')),
+    pintaEqDe,
+    refaz: () => { if (IDX && cam._map) { planeja(); redesenha(); } },   // a seleção mudou (selecionados.js)
+    indice: () => idxP,                                  // o indice.json lido (promessa; null antes de começar)
+    estado: () => ({ indice: IDX ? IDX.length : 0, desenhados: desenhados.map(e => e.cod), entram, selecionados: IDX ? IDX.filter(e => e.sel).map(e => e.cod) : [], niveis: desenhados.map(e => NIVEIS.filter(k => e.d[k]).join('')),
       fino: desenhados.map(e => !!e.fi), gasto, limite: { grosso: ORC_GROSSO, fino: ORC_FINO, desperdicio: DESPERDICIO, eq: ORC_EQ }, zMin,
       pontos, guardados: IDX ? IDX.reduce((t, e) => t + NIVEIS.reduce((u, k) => u + (e.d[k] ? e.d[k].pts : 0), 0), 0) : 0,
       bytes, voando: voando.size, fila: fila.length, zoom: tela && tela.z, pinturas: { ...pinturas },
@@ -754,8 +794,9 @@
   };
 
   // ---------- começo: depois da rede deste inteira no mapa (até lá, nem o canvas existe) ----------
-  const comeca = () => fetch(BASE + 'indice.json')
-    .then(r => r.ok ? r.json() : null)
+  // (o índice lido fica em idxP: selecionados.js usa o mesmo, sem baixá-lo de novo)
+  let idxP = null;
+  const comeca = () => (idxP = fetch(BASE + 'indice.json').then(r => r.ok ? r.json() : null).catch(() => null))
     .then(j => {
       const als = j && j.als;
       if (!als) return;

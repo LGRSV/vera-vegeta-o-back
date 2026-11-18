@@ -917,7 +917,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){display:no
   }
   const det = $('det');
   function poeDetalhe() {
-    if (det.querySelector('.limp-sec')) return;
+    if (det.dataset.al || det.querySelector('.limp-sec')) return;   // (data-al: trecho de alimentador selecionado, não deste)
     const h2 = det.querySelector('h2');
     if (!h2) return;
     const nome = [...h2.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();

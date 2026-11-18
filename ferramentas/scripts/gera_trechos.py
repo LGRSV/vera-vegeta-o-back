@@ -681,7 +681,7 @@ def ativos_interface(saida):
     for f in ('extras.js', 'municipios.js', 'chaves.js', 'site.css', 'mapa-municipios.js', 'limpeza.js', 'inspecao.js', 'manutencao.js', 'executadas.js',
               'telacheia.js', 'busca-ativo.js', 'ranking-polos.js', 'croqui.js', 'croqui-modelo.js', 'menu.js', 'lupa-painel.js', 'ativos-zoom.js', 'mapa-raiox.js',
               'croqui-rascunho.js', 'polo-rota.js', 'modo-faixa-rascunho.js', 'argos.png', 'focos.js', 'focos.css', 'vizinhos.js',
-              'visao-tocantins.js'):
+              'visao-tocantins.js', 'selecionados.js'):
         shutil.copyfile(PKG / 'site' / f, a / f)
     pacote_trechos(a / 'scripts' / 'trechos-kml.zip')
     return modelo
@@ -758,6 +758,9 @@ def pagina_alimentador(modelo, c):
                '<script src="../../assets/vizinhos.js"></script>\n'
                # o Tocantins inteiro de longe (dados/vizinhos/estado.txt), a máscara fora do estado e o botão Tocantins
                '<script src="../../assets/visao-tocantins.js"></script>\n'
+               # outros alimentadores selecionados no mapa (até 10 além deste: menu "Alimentadores" e "Selecionar" nos
+               # balões), com a rede, os nomes, a NAE e o detalhe do trecho como este; lê o dados.js deles num worker
+               '<script src="../../assets/selecionados.js"></script>\n'
                '<script src="../../assets/extras.js"></script>\n'
                # divisas dos municípios em tracejado: municipios.js do alimentador sai da interface, com a malha
                # divisas.js do alimentador sai de scripts/divisas.py

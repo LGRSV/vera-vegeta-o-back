@@ -1,9 +1,14 @@
 const D = window.D;
 const COR_Z = {1:'#3b82f6', 2:'#22c55e', 3:'#facc15', 4:'#f97316', 5:'#ef4444'};
-D.trechos.forEach(t => {
-  t.cor = COR_Z[t.zona] || '#d946ef';                  // cor pela classe: T2, T2-A, T2-B… na mesma cor
-  t.peso = t.tipo === 'principal' ? 6 : t.tipo === 'ramal' ? 4.5 : 3;
-});
+// cor e peso de cada trecho: os deste alimentador aqui; os dos alimentadores selecionados (assets/selecionados.js), pelo
+// window.__alKit, com a mesma regra
+function prepara(d) {
+  d.trechos.forEach(t => {
+    t.cor = COR_Z[t.zona] || '#d946ef';                  // cor pela classe: T2, T2-A, T2-B… na mesma cor
+    t.peso = t.tipo === 'principal' ? 6 : t.tipo === 'ramal' ? 4.5 : 3;
+  });
+}
+prepara(D);
 const TR = {};
 for (const t of D.trechos) TR[t.nome] = t;
 const TIPO = {DJ:'disjuntor', '79':'religador', '03':'fusível 03', '33':'fusível 33', '02':'chave 02',
@@ -145,13 +150,19 @@ $('legenda').innerHTML = leg.map(([n, c, k]) => `<span><i class="${k}" style="--
 
 // interrupções (NAE): coletiva = atuou DJ, religador, fusível ou trafo; individual = um consumidor
 const NAE = D.nae || null;
-const ROT_NAE = ((D.meta || {}).origem || {}).nae_filtro === 'arvore' ? 'NAE - vegetação' : 'NAE';   // NAE só de árvore/eucalipto
+const rotNae = d => ((d.meta || {}).origem || {}).nae_filtro === 'arvore' ? 'NAE - vegetação' : 'NAE';   // NAE só de árvore/eucalipto
+const ROT_NAE = rotNae(D);
+// o contexto do detalhe, do bloco NAE e das UCs: este alimentador (EU, o padrão de todas as funções que recebem cx). Um
+// alimentador selecionado (assets/selecionados.js) passa o dele, com o mesmo formato: os dados, os trechos pelo nome, a NAE,
+// o rótulo da NAE, o código, as UCs (promessa) e abre(nomes), o link da página dele
+const EU = {D, TR, NAE, ROT_NAE, al: (D.meta || {}).al || '', ucs: () => UCS_P};
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const rotMes1 = m => `${MESES[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`;
-// meses escolhidos (botão #mes, lista de marcar): vazio = todos
+// meses escolhidos (botão #mes, lista de marcar): vazio = todos. As funções da NAE recebem a NAE de um alimentador (N; o
+// padrão é a deste): os meses escolhidos valem para todos, cada um no período que tem
 const mesSel = new Set();
 const noPeriodo = m => !mesSel.size || mesSel.has(m);
-const escolhidos = () => NAE.meses.filter(noPeriodo);
+const escolhidos = (N = NAE) => N.meses.filter(noPeriodo);
 const segue = (a, b) => { const n = +a.slice(0, 4) * 12 + +a.slice(5, 7); return +b.slice(0, 4) * 12 + +b.slice(5, 7) === n + 1; };
 // texto curto do botão "Meses: …": "todos", "mar/2026", "mar, abr/2026", "3 meses"
 function rotBotao() {
@@ -162,8 +173,9 @@ function rotBotao() {
 }
 const ABR = {DJ: 'DJ', RL: 'religador', 'CH FUS': 'fusível', CH: 'chave', TR: 'trafo', UC: 'consumidor'};
 // período real da Crítica junto de todo número de NAE: "jan a ago/2026", "dez/2025 a fev/2026" ou os meses escolhidos
-function periodo() {
-  const ms = escolhidos();
+function periodo(N = NAE) {
+  if (!N) return '';
+  const ms = escolhidos(N);
   if (!ms.length) return '';
   const a = ms[0], b = ms[ms.length - 1], seguidos = ms.every((m, i) => !i || segue(ms[i - 1], m));
   if (ms.length === 1) return rotMes1(a);
@@ -193,10 +205,10 @@ if (NAE && NAE.meses.length) {
   $('mes').querySelector('.mes-txt').textContent = rotBotao();
 }
 const filtra = l => (l || []).filter(o => noPeriodo(o.mes) && (o.col || $('ind').checked));
-const doMes = () => NAE ? filtra(NAE.oc) : [];            // NAE deste alimentador (Crítica): o total do alimentador
-const doExt = () => NAE ? filtra(NAE.ext) : [];           // NAE de outro alimentador cujo ativo hoje está num trecho daqui
-const doTrecho = () => [...doMes(), ...doExt()];          // bloco do trecho: soma a NAE de todos os ativos do trecho
-function contagem() { const c = {}; doTrecho().forEach(o => { if (o.trecho) c[o.trecho] = (c[o.trecho] || 0) + 1; }); return c; }
+const doMes = (N = NAE) => N ? filtra(N.oc) : [];        // NAE deste alimentador (Crítica): o total do alimentador
+const doExt = (N = NAE) => N ? filtra(N.ext) : [];       // NAE de outro alimentador cujo ativo hoje está num trecho daqui
+const doTrecho = (N = NAE) => [...doMes(N), ...doExt(N)];   // bloco do trecho: soma a NAE de todos os ativos do trecho
+function contagem(N = NAE) { const c = {}; doTrecho(N).forEach(o => { if (o.trecho) c[o.trecho] = (c[o.trecho] || 0) + 1; }); return c; }
 function chiTrecho() { const c = {}; doTrecho().forEach(o => { if (o.trecho) c[o.trecho] = (c[o.trecho] || 0) + chiOc(o); }); return c; }
 const raizAl = location.pathname.includes('/alimentadores/') ? '../' : null;   // no site: link para o outro alimentador
 function listaOc(os, comTrecho) {
@@ -209,11 +221,12 @@ function listaOc(os, comTrecho) {
     (o.hoje ? `<br>ativo hoje no ${raizAl && o.hoje[1] ? `<a href="${raizAl}${encodeURIComponent(o.hoje[0])}/?t=${encodeURIComponent(o.hoje[1])}">${esc(o.hoje[0])} · ${esc(o.hoje[1])}</a>` : esc(o.hoje[0]) + (o.hoje[1] ? ' · ' + esc(o.hoje[1]) : '')}${o.hoje[1] ? ' (conta também lá)' : ''}` : '') +
     `</li>`).join('')}</ul>`;
 }
-function blocoNae(nome, l) {
-  const os = doTrecho().filter(o => (l || [nome]).includes(o.trecho)), col = os.filter(o => o.col).length, ext = os.filter(o => o.de).length;
+// (cx: o alimentador do trecho; um selecionado sem nenhum dos meses escolhidos diz que eles estão fora do período dele)
+function blocoNae(nome, l, cx = EU) {
+  const os = doTrecho(cx.NAE).filter(o => (l || [nome]).includes(o.trecho)), col = os.filter(o => o.col).length, ext = os.filter(o => o.de).length;
   const ind = $('ind').checked ? ` · ${os.length - col} individua${os.length - col === 1 ? 'l' : 'is'}` : '';
   const tip = tiposOc(os);
-  return `<dt class="nae">${ROT_NAE}</dt><dd class="nae"><b>${os.length}</b> · ${periodo()} (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})` +
+  return `<dt class="nae">${cx.ROT_NAE}</dt><dd class="nae"><b>${os.length}</b> · ${periodo(cx.NAE) || (cx === EU ? '' : 'fora do período da Crítica deste alimentador')} (${col} coletiva${col === 1 ? '' : 's'}${ind}${ext ? ` · ${ext} registrada${ext === 1 ? '' : 's'} em outro alimentador` : ''})` +
     `${tip ? `<br><small>${tip}${os.length ? ` · ${chiTxt(chi(os), chiEst(os))}` : ''}</small>` : ''}${os.length ? listaOc(os, !!l) : ''}</dd>`;
 }
 function atualizaNae() {
@@ -221,7 +234,10 @@ function atualizaNae() {
   multi.length ? detalheVarios(multi) : sel ? detalhe(TR[sel]) : resumo();
   marcaNaeVis();
   refazRotulos();
+  avisaNae();
 }
+// aviso de que a NAE mudou (meses, "Contar individuais", botão NAE): os selecionados (assets/selecionados.js) refazem a deles
+const avisaNae = () => document.dispatchEvent(new Event('al:nae'));
 // marcadores de NAE dos trechos escolhidos que estão à vista: com a classe escondida (T1 T2 T3) a seleção fica, sem eles
 // no mapa (como em mostraClasses)
 function marcaNaeVis() {
@@ -256,6 +272,7 @@ function ligaNae(on) {
   if (btNae) btNae.setAttribute('aria-pressed', String(on));
   marcaNaeVis();
   refazRotulos();
+  avisaNae();
 }
 // extras.js chama ao montar o Menu, antes de as outras camadas (Faixa, Inspeção…) porem os seus botões
 window.__naeBotao = l2 => {
@@ -268,7 +285,7 @@ window.__naeBotao = l2 => {
   btNae.addEventListener('click', () => ligaNae(!naeMapa));
 };
 // sem o botão (extras.js antigo ainda no cache do navegador): a NAE fica ligada, como antes
-if (NAE_SITE) AL.dom.then(() => { if (!btNae && !naeMapa && map) { naeMapa = true; $('map').classList.remove('sem-nae'); refazRotulos(); } });
+if (NAE_SITE) AL.dom.then(() => { if (!btNae && !naeMapa && map) { naeMapa = true; $('map').classList.remove('sem-nae'); refazRotulos(); avisaNae(); } });
 // a camada que mudou o que põe nos rótulos chama window.__refazRotulos(): o conteúdo, a ordem e os T3 que aparecem
 function refazRotulos() {
   const c = contaMapa();
@@ -504,6 +521,10 @@ function naLista(nome) {
   const p = rolador(), v = areaVisivel(p);
   if (!linha(nome) && (pendLista || !listaFeita)) selSemLinha = nome;   // a linha ainda não entrou (carga): a lista rola até ela quando chegar
   rolaNaLista(nome, v);
+  mostraDet(p, v);
+}
+// o detalhe à vista, sem mexer na lista (também o de um trecho de alimentador selecionado, que não está nela)
+function mostraDet(p = rolador(), v = areaVisivel(p)) {
   if (document.activeElement === $('busca')) return;   // digitando na busca: o campo fica onde está
   const det = $('det').getBoundingClientRect().top;
   if (p) { if (det < v.top || det > v.top + (v.bottom - v.top) / 2) rolaPara(p, p.scrollTop + det - v.top - 8); }   // painel: o detalhe vai para o alto
@@ -512,9 +533,11 @@ function naLista(nome) {
 
 // UCs ligadas por trecho (planilha UC por trafo): dados/ucs/<AL>.json, lido uma vez; sem o arquivo a linha "Clientes" não aparece
 const UCS_P = fetch(`../../dados/ucs/${encodeURIComponent((D.meta || {}).al || '')}.json`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
-function poeUc(u, nomes) {
+// (o trecho do detalhe é conferido pelo nome e pelo alimentador: T1 e T2 existem em todos, e as UCs deste, ainda chegando,
+// não podem cair no T1 de um selecionado)
+function poeUc(u, nomes, cx = EU) {
   const dd = $('uc-dd'), dt = $('uc-dt');
-  if (!dd || dd.dataset.t !== nomes.join('|') || !Object.keys(u).length) return;      // outro trecho já foi aberto, ou sem arquivo
+  if (!dd || dd.dataset.t !== nomes.join('|') || (dd.dataset.al || '') !== (cx === EU ? '' : cx.al) || !Object.keys(u).length) return;      // outro trecho já foi aberto, ou sem arquivo
   const e = nomes.map(n => u[n] || [0, 0, 0]), dir = e.reduce((s, x) => s + x[0], 0), tr = e.reduce((s, x) => s + x[2], 0);
   const fmt = n => n.toLocaleString('pt-BR'), trafos = ` · ${tr} trafo${tr === 1 ? '' : 's'}`;
   dd.innerHTML = nomes.length === 1
@@ -522,14 +545,22 @@ function poeUc(u, nomes) {
     : `<b>${fmt(dir)}</b> UC${dir === 1 ? '' : 's'} ligada${dir === 1 ? '' : 's'} nos trafos dos trechos${trafos}`;
   dt.style.display = dd.style.display = '';
 }
-const LINHA_UC = nomes => `<dt id="uc-dt" style="display:none">Clientes</dt><dd id="uc-dd" style="display:none" data-t="${nomes.map(esc).join('|')}"></dd>`;
+const daAl = cx => cx === EU ? '' : ` data-al="${esc(cx.al)}"`;   // outro alimentador: o código dele nos chips e nas UCs
+const LINHA_UC = (nomes, cx = EU) => `<dt id="uc-dt" style="display:none">Clientes</dt><dd id="uc-dd" style="display:none" data-t="${nomes.map(esc).join('|')}"${daAl(cx)}></dd>`;
+// detalhe de um selecionado: o #det leva o código (data-al: as camadas deste não põem as seções delas nele) e, logo
+// depois do título, de que alimentador é o trecho e o link da página dele
+function detDe(cx, nomes) {
+  if (cx === EU) { delete $('det').dataset.al; return ''; }
+  $('det').dataset.al = cx.al;
+  return `<p class="det-al">No alimentador <b class="mono">${esc(cx.al)}</b> · <a href="${esc(cx.abre(nomes))}">Abrir</a></p>`;
+}
 // detalhe
-function detalhe(t, vao) {
-  const chip = n => `<button class="chip" data-t="${esc(n)}">${esc(n)}</button>`;
+function detalhe(t, vao, cx = EU) {
+  const chip = n => `<button class="chip" data-t="${esc(n)}"${daAl(cx)}>${esc(n)}</button>`;
   const chips = l => l.length ? `<div class="chips">${l.slice(0, 8).map(chip).join('')}` +   // muitos: os 8 primeiros e o resto ao pedir
     (l.length > 8 ? `<details class="mais"><summary>mais ${l.length - 8}</summary><div class="chips">${l.slice(8).map(chip).join('')}</div></details>` : '') + '</div>' : '—';
   const tipoTxt = {principal: t.zona === 1 ? 'tronco T1' : 'tronco T2', ramal: t.tronco ? 'T2 · tronco' : 'T2 · ramal', fusivel: `depois de fusível · T${t.zona}`}[t.tipo];
-  $('det').innerHTML = `<h2 tabindex="-1"><i style="--c:${t.cor}"></i>${esc(t.nome)} <small>${tipoTxt}</small></h2>${FECHA}<dl>
+  $('det').innerHTML = `<h2 tabindex="-1"><i style="--c:${t.cor}"></i>${esc(t.nome)} <small>${tipoTxt}</small></h2>${detDe(cx, [t.nome])}${FECHA}<dl>
     <dt>Início</dt><dd><span class="mono">${esc(t.inicio)}</span> · ${TIPO[t.inicio_tipo] || t.inicio_tipo} · poste ${esc(t.inicio_poste)}</dd>
     ${t.passa.length ? `<dt>Passa por</dt><dd class="mono">${t.passa.map(esc).join(', ')}</dd>` : ''}
     <dt>Fim</dt><dd class="mono">${t.fim.map(esc).join('<br>')}</dd>
@@ -537,24 +568,24 @@ function detalhe(t, vao) {
     ${t.fase ? `<dt>Fases</dt><dd>${esc(t.fase)}${t.fases && Object.keys(t.fases).length > 1 ? ' · ' + Object.entries(t.fases).map(([f, m]) => `${esc(f)} ${km(m)}`).join(' · ') : ''}</dd>` : ''}
     <dt>Vem de</dt><dd>${t.pai ? chips([t.pai]) : '—'}</dd>
     <dt>Derivações</dt><dd>${chips(t.derivacoes)}</dd>
-    ${LINHA_UC([t.nome])}
-    ${NAE ? blocoNae(t.nome) : ''}
+    ${LINHA_UC([t.nome], cx)}
+    ${cx.NAE ? blocoNae(t.nome, null, cx) : ''}
     ${vao ? `<dt>Vão</dt><dd class="mono">${esc(vao[5])} · poste ${esc(vao[6])} → ${esc(vao[7])} · ${Math.round(vao[8])} m</dd>` : ''}
   </dl>`;
-  UCS_P.then(u => poeUc(u, [t.nome]));
+  cx.ucs().then(u => poeUc(u, [t.nome], cx));
 }
 // vários trechos (Ctrl ou ⌘ + clique): soma de extensão e NAE, e cada trecho com o seu
-function detalheVarios(l) {
-  const ts = l.map(n => TR[n]), ext = ts.reduce((s, t) => s + t.ext, 0), c = NAE ? contagem() : {};
-  const nae = NAE ? blocoNae(null, l) : '';
-  $('det').innerHTML = `<h2 tabindex="-1">${l.length} trechos <small>${km(ext)} · ${nv(ts.reduce((s, t) => s + t.qtd, 0))}</small></h2>${FECHA}
-    <div class="varios">${ts.map(t => `<div><button class="chip" data-t="${esc(t.nome)}">${esc(t.nome)}</button><span>${km(t.ext)}</span>` +
-      `${NAE ? `<span><b>${c[t.nome] || 0}</b> NAE</span>` : ''}<small class="mono">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</small></div>`).join('')}</div><dl>
+function detalheVarios(l, cx = EU) {
+  const ts = l.map(n => cx.TR[n]), ext = ts.reduce((s, t) => s + t.ext, 0), c = cx.NAE ? contagem(cx.NAE) : {};
+  const nae = cx.NAE ? blocoNae(null, l, cx) : '';
+  $('det').innerHTML = `<h2 tabindex="-1">${l.length} trechos <small>${km(ext)} · ${nv(ts.reduce((s, t) => s + t.qtd, 0))}</small></h2>${detDe(cx, l)}${FECHA}
+    <div class="varios">${ts.map(t => `<div><button class="chip" data-t="${esc(t.nome)}"${daAl(cx)}>${esc(t.nome)}</button><span>${km(t.ext)}</span>` +
+      `${cx.NAE ? `<span><b>${c[t.nome] || 0}</b> NAE</span>` : ''}<small class="mono">${esc(t.inicio)} → ${esc(fimTxt(t).replace('fim de linha · poste ', 'fim '))}</small></div>`).join('')}</div><dl>
     <dt>Extensão</dt><dd>${km(ext)} somados</dd>
-    ${LINHA_UC(l)}
+    ${LINHA_UC(l, cx)}
     ${nae}
   </dl><p class="lede so-mouse">Ctrl (⌘ no Mac) + clique põe ou tira um trecho. Clique sem Ctrl volta a um trecho só.</p>`;
-  UCS_P.then(u => poeUc(u, l));
+  cx.ucs().then(u => poeUc(u, l, cx));
 }
 // total da Crítica no alimentador e por que a soma dos trechos dá outro número (sem trecho; de outro alimentador)
 function resumoNae() {
@@ -572,6 +603,7 @@ function resumo() {
   const tabela = `<table class="resumo-classe"><tr><th>Classe</th><th>Trechos</th><th>Extensão</th></tr>` +
     Object.entries(cl).map(([k, [n, m]]) => `<tr><td>${k}</td><td>${mil(n)}</td><td>${km(m)}</td></tr>`).join('') +
     `<tr><th>Total</th><th>${mil(D.trechos.length)}</th><th>${km(total)}</th></tr></table>`;
+  delete $('det').dataset.al;
   $('det').innerHTML = `${tabela}
   ${NAE ? `<dl>${resumoNae()}</dl>` : ''}`;
 }
@@ -592,7 +624,8 @@ $('det').addEventListener('click', e => {
   }
   const b = e.target.closest('.chip, #todos'); if (!b) return;
   const tinhaFoco = b.contains(document.activeElement);  // o detalhe é refeito: o foco do teclado volta ao título dele (não cai no body)
-  b.id === 'todos' ? limpar() : clique(b.dataset.t, e, true);
+  // chip de um trecho de alimentador selecionado (data-al): escolhe nele (assets/selecionados.js)
+  b.id === 'todos' ? limpar() : b.dataset.al && window.__alSel ? window.__alSel.clique(b.dataset.al, b.dataset.t, e, true) : clique(b.dataset.t, e, true);
   if (tinhaFoco && !$('det').contains(document.activeElement)) $('det').querySelector('h2')?.focus({preventScroll: true});
 });
 
@@ -615,14 +648,23 @@ const Z_EQUIP = 12, Z_NUM = 15;
 let fusLonge = false;                                     // abaixo do Z_EQUIP: os pontos dos fusíveis não são pintados nem tocados
 const classeDe = nome => nome.split('-')[0];          // nome do trecho → [polyline com todos os vãos, vãos]; rótulos no mapa
 let halo = null, marcas = null;
-let fimDe = null, iniDe = null;                            // índices (sem eles cada um dos ~2.000 fusíveis varria todos os trechos), montados no 1º balão
-const papel = nome => {
-  if (!fimDe) {
-    fimDe = {}; iniDe = {};
-    D.trechos.forEach(t => { t.fim.forEach(f => (fimDe[f] = fimDe[f] || []).push(t.nome)); (iniDe[t.inicio] = iniDe[t.inicio] || []).push(t.nome); });
-  }
-  return [...(iniDe[nome] || []).map(n => 'início do ' + n), ...(fimDe[nome] || []).map(n => 'fim do ' + n)].join(' · ');
-};
+// papel de uma chave nos trechos dos dados d ("início do T2-A · fim do T2"): os índices (sem eles cada um dos ~2.000
+// fusíveis varria todos os trechos) são montados no 1º balão
+function papelDe(d) {
+  let fimDe = null, iniDe = null;
+  return nome => {
+    if (!fimDe) {
+      fimDe = {}; iniDe = {};
+      d.trechos.forEach(t => { t.fim.forEach(f => (fimDe[f] = fimDe[f] || []).push(t.nome)); (iniDe[t.inicio] = iniDe[t.inicio] || []).push(t.nome); });
+    }
+    return [...(iniDe[nome] || []).map(n => 'início do ' + n), ...(fimDe[nome] || []).map(n => 'fim do ' + n)].join(' · ');
+  };
+}
+const papel = papelDe(D);
+// DJ ou religador a no mapa: a caixinha do tipo e o número operativo (pf: o papel nos trechos do alimentador dele; o: mais
+// opções do marcador)
+const principal = (a, pf = papel, o) => L.marker([a.lat, a.lon], Object.assign({icon: L.divIcon({className: 'al-at', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500}, o))
+  .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${pf(a.nome) ? ' · ' + esc(pf(a.nome)) : ''}`, {direction: 'top'});
 // clique com Ctrl (⌘ no Mac): põe ou tira o trecho da seleção; sem Ctrl: um trecho só
 const comCtrl = e => !!e && (e.ctrlKey || e.metaKey);
 function clique(nome, e, enquadrar, vao) {
@@ -658,11 +700,7 @@ function realca(nomes, enquadrar) {
   halo.eachLayer(l => l.bringToBack());
   Object.entries(rotulos).forEach(([n, m]) => m.getElement() && m.getElement().firstChild.classList.toggle('sel', nomes.includes(n)));
   if (marcas) marcas.remove();
-  const pino = (pt, cls, tag, txt) => L.marker(pt, {interactive: false, zIndexOffset: 900, icon: L.divIcon({className: '', iconSize: null, html: `<div class="ie ${cls}"><em>${tag}</em>${esc(txt)}</div>`})});
-  const t = TR[nomes[0]];
-  marcas = L.layerGroup(nomes.length > 1 ? nomes.map(n => pino([TR[n].inicio_lat, TR[n].inicio_lon], 'ini', esc(n), TR[n].inicio))
-    : [pino([t.inicio_lat, t.inicio_lon], 'ini', 'INÍCIO', t.inicio),
-      ...t.fim.map((f, i) => pino(t.fim_pts[i], 'fim', 'FIM', f.replace('fim de linha · poste ', 'poste ') + (f.startsWith('fim de linha') ? ' (fim de linha)' : '')))]).addTo(map);
+  marcas = pinosDe(nomes).addTo(map);
   if (enquadrar) map.fitBounds(L.latLngBounds(nomes.flatMap(n => meus(n).flat())).pad(0.12), {maxZoom: 17, paddingTopLeft: [24, 72], paddingBottomRight: [24, 64]});   // folga para os controles sobre o mapa
   marcaNae(nomes);
   rotulosT3();
@@ -679,19 +717,33 @@ try {
       if (realcados && typeof f === 'function') Promise.resolve().then(() => { if (ganchoSel === f && realcados) f(realcados); });
     }});
 } catch (e) { /* fica como propriedade comum */ }
-function avisaSel(nomes) { const f = window.__onSel; if (f) f(nomes); }
+// O evento 'al:sel' no document (detail: os nomes, ou null) diz o mesmo aos alimentadores selecionados (assets/selecionados.js):
+// um trecho escolhido aqui, ou nenhum, solta o de lá
+function avisaSel(nomes) { const f = window.__onSel; if (f) f(nomes); document.dispatchEvent(new CustomEvent('al:sel', {detail: nomes})); }
+// pinos de início e fim dos trechos nomes (dos trechos T; com vários, só o início de cada um); o: mais opções dos marcadores
+function pinosDe(nomes, T = TR, o) {
+  const pino = (pt, cls, tag, txt) => L.marker(pt, Object.assign({interactive: false, zIndexOffset: 900, icon: L.divIcon({className: '', iconSize: null, html: `<div class="ie ${cls}"><em>${tag}</em>${esc(txt)}</div>`})}, o));
+  const t = T[nomes[0]];
+  return L.layerGroup(nomes.length > 1 ? nomes.map(n => pino([T[n].inicio_lat, T[n].inicio_lon], 'ini', esc(n), T[n].inicio))
+    : [pino([t.inicio_lat, t.inicio_lon], 'ini', 'INÍCIO', t.inicio),
+      ...t.fim.map((f, i) => pino(t.fim_pts[i], 'fim', 'FIM', f.replace('fim de linha · poste ', 'poste ') + (f.startsWith('fim de linha') ? ' (fim de linha)' : '')))]);
+}
 // ativos com NAE nos trechos escolhidos: um marcador vermelho por ativo, com quantas NAE teve (mês e filtro da tela)
 let naeMarcas = null, pinoAt = null;                   // pinoAt: o ativo do "ver no mapa" com o NAE desligado
 function marcaNae(nomes) {
   if (naeMarcas) { naeMarcas.remove(); naeMarcas = null; }
   if (pinoAt) { pinoAt.remove(); pinoAt = null; }
   if (!map || !NAE || !nomes || !naeMapa) return;          // NAE desligado no mapa: sem os marcadores
+  naeMarcas = camadaNae(nomes).addTo(map);
+}
+// os marcadores de NAE dos trechos nomes, com a NAE N (o: mais opções dos marcadores)
+function camadaNae(nomes, N = NAE, o) {
   const g = {};
-  doTrecho().forEach(o => { if (o.lonlat && nomes.includes(o.trecho)) { const k = o.ativo + '|' + o.trecho; (g[k] = g[k] || {o, n: 0, de: new Set()}).n++; if (o.de) g[k].de.add(o.de); } });
-  naeMarcas = L.layerGroup(Object.values(g).map(({o, n, de}) => L.marker([o.lonlat[1], o.lonlat[0]], {zIndexOffset: 950, keyboard: false,
-    icon: L.divIcon({className: '', iconSize: null, html: `<div class="nae-at">${n}</div>`})})
-    .bindTooltip(`${esc(ABR[o.abr] || o.abr)} ${esc(o.ativo)} · ${n} NAE · ${esc(o.trecho)}${de.size ? ' · registrada no ' + esc([...de].join(', ')) : ''}`, {direction: 'top'})
-    .on('click', e => { L.DomEvent.stopPropagation(e); map.setView(e.latlng, Math.max(map.getZoom(), 17)); }))).addTo(map);
+  doTrecho(N).forEach(o => { if (o.lonlat && nomes.includes(o.trecho)) { const k = o.ativo + '|' + o.trecho; (g[k] = g[k] || {o, n: 0, de: new Set()}).n++; if (o.de) g[k].de.add(o.de); } });
+  return L.layerGroup(Object.values(g).map(({o: a, n, de}) => L.marker([a.lonlat[1], a.lonlat[0]], Object.assign({zIndexOffset: 950, keyboard: false,
+    icon: L.divIcon({className: '', iconSize: null, html: `<div class="nae-at">${n}</div>`})}, o))
+    .bindTooltip(`${esc(ABR[a.abr] || a.abr)} ${esc(a.ativo)} · ${n} NAE · ${esc(a.trecho)}${de.size ? ' · registrada no ' + esc([...de].join(', ')) : ''}`, {direction: 'top'})
+    .on('click', e => { L.DomEvent.stopPropagation(e); map.setView(e.latlng, Math.max(map.getZoom(), 17)); })));
 }
 function limpar() {
   const nada = !sel && !multi.length && !realcados && !halo && !marcas;   // nada escolhido nem em destaque no mapa
@@ -721,10 +773,12 @@ function vaoPerto(vs, ll) {
   });
   return melhor;
 }
+// HTML do rótulo do trecho t (c: a NAE por trecho; x: o que outra camada põe; sel: escolhido; fixo: o do modo de faixa)
+const htmlRotulo = (t, c, x, sel, fixo) => `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${sel ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}${x ? ' fo' : ''}${x.includes('data-longe') ? ' fo-l' : ''}${fixo ? ' fixo' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}${x}</div>`;
 // rótulos: T1/T2 sempre; T3 só de perto e só os que estão na tela (mais leve em alimentador grande)
 function rotulo(t, c) {
   const x = extraRot(t.nome);
-  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: `<div class="lb ${t.tipo === 'fusivel' ? 'fus' : ''}${escolhido(t.nome) ? ' sel' : ''}${c && c[t.nome] ? ' oc' : ''}${x ? ' fo' : ''}${x.includes('data-longe') ? ' fo-l' : ''}${rotFixo(t.nome) ? ' fixo' : ''}" style="--c:${t.cor}">${esc(t.nome)}${c && c[t.nome] ? `<span class="n">${c[t.nome]}</span>` : ''}${x}</div>`}), zIndexOffset: zRot(t, x)})
+  const m = L.marker(t.rotulo, {icon: L.divIcon({className: '', iconSize: null, html: htmlRotulo(t, c, x, escolhido(t.nome), rotFixo(t.nome))}), zIndexOffset: zRot(t, x)})
     .bindTooltip(`${esc(t.inicio)} → ${esc(fimTxt(t))}`, {direction: 'top'})
     .on('click', e => { L.DomEvent.stopPropagation(e); clique(t.nome, e.originalEvent, false); }).addTo(map);
   rotulos[t.nome] = m;
@@ -1062,10 +1116,7 @@ if (typeof L === 'undefined') {
       lv.pinta();
       marca('al:tronco');
       await AL.segue();
-      D.principais.forEach(a => {
-        L.marker([a.lat, a.lon], {icon: L.divIcon({className: 'al-at', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500})
-          .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${papel(a.nome) ? ' · ' + esc(papel(a.nome)) : ''}`, {direction: 'top'}).addTo(map);
-      });
+      D.principais.forEach(a => principal(a).addTo(map));
       let c = contaMapa();
       D.trechos.forEach(t => { if (t.tipo !== 'fusivel' && visivel[classeDe(t.nome)] && !rotulos[t.nome]) rotulo(t, c); });
       // até aqui tudo saiu em sequência, na frente dos scripts seguintes; o quadro que vem agora (pedido no começo deste
@@ -1151,6 +1202,10 @@ window.__periodoNae = () => NAE ? periodo() : '';         // lupa-painel.js: o p
 window.__clique = clique;
 window.__selecao = () => multi.length ? multi.slice() : sel ? [sel] : [];   // trechos escolhidos (croqui da faixa)
 window.__limpar = limpar;
+// O que os alimentadores selecionados (assets/selecionados.js) usam daqui para ficar iguais a este no mapa e no painel:
+// as mesmas funções, com o alimentador (cx, os dados d, a NAE N, os trechos T) como argumento; o padrão de todas é este
+window.__alKit = {EU, prepara, rotNae, papelDe, cadeias, vaoPerto, htmlRotulo, zRot, pinosDe, camadaNae, principal, contagem, doTrecho,
+  periodo, detalhe, detalheVarios, mostraDet, naeMapa: () => naeMapa, comCtrl, COR_Z, TIPO, esc, km, fimTxt, Z_EQUIP, Z_NUM};
 // Sem o mapa (Leaflet não carregou) a rede já "está pronta": só o resumo e a lista
 if (!map) { AL.espera(comeco(AL.cede).catch(e => console.error(e))); fimLinhas(); fimRede(); document.dispatchEvent(new Event('al:linhas')); document.dispatchEvent(new Event('al:rede')); }
 AL.rede.then(listaAosPoucos);

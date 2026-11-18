@@ -289,7 +289,7 @@
       ${ks.map(k => osBtn(k, false)).join('')}</section>`;
   }
   function poeDetalhe() {
-    if (!det || det.querySelector('.mnt-sec')) return;
+    if (!det || det.dataset.al || det.querySelector('.mnt-sec')) return;   // (data-al: trecho de alimentador selecionado, não deste)
     const h2 = det.querySelector('h2');
     if (!h2) return;
     const nome = [...h2.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();

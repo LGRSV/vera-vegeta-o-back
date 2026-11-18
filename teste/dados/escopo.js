@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.14",
+ "versao": "2.15",
  "atualizado": "2026-11-18",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -145,7 +145,10 @@ window.ARGOS_ESCOPO = {
    {"t": "Alimentadores vizinhos no mapa do alimentador: a rede dos outros que aparecem na tela, mais apagada e sem rótulos, carregada sozinha ao afastar ou arrastar", "st": "ok", "d": "2026-11-17", "obs": "De longe T1 e T2, mais perto o T3 e de perto o desenho fino. Tocar num vizinho mostra o código e \"Abrir alimentador\"."},
    {"t": "Equipamentos dos alimentadores vizinhos de perto: religador, DJ, fusível e chave do zoom 15; transformador e outros do 16, apagados e sem códigos escritos", "st": "ok", "d": "2026-11-18", "obs": "Tocar ou passar o mouse num equipamento mostra o tipo, o código e o alimentador, com \"Abrir alimentador\". Só baixa os dos vizinhos na tela."},
    {"t": "Visão do Tocantins inteiro no mapa do alimentador: T1 e T2 de todos os alimentadores, só o estado (fora escuro) e botão Tocantins com voo suave; números dos equipamentos só de perto", "st": "ok", "d": "2026-11-18", "obs": "DJ e religador aparecem do zoom 12 (só a caixinha) e o número operativo do 15; pontinhos dos fusíveis do 12. Por baixo do satélite, uma imagem mais leve evita os quadrados escuros."},
-   {"t": "Satélite sem partes pretas no zoom do mapa do alimentador (roda, pinça, voo do botão Tocantins logo ao abrir e divisa do estado)", "st": "ok", "d": "2026-11-18", "obs": "Onde a imagem nítida ainda está chegando aparece a versão borrada, não o preto. Medido em 14 cenários no PC e no celular: 0 ms de preto dentro do estado."}
+   {"t": "Satélite sem partes pretas no zoom do mapa do alimentador (roda, pinça, voo do botão Tocantins logo ao abrir e divisa do estado)", "st": "ok", "d": "2026-11-18", "obs": "Onde a imagem nítida ainda está chegando aparece a versão borrada, não o preto. Medido em 14 cenários no PC e no celular: 0 ms de preto dentro do estado."},
+   {"t": "Selecionar até 10 outros alimentadores no mapa do alimentador (menu suspenso Alimentadores): rede, nomes dos trechos, NAE e painel como os do aberto", "st": "ok", "d": "2026-11-18", "obs": "Tocar num vizinho mostra Selecionar e Abrir alimentador. Abrir um selecionado leva a seleção junto. De longe só T1 e T2; do zoom 12, igual ao aberto. Camadas, lista de trechos e downloads seguem só do aberto por enquanto."},
+   {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
+   {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},
   {"id": "2.4", "frente": "mapa", "titulo": "Imagem de satélite", "itens": [
    {"t": "Satélite sem falhas de imagem ao aproximar", "st": "ok", "d": "2026-10-07"},

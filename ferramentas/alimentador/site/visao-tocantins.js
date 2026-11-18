@@ -30,6 +30,9 @@
 //   geométrica, numa curva suave (sem animação com prefers-reduced-motion). No voo a rede deste só estica (é refeita no
 //   pouso, como no zoom), o satélite nítido espera o pouso (se o fundo já chegou; senão carrega como no voo do Leaflet), e
 //   o worker desenha a máscara e as linhas do estado do trecho seguinte do voo antes de ele chegar.
+// Alimentadores selecionados (selecionados.js, window.__alSel): ficam fora das linhas do estado (lá eles são desenhados
+// fortes), a linha deles no ponto tem a vez sobre a do estado, o balão ganha "Selecionar" e, no voo, o canvas deles some e
+// volta como o dos vizinhos.
 // Sem o contorno do estado ou fora do site, não faz nada.
 (function () {
   const map = window.__map, L = window.L, D = window.D, AL = window.__al || null, eu = document.currentScript;
@@ -83,11 +86,11 @@
   // ---------- desenho (aqui e no worker: estas funções só usam o que recebem; o worker recebe o código delas) ----------
   // as linhas da classe g ({p: [x, y, ...] de Mercator, ini: 1º ponto de cada linha e o fim, cx: caixa de cada linha}) que
   // passam pela região r (px absolutos do zoom r.z, canto x, y), já num beginPath; pontos a menos de 0,6 px do anterior
-  // ficam de fora
-  function tracaLinhas(ctx, g, r) {
+  // ficam de fora; as dos alimentadores em fora (índices em g.al: os selecionados) também
+  function tracaLinhas(ctx, g, r, fora) {
     const s = 256 * Math.pow(2, r.z), bx = -r.x, by = -r.y, p = g.p, ini = g.ini, cx = g.cx, W = r.w + 8, H = r.h + 8;
     for (let l = 0, nl = ini.length - 1; l < nl; l++) {
-      if (cx[4 * l] * s + bx > W || cx[4 * l + 2] * s + bx < -8 || cx[4 * l + 1] * s + by > H || cx[4 * l + 3] * s + by < -8) continue;
+      if ((fora && fora.has(g.al[l])) || cx[4 * l] * s + bx > W || cx[4 * l + 2] * s + bx < -8 || cx[4 * l + 1] * s + by > H || cx[4 * l + 3] * s + by < -8) continue;
       const a = ini[l], b = ini[l + 1];
       let lx = p[2 * a] * s + bx, ly = p[2 * a + 1] * s + by;
       ctx.moveTo(lx, ly);
@@ -98,14 +101,15 @@
       }
     }
   }
-  // as linhas do estado (D: {T1, T2}) na região r; op: k (px do canvas por px do mapa), alfa e as classes [{c, cor, larg}]
-  // na ordem de desenho (o tronco por cima)
+  // as linhas do estado (D: {T1, T2}) na região r; op: k (px do canvas por px do mapa), alfa, as classes [{c, cor, larg}]
+  // na ordem de desenho (o tronco por cima) e os alimentadores que ficam de fora (fora: índices)
   function pintaEstado(ctx, r, D, op) {
+    const fora = op.fora && op.fora.length ? new Set(op.fora) : null;
     ctx.setTransform(op.k, 0, 0, op.k, 0, 0);
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = op.alfa;
     for (const cl of op.cls) {
       ctx.strokeStyle = cl.cor; ctx.lineWidth = cl.larg;
-      ctx.beginPath(); tracaLinhas(ctx, D[cl.c], r); ctx.stroke();
+      ctx.beginPath(); tracaLinhas(ctx, D[cl.c], r, fora); ctx.stroke();
     }
     ctx.globalAlpha = 1;
   }
@@ -491,7 +495,10 @@
   // no voo: a camada aparece abaixo do zoom em que os vizinhos entram (de 1 nível acima dele até ele), como fora do voo; de
   // perto (onde, parado, ficam os vizinhos) o estado simplificado em 150 m já sairia do lugar
   const opVoo = z => Math.max(0, Math.min(1, zm + 1 - z));
-  const opEstado = z => ({ alfa: ALFA, cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })) });   // o tronco por cima
+  // os selecionados já desenhados lá (selecionados.js), pelo índice nas linhas do estado: ficam de fora (lá eles são fortes;
+  // baixando ou com erro, seguem aqui)
+  const foraSel = () => { const S = window.__alSel, l = S && dados ? (S.desenhados ? S.desenhados() : S.lista()) : []; return l.length ? l.map(c => dados.cods.indexOf(c)).filter(i => i >= 0) : []; };
+  const opEstado = z => ({ alfa: ALFA, cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })), fora: foraSel() });   // o tronco por cima
   const Estado = Tela.extend({
     options: { pane: 'estado-to' },
     // fim de cada movimento: abaixo dos vizinhos, o estado inteiro (sem esmaecer: os vizinhos saem no mesmo quadro; se a
@@ -571,20 +578,22 @@
   if (cls) {
     COR.T1 = corBt('T1') || COR.T1; COR.T2 = corBt('T2') || COR.T2;
     // T1 ou T2 ligado ou desligado: a imagem guardada não vale mais
-    cls.addEventListener('click', e => { if (!e.target.closest('button')) return; estado.esquece(); if (mostra) estado.desenha(map.getCenter(), map.getZoom(), true); else estado._r = null; });
+    cls.addEventListener('click', e => { if (!e.target.closest('button')) return; refaz(); });
   }
+  // (também quando a seleção muda: selecionados.js)
+  function refaz() { estado.esquece(); if (mostra) estado.desenha(map.getCenter(), map.getZoom(), true); else estado._r = null; }
 
   // ---------- linha de outro alimentador sob o ponto (x, y) do mapa ----------
   function alvoEm(pt, tol) {
     if (!dados || !mostra) return null;
     const z = map.getZoom(), s = 256 * Math.pow(2, z), q = map.containerPointToLayerPoint(pt).add(map.getPixelOrigin());
-    const px = q.x / s, py = q.y / s, t = tol / s;
+    const px = q.x / s, py = q.y / s, t = tol / s, f = foraSel(), fora = f.length ? new Set(f) : null;
     let best = t * t, al = -1;
     for (const c of ['T1', 'T2']) {
       if (!visivel(c)) continue;
       const g = dados[c], p = g.p, ini = g.ini, cx = g.cx;
       for (let l = 0, nl = ini.length - 1; l < nl; l++) {
-        if (cx[4 * l] - t > px || cx[4 * l + 2] + t < px || cx[4 * l + 1] - t > py || cx[4 * l + 3] + t < py) continue;
+        if ((fora && fora.has(g.al[l])) || cx[4 * l] - t > px || cx[4 * l + 2] + t < px || cx[4 * l + 1] - t > py || cx[4 * l + 3] + t < py) continue;
         for (let k = ini[l]; k < ini[l + 1] - 1; k++) {
           const ax = p[2 * k], ay = p[2 * k + 1], dx = p[2 * k + 2] - ax, dy = p[2 * k + 3] - ay, l2 = dx * dx + dy * dy;
           const f = l2 ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / l2)) : 0;
@@ -597,12 +606,16 @@
   }
   const pode = () => mostra && !voo && !faixa() && map.getZoom() < zm;
   // o balão dos vizinhos (vizinhos.js): o código e "Abrir alimentador" (aqui pode ser de qualquer lugar do estado)
-  const balao = cod => `<div class="viz-pop"><b>${esc(cod)}</b><small>Outro alimentador</small><a href="../${encodeURIComponent(cod)}/">Abrir alimentador</a></div>`;
+  const balao = cod => {
+    const a = `<a href="../${encodeURIComponent(cod)}/">Abrir alimentador</a>`, bt = window.__alSel ? window.__alSel.botao(cod) : '';   // "Selecionar" (selecionados.js)
+    return `<div class="viz-pop"><b>${esc(cod)}</b><small>Outro alimentador</small>${bt ? `<span class="viz-acoes">${a}${bt}</span>` : a}</div>`;
+  };
   map.on('click', ev => {
     if (!pode() || !ev.containerPoint) return;
     const oe = ev.originalEvent || {}, toque = oe.pointerType ? oe.pointerType !== 'mouse' : MOVEL;
     const cod = alvoEm(ev.containerPoint, toque ? 14 : 7);
     if (!cod) return;
+    if (window.__alSel && window.__alSel.em(ev.containerPoint, toque ? 16 : 10)) return;   // a linha de um selecionado tem a vez
     paira(null);
     L.popup({ className: 'viz-popup', maxWidth: 260, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20] })
       .setLatLng(ev.latlng).setContent(balao(cod)).openOn(map);
@@ -617,6 +630,7 @@
     const alvo = ev && ev.target;
     if (ev && pode() && !map.dragging.moving() && alvo && (alvo === mc || alvo.tagName === 'CANVAS') && !(ren && ren._hoveredLayer))
       cod = alvoEm(pt = map.mouseEventToContainerPoint(ev), 7);
+    if (cod && window.__alSel && window.__alSel.em(pt, 10)) cod = null;   // a linha de um selecionado tem a vez
     mc.classList.toggle('vto-mao', !!cod);
     const mostraDica = cod && !(map._popup && map._popup._map && map._popup.options.className === 'viz-popup');
     if (mostraDica) { dica.textContent = cod; dica.style.left = pt.x + 'px'; dica.style.top = pt.y + 'px'; }
@@ -844,7 +858,9 @@
   // dos vizinhos e o das divisas e nomes) sai aos poucos quando encolhe a menos da metade (na ida: era um recorte nítido
   // encolhendo no meio do fundo borrado); o nível do satélite sai também quando fica mais borrado que o fundo (na volta, o
   // do estado inteiro esticado). Por baixo fica o fundo, inteiro. Voltam no pouso
-  const paneSat = map.getPane('tilePane'), panesIda = ['vizinhos', 'divisas'].map(n => map.getPane(n)).filter(Boolean);
+  // (os panes de agora, no começo de cada voo: os dos selecionados, selecionados.js, entram depois da carga)
+  const paneSat = map.getPane('tilePane'), idaDe = () => ['vizinhos', 'divisas', 'sel-rede', 'sel-eq', 'sel-realce'].map(n => map.getPane(n)).filter(Boolean);
+  let panesIda = idaDe();
   const opPane = (p, o) => { const v = o >= 1 ? '' : String(Math.max(0, o)); if (p.style.opacity !== v) { p.style.transition = 'none'; p.style.opacity = v; } };
   function apagaNoVoo(z) {
     const ida = Math.max(0, Math.min(1, (Math.pow(2, z - voo.z0) - 0.3) / 0.3));
@@ -900,6 +916,7 @@
         passo: dz => { const z = map.getZoom(), a = fr(0); for (let i = 1; i <= 40; i++) { const u = Math.min(1, a + i * 0.025), v = em(curva(u)); if (u >= 1 || Math.abs(v[1] - z) >= dz) return v; } return em(1); }
       };
       fimVoo = res;
+      panesIda = idaDe();
       if (fundoPronto()) quietaSat(true); else if (PINTOR) PINTOR.postMessage({ t: 'pressa' });
       mc.classList.add('vto-voando');
       clearTimeout(esperaViz);
@@ -1005,7 +1022,7 @@
 
   // para os testes e as medidas
   window.__visaoTO = {
-    alterna, noEstado, voando: () => !!voo, zAbre: () => vistaAl().zoom, zEstado: () => zEst, em: (x, y) => alvoEm(L.point(x, y), 7),
+    alterna, noEstado, refaz, voando: () => !!voo, zAbre: () => vistaAl().zoom, zEstado: () => zEst, em: (x, y) => alvoEm(L.point(x, y), 7),
     estado: () => ({ dados: !!dados, linhas: dados ? dados.T1.ini.length + dados.T2.ini.length - 2 : 0, pontos: dados ? dados.pts : 0, mostra,
       opacidade: +paneE.style.opacity, zMin: zm, zEstado: zEst, mascara: mascara._r && !mascara._c.hidden ? { k: mascara._r.k, w: mascara._r.w, h: mascara._r.h } : null,
       fundo: fundoPronto(), zFundo: fundoPronto() ? fundo._r.z : null, botao: btTx.textContent, modo: MODO }),
