@@ -1306,6 +1306,7 @@
       if (v0 && !recem) poeVista(v0.c, v0.z);
       if (v0) { caixaSat.dataset.k = v0.k; caixaSat.style.transform = `scaleY(${v0.k})`; }
       caixaSat.style.opacity = '0';
+      recolheLegenda();
       alvo.classList.add('sat-to');
       mascara.desenha();
       desenho.desenha();
@@ -1348,10 +1349,25 @@
     await new Promise(ok => requestAnimationFrame(() => ok()));
   }
   let meu = false;                                      // a troca de nível do mapa dos municípios fui eu que pedi (ao fechar)
+  // a legenda da NAE (a do mapa dos municípios) não vem aberta no satélite (pedido do usuário): ele abre com ela recolhida,
+  // sem os números nos cartões; a orelhinha mostra de novo. Ao fechar, ela volta como estava (a escolha guardada não muda)
+  let legAntes = null;
+  function recolheLegenda() {
+    const A = window.ARGOS_MAPA;
+    if (!A || !A.legenda || !A.legendaAberta) return;
+    legAntes = A.legendaAberta();
+    if (legAntes) A.legenda(false);
+  }
+  function devolveLegenda() {
+    const A = window.ARGOS_MAPA;
+    if (legAntes && A && A.legenda) A.legenda(true);
+    legAntes = null;
+  }
   async function fecha() {
     if (estado === 'off' || estado === 'fechando') return;
     if (estado === 'carregando') {
       ++vez; estado = 'off'; alvo.classList.remove('sat-to', 'st-cobre', 'st-nmun');
+      devolveLegenda();
       if (lado) lado.hidden = true;
       if (trilha) trilha.hidden = true;
       return;
@@ -1374,6 +1390,7 @@
     await sincroniza();
     if (estado !== 'fechando') { caixa.classList.remove('st-salto'); return; }   // Ctrl+S de novo no meio: abre() tomou o lugar
     alvo.classList.remove('sat-to', 'st-cobre', 'st-nmun');   // nomes e bandeiras do mapa voltam enquanto o satélite se dissolve
+    devolveLegenda();
     caixaSat.style.visibility = 'visible';                 // (a classe saiu: fica visível até o fim)
     const v = vistaDoSvg() || vistaDoEstado(), o0 = caixaSat.style.opacity === '' ? 1 : +caixaSat.style.opacity;
     const ok = await anima(v, calmo() ? 0 : DUR_FECHA, t => o0 * (1 - passo01(0.25, 1, t)));

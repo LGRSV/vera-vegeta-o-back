@@ -2030,5 +2030,7 @@
   };
   window.ARGOS_MAPA = { nivel: () => ({ reg, pol, mun, al: alf }), vai, ponto, previa, rede: redeDe, realceAl: al => { if (mun) realceAl(al); }, visao: visaoApi,
     alNoMun, prepara: queroAl, refaz: () => visao(V.id, true), projeta, svg, caixa, voando: () => !!anima,
-    abreAl: al => abreAl(al), url: pag, fechaPonto: () => limpaPonto() };
+    abreAl: al => abreAl(al), url: pag, fechaPonto: () => limpaPonto(),
+    // a visão satélite (mapa-sat-to.js) abre com a legenda recolhida e devolve como estava, sem gravar a escolha
+    legenda: sim => { legenda(!!sim, false); poeNomes(); }, legendaAberta: () => legAberta };
 })();
