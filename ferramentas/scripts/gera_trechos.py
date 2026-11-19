@@ -730,7 +730,8 @@ def pacote_trechos(destino):
 # ?v= dos assets da página inicial e da Queimadas: trocar quando o arquivo muda (o navegador guarda a versão anterior)
 V_MAPA = '20261119'                                     # mapa-municipios.js (e busca-ativo.js)
 V_FOCOS = '20261116'
-V_SAT_TO = '20261119'                                     # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
+V_SAT_TO = '20261119b'                                     # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
+V_RAIOX = '20261119'                                      # assets/mapa-raiox.js (raio-X da rede, Ctrl+X)
 
 
 def pagina_alimentador(modelo, c):
@@ -1043,10 +1044,12 @@ REDE_TOL = 25                                              # m do Douglas–Peuc
 def redes_mapa(saida, dados):
     """dados/redes/<AL>.json: a rede de cada alimentador já nas coordenadas do mapa de municípios, para a prévia do
     município aberto na página inicial (mapa-municipios.js). {d: path SVG (linhas encadeadas e simplificadas),
-    b: [x0, y0, x1, y1]}. Só a forma: as contas (NAE, km) continuam saindo dos dados de cada alimentador."""
+    b: [x0, y0, x1, y1]}. Só a forma: as contas (NAE, km) continuam saindo dos dados de cada alimentador.
+    Devolve {AL: linhas [(x, y), ...]} com os mesmos números do d (para o raiox.txt)."""
     a, b, c_, d = PROJ_MUN
     pasta = saida / 'dados' / 'redes'
     pasta.mkdir(parents=True, exist_ok=True)
+    redes = {}
     for c in dados:
         if c['validacao']['status'] == 'falha':
             continue
@@ -1082,6 +1085,92 @@ def redes_mapa(saida, dados):
         grava_json(pasta / f'{c["alimentador"]}.json', dict(
             d=''.join('M' + 'L'.join(f'{f(x)},{f(y)}' for x, y in ln) for ln in xy),
             b=[min(xs), min(ys), max(xs), max(ys)]))
+        redes[c['alimentador']] = xy
+    return redes
+
+
+# dados/redes/raiox.txt: a rede de todos os alimentadores do mapa da página inicial num arquivo só, já reduzida para o
+# Raio-X (assets/mapa-raiox.js, Ctrl+X), no lugar de baixar os ~300 dados/redes/<AL>.json e reduzir no navegador. No
+# estado inteiro um ponto a cada ~0,4 px da tela basta: os pontos do <AL>.json vão para uma grade de RAIOX_DIV passos na
+# largura do mapa (q = (w + 12) / RAIOX_DIV unidades do mapa, a do viewBox), os segmentos repetidos e os de comprimento
+# zero saem, os que sobram são encadeados em linhas (_trilhas: cada derivação continua pelo vão mais reto) e cada linha
+# passa por um Douglas–Peucker de RAIOX_TOL passos da grade entre as derivações (que ficam: as linhas se encontram).
+# 1ª linha: "raiox", a versão do formato e q; depois uma linha de texto por alimentador (na ordem do mapa, a de
+# window.MUN): o código, uma tabulação e as linhas da rede separadas por espaço, cada uma em polyline (o do Google) com os
+# inteiros da grade (x, y); cada ponto é a diferença do anterior, também de uma linha e de um alimentador para o seguinte
+# (o 1º do arquivo é a diferença de 0, 0). A versão (8 hex) vai no endereço (?v=, no data-rede do script na página inicial).
+RAIOX_DIV = 2600
+RAIOX_TOL = 0.5
+
+
+def _dp_plano(pts, tol):
+    """Douglas–Peucker (pontas mantidas) no plano, com a distância nas unidades dos pontos."""
+    manter, pilha, t2 = [False] * len(pts), [(0, len(pts) - 1)], tol * tol
+    manter[0] = manter[-1] = True
+    while pilha:
+        i, j = pilha.pop()
+        ax, ay = pts[i]
+        dx, dy = pts[j][0] - ax, pts[j][1] - ay
+        l2, dmax, k = dx * dx + dy * dy, t2, None
+        for m in range(i + 1, j):
+            px, py = pts[m][0] - ax, pts[m][1] - ay
+            f = max(0, min(1, (px * dx + py * dy) / l2)) if l2 else 0
+            d = (px - f * dx) ** 2 + (py - f * dy) ** 2
+            if d > dmax:
+                dmax, k = d, m
+        if k is not None:
+            manter[k] = True
+            pilha += [(i, k), (k, j)]
+    return [p for p, f in zip(pts, manter) if f]
+
+
+def raiox_txt(redes, q):
+    """[(AL, linhas [(x, y), ...] nas unidades do mapa), ...] → texto do raiox.txt (ver acima), na ordem dada."""
+    g = lambda v: math.floor(v / q + 0.5)                   # o Math.round do navegador
+    x0 = y0 = 0
+    out = [f'raiox\t1\t{q!r}']
+    for al, linhas in redes:
+        segs = set()
+        for ln in linhas:
+            pts = [(g(x), g(y)) for x, y in ln]
+            segs |= {(min(p, q_), max(p, q_)) for p, q_ in zip(pts, pts[1:]) if p != q_}
+        grau = {}
+        for p, q_ in segs:
+            grau[p] = grau.get(p, 0) + 1
+            grau[q_] = grau.get(q_, 0) + 1
+        fixos = {p for p, n in grau.items() if n != 2}
+        partes = []
+        for linha, manter in _trilhas(sorted(segs), fixos):
+            idx = sorted(manter)
+            pts = [linha[0]]
+            for i, j in zip(idx, idx[1:]):
+                pts += _dp_plano(linha[i:j + 1], RAIOX_TOL)[1:]
+            t = ''
+            for x, y in pts:
+                t += _poli(x - x0) + _poli(y - y0)
+                x0, y0 = x, y
+            partes.append(t)
+        if partes:
+            out.append(al + '\t' + ' '.join(partes))
+    return ''.join(x + '\n' for x in out)
+
+
+def raiox_mapa(saida, redes, man):
+    """dados/redes/raiox.txt (ver acima) com os alimentadores do mapa da página inicial (os de window.MUN, na mesma
+    ordem); só regrava se mudou. Devolve a versão (8 hex do arquivo)."""
+    geo = json.loads((PKG / 'site' / 'mapa-municipios-geo.json').read_text(encoding='utf-8'))
+    por_cod = {m['cod']: m for m in man['municipios']}
+    ordem = []
+    for g in geo['muns']:
+        for a in (por_cod[g['cod']]['alimentadores'] if g['cod'] in por_cod else ()):
+            if a['cod'] not in ordem and a['cod'] in redes:
+                ordem.append(a['cod'])
+    b = raiox_txt([(al, redes[al]) for al in ordem], (geo['w'] + 12) / RAIOX_DIV).encode('utf-8')
+    arq = saida / 'dados' / 'redes' / 'raiox.txt'
+    arq.parent.mkdir(parents=True, exist_ok=True)
+    if not arq.exists() or arq.read_bytes() != b:
+        arq.write_bytes(b)
+    return hashlib.sha1(b).hexdigest()[:8]
 
 
 # ---------------------------------------------------------------- alimentadores vizinhos no mapa do alimentador
@@ -1947,7 +2036,7 @@ def interface(saida, malha=None):
         p.write_text(casca(f'{m["nome"]} · alimentadores', corpo, '../../',
                            rodape=f'<p>Malha do IBGE, amostra a cada {PASSO_M}&nbsp;m; mínimo de {MIN_M}&nbsp;m.</p>'), encoding='utf-8')
     vb = mapa_e_ranking(saida, dados, man)
-    redes_mapa(saida, dados)
+    v_raiox = raiox_mapa(saida, redes_mapa(saida, dados), man)
     vizinhos_mapa(saida, vizinhos_dos_dados(dados))
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
@@ -1981,7 +2070,8 @@ def interface(saida, malha=None):
              f'<script src="assets/focos.js?v={V_FOCOS}"></script>\n'
              f'<script src="assets/mapa-municipios.js?v={V_MAPA}"></script>\n'
              f'<script src="assets/busca-ativo.js?v={V_MAPA}"></script>\n'
-             '<script src="assets/mapa-raiox.js?v=20261110"></script>\n'     # zoom → tela cheia e raio-X (Ctrl+X) no mapa
+             # zoom → tela cheia e raio-X (Ctrl+X) no mapa; data-rede: a versão do dados/redes/raiox.txt (baixado no 1º Ctrl+X)
+             f'<script src="assets/mapa-raiox.js?v={V_RAIOX}" data-rede="{v_raiox}"></script>\n'
              f'<script src="assets/mapa-sat-to.js?v={V_SAT_TO}"></script>')   # satélite do Tocantins (Ctrl+S); Leaflet só no 1º uso
     (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True, topo=TOPO_CENTRAL,   # página inicial sem rodapé (pedido do usuário)
                                             estilos=f'<link rel="stylesheet" href="assets/focos.css?v={V_FOCOS}">'),
