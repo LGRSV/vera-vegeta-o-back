@@ -1637,13 +1637,19 @@
   }
   // vai() é um passo só para o histórico: uma entrada por nível no fim, não uma por etapa do caminho
   // saindo do quadro de um ativo para o mesmo alimentador (focaAl não voa: ele já está aberto), o voo volta ao alimentador inteiro
-  const vai = alvo => {
+  // semVoo: vai direto ao nível, sem voo (como o Voltar do navegador); a visão satélite (mapa-sat-to.js) usa ao fechar,
+  // com o mapa ainda escondido embaixo dela. Sem ele, nada muda
+  const vai = (alvo, semVoo) => {
     const doAtivo = !!(alvo && alvo.al && alf === alvo.al && fixoPonto);
     pedidoP++;
     pedAl++;                                             // o alimentador que ainda está chegando não entra mais
     destinoAl = null;
     limpaPonto();
-    return vaiHist(alvo).then(() => { if (doAtivo && alf === alvo.al && !fixoPonto) voa(enquadra()); });
+    const antes = direto;
+    if (semVoo) direto = true;                          // os voos de agora (entra, saiPolo...) saem todos nesta chamada
+    const p = vaiHist(alvo);
+    direto = antes;
+    return p.then(() => { if (doAtivo && alf === alvo.al && !fixoPonto) voa(enquadra()); });
   };
   async function vaiHist(alvo) {
     if (hist) hist.pausa++;

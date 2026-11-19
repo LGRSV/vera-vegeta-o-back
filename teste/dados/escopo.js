@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.18",
+ "versao": "2.19",
  "atualizado": "2026-11-18",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -151,6 +151,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Visão satélite do Tocantins no mapa inicial com Ctrl+S (⌘S no Mac): o mapa se dissolve no satélite e aproxima até o estado, com o T1 e o T2 de todos os alimentadores", "st": "ok", "d": "2026-11-18", "obs": "Mouse na linha mostra o alimentador e o clique abre a página dele. Ctrl+S de novo ou Esc volta. No celular ainda não há botão."},
    {"t": "Clique na linha de outro alimentador já o seleciona no mapa do alimentador (vizinhos e visão do Tocantins), sem balão; o mouse mostra o código e \"Clique para selecionar\"", "st": "ok", "d": "2026-11-18", "obs": "Clique num selecionado abre o painel do trecho; tirar e abrir ficam no menu Alimentadores. No 11º, aviso de limite de 10."},
    {"t": "Visão satélite do mapa inicial com os 327 alimentadores: os 14 com só alguns metros de rede no cadastro aparecem como ponto", "st": "ok", "d": "2026-11-18"},
+   {"t": "Visão satélite com os níveis do mapa dos municípios: Tocantins › Regional › Polo › Município (contornos, cores dos polos, NAE, voo suave entre níveis)", "st": "ok", "d": "2026-11-19", "obs": "Trilha clicável; Esc sobe um nível e Ctrl+S fecha. Abre no nível em que o mapa estava e, ao fechar, o mapa fica no nível do satélite. No município, os alimentadores dele em destaque, com a lista."},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},

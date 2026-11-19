@@ -728,9 +728,9 @@ def pacote_trechos(destino):
 
 
 # ?v= dos assets da página inicial e da Queimadas: trocar quando o arquivo muda (o navegador guarda a versão anterior)
-V_MAPA = '20261116'
+V_MAPA = '20261118b'                                     # mapa-municipios.js (e busca-ativo.js)
 V_FOCOS = '20261116'
-V_SAT_TO = '20261118'                                      # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
+V_SAT_TO = '20261118b'                                     # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
 
 
 def pagina_alimentador(modelo, c):
