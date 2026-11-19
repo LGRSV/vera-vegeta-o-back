@@ -19,8 +19,14 @@
 //   resumo, a lista e o link da página do município). Mouse numa área realça e mostra a dica; clique (ou toque) entra nela.
 //   A trilha "Tocantins › Regional › Polo › Município" fica na barra da lupa, no lugar e no desenho da do mapa dos municípios.
 //   As linhas de fora do nível ficam apagadas. Contornos convertidos uma vez (simplificados) e desenhados em canvas; no voo
-//   entre níveis, num svg montado uma vez no começo do voo (a cada quadro só a escala e a mistura dos dois níveis) e, no
-//   pouso, as linhas T1/T2 redesenhadas em partes (um lote por quadro, o desenho pronto entra de uma vez).
+//   entre níveis, num svg montado uma vez no começo do voo (a cada quadro só a escala e a mistura dos dois níveis).
+// - Gestos livres leves (roda, arrasto, pinça, duplo clique, tela cheia): com o mapa em movimento, a máscara e os canvas da
+//   divisão não são refeitos, só acompanham (o painel do mapa os leva no arrasto; no zoom, esticados pelo transform, como os
+//   quadros do satélite) e são refeitos parados, um pouco depois (na roda seguida, só no último passo). As linhas T1/T2 são
+//   desenhadas por um worker (o "pintor", OffscreenCanvas) a partir das partes que o Leaflet recorta aqui, e a imagem entra
+//   num canvas "bitmaprenderer" de uma vez, enquanto a de antes fica esticada; depois de um arrasto que não sai da folga,
+//   nada é refeito. O realce da linha embaixo do mouse vai num canvas pequeno à parte e o da área num svg: o mouse não faz
+//   o navegador passar a limpo os canvas grandes. O mesmo desenho de antes, pixel a pixel, parado.
 // - Sincronia com o mapa dos municípios: abre no nível que ele mostra (window.ARGOS_MAPA.nivel) e, ao fechar, ele vai direto
 //   (sem voo, escondido embaixo do satélite) ao nível em que o satélite estava (ARGOS_MAPA.vai(…, semVoo)). Trocas de nível
 //   feitas por fora com o satélite aberto (busca da barra, Voltar do navegador) o satélite acompanha.
@@ -267,6 +273,7 @@
   // desenhar, os mesmos simplificados (~110 m) e já projetados no Mercator do Leaflet no zoom 0 (w); a caixa (bx, nas
   // unidades do mapa dos municípios; b, em lat/lon); o ponto do nome (rot, lat/lon)
   let D = null;
+  const setD = x => { D = x; };
   const svgLL = (x, y) => [(y - PD) / PC, (x - PB) / PA];
   const CORES = ['a', 'b', 'c', 'd'];
   function simplifica(p, tol) {                            // Douglas-Peucker (anel fechado: o 1º corte no ponto mais longe do 1º)
@@ -355,26 +362,37 @@
     return ms.reduce((a, b) => Math.hypot(b.c[0] - mx, b.c[1] - my) < Math.hypot(a.c[0] - mx, a.c[1] - my) ? b : a);
   };
   const alsDe = ms => new Set([].concat(...ms.map(m => (m.als || []).map(a => a.cod))));
-  function divisao() {
-    if (D) return D;
-    D = { reg: {}, pol: {}, mun: {}, regs: [] };
-    M.muns.forEach(m => {
+  // o ponto do nome (rot), feito só quando alguém pede (nomes do polo, cartão sem lugar): no 1º Ctrl+S, a busca do ponto
+  // de todas as áreas era trabalho à toa antes da animação
+  const rotDe = (a, c) => { let r = null; Object.defineProperty(a, 'rot', { get: () => r || (r = svgLL(...pontoDentro(a, c()))), configurable: true }); };
+  // (no 1º Ctrl+S, aos pedaços de ~8 ms: numa tarefa só, travava a página uns 100 ms no celular antes de o satélite aparecer)
+  async function divisao() {
+    if (!D) setD(await montaDivisao({ reg: {}, pol: {}, mun: {}, regs: [] }));
+    return D;
+  }
+  async function montaDivisao(D) {                         // (D: a divisão em construção; a de fora só no fim)
+    let t0 = performance.now();
+    const respira = async () => { if (performance.now() - t0 > 8) { await new Promise(r => setTimeout(r, 0)); t0 = performance.now(); } };
+    for (const m of M.muns) {
       const a = area(aneisD(m.d));
-      a.tipo = 'mun'; a.nome = m.nome; a.m = m; a.rot = svgLL(...pontoDentro(a, m.c));
+      a.tipo = 'mun'; a.nome = m.nome; a.m = m; rotDe(a, () => m.c);
       D.mun[m.cod] = a;
-    });
+      await respira();
+    }
     const ordem = [];                                      // polos na ordem em que aparecem (a dos grupos de mapa-municipios.js)
     M.muns.forEach(m => { if (m.polo && !ordem.includes(m.polo)) ordem.push(m.polo); });
-    ordem.forEach(p => {
+    for (const p of ordem) {
+      await respira();
       const ms = M.muns.filter(m => m.polo === p), aneis = encadeia((M.pols || {})[p]);
       const a = area(aneis.length ? aneis : [].concat(...ms.map(m => D.mun[m.cod].aneis.map(x => x.s))));
       Object.assign(a, { tipo: 'pol', nome: p, reg: ms[0].reg, ms, als: alsDe(ms), cor: 'a' });
-      a.rot = svgLL(...pontoDentro(a, meio(ms).c));
+      rotDe(a, () => meio(ms).c);
       D.pol[p] = a;
-    });
-    Object.keys(M.regs || {}).forEach(r => {
+    }
+    for (const r of Object.keys(M.regs || {})) {
+      await respira();
       const ms = M.muns.filter(m => m.reg === r);
-      if (!ms.length) return;
+      if (!ms.length) continue;
       const a = area(encadeia(M.regs[r]));
       // cor de cada polo como na regional aberta do mapa dos municípios (entra): os polos na ordem do mapa, de cima para baixo
       // ou da esquerda para a direita (o eixo em que eles mais se espalham), polo-a, -b, -c, -d
@@ -388,10 +406,10 @@
       ps.sort((x, y) => x[eixo] - y[eixo]);
       ps.forEach((q, i) => { D.pol[q.p].cor = CORES[i % CORES.length]; });
       Object.assign(a, { tipo: 'reg', nome: r, ms, als: alsDe(ms), polos: ps.map(q => q.p) });
-      a.rot = svgLL(...pontoDentro(a, meio(ms).c));
+      rotDe(a, () => meio(ms).c);
       D.reg[r] = a;
       D.regs.push(a);
-    });
+    }
     return D;
   }
   const corPolo = p => getComputedStyle(caixa).getPropertyValue('--polo-' + ((D && D.pol[p] && D.pol[p].cor) || 'a')).trim() || '#3d8fe0';
@@ -554,10 +572,31 @@
   // a vista do mapa como texto (tamanho, zoom, origem dos pixels e posição do painel): o Leaflet dispara 'zoom' e 'move' no
   // mesmo passo; com a vista igual à do último desenho, não se desenha de novo
   const chaveVista = () => { const t = map.getSize(), po = map.getPixelOrigin(), pp = map._getMapPanePos(); return `${t.x},${t.y},${map.getZoom()},${po.x},${po.y},${pp.x},${pp.y}`; };
-  // máscara: fora do Tocantins, a cor escura dos mapas. Um svg no tamanho da caixa com folga de meia caixa em volta, refeito a
-  // cada movimento (568 pontos, já projetados no zoom 0: cada ponto é uma conta; uma vez por passo; a cor lida só na
-  // abertura e na troca do tema, sem o estilo da página recalculado a cada quadro); na animação do zoom do Leaflet, estica
-  // junto com os quadros (como as camadas de imagem)
+  // ---------- desenhos que andam com o mapa (máscara, véu e contornos) ----------
+  // Cada um é feito para uma vista (v: o zoom z e o canto x, y em px do mundo nesse zoom, tamanho w × h, com folga em volta
+  // da caixa) e, com o mapa em movimento (arrasto, pinça, fim do zoom animado, voo), só acompanha: no arrasto o painel do
+  // mapa já o leva; com o zoom mudando, é esticado pelo transform (como os quadros do satélite e o canvas das linhas). Era o
+  // que mais pesava nos gestos: a máscara e os dois canvas eram refeitos (e enviados de novo ao compositor) a cada quadro do
+  // arrasto e da pinça. Refeito só quando a folga acaba (a caixa sairia do desenho) ou esticado demais (z), e parado: no
+  // fim do movimento, um pouco depois (na roda seguida, só o do último passo), se o zoom mudou ou a folga ficou curta.
+  // estica(v, els, f): devolve a escala e se o desenho cobre a caixa com folga f (fração da caixa)
+  function estica(v, els, f = 0) {
+    const s = map.getZoomScale(map.getZoom(), v.z), po = map.getPixelOrigin(), pp = map._getMapPanePos(), t = map.getSize();
+    if (els) { const o = L.point(v.x * s - po.x, v.y * s - po.y); els.forEach(e => L.DomUtil.setTransform(e, o, s)); }
+    const vx = po.x - pp.x, vy = po.y - pp.y, fx = t.x * f, fy = t.y * f;
+    return { s, cobre: v.x * s <= vx - fx && v.y * s <= vy - fy && (v.x + v.w) * s >= vx + t.x + fx && (v.y + v.h) * s >= vy + t.y + fy };
+  }
+  const ESTICA = 1.6;                                     // (mais que isso, o traço engrossa e a borda borra: refaz)
+  const parado = (v, f) => v.z === map.getZoom() && estica(v, null, f).cobre;
+  // refaz um pouco depois do fim do movimento (cancelado por outro movimento)
+  function adiado(faz) {
+    let t = 0, q = 0;
+    const cancela = () => { clearTimeout(t); cancelAnimationFrame(q); t = q = 0; };
+    return { cancela, pendente: () => !!(t || q), agenda() { cancela(); t = setTimeout(() => { t = 0; q = requestAnimationFrame(() => { q = 0; if (map && !map._animatingZoom && estado !== 'off') faz(); }); }, 60); } };
+  }
+  // máscara: fora do Tocantins, a cor escura dos mapas. Um svg no tamanho da caixa com folga de meia caixa em volta (568
+  // pontos, já projetados no zoom 0: cada ponto é uma conta; a cor lida só na abertura e na troca do tema, sem o estilo da
+  // página recalculado a cada quadro); na animação do zoom do Leaflet, estica junto com os quadros (como as camadas de imagem)
   function criaMascara() {
     const pane = map.createPane('st-mascara');
     pane.style.zIndex = 250;                               // acima do satélite (200), abaixo das linhas (400)
@@ -569,14 +608,16 @@
     path.style.filter = 'drop-shadow(0 0 3px rgba(0,0,0,.55))';   // a borda: uma sombra leve, como na visão Tocantins do alimentador
     el.append(path);
     pane.append(el);
-    let caixaM = null, chave = '', corM = '';
+    let caixaM = null, chave = '', corM = '', vM = null;
     const cor = () => getComputedStyle(caixa).getPropertyValue('--mapbg').trim() || '#0f1417';
     const TO0 = TO.map(anel => anel.map(ll => map.project(ll, 0)));   // o contorno no zoom 0
+    const depois = adiado(() => desenha());
     const desenha = forca => {                              // forca (true): mesmo com a vista igual (tema, abertura)
       if (!map || map._animatingZoom) return;
       const ch = chaveVista();
       if (forca !== true && ch === chave) return;
       chave = ch;
+      depois.cancela();
       const t = map.getSize(), m = 0.5, x0 = -t.x * m, y0 = -t.y * m, w = t.x * (1 + 2 * m), h = t.y * (1 + 2 * m);
       caixaM = L.latLngBounds(map.containerPointToLatLng([x0, y0]), map.containerPointToLatLng([x0 + w, y0 + h]));
       L.DomUtil.setPosition(el, map.containerPointToLayerPoint([x0, y0]));
@@ -588,17 +629,26 @@
       for (const anel of TO0) d += 'M' + anel.map(p => (Math.round(p.x * k) + dx).toFixed(1) + ',' + (Math.round(p.y * k) + dy).toFixed(1)).join('L') + 'Z';
       path.setAttribute('d', d);
       if (forca === true || !corM) { corM = cor(); path.setAttribute('fill', corM); }
+      vM = { z: map.getZoom(), x: x0 - pp.x + po.x, y: y0 - pp.y + po.y, w, h };
     };
-    map.on('zoom move viewreset resize', desenha);
+    // em movimento, só acompanha; refaz se a caixa sair do desenho ou esticar demais
+    map.on('zoom move', () => {
+      if (!map || map._animatingZoom || !vM) return;
+      const r = estica(vM, [el]);
+      if (!r.cobre || r.s > ESTICA) desenha();
+    });
+    map.on('moveend', () => { if (vM && !parado(vM, 0.2)) depois.agenda(); });   // parado: o desenho da vista de agora
+    map.on('viewreset resize', desenha);
     map.on('zoomanim', e => {
-      if (!caixaM) return;
+      if (!caixaM || !vM) return;
+      depois.cancela();
       chave = '';                                           // (esticado: o próximo passo desenha de novo)
-      const s = map.getZoomScale(e.zoom), o = map._latLngBoundsToNewLayerBounds(caixaM, e.zoom, e.center).min;
+      const s = map.getZoomScale(e.zoom, vM.z), o = map._latLngBoundsToNewLayerBounds(caixaM, e.zoom, e.center).min;
       L.DomUtil.setTransform(el, o, s);
     });
     new MutationObserver(() => desenha(true)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => desenha(true)); } catch (e) { /* navegador antigo */ }
-    return { desenha };
+    return { desenha, pendente: depois.pendente };
   }
   // divisão desenhada em dois canvas no tamanho da caixa (com folga de um quarto em volta), refeitos a cada movimento (os
   // anéis já projetados no zoom 0: cada ponto é uma conta) e, na animação do zoom do Leaflet, esticados como os quadros:
@@ -695,6 +745,46 @@
         gc.append(g);
       },
     });
+    // ---- realce (a área embaixo do mouse ou do cartão): o véu claro por baixo das linhas e o contorno forte por cima ----
+    // num svg à parte em cada pane, com o mesmo desenho que os canvas tinham: trocar o realce (o mouse passando de uma área
+    // a outra) não refaz os dois canvas, que são 1,5 × a caixa (×4 na tela de alta densidade), só o desenho da área
+    const rsv = cvs.map(c => {
+      const e = document.createElementNS(NS, 'svg');
+      e.style.cssText = 'position:absolute;left:0;top:0;display:none;margin:0;min-height:0;max-width:none;max-height:none;overflow:hidden;pointer-events:none';
+      c.cv.parentNode.append(e);
+      return e;
+    });
+    let rsA = null, rsG = [];
+    function poeRealce() {
+      const a = realceA && mistura >= 1 && !voandoN && !noVoo && map && !map._animatingZoom ? realceA : null;
+      if (a !== rsA) {
+        rsA = a;
+        rsv.forEach(e => { e.textContent = ''; });
+        rsG = [];
+        if (a) {
+          const pc = a.tipo === 'pol' ? corPolo(a.nome) : null, d = dDe(a), gv = el('g', {}), gc = el('g', {});
+          gv.append(el('path', { d, fill: pc || '#ffffff', 'fill-rule': 'evenodd', opacity: pc ? 0.2 : 0.12 }));
+          if (pc) {                                         // por dentro da área (o porDentro dos canvas), com a sombra
+            const df = el('defs', {}), cp = el('clipPath', { id: 'st-rs-rec' }), g = el('g', { 'clip-path': 'url(#st-rs-rec)' });
+            cp.append(el('path', { d, 'clip-rule': 'evenodd' }));
+            df.append(cp);
+            g.append(traco(d, 'rgba(0,0,0,.5)', 2 * (4 + 2), 1), traco(d, pc, 2 * 4, 1));
+            gc.append(df, g);
+          } else gc.append(traco(d, 'rgba(0,0,0,.5)', 2.6 + 3, 1), traco(d, '#ffffff', 2.6, 1));
+          rsv[0].append(gv); rsv[1].append(gc);
+          rsG = [gv, gc];
+        }
+      }
+      rsv.forEach(e => { e.style.display = a ? '' : 'none'; });
+      if (!a) return;
+      const t = map.getSize(), k = Math.pow(2, map.getZoom()), po = map.getPixelOrigin(), pp = map._getMapPanePos(), lp = map.containerPointToLayerPoint([0, 0]);
+      const tr = `matrix(${k / S} 0 0 ${k / S} ${O.x * k + pp.x - po.x} ${O.y * k + pp.y - po.y})`;
+      rsG.forEach(g => g.setAttribute('transform', tr));
+      rsv.forEach(e => {
+        if (e._tam !== t.x + 'x' + t.y) { e._tam = t.x + 'x' + t.y; e.setAttribute('width', t.x); e.setAttribute('height', t.y); e.style.width = t.x + 'px'; e.style.height = t.y + 'px'; }
+        L.DomUtil.setPosition(e, lp);
+      });
+    }
     const BR = 'rgba(255,255,255,.92)';
     function nivel(n, Pn) {                                 // o desenho de um nível com um pincel
       const a = areaDe(n);
@@ -757,24 +847,33 @@
       for (const c of cvs) { c.sv.style.display = 'none'; c.cv.style.display = ''; }
     }
     // ---- parado: os canvas ----
-    let chave = '';
-    const chaveDe = (n, na, mi, ra) => [chaveVista(), window.devicePixelRatio, mi, chN(n), chN(na), ra ? ra.tipo + ':' + ra.nome : ''].join('|');
+    let chave = '', vC = null, ctC = '';                    // vC: a vista do desenho dos canvas; ctC: o que está desenhado neles
+    const conteudo = (n, na, mi) => [window.devicePixelRatio, mi, chN(n), chN(na)].join('|');
+    const chaveDe = (n, na, mi) => chaveVista() + '|' + conteudo(n, na, mi);
+    const depois = adiado(() => desenha());
     function desenha(forca) {                               // forca (true): mesmo com tudo igual ao último desenho (tema, abertura)
       if (!map || !D || map._animatingZoom) return;
       if (voandoN) { poeVoo(forca === true); return; }
       // (um desenho por passo do mapa: 'zoom' e 'move' vêm juntos)
-      const ch = chaveDe(niv, nivAntes, mistura, realceA);
+      const ch = chaveDe(niv, nivAntes, mistura);
       if (noVoo && forca !== true && ch === chaveSvg) return;   // pousado, com o svg do voo
       tiraVoo();
       if (forca !== true && ch === chave) return;
       chave = ch;
+      depois.cancela();
       const t = map.getSize(), m = 0.25, x0 = -t.x * m, y0 = -t.y * m, w = t.x * (1 + 2 * m), h = t.y * (1 + 2 * m);
       const dpr = Math.min(2, window.devicePixelRatio || 1), tam = `${w}x${h}x${dpr}`;
       caixaC = L.latLngBounds(map.containerPointToLatLng([x0, y0]), map.containerPointToLatLng([x0 + w, y0 + h]));
       const po = map.getPixelOrigin(), pp = map._getMapPanePos();
       P = { k: Math.pow(2, map.getZoom()), ox: pp.x - po.x, oy: pp.y - po.y };
+      // no Tocantins o véu não tem nada: fica escondido, sem limpar e passar a limpo um canvas vazio a cada desenho
+      const veuVazio = !(mistura > 0.004 && areaDe(niv)) && !(mistura < 0.996 && areaDe(nivAntes));
       for (const c of cvs) {
         L.DomUtil.setPosition(c.cv, map.containerPointToLayerPoint([x0, y0]));
+        const vazio = c === veu && veuVazio;
+        if (vazio && c.vazio && c.tam === tam) continue;
+        c.vazio = vazio;
+        c.cv.style.visibility = vazio ? 'hidden' : '';
         if (c.tam !== tam) {
           c.tam = tam;
           c.cv.width = Math.round(w * dpr); c.cv.height = Math.round(h * dpr);
@@ -789,33 +888,38 @@
       if (mistura < 1 && 1 - mistura > 0.004) nivel(nivAntes, pincelCanvas(1 - mistura, vc, cc, x0, y0, w, h));
       if (mistura > 0.004) nivel(niv, pincelCanvas(mistura, vc, cc, x0, y0, w, h));
       vc.globalAlpha = cc.globalAlpha = 1;
-      if (realceA && mistura >= 1) {                        // área embaixo do mouse (ou do cartão): um véu claro e o contorno forte
-        const a = realceA, pc = a.tipo === 'pol' ? corPolo(a.nome) : null;
-        vc.beginPath();
-        traca(vc, a);
-        vc.fillStyle = pc || '#ffffff';
-        vc.globalAlpha = pc ? 0.2 : 0.12;
-        vc.fill('evenodd');
-        vc.globalAlpha = 1;
-        if (pc) porDentro(cc, a, pc, 4, 2); else linha(cc, [a], '#ffffff', 2.6, 3);
-      }
+      vC = { z: map.getZoom(), x: x0 - pp.x + po.x, y: y0 - pp.y + po.y, w, h };
+      ctC = conteudo(niv, nivAntes, mistura);
+      poeRealce();
     }
-    map.on('zoom move viewreset resize', desenha);
+    // em movimento (fora do voo entre níveis, que tem o svg), os canvas só acompanham; refeitos se a caixa sair do desenho,
+    // se esticarem demais ou se o que mostram mudou
+    map.on('zoom move', () => {
+      if (!map || !D || map._animatingZoom) return;
+      if (voandoN || noVoo || !vC || conteudo(niv, nivAntes, mistura) !== ctC) { desenha(); return; }
+      const r = estica(vC, cvs.map(c => c.cv));
+      if (!r.cobre || r.s > ESTICA) desenha(); else if (rsA || realceA) poeRealce();
+    });
+    map.on('moveend', () => { if (vC && !voandoN && !noVoo && !parado(vC, 0.08)) depois.agenda(); });
+    map.on('viewreset resize', desenha);
     map.on('zoomanim', e => {
-      if (!caixaC) return;
+      rsv.forEach(x => { x.style.display = 'none'; });       // (o realce volta no fim do zoom)
+      rsA = null;
+      if (!caixaC || !vC) return;
+      depois.cancela();
       chave = '';
-      const s = map.getZoomScale(e.zoom), o = map._latLngBoundsToNewLayerBounds(caixaC, e.zoom, e.center).min;
+      const s = map.getZoomScale(e.zoom, vC.z), o = map._latLngBoundsToNewLayerBounds(caixaC, e.zoom, e.center).min;
       cvs.forEach(c => L.DomUtil.setTransform(c.cv, o, s));
     });
     new MutationObserver(() => desenha(true)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     // parado depois do pouso: os canvas de volta no lugar do svg (o desenho parado é sempre o dos canvas)
     const fixa = () => { if (noVoo && !voandoN) { tiraVoo(); desenha(true); } };
-    return { desenha, fixa };
+    return { desenha, fixa, realce: poeRealce, pendente: depois.pendente };
   }
   function realceArea(a) {
     if (a === realceA) return;
     realceA = a;
-    if (desenho) desenho.desenha();
+    if (desenho) desenho.realce();
   }
   // linhas: o T1 e o T2 de cada alimentador (polilinhas do Leaflet num canvas, que já sabe o mouse em cima da linha).
   // Nos níveis, as de alimentadores de fora (escopo: os que têm rede na regional, no polo ou no município) ficam apagadas;
@@ -845,20 +949,142 @@
   }
   function estilizaLinhas() {
     if (!map) return;
-    grupos.forEach((g, cod) => g.forEach(pl => pl.setStyle(estiloDe(pl, cod === sobre))));
+    grupos.forEach(g => g.forEach(pl => pl.setStyle(estiloDe(pl, false))));
     if (niv.mun && escopo) escopo.forEach(cod => { const g = grupos.get(cod); if (g) g.forEach(pl => pl.bringToFront()); });
   }
-  // canvas das linhas com o redesenho do fim do voo entre níveis em partes (_partes, armado no pouso): o desenho novo vai
-  // sendo feito num canvas à parte, um lote de linhas por quadro, enquanto as de antes (esticadas, como no voo) seguem na
-  // tela; pronto, entra de uma vez, com o mesmo desenho que o redesenho inteiro faria. Era o maior quadro do pouso (todas as
-  // linhas num quadro só). Zoom, viewreset ou um moveend no meio largam o trabalho (o Leaflet redesenha como sempre); um
-  // pedido de redesenho (o mouse numa linha, um estilo) termina o trabalho na hora
-  let Tela = null;
-  const telaLinhas = opc => new (Tela || (Tela = L.Canvas.extend({
+  // canvas das linhas, redesenhado no fim de cada movimento (o pouso do voo entre níveis, o fim do zoom da roda, da pinça, do
+  // duplo clique) sem travar: o desenho novo é feito fora da tela enquanto o de antes fica nela, esticado como no zoom do
+  // Leaflet, e entra de uma vez, pronto, com o mesmo desenho que o redesenho inteiro do Leaflet faria. Era o maior quadro de
+  // cada passo (todas as linhas num quadro só, num canvas de 2× a caixa, ×2 na tela de alta densidade). Na roda seguida, o
+  // passo seguinte larga o trabalho do anterior: só a vista em que o mapa para é desenhada. Depois de um arrasto (o mesmo
+  // zoom), se o desenho de antes ainda cobre a caixa com folga, nada é refeito. Zoom e viewreset no meio largam o trabalho.
+  // - Com OffscreenCanvas (o normal): o desenho vai para um worker, o "pintor". A página só recorta e simplifica as linhas
+  //   (o Leaflet: as mesmas partes que o mouse e o clique usam) e manda as partes e os estilos; o pintor faz as operações do
+  //   L.Canvas._draw, na mesma ordem (cada camada: o caminho e o traço com a opacidade, a largura e a cor dela; os pontos, o
+  //   círculo com o preenchimento e o traço) e devolve a imagem (ImageBitmap), que entra num canvas "bitmaprenderer" sem
+  //   cópia. O canvas do Leaflet fica por cima, transparente, só para o mouse. Um estilo mudado (o nível) pede outro desenho.
+  // - Sem OffscreenCanvas: o desenho em partes aqui, num canvas à parte, um lote por quadro; um pedido de redesenho no meio
+  //   termina o trabalho na hora.
+  function pintaLinhas(tela, m) {
+    const traco = (x, e) => { x.globalAlpha = e[2]; x.lineWidth = e[1]; x.strokeStyle = e[0]; x.lineCap = 'round'; x.lineJoin = 'round'; x.stroke(); };
+    const x = tela.getContext('2d'), Ls = m.L, P = m.P, C = m.C, E = m.E;
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    x.clearRect(0, 0, m.W, m.H);
+    x.setTransform(m.k, 0, 0, m.k, -m.bx * m.k, -m.by * m.k);
+    x.save();
+    let ip = 0, ic = 0;
+    for (let i = 0; i < Ls.length; i += 3) {
+      const e = E[Ls[i + 1]], n = Ls[i + 2];
+      x.beginPath();
+      if (Ls[i] === 1) {                                    // polilinha: n partes
+        for (let k = 0; k < n; k++) {
+          const q = P[ip++];
+          for (let j = 0; j < q; j++, ic += 2) { if (j) x.lineTo(C[ic], C[ic + 1]); else x.moveTo(C[ic], C[ic + 1]); }
+        }
+        traco(x, e);
+      } else {                                              // ponto: centro e raio
+        x.arc(C[ic], C[ic + 1], C[ic + 2], 0, Math.PI * 2, false);
+        ic += 3;
+        x.globalAlpha = e[4]; x.fillStyle = e[3]; x.fill('evenodd');
+        traco(x, e);
+      }
+    }
+    x.restore();
+    return tela.transferToImageBitmap();
+  }
+  // o worker: desenha o último pedido (os do meio, que chegam juntos, ficam de fora) e devolve a imagem
+  function Pintor(posta) {
+    let tela = null, pedido = null, vez = 0;
+    const pinta = () => {
+      vez = 0;
+      const m = pedido;
+      pedido = null;
+      if (!m) return;
+      if (m.solta) { tela = null; return; }
+      const t0 = performance.now();
+      if (!tela || tela.width !== m.W || tela.height !== m.H) tela = new OffscreenCanvas(m.W, m.H);
+      const bm = pintaLinhas(tela, m);
+      posta({ id: m.id, bm, ms: performance.now() - t0 }, [bm]);
+    };
+    return m => { pedido = m; if (!vez) vez = setTimeout(pinta, 0); };
+  }
+  // com OffscreenCanvas e o canvas "bitmaprenderer", a imagem das linhas sempre vem de pintaLinhas (no worker; sem ele, aqui)
+  // e entra na tela sem cópia; sem eles, o canvas do Leaflet como sempre (o fim do movimento desenhado em partes)
+  const temOC = (() => { try { const o = new OffscreenCanvas(1, 1); return !!(o.getContext('2d') && o.transferToImageBitmap && document.createElement('canvas').getContext('bitmaprenderer')) && !window.__satSemPintor; } catch (e) { return false; } })();
+  let pintor = null, pintorFalhou = false, telaLocal = null;
+  const pintaAqui = d => {
+    if (!telaLocal || telaLocal.width !== d.W || telaLocal.height !== d.H) telaLocal = new OffscreenCanvas(d.W, d.H);
+    return pintaLinhas(telaLocal, d);
+  };
+  const comPintor = () => {
+    if (pintor || pintorFalhou) return pintor;
+    try {
+      if (!temOC || typeof Worker !== 'function') throw new Error('sem OffscreenCanvas');
+      const u = URL.createObjectURL(new Blob([`'use strict';\nconst pintaLinhas = ${pintaLinhas};\nconst recebe = (${Pintor})((m, t) => postMessage(m, t || []));\nonmessage = e => recebe(e.data);\n`], { type: 'text/javascript' }));
+      pintor = new Worker(u);
+      URL.revokeObjectURL(u);
+      pintor.onmessage = e => { if (rend) rend._pintado(e.data); else if (e.data.bm) e.data.bm.close(); };
+      pintor.onerror = e => { e.preventDefault(); pintorFalhou = true; pintor = null; if (rend) rend._semPintor(); };
+    } catch (e) { pintorFalhou = true; pintor = null; }
+    return pintor;
+  };
+  let Tela = null, FORA = null;
+  const telaLinhas = opc => new (Tela || (FORA = L.bounds([-1e9, -1e9], [-1e9, -1e9]), Tela = L.Canvas.extend({
+    // modo imagem (com OffscreenCanvas): a tela das linhas é um canvas "bitmaprenderer" (a imagem do pintor entra sem
+    // cópia); o canvas do Leaflet fica por cima, transparente e sem desenho (1 px), só para o mouse e o clique nas linhas
+    _initContainer() {
+      L.Canvas.prototype._initContainer.call(this);
+      if (!temOC) return;
+      const v = this._img = document.createElement('canvas');
+      v.className = 'leaflet-zoom-animated st-img';
+      v.style.pointerEvents = 'none';
+      this._bmr = v.getContext('bitmaprenderer');
+      this._container.style.opacity = '0';
+    },
+    onAdd() {
+      L.Canvas.prototype.onAdd.call(this);
+      if (this._img && this._img.parentNode !== this._container.parentNode) this._container.before(this._img);
+    },
+    _destroyContainer() { this._largaPartes(); if (this._img) this._img.remove(); return L.Canvas.prototype._destroyContainer.call(this); },
+    // a imagem acompanha o canvas do Leaflet (posição e escala)
+    _espelha() { if (this._img) this._img.style.transform = this._container.style.transform; },
+    _updateTransform(c, z) { L.Canvas.prototype._updateTransform.call(this, c, z); this._espelha(); },
+    // o canvas do Leaflet no lugar e no tamanho (CSS) do desenho b; no modo imagem, sem bitmap (só a área do mouse)
+    _poeCaixa(b, k) {
+      const e = this._container, sz = b.getSize();
+      L.DomUtil.setPosition(e, b.min);
+      if (this._img) { e.width = e.height = 1; }
+      else {
+        e.width = k * sz.x; e.height = k * sz.y;
+        if (k === 2) this._ctx.scale(2, 2);
+        this._ctx.translate(-b.min.x, -b.min.y);
+      }
+      e.style.width = sz.x + 'px'; e.style.height = sz.y + 'px';
+      this._espelha();
+    },
     _update() {
-      const J = this._job;
+      const J = this._job, mp = this._map;
       if (J) this._largaPartes();
-      if (!this._partes || (this._map._animatingZoom && this._bounds)) { this._partes = false; return L.Canvas.prototype._update.call(this); }
+      if (mp._animatingZoom && this._bounds) return;        // (o fim da animação do zoom chama de novo)
+      // arrasto: o desenho na tela (vis) é deste zoom e desta origem dos pixels e ainda cobre a caixa com 15% de folga
+      const vis = this._vis, sujo = this._sujo;
+      this._sujo = false;
+      if (vis && !sujo && !this._semPartes && vis.z === mp.getZoom() && vis.po.equals(mp.getPixelOrigin())) {
+        const t = mp.getSize(), a = mp.containerPointToLayerPoint([0, 0]), f = t.multiplyBy(0.15), b = vis.b;
+        // (no lugar exato do desenho: o _onZoom de um voo que voltou à mesma vista o deixa com fração de pixel)
+        if (a.x - f.x >= b.min.x && a.y - f.y >= b.min.y && a.x + t.x + f.x <= b.max.x && a.y + t.y + f.y <= b.max.y) {
+          L.DomUtil.setPosition(this._container, b.min);
+          this._espelha();
+          return;
+        }
+      }
+      if (!this._img && (!this._bounds || this._semPartes || !(this._partes || this._sempre))) {
+        this._partes = false;
+        L.Canvas.prototype._update.call(this);
+        this._vis = { z: mp.getZoom(), po: mp.getPixelOrigin(), b: this._bounds };
+        if (this._aoAtualizar) this._aoAtualizar();
+        return;
+      }
       this._partes = false;
       // os limites novos (os de L.Renderer._update); centro e zoom ficam os de antes até a troca: o transform do canvas
       // na tela segue o do conteúdo de antes
@@ -866,7 +1092,19 @@
       const b = this._bounds = new L.Bounds(min, min.add(t.multiplyBy(1 + 2 * pd)).round()), sz = b.getSize(), m = L.Browser.retina ? 2 : 1;
       if (this._redrawRequest) { L.Util.cancelAnimFrame(this._redrawRequest); this._redrawRequest = null; }
       this._redrawBounds = null;
-      for (const id in this._layers) this._layers[id]._update();   // recorte e simplificação de todas (o toque já vale)
+      const novo = { b, m, c: this._map.getCenter(), z: this._map.getZoom(), po: this._map.getPixelOrigin(), prontas: [] };
+      if (!this._center) { this._center = novo.c; this._zoom = novo.z; this._poeCaixa(b, m); }   // (o 1º: a caixa já no lugar)
+      if (this._img) this._prepara(b); else for (const id in this._layers) this._layers[id]._update();   // recorte e simplificação (o toque já vale)
+      if (this._img) {
+        const d = this._serializa(b, m), W = comPintor();
+        if (W && !this._semPartes) {                        // no worker
+          const job = this._job = Object.assign(novo, { id: (this._nPed = (this._nPed || 0) + 1), pintor: true });
+          d.id = job.id;
+          W.postMessage(d, [d.L.buffer, d.P.buffer, d.C.buffer]);
+        } else this._troca(novo, pintaAqui(d));          // (sem worker, ou o viewreset: aqui mesmo)
+        if (this._aoAtualizar) this._aoAtualizar();
+        return;
+      }
       // (o canvas à parte fica guardado enquanto o satélite está aberto: sem alocar 13 MB a cada pouso)
       const cv = this._cvPartes || (this._cvPartes = document.createElement('canvas'));
       if (cv.width !== m * sz.x || cv.height !== m * sz.y) { cv.width = m * sz.x; cv.height = m * sz.y; }
@@ -874,8 +1112,9 @@
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.setTransform(m, 0, 0, m, -b.min.x * m, -b.min.y * m);
-      this._job = { b, m, cv, ctx, c: this._map.getCenter(), z: this._map.getZoom(), no: this._drawFirst, raf: 0, prontas: [], lote: 3000 };
+      this._job = Object.assign(novo, { cv, ctx, no: this._drawFirst, raf: 0, lote: this._lote || 3000 });
       this._job.raf = L.Util.requestAnimFrame(this._passoPartes, this);
+      if (this._aoAtualizar) this._aoAtualizar();
     },
     _passoPartes(tudo) {
       const J = this._job;
@@ -895,57 +1134,190 @@
       this._ctx = ctx0;
       if (J.no) {
         J.ctx.getImageData(0, 0, 1, 1);                     // (o lote vira pixels neste quadro, sem acumular para a troca)
-        J.lote = Math.max(1000, Math.min(60000, Math.round(pts * 25 / Math.max(1, performance.now() - t0))));
+        J.lote = this._lote = Math.max(1000, Math.min(60000, Math.round(pts * 25 / Math.max(1, performance.now() - t0))));
         J.raf = L.Util.requestAnimFrame(this._passoPartes, this);
         return;
       }
-      // a troca: o que L.Canvas._update faria, com o desenho já pronto
+      this._troca(J, J.cv);
+    },
+    // as camadas na ordem do desenho, para o pintor: L (tipo, estilo, nº de partes), P (pontos de cada parte), C (as
+    // coordenadas, px da camada) e E (os estilos: cor, largura, opacidade, cor e opacidade do preenchimento)
+    _serializa(b, k) {
+      let nl = 0, np = 0, nc = 0;
+      for (let o = this._drawFirst; o; o = o.next) {
+        const l = o.layer;
+        if (l._parts) { if (!l._parts.length) continue; nl++; np += l._parts.length; for (const q of l._parts) nc += 2 * q.length; }
+        else if (l._point && !l._empty()) { nl++; nc += 3; }
+      }
+      const Ls = new Int32Array(nl * 3), P = new Int32Array(np), C = new Float64Array(nc), E = [], ie = new Map();
+      let il = 0, ip = 0, ic = 0;
+      const estilo = op => {
+        const ch = `${op.color}|${op.weight}|${op.opacity}|${op.fillColor}|${op.fillOpacity}`;
+        let i = ie.get(ch);
+        if (i === undefined) { ie.set(ch, i = E.length); E.push([op.color, op.weight, op.opacity, op.fillColor || op.color, op.fillOpacity]); }
+        return i;
+      };
+      for (let o = this._drawFirst; o; o = o.next) {
+        const l = o.layer, op = l.options;
+        if (l._parts) {
+          if (!l._parts.length) continue;
+          Ls[il++] = 1; Ls[il++] = estilo(op); Ls[il++] = l._parts.length;
+          for (const q of l._parts) { P[ip++] = q.length; for (const pt of q) { C[ic++] = pt.x; C[ic++] = pt.y; } }
+        } else if (l._point && !l._empty()) {
+          Ls[il++] = 2; Ls[il++] = estilo(op); Ls[il++] = 1;
+          C[ic++] = l._point.x; C[ic++] = l._point.y; C[ic++] = Math.max(Math.round(l._radius), 1);
+        }
+      }
+      const sz = b.getSize();
+      return { W: k * sz.x, H: k * sz.y, k, bx: b.min.x, by: b.min.y, L: Ls, P, C, E };
+    },
+    // a imagem do pintor: entra se ainda é a do pedido de agora
+    _pintado(r) {
+      const J = this._job;
+      if (!J || !J.pintor || r.id !== J.id || !this._map) { if (r.bm) r.bm.close(); return; }
+      this._troca(J, r.bm);
+    },
+    // a troca: o que L.Canvas._update faria, com o desenho já pronto (img: a imagem do pintor, ou o canvas à parte no modo
+    // sem imagem, quando os estilos mudados no meio são redesenhados na área deles)
+    _troca(J, img) {
       this._job = null;
       this._center = J.c; this._zoom = J.z;
-      const e = this._container, sz = J.b.getSize();
-      L.DomUtil.setPosition(e, J.b.min);
-      e.width = J.m * sz.x; e.height = J.m * sz.y;
-      e.style.width = sz.x + 'px'; e.style.height = sz.y + 'px';
-      this._ctx.drawImage(J.cv, 0, 0);
-      if (J.m === 2) this._ctx.scale(2, 2);
-      this._ctx.translate(-J.b.min.x, -J.b.min.y);
+      if (this._img) {
+        const sz = J.b.getSize(), v = this._img;
+        v.width = img.width; v.height = img.height;
+        this._bmr.transferFromImageBitmap(img);
+        v.style.width = sz.x + 'px'; v.style.height = sz.y + 'px';
+        this._poeCaixa(J.b, J.m);
+        this._redrawBounds = null;
+        if (J.sujo) { this._sujo = true; this._pedeDesenho(); }   // (um estilo mudou enquanto o pintor desenhava)
+      } else {
+        this._poeCaixa(J.b, J.m);
+        this._ctx.save(); this._ctx.setTransform(1, 0, 0, 1, 0, 0); this._ctx.drawImage(img, 0, 0); this._ctx.restore();
+        if (img.close) img.close();
+        if (this._redrawBounds) this._redraw();
+      }
+      this._vis = { z: J.z, po: J.po, b: J.b };
       J.prontas.forEach(f => f());
     },
+    _semPintor() { const J = this._job; if (J && J.pintor) { this._job = null; this._sujo = true; this._update(); J.prontas.forEach(f => f()); } },
     _largaPartes() {                                        // larga o trabalho: o canvas segue com o desenho de antes
       const J = this._job;
       if (!J) return;
-      L.Util.cancelAnimFrame(J.raf);
+      if (!J.pintor) L.Util.cancelAnimFrame(J.raf);
       this._job = null;
+      if (this._redrawBounds || J.sujo) this._sujo = true;   // (um estilo mudou no meio: o próximo fim de movimento redesenha)
+      this._redrawBounds = null;
       J.prontas.forEach(f => f());
     },
-    soltaPartes() { this._largaPartes(); if (this._cvPartes) this._cvPartes.width = this._cvPartes.height = 0; this._cvPartes = null; },
-    terminaPartes() { const J = this._job; if (J) { L.Util.cancelAnimFrame(J.raf); this._passoPartes(true); } },
+    soltaPartes() {
+      this._largaPartes();
+      if (this._cvPartes) this._cvPartes.width = this._cvPartes.height = 0;
+      this._cvPartes = null;
+      telaLocal = null;
+      if (pintor) pintor.postMessage({ solta: true });
+    },
+    // termina o trabalho agora (o desenho inteiro aqui)
+    terminaPartes() {
+      const J = this._job;
+      if (!J) return;
+      if (!J.pintor) { L.Util.cancelAnimFrame(J.raf); this._passoPartes(true); return; }
+      this._troca(J, pintaAqui(this._serializa(J.b, J.m)));
+    },
     // promessa do fim do trabalho (já resolvida sem trabalho)
     prontas() { const J = this._job; return J ? new Promise(ok => J.prontas.push(ok)) : Promise.resolve(); },
-    _requestRedraw(l) { if (this._job) this.terminaPartes(); return L.Canvas.prototype._requestRedraw.call(this, l); },
+    // um estilo mudou (o nível, a espessura): no modo imagem, o desenho inteiro de novo no próximo quadro (no pintor); no
+    // meio de um trabalho dele, um outro logo depois da troca
+    _requestRedraw(l) {
+      if (this._carregando || !this._map) return;           // (as linhas entrando: o desenho de todas no fim)
+      const J = this._job;
+      if (this._img) { if (J) J.sujo = true; else this._pedeDesenho(); return; }
+      if (J && J.pintor) { this._extendRedrawBounds(l); return; }   // (na troca)
+      if (J) this.terminaPartes();
+      return L.Canvas.prototype._requestRedraw.call(this, l);
+    },
+    _pedeDesenho() {
+      if (!this._pedido) this._pedido = L.Util.requestAnimFrame(() => { this._pedido = 0; if (this._map && !this._job) { this._sujo = true; this._update(); } });
+    },
     _onZoom() { this._largaPartes(); return L.Canvas.prototype._onZoom.call(this); },
     _onAnimZoom(e) { this._largaPartes(); return L.Canvas.prototype._onAnimZoom.call(this, e); },
-    _reset() { this._largaPartes(); return L.Canvas.prototype._reset.call(this); },
-    _destroyContainer() { this._largaPartes(); return L.Canvas.prototype._destroyContainer.call(this); },
+    // viewreset: a vista nova, desenhada já (as camadas reprojetadas antes)
+    // modo imagem: as linhas à vista do desenho b (com 64 px de folga, mais que o toque e o traço) projetadas para a vista de
+    // agora (se ainda não foram), recortadas e simplificadas; as de fora ficam sem partes e com a caixa longe (o mouse e o
+    // clique passam por elas). No zoom de perto, a maioria nem é projetada
+    _prepara(b) {
+      const mp = this._map, k = Math.pow(2, mp.getZoom()), po = mp.getPixelOrigin(), ch = mp.getZoom() + '|' + po.x + '|' + po.y;
+      const x0 = b.min.x - 64, y0 = b.min.y - 64, x1 = b.max.x + 64, y1 = b.max.y + 64;
+      for (const id in this._layers) {
+        const l = this._layers[id], z = l._z0box;
+        if (z && (z[2] * k - po.x < x0 || z[0] * k - po.x > x1 || z[3] * k - po.y < y0 || z[1] * k - po.y > y1)) {
+          l._parts = []; l._pxBounds = FORA; l._projCh = null;
+          continue;
+        }
+        if (z && l._projCh !== ch) { l._project(); l._projCh = ch; }
+        l._update();
+      }
+    },
+    _onZoomEnd() { if (!this._img) return L.Canvas.prototype._onZoomEnd.call(this); },
+    _reset() {
+      this._largaPartes();
+      if (!this._img) { this._semPartes = true; try { return L.Canvas.prototype._reset.call(this); } finally { this._semPartes = false; } }
+      this._postponeUpdatePaths = false;
+      this._sujo = true;
+      this._update();                                       // (no pintor; a imagem de antes fica no lugar até a troca)
+      if (this._center) this._updateTransform(this._center, this._zoom);
+    },
   })))(opc);
   // polilinha com a projeção guardada: os pontos de cada linha projetados uma vez no zoom 0; em cada zoom, a mesma conta do
   // Leaflet (latLngToLayerPoint: o projetado no zoom, arredondado, menos a origem) sem refazer o Mercator de cada ponto (o
   // fim de cada voo e de cada zoom reprojeta todas as linhas)
   let Linha = null;
+  // (_z0box: a caixa da linha no zoom 0, para o canvas das linhas saber, sem projetar, se ela está à vista; no modo imagem
+  // o zoomend não projeta todas: o canvas projeta só as que estão à vista, no fim do movimento)
   const linhaZ0 = () => Linha || (Linha = L.Polyline.extend({
+    getEvents() { return temOC ? { viewreset: this._reset } : L.Polyline.prototype.getEvents.call(this); },
     _projectLatlngs(lls, out, pb) {
       if (!(lls[0] instanceof L.LatLng)) { for (let i = 0; i < lls.length; i++) this._projectLatlngs(lls[i], out, pb); return; }
       const n = lls.length, m = this._map;
       let w = lls._z0;
-      if (!w) { w = lls._z0 = new Float64Array(n * 2); for (let i = 0; i < n; i++) { const p = m.project(lls[i], 0); w[2 * i] = p.x; w[2 * i + 1] = p.y; } }
+      if (!w) {
+        w = lls._z0 = new Float64Array(n * 2);
+        const bx = this._z0box || (this._z0box = [Infinity, Infinity, -Infinity, -Infinity]);
+        for (let i = 0; i < n; i++) {
+          const p = m.project(lls[i], 0);
+          w[2 * i] = p.x; w[2 * i + 1] = p.y;
+          if (p.x < bx[0]) bx[0] = p.x; if (p.y < bx[1]) bx[1] = p.y; if (p.x > bx[2]) bx[2] = p.x; if (p.y > bx[3]) bx[3] = p.y;
+        }
+      }
       const k = Math.pow(2, m.getZoom()), po = m.getPixelOrigin(), anel = new Array(n);
       for (let i = 0; i < n; i++) { const p = anel[i] = new L.Point(Math.round(w[2 * i] * k) - po.x, Math.round(w[2 * i + 1] * k) - po.y); pb.extend(p); }
       out.push(anel);
     },
   }));
+  // em lotes de ~10 ms (uma tarefa só travava a abertura no celular), sem desenhar nada no meio; no fim, o desenho de todas
+  // de uma vez (no pintor)
+  let pondo = false;
   function poeLinhas(lista) {
-    if (!map || nLinhas) return;
-    for (const a of lista) {
+    if (!map || nLinhas || pondo) return;
+    pondo = true;
+    rend._carregando = true;
+    let i = 0, n = 0;
+    const lote = () => {
+      if (!map) return;
+      const t0 = performance.now();
+      for (; i < lista.length && performance.now() - t0 < 10; i++) n += poeLinha(lista[i]);
+      if (i < lista.length) { setTimeout(lote, 0); return; }
+      nLinhas = n;
+      pondo = false;
+      rend._carregando = false;
+      if (niv.mun) poeEscopo();
+      rend._sujo = true;
+      rend._update();
+      if (estado === 'on') poeAviso(legenda());
+    };
+    lote();
+  }
+  function poeLinha(a) {
+    {
       const g = [];
       if (a.pt) {                                        // sem rede no cadastro: um ponto (por cima das linhas: vem no fim da lista)
         const pt = L.circleMarker(a.pt, Object.assign({ pane: 'st-linhas', renderer: rend, interactive: true, bubblingMouseEvents: false }, estiloLinha('PT', false, a.cod)));
@@ -962,19 +1334,63 @@
         pl.addTo(map);
         g.push(pl);
       }
-      if (g.length) { grupos.set(a.cod, g); nLinhas++; }
+      if (g.length) grupos.set(a.cod, g);
+      return g.length ? 1 : 0;
     }
-    if (niv.mun) poeEscopo();
-    if (estado === 'on') poeAviso(legenda());
+  }
+  // realce do alimentador embaixo do mouse (ou do item da lista do município): num canvas à parte por cima das linhas (no
+  // pane delas: a mesma opacidade), só do tamanho dele dentro da caixa, com o estilo "on" (branco e mais largo; o ponto,
+  // maior) e as mesmas partes que o canvas das linhas usa, na ordem em que o realce as punha à frente (o tronco por cima).
+  // O canvas das linhas não é mais tocado: redesenhar a área do alimentador nele fazia o navegador passar a limpo o canvas
+  // inteiro (2× a caixa, ×4 na tela de alta densidade) a cada linha que o mouse cruzava
+  let rlCv = null;
+  function poeRealceLinha() {
+    const g = sobre && grupos.get(sobre);
+    if (!g || !map || !rend || !rend._bounds || map._animatingZoom) { if (rlCv) rlCv.style.display = 'none'; return; }
+    if (!rlCv) { rlCv = document.createElement('canvas'); rlCv.className = 'st-realce'; rlCv.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none'; }
+    if (rlCv.parentNode !== paneL) paneL.append(rlCv);
+    const t = map.getSize(), a = map.containerPointToLayerPoint([0, 0]), f = t.multiplyBy(0.1);
+    const vb = L.bounds(a.subtract(f), a.add(t).add(f)), est = g.map(pl => estiloLinha(pl._stCls, true, pl._stAl));
+    let b = null;
+    g.forEach((pl, i) => {
+      const e = est[i], w = (e.weight || 0) / 2 + 2;
+      const q = pl._parts ? (pl._parts.length && pl._pxBounds) : pl._point && L.bounds(pl._point, pl._point);
+      if (!q) return;
+      const r = w + (pl._parts ? 0 : Math.max(Math.round(e.radius), 1));
+      const qb = L.bounds(q.min.subtract([r, r]), q.max.add([r, r]));
+      b = b ? b.extend(qb.min).extend(qb.max) : qb;
+    });
+    const bb = rend._bounds;
+    if (b) b = L.bounds([Math.max(b.min.x, vb.min.x, bb.min.x), Math.max(b.min.y, vb.min.y, bb.min.y)], [Math.min(b.max.x, vb.max.x, bb.max.x), Math.min(b.max.y, vb.max.y, bb.max.y)]);
+    if (!b || b.max.x <= b.min.x || b.max.y <= b.min.y) { rlCv.style.display = 'none'; return; }
+    const m = L.Browser.retina ? 2 : 1, min = b.min.floor(), sz = b.max.ceil().subtract(min);
+    rlCv.width = sz.x * m; rlCv.height = sz.y * m;
+    rlCv.style.width = sz.x + 'px'; rlCv.style.height = sz.y + 'px';
+    L.DomUtil.setPosition(rlCv, min);
+    const x = rlCv.getContext('2d');
+    x.setTransform(m, 0, 0, m, -min.x * m, -min.y * m);
+    g.forEach((pl, i) => {                                  // (as operações do L.Canvas: _updatePoly / _updateCircle e _fillStroke)
+      const e = est[i];
+      if (pl._parts) {
+        if (!pl._parts.length) return;
+        x.beginPath();
+        for (const q of pl._parts) for (let j = 0; j < q.length; j++) { if (j) x.lineTo(q[j].x, q[j].y); else x.moveTo(q[j].x, q[j].y); }
+      } else {
+        if (!pl._point) return;
+        x.beginPath();
+        x.arc(pl._point.x, pl._point.y, Math.max(Math.round(e.radius), 1), 0, Math.PI * 2, false);
+        x.globalAlpha = e.fillOpacity; x.fillStyle = e.fillColor || e.color; x.fill('evenodd');
+      }
+      x.globalAlpha = e.opacity; x.lineWidth = e.weight; x.strokeStyle = e.color; x.lineCap = 'round'; x.lineJoin = 'round';
+      x.stroke();
+    });
+    rlCv.style.display = '';
   }
   function realca(cod) {
     if (sobre === cod) return;
-    if (sobre && grupos.has(sobre)) grupos.get(sobre).forEach(pl => pl.setStyle(estiloDe(pl)));
     sobre = cod;
-    if (cod && grupos.has(cod)) {
-      grupos.get(cod).forEach(pl => { pl.setStyle(estiloDe(pl, true)); pl.bringToFront(); });
-      if (window.ARGOS_PAG && window.ARGOS_PAG.prepara) window.ARGOS_PAG.prepara(cod);   // a página dele começa a vir
-    }
+    poeRealceLinha();
+    if (cod && grupos.has(cod) && window.ARGOS_PAG && window.ARGOS_PAG.prepara) window.ARGOS_PAG.prepara(cod);   // a página dele começa a vir
     if (cartaoMun) cartaoMun.querySelectorAll('.st-al').forEach(b => b.classList.toggle('on', b.dataset.al === cod));
     if (!cod && balao) balao.hidden = true;
   }
@@ -1286,7 +1702,7 @@
     map.attributionControl.setPrefix(false);
     const v0 = vistaDoSvg();
     map.setView(v0 ? v0.c : limTO.getCenter(), v0 ? v0.z : 7, { animate: false });
-    divisao();
+    await divisao();
     camadas(await urlGoogle());
     mascara = criaMascara();
     desenho = criaDesenho();
@@ -1294,6 +1710,7 @@
     paneL.classList.add('st-linhas');
     paneL.style.opacity = '0';
     rend = telaLinhas({ padding: 0.5, tolerance: 5, pane: 'st-linhas' });
+    rend._sempre = true;                                  // (todo fim de movimento em partes)
     balao = document.createElement('div');
     balao.className = 'st-balao';
     balao.hidden = true;
@@ -1307,7 +1724,10 @@
     caixaSat.addEventListener('pointerdown', e => { ponteiro = e.pointerType || 'mouse'; }, true);
     caixaSat.addEventListener('wheel', e => { if (voandoN) e.preventDefault(); }, { passive: false });   // no voo, a roda não rola a página
     // a espessura das linhas muda com o zoom: só as opções, sem pedir redesenho (o moveend que vem logo depois redesenha todas)
-    map.on('zoomend', () => grupos.forEach(g => g.forEach(pl => { if (pl._stCls !== 'PT') L.setOptions(pl, estiloDe(pl, pl._stAl === sobre)); })));
+    map.on('zoomend', () => grupos.forEach(g => g.forEach(pl => { if (pl._stCls !== 'PT') L.setOptions(pl, estiloDe(pl, false)); })));
+    // o realce da linha: some no zoom e volta com as partes da vista nova (no fim de cada movimento)
+    map.on('zoomanim zoom', () => { if (rlCv) rlCv.style.display = 'none'; });
+    rend._aoAtualizar = () => { if (sobre) poeRealceLinha(); };
     // depois de arrastar ou do zoom do usuário: os nomes do polo de novo (cabem outros); bandeirinhas seguem presas ao contorno
     map.on('moveend', () => { if (estado === 'on' && !voandoN && niv.pol && !niv.mun) poeMarcas(true); });
     // a caixa mudou de tamanho (tela cheia, janela): refaz o mapa e o limite do zoom; num nível, o enquadramento dele
@@ -1541,6 +1961,10 @@
     limites(true);
     paneL.style.opacity = '1';
     poeAviso(legenda());
+    // as bandeirinhas e o foco num quadro à parte: o do fim da animação já prepara as linhas e põe os quadros
+    const v2 = vez;
+    await new Promise(r => requestAnimationFrame(r));
+    if (estado !== 'on' || v2 !== vez || voandoN) return;
     poeMarcas();
     caixaSat.focus({ preventScroll: true });
   }
@@ -1694,6 +2118,29 @@
   const rectCaixa = e => { const c = caixaSat.getBoundingClientRect(), q = e.getBoundingClientRect(); return { x: q.left - c.left, y: q.top - c.top, w: q.width, h: q.height }; };
   window.__satTo = { estado: () => estado, mapa: () => map, alterna, abre, fecha, linhas: () => nLinhas, semRede: () => semRede.size, sobre: () => sobre,
     vistaSvg: () => (L ? vistaDoSvg() : null), tempos,
+    // parado: sem linhas entrando, sem desenho das linhas em curso, sem desenho adiado da máscara e da divisão
+    ocioso: () => !!map && !pondo && !(rend && rend._job) && !(mascara && mascara.pendente()) && !(desenho && desenho.pendente()),
+    pintor: () => (pintor ? 'worker' : rend && rend._img ? 'pagina' : 'canvas'),
+    forca: () => { if (mascara) mascara.desenha(true); if (desenho) desenho.desenha(true); },
+    // o canvas das linhas como está (feito pelo pintor ou em partes) contra o redesenho inteiro do Leaflet nele mesmo:
+    // quantos valores de pixel mudam (0: o mesmo desenho)
+    confereLinhas: () => {
+      rend.terminaPartes();
+      const cv = rend._img || rend._container, W = cv.width, H = cv.height, bb = rend._vis.b, k = L.Browser.retina ? 2 : 1;
+      const tira = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
+      const ca = tira(), xa = ca.getContext('2d', { willReadFrequently: true });
+      xa.drawImage(cv, 0, 0);
+      const a = xa.getImageData(0, 0, W, H).data;
+      // o L.Canvas._draw (o redesenho inteiro do Leaflet) num canvas igual
+      const cb = tira(), xb = cb.getContext('2d', { willReadFrequently: true }), ctx0 = rend._ctx;
+      xb.scale(k, k); xb.translate(-bb.min.x, -bb.min.y);
+      rend._ctx = xb; rend._redrawBounds = null;
+      try { rend._draw(); } finally { rend._ctx = ctx0; }
+      const b = xb.getImageData(0, 0, W, H).data;
+      let n = 0, cheios = 0;
+      for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) n++; if ((i & 3) === 3 && a[i]) cheios++; }
+      return { dif: n, px: a.length / 4, cheios, modo: rend._img ? 'imagem' : 'canvas' };
+    },
     nivel: () => Object.assign({}, niv), vai: n => vaiPara(n), sobe, voando: () => voandoN,
     ocupados: () => (map ? ocupados() : []),
     destino: (x, y) => (map ? destino(map.containerPointToLatLng([x, y])) : null),
@@ -1714,7 +2161,7 @@
       const t = map.getSize(), c = caixaSat.getBoundingClientRect(), obst = ocupados().concat([...caixaSat.querySelectorAll('.st-card, .mt-mn')].map(e => {
         const q = rectCaixa(e); return { left: q.x, top: q.y, right: q.x + q.w, bottom: q.y + q.h };
       }));
-      const cv = rend._container, b = rend._bounds, s = cv.width / Math.max(1, b.max.x - b.min.x);
+      const cv = rend._img || rend._container, b = (rend._vis && rend._vis.b) || rend._bounds, s = cv.width / Math.max(1, b.max.x - b.min.x);
       const cp = document.createElement('canvas');
       cp.width = cv.width; cp.height = cv.height;
       const cx2 = cp.getContext('2d', { willReadFrequently: true });
