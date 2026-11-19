@@ -2175,6 +2175,10 @@
         }
         return false;
       };
+      // longe da divisa: o mouse ali e a 8 px em volta cai nesta área (munEm, o que a dica usa: os anéis simplificados
+      // de dois municípios vizinhos se cruzam um pouco na divisa, e lá vale o 1º da lista)
+      const quem = (x, y) => { const m = munEm(map.containerPointToLatLng([x, y])); return m && (tipo === 'reg' ? m.reg : tipo === 'pol' ? m.polo : m.cod); };
+      const firme = (x, y) => [[0, 0], [8, 0], [-8, 0], [0, 8], [0, -8]].every(([dx, dy]) => quem(x + dx, y + dy) === nome);
       const rot = map.latLngToContainerPoint(a.rot);
       let melhor = null;
       for (let y = 16; y < t.y - 16; y += 6) for (let x = 16; x < t.x - 16; x += 6) {
@@ -2183,7 +2187,7 @@
         if (obst.some(o => x > o.left - 10 && x < o.right + 10 && y > o.top - 10 && y < o.bottom + 10)) continue;
         const d = Math.hypot(x - rot.x, y - rot.y);
         if (melhor && d >= melhor.d) continue;
-        if (linha(x, y)) continue;
+        if (linha(x, y) || !firme(x, y)) continue;
         melhor = { x, y, d };
       }
       return melhor && { x: c.left + melhor.x, y: c.top + melhor.y };

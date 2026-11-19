@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.24",
+ "versao": "2.25",
  "atualizado": "2026-11-19",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -158,6 +158,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Rotina de 2 checks depois de cada publicação (desempenho do mapa ao vivo no PC e no celular lento; todas as funções) e otimização dos pontos pesados", "st": "ok", "d": "2026-11-19", "obs": "Raio-X no celular abre em 1 s (antes 6,5 s) sem travar; voo entre os níveis do satélite no celular com 0,3 s travado (antes 3,6 s). Visual e funções iguais."},
    {"t": "Mapa do alimentador leve no zoom, arrasto e pinça (rede desenhada em partes, troca quando pronta)", "st": "ok", "d": "2026-11-19", "obs": "Celular, LD01065015: roda de 2,6 s para 0,15 s travado; PC: de 275 para 26 ms. Desenho igual pixel a pixel."},
    {"t": "Visão satélite (Ctrl+S) fluida no PC e no celular: roda, arrasto, pinça, mouse nas linhas, duplo clique e tela cheia sem travar", "st": "ok", "d": "2026-11-19", "obs": "Linhas desenhadas fora da tela e trocadas prontas; máscara e divisão só acompanham durante o gesto. Celular: pinça de 2,7 s para 0,15 s travado, arrasto de 0,9 s para 0; PC 1920×1080: arrasto de 2,2 s para 0,9 s. Parado, o desenho é igual pixel a pixel."},
+   {"t": "Mapa do alimentador: ✕ na linha do aberto no menu Alimentadores esconde a rede, os nomes e os equipamentos dele no mapa (mesmo sem outros selecionados); \"mostrar\" traz de volta", "st": "ok", "d": "2026-11-19", "obs": "O painel continua o dele; vizinhos, estado e selecionados ficam à vista e respondem ao clique. Volta sozinho ao escolher um trecho dele e no modo Limpeza de faixa. Os focos da Queimadas continuam visíveis."},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},

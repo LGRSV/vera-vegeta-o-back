@@ -11,6 +11,9 @@
 // busca pelo código, ✕ para tirar, Ver todos, Tirar todos).
 // O endereço guarda a escolha (?sel=A,B: volta ao recarregar); "Abrir" um selecionado leva os outros junto, e o aberto de
 // agora vira selecionado na página dele.
+// O aberto também sai do mapa sem sair da página: ✕ na linha dele no menu (pedido do usuário: ver o mapa por baixo dele,
+// mesmo com um alimentador só); a linha fica "escondido", com "mostrar". O painel continua o dele e o endereço não guarda
+// (recarregar mostra de novo). Como: "o aberto escondido", mais abaixo.
 // Para não pesar (medido no celular com a CPU 4x mais lenta):
 // - o dados.js de cada um (o mesmo arquivo e o mesmo cache da página dele) é lido e montado num worker ("dados"); nunca roda
 //   como <script> (trocaria o window.D deste). A página recebe a geometria pronta em Float32 (Mercator relativo ao canto da
@@ -638,7 +641,9 @@
     cods.eachLayer(m => { const el = m.getElement() && m.getElement().firstElementChild; if (el) els.push([m, el]); });
     if (!els.length || !els[0][1].offsetWidth) return;
     const cx = map.getContainer().getBoundingClientRect(), M = 2;
-    const ocup = ['markerPane', 'sel-rotulos'].flatMap(n => map.getPane(n) ? [...map.getPane(n).querySelectorAll('.leaflet-marker-icon>*')] : []).map(e => e.getBoundingClientRect()).filter(r => r.width && r.right > cx.left && r.left < cx.right && r.bottom > cx.top && r.top < cx.bottom)
+    // (com o aberto escondido, do markerPane só o que ficou à vista: os incêndios da Queimadas)
+    const de = n => map.getPane(n) ? [...map.getPane(n).querySelectorAll(oculto && n === 'markerPane' ? '.leaflet-marker-icon>.fo-inc' : '.leaflet-marker-icon>*')] : [];
+    const ocup = ['markerPane', 'sel-rotulos'].flatMap(de).map(e => e.getBoundingClientRect()).filter(r => r.width && r.right > cx.left && r.left < cx.right && r.bottom > cx.top && r.top < cx.bottom)
       .map(r => [r.left - M, r.top - M, r.right + M, r.bottom + M]);
     const cobre = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
     for (const [m, el] of els) {
@@ -961,20 +966,105 @@
   document.addEventListener('al:sel', () => { if (!trava) solta(); });   // trecho escolhido no aberto, ou nenhum (✕, clique no vazio)
   document.addEventListener('al:nae', () => { if (!sels.size) return; mostra(true); if (!ativo) rotulos(); });   // meses, "Contar individuais", botão NAE
   const cls = document.getElementById('classes');
-  if (cls) cls.addEventListener('click', e => { if (sels.size && e.target.closest('button')) { mostra(false); pede(); rotulos(); } });
+  // (naClasse: do começo do clique até aqui, depois do ouvinte de alimentador.js, que refaz o realce do trecho escolhido e
+  // avisa 'al:sel' com os mesmos nomes; isso não é escolha de trecho e não mostra o aberto escondido)
+  if (cls) cls.addEventListener('click', () => { naClasse = true; }, true);
+  if (cls) cls.addEventListener('click', e => { naClasse = false; if (sels.size && e.target.closest('button')) { mostra(false); pede(); rotulos(); } });
   map.on('moveend', () => { if (sels.size) { rotulos(); bombeia(); marcas(); } });
   // os rótulos do aberto mudaram (camada, NAE, trecho escolhido): o grupo de códigos procura lugar de novo
   new MutationObserver(() => { if (cods && cods.getLayers().length) ajeita(); }).observe(map.getPane('markerPane'), { childList: true, subtree: true, characterData: true });
   if (window.__fusMarcas) window.__fusMarcas.on('add remove', () => { if (sels.size) pede(); });
-  // modo Limpeza de faixa: só o aberto (o escolhido aqui sai; o CSS apaga a rede e tira os nomes e o menu)
+  // modo Limpeza de faixa: só o aberto (o escolhido aqui sai; o CSS apaga a rede e tira os nomes e o menu; o aberto
+  // escondido volta)
   let fx = false;
   new MutationObserver(() => {
     const agora = box.classList.contains('fx-modo');
     if (agora === fx) return;
     fx = agora;
+    if (agora) esconde(false);
     if (agora && ativo) { if (document.getElementById('det').dataset.al) travaLimpa(true); solta(); }
     if (sels.size) rotulos();
   }).observe(box, { attributes: true, attributeFilter: ['class'] });
+
+  // ---------- o aberto escondido no mapa (✕ na linha dele no menu) ----------
+  // Fica na página e o painel continua o dele. Somem do mapa a rede (o canvas da rede, no overlayPane, com o que as camadas
+  // dele desenham nele: Faixa, Inspeção, Insp→manut, Manutenção, realce, fusíveis, ativos de perto), os nomes, a NAE, DJ,
+  // religadores, número operativo, pinos e marcas das camadas (markerPane) e as chaves (pane delas, chaves.js). Satélite,
+  // vizinhos, estado e selecionados ficam nos panes deles e aparecem por baixo. Só visibility (classe al-oculto no #map; o
+  // focos.js refaz a conta dos rótulos com foco a cada troca dela, antes da pintura seguinte): nada é refeito nem tirado do
+  // mapa, o canvas continua sendo desenhado (as fatias de alimentador.js) e os rótulos continuam no lugar; mostrar de novo é
+  // o mesmo desenho, também depois de mover o mapa escondido. Escondido não tem toque nem mouse: o clique cai no mapa
+  // (vizinhos, estado e selecionados o veem pelo ponto, como sempre: o da linha deles seleciona) e o canvas da rede não acha
+  // nem realça linha dele, nem por evento mandado de JS (cerca). A Queimadas fica à vista: os incêndios (markerPane) pelo
+  // CSS; os pontos dos focos estão no canvas da rede (focos.js) e, enquanto ele está escondido, vão copiados, na mesma ordem,
+  // para um canvas próprio (sel-focos; o clique na cópia abre o balão do ponto de verdade). Volta: "mostrar" na linha, um
+  // trecho dele escolhido no painel, na lista ou na busca ('al:sel' com nomes; o realce refeito pelos T1 T2 T3 não conta) e
+  // o modo Limpeza de faixa (só o aberto). Enquadrar (o código dele no menu) só enquadra; o endereço não guarda
+  const renA = map.options.renderer;
+  let oculto = false, naClasse = false, cercado = false, copias = null, renFocos = null;
+  // os pontos da Queimadas no canvas da rede (focos.js: circleMarker sem bolha, contorno branco ou marrom, cor da idade)
+  const ehFoco = l => l instanceof L.CircleMarker && l._renderer === renA && l.options.bubblingMouseEvents === false &&
+    /^#(fff|7c2d12)$/.test(l.options.color) && /^#(dc2626|f97316|fde3c0)$/.test(l.options.fillColor || '');
+  // o canvas da rede surdo enquanto o aberto está escondido (na 1ª vez): sem linha sob o mouse (realce, dica, mãozinha) e o
+  // clique, mesmo o mandado ao canvas por JS, sai como clique no vazio (o mapa)
+  function cerca() {
+    if (cercado) return;
+    cercado = true;
+    const paira0 = renA._handleMouseHover, evento0 = renA._fireEvent;
+    renA._handleMouseHover = function (e, p) { if (!oculto) return paira0.call(this, e, p); };
+    renA._fireEvent = function (ls, e, t) { return evento0.call(this, oculto ? false : ls, e, t); };
+  }
+  function copia(l) {
+    if (!renFocos) {
+      const p = map.createPane('sel-focos');
+      p.style.zIndex = 400;                              // onde estão na rede: acima dos selecionados (390, 395), abaixo do realce deles (405)
+      renFocos = L.canvas({ pane: 'sel-focos', tolerance: renA.options.tolerance });
+    }
+    const c = L.circleMarker(l.getLatLng(), Object.assign({}, l.options, { renderer: renFocos })).on('click', e => l.fire('click', e));
+    copias.set(l, c);
+    c.addTo(map);
+  }
+  // focos.js refaz a camada (período, distância, liga e desliga): as cópias seguem
+  function segueFocos(e) {
+    const l = e.layer;
+    if (e.type === 'layeradd') { if (!copias.has(l) && ehFoco(l)) copia(l); return; }
+    const c = copias.get(l);
+    if (c) { copias.delete(l); c.remove(); }
+  }
+  function focos(sim) {
+    if (sim) {
+      copias = new Map();
+      for (let o = renA._drawFirst; o; o = o.next) if (ehFoco(o.layer)) copia(o.layer);   // na ordem do canvas da rede
+      map.on('layeradd layerremove', segueFocos);
+    } else if (copias) {
+      map.off('layeradd layerremove', segueFocos);
+      copias.forEach(c => c.remove());
+      copias = null;
+      if (renFocos && map.hasLayer(renFocos)) renFocos.remove();   // (o canvas vazio, com toque, ficaria por cima da rede)
+    }
+  }
+  function esconde(sim) {
+    sim = !!sim;
+    if (!renA || sim === oculto || (sim && faixa())) return false;
+    if (sim) {
+      cerca();
+      // o que está aberto dele sai antes: a linha sob o mouse volta ao traço e a dica dela fecha (mouseout de verdade), as
+      // dicas dos marcadores (toque) e o balão das camadas
+      if (renA._hoveredLayer) renA._handleMouseOut(new MouseEvent('mouseout'));
+      const dicas = [];
+      for (const id in map._layers) { const t = map._layers[id]; if (t instanceof L.Tooltip && t._source && !/^sel-/.test(t._source.options.pane || '')) dicas.push(t._source); }
+      dicas.forEach(s => s.closeTooltip());
+      if (map._popup && map._popup._map && map._popup.options.className === 'limp-popup') map.closePopup();
+    }
+    oculto = sim;
+    mc.classList.toggle('al-oculto', sim);
+    focos(sim);
+    if (cods && cods.getLayers().length) ajeita();
+    menu();
+    aviso(sim ? `${EU} escondido no mapa` : `${EU} de volta no mapa`);
+    return true;
+  }
+  document.addEventListener('al:sel', e => { if (oculto && !naClasse && e.detail && e.detail.length) esconde(false); });   // trecho dele escolhido
 
   // ---------- CSS ----------
   const css = document.createElement('style');
@@ -984,6 +1074,12 @@
     '.vto-voando :is(.leaflet-sel-rotulos-pane,.leaflet-sel-cods-pane){display:none}.vto-pouso :is(.leaflet-sel-rotulos-pane,.leaflet-sel-cods-pane){animation:vto-aparece .22s var(--ease,ease) both}' +
     // modo Limpeza de faixa: a rede deles apagada, sem nomes, realce nem menu
     '.mapbox.fx-modo :is(.leaflet-sel-rede-pane,.leaflet-sel-eq-pane){opacity:.55}.mapbox.fx-modo :is(.leaflet-sel-rotulos-pane,.leaflet-sel-cods-pane,.leaflet-sel-realce-pane,.sel-canto,.sel-lg){display:none}' +
+    // o aberto escondido: a rede (e as camadas no canvas dela), as chaves e o markerPane, menos os incêndios da Queimadas;
+    // (html: mais forte que o visibility:visible!important dos rótulos com foco de longe, focos.css). A cópia dos focos
+    // (sel-focos) só enquanto ele está escondido
+    '#map.al-oculto :is(.leaflet-overlay-pane,.leaflet-chaves-pane){visibility:hidden}' +
+    'html.al-site #map.al-oculto .leaflet-marker-pane>:not(.leaflet-marker-icon:has(>.fo-inc)){visibility:hidden!important}' +
+    '#map:not(.al-oculto) .leaflet-sel-focos-pane{display:none}' +
     // o código do alimentador de longe, junto do DJ (abaixo do zoom 12, como o DJ some); os do mesmo lugar, um por linha
     '.sel-cod{display:grid;transform:translate(-50%,calc(-100% - 6px));padding:2px 6px;border-radius:var(--r1);background:var(--vidro);border:1px solid var(--vidro-borda);' +
     'color:var(--vidro-fg);font:600 11.5px/1.3 var(--f-mono);white-space:nowrap;box-shadow:var(--sh-vidro);pointer-events:none}#map:not(.sel-cod-longe) .sel-cod{display:none}' +
@@ -1086,6 +1182,9 @@
     lst.addEventListener('click', e => {
       const x = e.target.closest('[data-x]'), v = e.target.closest('[data-vai]'), o = e.target.closest('[data-poe]'), d = e.target.closest('[data-denovo]');
       if (x) { const cod = x.dataset.x, li = x.closest('li'), prox = li && (li.nextElementSibling || li.previousElementSibling); tira(cod); (prox && prox.querySelector('.sel-x, .sel-vai') || q || bt).focus(); return; }
+      // o aberto: ✕ esconde, "mostrar" mostra; o foco fica no botão que entra no lugar
+      const oc = e.target.closest('[data-oculta], [data-mostra]');
+      if (oc) { esconde(oc.hasAttribute('data-oculta')); (lst.querySelector('[data-oculta], [data-mostra]') || bt).focus(); return; }
       if (d) { deNovo(d.dataset.denovo); return; }
       if (o) { adiciona(o.dataset.poe); return; }
       if (v) {
@@ -1138,8 +1237,9 @@
     const n = sels.size, nb = bt.querySelector('.sel-n');
     nb.textContent = n ? String(n) : '+';
     nb.classList.toggle('zero', !n);
-    bt.setAttribute('aria-label', `Alimentadores no mapa: ${n} de ${MAX}`);
-    bt.title = n ? `Alimentadores no mapa: ${n} de ${MAX}` : 'Pôr outros alimentadores no mapa';
+    const oc = oculto ? ` · ${EU} escondido` : '';
+    bt.setAttribute('aria-label', `Alimentadores no mapa: ${n} de ${MAX}${oc}`);
+    bt.title = (n ? `Alimentadores no mapa: ${n} de ${MAX}` : 'Pôr outros alimentadores no mapa') + oc;
     if (lst.hidden) return;
     lst.querySelector('.sel-t').textContent = `No mapa · ${n} de ${MAX}`;
     menuLinhas();
@@ -1159,13 +1259,18 @@
   function menuLinhas() {
     if (!canto || lst.hidden) return;
     const ul = lst.querySelector('.sel-als'), foco = document.activeElement && ul.contains(document.activeElement) ? document.activeElement : null;
-    const fk = foco && (foco.dataset.x ? 'x' + foco.dataset.x : foco.dataset.vai ? 'v' + foco.dataset.vai : null);
-    ul.innerHTML = `<li class="sel-al"><button type="button" class="sel-vai" data-vai="${esc(EU)}" title="Enquadrar"><b>${esc(EU)}</b><small>aberto</small></button></li>` +
+    // (o ✕ e o "mostrar" do aberto são o mesmo lugar: o foco passa de um ao outro)
+    const fk = foco && (foco.dataset.x ? `[data-x="${foco.dataset.x}"]` : foco.dataset.vai ? `[data-vai="${foco.dataset.vai}"]`
+      : foco.matches('[data-oculta], [data-mostra]') ? '[data-oculta], [data-mostra]' : null);
+    // o aberto: ✕ (esconder no mapa) ou, escondido, "mostrar"
+    const ab = !renA ? '' : oculto ? `<button type="button" class="sel-denovo" data-mostra title="Mostrar no mapa" aria-label="Mostrar ${esc(EU)} no mapa">mostrar</button>`
+      : `<button type="button" class="sel-x" data-oculta title="Esconder no mapa" aria-label="Esconder ${esc(EU)} do mapa">✕</button>`;
+    ul.innerHTML = `<li class="sel-al"><button type="button" class="sel-vai" data-vai="${esc(EU)}" title="Enquadrar"><b>${esc(EU)}</b><small>${oculto ? 'escondido' : 'aberto'}</small></button>${ab}</li>` +
       [...sels.values()].map(s => `<li class="sel-al"><button type="button" class="sel-vai" data-vai="${esc(s.cod)}" title="Enquadrar"><b>${esc(s.cod)}</b>${linhaTxt(s)}</button>` +
         (s.estado === 'erro' ? `<button type="button" class="sel-denovo" data-denovo="${esc(s.cod)}">tentar de novo</button>`
           : `<a class="sel-ab" href="${esc(abreUrl(s.cod))}" title="Abrir ${esc(s.cod)}" aria-label="Abrir ${esc(s.cod)}">${SETA}</a>`) +
         `<button type="button" class="sel-x" data-x="${esc(s.cod)}" title="Tirar do mapa" aria-label="Tirar ${esc(s.cod)} do mapa">✕</button></li>`).join('');
-    if (fk) { const el = ul.querySelector(fk[0] === 'x' ? `[data-x="${fk.slice(1)}"]` : `[data-vai="${fk.slice(1)}"]`); if (el) el.focus(); }
+    if (fk) { const el = ul.querySelector(fk); if (el) el.focus(); }
   }
   // sugestões: o pedaço digitado em qualquer parte do código, sem caixa; as da tela primeiro, depois as mais perto
   function sugestoes() {
@@ -1272,6 +1377,10 @@
     limpar: () => { travaLimpa(true); solta(); },
     eqMudou: cod => { if (eqs && sels.has(cod)) eqs.pinta(); },
     ativo: () => ativo ? { al: ativo.s.cod, nomes: ativo.nomes.slice() } : null,
+    // o aberto escondido no mapa (✕ do menu): esconde(true | false), oculto(), focos() (quantos pontos copiados)
+    esconde: sim => esconde(sim),
+    oculto: () => oculto,
+    focos: () => copias ? copias.size : 0,
     ocioso: () => !tRot && ![...sels.values()].some(s => s.estado === 'baixando') && !(rede && (rede._t || rede._p || rede._guarda)),
     geo: cod => { const s = sels.get(cod); return s && s.g ? s.g : null; },
     latlngs: (cod, nome) => { const s = sels.get(cod); return s && s.g ? latlngsDe(s, nome) : null; },
