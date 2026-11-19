@@ -1,6 +1,9 @@
 // Chaves que não dividem trecho (88, faca 80, de passagem…): destaque no mapa só de perto (zoom 15,5 ou mais), como um
 // quadradinho âmbar (não losango: losango é a Manutenção); com o zoom 17 ou mais, o código da chave ao lado.
 // Os dados vêm do chaves.js do alimentador (window.CHAVES = [[nome, tipo, lat, lon], ...], gera_trechos.chaves_js); sem ele (ou vazio), nada aparece.
+// O clique (ou toque) abre o balão com Maps e Earth (window.__geo, alimentador.js). O código (.num-at, prioridade 3: depois
+// de DJ, religador e fusível) entra no arranjo dos números de alimentador.js: procura um lado livre em volta do quadradinho
+// ([data-ns]) e, sem nenhum, vai um pouco mais longe com uma linha até ele.
 (function () {
   const CS = window.CHAVES, map = window.__map;
   if (!CS || !CS.length || !map || !window.L) return;
@@ -18,8 +21,9 @@
   const grupo = L.layerGroup();
   const marcas = CS.map(([nome, tipo, lat, lon]) => L.marker([lat, lon], {
     pane: 'chaves', keyboard: false,
-    icon: L.divIcon({ className: '', iconSize: null, html: `<div class="ch-m"><i></i><b>${esc(nome)}</b></div>` }),
-  }).bindTooltip(`${esc(nome)} · ${esc(NOME[tipo] || 'chave ' + tipo)} · não divide trecho`, { direction: 'top', offset: [0, -6] }));
+    icon: L.divIcon({ className: '', iconSize: null, html: `<div class="ch-m"><i data-ns></i><b class="num-at" data-np="3">${esc(nome)}</b></div>` }),
+  }).bindTooltip(`${esc(nome)} · ${esc(NOME[tipo] || 'chave ' + tipo)} · não divide trecho`, { direction: 'top', offset: [0, -6] })
+    .on('click', e => { L.DomEvent.stopPropagation(e); if (window.__geo) window.__geo.balao(e.target, nome, `${NOME[tipo] || 'chave ' + tipo} · não divide trecho`); }));
   const atualiza = () => {
     const z = map.getZoom(), b = map.getBounds().pad(0.2);
     document.getElementById('map').classList.toggle('ch-cod', z >= CODIGO);

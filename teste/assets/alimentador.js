@@ -662,10 +662,50 @@ function papelDe(d) {
   };
 }
 const papel = papelDe(D);
+// ---------- Google Maps e Google Earth (pedido do usuário: "ativo e qualquer ponto") ----------
+// O balão de cada ativo (DJ, religador e fusível aqui; chaves 88/faca: chaves.js; transformador, outros equipamentos e
+// poste: ativos-zoom.js; o pino da busca do olho: lupa-painel.js; equipamentos dos vizinhos: vizinhos.js) leva os botões
+// "Maps" e "Earth" com a coordenada dele; o clique direito (ou o toque longo no celular) em qualquer ponto do mapa abre o
+// menu do ponto (no fim da montagem do mapa). Os endereços: o do Maps (api=1) abre o app no celular; o do Earth é a busca
+// pela coordenada: centraliza e marca o ponto (o "@lat,lon,…" volta ao globo inteiro quando o Earth abre do zero:
+// conferido no Earth na web, nov/2026). Nova aba, 6 casas decimais (~10 cm).
+const GEO = window.__geo = (() => {
+  const c6 = x => (+x).toFixed(6);
+  const maps = (la, lo) => `https://www.google.com/maps/search/?api=1&query=${c6(la)},${c6(lo)}`;
+  const earth = (la, lo) => `https://earth.google.com/web/search/${c6(la)},${c6(lo)}`;
+  const FORA = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5M12 9.5v4H2.5V4h4"/></svg>';
+  const botoes = (la, lo) => `<span class="geo-bts"><a class="geo-b" href="${maps(la, lo)}" target="_blank" rel="noopener" title="Abrir no Google Maps" aria-label="Abrir no Google Maps">${FORA}Maps</a>` +
+    `<a class="geo-b" href="${earth(la, lo)}" target="_blank" rel="noopener" title="Abrir no Google Earth" aria-label="Abrir no Google Earth">${FORA}Earth</a></span>`;
+  // UTM no SIRGAS 2000 (elipsoide GRS80; para o mapa, o mesmo que o WGS 84): fuso, letra da faixa de latitude, E e N em
+  // metros. Série de Krüger até a 3ª ordem (erro de milímetros dentro do fuso), N com 10.000 km no hemisfério sul
+  function utm(la, lo) {
+    const a = 6378137, f = 1 / 298.257222101, e2 = f * (2 - f), ep2 = e2 / (1 - e2), k0 = 0.9996;
+    const fuso = Math.min(60, Math.floor((lo + 180) / 6) + 1), l0 = ((fuso - 1) * 6 - 177) * Math.PI / 180;
+    const p = la * Math.PI / 180, sp = Math.sin(p), cp = Math.cos(p), tp = Math.tan(p);
+    const N = a / Math.sqrt(1 - e2 * sp * sp), T = tp * tp, C = ep2 * cp * cp, A = cp * (lo * Math.PI / 180 - l0);
+    const M = a * ((1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 ** 3 / 256) * p - (3 * e2 / 8 + 3 * e2 * e2 / 32 + 45 * e2 ** 3 / 1024) * Math.sin(2 * p) +
+      (15 * e2 * e2 / 256 + 45 * e2 ** 3 / 1024) * Math.sin(4 * p) - (35 * e2 ** 3 / 3072) * Math.sin(6 * p));
+    const E = k0 * N * (A + (1 - T + C) * A ** 3 / 6 + (5 - 18 * T + T * T + 72 * C - 58 * ep2) * A ** 5 / 120) + 500000;
+    const Y = k0 * (M + N * tp * (A * A / 2 + (5 - T + 9 * C + 4 * C * C) * A ** 4 / 24 + (61 - 58 * T + T * T + 600 * C - 330 * ep2) * A ** 6 / 720));
+    const faixa = 'CDEFGHJKLMNPQRSTUVWX'[Math.max(0, Math.min(19, Math.floor((la + 80) / 8)))];
+    return {fuso, faixa, e: Math.round(E), n: Math.round(la < 0 ? Y + 10000000 : Y), txt: `${fuso}${faixa} ${Math.round(E)} E ${Math.round(la < 0 ? Y + 10000000 : Y)} N`};
+  }
+  // balão do ativo (camada ou ponto ll): o código, o que ele é e os botões. Fecha a dica do mouse dele (o balão diz o mesmo)
+  function balao(alvo, cod, sub) {
+    if (!map) return null;
+    const ll = alvo instanceof L.Layer ? alvo.getLatLng() : L.latLng(alvo);
+    if (alvo instanceof L.Layer && alvo.closeTooltip) alvo.closeTooltip();
+    return L.popup({className: 'geo-popup', maxWidth: 280, autoPanPadding: [20, 20], autoPanPaddingTopLeft: window.__folgaBalao ? window.__folgaBalao() : [20, 20]})
+      .setLatLng(ll).setContent(`<div class="geo-pop"><b>${esc(cod)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}${botoes(ll.lat, ll.lng)}</div>`).openOn(map);
+  }
+  return {c6, maps, earth, botoes, utm, balao};
+})();
 // DJ ou religador a no mapa: a caixinha do tipo e o número operativo (pf: o papel nos trechos do alimentador dele; o: mais
-// opções do marcador)
-const principal = (a, pf = papel, o) => L.marker([a.lat, a.lon], Object.assign({icon: L.divIcon({className: 'al-at', iconSize: null, html: `<div class="at"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>`}), zIndexOffset: 500}, o))
-  .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${pf(a.nome) ? ' · ' + esc(pf(a.nome)) : ''}`, {direction: 'top'});
+// opções do marcador). O clique (ou toque) abre o balão com Maps e Earth; o número (.num-at, prioridade 0 o DJ e 1 o
+// religador) procura lugar livre em volta da caixinha ([data-ns], o símbolo) no arranjo dos números (fim da montagem)
+const principal = (a, pf = papel, o) => L.marker([a.lat, a.lon], Object.assign({icon: L.divIcon({className: 'al-at', iconSize: null, html: `<div class="at"><b data-ns>${a.t === 'DJ' ? 'DJ' : '79'}</b><span class="num-at" data-np="${a.t === 'DJ' ? 0 : 1}">${esc(a.nome)}</span></div>`}), zIndexOffset: 500}, o))
+  .bindTooltip(`${esc(a.nome)} · ${esc(TIPO[a.t])} · poste ${esc(a.poste)}${pf(a.nome) ? ' · ' + esc(pf(a.nome)) : ''}`, {direction: 'top'})
+  .on('click', e => { L.DomEvent.stopPropagation(e); GEO.balao(e.target, a.nome, `${TIPO[a.t]} · poste ${a.poste}${pf(a.nome) ? ' · ' + pf(a.nome) : ''}`); });
 // clique com Ctrl (⌘ no Mac): põe ou tira o trecho da seleção; sem Ctrl: um trecho só
 const comCtrl = e => !!e && (e.ctrlKey || e.metaKey);
 function clique(nome, e, enquadrar, vao) {
@@ -1237,10 +1277,12 @@ if (typeof L === 'undefined') {
     m._openTooltip(e);
   };
   paiF.on('click', e => {
-    const m = e.layer;
+    const m = e.layer, a = m._al;
     if (!m.getTooltip()) balaoF(m, e);
     L.DomEvent.stopPropagation(e);
-    if (m._al.trecho) clique(m._al.trecho, e.originalEvent, false);
+    if (a.trecho) clique(a.trecho, e.originalEvent, false);
+    // o balão com Maps e Earth (Ctrl + clique só soma o trecho à seleção, sem balão)
+    if (!comCtrl(e.originalEvent)) GEO.balao(m, a.nome, `${TIPO[a.t] || a.t}${papel(a.nome) ? ' · ' + papel(a.nome) : ''}`);
   });
   paiF.on('mouseover', e => { const m = e.layer; if (!m.getTooltip()) balaoF(m, e); });
 
@@ -1415,6 +1457,299 @@ if (typeof L === 'undefined') {
   });
   L.DomEvent.disableClickPropagation($('classes'));
   map.on('click', e => { if (!comCtrl(e.originalEvent)) limpar(); });   // Ctrl + clique fora da rede não desfaz a seleção
+  menuDoPonto();
+  arranjoNumeros();
+}
+
+// ---------- menu do ponto: clique direito (PC) ou toque longo (celular) em qualquer ponto do mapa ----------
+// "Abrir no Google Maps" e "Abrir no Google Earth" do ponto, a coordenada em graus decimais e em UTM (SIRGAS 2000), cada
+// uma com o botão de copiar. O menu fica na caixa do mapa (.mapbox), fora do #map: clicar nele não é clicar no mapa (o modo
+// Limpeza de faixa toma os cliques do #map). Toque longo: 500 ms parado (até 10 px), um dedo só; o 2º dedo (pinça), o
+// arrasto ou soltar antes cancelam, e o clique que o navegador manda ao soltar é engolido (não escolhe trecho nem abre
+// balão). Fecham o menu: Esc, clique ou toque fora (só fecha: esse clique não chega ao mapa), mexer no mapa e escolher.
+// No link, botão, campo ou balão o clique direito é o do navegador, como sempre.
+function menuDoPonto() {
+  const mc = map.getContainer(), caixa = mc.parentElement || mc;
+  const ICO = d => `<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">${d}</svg>`;
+  const PINO = ICO('<path d="M8 14.5s4.5-4.2 4.5-7.8a4.5 4.5 0 0 0-9 0c0 3.6 4.5 7.8 4.5 7.8z"/><circle cx="8" cy="6.7" r="1.6"/>');
+  const GLOBO = ICO('<circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c1.8 1.7 2.6 3.7 2.6 6S9.8 12.3 8 14C6.2 12.3 5.4 10.3 5.4 8S6.2 3.7 8 2z"/>');
+  const COPIA = ICO('<rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5"/>');
+  let menu = null, alvo = null, aberto = false, engole = false, quando = 0, toque = null;
+  const fora = t => !!(t && t.closest && t.closest('.leaflet-control, .leaflet-popup, a, button, input, select, textarea, label, .fx-alca'));
+  const copia = txt => navigator.clipboard && window.isSecureContext ? navigator.clipboard.writeText(txt) : new Promise((ok, erro) => {
+    const t = document.createElement('textarea');           // (sem a área de transferência do navegador: o jeito antigo)
+    t.value = txt; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;left:0;top:0;opacity:0';
+    document.body.append(t); t.select();
+    try { if (document.execCommand('copy')) ok(); else erro(); } catch (e) { erro(e); } finally { t.remove(); }
+  });
+  function cria() {
+    menu = L.DomUtil.create('div', 'geo-menu', caixa);
+    menu.setAttribute('role', 'dialog');
+    menu.hidden = true;
+    alvo = L.DomUtil.create('div', 'geo-alvo', caixa);
+    alvo.hidden = true;
+    L.DomEvent.disableClickPropagation(menu); L.DomEvent.disableScrollPropagation(menu);
+    menu.addEventListener('click', e => {
+      const b = e.target.closest('.geo-cp');
+      if (b) {
+        const s = b.querySelector('span'), voz = menu.querySelector('[aria-live]'), v = b.dataset.c;
+        copia(v).then(() => { s.textContent = 'Copiado'; voz.textContent = 'Copiado: ' + v; }, () => { s.textContent = 'Não copiou'; })
+          .then(() => setTimeout(() => { if (s.isConnected) s.textContent = 'Copiar'; }, 1600));
+      } else if (e.target.closest('a.geo-op')) setTimeout(() => fecha(false), 0);   // a aba nova abriu: o menu sai
+    });
+  }
+  // x, y: o ponto no #map (px); deToque: o clique que o navegador manda ao soltar o dedo é engolido
+  function abre(x, y, deToque) {
+    if (toque) { clearTimeout(toque.t); toque = null; }
+    if (!menu) cria();
+    const ll = map.containerPointToLatLng([x, y]), la = ll.lat, lo = L.Util.wrapNum(ll.lng, [-180, 180], true);
+    const dec = `${GEO.c6(la)}, ${GEO.c6(lo)}`, u = GEO.utm(la, lo).txt;
+    menu.setAttribute('aria-label', 'Ponto do mapa ' + dec);
+    menu.innerHTML = `<a class="geo-op" href="${GEO.maps(la, lo)}" target="_blank" rel="noopener">${PINO}Abrir no Google Maps</a>` +
+      `<a class="geo-op" href="${GEO.earth(la, lo)}" target="_blank" rel="noopener">${GLOBO}Abrir no Google Earth</a>` +
+      `<div class="geo-co"><span><small>Graus decimais</small>${dec}</span><button type="button" class="geo-cp" data-c="${dec}" aria-label="Copiar ${dec}">${COPIA}<span>Copiar</span></button></div>` +
+      `<div class="geo-co"><span><small>UTM · SIRGAS 2000</small>${u}</span><button type="button" class="geo-cp" data-c="${u}" aria-label="Copiar UTM ${u}">${COPIA}<span>Copiar</span></button></div>` +
+      '<span class="vh" aria-live="polite"></span>';
+    menu.hidden = false;
+    // abaixo e à direita do ponto; sem espaço, do outro lado (sempre dentro da caixa do mapa)
+    const cr = caixa.getBoundingClientRect(), mr = mc.getBoundingClientRect(), px = x + mr.left - cr.left, py = y + mr.top - cr.top;
+    const w = menu.offsetWidth, h = menu.offsetHeight, W = caixa.clientWidth, H = caixa.clientHeight;
+    let l = px + 12, t = py + 12;
+    if (l + w > W - 8) l = px - 12 - w;
+    if (t + h > H - 8) t = py - 12 - h;
+    menu.style.left = Math.max(8, Math.min(l, W - w - 8)) + 'px';
+    menu.style.top = Math.max(8, Math.min(t, H - h - 8)) + 'px';
+    alvo.style.left = px + 'px'; alvo.style.top = py + 'px';
+    alvo.hidden = false;
+    aberto = true; quando = performance.now(); engole = !!deToque;
+    menu.querySelector('a').focus({preventScroll: true});  // teclado: Tab segue pelo menu; Esc fecha
+  }
+  function fecha(volta) {
+    if (!aberto) return;
+    aberto = false;
+    const tinha = menu.contains(document.activeElement);
+    menu.hidden = true; alvo.hidden = true;
+    if (tinha && volta !== false) mc.focus({preventScroll: true});
+  }
+  mc.addEventListener('contextmenu', e => {
+    if (fora(e.target)) return;
+    e.preventDefault();
+    if (performance.now() - quando < 800) return;        // o toque longo daqui já abriu (o do navegador vem depois)
+    const r = mc.getBoundingClientRect(), tecla = !e.clientX && !e.clientY;   // tecla de menu (Shift+F10): o centro do mapa
+    const deToque = e.pointerType ? e.pointerType !== 'mouse' : !!(e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents);
+    abre(tecla ? r.width / 2 : e.clientX - r.left, tecla ? r.height / 2 : e.clientY - r.top, !tecla && deToque);
+  }, true);
+  // toque longo (dedo ou caneta; o mouse usa o botão direito)
+  const solta = e => { if (toque && (!e || e.pointerId === toque.id)) { clearTimeout(toque.t); toque = null; } };
+  mc.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse') return;
+    if (toque) { solta(); return; }                        // 2º dedo: é pinça
+    if (!e.isPrimary || fora(e.target)) return;
+    const x = e.clientX, y = e.clientY;
+    toque = {id: e.pointerId, x, y, t: setTimeout(() => {
+      toque = null;
+      if (map.dragging && map.dragging.moving()) return;
+      const r = mc.getBoundingClientRect();
+      abre(x - r.left, y - r.top, true);
+    }, 500)};
+  }, true);
+  mc.addEventListener('pointermove', e => { if (toque && e.pointerId === toque.id && Math.hypot(e.clientX - toque.x, e.clientY - toque.y) > 10) solta(); }, true);
+  mc.addEventListener('pointerup', solta, true);
+  mc.addEventListener('pointercancel', solta, true);
+  // o clique de quem abriu o menu pelo toque longo (no mapa ou, perto da borda, no próprio menu), ou de quem tocou no mapa
+  // fora do menu para fechá-lo: não chega a ninguém (mapa, marcadores, linhas, modo Limpeza de faixa, links do menu)
+  document.addEventListener('click', e => { if (engole) { engole = false; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  document.addEventListener('pointerdown', e => {
+    if (aberto && !menu.contains(e.target)) { fecha(false); engole = mc.contains(e.target) && !fora(e.target) && e.button === 0; }   // (controle, balão: o clique vale)
+    else engole = false;                                    // gesto novo: o que sobrou do toque longo não vale mais
+  }, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && aberto) { e.stopPropagation(); e.preventDefault(); fecha(); } }, true);
+  map.on('movestart zoomstart', () => { solta(); fecha(false); });
+  addEventListener('resize', () => fecha(false));
+  window.__menuPonto = {aberto: () => aberto, abre, fecha};   // para os testes
+}
+
+// ---------- números dos ativos: nenhum embaixo de outro (pedido do usuário: "afastar com linha") ----------
+// Os números escritos ao lado dos ativos — DJ e religador (aqui, do zoom 15), chaves 88/faca (chaves.js, do 17),
+// transformadores, outros equipamentos e postes (ativos-zoom.js, do 18,5) — são .num-at, com a prioridade em data-np
+// (0 DJ, 1 religador, 2 fusível e trip saver, 3 chave, 4 transformador, 5 outros, 6 poste) e o símbolo do ativo em
+// [data-ns] (sem ele: o ponto do marcador e o raio data-nr do círculo no canvas). Na ordem da prioridade, cada número fica
+// no lugar natural (à direita) se ele estiver livre; senão, colado ao ativo à esquerda, em cima, embaixo ou nas
+// diagonais; sem nenhum livre, um pouco mais longe (5 voltas, até 100 px) com uma linha fina até o ativo. Livre: sem cobrir outro
+// número, o que está nos marcadores do mapa (nomes dos trechos .lb, datas .limp-tag, NAE .nae-at, pinos .ie…), o símbolo
+// ou o ponto de outro ativo (fusíveis, postes e transformadores no canvas) nem os controles por cima do mapa, e inteiro
+// na tela se o ativo está nela. Nenhum some: sem lugar livre, fica onde cobre menos.
+// Refeito quando o mapa para (fim do zoom e do arrasto: nunca a cada quadro) e quando os marcadores ou as classes que os
+// mostram mudam; ativos-zoom.js chama window.__numAtivos.ja() logo depois de pôr os códigos dele (no mesmo quadro: os
+// números nunca aparecem um sobre o outro). Uma leitura do layout, a conta e uma escrita (translate e as variáveis da
+// linha: atributos, que os observadores dos marcadores, este e o de selecionados.js, não acompanham).
+function arranjoNumeros() {
+  const mc = map.getContainer(), raiz = map.getPanes().mapPane;
+  const VOLTAS = [0, 14, 30, 50, 75, 100];                 // px a mais em cada volta (0: colado, como o lugar natural)
+  const DIRS = [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, -1], [1, 1], [-1, 1]];   // direita, esquerda, cima, baixo e diagonais
+  const FOLGA = 3, M = 1, PANES = ['markerPane', 'chaves', 'sel-rotulos'];
+  const med = {vezes: 0, ms: 0, maxMs: 0, nums: 0, longe: 0, semLugar: 0};
+  let pedido = 0;
+  const pede = () => { if (!pedido) pedido = requestAnimationFrame(() => {
+    pedido = 0;
+    const AZ = window.__ativosZoom;
+    if (AZ && AZ.pendente && AZ.pendente()) return;        // ativos-zoom.js desenha neste quadro e chama ja() em seguida
+    ja();
+  }); };
+  // classes que mostram ou escondem números e nomes (#map: zoom, NAE, chaves; body: camadas): o resto (a mãozinha do mouse,
+  // o arrasto do Leaflet) não pede o arranjo
+  const assina = el => String(el.className).split(/\s+/).filter(c => c && !c.startsWith('leaflet-') && !c.endsWith('-mao')).sort().join(' ');
+  const ass = new Map();
+  const mudou = el => { const a = assina(el); if (ass.get(el) === a) return false; ass.set(el, a); return true; };
+  const obs = new MutationObserver(ms => { if (ms.some(m => m.type !== 'attributes' || mudou(m.target))) pede(); });
+  [mc, document.body].forEach(el => { ass.set(el, assina(el)); obs.observe(el, {attributes: true, attributeFilter: ['class']}); });
+  const vistos = new Set();
+  const observa = () => PANES.forEach(n => { const p = map.getPane(n); if (p && !vistos.has(p)) { vistos.add(p); obs.observe(p, {childList: true, subtree: true, characterData: true}); } });
+  observa();
+  map.on('moveend', pede);
+  const cobre = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
+  const visto = el => !el.checkVisibility || el.checkVisibility({visibilityProperty: true, opacityProperty: true});
+  function candidatos(n) {
+    const [a0, b0, a1, b1] = n.sim, cx = (a0 + a1) / 2, cy = (b0 + b1) / 2, w = n.w, h = n.h, l = [{r: n.nat, v: 0}];
+    VOLTAS.forEach((d, v) => DIRS.forEach(([dx, dy]) => {
+      if (!v && dx === 1 && !dy) return;                    // colado à direita: é o lugar natural
+      const x = dx > 0 ? a1 + FOLGA + d : dx < 0 ? a0 - FOLGA - d - w : cx - w / 2;
+      const y = dy > 0 ? b1 + FOLGA + d : dy < 0 ? b0 - FOLGA - d - h : cy - h / 2;
+      l.push({r: [x, y, x + w, y + h], v});
+    }));
+    return l;
+  }
+  function solta(el) { el.style.translate = ''; el.classList.remove('num-longe'); el._nx = el._ny = 0; el._nl = ''; }
+  // a linha de um número afastado: do ponto da borda dele mais perto do ativo até a borda do símbolo ([x1, y1, x2, y2]; null
+  // se ficaria com menos de 3 px)
+  function linhaDe(R, sim) {
+    const [a0, b0, a1, b1] = sim, cx = (a0 + a1) / 2, cy = (b0 + b1) / 2;
+    const qx = Math.max(R[0], Math.min(cx, R[2])), qy = Math.max(R[1], Math.min(cy, R[3])), vx = qx - cx, vy = qy - cy, d = Math.hypot(vx, vy) || 1;
+    const ux = vx / d, uy = vy / d, t = Math.min(ux ? (a1 - a0) / 2 / Math.abs(ux) : Infinity, uy ? (b1 - b0) / 2 / Math.abs(uy) : Infinity) + 1.5;
+    return d - t > 3 ? [qx, qy, cx + ux * t, cy + uy * t] : null;
+  }
+  // o segmento s passa pelo retângulo r? (Liang–Barsky)
+  function corta(s, r) {
+    let t0 = 0, t1 = 1;
+    const dx = s[2] - s[0], dy = s[3] - s[1], ps = [-dx, dx, -dy, dy], qs = [s[0] - r[0], r[2] - s[0], s[1] - r[1], r[3] - s[1]];
+    for (let i = 0; i < 4; i++) {
+      const p = ps[i], q = qs[i];
+      if (!p) { if (q < 0) return false; continue; }
+      const t = q / p;
+      if (p < 0) { if (t > t1) return false; if (t > t0) t0 = t; } else { if (t < t0) return false; if (t < t1) t1 = t; }
+    }
+    return t1 - t0 > 0.02;
+  }
+  // os segmentos a e b se cruzam (no meio: encostar na ponta, como duas linhas que chegam no mesmo ativo, não conta)?
+  const lado = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+  function cruzam(a, b) {
+    const p1 = [a[0], a[1]], p2 = [a[2], a[3]], q1 = [b[0], b[1]], q2 = [b[2], b[3]];
+    return lado(p1, p2, q1) * lado(p1, p2, q2) < -1 && lado(q1, q2, p1) * lado(q1, q2, p2) < -1;
+  }
+  function ja() {
+    if (pedido) { cancelAnimationFrame(pedido); pedido = 0; }
+    obs.takeRecords();
+    if (map._animatingZoom || (map.dragging && map.dragging.moving()) || map.getZoom() < Z_NUM) return;   // (abaixo do 15, nenhum número)
+    observa();
+    const els = mc.querySelectorAll('.num-at');
+    if (!els.length) return;
+    const t0 = performance.now(), cr = mc.getBoundingClientRect(), X = cr.left, Y = cr.top, W = cr.width, H = cr.height;
+    const rr = q => [q.left - X, q.top - Y, q.right - X, q.bottom - Y];
+    // 1) leitura: os números à vista (o lugar natural: o de agora menos o translate daqui), o símbolo de cada um e o que
+    // eles não podem cobrir: duros (outros marcadores), moles (símbolos e pontos dos ativos) e os controles do mapa
+    const nums = [], icNum = new Set(), duros = [], moles = [], tampa = [];
+    for (const el of els) {
+      const q = el.getBoundingClientRect();
+      if (!q.width) { if (el._nx || el._ny || el._nl) solta(el); continue; }
+      const dx = el._nx || 0, dy = el._ny || 0, nat = [q.left - X - dx, q.top - Y - dy, q.right - X - dx, q.bottom - Y - dy];
+      if (nat[2] < -150 || nat[0] > W + 150 || nat[3] < -150 || nat[1] > H + 150) continue;   // longe da tela: fica como está
+      const ic = el.closest('.leaflet-marker-icon'), s = ic && ic.querySelector('[data-ns]');
+      let sim;
+      if (s) sim = rr(s.getBoundingClientRect());
+      else { const p = (ic || el).getBoundingClientRect(), r = +el.dataset.nr || 4; sim = [p.left - X - r, p.top - Y - r, p.left - X + r, p.top - Y + r]; }
+      nums.push({el, nat, w: nat[2] - nat[0], h: nat[3] - nat[1], sim, p: +el.dataset.np || 0, bl: el.clientLeft, bt: el.clientTop});
+      moles.push(sim);
+      if (ic) icNum.add(ic);
+    }
+    if (!nums.length) return;
+    for (const ic of raiz.querySelectorAll('.leaflet-marker-icon')) {
+      const lp = ic._leaflet_pos;                           // o ponto do marcador (sem ler o layout): longe da tela, nem olha
+      if (lp) { const c = map.layerPointToContainerPoint(lp); if (c.x < -450 || c.x > W + 250 || c.y < -200 || c.y > H + 250) continue; }
+      if (icNum.has(ic)) continue;
+      if (ic.querySelector('.num-at')) {                   // número escondido (zoom): o símbolo dele continua no mapa
+        for (const s of ic.querySelectorAll('[data-ns]')) { const q = s.getBoundingClientRect(); if (q.width) moles.push(rr(q)); }
+        continue;
+      }
+      for (const ch of ic.children) { const q = ch.getBoundingClientRect(); if (q.width && q.height && visto(ch)) duros.push(rr(q)); }
+    }
+    const ponto = (lat, lon, r) => { const c = map.latLngToContainerPoint([lat, lon]); if (c.x > -60 && c.y > -60 && c.x < W + 60 && c.y < H + 60) moles.push([c.x - r, c.y - r, c.x + r, c.y + r]); };
+    if (fusMarcas && map.hasLayer(fusMarcas) && !fusLonge) {
+      const b = map.getBounds().pad(0.1), s = b.getSouth(), n = b.getNorth(), o = b.getWest(), l = b.getEast();
+      for (const a of D.fusiveis) if (a.lat >= s && a.lat <= n && a.lon >= o && a.lon <= l) ponto(a.lat, a.lon, 5.5);
+    }
+    const AZ = window.__ativosZoom;
+    if (AZ && AZ.pontos) for (const [lat, lon, r] of AZ.pontos()) ponto(lat, lon, r + 1);
+    const sobre = [...mc.querySelectorAll('.leaflet-control')];
+    if (mc.parentElement) for (const el of mc.parentElement.children) if (el !== mc && !el.classList.contains('geo-menu') && !el.classList.contains('geo-alvo')) sobre.push(el, ...el.children);
+    for (const el of sobre) { const q = el.getBoundingClientRect(); if (q.width && q.height) tampa.push(rr(q)); }
+    // 2) a conta: na ordem da prioridade (a ordenação é estável: empate fica na ordem da página)
+    nums.sort((a, b) => a.p - b.p);
+    const fora = r => r[2] - r[0] < 0 ? 0 : (r[2] - r[0]) * (r[3] - r[1]) - cobre(r, [0, 0, W, H]);
+    const postos = [], linhas = [];
+    let longe = 0, sem = 0;
+    for (const n of nums) {
+      const R = VOLTAS[VOLTAS.length - 1] + FOLGA + n.w + n.h + 4, [s0, s1, s2, s3] = n.sim;
+      const perto = o => o[0] < s2 + R && o[2] > s0 - R && o[1] < s3 + R && o[3] > s1 - R;
+      // fora da tela: o ativo à vista quer o número inteiro à vista (o lugar natural cortado pela borda não está livre)
+      const du = duros.filter(perto), mo = moles.filter(o => o !== n.sim && perto(o)), ta = tampa.filter(perto), po = postos.filter(perto);
+      const f0 = s0 >= 0 && s1 >= 0 && s2 <= W && s3 <= H ? 0 : fora(n.nat);
+      // custo de cada lugar: cobrir (px²) outro número ou marcador vale 10, um símbolo ou controle 4; a linha passar por
+      // outro número, marcador ou linha 60, por outro ativo 20; sair da tela 2 (px²); cada volta 30. O 1º sem nada disso (na
+      // ordem: natural, colado, voltas) fica; senão, o de menor custo (o lugar livre cuja linha passa por um ativo ganha
+      // de cobrir alguma coisa)
+      let melhor = null, menor = Infinity, livre = false;
+      for (const c of candidatos(n)) {
+        const r = [c.r[0] - M, c.r[1] - M, c.r[2] + M, c.r[3] + M], li = c.v ? linhaDe(c.r, n.sim) : null;
+        let d = 0, m = 0, x = 0;
+        for (const o of po) { d += cobre(r, o); if (li && corta(li, o)) x += 60; }
+        for (const o of du) { d += cobre(r, o); if (li && corta(li, o)) x += 60; }
+        for (const o of mo) { m += cobre(r, o); if (li && corta(li, o)) x += 20; }
+        for (const o of ta) m += cobre(r, o);
+        for (const l of linhas) { if (corta(l, r)) d += 30; if (li && cruzam(l, li)) x += 60; }
+        const f = Math.max(0, fora(c.r) - f0 - 0.5);
+        if (!d && !m && !x && !f) { melhor = c; livre = true; break; }
+        const custo = d * 10 + m * 4 + x + f * 2 + c.v * 30;
+        if (custo < menor) { menor = custo; melhor = c; livre = !d && !m && !f; }
+      }
+      if (!livre) sem++;
+      n.esc = melhor;
+      postos.push(melhor.r);
+      const li = melhor.v && linhaDe(melhor.r, n.sim);
+      if (li) linhas.push(li);
+    }
+    // 3) escrita: o deslocamento de cada número e a linha dos afastados (do ponto da borda do número mais perto do ativo
+    // até a borda do símbolo)
+    for (const n of nums) {
+      const el = n.el, c = n.esc, dx = Math.round(c.r[0] - n.nat[0]), dy = Math.round(c.r[1] - n.nat[1]);
+      if (dx !== (el._nx || 0) || dy !== (el._ny || 0)) { el.style.translate = dx || dy ? `${dx}px ${dy}px` : ''; el._nx = dx; el._ny = dy; }
+      let linha = '';
+      const R = [n.nat[0] + dx, n.nat[1] + dy, n.nat[2] + dx, n.nat[3] + dy], li = c.v && linhaDe(R, n.sim);
+      if (li) linha = `${(li[0] - R[0] - n.bl).toFixed(1)}|${(li[1] - R[1] - n.bt).toFixed(1)}|${Math.hypot(li[2] - li[0], li[3] - li[1]).toFixed(1)}|` +
+        (Math.atan2(li[3] - li[1], li[2] - li[0]) * 180 / Math.PI).toFixed(1);
+      if (linha !== (el._nl || '')) {
+        el._nl = linha;
+        if (linha) {
+          const [lx, ly, ll, la] = linha.split('|');
+          el.style.setProperty('--lx', lx + 'px'); el.style.setProperty('--ly', ly + 'px'); el.style.setProperty('--ll', ll + 'px'); el.style.setProperty('--la', la + 'deg');
+        }
+        el.classList.toggle('num-longe', !!linha);
+      }
+      if (linha) longe++;
+    }
+    const ms = performance.now() - t0;
+    Object.assign(med, {vezes: med.vezes + 1, ms: med.ms + ms, maxMs: Math.max(med.maxMs, ms), nums: nums.length, longe, semLugar: sem});
+  }
+  window.__numAtivos = {ja, med: () => Object.assign({}, med)};   // ja: ativos-zoom.js; med: os testes e as medidas
 }
 
 $('busca').addEventListener('input', e => {

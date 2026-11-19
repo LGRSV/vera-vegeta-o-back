@@ -257,14 +257,17 @@
     if (pts.length) window.__map.fitBounds(L.latLngBounds(pts), { padding: [20, 20] });
   }
 
-  // marcador de um ativo no mapa (busca da página inicial ou da lista): um só por vez
+  // marcador de um ativo no mapa (busca da página inicial ou da lista): um só por vez, com Maps e Earth (window.__geo,
+  // alimentador.js) na coordenada dele
   let marcaAtivo = null;
   function poeAtivo(ll, cod) {
     const map = window.__map;
     if (!map || !window.L) return;
     if (marcaAtivo) marcaAtivo.remove();
+    const G = window.__geo, p = L.latLng(ll);
     marcaAtivo = L.marker(ll, { interactive: false, zIndexOffset: 1000, icon: L.divIcon({ className: '', iconSize: null,
-      html: `<div class="ie ativo"><em>ATIVO</em>${esc(cod)}</div>` }) }).addTo(map);
+      html: `<div class="ie ativo"><em>ATIVO</em>${esc(cod)}${G ? G.botoes(p.lat, p.lng) : ''}</div>` }) }).addTo(map);
+    if (marcaAtivo.getElement()) marcaAtivo.getElement().querySelectorAll('.geo-b').forEach(a => L.DomEvent.disableClickPropagation(a));
     map.setView(ll, Math.max(map.getZoom(), 16), { animate: false });
   }
 

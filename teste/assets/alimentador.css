@@ -307,6 +307,51 @@ strong.nae.tem{background:var(--alerta-fundo);color:#fff}
 .ie em{font-style:normal;font-size:10.5px;letter-spacing:.05em;padding:2px 4px;border-radius:2px;color:#fff;background:#15803d}
 .ie.fim em{background:#b91c1c}
 .leaflet-container{font-family:var(--f-body)}
+/* números dos ativos (DJ e religador; chaves 88/faca: chaves.js; transformador, outros e poste: ativos-zoom.js): o arranjo
+   do fim do zoom e do arrasto põe cada um num lado livre (translate: o transform de cada um fica como está); afastado do
+   ativo, uma linha fina liga o número a ele, desenhada no próprio número (anda junto no zoom e no arrasto) */
+.num-at{position:relative}
+.num-at.num-longe::after{content:'';position:absolute;left:var(--lx);top:var(--ly);width:var(--ll);height:1.5px;margin-top:-.75px;border-radius:1px;
+  background:#1b2024;box-shadow:0 0 0 1px rgb(251 251 249 / .85);transform:rotate(var(--la));transform-origin:0 50%;pointer-events:none}
+/* balão de um ativo (o branco dos balões do mapa, nos dois temas): o código, o que ele é e os botões Maps e Earth */
+.geo-popup .leaflet-popup-content{margin:10px 12px;font:13px/1.45 var(--f-body)}
+.geo-pop{display:grid;gap:2px;min-width:150px}
+.geo-pop>b{font:600 15px/1.3 var(--f-mono);color:#1b2024;overflow-wrap:anywhere}
+.geo-pop>small{font-size:12px;color:#5a636a}
+.geo-bts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.leaflet-container a.geo-b,.geo-b{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;box-sizing:border-box;border:1px solid #8c948f;border-radius:6px;
+  background:#fbfbf9;color:#b8431f;font:600 12.5px/1 var(--f-body);text-decoration:none;white-space:nowrap;cursor:pointer}
+.geo-b svg{flex:none;width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.leaflet-container a.geo-b:hover{border-color:#b8431f;background:#f4e6df}
+.leaflet-container a.geo-b:focus-visible{outline:2px solid #b8431f;outline-offset:1px}
+@media (pointer:coarse){.leaflet-container a.geo-b{min-height:40px;padding:0 14px}}
+/* no pino do ativo ou poste escolhido (o pino não recebe o ponteiro; os botões sim): menores, no tom do pino; se não couber
+   numa linha (celular), descem para a 2ª */
+.ie:has(>.geo-bts){width:max-content;max-width:min(320px,calc(100vw - 48px));flex-wrap:wrap;justify-content:center;row-gap:4px}   /* (o pane dos marcadores não tem largura: sem o max-content, cada item numa linha) */
+.ie>.geo-bts{margin:0;gap:3px}
+.leaflet-container .ie a.geo-b{pointer-events:auto;min-height:0;gap:4px;padding:4px 6px;border-color:#1b2024;border-radius:3px;color:#1b2024;font:700 11px/1 var(--f-body)}
+.ie a.geo-b svg{width:11px;height:11px}
+@media (pointer:coarse){.leaflet-container .ie a.geo-b{padding:8px 9px;font-size:12px}}
+/* menu do ponto (clique direito ou toque longo): na caixa do mapa, por cima dos controles; o anel amarelo marca o ponto */
+.geo-menu{position:absolute;z-index:1150;display:grid;width:max-content;min-width:240px;max-width:calc(100% - 16px);padding:var(--s1);
+  background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);font:var(--t-sm)/1.35 var(--f-body)}
+.geo-menu[hidden],.geo-alvo[hidden]{display:none}
+.geo-op{display:flex;align-items:center;gap:var(--s2);min-height:40px;padding:0 var(--s3);border-radius:var(--r1);color:var(--fg);text-decoration:none;font:600 var(--t-sm)/1.2 var(--f-body)}
+.geo-op svg,.geo-cp svg{flex:none;width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.geo-op:hover{background:var(--hover);color:var(--fg)}
+.geo-co{display:flex;align-items:center;gap:var(--s2);margin-top:2px;padding:var(--s1) 0 0 var(--s3);border-top:1px solid var(--line)}
+.geo-co+.geo-co{border-top:0;margin-top:0;padding-top:0}
+.geo-co>span{flex:1;min-width:0;display:grid;font:600 var(--t-xs)/1.35 var(--f-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.geo-co small{font:500 11px/1.3 var(--f-body);color:var(--muted)}
+.geo-cp{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:40px;min-height:40px;padding:0 var(--s2);border:0;border-radius:var(--r1);
+  background:none;color:var(--muted);font:600 var(--t-xs) var(--f-body);cursor:pointer}
+.geo-cp:hover{background:var(--hover);color:var(--fg)}
+.geo-menu :focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+@media (pointer:coarse){.geo-op{min-height:48px}.geo-cp{min-width:48px;min-height:48px}}
+.geo-alvo{position:absolute;z-index:1149;width:16px;height:16px;margin:-8px 0 0 -8px;box-sizing:border-box;border-radius:50%;border:2px solid #fde047;
+  box-shadow:0 0 0 1.5px #111,inset 0 0 0 1.5px #111;pointer-events:none}
+@media (prefers-reduced-motion:no-preference){.geo-menu:not([hidden]){animation:entra var(--dur) var(--ease)}.geo-op,.geo-cp{transition:background-color var(--dur) var(--ease)}}
+#map{-webkit-touch-callout:none}   /* toque longo: o menu do ponto, não o do navegador (salvar imagem do satélite) */
 
 /* ====== Movimento: discreto, só para quem não pediu menos movimento ====== */
 @media (prefers-reduced-motion:no-preference){

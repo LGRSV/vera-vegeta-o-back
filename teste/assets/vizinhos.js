@@ -761,15 +761,15 @@
     return L.latLng(Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * 180 / Math.PI, x * 360 - 180);
   };
   // balão: o vizinho (código e "Abrir alimentador"); no equipamento, o código dele, o tipo e o vizinho (ou "selecionado",
-  // se ele está na seleção: selecionados.js)
+  // se ele está na seleção: selecionados.js), e embaixo Maps e Earth com a coordenada dele (window.__geo, alimentador.js)
   function conteudo(a) {
     const al = esc(a.e.cod), url = '../' + encodeURIComponent(a.e.cod) + '/', S = window.__alSel, bt = S ? S.botao(a.e.cod) : '';
     const abre = bt ? `<span class="viz-acoes"><a href="${url}">Abrir alimentador</a>${bt}</span>` : `<a href="${url}">Abrir alimentador</a>`;
     const papel = S && S.tem(a.e.cod) ? 'selecionado' : 'vizinho';
     if (!a.q) return `<div class="viz-pop"><b>${al}</b><small>Alimentador ${papel}</small>${abre}</div>`;
-    const x = sobre(a.e, a.q);
-    return x.cod ? `<div class="viz-pop"><b>${esc(x.cod)}</b><small>${esc(maiuscula(x.nome))} · alimentador ${papel} ${al}</small>${abre}</div>`
-      : `<div class="viz-pop"><b>${esc(maiuscula(x.nome))}</b><small>Alimentador ${papel} ${al}</small>${abre}</div>`;
+    const x = sobre(a.e, a.q), ll = ondeEq(a.e, a.q), geo = window.__geo ? window.__geo.botoes(ll.lat, ll.lng) : '';
+    return x.cod ? `<div class="viz-pop"><b>${esc(x.cod)}</b><small>${esc(maiuscula(x.nome))} · alimentador ${papel} ${al}</small>${abre}${geo}</div>`
+      : `<div class="viz-pop"><b>${esc(maiuscula(x.nome))}</b><small>Alimentador ${papel} ${al}</small>${abre}${geo}</div>`;
   }
   // clique fora da rede deste (o da rede e o das camadas não chegam ao mapa): na linha do vizinho, já o seleciona (sem
   // __alSel ou fora do índice dela: o balão); no equipamento, o balão dele. O limpar segue igual

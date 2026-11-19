@@ -902,15 +902,19 @@
   if (comMapa) map.on('click', tiraPino);
   // tr: o trecho do ativo (a faixa usa quando o ativo não está nas listas da página). Com o modo Limpeza de faixa na página
   // (modo-faixa-rascunho.js) e o ativo achado na rede, o pino traz o "Faixa a partir daqui": abre o modo com a faixa do
-  // ativo até o fim do trecho dele, pendente de Leve ou Pesada. Sem nada a jusante (fim de linha), só "Fim do T3-…", sem botão
+  // ativo até o fim do trecho dele, pendente de Leve ou Pesada. Sem nada a jusante (fim de linha), só "Fim do T3-…", sem botão.
+  // Por último, Maps e Earth (window.__geo, alimentador.js) com a coordenada do ativo ou do poste: abrem em nova aba e não
+  // tiram o pino
   function vaiPonto(ll, tag, cod, tr) {
     tiraPino();
     if (!comMapa || !ll) return;
     const FX = window.__faixa, fx = FX && FX.doAtivo && FX.faixa && FX.faixa({ cod, ll, tr }), vai = fx && fx.pedacos > 0;
+    const G = window.__geo, p = L.latLng(ll);
     pino = L.marker(ll, { interactive: false, keyboard: false, zIndexOffset: 1000,
       icon: L.divIcon({ className: '', iconSize: null, html: `<div class="ie ativo"><em>${esc(tag)}</em>${esc(cod)}` +
         (vai ? `<button type="button" class="lp-fx" title="Abre a Limpeza de faixa com a faixa daqui até o fim do ${esc(fx.trecho)}">Faixa a partir daqui</button>` :
-          fx ? `<span class="lp-fx-fim">Fim do ${esc(fx.trecho)}</span>` : '') + '</div>' }) }).addTo(map);
+          fx ? `<span class="lp-fx-fim">Fim do ${esc(fx.trecho)}</span>` : '') + (G ? G.botoes(p.lat, p.lng) : '') + '</div>' }) }).addTo(map);
+    if (pino.getElement()) pino.getElement().querySelectorAll('.geo-b').forEach(a => L.DomEvent.disableClickPropagation(a));
     const b = vai && pino.getElement() && pino.getElement().querySelector('.lp-fx');
     if (b) {
       L.DomEvent.disableClickPropagation(b);              // o clique não chega no mapa (que tiraria o pino) nem arrasta

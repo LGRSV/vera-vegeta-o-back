@@ -804,7 +804,7 @@
   let down = null, mov = 0;
   mc.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; }, true);
   mc.addEventListener('click', e => {
-    if (!ativo || e.target.closest('.leaflet-control, .leaflet-popup, .lp-fx')) return;   // .lp-fx: "Faixa a partir daqui" do pino da busca
+    if (!ativo || e.target.closest('.leaflet-control, .leaflet-popup, .lp-fx, .geo-b')) return;   // .lp-fx e .geo-b: "Faixa a partir daqui", Maps e Earth do pino da busca
     e.stopPropagation();
     if (e.target.closest('.fx-alca')) return;                       // a alça trata o próprio clique (comecaArrasto)
     cancelAnimationFrame(mov); mov = 0;                             // toque: o mousemove de compatibilidade não reacende a dica
