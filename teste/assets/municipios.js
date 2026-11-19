@@ -28,6 +28,7 @@
   // entre o satélite (200) e a rede (overlayPane, 400): a rede e o realce do trecho ficam sempre por cima
   map.createPane('divisas').style.zIndex = 350;
   const tela = L.canvas({ pane: 'divisas' });           // canvas próprio, por baixo do da rede (mesma folga do da rede)
+  if (window.__alFatias) window.__alFatias(tela, () => true);   // desenhado em fatias, como o da rede (alimentador.js)
   const tok = (n, x) => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || x;
 
   // cada lado uma vez (a divisa de dois municípios vem nos dois) e sem os lados do corte (borda da área do arquivo)

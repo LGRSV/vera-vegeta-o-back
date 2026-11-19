@@ -943,7 +943,246 @@ if (typeof L === 'undefined') {
   const todos = L.latLngBounds([sul, oeste], [norte, leste]);
   map.fitBounds(todos.pad(0.04));
   window.__caixaRede = todos;                             // visao-tocantins.js: o voo de volta à vista com que o alimentador abre
+
+  // ---------- desenho em fatias (o canvas da rede; municipios.js usa o mesmo no das divisas: window.__alFatias) ----------
+  // No fim de cada zoom e de cada arrasto o Leaflet projetava, recortava e desenhava de uma vez todas as linhas do canvas,
+  // numa tarefa só: no celular com a CPU 4× mais lenta, 250 a 450 ms parado a cada passo da roda no LD01065015, uns 2/3
+  // disso a pintura das linhas no fim da tarefa (o canvas 2D era 46% da linha principal no gesto). Aqui a vista nova é
+  // desenhada num 2º canvas, fora da página, um pouco por quadro (umas dezenas de ms com a pintura: o custo de pintar é
+  // estimado pelo tamanho das linhas e medido a cada fatia), e entra no lugar do de antes de uma vez, quando fica pronta.
+  // Até lá a imagem de antes continua no lugar, esticada e levada junto com o mapa, como no zoom do Leaflet. O desenho é o
+  // mesmo, operação por operação e na mesma ordem: a imagem final é idêntica à do Leaflet. Um gesto novo (zoom, arrasto,
+  // pinça) interrompe o desenho em curso: só a vista em que o mapa para é desenhada (na roda seguida, a do último passo).
+  // A projeção e o recorte de cada linha também ficam para o desenho (as que estão fora da vista nem são projetadas); o
+  // clique e o mouse sobre as linhas, que precisam deles, completam na hora o que faltar. Mudanças no meio do desenho: linha
+  // nova entra no fim da ordem (o desenho chega nela); a que muda de estilo ou de forma depois de desenhada, ou que sai do
+  // mapa, ganha um redesenho da área dela logo depois da troca (como o Leaflet faz); a que muda de lugar na ordem recomeça
+  // o desenho. Camada com dois traços (o contorno e a cor da limpeza.js: _alPasso) pode ter cada traço numa fatia.
+  // liga(): desde quando (o da rede, depois da carga: as linhas entram no mapa em levas, pintadas por cima do canvas).
+  // ren._alQuando(f): f roda quando o canvas mostrar a vista de agora (visao-tocantins.js: a rede volta no pouso do voo).
+  const FT = {un: L.Browser.mobile ? 0.006 : 0.002};    // ms de pintura por unidade de custo (medido e ajustado a cada fatia)
+  function fatiado(ren, liga) {
+    const C = L.Canvas.prototype, R = L.Renderer.prototype, m = map, PEDIDO = -1;   // PEDIDO: "redesenho em curso" (_redrawRequest)
+    const o0 = {update: C._update, reset: C._reset, zoomEnd: R._onZoomEnd, redraw: C._redraw, req: C._requestRedraw, ext: C._extendRedrawBounds,
+      click: C._onClick, hover: C._handleMouseHover, init: C._initPath, upd: C._updatePath, frente: C._bringToFront, fundo: C._bringToBack};
+    // voo: o desenho em curso; pend: desenho pedido nesta tarefa (começa no fim dela); incons: o canvas da página não mostra a
+    // vista de agora (desenho em curso, ou interrompido por um gesto: o próximo fim de movimento refaz tudo)
+    // reset: o último fim de movimento foi um viewreset (setView sem animação): o Leaflet, depois do _update, punha no canvas
+    // a posição exata (com fração de pixel) do _updateTransform; nos outros, a posição inteira do canto
+    let voo = null, pend = false, incons = false, nv = 0, reserva = null, quando = [], reset = false;
+    const ativo = () => !!ren._bounds && !!ren._map && liga();
+    const chave = () => { const o = m.getPixelOrigin(); return m.getZoom() + '|' + o.x + '|' + o.y; };
+    const caixa = () => {                                 // a mesma conta de L.Renderer._update
+      const p = ren.options.padding, t = m.getSize(), a = m.containerPointToLayerPoint(t.multiplyBy(-p)).round();
+      return new L.Bounds(a, a.add(t.multiplyBy(1 + p * 2)).round());
+    };
+    const novo = () => {                                  // canvas com os ouvintes do L.Canvas._initContainer
+      const c = document.createElement('canvas');
+      L.DomEvent.on(c, 'mousemove', ren._onMouseMove, ren);
+      L.DomEvent.on(c, 'click dblclick mousedown mouseup contextmenu', ren._onClick, ren);
+      L.DomEvent.on(c, 'mouseout', ren._handleMouseOut, ren);
+      c._leaflet_disable_events = true;
+      return c;
+    };
+    const FORA = new L.Point(-1e9, -1e9), CXFORA = new L.Bounds(FORA, FORA);
+    // linha (ou ponto) pronta para a vista do desenho v: projetada (se a vista mudou), recortada e simplificada pelo Leaflet;
+    // fora da vista (com 64 px de folga, mais que a área de toque e a largura do traço), nada a desenhar nem a tocar
+    function prepara(l, v) {
+      if (l._alEp === v.id) return;
+      l._alEp = v.id;
+      if (l instanceof L.Polyline) {
+        if (!(l._bounds && l._bounds.isValid() && v.vb.intersects(l._bounds))) { l._parts = []; return; }
+      } else if (l instanceof L.CircleMarker && !(l instanceof L.Circle) && l._latlng && !v.vb.contains(l._latlng)) {
+        l._point = FORA; l._pxBounds = CXFORA; l._alPk = null; return;
+      }
+      if (l._alPk !== v.chave) {
+        l._project(); l._alPk = v.chave;
+        if (l._rings && l._alNp === undefined) { let n = 0; for (const r of l._rings) n += r.length; l._alNp = n; }   // (tamanho: fatia.)
+      }
+      l._update();                                        // (_drawing é false: só recorta e simplifica)
+    }
+    // custo de pintar a linha l com o traço de largura w: pontos e comprimento (px) vezes a largura (fora da vista: quase nada)
+    function custo(l, w) {
+      const ps = l._parts;
+      if (!ps) return l._point === FORA ? 1 : 12;
+      if (!ps.length) return 1;
+      let n = 12;
+      const k = (w || 0) + 2;
+      for (let i = 0; i < ps.length; i++) {
+        const p = ps[i];
+        let s = 0;
+        for (let j = 1; j < p.length; j++) s += Math.abs(p[j].x - p[j - 1].x) + Math.abs(p[j].y - p[j - 1].y);
+        n += p.length + s * k / 16;
+      }
+      return n;
+    }
+    // o canvas de trás em branco e a ordem do começo: o _clear e o começo do _draw do Leaflet
+    function limpa(v) {
+      const c = v.c, x = v.ctx;
+      x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, c.width, c.height); x.restore();
+      x.save();
+      v.cur = ren._drawFirst; v.passo = 0; v.des = ++nv; v.sujo = null;
+    }
+    function inicia() {
+      pend = false;
+      if (voo) solta(voo);
+      if (!ativo() || m._animatingZoom) return;
+      const nb = caixa(), k = L.Browser.retina ? 2 : 1, t = nb.getSize(), c = reserva || novo();
+      reserva = null;
+      c.width = k * t.x; c.height = k * t.y; c.style.width = t.x + 'px'; c.style.height = t.y + 'px';
+      const ctx = c.getContext('2d');
+      if (k === 2) ctx.scale(2, 2);
+      ctx.translate(-nb.min.x, -nb.min.y);
+      const M = 64, sw = m.layerPointToLatLng([nb.min.x - M, nb.max.y + M]), ne = m.layerPointToLatLng([nb.max.x + M, nb.min.y - M]);
+      if (ren._redrawRequest && ren._redrawRequest !== PEDIDO) L.Util.cancelAnimFrame(ren._redrawRequest);
+      ren._redrawRequest = PEDIDO; ren._redrawBounds = null;
+      voo = {c, ctx, nb, vb: L.latLngBounds(sw, ne), centro: m.getCenter(), zoom: m.getZoom(), chave: chave(), id: ++nv};
+      limpa(voo);
+    }
+    // desenha a partir de onde parou, até ms de JS ou un de custo. Camada grande (a rede inteira da Faixa) é preparada numa
+    // fatia e pintada noutra; o traço que não cabe no que sobra da fatia fica para a seguinte (que começa por ele)
+    function fatia(v, ms, un) {
+      const t0 = performance.now(), b0 = ren._bounds, x0 = ren._ctx;
+      let u = 0;
+      ren._bounds = v.nb;                                 // o recorte e os pontos (L.CircleMarker._empty) são da vista nova
+      try {
+        while (v.cur) {
+          const o = v.cur, l = o.layer;
+          if (l._order !== o || !l._map) { v.cur = o.next; v.passo = 0; continue; }   // saiu do mapa
+          if (l._alEp !== v.id) {
+            if (u > 0 && (l._alNp || (l._latlngs ? l._latlngs.length : 0)) > 1500) break;
+            prepara(l, v);
+            if (performance.now() - t0 >= ms) break;
+          }
+          const dois = !!l._alPasso, c = custo(l, dois && !v.passo ? l._contorno.weight : l.options.weight);
+          if (u > 0 && u + c > un) break;
+          ren._ctx = v.ctx; ren._drawing = true;
+          try { if (dois) l._alPasso(v.passo); else l._updatePath(); } finally { ren._drawing = false; ren._ctx = x0; }
+          u += c;
+          l._alDes = v.des;
+          if (dois && ++v.passo < 2) continue;
+          v.passo = 0; v.cur = o.next;
+          if (u >= un || performance.now() - t0 >= ms) break;
+        }
+      } finally { ren._bounds = b0; }
+      v.u = u;
+      if (!v.cur) troca(v);
+    }
+    // pronto: o canvas de trás entra no lugar do da página (que fica de reserva para o próximo desenho)
+    function troca(v) {
+      const nb = caixa();
+      if (!nb.min.equals(v.nb.min) || !nb.max.equals(v.nb.max) || chave() !== v.chave) { inicia(); return; }   // o mapa mudou sem avisar (tamanho): de novo
+      v.ctx.restore();
+      v.morto = true;
+      const velho = ren._container;
+      v.c.className = velho.className;
+      L.DomUtil.setPosition(v.c, v.nb.min);
+      if (velho.parentNode) velho.parentNode.replaceChild(v.c, velho);
+      ren._container = v.c; ren._ctx = v.ctx; ren._bounds = v.nb; ren._center = v.centro; ren._zoom = v.zoom;
+      if (reset) ren._updateTransform(v.centro, v.zoom);
+      reserva = velho; voo = null; incons = false;
+      ren._redrawRequest = null; ren._redrawBounds = null;
+      if (v.sujo) { ren._redrawBounds = v.sujo; ren._redrawRequest = L.Util.requestAnimFrame(ren._redraw, ren); }
+      const fs = quando;
+      quando = [];
+      fs.forEach(f => { try { f(); } catch (e) { console.error(e); } });
+    }
+    function solta(v) {                                   // desenho interrompido (gesto novo): o canvas da página fica como está
+      v.morto = true;
+      if (v.raf) cancelAnimationFrame(v.raf);
+      v.ctx.restore();
+      if (!reserva) reserva = v.c;
+      if (voo === v) voo = null;
+    }
+    function recomeca(v) { v.ctx.restore(); limpa(v); }  // a ordem do desenho mudou no meio dele
+    const canal = (() => { const c = new MessageChannel(), f = []; c.port1.onmessage = () => f.shift()(); return g => { f.push(g); c.port2.postMessage(0); }; })();
+    // a próxima fatia: depois da pintura desta (no fim da tarefa dela; o tempo dela ajusta o custo) e do quadro seguinte
+    function segue(v) {
+      const t1 = performance.now();
+      canal(() => {
+        if (v.morto) return;
+        if (v.u > 400) FT.un = Math.min(0.05, Math.max(0.0003, 0.5 * FT.un + 0.5 * (performance.now() - t1) / v.u));
+        v.raf = requestAnimationFrame(() => {
+          v.raf = 0;
+          canal(() => { if (v.morto) return; fatia(v, 8, 20 / FT.un); if (voo) segue(voo); });
+        });
+      });
+    }
+    // as linhas para o toque: todas prontas na vista nova (o desenho em curso não precisa refazê-las)
+    function geo() {
+      if (pend) inicia();
+      const v = voo;
+      if (!v) return;
+      const b0 = ren._bounds;
+      ren._bounds = v.nb;
+      try { for (let o = ren._drawFirst; o; o = o.next) prepara(o.layer, v); } finally { ren._bounds = b0; }
+    }
+    // área de uma camada já desenhada nesta vista que mudou ou saiu: redesenhada depois da troca
+    const marca = (l, v) => {
+      if (l._alDes !== v.des || !l._pxBounds) return;
+      const w = (l.options.weight || 0) + 1, b = l._pxBounds;
+      v.sujo = v.sujo || new L.Bounds();
+      v.sujo.extend(b.min.subtract([w, w])); v.sujo.extend(b.max.add([w, w]));
+    };
+    ren._update = function () {                           // fim de movimento (moveend) e viewreset
+      if (!ativo()) return o0.update.call(this);
+      if (m._animatingZoom && this._bounds) return;
+      if (voo) solta(voo);
+      incons = true; reset = false;
+      if (this._redrawRequest && this._redrawRequest !== PEDIDO) L.Util.cancelAnimFrame(this._redrawRequest);
+      this._redrawRequest = PEDIDO; this._redrawBounds = null;
+      if (pend) return;
+      pend = true;                                        // no fim desta tarefa (os outros ouvintes do fim do movimento antes): a 1ª fatia, pequena
+      queueMicrotask(() => { if (!pend) return; inicia(); if (voo) { fatia(voo, 3, 6 / FT.un); if (voo) segue(voo); } });
+    };
+    ren._reset = function () {                            // viewreset: a projeção e o recorte das camadas ficam para o desenho
+      if (!ativo()) return o0.reset.call(this);
+      this._update();
+      this._updateTransform(this._center, this._zoom);
+      reset = true;
+    };
+    ren._onZoomEnd = function () { if (!ativo()) return o0.zoomEnd.call(this); };   // idem
+    ren._redraw = function () {
+      if (pend) inicia();
+      if (voo) {                                          // redesenho pedido no meio do desenho em fatias: termina agora
+        for (let i = 0; voo && i < 3; i++) fatia(voo, Infinity, Infinity);   // (recomeça se o mapa mudou de tamanho)
+        if (this._redrawRequest && this._redrawRequest !== PEDIDO) L.Util.cancelAnimFrame(this._redrawRequest);
+        this._redrawBounds = null;
+      } else if (incons) { this._redrawRequest = PEDIDO; this._redrawBounds = null; return; }
+      return o0.redraw.call(this);
+    };
+    ren._extendRedrawBounds = function (l) {
+      if (voo) return marca(l, voo);
+      if (pend || incons) return;
+      return o0.ext.call(this, l);
+    };
+    ren._requestRedraw = function (l) {
+      const v = voo;
+      if (v) {
+        if (l._alDes === v.des && l._alEp !== v.id && l._order && l._map) {   // forma nova numa já desenhada: pronta já, para a área certa
+          const b0 = this._bounds;
+          this._bounds = v.nb;
+          try { prepara(l, v); } finally { this._bounds = b0; }
+        }
+        return marca(l, v);
+      }
+      if (pend || incons) return;
+      return o0.req.call(this, l);
+    };
+    ren._initPath = function (l) { l._alPk = null; l._alEp = -1; l._alDes = 0; return o0.init.call(this, l); };
+    ren._updatePath = function (l) { l._alPk = null; l._alEp = -1; return o0.upd.call(this, l); };   // (redraw: forma nova)
+    ren._bringToFront = function (l) { o0.frente.call(this, l); if (voo) recomeca(voo); };
+    ren._bringToBack = function (l) { o0.fundo.call(this, l); if (voo) recomeca(voo); };
+    ren._onClick = function (e) { if ((voo || pend) && /click|contextmenu/.test(e.type)) geo(); return o0.click.call(this, e); };
+    ren._handleMouseHover = function (e, p) { if ((voo || pend) && !this._mouseHoverThrottled) geo(); return o0.hover.call(this, e, p); };
+    ren._alQuando = f => { if (incons || pend) quando.push(f); else f(); };
+    m.on('movestart zoomstart', () => { pend = false; if (voo) solta(voo); });
+  }
+  window.__alFatias = fatiado;
   const ren = map.options.renderer;                       // o canvas da rede
+  let redeOk = false;
+  AL.rede.then(() => { redeOk = true; });
+  fatiado(ren, () => redeOk);                             // (antes de entrar no mapa: os ouvintes do canvas são os daqui)
   map.addLayer(ren);
   fusMarcas = L.layerGroup().addTo(map);
   window.__fusMarcas = fusMarcas;                         // limpeza.js: com a Faixa ligada, os ~2.000 pontos só aparecem de perto (zoom 14+)

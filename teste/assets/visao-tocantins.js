@@ -914,10 +914,14 @@
     clearTimeout(tPouso);
     tPouso = setTimeout(() => mc.classList.remove('vto-pouso'), 300);
   }
+  // (o canvas da rede é desenhado em fatias, alimentador.js: ela volta quando a vista do pouso está nele, não esticada)
   function redeVolta() {
-    if (paneRede.style.opacity === '') return;
-    paneRede.style.transition = calmo() ? 'none' : 'opacity .24s var(--ease,ease)';
-    paneRede.style.opacity = '';
+    const volta = () => {
+      if (paneRede.style.opacity === '' || voo) return;
+      paneRede.style.transition = calmo() ? 'none' : 'opacity .24s var(--ease,ease)';
+      paneRede.style.opacity = '';
+    };
+    if (renRede && renRede._alQuando) renRede._alQuando(volta); else volta();
   }
   // quem interrompe o voo (arrasto, roda, pinça, outra vista) passa pelo map._stop(): o voo acaba ali, sem pouso
   const para0 = map._stop;

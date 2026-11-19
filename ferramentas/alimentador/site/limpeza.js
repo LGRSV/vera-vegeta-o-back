@@ -349,11 +349,13 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){display:no
   // projeta, recorta e simplifica os pontos uma vez para os dois traços, na carga e a cada zoom. O desenho é o mesmo: o
   // contorno e, logo por cima, a cor, no lugar que as duas tinham na ordem do canvas; o toque vale pela linha da cor.
   const Dupla = map && window.L && L.Canvas && map.options.renderer instanceof L.Canvas && L.Polyline.extend({
-    _updatePath() {
+    _updatePath() { this._alPasso(0); this._alPasso(1); },
+    // um traço: 0 o contorno, 1 a cor (o desenho em fatias do alimentador.js pode pôr cada um numa fatia)
+    _alPasso(i) {
       const r = this._renderer, cor = this.options;
+      if (i) return r._updatePoly(this);
       this.options = this._contorno;
       try { r._updatePoly(this); } finally { this.options = cor; }
-      r._updatePoly(this);
     },
     // a caixa de redesenho é a que as duas linhas somavam: a do contorno (2 px a mais de cada lado) e os 4 px que ele pedia além dela
     _updateBounds() {
