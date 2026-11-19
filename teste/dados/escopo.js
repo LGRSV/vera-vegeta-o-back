@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.20",
+ "versao": "2.21",
  "atualizado": "2026-11-18",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -153,6 +153,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Visão satélite do mapa inicial com os 327 alimentadores: os 14 com só alguns metros de rede no cadastro aparecem como ponto", "st": "ok", "d": "2026-11-18"},
    {"t": "Visão satélite com os níveis do mapa dos municípios: Tocantins › Regional › Polo › Município (contornos, cores dos polos, NAE, voo suave entre níveis)", "st": "ok", "d": "2026-11-19", "obs": "Trilha clicável; Esc sobe um nível e Ctrl+S fecha. Abre no nível em que o mapa estava e, ao fechar, o mapa fica no nível do satélite. No município, os alimentadores dele em destaque, com a lista."},
    {"t": "Visão satélite abre com a legenda da NAE recolhida (sem os números nos cartões); a orelhinha mostra de novo e, ao fechar, o mapa volta como estava", "st": "ok", "d": "2026-11-19"},
+   {"t": "Correção: 34 alimentadores voltam à divisão de trechos de antes de 17/11 (a base do Rede Sentinela não entra na divisão); os 3 que faltavam (PS01112193, LD01104052 e LD01926241) ficam, com a divisão conferida", "st": "ok", "d": "2026-11-19", "obs": "NAE, Limpeza de faixa, Inspeção, Manutenção, Queimadas, busca e Priorização iguais a antes, sem OS ou ativo órfão. AL10097122 e LD04047073 saem (a rede deles já está nos alimentadores de antes). O site fica com 325 alimentadores."},
+   {"t": "Exportação do GIS com as chaves fechadas (Fechado.kmz) de LD02424015, LD01414015 e AL01102271, para dividir os ramais em T3 pelo script", "st": "pend", "prazo": "2026-11-26", "resp": "proj", "obs": "Hoje estão na divisão manual de 16/10: T2 com centenas de km porque só há fusíveis das OS."},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},
