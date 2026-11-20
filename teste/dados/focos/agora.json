@@ -1,4 +1,12 @@
-{"gerado":"2026-11-20T01:01Z","janela_h":84,"ramo":"focos","fontes":{"inpe":{"ultimo_arquivo":"2026-11-20T01:00Z","arquivos":439,"ultimo_foco":"2026-11-20T00:40Z"},"firms":{"modo":"csv","atualizado":"2026-11-20T00:45Z","arquivos":["J1_VIIRS_C2_South_America_7d.csv","J2_VIIRS_C2_South_America_7d.csv","MODIS_C6_1_South_America_7d.csv"],"ultimo_foco":"2026-11-19T23:58Z"}},"faixas":{"sob":"Sob a rede: o pixel do satélite cobre a rede (até 200 m no VIIRS, 500 m no MODIS, 1 km no GOES)","1km":"Até 1 km da rede","5km":"De 1 a 5 km da rede"},"sensores":{"AQUA":"MODIS, pixel de 1 km","GOES-19":"geoestacionário, pixel de 2 a 4 km","NOAA-20":"VIIRS, pixel de 375 m","NOAA-21":"VIIRS, pixel de 375 m"},"contagem":{"to":77,"sob":34,"1km":22,"5km":27},"focos":[
+{"gerado":"2026-11-20T02:02Z","janela_h":84,"ramo":"focos","fontes":{"inpe":{"ultimo_arquivo":"2026-11-20T02:00Z","arquivos":445,"ultimo_foco":"2026-11-20T01:40Z"},"firms":{"modo":"csv","atualizado":"2026-11-20T01:46Z","arquivos":["J1_VIIRS_C2_South_America_7d.csv","J2_VIIRS_C2_South_America_7d.csv","MODIS_C6_1_South_America_7d.csv"],"ultimo_foco":"2026-11-19T23:58Z"}},"faixas":{"sob":"Sob a rede: o pixel do satélite cobre a rede (até 200 m no VIIRS, 500 m no MODIS, 1 km no GOES)","1km":"Até 1 km da rede","5km":"De 1 a 5 km da rede"},"sensores":{"AQUA":"MODIS, pixel de 1 km","GOES-19":"geoestacionário, pixel de 2 a 4 km","NOAA-20":"VIIRS, pixel de 375 m","NOAA-21":"VIIRS, pixel de 375 m","TERRA":"MODIS, pixel de 1 km"},"contagem":{"to":85,"sob":36,"1km":25,"5km":30},"focos":[
+[-5.94572,-47.94427,"2026-11-20T00:05Z","TERRA","I",752,"LD03109039","T3-OK","1km",null,"1702208"],
+[-8.54538,-49.23652,"2026-11-20T00:02Z","TERRA","I",839,"LD02020023","T3-AXI","1km",null,"1706001"],
+[-8.79722,-49.461,"2026-11-20T00:02Z","TERRA","I",2743,"LD03022033","T2-B","5km",null,"1701903"],
+[-9.30999,-47.85387,"2026-11-20T00:02Z","TERRA","I",2624,"LD02424015","T2-A","5km",null,"1716505"],
+[-9.52932,-49.09392,"2026-11-20T00:02Z","TERRA","I",93,"LD05062013","T3-JM","sob",null,"1707207"],
+[-10.20523,-49.12408,"2026-11-20T00:02Z","TERRA","I",818,"LD03062013","T3-KM","1km",null,"1704600"],
+[-10.40454,-47.70588,"2026-11-20T00:02Z","TERRA","I",156,"LD02059122","T2-O","sob",null,"1717909"],
+[-11.41828,-47.0868,"2026-11-20T00:02Z","TERRA","I",1922,"LD07002091","T2-D","5km",null,"1718006"],
 [-10.9375,-49.1345,"2026-11-19T22:40Z","GOES-19","I",206,"LD01025012","T3-KB","sob",null,"1718899"],
 [-10.9375,-49.1345,"2026-11-19T22:30Z","GOES-19","I",206,"LD01025012","T3-KB","sob",null,"1718899"],
 [-5.54835,-47.77628,"2026-11-19T18:57Z","AQUA","IF",456,"AL01016065","T3-DI","sob",11.1,"1718303"],
