@@ -6,8 +6,8 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.26",
- "atualizado": "2026-11-19",
+ "versao": "2.27",
+ "atualizado": "2026-11-23",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
@@ -161,6 +161,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Mapa do alimentador: ✕ na linha do aberto no menu Alimentadores esconde a rede, os nomes e os equipamentos dele no mapa (mesmo sem outros selecionados); \"mostrar\" traz de volta", "st": "ok", "d": "2026-11-19", "obs": "O painel continua o dele; vizinhos, estado e selecionados ficam à vista e respondem ao clique. Volta sozinho ao escolher um trecho dele e no modo Limpeza de faixa. Os focos da Queimadas continuam visíveis."},
    {"t": "Mapa do alimentador: abrir no Google Maps ou no Google Earth pelo balão de cada ativo e poste, e por clique direito ou toque longo em qualquer ponto (com a coordenada em graus e UTM para copiar)", "st": "ok", "d": "2026-11-19"},
    {"t": "Mapa do alimentador: números dos ativos sem se cobrir (cada um procura um lado livre; sem lugar, vai um pouco mais longe com uma linha até o ativo; nenhum some)", "st": "ok", "d": "2026-11-19", "obs": "Exemplo do usuário: LD03046026, chave 8861256257 junto do poste 44142842 (São Félix do Tocantins)."},
+   {"t": "Limpeza de faixa: OS executada que veio de uma inspeção sai da Faixa (sem número de obra e com a tarefa \"VEGETAÇÃO > LIMPEZA DE FAIXA > …\" de outra OS na descrição)", "st": "ok", "d": "2026-11-23", "obs": "Saem 1.099 OS executadas. Ficam as executadas sem obra com o texto de limpeza programada (297, a obra só faltou na base) e as pendentes. No mapa inicial, de 2.617 para 1.614 OS executadas (35.766 para 30.896 km). A regra vale também nas próximas atualizações da base."},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},

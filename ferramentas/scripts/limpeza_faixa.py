@@ -14,7 +14,11 @@ Como a OS vira trecho no mapa (é aproximado: a OS não traz o traçado, só ati
      Com 0: tenta MONT_ABRANGENCIA como ponto único; senão fica "sem localização".
 Data da limpeza: FIM_EXEC; se o FIM vier mais de 60 dias depois do INICIO (fechamento em lote), usa INICIO_EXEC.
 Só OS EXECUTADA conta como limpeza, e só das equipes de EQUIPES (prefixo do NUMERO_OS, ex.: "ETO-RD-GU 004972/2022");
-CRIADA / A REPROGRAMAR / REPROGRAMADA aparecem como pendentes, de qualquer equipe.
+a executada que veio de uma inspeção não conta (pedido do usuário, 23/11/2026): sem número de obra (NUM_OBRA nem obra
+citada na descrição) e com a tarefa da inspeção na descrição ("VEGETAÇÃO > LIMPEZA DE FAIXA > ...", "VEGETAÇÃO > PODA
+...", o esquema de outra OS). A executada sem obra com o texto de limpeza programada ("Faixa de aproximadamente X km...")
+continua contando (a obra só faltou na base). CRIADA / A REPROGRAMAR / REPROGRAMADA aparecem como pendentes, de
+qualquer equipe, com ou sem obra.
 
 OS parcial: cada obra tem uma OS mãe (a primeira criada, que descreve o trecho todo) e pode ter OS parciais criadas
 depois (espelho, pagamento parcial, medição) que só detalham a execução da mãe. As parciais não pintam vãos, não somam
@@ -30,7 +34,7 @@ no lugar do KMZ. OS que saiu da planilha sai do site.
 Uso:
   python teste/ferramentas/limpeza_faixa.py "OS LIMPEZA DE FAIXA.xlsx" [saida.xlsx] [pasta_kmz ...]
   python scripts/limpeza_faixa.py --site <pasta do site> "OS LIMPEZA DE FAIXA.xlsx"   (sem KMZ: índice do site)
-  python teste/ferramentas/limpeza_faixa.py --so-equipes [pasta do site]   (aplica EQUIPES nos limpeza.js já gerados)
+  python teste/ferramentas/limpeza_faixa.py --so-equipes [pasta do site]   (aplica EQUIPES e tira as da inspeção dos limpeza.js já gerados)
   pasta_kmz: pasta(s) com o export KMZ_GOOGLE_EARTH (SE_*/AL*/Equipamentos/..., Apoios_e_pontos/Postes.kmz).
 """
 import glob
@@ -56,10 +60,19 @@ RAIO_M = 300  # distância máxima do ativo do KMZ até o poste do mapa
 EQUIPES = ("ETO-RD-PA", "ETO-RD-PS", "ETO-RD-PO", "ETO-RD-GR", "ETO-RD-AR", "ETO-RD-AG", "ETO-RD-GU", "ETO-RD-DP")
 
 
-def conta(sit, numero_os):
-    """OS que entra no mapa: pendente de qualquer equipe; executada só das EQUIPES; cancelada nunca."""
+TAREFA_INSPECAO = re.compile(r"^\s*VEGETA\S{0,3}O\s*>", re.I)   # "VEGETAÇÃO > LIMPEZA DE FAIXA > ...", a tarefa de outra OS
+
+
+def da_inspecao(o):
+    """OS que veio de uma inspeção: sem número de obra (obra_de) e com a tarefa da inspeção na descrição."""
+    return not obra_de(o) and bool(TAREFA_INSPECAO.match(o.get("desc") or ""))
+
+
+def conta(sit, numero_os, inspecao=False):
+    """OS que entra no mapa: pendente de qualquer equipe; executada só das EQUIPES e que não veio de uma inspeção
+    (inspecao: da_inspecao); cancelada nunca."""
     eq = str(numero_os).split()[0] if str(numero_os).split() else ""
-    return sit != "CANCELADA" and (sit != "EXECUTADA" or eq in EQUIPES)
+    return sit != "CANCELADA" and (sit != "EXECUTADA" or (eq in EQUIPES and not inspecao))
 
 
 def carrega_dados_js(al):
@@ -407,9 +420,10 @@ def main(xlsx, pastas_kmz=()):
 
     por_al = {a: [] for a in als}
     for _, r in df.iterrows():
-        if not conta(r.SITUACAO, r.NUMERO_OS):
-            continue
         desc = str(r.DESCRICAO_OS) if not pd.isna(r.DESCRICAO_OS) else ""
+        num = r.get("NUM_OBRA")
+        if not conta(r.SITUACAO, r.NUMERO_OS, da_inspecao({"obra": "" if pd.isna(num) else num, "desc": desc})):
+            continue
         cod_desc = list(dict.fromkeys(re.findall(r"(?<!\d)\d{10}(?!\d)", desc)))
         extra = [str(r[c]).strip() for c in ("ELEMENTO", "ABRANGENCIA") if not pd.isna(r[c])]
         if isinstance(r.ESTRUTURA, str) and "-" in r.ESTRUTURA:
@@ -538,16 +552,30 @@ def main(xlsx, pastas_kmz=()):
     return linhas, por_al
 
 
+def recalcula_m(d, dados_js):
+    """Os metros de cada OS que não é parcial pelos vãos dela no mapa (como main faz): a parcial que vira mãe quando a mãe
+    sai (executada da inspeção) volta a somar os vãos dela."""
+    s = open(dados_js, encoding="utf8").read()
+    comp = {str(v[5]): v[8] for v in json.loads(s[s.index("=") + 1:].strip().rstrip(";"))["vaos"]}
+    soma = defaultdict(float)
+    for v, ks in d["vaos"].items():
+        for k in ks:
+            soma[k] += comp.get(str(v), 0.0)
+    for k, o in enumerate(d["os"]):
+        if not o.get("mae"):
+            o["m"] = round(soma.get(k, 0.0), 1)
+
+
 def so_equipes(raiz=RAIZ):
-    """Aplica EQUIPES nos limpeza.js já gerados, sem refazer a localização das OS (cada OS é localizada sozinha,
-    então tirar uma OS depois dá o mesmo que não ler a linha dela)."""
+    """Aplica EQUIPES e tira as da inspeção (conta) nos limpeza.js já gerados, sem refazer a localização das OS (cada OS é localizada
+    sozinha, então tirar uma OS depois dá o mesmo que não ler a linha dela); as parciais refeitas (a mãe pode ter saído)."""
     antes = depois = 0
     for f in sorted(glob.glob(os.path.join(raiz, "alimentadores", "*", "limpeza.js"))):
         s = open(f, encoding="utf8").read()
         d = json.loads(s[s.index("=") + 1:].strip().rstrip(";"))
         if not d:
             continue
-        fica = [k for k, o in enumerate(d["os"]) if conta(o["sit"], o["os_completa"])]
+        fica = [k for k, o in enumerate(d["os"]) if conta(o["sit"], o["os_completa"], da_inspecao(o))]
         novo = {k: i for i, k in enumerate(fica)}
         antes, depois = antes + len(d["os"]), depois + len(fica)
         d["os"] = [d["os"][k] for k in fica]
@@ -555,6 +583,8 @@ def so_equipes(raiz=RAIZ):
         d["vaos"] = {v: ks for v, ks in vaos.items() if ks}
         d["sem_local"] = [novo[k] for k in d["sem_local"] if k in novo]
         d["equipes"] = list(EQUIPES)
+        marca_parciais(d)
+        recalcula_m(d, os.path.join(os.path.dirname(f), "dados.js"))
         open(f, "w", encoding="utf8").write("window.LIMPEZA = " + json.dumps(d, ensure_ascii=False, separators=(",", ":")) + ";\n")
     return antes, depois
 
@@ -582,7 +612,7 @@ if __name__ == "__main__":
         sys.exit(0)
     if sys.argv[1] == "--so-equipes":
         antes, depois = so_equipes(*sys.argv[2:3])
-        print(f"{antes} OS antes, {depois} depois (executadas só de {', '.join(EQUIPES)})")
+        print(f"{antes} OS antes, {depois} depois (executadas só de {', '.join(EQUIPES)} e sem as da inspeção)")
         sys.exit(0)
     if sys.argv[1] == "--site":                    # sem KMZ: índice do site e posição já publicada
         usa_site(sys.argv[2])
