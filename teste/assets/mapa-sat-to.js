@@ -1566,13 +1566,7 @@
   function criaFaixa(a, c) {
     const g = [], por = {};
     for (const t of a.tr) {
-      if (t.pt) {
-        const pt = L.circleMarker(t.pt, Object.assign(OPC(), estiloLinha('PT', false, a.cod, t.sit)));
-        pt._stCls = 'PT'; pt._stAl = a.cod; pt._stSit = t.sit; pt._stTr = [t];
-        liga(pt, a.cod);
-        g.push(pt); c.semRede.add(a.cod);
-        continue;
-      }
+      if (t.pt) continue;                               // (sem rede no cadastro: na visão Limpeza nada de ponto; pedido do usuário)
       if (!t.ls.length) continue;
       const o = por[t.cls + '|' + t.sit] || (por[t.cls + '|' + t.sit] = { rs: [], ts: [] });
       for (const r of t.ls) { o.rs.push(r); o.ts.push(t); }
@@ -1595,14 +1589,7 @@
   function criaAno(a, c) {
     const g = [], por = new Map(), nx = { cri: { rs: [], ts: [], ps: [] }, pend: { rs: [], ts: [], ps: [] } };
     for (const t of a.tr) {
-      if (t.pt) {
-        const y = t.ult ? +t.ult.slice(0, 4) : 0, pt = L.circleMarker(t.pt, Object.assign(OPC(), estiloLinha('PT', false, a.cod)));
-        pt._stCls = 'PT'; pt._stAl = a.cod; pt._stPtCor = y ? corAno(y) : FUNDOCOR; pt._stTr = [t]; pt._stOrd = 9;
-        pt.setStyle(estiloDe(pt, false));
-        liga(pt, a.cod);
-        g.push(pt); c.semRede.add(a.cod);
-        continue;
-      }
+      if (t.pt) continue;                               // (sem rede no cadastro: na visão Limpeza nada de ponto; pedido do usuário)
       for (const pc of t.pec) {
         if (!pc.ls.length) continue;
         const ch = pc.anos.join(','), o = por.get(ch) || (por.set(ch, { anos: pc.anos, rs: [], ts: [], ps: [] }), por.get(ch));
