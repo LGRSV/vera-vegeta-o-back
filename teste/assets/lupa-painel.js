@@ -23,8 +23,9 @@
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const pasta = ((document.currentScript && document.currentScript.src) || '').replace(/[^/]*$/, '');   // a pasta assets/
   const D = window.D || { trechos: [] };
-  const mil = n => Number(n).toLocaleString('pt-BR');
-  const km = m => m < 1000 ? Math.round(m) + ' m' : (m / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
+  let NF0 = null, NF1 = null;                          // formatadores criados uma vez, no 1º uso
+  const mil = n => (NF0 || (NF0 = new Intl.NumberFormat('pt-BR'))).format(Number(n));
+  const km = m => m < 1000 ? Math.round(m) + ' m' : (NF1 || (NF1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }))).format(m / 1000) + ' km';
   const classe = n => n.split('-')[0];
   const CLS = ['T1', 'T2', 'T3'];
   const btCls = c => document.querySelector(`#classes button[data-c="${c}"]`);
@@ -424,7 +425,9 @@
     do { if (aquecer[0](tem)) aquecer.shift(); } while (aquecer.length && tem());
     if (aquecer.length) livre(aquece);
   };
-  livre(aquece);
+  // (começa depois da lista de trechos inteira: as folgas da carga são dela; quem precisa do índice antes o monta na hora)
+  const pag = window.__al;
+  (pag && pag.lista ? Promise.race([pag.lista, new Promise(r => setTimeout(r, 10000))]) : Promise.resolve()).then(() => livre(aquece));
 
   // vão mais perto de um ponto (chave solta, sem trecho nos dados): o trecho dela. Grade de ~1 km com os vãos de cada
   // quadrado; olha o quadrado do ponto e os vizinhos (sem nada perto, todos os vãos)

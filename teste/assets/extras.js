@@ -4,8 +4,11 @@
 (function () {
   const M = D.meta || {};
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const km = m => (m / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' km';
-  const mil = x => x === '' || x == null ? '' : Number(x).toLocaleString('pt-BR');
+  // formatadores criados uma vez, no 1º uso (o toLocaleString com opções monta um formatador a cada chamada: ~1 ms cada no
+  // celular, e os municípios da página chamam o km dezenas de vezes na carga)
+  let NF2 = null, NF0 = null;
+  const km = m => (NF2 || (NF2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))).format(m / 1000) + ' km';
+  const mil = x => x === '' || x == null ? '' : (NF0 || (NF0 = new Intl.NumberFormat('pt-BR'))).format(Number(x));
   const muns = M.municipios || [];
   const mun = muns.find(x => x.slug === new URLSearchParams(location.search).get('m'));
   const css = document.createElement('style');

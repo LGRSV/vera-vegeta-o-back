@@ -458,9 +458,18 @@
     };
     return m => {
       if (m.t === 'dados') D = m.D;
-      else if (m.t === 'camtexto') {                     // um arquivo das camadas dos outros: lido aqui (no worker); devolve o resumo
-        const G = CAM[m.tipo] = decodificaCam(m.tipo, m.txt, m.eu);
-        posta({ t: 'cam', tipo: m.tipo, cods: G.cods, anos: G.anos || null, linhas: G.linhas || 0, pontos: G.pontos, os: G.os ? G.os.length : 0, hoje: G.hoje || '' });
+      else if (m.t === 'camurl') {                       // um arquivo das camadas dos outros: baixado e lido aqui (no worker, fora da
+        // linha principal: nem o texto passa por ela); devolve o resumo. Executadas: os anos do arquivo vêm do cabeçalho
+        fetch(m.url, { cache: 'no-cache' })              // (sem ?v=: confere a versão com o servidor)
+          .then(r => (r.ok ? r.text() : null))
+          .then(txt => {
+            if (!txt) return;
+            const G = CAM[m.tipo] = decodificaCam(m.tipo, txt, m.eu);
+            let anos = G.anos || null;
+            if (m.tipo === 'executadas') { try { anos = JSON.parse(txt.slice(1, txt.indexOf('\n'))).anos || []; } catch (e) { anos = []; } }
+            posta({ t: 'cam', tipo: m.tipo, cods: G.cods, anos, linhas: G.linhas || 0, pontos: G.pontos, os: G.os ? G.os.length : 0, hoje: G.hoje || '' });
+          })
+          .catch(() => { /* sem o arquivo: os outros ficam como estão */ });
       }
       else if (m.t === 'contorno') P = m.P;
       else if (m.t === 'quadros') {
@@ -866,6 +875,10 @@
   // página não passa pelos arquivos). Um canvas só, acima dos vizinhos e abaixo das divisas e da rede deste, desenhado pelo
   // pintor como o do estado (no zoom e no arrasto ele só estica e move; refeito no fim do movimento, se a vista sai da
   // região, e quando uma camada muda). Os selecionados ficam como estão (selecionados.js). Sem OffscreenCanvas: nada.
+  // Só depois da carga (a rede, o painel e a lista de trechos inteira, e o navegador à toa: o começo, no fim): antes
+  // disso os avisos das camadas (al:faixa, al:camada, que saem já na montagem delas) e os fins de movimento não baixam
+  // nem desenham nada (medido no celular: o faixa.txt baixado e desenhado no meio da carga atrasava o painel e a lista)
+  let comecouF = false;
   const paneF = map.createPane('camadas-outros');
   paneF.style.zIndex = 345;                              // acima dos vizinhos (340); abaixo das divisas (350) e da rede (400)
   paneF.style.pointerEvents = 'none';
@@ -953,27 +966,22 @@
     return op;
   }
   // os anos de cada arquivo (Inspeção, Manutenção) vêm no cabeçalho; os da Faixa nas chaves dos pedaços
+  // O arquivo é baixado e lido pelo pintor (no worker: o texto não passa pela linha principal)
   function carregaCam(n) {
     const C = CAMS[n];
-    if (C.carga) return;
-    C.carga = fetch(new URL('../dados/redes/' + C.arq, eu.src).href, { cache: 'no-cache' })   // (sem ?v=: confere a versão com o servidor)
-      .then(r => (r.ok ? r.text() : null))
-      .then(t => {
-        if (!t || !PINTOR) return;
-        if (n === 'executadas') { try { C.anosArq = JSON.parse(t.slice(1, t.indexOf('\n'))).anos || []; } catch (e) { C.anosArq = []; } }
-        PINTOR.postMessage({ t: 'camtexto', tipo: n, txt: t, eu: EU });
-      })
-      .catch(() => { /* sem o arquivo: os outros ficam como estão */ });
+    if (C.carga || !PINTOR) return;
+    C.carga = true;
+    PINTOR.postMessage({ t: 'camurl', tipo: n, url: new URL('../dados/redes/' + C.arq, eu.src).href, eu: EU });
   }
   camChegou = m => {
     const C = CAMS[m.tipo];
-    C.dados = Object.assign(m, { anos: m.anos || C.anosArq || [] });
+    C.dados = Object.assign(m, { anos: m.anos || [] });
     outros.vista(true);
   };
   const Outros = Tela.extend({
     options: { pane: 'camadas-outros' },
     vista(forca) {
-      if (voo) return;
+      if (voo || !comecouF) return;
       const ls = ligadas();
       ls.forEach(n => { if (!CAMS[n].dados) carregaCam(n); });
       if (!ls.some(n => CAMS[n].dados)) { this.apaga(); return; }
@@ -1447,8 +1455,10 @@
     map.panTo(c, { animate: !calmo(), duration: 0.45 });
   });
 
-  // ---------- começo: depois da rede deste inteira no mapa e do painel (a carga da página não muda) ----------
-  const depois = AL ? Promise.all([AL.rede, AL.pronto]) : Promise.resolve();
+  // ---------- começo: depois da rede deste inteira no mapa, do painel e da lista de trechos inteira (a carga da página
+  // não muda: medido no celular com a CPU 4× mais lenta, o começo daqui no meio da lista a atrasava; a lista que não
+  // termina em 10 s não segura mais) ----------
+  const depois = AL ? Promise.all([AL.rede, AL.pronto]).then(() => Promise.race([AL.lista, new Promise(r => setTimeout(r, 10000))])) : Promise.resolve();
   depois.then(() => {
     leZm();
     minimo();                                            // com os controles do mapa já no lugar (as folgas da vista do estado)
@@ -1466,7 +1476,7 @@
     }
     const vez = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 200));
     vez(() => { carrega().then(() => vez(() => { leZm(); estado.vista(true); })); });
-    vez(() => outros.vista(true));                       // as camadas nos outros (as ligadas: baixa o arquivo de cada uma)
+    vez(() => { comecouF = true; outros.vista(true); });   // as camadas nos outros (as ligadas: baixa o arquivo de cada uma)
   });
 
   // para os testes e as medidas

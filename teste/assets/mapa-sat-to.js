@@ -43,6 +43,14 @@
 //   ao fechar.
 //   Ligado, as divisas também seguem o zoom: de longe as regionais; aproximando, os polos (Z_FR_POL) e os municípios
 //   (Z_FR_MUN), em qualquer nível (porZoom).
+// - Camadas (pedido do usuário: no satélite em tela cheia não havia como trocar a visão; "a mesma faixa de opção de quando
+//   eu selecionava um alimentador"): no alto do cartão da legenda, a fileira NAE | Faixa | Inspeção | Insp→manut |
+//   Manutenção | Queimadas do mapa do alimentador (lupa-painel.js, .lp-cams: o mesmo desenho e o mesmo liga/desliga; setas
+//   andam nela), cada uma com a legenda dela (anos e situações liga/desliga, km e contagens do nível aberto). Faixa é a
+//   visão Limpeza de antes (Por ano / Vencimento); NAE e Inspeção pintam as linhas T1/T2 (dados/redes/nae.txt e
+//   inspecao.txt); Insp→manut e Manutenção são losangos (manutencao.txt e executadas.txt) e Queimadas os focos ao vivo
+//   (dados/focos/agora.json), por cima. Detalhes em CAMS. Cada arquivo só é baixado quando a camada dele é ligada, e lido num
+//   worker. Sincronia com a visão do mapa dos municípios (window.ARGOS_MAPA.visao) nos dois sentidos.
 // - Raio-X (mapa-raiox.js, Ctrl+X) e satélite não ficam ligados juntos: Ctrl+S desliga o raio-X, e o raio-X ligado fecha o
 //   satélite.
 (function () {
@@ -74,6 +82,39 @@
   let vistaFx = lsGet('st-fx-vista') === 'sit' ? 'sit' : 'ano';
   let fronteira = lsGet('st-fronteira') === '1';            // botão Fronteira: divisas, cartões e níveis (desligado: a visão limpa)
   const anosOff = new Set(), nexeOn = new Set();             // anos desligados; criadas ('c') e pendentes ('p') ligadas
+  // camadas (pedido do usuário: "a mesma faixa de opção de quando eu selecionava um alimentador"): a fileira NAE | Faixa |
+  // Inspeção | Insp→manut | Manutenção | Queimadas do mapa do alimentador (lupa-painel.js, .lp-cams), no alto do cartão da
+  // legenda, com o mesmo desenho e o mesmo liga/desliga (combinam livremente). As linhas T1/T2 ficam com uma pintura de cada
+  // vez, nesta ordem: Faixa (a visão Limpeza de antes; com a Inspeção junto, ela vira a borda larga por baixo, como no mapa
+  // do alimentador), Inspeção (os vãos pela cor do ano), NAE (cada trecho pela NAE dele, na rampa do mapa dos municípios);
+  // a NAE com a Faixa ou a Inspeção vira os números dos trechos (o selo vermelho do mapa do alimentador). Manutenção,
+  // Insp→manut e Queimadas são pontos por cima (losangos e focos). Linha sem o dado da camada: neutra (o "sem registro" da
+  // Limpeza). Sem camada nenhuma, o T1 azul e o T2 verde de antes. Cada camada tem a visão dela no mapa dos municípios
+  // (window.ARGOS_MAPA.visao): ligar uma aqui troca a visão de lá; trocar a visão lá deixa aqui só a camada dela.
+  const CAMS = [
+    { id: 'nae', nome: 'NAE', vis: 'nae', dica: 'NAE-Vegetação de cada trecho T1/T2 (Crítica)' },
+    { id: 'faixa', nome: 'Faixa', vis: 'limpeza', dica: 'Limpeza de faixa do T1/T2 (por ano ou vencimento)' },
+    { id: 'insp', nome: 'Inspeção', curto: 'Insp.', vis: 'inspecao', dica: 'Vãos T1/T2 inspecionados, pela cor do ano' },
+    { id: 'imn', nome: 'Insp→manut', vis: 'insp-manut', dica: 'OS de manutenção geradas pela inspeção, pela situação' },
+    { id: 'man', nome: 'Manutenção', curto: 'Manut.', vis: 'manutencao', dica: 'Manutenção executada nos ativos do T1/T2, pela cor do ano' },
+    { id: 'fogo', nome: 'Queimadas', vis: 'queimadas', dica: 'Focos de calor ao vivo perto da rede (INPE e FIRMS)' }];
+  const CAM = Object.fromEntries(CAMS.map(c => [c.id, c]));
+  const VIS_CAM = { nae: 'nae', nae100: 'nae', limpeza: 'faixa', inspecao: 'insp', 'insp-manut': 'imn', manutencao: 'man', queimadas: 'fogo' };
+  const cams = new Set(), ordemCams = [];                     // ligadas (e a ordem em que foram ligadas)
+  let visVista;                                              // a visão do mapa dos municípios na última sincronia
+  let meuVis = false;                                        // a troca de visão fui eu que pedi
+  const naeRam = { on: lsGet('st-nae-ram') === '1' };       // NAE: somar a dos ramais (T3) no T1/T2 de onde saem
+  const inspOff = new Set(), manOff = new Set(), mntOff = new Set();   // anos e situações desligados na legenda
+  // cores das camadas do mapa do alimentador (inspecao.js, executadas.js, manutencao.js) e a rampa da NAE do mapa dos municípios
+  const IN_COR_ANO = { 2024: '#c084fc', 2025: '#818cf8', 2026: '#2dd4bf', 2027: '#a3e635' };
+  const inCorAno = a => IN_COR_ANO[a] || (a < 2024 ? '#e879f9' : '#bef264');
+  const exCorAno = a => (a === -1 ? '#9ca3af' : corAno(a));
+  const exRot = a => (a === -1 ? 'NAE DEOP' : a ? String(a) : 'Sem data');
+  const MN_SIT = ['venc', 'pend', 'fora', 'exec'], MN_COR = ['#ef4444', '#f59e0b', '#0ea5e9', '#22c55e'];
+  const MN_NOME = { venc: 'Vencidas', pend: 'No prazo', fora: 'Executadas fora do prazo', exec: 'Executadas no prazo' };
+  const NAE_COR0 = ['#cbd5e1', '#fde3c8', '#fbbf8f', '#f28f55', '#d65a28', '#9e3510'];
+  const FO_IDADE = ['menos de 6 h', '6 a 24 h', 'mais de 24 h'], FO_COR0 = ['#dc2626', '#f97316', '#fde3c0'];
+  const Z_NUM = 11;                                          // números dos losangos e dos trechos (NAE) só daqui para perto
   const DUR_ABRE = 1200, DUR_FECHA = 850;
   const SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
   const ATR = 'Imagem © Esri — Esri, Maxar, Earthstar Geographics';
@@ -216,6 +257,136 @@
     .then(t => (F = decodificaFaixa(t)).als)
     .catch(e => { fxP = null; throw e; }));
 
+  // dados/redes/inspecao.txt, executadas.txt e manutencao.txt (scripts/gera_trechos.py, camadas_txt: os de visao-tocantins.js)
+  // e nae.txt (nae_txt), lidos fora da linha principal (um worker baixa e lê; a página só recebe o resultado):
+  //   inspecao   → {anos, als: [{cod, ps: [{anos (do mais recente), m, ls}]}]}
+  //   nae        → {meses, oc, t12, t3, sem, als: [{cod, tr: [{nome, cls, n, n3, m, ls, pt}]}]}
+  //   executadas → {anos, cods, la, lo, al, ini, ys, ns}: os ativos (ponto e alimentador) e os serviços de cada um por ano
+  //                (de ini[i] a ini[i+1]; ano -1 NAE DEOP, 0 sem data)
+  //   manutencao → {cods, la, lo, al, ns}: os postes e as OS de cada um por situação (4 por poste, na ordem de MN_SIT)
+  function leCamada(tipo, txt) {
+    const esc = tipo === 'executadas' || tipo === 'manutencao' ? 1e5 : 1e4;
+    let la = 0, lo = 0, al = null, cab = {};
+    const pontos = s => {
+      const out = [], n = s.length;
+      let i = 0;
+      while (i < n) {
+        let v = 0, sh = 0, b;
+        do { b = s.charCodeAt(i++) - 63; v |= (b & 31) << sh; sh += 5; } while (b >= 32);
+        la += v & 1 ? ~(v >> 1) : v >> 1;
+        v = 0; sh = 0;
+        do { b = s.charCodeAt(i++) - 63; v |= (b & 31) << sh; sh += 5; } while (b >= 32);
+        lo += v & 1 ? ~(v >> 1) : v >> 1;
+        out.push([la / esc, lo / esc]);
+      }
+      return out;
+    };
+    const linhas = g => { const ls = []; for (const x of (g || '').split(' ')) if (x) { const q = pontos(x); if (q.length > 1) ls.push(q); } return ls; };
+    const als = [], cods = [], pla = [], plo = [], pal = [], ini = [0], ys = [], ns = [];
+    for (const ln of txt.split('\n')) {
+      if (!ln) continue;
+      if (ln[0] === '#') { try { cab = JSON.parse(ln.slice(1)); } catch (e) { /* cabeçalho estranho */ } continue; }
+      const c = ln.split('\t');
+      if (c[0] === 'A') { als.push(al = { cod: c[1], ps: [], tr: [] }); cods.push(c[1]); }
+      else if (!al) continue;
+      else if (c[0] === 'I') al.ps.push({ anos: c[1] ? c[1].split(',').map(Number) : [], m: +c[2] || 0, ls: linhas(c[3]), al: al.cod });
+      else if (c[0] === 'T') {
+        const g = c[6] || '', t = { nome: c[1], cls: c[2], n: +c[3] || 0, n3: +c[4] || 0, m: +c[5] || 0, ls: [], pt: null, al: al.cod };
+        if (g[0] === '!') t.pt = pontos(g.slice(1))[0] || null; else t.ls = linhas(g);
+        al.tr.push(t);
+      } else if (c[0] === 'E' || c[0] === 'M') {
+        const q = pontos(c[1] || ''), cs = (c[2] || '').split(' '), ia = cods.length - 1;
+        q.forEach((p, i) => {
+          pla.push(p[0]); plo.push(p[1]); pal.push(ia);
+          if (c[0] === 'M') { const n = (cs[i] || '').split(',').map(Number); for (let j = 0; j < 4; j++) ns.push(n[j] || 0); return; }
+          for (const t of (cs[i] || '').split(',')) {
+            if (!t) continue;
+            const [y, n] = t.split(':');
+            ys.push(y === 'd' ? -1 : y === 'z' ? 0 : 2000 + +y); ns.push(n ? +n : 1);
+          }
+          ini.push(ys.length);
+        });
+      }
+    }
+    if (tipo === 'executadas' || tipo === 'manutencao') {
+      const d = { anos: cab.anos || [], cods, la: Float64Array.from(pla), lo: Float64Array.from(plo), al: Uint16Array.from(pal), ns: Uint16Array.from(ns) };
+      if (tipo === 'executadas') { d.ini = Uint32Array.from(ini); d.ys = Int16Array.from(ys); }
+      return { d, tr: Object.values(d).filter(x => x && x.buffer).map(x => x.buffer) };
+    }
+    if (tipo === 'inspecao') return { d: { anos: cab.anos || [], als: als.filter(a => a.ps.length).map(a => ({ cod: a.cod, ps: a.ps })) } };
+    return { d: { meses: cab.meses || [], oc: cab.oc || 0, t12: cab.t12 || 0, t3: cab.t3 || 0, sem: cab.sem || 0, als: als.map(a => ({ cod: a.cod, tr: a.tr })) } };
+  }
+  // o leitor: um worker (sem ele, aqui mesmo); cada arquivo é baixado uma vez (sem ?v=: confere a versão com o servidor,
+  // como o visao-tocantins.js)
+  let leitor = null, nLe = 0;
+  const lendo = new Map(), lidos = {};
+  const leArq = tipo => lidos[tipo] || (lidos[tipo] = new Promise((ok, falha) => {
+    const url = RAIZ + 'dados/redes/' + tipo + '.txt';
+    if (!leitor && typeof Worker === 'function' && !window.__satSemLeitor) {
+      try {
+        const u = URL.createObjectURL(new Blob([`'use strict';\nconst leCamada = ${leCamada};\n` +
+          'onmessage = async e => { const m = e.data; try { const r = await fetch(m.url, { cache: "no-cache" }); if (!r.ok) throw new Error(m.url + " " + r.status); ' +
+          'const o = leCamada(m.tipo, await r.text()); postMessage({ id: m.id, d: o.d }, o.tr || []); } catch (er) { postMessage({ id: m.id, erro: String(er && er.message || er) }); } };'], { type: 'text/javascript' }));
+        leitor = new Worker(u);
+        URL.revokeObjectURL(u);
+        leitor.onmessage = e => { const p = lendo.get(e.data.id); if (!p) return; lendo.delete(e.data.id); if (e.data.erro) p[1](new Error(e.data.erro)); else p[0](e.data.d); };
+        leitor.onerror = e => { e.preventDefault(); leitor = false; lendo.forEach(p => p[1](new Error('leitor'))); lendo.clear(); };
+      } catch (e) { leitor = false; }
+    }
+    if (leitor) { const id = ++nLe; lendo.set(id, [ok, falha]); leitor.postMessage({ id, url, tipo }); return; }
+    fetch(url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(tipo + ' ' + r.status); return r.text(); }).then(t => ok(leCamada(tipo, t).d), falha);
+  }).then(d => { ERRO[tipo] = null; return d; }, e => { delete lidos[tipo]; ERRO[tipo] = 'falhou'; throw e; }));
+  // focos de calor ao vivo (dados/focos/agora.json, o mesmo dos pontos da visão Queimadas do mapa dos municípios, focos.js):
+  // [lat, lon, hora UTC, satélite, fonte, distância (m), alimentador, trecho, faixa (sob, 1km, 5km), FRP, município];
+  // a distância escolhida na visão Queimadas (fo-dist, guardada por focos.js; padrão até 5 km)
+  const FO_DIST = { sob: ['sob'], '1km': ['sob', '1km'], '5km': ['sob', '1km', '5km'] };
+  const FO_DIST_TXT = { sob: 'sob a rede', '1km': 'até 1 km da rede', '5km': 'até 5 km da rede' };
+  const leFocos = () => lidos.focos || (lidos.focos = fetch(RAIZ + 'dados/focos/agora.json', { cache: 'no-cache' })
+    .then(r => { if (!r.ok) throw new Error('agora.json ' + r.status); return r.json(); })
+    .then(a => ({ gerado: a.gerado || '', janela: a.janela_h || 84, fs: (a.focos || []).map(f => ({ la: +f[0], lo: +f[1], t: Date.parse(f[2]), sat: String(f[3] || ''),
+      d: +f[5] || 0, al: f[6] || '', tr: f[7] || '', fx: f[8], mun: f[10] || '' })).filter(f => isFinite(f.t) && isFinite(f.la) && isFinite(f.lo)) }))
+    .catch(e => { delete lidos.focos; throw e; }));
+  const DADOS = {};                                         // o que já chegou: inspecao, nae, executadas, manutencao, focos
+  const ERRO = {};
+  function pedeDados(tipo) {
+    if (DADOS[tipo] || ERRO[tipo] === 'lendo') return;
+    ERRO[tipo] = 'lendo';
+    (tipo === 'focos' ? leFocos() : leArq(tipo)).then(d => { DADOS[tipo] = d; ERRO[tipo] = null; aoChegar(tipo); })
+      .catch(() => { ERRO[tipo] = 'falhou'; aoChegar(tipo); });
+  }
+
+  function aoChegar() { if (estado === 'on') poeAviso(legenda()); pontos.pede(); }
+  // liga ou desliga uma camada (a fileira, ou os testes): a visão do mapa dos municípios vai junto (ligar: a dela; desligar a
+  // da visão aberta: a da última ligada que ficou, ou a NAE)
+  const visId = () => { const v = vis(); return v ? v.id : 'nae'; };
+  function alternaCam(id, quer) {
+    if (!CAM[id]) return;
+    const on = quer === undefined ? !cams.has(id) : !!quer;
+    if (on === cams.has(id)) return;
+    if (on) { cams.add(id); ordemCams.push(id); } else { cams.delete(id); ordemCams.splice(ordemCams.indexOf(id), 1); }
+    tempos.cam = performance.now();
+    const atual = visId(), nova = on ? CAM[id].vis : VIS_CAM[atual] === id ? (ordemCams.length ? CAM[ordemCams[ordemCams.length - 1]].vis : 'nae') : null;
+    const A = window.ARGOS_MAPA;
+    if (nova && VIS_CAM[nova] !== VIS_CAM[atual] && A && A.visao) { meuVis = true; try { A.visao(nova); } catch (e) { /* o mapa segue como estava */ } finally { meuVis = false; } }
+    visVista = visId();
+    aplicaCams();
+  }
+  function aplicaCams() {
+    sincCams();
+    if (!map) return;
+    sincModo();
+    pontos.sinc();
+    if (estado === 'on') poeAviso(legenda());
+  }
+  // a visão do mapa dos municípios mudou (por fora, ou com o satélite fechado): aqui, só a camada dela (a NAE, a visão de
+  // sempre, ao abrir não liga nada: o satélite abre com o T1 e o T2 de antes)
+  function camsDaVisao(abrindo) {
+    const vi = visId(), id = VIS_CAM[vi];
+    visVista = vi;
+    cams.clear(); ordemCams.length = 0;
+    if (id && !(abrindo && id === 'nae')) { cams.add(id); ordemCams.push(id); }
+  }
+
   // alimentadores do mapa (SE de cada um, para o balão), feito só no primeiro uso
   let als = null;
   const infoAl = cod => {
@@ -275,7 +446,31 @@
       '.st-semfr .leaflet-st-veu-pane,.st-semfr .leaflet-st-cont-pane{display:none}' +
       '.st-aviso,.st-mun,.st-balao{color:var(--vidro-fg,#f3f4f4);background:var(--vidro,rgba(15,20,23,.82));' +
       'border:1px solid var(--vidro-borda,rgba(255,255,255,.12));box-shadow:var(--sh-vidro,0 2px 8px rgb(0 0 0 / .35));font:500 var(--t-sm,13px)/1.35 var(--f-body,sans-serif)}' +
-      '.st-aviso{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;max-width:100%;padding:7px 12px;border-radius:var(--r2,10px)}' +
+      // o cartão: a fileira das camadas (o desenho da .lp-cams do mapa do alimentador, lupa-painel.js) e, embaixo, a legenda
+      '.st-aviso{display:grid;gap:5px;max-width:100%;max-height:min(58svh,calc(var(--st-alt,600px) - 40px));overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;' +
+      'padding:7px 12px;border-radius:var(--r2,10px)}' +
+      '.st-leg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0;min-height:max-content}.st-leg:empty{display:none}' +
+      '.st-cams{display:flex;gap:2px;max-width:calc(100% + 18px);min-height:max-content;margin:-4px -9px 0;overflow-x:auto;scrollbar-width:none}.st-cams[hidden]{display:none}' +
+      '.st-cams button{flex:none;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--vidro-fg,#f3f4f4);font:600 var(--t-xs,12px)/1 var(--f-body,sans-serif);white-space:nowrap;cursor:pointer}' +
+      '@media (pointer:coarse){.st-cams button{min-height:40px}}' +
+      '.st-cams button:hover{background:var(--vidro-hover,rgba(255,255,255,.1))}.st-cams button:focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:-2px}' +
+      '.st-cams button[aria-pressed=true]{background:var(--accent,#f08a5d);color:var(--on-accent,#14181b)}' +
+      '.st-cams .st-cc{display:none}@media (max-width:540px){.st-cams{gap:0;margin:-3px -9px 0}.st-cams button{padding:0 5px}.st-cams .st-cl{display:none}.st-cams .st-cc{display:inline}}' +
+      // (no celular a coluna para antes do Tela cheia: a fileira inteira cabe com o nome um pouco menor)
+      '@media (max-width:420px){.st-cams button{padding:0 4px;font-size:11px}}' +
+      // (no celular o cartão com a fileira ocupa a largura da coluna: o Fronteira fica no alto, antes dele)
+      '@media (max-width:640px){.st-aviso{max-height:min(44svh,calc(var(--st-alt,600px) - 80px))}.st-topo>.st-fr{order:-1}}' +
+      '.st-aviso.st-larga{width:min(470px,100%)}' +
+      // uma seção da legenda por camada ligada (a de cima pinta as linhas; as outras, os pontos)
+      '.st-leg .st-sec{flex:none;width:100%;box-sizing:border-box;margin-top:3px;padding-top:5px;border-top:1px solid var(--vidro-borda,rgba(255,255,255,.12));font:700 var(--t-xs,12px)/1.2 var(--f-body,sans-serif);color:var(--muted,#9aa4ab)}' +
+      '.st-leg .st-sec small{font-weight:500;margin-left:6px}' +
+      '.st-fa i.los{width:9px;height:9px;border-radius:1px;transform:rotate(45deg);margin:0 7px 0 3px;box-shadow:0 0 0 1px #fff,0 0 0 2px #0b0f14}' +
+      // a NAE com os ramais: caixa de marcar (a das camadas no Menu do mapa do alimentador, .ctl-l2)
+      '.st-fa.st-chk{gap:6px}.st-fa.st-chk[aria-pressed="false"]{opacity:.85;text-decoration:none}' +
+      '.st-fa.st-chk::before{content:"";flex:none;display:grid;place-items:center;width:14px;height:14px;box-sizing:border-box;border:1.5px solid currentColor;border-radius:3px;font:700 11px/1 var(--f-body,sans-serif)}' +
+      '.st-fa.st-chk[aria-pressed="true"]::before{content:"✓";background:var(--vidro-fg,#f3f4f4);border-color:var(--vidro-fg,#f3f4f4);color:#0b0f14}' +
+      '.st-fa i.bol{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 3px rgb(0 0 0 / .3)}' +
+      '.st-fa i.selo{width:auto;height:auto;padding:0 4px;border-radius:7px;background:var(--alerta,#b91c1c);color:#fff;font:700 10px/14px var(--f-mono,monospace);font-style:normal;box-shadow:0 0 0 1.5px #fff}' +
       '.st-aviso[hidden],.st-mun[hidden]{display:none}' +
       '.st-aviso b{font:700 var(--t-xs,12px)/1 var(--f-display,sans-serif);letter-spacing:.12em;text-transform:uppercase}' +
       '.st-aviso i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}' +
@@ -287,7 +482,7 @@
       '.st-vfx{display:inline-flex;border:1px solid var(--vidro-borda,rgba(255,255,255,.16));border-radius:var(--r1,6px);overflow:hidden}' +
       '.st-vfx button{all:unset;cursor:pointer;padding:4px 9px;font:600 var(--t-xs,12px)/1.2 var(--f-body,sans-serif)}.st-vfx button[aria-pressed="true"]{background:var(--vidro-fg,#f3f4f4);color:var(--vidro,#111)}' +
       '.st-vfx button:focus-visible,.st-fa:focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:1px}' +
-      '.st-aviso.st-fxl{width:360px;max-width:100%}.st-aviso.st-fxl .st-n{flex-basis:100%}' +
+      '.st-aviso.st-fxl{width:min(470px,100%)}.st-aviso.st-fxl .st-n,.st-aviso.st-larga .st-n{flex-basis:100%}' +
       '.st-anos{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}' +
       '.st-fa{all:unset;cursor:pointer;display:inline-flex;align-items:center;min-height:24px;padding:0 3px;border-radius:4px;font:500 var(--t-sm,13px)/1.2 var(--f-body,sans-serif)}' +
       'button.st-fa:hover{background:var(--vidro-hover,rgba(255,255,255,.1))}.st-fa[aria-pressed="false"]{opacity:.45;text-decoration:line-through}.st-semreg{cursor:default}' +
@@ -345,8 +540,8 @@
       '.sem-nae .st-card i,.sem-nae .st-sat .mt-mn i,.sem-nae .st-balao .h i,.sem-nae .st-lado .st-sel{display:none}' +
       // celular: o aviso em coluna, só o nome e as cores (sem teclado; o resto não cabe sem cobrir a ponta norte do estado);
       // nos níveis, numa linha só (a trilha já diz onde se está)
-      '@media (max-width:640px){.st-lado{left:8px;top:8px;gap:6px;max-width:calc(100% - 64px)}.st-aviso{flex-direction:column;align-items:flex-start;gap:2px;padding:6px 10px}' +
-      '.st-aviso .st-n,.st-aviso .st-tecla{display:none}.st-lado.st-niv .st-aviso{flex-direction:row;align-items:center;gap:4px 10px}' +
+      '@media (max-width:640px){.st-lado{left:8px;top:8px;gap:6px;max-width:calc(100% - 64px)}.st-aviso{padding:6px 10px;gap:4px}.st-leg{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:2px}' +
+      '.st-aviso .st-n,.st-aviso .st-tecla{display:none}.st-lado.st-niv .st-leg{flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 10px}' +
       '.st-mun{width:auto;padding:9px 10px 10px;gap:4px}.st-mun-h b{font-size:var(--t-lg,17px)}.st-mun-l{max-height:30svh}.st-mun .st-mun-pr{display:none}' +
       '.st-sat .leaflet-control-attribution{font-size:9px}}' +
       '@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .st-aviso .st-tecla{color:#b9c1c6}}' +
@@ -356,7 +551,7 @@
   }
 
   // ---------- telas: coluna (aviso e município), balão e trilha ----------
-  let lado = null, aviso = null, cartaoMun = null, balao = null, trilha = null, frCard = null, frBt = null;
+  let lado = null, aviso = null, legEl = null, camsEl = null, cartaoMun = null, balao = null, trilha = null, frCard = null, frBt = null;
   function poeLado() {
     if (lado) return;
     lado = document.createElement('div');
@@ -364,13 +559,45 @@
     lado.hidden = true;
     aviso = document.createElement('div');
     aviso.className = 'st-aviso';
-    aviso.setAttribute('role', 'status');
-    // visão Limpeza: o seletor Por ano / Vencimento e, na vista Por ano, cada ano, criadas e pendentes (liga/desliga)
-    aviso.addEventListener('click', e => {
+    // a fileira das camadas (no alto do cartão; aparece com o mapa pronto) e a legenda (o que muda)
+    camsEl = document.createElement('div');
+    camsEl.className = 'st-cams';
+    camsEl.setAttribute('role', 'group');
+    camsEl.setAttribute('aria-label', 'Camadas do satélite');
+    camsEl.hidden = true;
+    camsEl.innerHTML = CAMS.map(c => `<button type="button" data-cam="${c.id}" aria-pressed="false" title="${esc(c.dica)}"${c.curto ? ` aria-label="${esc(c.nome)}"` : ''}>` +
+      (c.curto ? `<span class="st-cl">${esc(c.nome)}</span><span class="st-cc" aria-hidden="true">${esc(c.curto)}</span>` : esc(c.nome)) + '</button>').join('');
+    camsEl.addEventListener('click', e => { const b = e.target.closest('button[data-cam]'); if (b && estado === 'on') alternaCam(b.dataset.cam); });
+    camsEl.addEventListener('keydown', e => {                // setas andam pela fileira (Tab entra e sai dela)
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+      const bs = [...camsEl.querySelectorAll('button')], i = bs.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      const j = e.key === 'Home' ? 0 : e.key === 'End' ? bs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : bs.length - 1)) % bs.length;
+      bs[j].focus();
+    });
+    legEl = document.createElement('div');
+    legEl.className = 'st-leg';
+    legEl.setAttribute('role', 'status');
+    aviso.append(camsEl, legEl);
+    // visão Limpeza: o seletor Por ano / Vencimento e, na vista Por ano, cada ano, criadas e pendentes (liga/desliga); nas
+    // outras camadas, os anos e as situações (liga/desliga) e a NAE com os ramais
+    legEl.addEventListener('click', e => {
       const b = e.target.closest('button');
       if (!b) return;
       const tinha = document.activeElement === b;
       let foco;
+      const troca1 = (S, k) => { if (S.has(k)) S.delete(k); else S.add(k); };
+      if (b.dataset.ia) { troca1(inspOff, +b.dataset.ia); restilizaV(); foco = `[data-ia="${b.dataset.ia}"]`; }
+      else if (b.dataset.ma) { troca1(manOff, +b.dataset.ma); pontos.pede(); foco = `[data-ma="${b.dataset.ma}"]`; }
+      else if (b.dataset.ms) { troca1(mntOff, b.dataset.ms); pontos.pede(); foco = `[data-ms="${b.dataset.ms}"]`; }
+      else if (b.dataset.nr) { naeRam.on = !naeRam.on; lsSet('st-nae-ram', naeRam.on ? '1' : '0'); naeFx = null; restilizaV(); pontos.pede(); foco = '[data-nr]'; }
+      if (foco) {
+        poeAviso(legenda());
+        const f = tinha && legEl.querySelector(foco);
+        if (f) f.focus({ preventScroll: true });
+        return;
+      }
       if (b.dataset.vfx) {
         if (vistaFx === b.dataset.vfx) return;
         vistaFx = b.dataset.vfx; lsSet('st-fx-vista', vistaFx); tiraRotulos(); sincModo(); foco = `[data-vfx="${vistaFx}"]`;
@@ -380,7 +607,7 @@
         const x = b.dataset.nx; if (nexeOn.has(x)) nexeOn.delete(x); else nexeOn.add(x); restilizaAno(); foco = `[data-nx="${x}"]`;
       } else return;
       poeAviso(legenda());
-      const f = tinha && aviso.querySelector(foco);
+      const f = tinha && legEl.querySelector(foco);
       if (f) f.focus({ preventScroll: true });
     });
     cartaoMun = document.createElement('div');
@@ -409,10 +636,18 @@
   function poeAviso(html) {
     poeLado();
     aviso.classList.toggle('st-fxl', html.includes('st-vfx'));
-    aviso.innerHTML = html;
+    aviso.classList.toggle('st-larga', html.includes('st-sec') || html.includes('st-anos'));
+    legEl.innerHTML = html;
     aviso.hidden = !html;
     sincFr();
+    sincCams();
     lado.hidden = !html && cartaoMun.hidden;
+    if (caixaSat) caixa.style.setProperty('--st-alt', caixa.clientHeight + 'px');
+  }
+  function sincCams() {                                     // a fileira como estão as camadas
+    if (!camsEl) return;
+    camsEl.hidden = !map || (estado !== 'on' && estado !== 'abrindo');
+    camsEl.querySelectorAll('button[data-cam]').forEach(b => b.setAttribute('aria-pressed', String(cams.has(b.dataset.cam))));
   }
   const TECLA0 = `${MAC ? '⌘S' : 'Ctrl+S'} ou Esc volta`, TECLA1 = `Esc sobe um nível · ${MAC ? '⌘S' : 'Ctrl+S'} volta`;
   // km de cada situação da faixa (na ordem de SIT) no nível aberto: a soma dos municípios dele (no Tocantins, todos)
@@ -433,8 +668,19 @@
   }
   const seletorFx = () => `<span class="st-vfx" role="group" aria-label="Vista da limpeza de faixa">` +
     `<button type="button" data-vfx="ano" aria-pressed="${vistaFx === 'ano'}">Por ano</button><button type="button" data-vfx="sit" aria-pressed="${vistaFx === 'sit'}">Vencimento</button></span>`;
+  // as seções da legenda de cada camada ligada: a de cima é a que pinta as linhas (dono); as outras, os pontos
   function legenda() {
-    if (querFaixa() && vistaFx === 'ano') {
+    const tecla = `<span class="st-tecla">${niv.reg ? TECLA1 : TECLA0}</span>`, d = dono();
+    let h = d === 'faixa' ? legFaixa() : d === 'insp' ? legInsp() : d === 'nae' ? legNae() : legRede(d === 'neutro');
+    if (d === 'faixa' && cams.has('insp')) h += legInsp(true);
+    if (d !== 'nae' && cams.has('nae')) h += legNae(true);
+    if (cams.has('imn')) h += legMnt();
+    if (cams.has('man')) h += legMan();
+    if (cams.has('fogo')) h += legFogo();
+    return h + tecla;
+  }
+  function legFaixa() {
+    if (vistaFx === 'ano') {
       const pronta = ativo === conjA && F, k = kmAno();
       const n = pronta ? `Limpeza de faixa · T1 e T2 · por ano da última limpeza` : conjA.erro ? 'a limpeza de faixa não carregou' : 'carregando a limpeza de faixa…';
       const anos = pronta ? F.anos.filter(a => k[a] > 0) : [];
@@ -442,20 +688,82 @@
         anos.map(a => `<button type="button" class="st-fa" data-ano="${a}" aria-pressed="${!anosOff.has(a)}" title="Mostrar/esconder ${a}"><i style="background:${corAno(a)}"></i>${a}<em>${kmTxt(k[a])}</em></button>`).join('') +
         [['c', 'Criadas', 'trac'], ['p', 'Pendentes', 'pont']].filter(([x]) => k[x] > 0).map(([x, nome, cls]) =>
           `<button type="button" class="st-fa" data-nx="${x}" aria-pressed="${nexeOn.has(x)}" title="Mostrar/esconder as OS ${nome.toLowerCase()}"><i class="${cls}"></i>${nome}<em>${kmTxt(k[x])}</em></button>`).join('') +
-        `<span class="st-fa st-semreg"><i style="background:${FUNDOCOR}"></i>sem registro (pendente)<em>${kmTxt(k.sem || 0)}</em></span></span>` : '') +
-        `<span class="st-tecla">${niv.reg ? TECLA1 : TECLA0}</span>`;
+        `<span class="st-fa st-semreg"><i style="background:${FUNDOCOR}"></i>sem registro (pendente)<em>${kmTxt(k.sem || 0)}</em></span></span>` : '');
     }
-    if (querFaixa()) {
-      const pronta = ativo === conjF && F, k = kmFaixa();
-      const n = pronta ? `Limpeza de faixa · T1 e T2${F.hoje ? ' · situação em ' + dataBr(F.hoje) : ''}` : conjF.erro ? 'a limpeza de faixa não carregou' : 'carregando a limpeza de faixa…';
-      return `<b>Satélite</b><span class="st-n">${n}</span>` + seletorFx() + (pronta ? SIT_LEG.map(x => `<span class="st-fx" data-sit="${x}"><i style="background:${SIT_COR[x]}"></i>` +
-        `${SIT_NOME[x]}<em>${kmTxt(k[SIT.indexOf(x)])}</em></span>`).join('') : '') + `<span class="st-tecla">${niv.reg ? TECLA1 : TECLA0}</span>`;
-    }
+    const pronta = ativo === conjF && F, k = kmFaixa();
+    const n = pronta ? `Limpeza de faixa · T1 e T2${F.hoje ? ' · situação em ' + dataBr(F.hoje) : ''}` : conjF.erro ? 'a limpeza de faixa não carregou' : 'carregando a limpeza de faixa…';
+    return `<b>Satélite</b><span class="st-n">${n}</span>` + seletorFx() + (pronta ? SIT_LEG.map(x => `<span class="st-fx" data-sit="${x}"><i style="background:${SIT_COR[x]}"></i>` +
+      `${SIT_NOME[x]}<em>${kmTxt(k[SIT.indexOf(x)])}</em></span>`).join('') : '');
+  }
+  function legRede(neutro) {
     let n = '';
     if (!niv.reg) n = ativo === conjR && nLinhas ? `${nLinhas.toLocaleString('pt-BR')} alimentadores` : 'carregando as linhas…';
     else if (!niv.mun && escopo) n = `${nAls(escopo.size)} ${niv.pol ? 'no polo' : 'na regional'}`;
-    return `<b>Satélite</b>${n ? `<span class="st-n">${n}</span>` : ''}` +
-      `<span><i style="background:${COR.T1}"></i>T1</span><span><i style="background:${COR.T2}"></i>T2</span><span class="st-tecla">${niv.reg ? TECLA1 : TECLA0}</span>`;
+    return `<b>Satélite</b>${n ? `<span class="st-n">${n}</span>` : ''}` + (neutro ? `<span><i style="background:${FUNDOCOR}"></i>T1 e T2</span>`
+      : `<span><i style="background:${COR.T1}"></i>T1</span><span><i style="background:${COR.T2}"></i>T2</span>`);
+  }
+  // o que entra na conta da legenda: os alimentadores do nível aberto (no Tocantins, todos)
+  const noEscopo = cod => !escopo || escopo.has(cod);
+  const onde = () => (!niv.reg ? '' : niv.mun ? ' · alimentadores do município' : niv.pol ? ' · alimentadores do polo' : ' · alimentadores da regional');
+  const carregando = (tipo, nome) => (ERRO[tipo] === 'falhou' ? `${nome} não carregou` : `carregando ${nome}…`);
+  const sec = (t, sub) => `<span class="st-sec">${t}${sub ? ` <small>${sub}</small>` : ''}</span>`;
+  function legInsp(borda) {
+    const I = DADOS.inspecao, pronta = !!I && (borda ? ativoX === conjB : ativo === conjI);
+    const tit = 'Inspeção' + (borda ? ' (borda por baixo da Faixa)' : ' · T1 e T2 · por ano da inspeção mais recente');
+    const cab = borda ? sec(tit) : `<b>Satélite</b><span class="st-n">${pronta ? tit + onde() : carregando('inspecao', 'a inspeção')}</span>`;
+    if (!pronta) return borda ? cab + `<span class="st-fa st-semreg">${carregando('inspecao', 'a inspeção')}</span>` : cab;
+    const k = {};
+    for (const a of I.als) if (noEscopo(a.cod)) for (const p of a.ps) if (p.anos.length) k[p.anos[0]] = (k[p.anos[0]] || 0) + p.m;
+    return cab + '<span class="st-anos">' + I.anos.filter(a => k[a] > 0).map(a => `<button type="button" class="st-fa" data-ia="${a}" aria-pressed="${!inspOff.has(a)}" ` +
+      `title="Mostrar/esconder ${a}"><i style="background:${inCorAno(a)}"></i>${a}<em>${kmTxt(k[a])}</em></button>`).join('') +
+      (borda ? '' : `<span class="st-fa st-semreg"><i style="background:${FUNDOCOR}"></i>sem inspeção</span>`) + '</span>';
+  }
+  const mesesTxt = ms => { const M3 = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'], f = m => `${M3[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`; return ms && ms.length === 2 ? `Crítica ${f(ms[0])} a ${f(ms[1])}` : 'Crítica'; };
+  function legNae(numeros) {
+    const N = DADOS.nae, pronta = !!N && (numeros || ativo === conjN);
+    const per = N ? mesesTxt(N.meses) : '';
+    const cab = numeros ? sec('NAE', 'número de cada trecho' + (N ? ' · ' + per : '')) : `<b>Satélite</b><span class="st-n">${pronta ? `NAE-Vegetação · T1 e T2 · ${per}${onde()}` : carregando('nae', 'a NAE')}</span>`;
+    if (!pronta) return numeros ? cab + `<span class="st-fa st-semreg">${carregando('nae', 'a NAE')}</span>` : cab;
+    const fx = faixasNae(), k = [0, 0, 0, 0, 0, 0];
+    let tot = 0;
+    for (const a of N.als) if (noEscopo(a.cod)) for (const t of a.tr) { const v = naeDe(t); tot += v; k[classeNae(v, fx)] += t.m; }
+    const rot = i => (i === 5 ? `${fx[5]} ou mais` : fx[i + 1] - 1 > fx[i] ? `${fx[i]} a ${fx[i + 1] - 1}` : String(fx[i]));
+    const ram = `<button type="button" class="st-fa st-chk" data-nr="1" aria-pressed="${naeRam.on}" title="Somar no T1/T2 as NAE dos ramais (T3) que saem dele">com os ramais (T3)</button>`;
+    if (numeros) return cab + `<span class="st-anos"><span class="st-fa st-semreg"><i class="selo">${NF0.format(tot)}</i>NAE${naeRam.on ? ' com os ramais' : ''}</span>${ram}</span>`;
+    return cab + '<span class="st-anos">' + [1, 2, 3, 4, 5].filter(i => k[i] > 0).map(i => `<span class="st-fa st-semreg"><i style="background:${corNae(i)}"></i>${rot(i)} NAE<em>${kmTxt(k[i])}</em></span>`).join('') +
+      `<span class="st-fa st-semreg"><i style="background:${FUNDOCOR}"></i>sem NAE<em>${kmTxt(k[0])}</em></span>` +
+      `<span class="st-fa st-semreg"><i class="selo">${NF0.format(tot)}</i>NAE no T1/T2${naeRam.on ? ' e nos ramais' : ''}</span>${ram}</span>`;
+  }
+  function legMan() {
+    const E = DADOS.executadas;
+    if (!E) return sec('Manutenção') + `<span class="st-fa st-semreg">${carregando('executadas', 'a manutenção')}</span>`;
+    const k = {};
+    let nat = 0;
+    for (let i = 0; i < E.al.length; i++) {
+      if (!noEscopo(E.cods[E.al[i]])) continue;
+      nat++;
+      for (let j = E.ini[i]; j < E.ini[i + 1]; j++) k[E.ys[j]] = (k[E.ys[j]] || 0) + E.ns[j];
+    }
+    const anos = E.anos.filter(a => k[a] > 0);
+    return sec('Manutenção', `serviços executados no T1/T2 · ${NF0.format(nat)} ativos`) + '<span class="st-anos">' + anos.map(a => `<button type="button" class="st-fa" data-ma="${a}" ` +
+      `aria-pressed="${!manOff.has(a)}" title="Mostrar/esconder ${exRot(a)}"><i class="los" style="background:${exCorAno(a)}"></i>${exRot(a)}<em>${NF0.format(k[a])}</em></button>`).join('') + '</span>';
+  }
+  function legMnt() {
+    const G = DADOS.manutencao;
+    if (!G) return sec('Insp→manut') + `<span class="st-fa st-semreg">${carregando('manutencao', 'a manutenção da inspeção')}</span>`;
+    const k = [0, 0, 0, 0];
+    let np = 0;
+    for (let i = 0; i < G.al.length; i++) { if (!noEscopo(G.cods[G.al[i]])) continue; np++; for (let j = 0; j < 4; j++) k[j] += G.ns[4 * i + j]; }
+    return sec('Insp→manut', `OS geradas pela inspeção no T1/T2 · ${NF0.format(np)} postes`) + '<span class="st-anos">' + MN_SIT.map((x, i) => (k[i] ? `<button type="button" class="st-fa" data-ms="${x}" ` +
+      `aria-pressed="${!mntOff.has(x)}" title="Mostrar/esconder as ${MN_NOME[x].toLowerCase()}"><i class="los" style="background:${MN_COR[i]}"></i>${MN_NOME[x]}<em>${NF0.format(k[i])}</em></button>` : '')).join('') + '</span>';
+  }
+  function legFogo() {
+    const Fo = DADOS.focos;
+    if (!Fo) return sec('Queimadas') + `<span class="st-fa st-semreg">${carregando('focos', 'os focos')}</span>`;
+    const k = [0, 0, 0], fs = focosVis();
+    fs.forEach(f => k[f.idade]++);
+    return sec('Queimadas', `focos ao vivo (${Fo.janela} h) ${FO_DIST_TXT[distFo()]}`) + '<span class="st-anos">' + FO_IDADE.map((t, i) =>
+      `<span class="st-fa st-semreg"><i class="bol" style="background:${corFo(i)}"></i>${t}<em>${NF0.format(k[i])}</em></span>`).join('') + '</span>';
   }
 
   // ---------- divisão: regionais, polos e municípios (window.MUN), feita uma vez no primeiro Ctrl+S ----------
@@ -1173,14 +1481,238 @@
     if (on) return { color: '#ffffff', weight: w + 2.4, opacity: 1, contorno: null, dashArray: null, _dashArray: null };
     return { color: cor, weight: w, opacity: op, contorno: { color: '#0b0f14', weight: w + 4 * k, opacity: 0.75 * op }, dashArray: null, _dashArray: null };
   }
-  const estiloDe = (pl, on) => (pl._stK ? estiloAno(pl, on)
-    : pl._stPtCor ? Object.assign(estiloLinha('PT', on, pl._stAl), { fillColor: pl._stPtCor }) : estiloLinha(pl._stCls, on, pl._stAl, pl._stSit));
+  // as linhas das camadas novas (pl._stV): neutra (a linha sem o dado: o "sem registro" da Limpeza, o vão sem OS da vista
+  // Por ano), insp (o pedaço inspecionado na cor do ano mais recente entre os ligados; sem nenhum ligado, não aparece),
+  // inspB (o mesmo, a borda larga por baixo da Faixa: 15 px em volta dos 5 da Faixa, como no mapa do alimentador) e nae
+  // (o trecho na cor da faixa da NAE dele; sem NAE, neutro). Mais finas de longe, como as da vista Por ano
+  const SEM = { color: '#fff', weight: 1, opacity: 0, contorno: null, dashArray: null, _dashArray: null };
+  function estiloV(pl, on) {
+    const cod = pl._stAl, fora = !!(escopo && cod && !escopo.has(cod)), z = map.getZoom(), k = z < 8 ? 0.42 : z < 10 ? 0.55 : z < 12 ? 0.75 : 1;
+    const f = fora ? OP_FORA() : 1, V = pl._stV;
+    let cor = null;
+    if (V === 'insp' || V === 'inspB') { const a = pl._stAnos.find(x => !inspOff.has(x)); if (!a) return pl._stCls === 'PT' ? Object.assign({}, SEM, { radius: 1, fillOpacity: 0 }) : SEM; cor = inCorAno(a); }
+    else if (V === 'nae') { const i = classeNae(naeDe(pl._stNae), faixasNae()); cor = i ? corNae(i) : null; }
+    if (pl._stCls === 'PT') {
+      const fc = cor || FUNDOCOR;
+      return on ? { radius: 6.5, color: '#ffffff', weight: 2, opacity: 1, fillColor: fc, fillOpacity: 1 }
+        : { radius: 4.5, color: '#ffffff', weight: 1.5, opacity: 0.95 * f, fillColor: fc, fillOpacity: 0.95 * f };
+    }
+    if (V === 'inspB') {
+      const w = 15 * k;
+      return on ? { color: '#ffffff', weight: w, opacity: 0.5, contorno: null, dashArray: null, _dashArray: null } : { color: cor, weight: w, opacity: 0.9 * f, contorno: null, dashArray: null, _dashArray: null };
+    }
+    const w = (cor ? 5 : 2.5) * k, op = (cor ? 1 : 0.9) * f;
+    if (on) return { color: '#ffffff', weight: w + 2.4, opacity: 1, contorno: null, dashArray: null, _dashArray: null };
+    return { color: cor || FUNDOCOR, weight: w, opacity: op, contorno: { color: '#0b0f14', weight: w + 4 * k, opacity: 0.75 * op }, dashArray: null, _dashArray: null };
+  }
+  // a rede (T1 e T2 nas cores de sempre) neutra quando só há camadas de pontos ligadas (Manutenção, Insp→manut, Queimadas)
+  const estiloRede = (pl, on) => (dono() === 'neutro' && pl._stCls !== 'PT' ? estiloV({ _stAl: pl._stAl, _stV: 'neutra', _stCls: pl._stCls, _stAnos: [] }, on)
+    : dono() === 'neutro' ? estiloV({ _stAl: pl._stAl, _stV: 'neutra', _stCls: 'PT' }, on) : null);
+  // NAE de cada trecho (a dele, ou com a dos ramais) e as faixas da rampa: 0 = sem; depois 5, pelos quintis dos trechos com
+  // NAE, em números redondos (a conta das faixas da visão Queimadas, focos.js, e das visões do mapa: 1; 1,5; 2; 2,5; 3; 4; 5;
+  // 7,5 × 10^k, só inteiros), o limite + 1
+  const naeDe = t => (t ? t.n + (naeRam.on ? t.n3 : 0) : 0);
+  let naeFx = null;
+  const REDONDOS = [1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10];
+  function faixasNae() {
+    if (naeFx) return naeFx;
+    const N = DADOS.nae;
+    if (!N) return [0, 1, 2, 3, 4, 5];
+    const vs = [];
+    for (const a of N.als) for (const t of a.tr) { const v = naeDe(t); if (v > 0) vs.push(v); }
+    vs.sort((a, b) => a - b);
+    const cands = x => { const b = 10 ** Math.floor(Math.log10(x)); return REDONDOS.map(f => f * b).filter(v => Number.isInteger(v)); };
+    const redondo = x => (!(x > 0) ? 1 : cands(x).reduce((m, v) => (Math.abs(Math.log(v / x)) < Math.abs(Math.log(m / x)) ? v : m)));
+    const proximo = v => cands(v).find(f => f > v * 1.0001) || v * 2;
+    const q = p => (vs.length ? vs[Math.min(vs.length - 1, Math.floor(p * (vs.length - 1) + 0.5))] : 1), lim = [];
+    [0.2, 0.4, 0.6, 0.8].forEach(p => { let v = Math.max(redondo(q(p)), 1); if (lim.length && v <= lim[lim.length - 1]) v = proximo(lim[lim.length - 1]); lim.push(v); });
+    return (naeFx = [0, 1, ...lim.map(v => v + 1)]);
+  }
+  const classeNae = (v, fx) => fx.reduce((k, l, i) => (v >= l ? i : k), 0);
+  let naeCor = null;                                         // a rampa da NAE do mapa dos municípios (--nae1…5 de site.css)
+  const corNae = i => {
+    if (!naeCor) { const cs = getComputedStyle(document.documentElement); naeCor = NAE_COR0.map((c, j) => (j && cs.getPropertyValue('--nae' + j).trim()) || c); }
+    return naeCor[i];
+  };
+  let foCor = null;                                          // a idade do foco (--fo-a0…2 de focos.css)
+  const corFo = i => {
+    if (!foCor) { const cs = getComputedStyle(document.documentElement); foCor = FO_COR0.map((c, j) => cs.getPropertyValue('--fo-a' + j).trim() || c); }
+    return foCor[i];
+  };
+  const distFo = () => { const d = lsGet('fo-dist'); return FO_DIST[d] ? d : '5km'; };
+  // os focos da distância escolhida (todos: também os de fora do nível aberto, com fora marcado)
+  const focosVis = todos => {
+    const Fo = DADOS.focos;
+    if (!Fo) return [];
+    const fx = FO_DIST[distFo()], ms = (() => { const a = areaDe(niv); return !a ? null : new Set(a.tipo === 'mun' ? [a.m.cod] : a.ms.map(m => m.cod)); })(), agora = Date.now();
+    return Fo.fs.filter(f => fx.includes(f.fx) && (todos || !ms || ms.has(f.mun))).map(f => {
+      const h = (agora - f.t) / 36e5; f.idade = h < 6 ? 0 : h < 24 ? 1 : 2; f.fora = !!ms && !ms.has(f.mun); return f;
+    });
+  };
+  // ---------- pontos por cima das linhas: Insp→manut e Manutenção (losangos), Queimadas (focos) e os números da NAE ----------
+  // Como as camadas dos outros no mapa do alimentador (visao-tocantins.js, pintaOutros): os pontos juntos numa célula de
+  // 44 px (no meio deles; grupo: o losango empilhado), a cor do ano mais recente (Manutenção) ou da pior situação
+  // (Insp→manut), o número só de perto (zoom Z_NUM); a NAE no selo vermelho dos trechos do mapa do alimentador (.nae-at),
+  // somada na célula. Num canvas do Leaflet no pane das linhas (a mesma opacidade no voo e ao fechar), refeito no fim de
+  // cada movimento (no zoom e no voo, esticado como as linhas) e quando a legenda liga ou desliga um ano. Fora do nível
+  // aberto, mais apagados (como as linhas). O mouse num ponto mostra o que ele junta; o clique abre o alimentador.
+  const pontos = (() => {
+    let R = null, alvos = [], pedido = 0;
+    const quer = () => !!map && (cams.has('man') || cams.has('imn') || cams.has('fogo') || cams.has('nae'));
+    const brD = t => { const d = new Date(t - 3 * 36e5).toISOString(); return `${d.slice(8, 10)}/${d.slice(5, 7)} às ${d.slice(11, 16)}`; };
+    function sinc() {
+      if (!map) return;
+      const q = quer();
+      if (q && !R) {
+        const C = L.Canvas.extend({ _draw() {}, _redraw() {} });
+        R = new C({ pane: 'st-linhas', padding: 0.15 });
+        R.on('update', desenha);
+      }
+      if (q && !map.hasLayer(R)) { R.addTo(map); R._container.style.pointerEvents = 'none'; R._container.classList.add('st-pts'); }
+      else if (!q && R && map.hasLayer(R)) { R.remove(); alvos = []; }
+      if (q) { if (cams.has('man')) pedeDados('executadas'); if (cams.has('imn')) pedeDados('manutencao'); if (cams.has('fogo')) pedeDados('focos'); pede(); }
+    }
+    function pede() { if (!R || !map || !map.hasLayer(R) || pedido) return; pedido = requestAnimationFrame(() => { pedido = 0; desenha(); }); }
+    function desenha() {
+      const x = R && R._ctx, b = R && R._bounds;
+      if (!x || !b || !map.hasLayer(R)) return;
+      x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, R._container.width, R._container.height); x.restore();
+      alvos = [];
+      const z = map.getZoom(), po = map.getPixelOrigin(), num = z >= Z_NUM, lado = z < 9 ? 4 : z < 12 ? 5.5 : 6.5;
+      const x0 = b.min.x - 30, y0 = b.min.y - 30, x1 = b.max.x + 30, y1 = b.max.y + 30, k = Math.pow(2, z) * 256;
+      const proj = (la, lo) => { const X = (lo + 180) / 360 * k, sn = Math.sin(la * Math.PI / 180), Y = (0.5 - Math.log((1 + sn) / (1 - sn)) / (4 * Math.PI)) * k; return [X - po.x, Y - po.y, X, Y]; };
+      const fora = cod => !!(escopo && cod && !escopo.has(cod));
+      // pontos de uma camada juntos por célula: val(i) → [cor, n] ou null; a da célula, a de maior (maior) ou menor índice
+      const junta = (n, ll, val, cel, maior) => {
+        const cs = new Map();
+        for (let i = 0; i < n; i++) {
+          const [la, lo, cod] = ll(i), [px, py, X, Y] = proj(la, lo);
+          if (px < x0 || py < y0 || px > x1 || py > y1) continue;
+          const v = val(i);
+          if (!v) continue;
+          const kk = cel ? Math.floor(X / cel) + ',' + Math.floor(Y / cel) + (fora(cod) ? 'f' : '') : i;
+          let c = cs.get(kk);
+          if (!c) cs.set(kk, c = { x: 0, y: 0, q: 0, n: 0, cor: v[0], al: cod, fora: fora(cod), als: new Set(), v: [] });
+          c.x += px; c.y += py; c.q++; c.n += v[1]; c.als.add(cod); c.v.push(v);
+          if (maior ? v[0] > c.cor : v[0] < c.cor) c.cor = v[0];
+        }
+        return [...cs.values()].map(c => Object.assign(c, { x: c.x / c.q, y: c.y / c.q }));
+      };
+      const losango = (cx, cy, h, cor) => {
+        x.beginPath(); x.moveTo(cx, cy - h); x.lineTo(cx + h, cy); x.lineTo(cx, cy + h); x.lineTo(cx - h, cy); x.closePath();
+        x.lineWidth = lado > 5 ? 4.5 : 3; x.strokeStyle = '#0b0f14'; x.stroke();
+        x.lineWidth = lado > 5 ? 2 : 1.3; x.strokeStyle = '#fff'; x.stroke();
+        x.fillStyle = cor; x.fill();
+      };
+      const pilula = (cx, cy, t, fundo, borda) => {
+        x.font = '700 10px ui-monospace,Menlo,Consolas,monospace';
+        const w = Math.max(16, x.measureText(t).width + 8), l = cx - w / 2, tp = cy - 8, r = 8;
+        x.beginPath(); x.moveTo(l + r, tp); x.arcTo(l + w, tp, l + w, tp + 16, r); x.arcTo(l + w, tp + 16, l, tp + 16, r); x.arcTo(l, tp + 16, l, tp, r); x.arcTo(l, tp, l + w, tp, r); x.closePath();
+        x.fillStyle = fundo; x.fill(); x.lineWidth = 1.5; x.strokeStyle = borda; x.stroke();
+        x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(t, cx, cy + 0.5); x.textAlign = 'start';
+        return w;
+      };
+      const desenhaLos = (lista, cores, dx, html) => {
+        for (const c of lista) {
+          x.globalAlpha = c.fora ? OP_FORA() : 1;
+          const cx = c.x + dx, cy = c.y + dx, h = c.q > 1 ? lado * 1.25 : lado;
+          if (c.q > 1) losango(cx + 3, cy + 3, h, '#fff');
+          losango(cx, cy, h, cores[c.cor]);
+          alvos.push({ x: cx, y: cy, r: h + 4, al: c.al, html: html(c) });
+        }
+        if (num) for (const c of lista) {
+          if (c.n < 2) continue;
+          x.globalAlpha = c.fora ? OP_FORA() : 1;
+          const t = String(c.n);
+          x.font = '700 10px ui-monospace,Menlo,Consolas,monospace';
+          const w = Math.max(16, x.measureText(t).width + 8);
+          pilula(c.x + dx + (c.q > 1 ? 8 : 6) + w / 2, c.y + dx - (c.q > 1 ? 21 : 18) + 8, t, '#0b0f14', '#fff');
+        }
+      };
+      const nomeAls = c => `${[...c.als].slice(0, 3).map(esc).join(', ')}${c.als.size > 3 ? ` e mais ${c.als.size - 3}` : ''}`;
+      // NAE (os números dos trechos): com a Faixa ou a Inspeção pintando as linhas, em qualquer zoom; sozinha, de perto
+      const N = DADOS.nae;
+      if (cams.has('nae') && N && (dono() !== 'nae' || num)) {
+        const ts = [];
+        for (const a of N.als) for (const t of a.tr) { if (naeDe(t) > 0) { if (!t._mp) t._mp = t.pt || meioDe(t.ls) || null; if (t._mp) ts.push(t); } }
+        const lista = junta(ts.length, i => [ts[i]._mp[0], ts[i]._mp[1], ts[i].al], i => [0, naeDe(ts[i])], z < 15 ? 44 : 0, true);
+        x.textBaseline = 'middle';
+        for (const c of lista) {
+          x.globalAlpha = c.fora ? OP_FORA() : 1;
+          const w = pilula(c.x, c.y, NF0.format(c.n), '#b91c1c', '#fff');
+          alvos.push({ x: c.x, y: c.y, r: w / 2 + 3, al: c.al, html: `<span class="h"><b>${NF0.format(c.n)} NAE</b></span><small>${c.q} trecho${c.q > 1 ? 's' : ''} T1/T2${naeRam.on ? ' (com os ramais)' : ''} · ${nomeAls(c)}</small>` });
+        }
+      }
+      const G = DADOS.manutencao;
+      if (cams.has('imn') && G) {
+        const sits = MN_SIT.map((s0, i) => i).filter(i => !mntOff.has(MN_SIT[i]));
+        const lista = junta(G.al.length, i => [G.la[i], G.lo[i], G.cods[G.al[i]]], i => {
+          let n = 0, pior = -1;
+          for (const j of sits) { const v = G.ns[4 * i + j]; if (v) { n += v; if (pior < 0) pior = j; } }
+          return n ? [pior, n] : null;
+        }, z < 15 ? 44 : 0, false);
+        desenhaLos(lista, MN_COR, 0, c => `<span class="h"><b>Insp→manut</b><i>${NF0.format(c.n)} OS</i></span><small class="st-fx-t"><i style="background:${MN_COR[c.cor]}"></i>${MN_NOME[MN_SIT[c.cor]]}` +
+          `${c.q > 1 ? ` (a pior de ${c.q} postes)` : ''}</small><small>${nomeAls(c)}</small>`);
+      }
+      const E = DADOS.executadas;
+      if (cams.has('man') && E) {
+        const on = a => !manOff.has(a);
+        const lista = junta(E.al.length, i => [E.la[i], E.lo[i], E.cods[E.al[i]]], i => {
+          let n = 0, ano = -Infinity;
+          for (let j = E.ini[i]; j < E.ini[i + 1]; j++) if (on(E.ys[j])) { n += E.ns[j]; if (E.ys[j] > ano) ano = E.ys[j]; }
+          return n ? [ano, n] : null;
+        }, z < 17 ? 44 : 0, true);
+        const anos = E.anos.slice().sort((a, b) => a - b), cores = {};
+        anos.forEach(a => { cores[a] = exCorAno(a); });
+        desenhaLos(lista, cores, G && cams.has('imn') ? 7 : 0, c => `<span class="h"><b>Manutenção</b><i>${NF0.format(c.n)} serviço${c.n > 1 ? 's' : ''}</i></span>` +
+          `<small class="st-fx-t"><i style="background:${exCorAno(c.cor)}"></i>${c.cor > 0 ? 'o mais recente em ' + c.cor : exRot(c.cor)}${c.q > 1 ? ` · ${c.q} ativos` : ''}</small><small>${nomeAls(c)}</small>`);
+      }
+      if (cams.has('fogo') && DADOS.focos) {
+        const fs = focosVis(true).sort((a, b) => a.t - b.t), rr = z < 10 ? 4 : 5.5, cs = new Map();
+        for (const f of fs) {
+          const [px, py] = proj(f.la, f.lo);
+          if (px < x0 || py < y0 || px > x1 || py > y1) continue;
+          const kk = Math.round(px / 6) + ',' + Math.round(py / 6);
+          const c = cs.get(kk) || (cs.set(kk, { x: px, y: py, n: 0, f }), cs.get(kk));
+          c.n++; c.f = f;                                    // (o mais novo do lugar tem a vez)
+        }
+        for (const c of cs.values()) {
+          const f = c.f;
+          x.globalAlpha = f.fora ? OP_FORA() : 1;
+          x.beginPath(); x.arc(c.x, c.y, rr, 0, Math.PI * 2);
+          x.fillStyle = corFo(f.idade); x.fill();
+          x.lineWidth = f.idade === 2 ? 2.5 : 2; x.strokeStyle = f.idade === 2 ? '#7c2d12' : '#fff'; x.stroke();
+          alvos.push({ x: c.x, y: c.y, r: rr + 4, al: f.al, html: `<span class="h"><b>Foco de calor · ${esc(f.sat)}</b></span><small class="st-fx-t"><i style="background:${corFo(f.idade)}"></i>${brD(f.t)} · ${FO_IDADE[f.idade]}</small>` +
+            `<small>${f.fx === 'sob' ? 'Sob a rede' : f.fx === '1km' ? 'Até 1 km da rede' : 'De 1 a 5 km da rede'}${f.al ? ' · ' + esc(f.al) + (f.tr ? ' ' + esc(f.tr) : '') : ''}${c.n > 1 ? ` · ${c.n} leituras aqui` : ''}</small>` });
+        }
+      }
+      x.globalAlpha = 1;
+    }
+    // o ponto embaixo do mouse (px da caixa): o mais perto, dentro do alcance dele
+    function em(cp) {
+      if (!R || !map.hasLayer(R) || !alvos.length || !cp || map._animatingZoom) return null;
+      const p = map.containerPointToLayerPoint(cp);
+      let best = null, bd = Infinity;
+      for (const a of alvos) { const d = Math.hypot(a.x - p.x, a.y - p.y); if (d <= a.r && d < bd) { bd = d; best = a; } }
+      return best;
+    }
+    return { sinc, pede, em, alvos: () => alvos.slice(), ligado: () => !!(R && map && map.hasLayer(R)) };
+  })();
+  const extraPts = e => { const p = pontos.em(e && e.containerPoint); return p ? `<small class="c">${p.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}</small>` : ''; };
+  // anos da Inspeção ou a NAE com os ramais mudaram na legenda: o estilo das linhas de novo
+  function restilizaV() {
+    if (!map) return;
+    grupos.forEach(g => g.forEach(pl => { if (pl._stV) pl.setStyle(estiloDe(pl, false)); }));
+  }
+  const estiloDe = (pl, on) => (pl._stV ? estiloV(pl, on) : estiloRede(pl, on) || (pl._stK ? estiloAno(pl, on)
+    : pl._stPtCor ? Object.assign(estiloLinha('PT', on, pl._stAl), { fillColor: pl._stPtCor }) : estiloLinha(pl._stCls, on, pl._stAl, pl._stSit)));
   // aplica: já muda o estilo das linhas (no voo entre níveis fica para o pouso, que redesenha as linhas de qualquer jeito:
   // um redesenho só, e não um no 1º quadro do voo e outro no pouso)
   function poeEscopo(aplica = true) {
     const a = areaDe(niv);
     escopo = !a ? null : a.tipo === 'mun' ? alsDe([a.m]) : a.als;
     if (aplica) estilizaLinhas();
+    pontos.pede();
   }
   // o estilo novo das linhas pede ao canvas um redesenho no próximo quadro (pede: o pedido feito antes do fim do movimento);
   // quando o fim do movimento (moveend) já as redesenhou todas com ele (o pedido foi consumido), esse segundo redesenho
@@ -1553,17 +2085,44 @@
   // no mapa e tira as do outro, em lotes de ~10 ms (uma tarefa só travava a abertura no celular), sem desenhar nada no
   // meio; no fim, o desenho de todas de uma vez (no pintor). grupos, semRede e nLinhas são sempre os do conjunto na tela.
   const novoConj = (nome, carrega, cria) => ({ nome, carrega, cria, grupos: new Map(), semRede: new Set(), camadas: [], n: 0, pronto: false, montando: false, erro: false });
+  // Inspeção (conjI: a rede neutra e, por cima, os pedaços inspecionados; precisa do estado.txt e do inspecao.txt), a borda
+  // da Inspeção por baixo da Faixa (conjB: só os pedaços) e a NAE (conjN: os trechos T1/T2 do nae.txt)
+  const carregaInsp = () => Promise.all([carregaLinhas(), leArq('inspecao')]).then(([rede, I]) => {
+    DADOS.inspecao = I;
+    const por = new Map(I.als.map(a => [a.cod, a.ps])), vistos = new Set();
+    const lista = rede.map(a => { vistos.add(a.cod); return Object.assign({}, a, { ps: por.get(a.cod) || [] }); });
+    I.als.forEach(a => { if (!vistos.has(a.cod)) lista.push({ cod: a.cod, T1: [], T2: [], ps: a.ps }); });
+    return lista.sort((a, b) => !!a.pt - !!b.pt);                 // (os pontos no fim: por cima)
+  });
   const conjR = novoConj('rede', carregaLinhas, criaRede), conjF = novoConj('faixa', carregaFaixa, criaFaixa), conjA = novoConj('ano', carregaFaixa, criaAno);
-  let ativo = null, trocando = false, deNovo = false;
-  const querFaixa = () => { const v = vis(); return !!(v && v.id === 'limpeza'); };
-  const montando = () => conjR.montando || conjF.montando || conjA.montando || trocando;
+  const conjI = novoConj('insp', carregaInsp, criaInsp), conjB = novoConj('inspB', () => leArq('inspecao').then(I => (DADOS.inspecao = I).als), criaInspB);
+  // (os alimentadores do índice que só têm o ponto na rede e não estão no nae.txt: o ponto neutro, como nas outras camadas)
+  const conjN = novoConj('nae', () => Promise.all([carregaLinhas(), leArq('nae')]).then(([rede, N]) => {
+    DADOS.nae = N; naeFx = null;
+    const tem = new Set(N.als.map(a => a.cod));
+    const pts = rede.filter(a => a.pt && !tem.has(a.cod)).map(a => ({ cod: a.cod, tr: [{ nome: '', cls: 'T1', n: 0, n3: 0, m: 0, ls: [], pt: a.pt, al: a.cod, semDado: true }] }));
+    return N.als.concat(pts).sort((a, b) => a.tr.some(t => t.pt) - b.tr.some(t => t.pt));
+  }), criaNae);
+  conjF.dica = conjA.dica = conjI.dica = conjN.dica = true;  // (a dica do mouse diz o trecho ou o pedaço)
+  const CONJS = [conjR, conjF, conjA, conjI, conjB, conjN];
+  let ativo = null, ativoX = null, trocando = false, deNovo = false;
+  // quem pinta as linhas: a Faixa, a Inspeção, a NAE; só camadas de pontos, a rede neutra; nenhuma, a rede de sempre
+  const dono = () => (cams.has('faixa') ? 'faixa' : cams.has('insp') ? 'insp' : cams.has('nae') ? 'nae' : cams.size ? 'neutro' : 'rede');
+  const querFaixa = () => cams.has('faixa');
+  const montando = () => CONJS.some(c => c.montando) || trocando;
+  const querConj = () => { const d = dono(); return d === 'faixa' ? (vistaFx === 'ano' ? conjA : conjF) : d === 'insp' ? conjI : d === 'nae' ? conjN : conjR; };
+  const querX = () => (dono() === 'faixa' && cams.has('insp') ? conjB : null);
+  let neutroVisto = false;
   // o conjunto da visão aberta na tela (baixa e monta o que faltar; uma troca no meio de outra fica para o fim dela)
   function sincModo() {
     if (!map) return;
-    const c = querFaixa() ? (vistaFx === 'ano' ? conjA : conjF) : conjR;
-    if (!c.pronto) { carregaConj(c); return; }
+    const c = querConj(), x = querX();
+    if (!c.pronto) carregaConj(c);
+    if (x && !x.pronto) carregaConj(x);
+    if (!c.pronto || (x && !x.pronto)) { if (estado === 'on') poeAviso(legenda()); return; }
     if (trocando) { deNovo = true; return; }
-    if (ativo !== c) troca(c);
+    if (ativo !== c || ativoX !== x) troca(c, x);
+    else if (neutroVisto !== (dono() === 'neutro')) { neutroVisto = dono() === 'neutro'; estilizaLinhas(); }
   }
   function carregaConj(c) {
     if (c.montando) return;
@@ -1588,11 +2147,15 @@
       if (estado === 'on') poeAviso(legenda());
     });
   }
-  function troca(c) {
+  function troca(c, x) {
     trocando = true;
     realca(null);
     rend._carregando = true;
-    const velho = ativo, novas = c.camadas;
+    // as que ficam saem antes e voltam na ordem nova (a borda da Inspeção por baixo da Faixa)
+    const velhos = [ativo, ativoX].filter(Boolean), fica = velhos.filter(k => k === c || k === x), saem = velhos.filter(k => k !== c && k !== x);
+    fica.forEach(k => k.camadas.forEach(pl => pl.remove()));
+    const novas = (x ? x.camadas : []).concat(c.camadas);
+    neutroVisto = dono() === 'neutro';
     let i = 0;
     const lote = () => {
       if (!map) return;
@@ -1603,8 +2166,10 @@
         pl.addTo(map);
       }
       if (i < novas.length) { setTimeout(lote, 0); return; }
-      if (velho) velho.camadas.forEach(pl => pl.remove());
-      ativo = c; grupos = c.grupos; semRede = c.semRede; nLinhas = c.n;
+      saem.forEach(k => k.camadas.forEach(pl => pl.remove()));
+      ativo = c; ativoX = x; semRede = c.semRede; nLinhas = c.n;
+      grupos = c.grupos;
+      if (x) { grupos = new Map(c.grupos); x.grupos.forEach((g, cod) => grupos.set(cod, g.concat(grupos.get(cod) || []))); }
       trocando = false;
       poeEscopo();
       rend._carregando = false;
@@ -1658,6 +2223,68 @@
     if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
     return g.length ? 1 : 0;
   }
+  // Inspeção: a rede do alimentador neutra (o T2 e o T1; sem rede no cadastro, o ponto) e, por cima, uma polilinha por
+  // conjunto de anos com os pedaços inspecionados (_stTr: o pedaço de cada linha; os da rede, null: "sem inspeção aqui")
+  const BASE_I = { base: true };
+  function criaInsp(a, c) {
+    const g = [];
+    for (const cl of ['T2', 'T1']) {
+      if (!a[cl] || !a[cl].length) continue;
+      const pl = new (linhaZ0())(a[cl], Object.assign(OPC(), { smoothFactor: 1 }));
+      pl._stCls = cl; pl._stAl = a.cod; pl._stV = 'neutra'; pl._stAnos = []; pl._stTr = a[cl].map(() => BASE_I);
+      L.setOptions(pl, estiloDe(pl, false));
+      liga(pl, a.cod);
+      g.push(pl);
+    }
+    for (const p of (a.ps || []).slice().sort((x, y) => (x.anos[0] || 0) - (y.anos[0] || 0))) {   // o ano mais recente por cima
+      if (!p.ls.length) continue;
+      const pl = new (linhaZ0())(p.ls, Object.assign(OPC(), { smoothFactor: 1 }));
+      pl._stCls = 'IN'; pl._stAl = a.cod; pl._stV = 'insp'; pl._stAnos = p.anos; pl._stTr = p.ls.map(() => p);
+      L.setOptions(pl, estiloDe(pl, false));
+      liga(pl, a.cod);
+      g.push(pl);
+    }
+    if (a.pt) {                                          // sem rede no cadastro: o ponto (por cima)
+      const pt = L.circleMarker(a.pt, OPC());
+      pt._stCls = 'PT'; pt._stAl = a.cod; pt._stV = 'neutra'; pt._stTr = [BASE_I];
+      L.setOptions(pt, estiloDe(pt, false));
+      liga(pt, a.cod);
+      g.push(pt); c.semRede.add(a.cod);
+    }
+    if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
+    return g.length ? 1 : 0;
+  }
+  function criaInspB(a, c) {
+    const g = [];
+    for (const p of a.ps.slice().sort((x, y) => (x.anos[0] || 0) - (y.anos[0] || 0))) {
+      if (!p.ls.length) continue;
+      const pl = new (linhaZ0())(p.ls, Object.assign(OPC(), { smoothFactor: 1, interactive: false }));
+      pl._stCls = 'IN'; pl._stAl = a.cod; pl._stV = 'inspB'; pl._stAnos = p.anos;
+      L.setOptions(pl, estiloDe(pl, false));
+      g.push(pl);
+    }
+    if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
+    return g.length ? 1 : 0;
+  }
+  // NAE: uma polilinha por trecho (_stNae: o trecho; _stTr: ele em cada linha); o alimentador sem linha, o ponto do maior
+  // trecho. A ordem do desenho (conjN.fim): os sem NAE embaixo, os de mais NAE por cima
+  function criaNae(a, c) {
+    const g = [];
+    for (const t of a.tr) {
+      let pl;
+      if (t.pt) { pl = L.circleMarker(t.pt, OPC()); pl._stCls = 'PT'; c.semRede.add(a.cod); }
+      else if (t.ls.length) { pl = new (linhaZ0())(t.ls, Object.assign(OPC(), { smoothFactor: 1 })); pl._stCls = t.cls; pl._stTr = t.ls.map(() => t); }
+      else continue;
+      pl._stAl = a.cod; pl._stV = 'nae'; pl._stNae = t; pl._stOrd = (t.pt ? 1e6 : 0) + t.n + t.n3 + (t.cls === 'T1' ? 0.5 : 0);
+      if (t.pt) pl._stTr = [t];
+      L.setOptions(pl, estiloDe(pl, false));
+      liga(pl, a.cod);
+      g.push(pl);
+    }
+    if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
+    return g.length ? 1 : 0;
+  }
+  conjN.fim = c => { c.camadas = c.camadas.map((l, i) => [l, i]).sort((x, y) => x[0]._stOrd - y[0]._stOrd || x[1] - y[1]).map(x => x[0]); };
   // vista Por ano: por alimentador, uma polilinha por (anos, marcas) com os pedaços dos trechos dela (_stTr e _stPc: o trecho
   // e o pedaço de cada linha) e, por cima, as das OS criadas e pendentes (com opacidade 0 enquanto desligadas). A ordem do
   // desenho é a da camada Faixa no estado inteiro: o vão sem OS embaixo, os anos do mais antigo ao mais recente, criadas,
@@ -1705,13 +2332,13 @@
   // na vista Por ano)
   let pcEm = null;
   function trechoEm(cod, ll) {
-    const g = (ativo === conjF || ativo === conjA) && grupos.get(cod);
+    const g = ativo && ativo.dica && grupos.get(cod);
     pcEm = null;
     if (!g || !map) return null;
     const P = map.project(ll, 0);
     let best = null, bd = Infinity;
     for (const pl of g) {
-      if (!pl._stTr || pl.options.interactive === false) continue;
+      if (!pl._stTr || pl.options.interactive === false || pl.options.opacity === 0) continue;
       if (pl._stCls === 'PT') {
         const q = map.project(pl.getLatLng(), 0), d = (q.x - P.x) ** 2 + (q.y - P.y) ** 2;
         if (d < bd) { bd = d; best = pl._stTr[0]; }
@@ -1851,7 +2478,23 @@
       map.getContainer().style.cursor = '';
       const a = infoAl(sobre), m = niv.mun && porCod[niv.mun], am = m && m.als.find(x => x.cod === sobre);
       // visão Limpeza: o trecho embaixo do mouse, a situação da faixa e a última limpeza
-      const t = ativo === conjF || ativo === conjA ? trechoEm(sobre, e.latlng) : null;
+      const t = ativo && ativo.dica ? trechoEm(sobre, e.latlng) : null;
+      const cabA = `<span class="h"><b class="cod">${esc(sobre)}</b>${am ? `<i>${esc(numAl(sobre, m))}</i>` : ''}</span>` +
+        (a.se || am ? `<small>${esc(a.se || '')}${am ? `${a.se ? ' · ' : ''}${kmTxt(am.m)} em ${esc(m.nome)}` : ''}</small>` : '');
+      if (t && ativo === conjN && !t.semDado) {                          // NAE: o trecho e a NAE dele (e a dos ramais)
+        const i = classeNae(naeDe(t), faixasNae());
+        poeBalao(cabA + `<small class="st-fx-t"><i style="background:${i ? corNae(i) : FUNDOCOR}"></i>Trecho ${esc(t.nome)} · ${NF0.format(t.n)} NAE` +
+          `${t.n3 ? ` (+${NF0.format(t.n3)} nos ramais T3${naeRam.on ? '' : ', fora da cor'})` : ''}</small>` +
+          `<small>${esc(t.cls)} · ${kmTxt(t.m)} · ${esc(mesesTxt(DADOS.nae && DADOS.nae.meses))}</small>` + extraPts(e) + '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
+        return;
+      }
+      if (t && ativo === conjI) {                          // Inspeção: o pedaço embaixo do mouse
+        const a0 = t.base ? null : t.anos.find(x => !inspOff.has(x));
+        poeBalao(cabA + `<small class="st-fx-t"><i style="background:${a0 ? inCorAno(a0) : FUNDOCOR}"></i>${a0 ? 'Inspecionado em ' + a0 +
+          (t.anos.length > 1 ? ' (também ' + t.anos.filter(x => x !== a0).join(', ') + ')' : '') : 'Sem inspeção registrada aqui'}</small>` +
+          extraPts(e) + '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
+        return;
+      }
       if (t && ativo === conjA) {                           // vista Por ano: o trecho, o ano do pedaço, a última limpeza e os km limpos
         const pc = pcEm, a0 = pc && pc.anos.find(x => !anosOff.has(x));
         poeBalao(`<span class="h"><b class="cod">${esc(sobre)}</b>${am ? `<i>${esc(numAl(sobre, m))}</i>` : ''}</span>` +
@@ -1863,10 +2506,17 @@
       }
       poeBalao(`<span class="h"><b class="cod">${esc(sobre)}</b>${am ? `<i>${esc(numAl(sobre, m))}</i>` : ''}</span>` +
         (a.se || am ? `<small>${esc(a.se || '')}${am ? `${a.se ? ' · ' : ''}${kmTxt(am.m)} em ${esc(m.nome)}` : ''}</small>` : '') +
-        (t ? `<small class="st-fx-t" data-sit="${t.sit}"><i style="background:${SIT_COR[t.sit]}"></i>Trecho ${esc(t.nome)} · ${SIT_NOME[t.sit]}</small>` +
+        (t && ativo === conjF ? `<small class="st-fx-t" data-sit="${t.sit}"><i style="background:${SIT_COR[t.sit]}"></i>Trecho ${esc(t.nome)} · ${SIT_NOME[t.sit]}</small>` +
           `<small>${t.ult ? 'Última limpeza ' + dataBr(t.ult) : 'Sem registro de limpeza'} · ${esc(t.cls)} a cada ${t.prazo} anos · ${kmTxt(t.m)}</small>` : '') +
-        (semRede.has(sobre) && !t ? '<small>Sem rede no cadastro (só o ponto)</small>' : '') +
+        (semRede.has(sobre) && (!t || t.semDado || t.base) ? '<small>Sem rede no cadastro (só o ponto)</small>' : '') + extraPts(e) +
         '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
+      return;
+    }
+    const pt = pontos.em(e.containerPoint);                 // um losango ou foco embaixo do mouse
+    if (pt) {
+      realceArea(null);
+      map.getContainer().style.cursor = pt.al ? 'pointer' : '';
+      poeBalao(pt.html + (pt.al ? '<small class="c">Clique para abrir o painel do alimentador</small>' : ''), ev);
       return;
     }
     const n = fronteira ? destino(e.latlng) : null;            // (Fronteira desligada: sem a navegação por áreas)
@@ -2228,6 +2878,8 @@
     caixaSat.addEventListener('pointerleave', () => { realca(null); realceArea(null); balao.hidden = true; map.getContainer().style.cursor = ''; });
     map.on('click', e => {
       if (rotAl && ponteiro === 'touch' && !(e.originalEvent && e.originalEvent._stLinha)) { rotAl = null; pedeRotulos(); }
+      const pt = !(e.originalEvent && e.originalEvent._stLinha) && pontos.em(e.containerPoint);   // um ponto: o alimentador dele
+      if (pt && pt.al && estado === 'on' && !voandoN && !(ponteiro === 'touch' && fronteira && !niv.mun)) { abreAl(pt.al); return; }
       cliqueArea(e.latlng);
     });
     caixaSat.addEventListener('pointerdown', e => { ponteiro = e.pointerType || 'mouse'; }, true);
@@ -2442,12 +3094,14 @@
     if (!voltando) focoAntes = ae && ae !== document.body && !(caixaSat && caixaSat.contains(ae)) ? ae : null;
     const minha = ++vez;
     poeEstilo();
+    if (!voltando && visId() !== visVista) camsDaVisao(true);   // a visão do mapa mudou desde a última vez
     const tAviso = setTimeout(() => { if (estado === 'carregando') poeAviso('<b>Satélite</b><span>carregando…</span>'); }, 120);
     const recem = !map;
     try {
       await carregaLibs();
       if (!map) await cria();
       sincModo();                                         // (as linhas da visão aberta: a rede, ou a faixa na visão Limpeza)
+      pontos.sinc();
     } catch (e) {
       clearTimeout(tAviso);
       estado = 'off';
@@ -2593,7 +3247,12 @@
     .observe(alvo, { attributes: true, attributeFilter: ['class'] });
   // visão trocada na legenda (NAE, Manutenção…): os números do nível de novo
   // (na visão Limpeza de faixa, as linhas pela situação da faixa; ao sair dela, a rede de novo)
-  document.addEventListener('argos-visao', () => { if (estado !== 'on' || !D) return; poeNivel(); if (!voandoN) poeMarcas(); sincModo(); });
+  // (a troca feita por fora deixa só a camada da visão nova; a que eu pedi, ao ligar ou desligar uma camada, não mexe nelas)
+  document.addEventListener('argos-visao', () => {
+    if (estado !== 'on' || !D) return;
+    if (!meuVis && visId() !== visVista) { camsDaVisao(false); sincCams(); pontos.sinc(); }
+    poeNivel(); if (!voandoN) poeMarcas(); sincModo();
+  });
   // o mapa dos municípios trocou de nível por fora com o satélite aberto (busca da barra, Voltar): o satélite acompanha
   document.addEventListener('argos-nivel', e => {
     if (meu || estado !== 'on' || !D || !fronteira) return;
@@ -2696,7 +3355,14 @@
     fronteira: v => { if (v !== undefined && estado === 'on') poeFronteira(v); return fronteira; },
     // visão Limpeza: o conjunto na tela ('rede' ou 'faixa'), os km de cada situação no nível (ordem de SIT), o total do
     // nível somado dos municípios, a data de referência e o trecho mais perto de um ponto (px do quadro)
-    modo: () => (ativo ? ativo.nome : null), quer: () => (querFaixa() ? (vistaFx === 'ano' ? 'ano' : 'faixa') : 'rede'),
+    modo: () => (ativo ? ativo.nome + (ativoX ? '+' + ativoX.nome : '') : null), quer: () => querConj().nome + (querX() ? '+' + querX().nome : ''),
+    // camadas: as ligadas, ligar/desligar (como a fileira), quem pinta as linhas, os pontos desenhados, os dados lidos
+    cams: () => [...cams], cam: (id, on) => { if (estado === 'on') alternaCam(id, on); return [...cams]; }, dono: () => dono(),
+    pontos: () => ({ ligado: pontos.ligado(), alvos: pontos.alvos().map(a => ({ x: a.x, y: a.y, al: a.al, txt: a.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() })) }),
+    camDados: t => DADOS[t] || null, camErro: t => ERRO[t] || null, naeFaixas: () => faixasNae().slice(), naeRam: v => { if (v !== undefined) { naeRam.on = !!v; naeFx = null; restilizaV(); pontos.pede(); if (estado === 'on') poeAviso(legenda()); } return naeRam.on; },
+    corNae: i => corNae(i), classeNae: v => classeNae(v, faixasNae()), inCorAno: a => inCorAno(a), exCorAno: a => exCorAno(a), mnCor: () => MN_COR.slice(), foCor: i => corFo(i),
+    linhasV: () => { const out = []; grupos.forEach(g => g.forEach(pl => { if (pl._stV) out.push({ al: pl._stAl, v: pl._stV, cls: pl._stCls, anos: pl._stAnos || null, nae: pl._stNae ? naeDe(pl._stNae) : null, cor: pl.options.color, op: pl.options.opacity, fill: pl.options.fillColor }); })); return out; },
+    lePor: () => (leitor ? 'worker' : leitor === false ? 'pagina' : 'nada'),
     // vista Por ano: a vista (pede 'ano' ou 'sit'), os km do nível (kmAno), anos desligados e as etiquetas na tela
     vistaFx: v => { if (v && v !== vistaFx) { vistaFx = v; lsSet('st-fx-vista', v); tiraRotulos(); sincModo(); if (estado === 'on') poeAviso(legenda()); } return vistaFx; },
     kmAno: () => kmAno(), anos: () => (F ? F.anos.slice() : []), corAno: a => corAno(a),
