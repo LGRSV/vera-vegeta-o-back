@@ -104,7 +104,8 @@
   let visVista;                                              // a visão do mapa dos municípios na última sincronia
   let meuVis = false;                                        // a troca de visão fui eu que pedi
   const naeRam = { on: lsGet('st-nae-ram') === '1' };       // NAE: somar a dos ramais (T3) no T1/T2 de onde saem
-  const inspOff = new Set(), manOff = new Set(), mntOff = new Set();   // anos e situações desligados na legenda
+  const inspOff = new Set(), manOff = new Set(), mntOff = new Set();
+  const clsOff = new Set();                                  // T1 ou T2 desligado (os botões de classe)   // anos e situações desligados na legenda
   // cores das camadas do mapa do alimentador (inspecao.js, executadas.js, manutencao.js) e a rampa da NAE do mapa dos municípios
   const IN_COR_ANO = { 2024: '#c084fc', 2025: '#818cf8', 2026: '#2dd4bf', 2027: '#a3e635' };
   const inCorAno = a => IN_COR_ANO[a] || (a < 2024 ? '#e879f9' : '#bef264');
@@ -416,7 +417,7 @@
       '.st-sat .leaflet-control-attribution{background:var(--vidro,rgba(15,20,23,.82));color:var(--vidro-fg,#f3f4f4);font:11px/1.4 var(--f-body,sans-serif);border-top-left-radius:var(--r1,6px)}' +
       '.st-linhas{transition:opacity .45s var(--ease,ease)}' +
       // os outros elementos do mapa (nomes, bandeiras, cartões) saem como no raio-X; o Tela cheia e o "Abrindo…" ficam
-      '.sat-to .mt-mapa>:not(svg):not(.mt-tc):not(.st-sat):not(.st-lado):not(.st-balao):not(.mt-abrindo){opacity:0;pointer-events:none}' +
+      '.sat-to .mt-mapa>:not(svg):not(.mt-tc):not(.st-sat):not(.st-lado):not(.st-lgs):not(.st-balao):not(.mt-abrindo){opacity:0;pointer-events:none}' +
       // com o satélite inteiro na tela, o mapa dos municípios embaixo dele não é pintado (nada de trabalho escondido)
       '.sat-to.st-cobre .mt-mapa>svg{visibility:hidden}' +
       // trilha: a do satélite no lugar da do mapa dos municípios (mesmo desenho); a legenda some no município, como lá
@@ -425,8 +426,20 @@
       // fechando: o mapa dos municípios pula ao nível do satélite sem as transições dele (os polos não deslizam no dissolve)
       '.st-salto .mt-polo,.st-salto .mt-polo *,.st-salto .mt-regc,.st-salto .mt-nomes2,.st-salto .mt-nomes2 *,.st-salto .mt-selos,' +
       '.st-salto .mt-selos *,.st-salto .mt-bandeiras *{transition:none!important;animation:none!important}' +
-      // coluna da esquerda: o aviso (legenda) e, no município, o cartão dele
+      // o canto de cima à esquerda como o do mapa do alimentador (pedido do usuário: "isso era pra tá igual na visão
+      // satélite"): T1 T2 T3 (o card .classes de mapa_trechos.html) e o Fronteira ao lado; embaixo, a fileira das camadas no
+      // cartão próprio (.lp-cams de lupa-painel.js); no município, o cartão dele. A legenda fica no canto de baixo à
+      // esquerda (como as legendas das camadas, .ctl-lgs de extras.js)
       '.st-lado{position:absolute;left:12px;top:12px;z-index:7;display:grid;justify-items:start;gap:8px;max-width:calc(100% - 76px);pointer-events:none}' +
+      '.st-lgs{position:absolute;left:12px;bottom:12px;z-index:7;display:flex;flex-direction:column;align-items:flex-start;max-width:calc(100% - 24px);pointer-events:none}' +
+      '.st-lgs[hidden]{display:none}.st-lgs>*{pointer-events:auto}' +
+      '.st-cls{display:flex;flex:none;gap:var(--s1,4px);padding:var(--s1,4px);background:var(--vidro,rgba(15,20,23,.82));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);' +
+      'border:1px solid var(--vidro-borda,rgba(255,255,255,.12));border-radius:var(--r2,10px);box-shadow:var(--sh-vidro,0 2px 8px rgb(0 0 0 / .35))}.st-cls[hidden]{display:none}' +
+      '.st-cls button{font:600 var(--t-sm,13px)/1 var(--f-mono,monospace);padding:0 var(--s2,8px);border:0;border-radius:var(--r1,6px);background:transparent;color:var(--vidro-fg,#f3f4f4);' +
+      'cursor:pointer;min-width:40px;min-height:40px;box-shadow:inset 0 -3px 0 var(--c)}' +
+      '.st-cls button:hover{background:var(--vidro-hover,rgba(255,255,255,.1))}.st-cls button:focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:1px}' +
+      '.st-cls button[aria-pressed="false"]{opacity:.6;text-decoration:line-through;box-shadow:inset 0 -3px 0 #5a636a}' +
+      '.st-cls button[aria-disabled="true"]{opacity:.35;cursor:not-allowed;box-shadow:inset 0 -3px 0 #5a636a}.st-cls button[aria-disabled="true"]:hover{background:transparent}' +
       '.st-lado[hidden]{display:none}.st-lado>*{pointer-events:auto}#mapa-to:not(.sat-to) .st-mun{display:none}' +
       // no alto: o aviso e, ao lado (embaixo, se não couber), o botão Fronteira (o card e o botão NAE do mapa do alimentador,
       // .ctl-card/.ctl-nae de extras.js: ligado, o filete colorido embaixo, nas cores dos polos; desligado, riscado)
@@ -439,27 +452,24 @@
       '.st-fr button:hover{background-color:var(--vidro-hover,rgba(255,255,255,.1))}.st-fr button:focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:1px}' +
       '.st-fr button[aria-pressed="false"]{opacity:.6;text-decoration:line-through;background-image:none;box-shadow:inset 0 -3px 0 #5a636a}' +
       '.st-fr button[aria-disabled="true"]{cursor:progress}' +
-      // com mouse, da altura do aviso ao lado (no toque, o alvo de 40 px do NAE)
-      '@media (pointer:fine){.st-fr{padding:3px}.st-fr button{min-height:26px;padding:0 10px}}' +
       '@media (prefers-reduced-motion:no-preference){.st-fr button{transition:background-color var(--dur,.15s) var(--ease,ease),opacity var(--dur,.15s) var(--ease,ease)}}' +
       // Fronteira desligada: o véu e os contornos (com o realce da área) fora da tela
       '.st-semfr .leaflet-st-veu-pane,.st-semfr .leaflet-st-cont-pane{display:none}' +
       '.st-aviso,.st-mun,.st-balao{color:var(--vidro-fg,#f3f4f4);background:var(--vidro,rgba(15,20,23,.82));' +
       'border:1px solid var(--vidro-borda,rgba(255,255,255,.12));box-shadow:var(--sh-vidro,0 2px 8px rgb(0 0 0 / .35));font:500 var(--t-sm,13px)/1.35 var(--f-body,sans-serif)}' +
-      // o cartão: a fileira das camadas (o desenho da .lp-cams do mapa do alimentador, lupa-painel.js) e, embaixo, a legenda
-      '.st-aviso{display:grid;gap:5px;max-width:100%;max-height:min(58svh,calc(var(--st-alt,600px) - 40px));overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;' +
+      // a legenda (no canto de baixo; a altura que sobra embaixo da coluna de cima, lgsMax)
+      '.st-aviso{display:grid;gap:5px;max-width:100%;max-height:var(--st-lgs-max,60svh);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;' +
       'padding:7px 12px;border-radius:var(--r2,10px)}' +
       '.st-leg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0;min-height:max-content}.st-leg:empty{display:none}' +
-      '.st-cams{display:flex;gap:2px;max-width:calc(100% + 18px);min-height:max-content;margin:-4px -9px 0;overflow-x:auto;scrollbar-width:none}.st-cams[hidden]{display:none}' +
+      '.st-cams{display:flex;gap:2px;max-width:100%;padding:2px;overflow-x:auto;scrollbar-width:none;background:var(--vidro,rgba(15,20,23,.82));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);' +
+      'border:1px solid var(--vidro-borda,rgba(255,255,255,.12));border-radius:var(--r2,10px);box-shadow:var(--sh-vidro,0 2px 8px rgb(0 0 0 / .35))}.st-cams[hidden]{display:none}' +
       '.st-cams button{flex:none;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--vidro-fg,#f3f4f4);font:600 var(--t-xs,12px)/1 var(--f-body,sans-serif);white-space:nowrap;cursor:pointer}' +
       '@media (pointer:coarse){.st-cams button{min-height:40px}}' +
       '.st-cams button:hover{background:var(--vidro-hover,rgba(255,255,255,.1))}.st-cams button:focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:-2px}' +
       '.st-cams button[aria-pressed=true]{background:var(--accent,#f08a5d);color:var(--on-accent,#14181b)}' +
-      '.st-cams .st-cc{display:none}@media (max-width:540px){.st-cams{gap:0;margin:-3px -9px 0}.st-cams button{padding:0 5px}.st-cams .st-cl{display:none}.st-cams .st-cc{display:inline}}' +
+      '.st-cams .st-cc{display:none}@media (max-width:540px){.st-cams{gap:0}.st-cams button{padding:0 5px}.st-cams .st-cl{display:none}.st-cams .st-cc{display:inline}}' +
       // (no celular a coluna para antes do Tela cheia: a fileira inteira cabe com o nome um pouco menor)
       '@media (max-width:420px){.st-cams button{padding:0 4px;font-size:11px}}' +
-      // (no celular o cartão com a fileira ocupa a largura da coluna: o Fronteira fica no alto, antes dele)
-      '@media (max-width:640px){.st-aviso{max-height:min(44svh,calc(var(--st-alt,600px) - 80px))}.st-topo>.st-fr{order:-1}}' +
       '.st-aviso.st-larga{width:min(470px,100%)}' +
       // uma seção da legenda por camada ligada (a de cima pinta as linhas; as outras, os pontos)
       '.st-leg .st-sec{flex:none;width:100%;box-sizing:border-box;margin-top:3px;padding-top:5px;border-top:1px solid var(--vidro-borda,rgba(255,255,255,.12));font:700 var(--t-xs,12px)/1.2 var(--f-body,sans-serif);color:var(--muted,#9aa4ab)}' +
@@ -517,7 +527,7 @@
       'background:none;color:var(--vidro-fg,#f3f4f4);text-align:left;font:inherit;cursor:pointer}.st-al:hover,.st-al:focus-visible,.st-al.on{background:var(--vidro-hover,rgba(255,255,255,.1))}' +
       '.st-al b{font:600 var(--t-sm,13px)/1.2 var(--f-mono,monospace)}.st-al em{grid-column:1;font:400 var(--t-xs,12px)/1.2 var(--f-body,sans-serif);font-style:normal;color:var(--cartao-mute,#a9b2b8)}' +
       '.st-al .st-sel{grid-row:span 2;grid-column:2}' +
-      '.st-sat a:focus-visible,.st-lado :focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:2px}' +
+      '.st-sat a:focus-visible,.st-lado :focus-visible,.st-lgs :focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:2px}' +
       // dica do mouse: o "cartão preto" do mapa dos municípios
       '.st-balao{position:absolute;z-index:8;display:grid;gap:1px;padding:8px 11px 9px;border-radius:var(--r1,6px);pointer-events:none;white-space:nowrap;' +
       'background:var(--cartao,#111314);color:var(--cartao-fg,#f2f3f2);border-color:var(--cartao-borda,rgba(255,255,255,.16));box-shadow:0 10px 24px -8px rgb(0 0 0 / .6)}' +
@@ -540,8 +550,8 @@
       '.sem-nae .st-card i,.sem-nae .st-sat .mt-mn i,.sem-nae .st-balao .h i,.sem-nae .st-lado .st-sel{display:none}' +
       // celular: o aviso em coluna, só o nome e as cores (sem teclado; o resto não cabe sem cobrir a ponta norte do estado);
       // nos níveis, numa linha só (a trilha já diz onde se está)
-      '@media (max-width:640px){.st-lado{left:8px;top:8px;gap:6px;max-width:calc(100% - 64px)}.st-aviso{padding:6px 10px;gap:4px}.st-leg{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:2px}' +
-      '.st-aviso .st-n,.st-aviso .st-tecla{display:none}.st-lado.st-niv .st-leg{flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 10px}' +
+      '@media (max-width:640px){.st-lado{left:8px;top:8px;gap:6px;max-width:calc(100% - 64px)}.st-lgs{left:8px;bottom:22px;max-width:calc(100% - 16px)}.st-aviso{padding:6px 10px;gap:4px}.st-leg{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:2px}' +
+      '.st-aviso .st-n,.st-aviso .st-tecla{display:none}.st-lgs.st-niv .st-leg{flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 10px}' +
       '.st-mun{width:auto;padding:9px 10px 10px;gap:4px}.st-mun-h b{font-size:var(--t-lg,17px)}.st-mun-l{max-height:30svh}.st-mun .st-mun-pr{display:none}' +
       '.st-sat .leaflet-control-attribution{font-size:9px}}' +
       '@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .st-aviso .st-tecla{color:#b9c1c6}}' +
@@ -551,15 +561,37 @@
   }
 
   // ---------- telas: coluna (aviso e município), balão e trilha ----------
-  let lado = null, aviso = null, legEl = null, camsEl = null, cartaoMun = null, balao = null, trilha = null, frCard = null, frBt = null;
+  let lado = null, lgs = null, clsCard = null, aviso = null, legEl = null, camsEl = null, cartaoMun = null, balao = null, trilha = null, frCard = null, frBt = null;
   function poeLado() {
     if (lado) return;
     lado = document.createElement('div');
     lado.className = 'st-lado';
     lado.hidden = true;
+    lgs = document.createElement('div');
+    lgs.className = 'st-lgs';
+    lgs.hidden = true;
     aviso = document.createElement('div');
     aviso.className = 'st-aviso';
-    // a fileira das camadas (no alto do cartão; aparece com o mapa pronto) e a legenda (o que muda)
+    // T1 T2 T3 (os botões de classe do mapa do alimentador: ligam e desligam a classe das linhas em todas as camadas; o
+    // satélite não tem o T3)
+    clsCard = document.createElement('div');
+    clsCard.className = 'st-cls';
+    clsCard.setAttribute('role', 'group');
+    clsCard.setAttribute('aria-label', 'Classes das linhas');
+    clsCard.hidden = true;
+    clsCard.innerHTML = ['T1', 'T2'].map(c => `<button type="button" data-c="${c}" aria-pressed="true" style="--c:${COR[c]}" title="Mostrar ou esconder ${c}">${c}</button>`).join('') +
+      '<button type="button" data-c="T3" aria-disabled="true" style="--c:#facc15" title="T3 só no mapa do alimentador">T3</button>';
+    clsCard.addEventListener('click', e => {
+      const b = e.target.closest('button[data-c]');
+      if (!b || b.getAttribute('aria-disabled') === 'true' || estado !== 'on') return;
+      const c = b.dataset.c;
+      if (clsOff.has(c)) clsOff.delete(c); else clsOff.add(c);
+      b.setAttribute('aria-pressed', String(!clsOff.has(c)));
+      realca(null);
+      estilizaLinhas();
+      pontos.pede();
+    });
+    // a fileira das camadas (no cartão dela, embaixo do T1 T2 T3; aparece com o mapa pronto)
     camsEl = document.createElement('div');
     camsEl.className = 'st-cams';
     camsEl.setAttribute('role', 'group');
@@ -579,7 +611,7 @@
     legEl = document.createElement('div');
     legEl.className = 'st-leg';
     legEl.setAttribute('role', 'status');
-    aviso.append(camsEl, legEl);
+    aviso.append(legEl);
     // visão Limpeza: o seletor Por ano / Vencimento e, na vista Por ano, cada ano, criadas e pendentes (liga/desliga); nas
     // outras camadas, os anos e as situações (liga/desliga) e a NAE com os ramais
     legEl.addEventListener('click', e => {
@@ -623,9 +655,17 @@
     frBt.addEventListener('click', () => { if (estado === 'on') poeFronteira(!fronteira); });
     const topo = document.createElement('div');
     topo.className = 'st-topo';
-    topo.append(aviso, frCard);
-    lado.append(topo, cartaoMun);
-    caixa.append(lado);
+    topo.append(clsCard, frCard);
+    lado.append(topo, camsEl, cartaoMun);
+    lgs.append(aviso);
+    caixa.append(lado, lgs);
+  }
+  // a altura da legenda: o que sobra embaixo da coluna de cima (no celular, no máximo 40% da caixa)
+  function lgsMax() {
+    if (!lgs || !lado) return;
+    const h = caixa.clientHeight, pe = lado.hidden ? 0 : lado.offsetTop + lado.offsetHeight, base = celular() ? 22 : 12;
+    const m = Math.max(90, h - pe - base - 10);
+    lgs.style.setProperty('--st-lgs-max', Math.round(celular() ? Math.min(m, Math.max(140, h * 0.4)) : m) + 'px');
   }
   function sincFr() {                                       // o botão como está a escolha
     if (!frBt) return;
@@ -639,14 +679,16 @@
     aviso.classList.toggle('st-larga', html.includes('st-sec') || html.includes('st-anos'));
     legEl.innerHTML = html;
     aviso.hidden = !html;
+    lgs.hidden = !html;
     sincFr();
     sincCams();
-    lado.hidden = !html && cartaoMun.hidden;
-    if (caixaSat) caixa.style.setProperty('--st-alt', caixa.clientHeight + 'px');
+    lado.hidden = false;
+    lgsMax();
   }
   function sincCams() {                                     // a fileira como estão as camadas
     if (!camsEl) return;
-    camsEl.hidden = !map || (estado !== 'on' && estado !== 'abrindo');
+    camsEl.hidden = clsCard.hidden = !map || (estado !== 'on' && estado !== 'abrindo');
+    clsCard.querySelectorAll('button[data-c]:not([aria-disabled])').forEach(b => b.setAttribute('aria-pressed', String(!clsOff.has(b.dataset.c))));
     camsEl.querySelectorAll('button[data-cam]').forEach(b => b.setAttribute('aria-pressed', String(cams.has(b.dataset.cam))));
   }
   const TECLA0 = `${MAC ? '⌘S' : 'Ctrl+S'} ou Esc volta`, TECLA1 = `Esc sobe um nível · ${MAC ? '⌘S' : 'Ctrl+S'} volta`;
@@ -953,7 +995,7 @@
   // retângulos (px da caixa do satélite) do que fica por cima do mapa: a coluna da esquerda, o Tela cheia e os créditos
   function ocupados() {
     const c = caixa.getBoundingClientRect(), out = [];
-    [aviso, frCard, cartaoMun, caixa.querySelector('.mt-tc'), map && map.attributionControl && map.attributionControl.getContainer()].forEach(e => {
+    [aviso, clsCard, camsEl, frCard, cartaoMun, caixa.querySelector('.mt-tc'), map && map.attributionControl && map.attributionControl.getContainer()].forEach(e => {
       if (!e || e.hidden || !e.getClientRects().length) return;
       const q = e.getBoundingClientRect();
       if (q.width) out.push({ left: q.left - c.left, top: q.top - c.top, right: q.right - c.left, bottom: q.bottom - c.top });
@@ -966,12 +1008,15 @@
     const a = areaDe(n);
     if (!a) return vistaDoEstado();
     const f = folga(), cel = celular(), topo = n.reg && !n.pol ? (cel ? 30 : 44) : 0;
-    const col = [aviso, frCard, cartaoMun].filter(e => e && !e.hidden && lado && !lado.hidden && e.getClientRects().length)
-      .map(e => e.getBoundingClientRect()), c = caixa.getBoundingClientRect();
+    // (a coluna de cima e a legenda embaixo: o nível ao lado das duas, ou entre elas)
+    const vis = e => e && !e.hidden && e.getClientRects().length;
+    const col = [clsCard, camsEl, frCard, cartaoMun].filter(e => vis(e) && lado && !lado.hidden).map(e => e.getBoundingClientRect()), c = caixa.getBoundingClientRect();
+    const lg = vis(aviso) && lgs && !lgs.hidden ? aviso.getBoundingClientRect() : null;
     const opc = [];
-    if (col.length) {
-      const dir = Math.max(...col.map(q => q.right)) - c.left, pe = Math.max(...col.map(q => q.bottom)) - c.top;
-      opc.push([[Math.max(f, dir + 12), f + topo], [f, f]], [[f, Math.max(f + topo, pe + 10)], [f, f]]);
+    if (col.length || lg) {
+      const todos = col.concat(lg ? [lg] : []), dir = Math.max(...todos.map(q => q.right)) - c.left;
+      const pe = col.length ? Math.max(...col.map(q => q.bottom)) - c.top : 0, sob = lg ? c.bottom - lg.top + 10 : f;
+      opc.push([[Math.max(f, dir + 12), f + topo], [f, f]], [[f, Math.max(f + topo, pe + 10)], [f, Math.max(f, sob)]]);
     } else opc.push([[f, f + topo], [f, f]]);
     // (o 1º que couber; o de baixo da coluna, centrado, a não ser que o do lado aproxime bem mais)
     const t = map.getSize();
@@ -1634,7 +1679,7 @@
       const N = DADOS.nae;
       if (cams.has('nae') && N && (dono() !== 'nae' || num)) {
         const ts = [];
-        for (const a of N.als) for (const t of a.tr) { if (naeDe(t) > 0) { if (!t._mp) t._mp = t.pt || meioDe(t.ls) || null; if (t._mp) ts.push(t); } }
+        for (const a of N.als) for (const t of a.tr) { if (naeDe(t) > 0 && !clsOff.has(t.cls)) { if (!t._mp) t._mp = t.pt || meioDe(t.ls) || null; if (t._mp) ts.push(t); } }
         const lista = junta(ts.length, i => [ts[i]._mp[0], ts[i]._mp[1], ts[i].al], i => [0, naeDe(ts[i])], z < 15 ? 44 : 0, true);
         x.textBaseline = 'middle';
         for (const c of lista) {
@@ -1704,7 +1749,16 @@
     if (!map) return;
     grupos.forEach(g => g.forEach(pl => { if (pl._stV) pl.setStyle(estiloDe(pl, false)); }));
   }
-  const estiloDe = (pl, on) => (pl._stV ? estiloV(pl, on) : estiloRede(pl, on) || (pl._stK ? estiloAno(pl, on)
+  // T1 ou T2 desligado nos botões de classe: as linhas dele somem (sem mouse nem clique) em qualquer camada; os pedaços da
+  // Inspeção (o arquivo não diz a classe) e os pontos ficam, como nas camadas dos outros no mapa do alimentador
+  const classeDe = pl => pl._stC || (pl._stCls === 'T1' || pl._stCls === 'T2' ? pl._stCls : null);
+  const interativa = pl => !(pl._stV === 'inspB' || pl._stK === 'cri' || pl._stK === 'pend');
+  const estiloDe = (pl, on) => {
+    const st = estiloDe0(pl, on);
+    if (clsOff.size && clsOff.has(classeDe(pl))) return Object.assign({}, st, { opacity: 0, fillOpacity: 0, contorno: null, interactive: false });
+    return Object.assign({}, st, { interactive: interativa(pl) });
+  };
+  const estiloDe0 = (pl, on) => (pl._stV ? estiloV(pl, on) : estiloRede(pl, on) || (pl._stK ? estiloAno(pl, on)
     : pl._stPtCor ? Object.assign(estiloLinha('PT', on, pl._stAl), { fillColor: pl._stPtCor }) : estiloLinha(pl._stCls, on, pl._stAl, pl._stSit)));
   // aplica: já muda o estilo das linhas (no voo entre níveis fica para o pouso, que redesenha as linhas de qualquer jeito:
   // um redesenho só, e não um no 1º quadro do voo e outro no pouso)
@@ -2296,30 +2350,31 @@
   // desenho é a da camada Faixa no estado inteiro: o vão sem OS embaixo, os anos do mais antigo ao mais recente, criadas,
   // pendentes e os pontos (conjA.fim)
   function criaAno(a, c) {
-    const g = [], por = new Map(), nx = { cri: { rs: [], ts: [], ps: [] }, pend: { rs: [], ts: [], ps: [] } };
+    // (por classe também: o T1 e o T2 ligam e desligam à parte nos botões de classe)
+    const g = [], por = new Map(), nx = {};
+    const nxDe = (k, cls) => nx[k + cls] || (nx[k + cls] = { cls, rs: [], ts: [], ps: [] });
     for (const t of a.tr) {
       if (t.pt) continue;                               // (sem rede no cadastro: na visão Limpeza nada de ponto; pedido do usuário)
       for (const pc of t.pec) {
         if (!pc.ls.length) continue;
-        const ch = pc.anos.join(','), o = por.get(ch) || (por.set(ch, { anos: pc.anos, rs: [], ts: [], ps: [] }), por.get(ch));
+        const ch = t.cls + '|' + pc.anos.join(','), o = por.get(ch) || (por.set(ch, { cls: t.cls, anos: pc.anos, rs: [], ts: [], ps: [] }), por.get(ch));
         for (const r of pc.ls) {
           o.rs.push(r); o.ts.push(t); o.ps.push(pc);
-          if (pc.mk.includes('c')) { nx.cri.rs.push(r); nx.cri.ts.push(t); nx.cri.ps.push(pc); }
-          if (pc.mk.includes('p')) { nx.pend.rs.push(r); nx.pend.ts.push(t); nx.pend.ps.push(pc); }
+          if (pc.mk.includes('c')) { const q = nxDe('cri', t.cls); q.rs.push(r); q.ts.push(t); q.ps.push(pc); }
+          if (pc.mk.includes('p')) { const q = nxDe('pend', t.cls); q.rs.push(r); q.ts.push(t); q.ps.push(pc); }
         }
       }
     }
     const linha = (o, K, ord) => {
       const pl = new (linhaZ0())(o.rs, Object.assign(OPC(), { smoothFactor: 1 }));
-      pl._stCls = 'FX'; pl._stK = K; pl._stAl = a.cod; pl._stAnos = o.anos || []; pl._stTr = o.ts; pl._stPc = o.ps; pl._stOrd = ord;
+      pl._stCls = 'FX'; pl._stC = o.cls; pl._stK = K; pl._stAl = a.cod; pl._stAnos = o.anos || []; pl._stTr = o.ts; pl._stPc = o.ps; pl._stOrd = ord;
       L.setOptions(pl, estiloDe(pl, false));
       if (K === 'cri' || K === 'pend') pl.options.interactive = false;
       else liga(pl, a.cod);
       g.push(pl);
     };
     for (const o of por.values()) linha(o, o.anos.length ? 'ano' : 'fundo', o.anos.length ? 1 + (o.anos[0] - 1900) / 1000 : 0);
-    if (nx.cri.rs.length) linha(nx.cri, 'cri', 3);
-    if (nx.pend.rs.length) linha(nx.pend, 'pend', 4);
+    for (const q of Object.keys(nx).sort()) linha(nx[q], q.startsWith('cri') ? 'cri' : 'pend', q.startsWith('cri') ? 3 : 4);
     if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
     c.os = (c.os || []).concat(a.os);
     return g.length ? 1 : 0;
@@ -2788,7 +2843,8 @@
     poeLado();
     const m = niv.mun && porCod[niv.mun];
     lado.classList.toggle('st-niv', !!niv.reg);
-    if (!m) { cartaoMun.hidden = true; cartaoMun.innerHTML = ''; lado.hidden = aviso.hidden; return; }
+    lgs.classList.toggle('st-niv', !!niv.reg);
+    if (!m) { cartaoMun.hidden = true; cartaoMun.innerHTML = ''; lgsMax(); return; }
     const lista = m.als.slice().sort((a, b) => b.m - a.m), pg = window.ARGOS_PAG, hPag = `municipios/${m.slug}/`;
     const href = pg && pg.mun ? pg.mun(m) : hPag, ir = h => (pg && pg.url ? pg.url(h) : RAIZ + h);
     const url = ir(href), fora = pg && pg.alvo ? pg.alvo : '', noMapa = href !== hPag;
@@ -2804,6 +2860,7 @@
         `<b>${esc(a.cod)}</b><i class="st-sel">${esc(numAl(a.cod, m))}</i><em>${kmTxt(a.m)} aqui${a.se ? ' · ' + esc(a.se) : ''}</em></button>`).join('') + '</div>';
     cartaoMun.hidden = false;
     lado.hidden = false;
+    lgsMax();
   }
   function poeTrilha() {
     if (!trilha) {
@@ -2906,6 +2963,7 @@
       if (k === tamAntes) return;
       tamAntes = k;
       map.invalidateSize({ pan: false });
+      lgsMax();
       if (estado !== 'on' || voandoN) return;
       limites(true);
       if (niv.reg) { const v = vistaDoNivel(niv); poeVista(v.c, v.z); }
@@ -3112,7 +3170,7 @@
       clearTimeout(tAviso);
       estado = 'off';
       poeAviso('<b>Satélite</b><span>não carregou (sem internet?)</span>');
-      setTimeout(() => { if (estado === 'off' && aviso) { aviso.hidden = true; lado.hidden = true; } }, 3500);
+      setTimeout(() => { if (estado === 'off' && aviso) { aviso.hidden = true; lado.hidden = true; lgs.hidden = true; } }, 3500);
       return;
     }
     if (minha !== vez || estado !== 'carregando') { clearTimeout(tAviso); return; }   // Ctrl+S de novo enquanto carregava
@@ -3200,7 +3258,7 @@
     if (estado === 'carregando') {
       ++vez; estado = 'off'; alvo.classList.remove('sat-to', 'st-cobre', 'st-nmun');
       devolveLegenda();
-      if (lado) lado.hidden = true;
+      if (lado) { lado.hidden = true; lgs.hidden = true; }
       if (trilha) trilha.hidden = true;
       return;
     }
@@ -3215,7 +3273,7 @@
     realceArea(null);
     tiraMarcas();
     if (balao) balao.hidden = true;
-    if (lado) lado.hidden = true;
+    if (lado) { lado.hidden = true; lgs.hidden = true; }
     paneL.style.opacity = '0';
     limites(false);
     interage(true);
@@ -3311,6 +3369,7 @@
     const l = cartaoMun.querySelector('.st-mun-l'), sim = l.hidden;
     l.hidden = !sim;
     b.setAttribute('aria-expanded', String(sim));
+    lgsMax();
   });
   caixa.addEventListener('pointerover', e => {
     if (!cartaoMun || e.pointerType !== 'mouse' || !cartaoMun.contains(e.target)) return;
