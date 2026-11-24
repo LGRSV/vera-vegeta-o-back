@@ -432,7 +432,11 @@
       this._r = this._p = null; this._v = -1;
       if (this._guarda) { this._guarda[1].close && this._guarda[1].close(); this._guarda = null; }
       this._vis = this._id;
+      // a imagem sai da tela de verdade: no canvas do pintor (bitmaprenderer) zerar width/height não apaga o bitmap já
+      // entregue; sem isto, a rede do último selecionado tirado ficava desenhada, presa à tela (não seguia o mapa)
+      if (MODO !== '2d' && this._ctx && this._ctx.transferFromImageBitmap) { try { this._ctx.transferFromImageBitmap(null); } catch (e) { /* navegador antigo: fica o tamanho zero */ } }
       this._c.width = this._c.height = 0;
+      this._c.style.width = this._c.style.height = '0px';
     },
     _chegou(id, bm, r) {
       if (!this._map || id <= this._vis) { if (bm.close) bm.close(); return; }
@@ -1130,7 +1134,7 @@
     '.sel-lista{width:max-content;min-width:min(300px,calc(var(--sel-w,100vw) - 24px));max-width:calc(var(--sel-w,100vw) - 24px)}' +
     '.sel-mun,.sel-lim,.sel-vazio{contain:inline-size}' +
     '.sel-als{list-style:none;margin:0;padding:var(--s1) var(--s1) var(--s2);display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;' +
-    'overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}.sel-al:first-child{margin-left:auto}' +
+    'overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;position:relative}.sel-al:first-child{margin-left:auto}' +   // (relative: os textos .vh dos chips, absolutos, ficam recortados pela fileira e não criam uma 2ª rolagem na lista)
     '.sel-al{flex:none;display:flex;align-items:stretch;border:1px solid var(--line);border-radius:var(--r2);background:var(--paper)}' +
     '.sel-al .sel-c{border-radius:var(--r2)}' +
     '.sel-al.ab{border-color:var(--accent)}.sel-al.ab.oc{border-color:var(--line);border-style:dashed}' +
