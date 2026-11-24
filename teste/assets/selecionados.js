@@ -1120,12 +1120,15 @@
     '.sel-lista{position:absolute;top:calc(100% + 6px);right:0;width:min(340px,calc(var(--sel-w,100vw) - 24px));overflow:auto;overscroll-behavior:contain;padding:var(--s1);' +
     'background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);font:var(--t-sm)/1.4 var(--f-body)}' +
     '.sel-t{margin:0;padding:var(--s2) var(--s3) 2px;font:700 var(--t-xs)/1.4 var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}.sel-t:focus{outline:none}' +
-    // os alimentadores no mapa em lista, um embaixo do outro, alinhados à esquerda (pedido do usuário: "enfileirado pra
-    // esquerda, como um menu suspenso"; o aberto primeiro): tocar num selecionado o tira do mapa; no aberto, esconde e
-    // mostra (apagado e riscado, aria-pressed=false)
-    '.sel-als{list-style:none;margin:0;padding:var(--s1) var(--s1) var(--s2);display:flex;flex-direction:column;gap:4px}' +
-    '.sel-al{display:flex;align-items:stretch;width:100%;border:1px solid var(--line);border-radius:var(--r2);background:var(--paper)}' +
-    '.sel-al .sel-c{flex:1;justify-content:flex-start;border-radius:var(--r2)}.sel-al .sel-c .sel-xi{margin-left:auto}' +
+    // os alimentadores no mapa numa fileira horizontal, presa à direita (no botão): o aberto junto do botão e cada novo
+    // selecionado entra à esquerda, e a lista cresce para a esquerda (pedido do usuário: "lista suspensa na horizontal,
+    // quanto mais eu seleciono mais à esquerda vai"); sem caber, rola de lado. Tocar num selecionado o tira do mapa; no
+    // aberto, esconde e mostra (apagado e riscado, aria-pressed=false)
+    '.sel-lista{width:max-content;min-width:min(300px,calc(var(--sel-w,100vw) - 24px));max-width:calc(var(--sel-w,100vw) - 24px)}' +
+    '.sel-als{list-style:none;margin:0;padding:var(--s1) var(--s1) var(--s2);display:flex;flex-direction:row-reverse;flex-wrap:nowrap;justify-content:flex-start;gap:6px;' +
+    'overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}' +
+    '.sel-al{flex:none;display:flex;align-items:stretch;border:1px solid var(--line);border-radius:var(--r2);background:var(--paper)}' +
+    '.sel-al .sel-c{border-radius:var(--r2)}' +
     '.sel-al.ab{border-color:var(--accent)}.sel-al.ab.oc{border-color:var(--line);border-style:dashed}' +
     '.sel-c{display:inline-flex;align-items:center;gap:5px;min-width:0;min-height:40px;padding:0 8px 0 10px;border:0;border-radius:var(--rp);background:none;color:var(--fg);' +
     'font:inherit;text-align:left;cursor:pointer}.sel-c:hover{background:var(--hover)}' +
@@ -1254,7 +1257,9 @@
     if (!sim) return;
     // a lista cabe no mapa (até o pé dele), com rolagem própria
     const m = box.getBoundingClientRect(), b = bt.getBoundingClientRect();
-    box.style.setProperty('--sel-w', m.width + 'px');
+    // a largura que cabe à esquerda do botão (a fileira cresce para a esquerda; na tela cheia do tablet o botão fica à
+    // esquerda da gaveta): do lado direito da lista até a borda esquerda do mapa
+    box.style.setProperty('--sel-w', Math.max(200, Math.min(m.width, b.right - m.left)) + 'px');
     lst.style.maxHeight = Math.max(160, m.bottom - b.bottom - 18) + 'px';
     menu();
     if (foco === 'titulo') lst.querySelector('.sel-t').focus({ preventScroll: true });
