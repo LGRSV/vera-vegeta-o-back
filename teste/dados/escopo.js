@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.34",
+ "versao": "2.35",
  "atualizado": "2026-11-24",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -180,6 +180,9 @@ window.ARGOS_ESCOPO = {
    {"t": "Busca da página inicial: POLO na frente do nome do polo (não se confunde com o município de mesmo nome)", "st": "ok", "d": "2026-11-24"},
    {"t": "Visão satélite: barra de camadas do mapa do alimentador (NAE, Faixa, Inspeção, Insp→manut, Manutenção, Queimadas) no T1/T2 de todos", "st": "ok", "d": "2026-11-24"},
    {"t": "Mapa do alimentador no celular: camadas dos outros, vizinhos e visão do estado depois da lista (carga mais leve)", "st": "ok", "d": "2026-11-24"},
+   {"t": "Satélite: sem os pontos soltos dos alimentadores sem rede; etiquetas das OS só do zoom 12", "st": "ok", "d": "2026-11-24"},
+   {"t": "Menu Alimentadores em lista (um embaixo do outro); selecionar pela busca não reenquadra o mapa", "st": "ok", "d": "2026-11-24"},
+   {"t": "Satélite com os controles do mapa do alimentador (T1 | T2 e a fileira de camadas no alto à esquerda)", "st": "and", "prazo": "2026-11-24", "resp": "dev"},
    {"t": "Revisão da reclassificação T1/T2 (conservação de km, NAE, UCs, Priorização e Faixa)", "st": "ok", "d": "2026-11-24"},
    {"t": "Priorização pelo mapa de hoje: T1 com o km do mapa e T3 novos como linhas próprias (não somam no T1)", "st": "ok", "d": "2026-11-24"},
    {"t": "Fora do site os 3 alimentadores divididos com a base do Rede Sentinela (PS01112193, LD01104052, LD01926241)", "st": "ok", "d": "2026-11-24"},

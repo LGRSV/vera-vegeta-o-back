@@ -2100,7 +2100,7 @@
   const conjN = novoConj('nae', () => Promise.all([carregaLinhas(), leArq('nae')]).then(([rede, N]) => {
     DADOS.nae = N; naeFx = null;
     const tem = new Set(N.als.map(a => a.cod));
-    const pts = rede.filter(a => a.pt && !tem.has(a.cod)).map(a => ({ cod: a.cod, tr: [{ nome: '', cls: 'T1', n: 0, n3: 0, m: 0, ls: [], pt: a.pt, al: a.cod, semDado: true }] }));
+    const pts = rede.filter(a => MOSTRA_PT && a.pt && !tem.has(a.cod)).map(a => ({ cod: a.cod, tr: [{ nome: '', cls: 'T1', n: 0, n3: 0, m: 0, ls: [], pt: a.pt, al: a.cod, semDado: true }] }));
     return N.als.concat(pts).sort((a, b) => a.tr.some(t => t.pt) - b.tr.some(t => t.pt));
   }), criaNae);
   conjF.dica = conjA.dica = conjI.dica = conjN.dica = true;  // (a dica do mouse diz o trecho ou o pedaço)
@@ -2182,14 +2182,20 @@
     lote();
   }
   const liga = (pl, cod) => pl.on('mouseover', () => realca(cod)).on('mouseout', () => { if (sobre === cod) realca(null); }).on('click', e => cliqueLinha(cod, e));
+  // alimentador sem rede no cadastro (só o ponto do DJ, às vezes fora do estado): sem o ponto no satélite, em nenhuma
+  // camada (pedido do usuário: "pontos suspensos" no mapa); ele continua contado no total
+  const MOSTRA_PT = false;
   const OPC = () => ({ pane: 'st-linhas', renderer: rend, interactive: true, bubblingMouseEvents: false });
   function criaRede(a, c) {
     const g = [];
-    if (a.pt) {                                          // sem rede no cadastro: um ponto (por cima das linhas: vem no fim da lista)
-      const pt = L.circleMarker(a.pt, Object.assign(OPC(), estiloLinha('PT', false, a.cod)));
-      pt._stCls = 'PT'; pt._stAl = a.cod;
-      liga(pt, a.cod);
-      g.push(pt); c.semRede.add(a.cod);
+    if (a.pt) {                                          // sem rede no cadastro: conta, mas sem o ponto (MOSTRA_PT)
+      c.semRede.add(a.cod);
+      if (MOSTRA_PT) {
+        const pt = L.circleMarker(a.pt, Object.assign(OPC(), estiloLinha('PT', false, a.cod)));
+        pt._stCls = 'PT'; pt._stAl = a.cod;
+        liga(pt, a.cod);
+        g.push(pt);
+      }
     }
     for (const cl of ['T2', 'T1']) {                     // o tronco por cima
       if (!a[cl].length) continue;
@@ -2199,7 +2205,7 @@
       g.push(pl);
     }
     if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
-    return g.length ? 1 : 0;
+    return g.length || a.pt ? 1 : 0;
   }
   // faixa: por classe (o T1 por cima) e situação (a mais grave por cima), uma polilinha com as linhas de todos os trechos
   // dela; _stTr: o trecho de cada linha (a dica acha a mais perto do mouse). Alimentador sem linha (só uns metros de rede):
@@ -2244,7 +2250,7 @@
       liga(pl, a.cod);
       g.push(pl);
     }
-    if (a.pt) {                                          // sem rede no cadastro: o ponto (por cima)
+    if (a.pt && MOSTRA_PT) {                             // sem rede no cadastro: o ponto (por cima)
       const pt = L.circleMarker(a.pt, OPC());
       pt._stCls = 'PT'; pt._stAl = a.cod; pt._stV = 'neutra'; pt._stTr = [BASE_I];
       L.setOptions(pt, estiloDe(pt, false));
@@ -2272,7 +2278,7 @@
     const g = [];
     for (const t of a.tr) {
       let pl;
-      if (t.pt) { pl = L.circleMarker(t.pt, OPC()); pl._stCls = 'PT'; c.semRede.add(a.cod); }
+      if (t.pt) { c.semRede.add(a.cod); if (!MOSTRA_PT) continue; pl = L.circleMarker(t.pt, OPC()); pl._stCls = 'PT'; }
       else if (t.ls.length) { pl = new (linhaZ0())(t.ls, Object.assign(OPC(), { smoothFactor: 1 })); pl._stCls = t.cls; pl._stTr = t.ls.map(() => t); }
       else continue;
       pl._stAl = a.cod; pl._stV = 'nae'; pl._stNae = t; pl._stOrd = (t.pt ? 1e6 : 0) + t.n + t.n3 + (t.cls === 'T1' ? 0.5 : 0);
@@ -2542,7 +2548,7 @@
   // Só as do alimentador embaixo do mouse (rotAl; pedido do usuário: as etiquetas só quando passar o mouse; clique abre),
   // em qualquer zoom; ficam ROT_FICA ms depois que o mouse sai da linha (a linha é fina: sem piscar). No toque, o 1º
   // toque numa linha (cliqueLinha).
-  const ROT_MAX = [50, 18], ROT_FICA = 1200;
+  const ROT_MAX = [50, 18], ROT_FICA = 1200, ZROT = 12;   // ZROT: só de perto (pedido do usuário: "só com bastante zoom")
   let rotulos = [], quadroRot = 0, rotAl = null, rotT = 0;
   function rotDoAl(cod) {                                   // o alimentador do mouse mudou
     clearTimeout(rotT);
@@ -2552,7 +2558,7 @@
   }
   function tiraRotulos() { rotulos.forEach(mk => mk.remove()); rotulos = []; }
   const pedeRotulos = () => { if (!quadroRot) quadroRot = requestAnimationFrame(() => { quadroRot = 0; poeRotulos(); }); };
-  const querRotulos = () => !!map && estado === 'on' && !voandoN && ativo === conjA && !!F && !!rotAl;
+  const querRotulos = () => !!map && estado === 'on' && !voandoN && ativo === conjA && !!F && !!rotAl && map.getZoom() >= ZROT;
   const htmlOS = o => `<div class="st-os" style="--c:${corAno(o.ano)}"><em>${esc(o.tr)}</em>${o.datas.map(dataBr).join(' · ')}` +
     `<small>${o.n > 1 ? o.n + ' OS · ' : ''}${NF1.format(o.feito / 1000)} de ${kmTxt(o.total)}</small></div>`;
   function meioDe(ls, fr = 0.5) {                           // o ponto a fr do comprimento da maior linha (0,5: o meio)

@@ -1120,10 +1120,12 @@
     '.sel-lista{position:absolute;top:calc(100% + 6px);right:0;width:min(340px,calc(var(--sel-w,100vw) - 24px));overflow:auto;overscroll-behavior:contain;padding:var(--s1);' +
     'background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);font:var(--t-sm)/1.4 var(--f-body)}' +
     '.sel-t{margin:0;padding:var(--s2) var(--s3) 2px;font:700 var(--t-xs)/1.4 var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}.sel-t:focus{outline:none}' +
-    // os alimentadores no mapa em chips lado a lado (o aberto primeiro; quebram linha), como os chips do site (.mt-pchip):
-    // tocar no chip de um selecionado o tira do mapa; no do aberto, esconde e mostra (apagado e riscado, aria-pressed=false)
-    '.sel-als{list-style:none;margin:0;padding:var(--s1) var(--s1) var(--s2);display:flex;flex-wrap:wrap;gap:var(--s2) 6px}' +
-    '.sel-al{display:flex;align-items:stretch;max-width:100%;border:1px solid var(--line);border-radius:var(--rp);background:var(--paper)}' +
+    // os alimentadores no mapa em lista, um embaixo do outro, alinhados à esquerda (pedido do usuário: "enfileirado pra
+    // esquerda, como um menu suspenso"; o aberto primeiro): tocar num selecionado o tira do mapa; no aberto, esconde e
+    // mostra (apagado e riscado, aria-pressed=false)
+    '.sel-als{list-style:none;margin:0;padding:var(--s1) var(--s1) var(--s2);display:flex;flex-direction:column;gap:4px}' +
+    '.sel-al{display:flex;align-items:stretch;width:100%;border:1px solid var(--line);border-radius:var(--r2);background:var(--paper)}' +
+    '.sel-al .sel-c{flex:1;justify-content:flex-start;border-radius:var(--r2)}.sel-al .sel-c .sel-xi{margin-left:auto}' +
     '.sel-al.ab{border-color:var(--accent)}.sel-al.ab.oc{border-color:var(--line);border-style:dashed}' +
     '.sel-c{display:inline-flex;align-items:center;gap:5px;min-width:0;min-height:40px;padding:0 8px 0 10px;border:0;border-radius:var(--rp);background:none;color:var(--fg);' +
     'font:inherit;text-align:left;cursor:pointer}.sel-c:hover{background:var(--hover)}' +
@@ -1135,7 +1137,7 @@
     '.sel-c[aria-busy=true] small::before{content:"";display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:50%;border:1.5px solid currentColor;border-right-color:transparent;' +
     'vertical-align:-1px;animation:sel-gira .8s linear infinite}@keyframes sel-gira{to{transform:rotate(1turn)}}@media (prefers-reduced-motion:reduce){.sel-c[aria-busy=true] small::before{animation:none}}' +
     // o ↗ discreto, separado do chip (não tira); "tentar de novo" no lugar dele
-    '.sel-ab{flex:none;display:grid;place-items:center;width:40px;min-height:40px;margin-left:-4px;padding:0;border:0;border-left:1px solid var(--line);border-radius:0 var(--rp) var(--rp) 0;' +
+    '.sel-ab{flex:none;display:grid;place-items:center;width:40px;min-height:40px;margin-left:-4px;padding:0;border:0;border-left:1px solid var(--line);border-radius:0 var(--r2) var(--r2) 0;' +
     'color:var(--muted);text-decoration:none}.sel-ab:hover{background:var(--hover);color:var(--fg)}' +
     '.sel-ab svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
     '.sel-denovo{flex:none;min-height:40px;padding:0 var(--s3) 0 var(--s2);border:0;border-left:1px solid var(--line);border-radius:0 var(--rp) var(--rp) 0;background:none;color:var(--accent);' +
@@ -1330,7 +1332,7 @@
     if (o) { q.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); } else q.removeAttribute('aria-activedescendant');
   }
   function adiciona(cod) {
-    if (!poe(cod, true)) return;
+    if (!poe(cod, false)) return;                        // sem mexer no mapa (pedido do usuário: selecionar não reenquadra)
     q.value = ''; iSug = -1;
     menu();
     q.disabled ? bt.focus() : q.focus();
