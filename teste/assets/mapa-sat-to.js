@@ -48,6 +48,23 @@
   // x = a·lon + b, y = c·lat + d: a projeção do mapa dos municípios (scripts/gera_trechos.py, PROJ_MUN)
   const PA = 112.8878, PB = 5722.7136, PC = -111.6377, PD = -574.6836;
   const COR = { T1: '#3b82f6', T2: '#22c55e' };          // as cores do T1 e do T2 da visão Tocantins do alimentador
+  // visão "Limpeza de faixa" do mapa dos municípios: as linhas pela situação da faixa de cada trecho T1 e T2 (as cores e os
+  // nomes da camada Faixa do mapa do alimentador, limpeza.js; a situação vem pronta em dados/redes/faixa.txt)
+  const SIT = ['dia', 'vence', 'vencida', 'sem'];
+  const SIT_COR = { dia: '#22c55e', vence: '#facc15', vencida: '#ef4444', sem: '#d946ef' };
+  const SIT_NOME = { dia: 'Em dia', vence: 'Vence em até 12 meses', vencida: 'Vencida', sem: 'Sem registro (pendente)' };
+  const SIT_LEG = ['vencida', 'sem', 'vence', 'dia'];    // a ordem da lista da camada Faixa (a mais grave em cima)
+  const SIT_DESENHO = ['sem', 'dia', 'vence', 'vencida'];   // a mais grave por cima
+  const FAIXA_V = eu.dataset.faixa || '';                   // a versão do faixa.txt (?v=)
+  // vista Por ano (o padrão da visão Limpeza, como na camada Faixa): cada vão na cor do ano da limpeza mais recente (as cores
+  // de limpeza.js), o vão sem OS neutro; criadas e pendentes, o traço por cima (ligados na legenda); as etiquetas das OS
+  const COR_ANO = { 2021: '#a78bfa', 2022: '#60a5fa', 2023: '#22d3ee', 2024: '#4ade80', 2025: '#facc15', 2026: '#fb923c', 2027: '#f87171', 2028: '#f472b6' };
+  const corAno = a => COR_ANO[a] || (a < 2021 ? '#c4b5fd' : '#fb7185');
+  const FUNDOCOR = '#cbd5e1';
+  const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* sem armazenamento */ } };
+  let vistaFx = lsGet('st-fx-vista') === 'sit' ? 'sit' : 'ano';
+  const anosOff = new Set(), nexeOn = new Set();             // anos desligados; criadas ('c') e pendentes ('p') ligadas
   const DUR_ABRE = 1200, DUR_FECHA = 850;
   const SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
   const ATR = 'Imagem © Esri — Esri, Maxar, Earthstar Geographics';
@@ -59,6 +76,7 @@
   const NF0 = new Intl.NumberFormat('pt-BR'), NF1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const porCod = Object.fromEntries(M.muns.map(m => [m.cod, m]));
   const kmTxt = m => NF1.format(m / 1000) + ' km';
+  const dataBr = d => (d ? d.slice(0, 10).split('-').reverse().join('/') : '');
   const kmMun = m => (m.als || []).reduce((s, a) => s + a.m, 0);
   const nAls = n => `${NF0.format(n)} alimentador${n === 1 ? '' : 'es'}`;
   // visão aberta no mapa dos municípios (NAE, Manutenção, Inspeção…): null é a NAE; recolhida a legenda, os números saem
@@ -138,59 +156,56 @@
       .then(r => (r && r.ok ? r.text() : null)).then(t => comPontos(t ? decodifica(t) : [], j.als)) : []))
     .catch(() => []));
 
-  // visão "Limpeza de faixa" do mapa dos municípios: no satélite, o T1 e o T2 de cada alimentador por trecho, na cor da
-  // situação da faixa de hoje (a regra, os nomes e as cores da camada Faixa do mapa do alimentador, limpeza.js), com os km
-  // de cada situação do nível aberto na legenda. dados/redes/faixa.txt (scripts/gera_trechos.py, faixa_txt): cabeçalho com
-  // a data de referência; por trecho, alimentador, nome, situação, última limpeza, metros e as linhas (polyline com 4
-  // casas, a diferença acumulando pelo arquivo, como o estado.txt); por município, os metros de cada situação. Baixado só
-  // quando a visão é escolhida com o satélite (data-faixa: a versão do arquivo)
-  const SITF = { dia: ['Em dia', '#22c55e'], vence: ['Vence em até 12 meses', '#facc15'], vencida: ['Vencida', '#ef4444'], sem: ['Sem registro (pendente)', '#d946ef'] };
-  const ORDF = ['dia', 'vence', 'vencida', 'sem'];
-  const ehFaixa = () => { const v = vis(); return !!(v && v.id === 'limpeza'); };
-  const dataBr = d => (d ? d.slice(0, 10).split('-').reverse().join('/') : '');
+  // dados/redes/faixa.txt (scripts/gera_trechos.py, faixa_txt) → {hoje, muns: {cod: [m em dia, vence, vencida, sem]},
+  // als: [{cod, tr: [{nome, cls, sit, ult, m, prazo, ls: linhas [[lat, lon], ...], pt}]}]}: cabeçalho JSON (#), município
+  // (M), alimentador (A) e trecho (T); as linhas no formato do estado.txt (a diferença acumulando pelo arquivo inteiro)
   function decodificaFaixa(txt) {
-    const F = { ref: '', lista: [], mun: {} }, por = new Map();
-    let la = 0, lo = 0;
-    for (const ln of txt.split('\n')) {
-      if (!ln) continue;
-      const cl = ln.split('\t');
-      if (cl[0] === 'faixa') { F.ref = cl[2] || ''; continue; }
-      if (cl[0] === 'm') { F.mun[cl[1]] = { dia: +cl[2] || 0, vence: +cl[3] || 0, vencida: +cl[4] || 0, sem: +cl[5] || 0 }; continue; }
-      const s = cl[5] || '', n = s.length, linhas = [];
-      let i = 0, atual = [];
-      const fecha = () => { if (atual.length > 1) linhas.push(atual); atual = []; };
+    const F = { hoje: '', muns: {}, als: [], ano: {}, anos: [] };
+    let la = 0, lo = 0, al = null;
+    const pontos = s => {
+      const out = [], n = s.length;
+      let i = 0;
       while (i < n) {
-        if (s.charCodeAt(i) === 32) { fecha(); i++; continue; }
         let v = 0, sh = 0, b;
         do { b = s.charCodeAt(i++) - 63; v |= (b & 31) << sh; sh += 5; } while (b >= 32);
         la += v & 1 ? ~(v >> 1) : v >> 1;
         v = 0; sh = 0;
         do { b = s.charCodeAt(i++) - 63; v |= (b & 31) << sh; sh += 5; } while (b >= 32);
         lo += v & 1 ? ~(v >> 1) : v >> 1;
-        atual.push([la / 1e4, lo / 1e4]);
+        out.push([la / 1e4, lo / 1e4]);
       }
-      fecha();
-      let a = por.get(cl[0]);
-      if (!a) { por.set(cl[0], a = { cod: cl[0], trs: [] }); F.lista.push(a); }
-      const sit = SITF[cl[2]] ? cl[2] : 'sem';
-      a.trs.push({ nome: cl[1], cls: cl[1].split('-')[0] === 'T1' ? 'T1' : 'T2', sit, ult: cl[3] || '', m: +cl[4] || 0, linhas });
+      return out;
+    };
+    for (const ln of txt.split('\n')) {
+      if (!ln) continue;
+      if (ln[0] === '#') { try { const h = JSON.parse(ln.slice(1)); F.hoje = h.hoje || ''; F.anos = h.anos || []; } catch (e) { /* cabeçalho estranho: sem a data */ } continue; }
+      const cl = ln.split('\t');
+      if (cl[0] === 'M') F.muns[cl[1]] = cl.slice(2, 6).map(Number);
+      else if (cl[0] === 'Y') { const y = F.ano[cl[1]] = {}; for (const x of (cl[2] || '').split(',')) { const i = x.indexOf(':'); if (i > 0) y[x.slice(0, i)] = +x.slice(i + 1); } }
+      else if (cl[0] === 'P' && al && al.tr.length) {
+        // pedaço do trecho de cima (vista Por ano): os anos das OS dele (o mais recente primeiro) e as marcas (c, p)
+        const t = al.tr[al.tr.length - 1], pc = { anos: cl[1] ? cl[1].split(',').map(Number) : [], mk: cl[2] || '', m: +cl[3] || 0, ls: [] };
+        for (const x of (cl[4] || '').split(' ')) if (x) { const q = pontos(x); if (q.length > 1) pc.ls.push(q); }
+        t.pec.push(pc);
+        if (pc.anos.length) t.limpo += pc.m;
+      } else if (cl[0] === 'O' && al) al.os.push({ al: al.cod, ll: [+cl[1], +cl[2]], data: cl[3], ano: +cl[4], n: +cl[5], datas: (cl[6] || '').split(','), tr: cl[7] || '', feito: +cl[8] || 0, total: +cl[9] || 0 });
+      else if (cl[0] === 'A') F.als.push(al = { cod: cl[1], tr: [], pt: false, os: [] });
+      else if (cl[0] === 'T' && al) {
+        const g = cl[7] || '', t = { nome: cl[1], cls: cl[2], sit: SIT[+cl[3]] || 'sem', ult: cl[4] || null, m: +cl[5] || 0, prazo: +cl[6] || 0, ls: [], pt: null, pec: [], limpo: 0, al: al.cod };
+        if (g[0] === '@') { t.pt = pontos(g.slice(1))[0] || null; al.pt = al.pt || !!t.pt; }
+        else for (const x of g.split(' ')) if (x) { const q = pontos(x); if (q.length > 1) t.ls.push(q); }
+        al.tr.push(t);
+      }
     }
+    // os de só um ponto no fim (por cima das linhas, como os pontos da rede)
+    F.als.sort((a, b) => a.pt - b.pt);
     return F;
   }
-  let faixaP = null, FX = null;
-  const carregaFaixa = () => faixaP || (faixaP = fetch(`${RAIZ}dados/redes/faixa.txt?v=${encodeURIComponent(eu.dataset.faixa || '')}`)
-    .then(r => (r.ok ? r.text() : null))
-    .then(t => (t ? (FX = decodificaFaixa(t)) : (faixaP = null)))
-    .catch(() => (faixaP = null)));
-  // km de cada situação no nível aberto (Tocantins, regional, polo, município)
-  function kmFaixa() {
-    const t = { dia: 0, vence: 0, vencida: 0, sem: 0 };
-    if (!FX) return t;
-    const ms = niv.mun ? [niv.mun] : niv.pol && D && D.pol[niv.pol] ? D.pol[niv.pol].ms.map(m => m.cod)
-      : niv.reg && D && D.reg[niv.reg] ? D.reg[niv.reg].ms.map(m => m.cod) : Object.keys(FX.mun);
-    ms.forEach(c => { const x = FX.mun[c]; if (x) ORDF.forEach(k => { t[k] += x[k]; }); });
-    return t;
-  }
+  let F = null, fxP = null;
+  const carregaFaixa = () => fxP || (fxP = fetch(`${RAIZ}dados/redes/faixa.txt${FAIXA_V ? '?v=' + encodeURIComponent(FAIXA_V) : ''}`)
+    .then(r => { if (!r.ok) throw new Error('faixa.txt ' + r.status); return r.text(); })
+    .then(t => (F = decodificaFaixa(t)).als)
+    .catch(e => { fxP = null; throw e; }));
 
   // alimentadores do mapa (SE de cada um, para o balão), feito só no primeiro uso
   let als = null;
@@ -240,6 +255,28 @@
       '.st-aviso b{font:700 var(--t-xs,12px)/1 var(--f-display,sans-serif);letter-spacing:.12em;text-transform:uppercase}' +
       '.st-aviso i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}' +
       '.st-aviso .st-tecla{color:var(--muted,#9aa4ab);font-size:var(--t-xs,12px)}' +
+      // visão Limpeza: o km de cada situação ao lado do nome
+      '.st-aviso .st-fx em{margin-left:6px;font:600 var(--t-xs,12px)/1 var(--f-mono,monospace);font-style:normal;font-variant-numeric:tabular-nums;opacity:.85}' +
+      // vista Por ano: o seletor Por ano / Vencimento, os anos (liga/desliga), criadas e pendentes; as etiquetas das OS (as da
+      // camada Faixa) e o nome do trecho sem OS (no município)
+      '.st-vfx{display:inline-flex;border:1px solid var(--vidro-borda,rgba(255,255,255,.16));border-radius:var(--r1,6px);overflow:hidden}' +
+      '.st-vfx button{all:unset;cursor:pointer;padding:4px 9px;font:600 var(--t-xs,12px)/1.2 var(--f-body,sans-serif)}.st-vfx button[aria-pressed="true"]{background:var(--vidro-fg,#f3f4f4);color:var(--vidro,#111)}' +
+      '.st-vfx button:focus-visible,.st-fa:focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:1px}' +
+      '.st-anos{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}' +
+      '.st-fa{all:unset;cursor:pointer;display:inline-flex;align-items:center;min-height:24px;padding:0 3px;border-radius:4px;font:500 var(--t-sm,13px)/1.2 var(--f-body,sans-serif)}' +
+      'button.st-fa:hover{background:var(--vidro-hover,rgba(255,255,255,.1))}.st-fa[aria-pressed="false"]{opacity:.45;text-decoration:line-through}.st-semreg{cursor:default}' +
+      '.st-fa i{box-shadow:0 0 0 1px #000}.st-fa em{margin-left:5px;font:600 var(--t-xs,12px)/1 var(--f-mono,monospace);font-style:normal;font-variant-numeric:tabular-nums;opacity:.85}' +
+      '.st-aviso .st-fa i.trac{background:repeating-linear-gradient(90deg,#fff 0 5px,transparent 5px 9px);box-shadow:none}' +
+      '.st-aviso .st-fa i.pont{background:radial-gradient(circle,#fff 2.5px,transparent 3px) 0 50%/7px 100% repeat-x;height:6px;box-shadow:none}' +
+      '.st-os{position:relative;display:inline-flex;align-items:baseline;gap:6px;transform:translate(-50%,-140%);white-space:nowrap;pointer-events:none;' +
+      'font:700 12.5px/1 var(--f-mono,monospace);color:#111;background:var(--c);padding:5px 8px;border-radius:6px;border:2px solid #0b0f14;box-shadow:0 2px 6px #0008}' +
+      '.st-os::after{content:"";position:absolute;left:50%;bottom:-8px;margin-left:-6px;border:6px solid transparent;border-top-color:#0b0f14;border-bottom:0}' +
+      '.st-os small{font:600 11px var(--f-body,sans-serif);opacity:.8}' +
+      '.st-os em{font:700 11px var(--f-body,sans-serif);font-style:normal;background:#0b0f14;color:#fff;padding:2px 5px;border-radius:4px;margin:-2px 0 -2px -4px}' +
+      '.st-trn{display:inline-block;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;padding:2px 5px;border-radius:4px;' +
+      'background:rgb(11 15 20 / .72);color:#f3f4f4;font:600 11px/1.2 var(--f-mono,monospace)}.st-trn small{font:500 10px var(--f-body,sans-serif);opacity:.75;margin-left:4px}' +
+      '@media (max-width:640px){.st-os{font-size:11px;padding:4px 6px;gap:4px}.st-os small,.st-os em{font-size:10px}.st-aviso .st-anos{gap:0 6px}.st-fa{min-height:22px;font-size:12px}}' +
+      '.st-balao .st-fx-t{display:flex;align-items:center;gap:6px;color:var(--cartao-fg,#f2f3f2)}.st-balao .st-fx-t i{flex:none;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 1px rgb(0 0 0 / .5)}' +
       // cartão do município aberto (o nome, o resumo, o link da página e a lista dos alimentadores)
       '.st-mun{display:grid;gap:5px;width:300px;max-width:100%;padding:11px 12px 12px;border-radius:var(--r2,10px)}' +
       '.st-mun-h{display:flex;align-items:center;gap:12px}.st-mun-h b{font:700 var(--t-xl,20px)/1.1 var(--f-display,sans-serif);letter-spacing:.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
@@ -265,9 +302,6 @@
       '.st-balao .h i{margin-left:auto;padding:2px 6px;border-radius:5px;background:var(--selo,#b8431f);color:#fff;font:700 var(--t-xs,12px)/1.2 var(--f-mono,monospace);font-style:normal;font-variant-numeric:tabular-nums}' +
       '.st-balao b{font:600 var(--t-md,14px)/1.2 var(--f-body,sans-serif)}.st-balao b.cod{font:600 var(--t-sm,13px)/1.2 var(--f-mono,monospace)}' +
       '.st-balao small{display:block;margin-top:3px;font:400 var(--t-xs,12px)/1.35 var(--f-body,sans-serif);color:var(--cartao-mute,#a9b2b8)}' +
-      '.st-balao small.st-sit{color:var(--cartao-fg,#f2f3f2);font-weight:600}.st-balao .st-sit i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}' +
-      '.st-aviso .st-fx{font-variant-numeric:tabular-nums}' +
-      '.st-balao .st-tr{margin-left:auto;font:600 var(--t-sm,13px)/1.2 var(--f-mono,monospace)}' +
       '.st-balao small.c{margin-top:6px;padding-top:6px;border-top:1px solid var(--cartao-borda,rgba(255,255,255,.16));color:var(--cartao-fg,#f2f3f2);opacity:.75}' +
       // bandeirinhas (regionais no Tocantins, polos na regional) e nomes dos municípios (polo): o desenho do mapa dos municípios
       '.st-mk{background:none;border:0}.st-band{position:absolute;left:0;top:0;width:0;height:0}' +
@@ -303,6 +337,24 @@
     aviso = document.createElement('div');
     aviso.className = 'st-aviso';
     aviso.setAttribute('role', 'status');
+    // visão Limpeza: o seletor Por ano / Vencimento e, na vista Por ano, cada ano, criadas e pendentes (liga/desliga)
+    aviso.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const tinha = document.activeElement === b;
+      let foco;
+      if (b.dataset.vfx) {
+        if (vistaFx === b.dataset.vfx) return;
+        vistaFx = b.dataset.vfx; lsSet('st-fx-vista', vistaFx); tiraRotulos(); sincModo(); foco = `[data-vfx="${vistaFx}"]`;
+      } else if (b.dataset.ano) {
+        const a = +b.dataset.ano; if (anosOff.has(a)) anosOff.delete(a); else anosOff.add(a); restilizaAno(); foco = `[data-ano="${a}"]`;
+      } else if (b.dataset.nx) {
+        const x = b.dataset.nx; if (nexeOn.has(x)) nexeOn.delete(x); else nexeOn.add(x); restilizaAno(); foco = `[data-nx="${x}"]`;
+      } else return;
+      poeAviso(legenda());
+      const f = tinha && aviso.querySelector(foco);
+      if (f) f.focus({ preventScroll: true });
+    });
     cartaoMun = document.createElement('div');
     cartaoMun.className = 'st-mun';
     cartaoMun.setAttribute('role', 'group');
@@ -317,15 +369,44 @@
     lado.hidden = !html && cartaoMun.hidden;
   }
   const TECLA0 = `${MAC ? '⌘S' : 'Ctrl+S'} ou Esc volta`, TECLA1 = `Esc sobe um nível · ${MAC ? '⌘S' : 'Ctrl+S'} volta`;
+  // km de cada situação da faixa (na ordem de SIT) no nível aberto: a soma dos municípios dele (no Tocantins, todos)
+  function kmFaixa() {
+    const t = [0, 0, 0, 0];
+    if (!F) return t;
+    const a = areaDe(niv), cods = !a ? Object.keys(F.muns) : a.tipo === 'mun' ? [a.m.cod] : a.ms.map(m => m.cod);
+    for (const c of cods) { const v = F.muns[c]; if (v) for (let i = 0; i < 4; i++) t[i] += v[i]; }
+    return t;
+  }
+  // vista Por ano: m de cada ano (o mais recente de cada vão), sem registro, criadas (c) e pendentes (p) no nível aberto
+  function kmAno() {
+    const t = {};
+    if (!F) return t;
+    const a = areaDe(niv), cods = !a ? Object.keys(F.ano) : a.tipo === 'mun' ? [a.m.cod] : a.ms.map(m => m.cod);
+    for (const c of cods) { const v = F.ano[c]; if (v) for (const k in v) t[k] = (t[k] || 0) + v[k]; }
+    return t;
+  }
+  const seletorFx = () => `<span class="st-vfx" role="group" aria-label="Vista da limpeza de faixa">` +
+    `<button type="button" data-vfx="ano" aria-pressed="${vistaFx === 'ano'}">Por ano</button><button type="button" data-vfx="sit" aria-pressed="${vistaFx === 'sit'}">Vencimento</button></span>`;
   function legenda() {
-    if (modoL === 'faixa' && FX) {
-      const t = kmFaixa();
-      return `<b>Satélite · Limpeza de faixa</b><span class="st-n">T1 e T2 · situação em ${esc(dataBr(FX.ref))}</span>` +
-        ORDF.map(k => `<span class="st-fx" data-sit="${k}" data-m="${Math.round(t[k])}"><i style="background:${SITF[k][1]}"></i>${esc(SITF[k][0])} ${kmTxt(t[k])}</span>`).join('') +
+    if (querFaixa() && vistaFx === 'ano') {
+      const pronta = ativo === conjA && F, k = kmAno();
+      const n = pronta ? `Limpeza de faixa · T1 e T2 · por ano da última limpeza` : conjA.erro ? 'a limpeza de faixa não carregou' : 'carregando a limpeza de faixa…';
+      const anos = pronta ? F.anos.filter(a => k[a] > 0) : [];
+      return `<b>Satélite</b><span class="st-n">${n}</span>` + seletorFx() + (pronta ? '<span class="st-anos">' +
+        anos.map(a => `<button type="button" class="st-fa" data-ano="${a}" aria-pressed="${!anosOff.has(a)}" title="Mostrar/esconder ${a}"><i style="background:${corAno(a)}"></i>${a}<em>${kmTxt(k[a])}</em></button>`).join('') +
+        [['c', 'Criadas', 'trac'], ['p', 'Pendentes', 'pont']].filter(([x]) => k[x] > 0).map(([x, nome, cls]) =>
+          `<button type="button" class="st-fa" data-nx="${x}" aria-pressed="${nexeOn.has(x)}" title="Mostrar/esconder as OS ${nome.toLowerCase()}"><i class="${cls}"></i>${nome}<em>${kmTxt(k[x])}</em></button>`).join('') +
+        `<span class="st-fa st-semreg"><i style="background:${FUNDOCOR}"></i>sem registro (pendente)<em>${kmTxt(k.sem || 0)}</em></span></span>` : '') +
         `<span class="st-tecla">${niv.reg ? TECLA1 : TECLA0}</span>`;
     }
+    if (querFaixa()) {
+      const pronta = ativo === conjF && F, k = kmFaixa();
+      const n = pronta ? `Limpeza de faixa · T1 e T2${F.hoje ? ' · situação em ' + dataBr(F.hoje) : ''}` : conjF.erro ? 'a limpeza de faixa não carregou' : 'carregando a limpeza de faixa…';
+      return `<b>Satélite</b><span class="st-n">${n}</span>` + seletorFx() + (pronta ? SIT_LEG.map(x => `<span class="st-fx" data-sit="${x}"><i style="background:${SIT_COR[x]}"></i>` +
+        `${SIT_NOME[x]}<em>${kmTxt(k[SIT.indexOf(x)])}</em></span>`).join('') : '') + `<span class="st-tecla">${niv.reg ? TECLA1 : TECLA0}</span>`;
+    }
     let n = '';
-    if (!niv.reg) n = nLinhas ? `${nLinhas.toLocaleString('pt-BR')} alimentadores` : 'carregando as linhas…';
+    if (!niv.reg) n = ativo === conjR && nLinhas ? `${nLinhas.toLocaleString('pt-BR')} alimentadores` : 'carregando as linhas…';
     else if (!niv.mun && escopo) n = `${nAls(escopo.size)} ${niv.pol ? 'no polo' : 'na regional'}`;
     return `<b>Satélite</b>${n ? `<span class="st-n">${n}</span>` : ''}` +
       `<span><i style="background:${COR.T1}"></i>T1</span><span><i style="background:${COR.T2}"></i>T2</span><span class="st-tecla">${niv.reg ? TECLA1 : TECLA0}</span>`;
@@ -500,7 +581,7 @@
 
   // ---------- o mapa de satélite (criado no primeiro Ctrl+S) ----------
   let L = null, map = null, caixaSat = null, fundo = null, nitido = null, mascara = null, desenho = null, rend = null, paneL = null;
-  let TO = null, limTO = null, grupos = new Map(), nLinhas = 0, sobre = null, semRede = new Set(), sobreTr = null, tocado = null;
+  let TO = null, limTO = null, grupos = new Map(), nLinhas = 0, sobre = null, semRede = new Set();
   // a área que o mapa dos municípios mostra agora, no tamanho da caixa: centro, zoom (o mesmo px por grau de longitude) e a
   // correção da altura (o mapa dos municípios é proporcional em graus; o satélite, Mercator)
   function vistaDoSvg() {
@@ -988,15 +1069,34 @@
   // Nos níveis, as de alimentadores de fora (escopo: os que têm rede na regional, no polo ou no município) ficam apagadas;
   // no município, as dele mais fortes
   const peso = (c, z) => (c === 'T1' ? 1.7 : 1.15) * (z < 8 ? 1 : z < 10 ? 1.4 : z < 12 ? 1.8 : 2.3);
-  function estiloLinha(c, on, cod, cor) {
-    const fora = !!(escopo && cod && !escopo.has(cod)), forte = !!(niv.mun && escopo && !fora);
-    if (c === 'PT') return on ? { radius: 6.5, color: '#ffffff', weight: 2, opacity: 1, fillColor: COR.T1, fillOpacity: 1 }
-      : { radius: 4.5, color: '#ffffff', weight: 1.5, opacity: fora ? 0.3 : 0.95, fillColor: COR.T1, fillOpacity: fora ? 0.3 : 0.95 };
+  // sit: a situação da faixa (visão Limpeza): a cor dela no lugar da do T1 ou do T2
+  function estiloLinha(c, on, cod, sit) {
+    const fora = !!(escopo && cod && !escopo.has(cod)), forte = !!(niv.mun && escopo && !fora), cor = sit ? SIT_COR[sit] : COR[c === 'PT' ? 'T1' : c];
+    if (c === 'PT') return on ? { radius: 6.5, color: '#ffffff', weight: 2, opacity: 1, fillColor: cor, fillOpacity: 1 }
+      : { radius: 4.5, color: '#ffffff', weight: 1.5, opacity: fora ? 0.3 : 0.95, fillColor: cor, fillOpacity: fora ? 0.3 : 0.95 };
     const z = map.getZoom();
     return on ? { color: '#ffffff', weight: peso(c, z) + 2.4, opacity: 1 }
-      : { color: cor || COR[c], weight: peso(c, z) * (forte ? 1.3 : 1), opacity: fora ? (niv.mun ? 0.2 : 0.28) : forte ? 1 : 0.9 };
+      : { color: cor, weight: peso(c, z) * (forte ? 1.3 : 1), opacity: fora ? (niv.mun ? 0.2 : 0.28) : forte ? 1 : 0.9 };
   }
-  const estiloDe = (pl, on) => estiloLinha(pl._stCls, on, pl._stAl, pl._stCor);
+  // vista Por ano: os traços da camada Faixa (limpeza.js: o vão sem OS 2,5 px, o ano 5 px, com o contorno escuro; criadas
+  // tracejado branco, pendentes pontilhado), mais finos de longe
+  const anoTopo = pl => pl._stAnos.find(a => !anosOff.has(a));
+  function estiloAno(pl, on) {
+    const cod = pl._stAl, fora = !!(escopo && cod && !escopo.has(cod)), z = map.getZoom(), k = z < 8 ? 0.42 : z < 10 ? 0.55 : z < 12 ? 0.75 : 1;
+    const f = fora ? (niv.mun ? 0.2 : 0.28) : 1, K = pl._stK;
+    if (K === 'cri' || K === 'pend') {
+      const ligado = nexeOn.has(K === 'cri' ? 'c' : 'p');
+      if (!ligado) return { color: '#fff', weight: 1, opacity: 0, contorno: null, dashArray: null, _dashArray: null };
+      const d = K === 'cri' ? [6 * k, 7 * k] : [1, 11 * k];
+      return K === 'cri' ? { color: '#fff', weight: 4 * k, opacity: f, contorno: null, dashArray: d, _dashArray: d }
+        : { color: '#fff', weight: 6 * k, opacity: f, contorno: { color: '#0b0f14', weight: 9 * k, opacity: 0.8 * f }, dashArray: d, _dashArray: d };
+    }
+    const a = K === 'ano' ? anoTopo(pl) : undefined, cor = a ? corAno(a) : FUNDOCOR, w = (a ? 5 : 2.5) * k, op = (a ? 1 : 0.9) * f;
+    if (on) return { color: '#ffffff', weight: w + 2.4, opacity: 1, contorno: null, dashArray: null, _dashArray: null };
+    return { color: cor, weight: w, opacity: op, contorno: { color: '#0b0f14', weight: w + 4 * k, opacity: 0.75 * op }, dashArray: null, _dashArray: null };
+  }
+  const estiloDe = (pl, on) => (pl._stK ? estiloAno(pl, on)
+    : pl._stPtCor ? Object.assign(estiloLinha('PT', on, pl._stAl), { fillColor: pl._stPtCor }) : estiloLinha(pl._stCls, on, pl._stAl, pl._stSit));
   // aplica: já muda o estilo das linhas (no voo entre níveis fica para o pouso, que redesenha as linhas de qualquer jeito:
   // um redesenho só, e não um no 1º quadro do voo e outro no pouso)
   function poeEscopo(aplica = true) {
@@ -1029,7 +1129,12 @@
   // - Sem OffscreenCanvas: o desenho em partes aqui, num canvas à parte, um lote por quadro; um pedido de redesenho no meio
   //   termina o trabalho na hora.
   function pintaLinhas(tela, m) {
-    const traco = (x, e) => { x.globalAlpha = e[2]; x.lineWidth = e[1]; x.strokeStyle = e[0]; x.lineCap = 'round'; x.lineJoin = 'round'; x.stroke(); };
+    const traco = (x, e) => {
+      x.setLineDash(e[5] || []);
+      x.lineCap = 'round'; x.lineJoin = 'round';
+      if (e[6]) { x.globalAlpha = e[8]; x.lineWidth = e[7]; x.strokeStyle = e[6]; x.stroke(); }   // o contorno escuro por baixo (vista Por ano)
+      x.globalAlpha = e[2]; x.lineWidth = e[1]; x.strokeStyle = e[0]; x.stroke();
+    };
     const x = tela.getContext('2d'), Ls = m.L, P = m.P, C = m.C, E = m.E;
     x.setTransform(1, 0, 0, 1, 0, 0);
     x.clearRect(0, 0, m.W, m.H);
@@ -1215,9 +1320,10 @@
       const Ls = new Int32Array(nl * 3), P = new Int32Array(np), C = new Float64Array(nc), E = [], ie = new Map();
       let il = 0, ip = 0, ic = 0;
       const estilo = op => {
-        const ch = `${op.color}|${op.weight}|${op.opacity}|${op.fillColor}|${op.fillOpacity}`;
+        const c = op.contorno, d = op._dashArray || null;
+        const ch = `${op.color}|${op.weight}|${op.opacity}|${op.fillColor}|${op.fillOpacity}|${d}|${c ? c.color + c.weight + c.opacity : ''}`;
         let i = ie.get(ch);
-        if (i === undefined) { ie.set(ch, i = E.length); E.push([op.color, op.weight, op.opacity, op.fillColor || op.color, op.fillOpacity]); }
+        if (i === undefined) { ie.set(ch, i = E.length); E.push([op.color, op.weight, op.opacity, op.fillColor || op.color, op.fillOpacity, d, c ? c.color : null, c ? c.weight : 0, c ? c.opacity : 0]); }
         return i;
       };
       for (let o = this._drawFirst; o; o = o.next) {
@@ -1338,6 +1444,12 @@
   // o zoomend não projeta todas: o canvas projeta só as que estão à vista, no fim do movimento)
   const linhaZ0 = () => Linha || (Linha = L.Polyline.extend({
     getEvents() { return temOC ? { viewreset: this._reset } : L.Polyline.prototype.getEvents.call(this); },
+    // o contorno (vista Por ano) antes do traço, com as opções herdadas (as do Leaflet herdam os padrões: stroke, lineCap…)
+    _updatePath() {
+      const c = this.options.contorno;
+      if (c) { const op = this.options; this.options = Object.assign(Object.create(op), c); try { this._renderer._updatePoly(this); } finally { this.options = op; } }
+      this._renderer._updatePoly(this);
+    },
     _projectLatlngs(lls, out, pb) {
       if (!(lls[0] instanceof L.LatLng)) { for (let i = 0; i < lls.length; i++) this._projectLatlngs(lls[i], out, pb); return; }
       const n = lls.length, m = this._map;
@@ -1356,98 +1468,202 @@
       out.push(anel);
     },
   }));
-  // em lotes de ~10 ms (uma tarefa só travava a abertura no celular), sem desenhar nada no meio; no fim, o desenho de todas
-  // de uma vez (no pintor)
-  let pondo = false, gerL = 0, modoL = '';               // modoL: as linhas no mapa ('to': T1 azul e T2 verde; 'faixa')
-  function poeLinhas(lista, modo = 'to') {
-    if (!map || !lista || pondo || modoL) return;
-    pondo = true;
-    modoL = modo;
+  // Dois conjuntos de linhas, um na tela de cada vez: a rede (o T1 e o T2 de cada alimentador, dados/vizinhos/estado.txt) e,
+  // na visão "Limpeza de faixa" do mapa dos municípios, a faixa (os trechos T1 e T2 pela situação da faixa de hoje,
+  // dados/redes/faixa.txt: por alimentador, uma polilinha por classe e situação). Cada um é baixado e montado (as
+  // polilinhas, sem entrar no mapa) só na 1ª vez que a visão dele aparece com o satélite aberto; a troca põe as do novo
+  // no mapa e tira as do outro, em lotes de ~10 ms (uma tarefa só travava a abertura no celular), sem desenhar nada no
+  // meio; no fim, o desenho de todas de uma vez (no pintor). grupos, semRede e nLinhas são sempre os do conjunto na tela.
+  const novoConj = (nome, carrega, cria) => ({ nome, carrega, cria, grupos: new Map(), semRede: new Set(), camadas: [], n: 0, pronto: false, montando: false, erro: false });
+  const conjR = novoConj('rede', carregaLinhas, criaRede), conjF = novoConj('faixa', carregaFaixa, criaFaixa), conjA = novoConj('ano', carregaFaixa, criaAno);
+  let ativo = null, trocando = false, deNovo = false;
+  const querFaixa = () => { const v = vis(); return !!(v && v.id === 'limpeza'); };
+  const montando = () => conjR.montando || conjF.montando || conjA.montando || trocando;
+  // o conjunto da visão aberta na tela (baixa e monta o que faltar; uma troca no meio de outra fica para o fim dela)
+  function sincModo() {
+    if (!map) return;
+    const c = querFaixa() ? (vistaFx === 'ano' ? conjA : conjF) : conjR;
+    if (!c.pronto) { carregaConj(c); return; }
+    if (trocando) { deNovo = true; return; }
+    if (ativo !== c) troca(c);
+  }
+  function carregaConj(c) {
+    if (c.montando) return;
+    c.montando = true;
+    c.erro = false;
+    c.carrega().then(lista => {
+      let i = 0;
+      const lote = () => {
+        if (!map) return;
+        const t0 = performance.now();
+        for (; i < lista.length && performance.now() - t0 < 10; i++) c.n += c.cria(lista[i], c);
+        if (i < lista.length) { setTimeout(lote, 0); return; }
+        if (c.fim) c.fim(c);
+        c.pronto = true;
+        c.montando = false;
+        sincModo();
+      };
+      lote();
+    }).catch(() => {
+      c.montando = false;
+      c.erro = true;
+      if (estado === 'on') poeAviso(legenda());
+    });
+  }
+  function troca(c) {
+    trocando = true;
+    realca(null);
     rend._carregando = true;
-    const ger = ++gerL;
-    let i = 0, n = 0;
+    const velho = ativo, novas = c.camadas;
+    let i = 0;
     const lote = () => {
-      if (!map || ger !== gerL) return;
+      if (!map) return;
       const t0 = performance.now();
-      for (; i < lista.length && performance.now() - t0 < 10; i++) n += poeLinha(lista[i]);
-      if (i < lista.length) { setTimeout(lote, 0); return; }
-      nLinhas = n;
-      pondo = false;
+      for (; i < novas.length && performance.now() - t0 < 10; i++) {
+        const pl = novas[i], st = estiloDe(pl, false);
+        if (pl._stCls === 'PT') pl.setStyle(st); else L.setOptions(pl, st);   // (a espessura do zoom de agora)
+        pl.addTo(map);
+      }
+      if (i < novas.length) { setTimeout(lote, 0); return; }
+      if (velho) velho.camadas.forEach(pl => pl.remove());
+      ativo = c; grupos = c.grupos; semRede = c.semRede; nLinhas = c.n;
+      trocando = false;
+      poeEscopo();
       rend._carregando = false;
-      if (niv.mun) poeEscopo();
       rend._sujo = true;
       rend._update();
       if (estado === 'on') poeAviso(legenda());
+      pedeRotulos();
+      if (deNovo) { deNovo = false; sincModo(); }
     };
     lote();
   }
-  // tira as linhas do mapa (a troca de visão: o desenho seguinte vem no fim da carga das novas)
-  function tiraLinhas() {
-    gerL++;
-    pondo = false;
-    modoL = '';
-    realca(null);
-    rend._carregando = true;
-    grupos.forEach(g => g.forEach(pl => pl.remove()));
-    rend._carregando = false;
-    grupos.clear();
-    semRede.clear();
-    nLinhas = 0;
-    tocado = null;
-  }
-  // as linhas da visão escolhida: Limpeza de faixa (por trecho, na cor da situação) ou as de sempre; sem o faixa.txt,
-  // as de sempre
-  let pedL = 0, esperaL = false;                         // esperaL: o arquivo das linhas da visão ainda vindo
-  async function acertaLinhas() {
-    if (!map) return;
-    const quer = ehFaixa() ? 'faixa' : 'to';
-    if (quer === modoL) return;
-    const minha = ++pedL;
-    esperaL = true;
-    if (quer === 'faixa' && estado === 'on') poeAviso('<b>Satélite</b><span class="st-n">carregando a limpeza de faixa…</span>');
-    const F = quer === 'faixa' ? await carregaFaixa() : null;
-    const lista = F ? F.lista : await carregaLinhas();
-    if (minha !== pedL || !map) return;
-    esperaL = false;
-    const modo = F ? 'faixa' : 'to';
-    if (modo === modoL) { if (estado === 'on') poeAviso(legenda()); return; }
-    if (modoL) tiraLinhas();
-    poeLinhas(lista, modo);
-  }
-  function poeLinha(a) {
-    {
-      const g = [];
-      if (a.pt) {                                        // sem rede no cadastro: um ponto (por cima das linhas: vem no fim da lista)
-        const pt = L.circleMarker(a.pt, Object.assign({ pane: 'st-linhas', renderer: rend, interactive: true, bubblingMouseEvents: false }, estiloLinha('PT', false, a.cod)));
-        pt._stCls = 'PT'; pt._stAl = a.cod;
-        pt.on('mouseover', () => realca(a.cod)).on('mouseout', () => { if (sobre === a.cod) realca(null); }).on('click', e => cliqueLinha(a.cod, e));
-        pt.addTo(map);
-        g.push(pt); semRede.add(a.cod);
-      }
-      if (a.trs) {                                       // Limpeza de faixa: um traço por trecho (o T1 por cima)
-        for (const c of ['T2', 'T1']) for (const t of a.trs) {
-          if (t.cls !== c || !t.linhas.length) continue;
-          const cor = SITF[t.sit][1];
-          const pl = new (linhaZ0())(t.linhas, Object.assign({ pane: 'st-linhas', renderer: rend, interactive: true, bubblingMouseEvents: false, smoothFactor: 1 }, estiloLinha(c, false, a.cod, cor)));
-          pl._stCls = c; pl._stAl = a.cod; pl._stCor = cor; pl._stTr = t;
-          pl.on('mouseover', () => { sobreTr = pl; realca(a.cod); }).on('mouseout', () => { if (sobreTr === pl) sobreTr = null; if (sobre === a.cod) realca(null); }).on('click', e => cliqueLinha(a.cod, e, pl));
-          pl.addTo(map);
-          g.push(pl);
-        }
-        if (g.length) grupos.set(a.cod, g);
-        return g.length ? 1 : 0;
-      }
-      for (const c of ['T2', 'T1']) {                     // o tronco por cima
-        if (!a[c].length) continue;
-        const pl = new (linhaZ0())(a[c], Object.assign({ pane: 'st-linhas', renderer: rend, interactive: true, bubblingMouseEvents: false, smoothFactor: 1 }, estiloLinha(c, false, a.cod)));
-        pl._stCls = c; pl._stAl = a.cod;
-        pl.on('mouseover', () => realca(a.cod)).on('mouseout', () => { if (sobre === a.cod) realca(null); }).on('click', e => cliqueLinha(a.cod, e));
-        pl.addTo(map);
-        g.push(pl);
-      }
-      if (g.length) grupos.set(a.cod, g);
-      return g.length ? 1 : 0;
+  const liga = (pl, cod) => pl.on('mouseover', () => realca(cod)).on('mouseout', () => { if (sobre === cod) realca(null); }).on('click', e => cliqueLinha(cod, e));
+  const OPC = () => ({ pane: 'st-linhas', renderer: rend, interactive: true, bubblingMouseEvents: false });
+  function criaRede(a, c) {
+    const g = [];
+    if (a.pt) {                                          // sem rede no cadastro: um ponto (por cima das linhas: vem no fim da lista)
+      const pt = L.circleMarker(a.pt, Object.assign(OPC(), estiloLinha('PT', false, a.cod)));
+      pt._stCls = 'PT'; pt._stAl = a.cod;
+      liga(pt, a.cod);
+      g.push(pt); c.semRede.add(a.cod);
     }
+    for (const cl of ['T2', 'T1']) {                     // o tronco por cima
+      if (!a[cl].length) continue;
+      const pl = new (linhaZ0())(a[cl], Object.assign(OPC(), { smoothFactor: 1 }, estiloLinha(cl, false, a.cod)));
+      pl._stCls = cl; pl._stAl = a.cod;
+      liga(pl, a.cod);
+      g.push(pl);
+    }
+    if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
+    return g.length ? 1 : 0;
+  }
+  // faixa: por classe (o T1 por cima) e situação (a mais grave por cima), uma polilinha com as linhas de todos os trechos
+  // dela; _stTr: o trecho de cada linha (a dica acha a mais perto do mouse). Alimentador sem linha (só uns metros de rede):
+  // o ponto do maior trecho, na cor da situação dele
+  function criaFaixa(a, c) {
+    const g = [], por = {};
+    for (const t of a.tr) {
+      if (t.pt) {
+        const pt = L.circleMarker(t.pt, Object.assign(OPC(), estiloLinha('PT', false, a.cod, t.sit)));
+        pt._stCls = 'PT'; pt._stAl = a.cod; pt._stSit = t.sit; pt._stTr = [t];
+        liga(pt, a.cod);
+        g.push(pt); c.semRede.add(a.cod);
+        continue;
+      }
+      if (!t.ls.length) continue;
+      const o = por[t.cls + '|' + t.sit] || (por[t.cls + '|' + t.sit] = { rs: [], ts: [] });
+      for (const r of t.ls) { o.rs.push(r); o.ts.push(t); }
+    }
+    for (const cl of ['T2', 'T1']) for (const sit of SIT_DESENHO) {
+      const o = por[cl + '|' + sit];
+      if (!o) continue;
+      const pl = new (linhaZ0())(o.rs, Object.assign(OPC(), { smoothFactor: 1 }, estiloLinha(cl, false, a.cod, sit)));
+      pl._stCls = cl; pl._stAl = a.cod; pl._stSit = sit; pl._stTr = o.ts;
+      liga(pl, a.cod);
+      g.push(pl);
+    }
+    if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
+    return g.length ? 1 : 0;
+  }
+  // vista Por ano: por alimentador, uma polilinha por (anos, marcas) com os pedaços dos trechos dela (_stTr e _stPc: o trecho
+  // e o pedaço de cada linha) e, por cima, as das OS criadas e pendentes (com opacidade 0 enquanto desligadas). A ordem do
+  // desenho é a da camada Faixa no estado inteiro: o vão sem OS embaixo, os anos do mais antigo ao mais recente, criadas,
+  // pendentes e os pontos (conjA.fim)
+  function criaAno(a, c) {
+    const g = [], por = new Map(), nx = { cri: { rs: [], ts: [], ps: [] }, pend: { rs: [], ts: [], ps: [] } };
+    for (const t of a.tr) {
+      if (t.pt) {
+        const y = t.ult ? +t.ult.slice(0, 4) : 0, pt = L.circleMarker(t.pt, Object.assign(OPC(), estiloLinha('PT', false, a.cod)));
+        pt._stCls = 'PT'; pt._stAl = a.cod; pt._stPtCor = y ? corAno(y) : FUNDOCOR; pt._stTr = [t]; pt._stOrd = 9;
+        pt.setStyle(estiloDe(pt, false));
+        liga(pt, a.cod);
+        g.push(pt); c.semRede.add(a.cod);
+        continue;
+      }
+      for (const pc of t.pec) {
+        if (!pc.ls.length) continue;
+        const ch = pc.anos.join(','), o = por.get(ch) || (por.set(ch, { anos: pc.anos, rs: [], ts: [], ps: [] }), por.get(ch));
+        for (const r of pc.ls) {
+          o.rs.push(r); o.ts.push(t); o.ps.push(pc);
+          if (pc.mk.includes('c')) { nx.cri.rs.push(r); nx.cri.ts.push(t); nx.cri.ps.push(pc); }
+          if (pc.mk.includes('p')) { nx.pend.rs.push(r); nx.pend.ts.push(t); nx.pend.ps.push(pc); }
+        }
+      }
+    }
+    const linha = (o, K, ord) => {
+      const pl = new (linhaZ0())(o.rs, Object.assign(OPC(), { smoothFactor: 1 }));
+      pl._stCls = 'FX'; pl._stK = K; pl._stAl = a.cod; pl._stAnos = o.anos || []; pl._stTr = o.ts; pl._stPc = o.ps; pl._stOrd = ord;
+      L.setOptions(pl, estiloDe(pl, false));
+      if (K === 'cri' || K === 'pend') pl.options.interactive = false;
+      else liga(pl, a.cod);
+      g.push(pl);
+    };
+    for (const o of por.values()) linha(o, o.anos.length ? 'ano' : 'fundo', o.anos.length ? 1 + (o.anos[0] - 1900) / 1000 : 0);
+    if (nx.cri.rs.length) linha(nx.cri, 'cri', 3);
+    if (nx.pend.rs.length) linha(nx.pend, 'pend', 4);
+    if (g.length) { c.grupos.set(a.cod, g); c.camadas.push(...g); }
+    c.os = (c.os || []).concat(a.os);
+    return g.length ? 1 : 0;
+  }
+  conjA.fim = c => {
+    c.camadas = c.camadas.map((l, i) => [l, i]).sort((x, y) => x[0]._stOrd - y[0]._stOrd || x[1] - y[1]).map(x => x[0]);
+    (c.os || []).sort((x, y) => (y.data > x.data) - (y.data < x.data));   // a mais recente primeiro (fica a dela onde se cruzam)
+  };
+  // anos ou criadas/pendentes ligados ou desligados na legenda: o estilo das linhas e as etiquetas de novo
+  function restilizaAno() {
+    if (!map) return;
+    conjA.grupos.forEach(g => g.forEach(pl => { if (pl._stK && pl._stK !== 'fundo') pl.setStyle(estiloDe(pl, false)); }));
+    pedeRotulos();
+  }
+  // o trecho da faixa (do alimentador cod) mais perto do ponto ll: a linha mais perto entre as dele (pcEm: o pedaço dela,
+  // na vista Por ano)
+  let pcEm = null;
+  function trechoEm(cod, ll) {
+    const g = (ativo === conjF || ativo === conjA) && grupos.get(cod);
+    pcEm = null;
+    if (!g || !map) return null;
+    const P = map.project(ll, 0);
+    let best = null, bd = Infinity;
+    for (const pl of g) {
+      if (!pl._stTr || pl.options.interactive === false) continue;
+      if (pl._stCls === 'PT') {
+        const q = map.project(pl.getLatLng(), 0), d = (q.x - P.x) ** 2 + (q.y - P.y) ** 2;
+        if (d < bd) { bd = d; best = pl._stTr[0]; }
+        continue;
+      }
+      pl._latlngs.forEach((r, i) => {
+        let w = r._z0;
+        if (!w) { w = new Float64Array(r.length * 2); r.forEach((x, j) => { const q = map.project(x, 0); w[2 * j] = q.x; w[2 * j + 1] = q.y; }); }
+        for (let j = 2; j < w.length; j += 2) {
+          const ax = w[j - 2], ay = w[j - 1], dx = w[j] - ax, dy = w[j + 1] - ay, L2 = dx * dx + dy * dy;
+          const f = L2 ? Math.max(0, Math.min(1, ((P.x - ax) * dx + (P.y - ay) * dy) / L2)) : 0;
+          const d = (P.x - ax - f * dx) ** 2 + (P.y - ay - f * dy) ** 2;
+          if (d < bd) { bd = d; best = pl._stTr[i]; pcEm = pl._stPc ? pl._stPc[i] : null; }
+        }
+      });
+    }
+    return best;
   }
   // realce do alimentador embaixo do mouse (ou do item da lista do município): num canvas à parte por cima das linhas (no
   // pane delas: a mesma opacidade), só do tamanho dele dentro da caixa, com o estilo "on" (branco e mais largo; o ponto,
@@ -1461,7 +1677,7 @@
     if (!rlCv) { rlCv = document.createElement('canvas'); rlCv.className = 'st-realce'; rlCv.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none'; }
     if (rlCv.parentNode !== paneL) paneL.append(rlCv);
     const t = map.getSize(), a = map.containerPointToLayerPoint([0, 0]), f = t.multiplyBy(0.1);
-    const vb = L.bounds(a.subtract(f), a.add(t).add(f)), est = g.map(pl => estiloLinha(pl._stCls, true, pl._stAl));
+    const vb = L.bounds(a.subtract(f), a.add(t).add(f)), est = g.map(pl => estiloDe(pl, true));
     let b = null;
     g.forEach((pl, i) => {
       const e = est[i], w = (e.weight || 0) / 2 + 2;
@@ -1512,12 +1728,9 @@
   // toque (dedo) acima do município: a linha embaixo do dedo é difícil de evitar no mapa inteiro, então o toque entra na área
   // (sem o balão do mouse, o dedo não saberia que ia abrir um alimentador); no município, o toque na linha abre a página dele
   let ponteiro = 'mouse';
-  function cliqueLinha(cod, e, pl) {
+  function cliqueLinha(cod, e) {
     const oe = e && e.originalEvent, tipo = (oe && oe.pointerType) || ponteiro;
     if (tipo === 'touch' && !niv.mun && e.latlng) { cliqueArea(e.latlng); return; }
-    // Limpeza de faixa no toque: o 1º toque no trecho mostra a dica (situação e data); o 2º, no mesmo, abre o alimentador
-    if (tipo === 'touch' && pl && pl._stTr && tocado !== pl && oe) { tocado = pl; sobreTr = pl; realca(cod); poeBalao(dicaLinha(cod), oe); return; }
-    tocado = null;
     abreAl(cod);
   }
   // para onde o clique (ou o toque) num ponto leva: a área do nível de baixo, ou a vizinha (outra regional, outro polo,
@@ -1551,19 +1764,6 @@
     return cab('Regional ' + r.nome, numGrupo(r.ms)) + `<small>${r.polos.length} polos · ${r.ms.length} municípios · ${nAls(r.als.size)}</small>` +
       `<small class="c">${niv.reg ? `Clique para ir à Regional ${esc(r.nome)}` : `Clique para ver os polos da Regional ${esc(r.nome)}`}</small>`;
   }
-  function dicaLinha(cod) {
-    const a = infoAl(cod), m = niv.mun && porCod[niv.mun], am = m && m.als.find(x => x.cod === cod), t = sobreTr && sobreTr._stAl === cod && sobreTr._stTr;
-    if (t) {                                                // Limpeza de faixa: o trecho, a situação e a última limpeza
-      return `<span class="h"><b class="cod">${esc(cod)}</b><span class="st-tr">${esc(t.nome)}</span></span>` +
-        `<small class="st-sit" data-sit="${t.sit}"><i style="background:${SITF[t.sit][1]}"></i>${esc(SITF[t.sit][0])} · ${kmTxt(t.m)}</small>` +
-        `<small>${t.ult ? 'Última limpeza: ' + dataBr(t.ult) : 'Sem registro de limpeza'}</small>` +
-        `<small class="c">${ponteiro === 'touch' ? 'Toque de novo' : 'Clique'} para abrir o painel do alimentador</small>`;
-    }
-    return `<span class="h"><b class="cod">${esc(cod)}</b>${am ? `<i>${esc(numAl(cod, m))}</i>` : ''}</span>` +
-      (a.se || am ? `<small>${esc(a.se || '')}${am ? `${a.se ? ' · ' : ''}${kmTxt(am.m)} em ${esc(m.nome)}` : ''}</small>` : '') +
-      (semRede.has(cod) ? '<small>Sem rede no cadastro (só o ponto)</small>' : '') +
-      '<small class="c">Clique para abrir o painel do alimentador</small>';
-  }
   function poeBalao(html, ev) {
     const r = caixa.getBoundingClientRect();
     balao.innerHTML = html;
@@ -1579,7 +1779,24 @@
     if (sobre) {
       realceArea(null);
       map.getContainer().style.cursor = '';
-      poeBalao(dicaLinha(sobre), ev);
+      const a = infoAl(sobre), m = niv.mun && porCod[niv.mun], am = m && m.als.find(x => x.cod === sobre);
+      // visão Limpeza: o trecho embaixo do mouse, a situação da faixa e a última limpeza
+      const t = ativo === conjF || ativo === conjA ? trechoEm(sobre, e.latlng) : null;
+      if (t && ativo === conjA) {                           // vista Por ano: o trecho, o ano do pedaço, a última limpeza e os km limpos
+        const pc = pcEm, a0 = pc && pc.anos.find(x => !anosOff.has(x));
+        poeBalao(`<span class="h"><b class="cod">${esc(sobre)}</b>${am ? `<i>${esc(numAl(sobre, m))}</i>` : ''}</span>` +
+          `<small class="st-fx-t"><i style="background:${a0 ? corAno(a0) : FUNDOCOR}"></i>Trecho ${esc(t.nome)} · ${a0 ? 'limpo em ' + a0 + (pc.anos.length > 1 ? ' (antes ' + pc.anos.slice(1).join(', ') + ')' : '') : 'sem registro de limpeza aqui'}</small>` +
+          (pc && pc.mk ? `<small>${[pc.mk.includes('c') ? 'OS criada' : '', pc.mk.includes('p') ? 'OS pendente' : ''].filter(Boolean).join(' · ')} neste pedaço</small>` : '') +
+          `<small>${t.ult ? 'Última limpeza do trecho ' + dataBr(t.ult) : 'Trecho sem registro de limpeza'} · ${t.limpo < 1000 ? Math.round(t.limpo) + " m" : NF1.format(t.limpo / 1000)} de ${kmTxt(t.m)} limpos · ${esc(t.cls)} a cada ${t.prazo} anos</small>` +
+          '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
+        return;
+      }
+      poeBalao(`<span class="h"><b class="cod">${esc(sobre)}</b>${am ? `<i>${esc(numAl(sobre, m))}</i>` : ''}</span>` +
+        (a.se || am ? `<small>${esc(a.se || '')}${am ? `${a.se ? ' · ' : ''}${kmTxt(am.m)} em ${esc(m.nome)}` : ''}</small>` : '') +
+        (t ? `<small class="st-fx-t" data-sit="${t.sit}"><i style="background:${SIT_COR[t.sit]}"></i>Trecho ${esc(t.nome)} · ${SIT_NOME[t.sit]}</small>` +
+          `<small>${t.ult ? 'Última limpeza ' + dataBr(t.ult) : 'Sem registro de limpeza'} · ${esc(t.cls)} a cada ${t.prazo} anos · ${kmTxt(t.m)}</small>` : '') +
+        (semRede.has(sobre) && !t ? '<small>Sem rede no cadastro (só o ponto)</small>' : '') +
+        '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
       return;
     }
     const n = destino(e.latlng);
@@ -1595,7 +1812,86 @@
   // outro cartão, com o fio mais curto, como em mapa-municipios.js: bandeiras/planta); no polo, o nome e o número de cada
   // município, dentro dele (os que se cruzam: letra menor; senão, só na dica). Postos no pouso e depois do zoom
   let marcas = [];
-  const tiraMarcas = () => { marcas.forEach(mk => mk.remove()); marcas = []; };
+  const tiraMarcas = () => { marcas.forEach(mk => mk.remove()); marcas = []; tiraRotulos(); };
+
+  // ---------- etiquetas das OS (vista Por ano da visão Limpeza; as da camada Faixa, limpeza.js) ----------
+  // No polo e no município (ou de perto, a partir do zoom ZROT): as das OS dos alimentadores do nível dentro da vista, da
+  // mais recente para a mais antiga, cada uma só se couber sem cobrir outra, as bandeirinhas, os nomes ou a coluna da
+  // esquerda (até ROT_MAX). No município, os trechos sem OS ganham o nome num rótulo leve, se couber. Refeitas no fim de
+  // cada movimento, no pouso e ao ligar ou desligar um ano.
+  const ZROT = 9.5, ROT_MAX = [50, 18];
+  let rotulos = [], quadroRot = 0;
+  function tiraRotulos() { rotulos.forEach(mk => mk.remove()); rotulos = []; }
+  const pedeRotulos = () => { if (!quadroRot) quadroRot = requestAnimationFrame(() => { quadroRot = 0; poeRotulos(); }); };
+  const querRotulos = () => !!map && estado === 'on' && !voandoN && ativo === conjA && !!F && (!!niv.pol || map.getZoom() >= ZROT);
+  const htmlOS = o => `<div class="st-os" style="--c:${corAno(o.ano)}"><em>${esc(o.tr)}</em>${o.datas.map(dataBr).join(' · ')}` +
+    `<small>${o.n > 1 ? o.n + ' OS · ' : ''}${NF1.format(o.feito / 1000)} de ${kmTxt(o.total)}</small></div>`;
+  function meioDe(ls, fr = 0.5) {                           // o ponto a fr do comprimento da maior linha (0,5: o meio)
+    let melhor = null, lm = -1;
+    for (const r of ls) {
+      let l = 0;
+      for (let i = 1; i < r.length; i++) l += Math.hypot(r[i][0] - r[i - 1][0], r[i][1] - r[i - 1][1]);
+      if (l > lm) { lm = l; melhor = r; }
+    }
+    if (!melhor) return null;
+    let a = lm * fr;
+    for (let i = 1; i < melhor.length; i++) {
+      const d = Math.hypot(melhor[i][0] - melhor[i - 1][0], melhor[i][1] - melhor[i - 1][1]);
+      if (a <= d) { const f = d ? a / d : 0; return [melhor[i - 1][0] + f * (melhor[i][0] - melhor[i - 1][0]), melhor[i - 1][1] + f * (melhor[i][1] - melhor[i - 1][1])]; }
+      a -= d;
+    }
+    return melhor[melhor.length - 1];
+  }
+  function poeRotulos() {
+    tiraRotulos();
+    if (!querRotulos()) return;
+    const t = map.getSize(), cel = celular(), max = ROT_MAX[cel ? 1 : 0], vb = map.getBounds();
+    const obst = ocupados().concat([...caixaSat.querySelectorAll('.st-card, .mt-mn')].map(e => {
+      const c = caixaSat.getBoundingClientRect(), q = e.getBoundingClientRect();
+      return { left: q.left - c.left, top: q.top - c.top, right: q.right - c.left, bottom: q.bottom - c.top };
+    }));
+    const cands = [];
+    for (const o of conjA.os || []) {
+      if (anosOff.has(o.ano) || (escopo && !escopo.has(o.al)) || !vb.contains(o.ll)) continue;
+      cands.push({ ll: o.ll, html: htmlOS(o), cls: 'st-os', dy: 1.4, extra: 8 });
+      if (cands.length >= 6 * max) break;
+    }
+    if (niv.mun && escopo) {
+      for (const a of F.als) {
+        if (!escopo.has(a.cod)) continue;
+        for (const tr of a.tr) {
+          if (tr.limpo > 0 || tr.pec.some(pc => pc.mk) || !tr.ls.length) continue;
+          const lls = [0.5, 0.3, 0.7, 0.15, 0.85].map(fr => meioDe(tr.ls, fr)).filter(ll => ll && vb.contains(ll));
+          if (lls.length) cands.push({ ll: lls[0], lls, html: `<span class="st-trn">${esc(tr.nome)}<small>${esc(a.cod)}</small></span>`, cls: 'st-trn', dy: 0.5, extra: 0, leve: true });
+        }
+      }
+    }
+    if (!cands.length) return;
+    const med = document.createElement('div');
+    med.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;pointer-events:none';
+    med.innerHTML = cands.map(c => c.html).join('');
+    caixaSat.append(med);
+    [...med.children].forEach((e, i) => { cands[i].w = e.offsetWidth; cands[i].h = e.offsetHeight; });
+    med.remove();
+    const feitos = [], F2 = 3;
+    let n = 0;
+    const cabe = R => !(R.left < 2 || R.top < 2 || R.right > t.x - 2 || R.bottom > t.y - 2) &&
+      !feitos.concat(obst).some(o => R.left < o.right + F2 && R.right + F2 > o.left && R.top < o.bottom + F2 && R.bottom + F2 > o.top);
+    for (const c of cands) {
+      if (n >= max && !c.leve) continue;
+      let R = null;
+      for (const ll of c.lls || [c.ll]) {                    // (o nome do trecho: o meio dele ou outro ponto ao longo dele)
+        const p = map.latLngToContainerPoint(ll), q = { left: p.x - c.w / 2, right: p.x + c.w / 2, top: p.y - c.dy * c.h, bottom: p.y - c.dy * c.h + c.h + c.extra };
+        if (cabe(q)) { R = q; c.ll = ll; break; }
+      }
+      if (!R) continue;
+      feitos.push(R);
+      if (!c.leve) n++;
+      const mk = L.marker(c.ll, { icon: L.divIcon({ className: 'st-mk', html: c.html, iconSize: null }), interactive: false, keyboard: false, zIndexOffset: c.leve ? 300 : 500 });
+      mk.addTo(map);
+      rotulos.push(mk);
+    }
+  }
   function mascaraPx(as) {                                  // o que está desenhado (px da caixa, de 2 em 2 px)
     const t = map.getSize(), E = 2, W = Math.max(1, Math.ceil(t.x / E)), H = Math.max(1, Math.ceil(t.y / E));
     const cv = document.createElement('canvas');
@@ -1737,6 +2033,7 @@
   }
   function poeMarcas(quieto) {
     tiraMarcas();
+    pedeRotulos();
     if (estado !== 'on' || voandoN || !D) return;
     if (!niv.reg) {
       bandeiras(D.regs.map(r => ({ area: r, nome: r.nome, num: numGrupo(r.ms), ir: { reg: r.nome },
@@ -1852,7 +2149,7 @@
     map.on('zoomanim zoom', () => { if (rlCv) rlCv.style.display = 'none'; });
     rend._aoAtualizar = () => { if (sobre) poeRealceLinha(); };
     // depois de arrastar ou do zoom do usuário: os nomes do polo de novo (cabem outros); bandeirinhas seguem presas ao contorno
-    map.on('moveend', () => { if (estado === 'on' && !voandoN && niv.pol && !niv.mun) poeMarcas(true); });
+    map.on('moveend', () => { if (estado === 'on' && !voandoN && niv.pol && !niv.mun) poeMarcas(true); else pedeRotulos(); });
     // a caixa mudou de tamanho (tela cheia, janela): refaz o mapa e o limite do zoom; num nível, o enquadramento dele
     // (fechado, fica para o próximo Ctrl+S: abre() refaz o tamanho antes de tudo)
     let tamAntes = '';
@@ -1867,7 +2164,7 @@
       if (niv.reg) { const v = vistaDoNivel(niv); poeVista(v.c, v.z); }
       poeMarcas();
     }).observe(caixa);
-    acertaLinhas();
+    sincModo();
   }
   function limites(liga) {
     if (liga) {
@@ -2037,7 +2334,7 @@
     try {
       await carregaLibs();
       if (!map) await cria();
-      acertaLinhas();
+      sincModo();                                         // (as linhas da visão aberta: a rede, ou a faixa na visão Limpeza)
     } catch (e) {
       clearTimeout(tAviso);
       estado = 'off';
@@ -2182,11 +2479,8 @@
   })
     .observe(alvo, { attributes: true, attributeFilter: ['class'] });
   // visão trocada na legenda (NAE, Manutenção…): os números do nível de novo
-  document.addEventListener('argos-visao', () => {
-    if (map && estado !== 'off' && estado !== 'fechando') acertaLinhas();   // (Limpeza de faixa: as linhas por trecho)
-    if (estado !== 'on' || !D) return;
-    poeNivel(); if (!voandoN) poeMarcas();
-  });
+  // (na visão Limpeza de faixa, as linhas pela situação da faixa; ao sair dela, a rede de novo)
+  document.addEventListener('argos-visao', () => { if (estado !== 'on' || !D) return; poeNivel(); if (!voandoN) poeMarcas(); sincModo(); });
   // o mapa dos municípios trocou de nível por fora com o satélite aberto (busca da barra, Voltar): o satélite acompanha
   document.addEventListener('argos-nivel', e => {
     if (meu || estado !== 'on' || !D) return;
@@ -2244,11 +2538,9 @@
   // para os testes (scripts/teste_sat_to_tela.js)
   const rectCaixa = e => { const c = caixaSat.getBoundingClientRect(), q = e.getBoundingClientRect(); return { x: q.left - c.left, y: q.top - c.top, w: q.width, h: q.height }; };
   window.__satTo = { estado: () => estado, mapa: () => map, alterna, abre, fecha, linhas: () => nLinhas, semRede: () => semRede.size, sobre: () => sobre,
-    modo: () => modoL, faixa: () => FX, kmFaixa, trechos: () => { const o = []; grupos.forEach(g => g.forEach(pl => { if (pl._stTr) o.push({ al: pl._stAl, nome: pl._stTr.nome, sit: pl._stTr.sit, cor: pl.options.color, ult: pl._stTr.ult }); })); return o; },
-    dicaTrecho: (al, nome) => { const g = grupos.get(al), pl = g && g.find(x => x._stTr && x._stTr.nome === nome); if (!pl) return null; sobreTr = pl; const h = dicaLinha(al); sobreTr = null; return h; },
     vistaSvg: () => (L ? vistaDoSvg() : null), tempos,
     // parado: sem linhas entrando, sem desenho das linhas em curso, sem desenho adiado da máscara e da divisão
-    ocioso: () => !!map && !pondo && !esperaL && !(rend && rend._job) && !(mascara && mascara.pendente()) && !(desenho && desenho.pendente()),
+    ocioso: () => !!map && !montando() && !(rend && rend._job) && !(mascara && mascara.pendente()) && !(desenho && desenho.pendente()),
     pintor: () => (pintor ? 'worker' : rend && rend._img ? 'pagina' : 'canvas'),
     forca: () => { if (mascara) mascara.desenha(true); if (desenho) desenho.desenha(true); },
     // o canvas das linhas como está (feito pelo pintor ou em partes) contra o redesenho inteiro do Leaflet nele mesmo:
@@ -2271,6 +2563,16 @@
       return { dif: n, px: a.length / 4, cheios, modo: rend._img ? 'imagem' : 'canvas' };
     },
     nivel: () => Object.assign({}, niv), vai: n => vaiPara(n), sobe, voando: () => voandoN,
+    // visão Limpeza: o conjunto na tela ('rede' ou 'faixa'), os km de cada situação no nível (ordem de SIT), o total do
+    // nível somado dos municípios, a data de referência e o trecho mais perto de um ponto (px do quadro)
+    modo: () => (ativo ? ativo.nome : null), quer: () => (querFaixa() ? (vistaFx === 'ano' ? 'ano' : 'faixa') : 'rede'),
+    // vista Por ano: a vista (pede 'ano' ou 'sit'), os km do nível (kmAno), anos desligados e as etiquetas na tela
+    vistaFx: v => { if (v && v !== vistaFx) { vistaFx = v; lsSet('st-fx-vista', v); tiraRotulos(); sincModo(); if (estado === 'on') poeAviso(legenda()); } return vistaFx; },
+    kmAno: () => kmAno(), anos: () => (F ? F.anos.slice() : []), corAno: a => corAno(a),
+    dadosFx: () => F, rotulos: () => rotulos.map(mk => { const e = mk.getElement() && mk.getElement().firstElementChild; return e ? Object.assign({ cls: e.className, txt: e.textContent }, rectCaixa(e)) : null; }).filter(Boolean),
+    pedaco: () => (pcEm ? { anos: pcEm.anos.slice(), mk: pcEm.mk, m: pcEm.m } : null),
+    faixa: () => (F ? { hoje: F.hoje, sit: SIT.slice(), km: kmFaixa(), muns: F.muns, cores: Object.assign({}, SIT_COR), nomes: Object.assign({}, SIT_NOME) } : null),
+    trecho: (cod, x, y) => (map ? trechoEm(cod, map.containerPointToLatLng([x, y])) : null),
     ocupados: () => (map ? ocupados() : []),
     destino: (x, y) => (map ? destino(map.containerPointToLatLng([x, y])) : null),
     realce: () => (realceA ? realceA.tipo + ':' + realceA.nome : null),
