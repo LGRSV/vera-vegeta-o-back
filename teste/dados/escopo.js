@@ -172,7 +172,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Abrir município abre o mapa do alimentador com mais rede nele, os 10 seguintes já selecionados e enquadrado no município (aviso de quantos ficaram de fora)", "st": "ok", "d": "2026-11-24"},
    {"t": "Mapa do alimentador: camada Faixa pinta também o T1/T2 dos outros alimentadores (estado e vizinhos), com as OS de perto", "st": "ok", "d": "2026-11-24"},
    {"t": "Mapa do alimentador: Inspeção, Insp→manut e Manutenção também no T1/T2 dos outros alimentadores", "st": "and", "prazo": "2026-11-25", "resp": "dev"},
-   {"t": "Visão satélite: botão Fronteira (sem divisões por padrão; ligado, regional/polo/município com a navegação)", "st": "and", "prazo": "2026-11-25", "resp": "dev"},
+   {"t": "Visão satélite: botão Fronteira (sem divisões por padrão; ligado, regional/polo/município com a navegação)", "st": "ok", "d": "2026-11-24"},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},

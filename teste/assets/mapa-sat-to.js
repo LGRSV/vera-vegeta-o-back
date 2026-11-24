@@ -18,7 +18,7 @@
 //   dos municípios e o nome de cada um) › Município (os alimentadores dele em destaque, os outros apagados; o nome, o
 //   resumo, a lista e o link da página do município). Mouse numa área realça e mostra a dica; clique (ou toque) entra nela.
 //   A trilha "Tocantins › Regional › Polo › Município" fica na barra da lupa, no lugar e no desenho da do mapa dos municípios.
-//   As linhas de fora do nível ficam apagadas. Contornos convertidos uma vez (simplificados) e desenhados em canvas; no voo
+//   As linhas de fora do nível ficam um pouco esmaecidas (todas continuam à vista). Contornos convertidos uma vez (simplificados) e desenhados em canvas; no voo
 //   entre níveis, num svg montado uma vez no começo do voo (a cada quadro só a escala e a mistura dos dois níveis).
 // - Gestos livres leves (roda, arrasto, pinça, duplo clique, tela cheia): com o mapa em movimento, a máscara e os canvas da
 //   divisão não são refeitos, só acompanham (o painel do mapa os leva no arrasto; no zoom, esticados pelo transform, como os
@@ -35,6 +35,12 @@
 //   já pede os quadros da chegada.
 // - Leaflet (assets/leaflet/), o contorno do estado (dados/tocantins.js) e as linhas só são baixados no primeiro Ctrl+S: a
 //   página inicial não fica mais pesada para abrir.
+// - Botão "Fronteira" (no alto, ao lado do aviso; o desenho do botão NAE do mapa do alimentador; pedido do usuário):
+//   desligado (o padrão), a visão limpa, como a visão Tocantins do mapa do alimentador: o estado inteiro com o T1 e o T2 de
+//   todos os alimentadores, sem as divisas, os cartões e o véu (os panes deles escondidos e sem desenho), e sem a navegação
+//   por áreas (zoom, arrasto, a dica da linha e o clique que abre a página continuam); ligado, os níveis acima. A escolha
+//   fica guardada (localStorage st-fronteira). Desligado, o satélite não segue o nível do mapa dos municípios nem o muda
+//   ao fechar.
 // - Raio-X (mapa-raiox.js, Ctrl+X) e satélite não ficam ligados juntos: Ctrl+S desliga o raio-X, e o raio-X ligado fecha o
 //   satélite.
 (function () {
@@ -64,6 +70,7 @@
   const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* sem armazenamento */ } };
   let vistaFx = lsGet('st-fx-vista') === 'sit' ? 'sit' : 'ano';
+  let fronteira = lsGet('st-fronteira') === '1';            // botão Fronteira: divisas, cartões e níveis (desligado: a visão limpa)
   const anosOff = new Set(), nexeOn = new Set();             // anos desligados; criadas ('c') e pendentes ('p') ligadas
   const DUR_ABRE = 1200, DUR_FECHA = 850;
   const SAT = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
@@ -248,6 +255,22 @@
       // coluna da esquerda: o aviso (legenda) e, no município, o cartão dele
       '.st-lado{position:absolute;left:12px;top:12px;z-index:7;display:grid;justify-items:start;gap:8px;max-width:calc(100% - 76px);pointer-events:none}' +
       '.st-lado[hidden]{display:none}.st-lado>*{pointer-events:auto}#mapa-to:not(.sat-to) .st-mun{display:none}' +
+      // no alto: o aviso e, ao lado (embaixo, se não couber), o botão Fronteira (o card e o botão NAE do mapa do alimentador,
+      // .ctl-card/.ctl-nae de extras.js: ligado, o filete colorido embaixo, nas cores dos polos; desligado, riscado)
+      '.st-lado{grid-template-columns:minmax(0,auto)}.st-lado>.st-topo{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;width:100%;pointer-events:none}.st-topo>*{pointer-events:auto}' +
+      '.st-fr{display:flex;flex:none;padding:var(--s1,4px);background:var(--vidro,rgba(15,20,23,.82));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);' +
+      'border:1px solid var(--vidro-borda,rgba(255,255,255,.12));border-radius:var(--r2,10px);box-shadow:var(--sh-vidro,0 2px 8px rgb(0 0 0 / .35))}.st-fr[hidden]{display:none}' +
+      '.st-fr button{display:inline-flex;align-items:center;font:600 var(--t-sm,13px)/1 var(--f-mono,monospace);padding:0 var(--s3,12px);border:0;border-radius:var(--r1,6px);' +
+      'color:var(--vidro-fg,#f3f4f4);cursor:pointer;min-width:40px;min-height:40px;white-space:nowrap;background-color:transparent;' +
+      'background-image:linear-gradient(90deg,var(--polo-a,#3d8fe0),var(--polo-b,#ffa438),var(--polo-c,#6cc4f2),var(--polo-d,#e07a1f));background-repeat:no-repeat;background-size:100% 3px;background-position:0 100%}' +
+      '.st-fr button:hover{background-color:var(--vidro-hover,rgba(255,255,255,.1))}.st-fr button:focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:1px}' +
+      '.st-fr button[aria-pressed="false"]{opacity:.6;text-decoration:line-through;background-image:none;box-shadow:inset 0 -3px 0 #5a636a}' +
+      '.st-fr button[aria-disabled="true"]{cursor:progress}' +
+      // com mouse, da altura do aviso ao lado (no toque, o alvo de 40 px do NAE)
+      '@media (pointer:fine){.st-fr{padding:3px}.st-fr button{min-height:26px;padding:0 10px}}' +
+      '@media (prefers-reduced-motion:no-preference){.st-fr button{transition:background-color var(--dur,.15s) var(--ease,ease),opacity var(--dur,.15s) var(--ease,ease)}}' +
+      // Fronteira desligada: o véu e os contornos (com o realce da área) fora da tela
+      '.st-semfr .leaflet-st-veu-pane,.st-semfr .leaflet-st-cont-pane{display:none}' +
       '.st-aviso,.st-mun,.st-balao{color:var(--vidro-fg,#f3f4f4);background:var(--vidro,rgba(15,20,23,.82));' +
       'border:1px solid var(--vidro-borda,rgba(255,255,255,.12));box-shadow:var(--sh-vidro,0 2px 8px rgb(0 0 0 / .35));font:500 var(--t-sm,13px)/1.35 var(--f-body,sans-serif)}' +
       '.st-aviso{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;max-width:100%;padding:7px 12px;border-radius:var(--r2,10px)}' +
@@ -331,7 +354,7 @@
   }
 
   // ---------- telas: coluna (aviso e município), balão e trilha ----------
-  let lado = null, aviso = null, cartaoMun = null, balao = null, trilha = null;
+  let lado = null, aviso = null, cartaoMun = null, balao = null, trilha = null, frCard = null, frBt = null;
   function poeLado() {
     if (lado) return;
     lado = document.createElement('div');
@@ -362,14 +385,31 @@
     cartaoMun.className = 'st-mun';
     cartaoMun.setAttribute('role', 'group');
     cartaoMun.hidden = true;
-    lado.append(aviso, cartaoMun);
+    // botão Fronteira (aparece com o mapa pronto; antes do satélite aberto, o clique não faz nada)
+    frCard = document.createElement('div');
+    frCard.className = 'st-fr';
+    frCard.hidden = true;
+    frCard.innerHTML = '<button type="button" class="st-fr-b" aria-pressed="false" title="Mostrar ou esconder as divisas das regionais, dos polos e dos municípios (e a navegação por elas)">Fronteira</button>';
+    frBt = frCard.firstChild;
+    frBt.addEventListener('click', () => { if (estado === 'on') poeFronteira(!fronteira); });
+    const topo = document.createElement('div');
+    topo.className = 'st-topo';
+    topo.append(aviso, frCard);
+    lado.append(topo, cartaoMun);
     caixa.append(lado);
+  }
+  function sincFr() {                                       // o botão como está a escolha
+    if (!frBt) return;
+    frCard.hidden = !map;
+    frBt.setAttribute('aria-pressed', String(fronteira));
+    if (estado === 'on') frBt.removeAttribute('aria-disabled'); else frBt.setAttribute('aria-disabled', 'true');
   }
   function poeAviso(html) {
     poeLado();
     aviso.classList.toggle('st-fxl', html.includes('st-vfx'));
     aviso.innerHTML = html;
     aviso.hidden = !html;
+    sincFr();
     lado.hidden = !html && cartaoMun.hidden;
   }
   const TECLA0 = `${MAC ? '⌘S' : 'Ctrl+S'} ou Esc volta`, TECLA1 = `Esc sobe um nível · ${MAC ? '⌘S' : 'Ctrl+S'} volta`;
@@ -603,7 +643,7 @@
   // retângulos (px da caixa do satélite) do que fica por cima do mapa: a coluna da esquerda, o Tela cheia e os créditos
   function ocupados() {
     const c = caixa.getBoundingClientRect(), out = [];
-    [aviso, cartaoMun, caixa.querySelector('.mt-tc'), map && map.attributionControl && map.attributionControl.getContainer()].forEach(e => {
+    [aviso, frCard, cartaoMun, caixa.querySelector('.mt-tc'), map && map.attributionControl && map.attributionControl.getContainer()].forEach(e => {
       if (!e || e.hidden || !e.getClientRects().length) return;
       const q = e.getBoundingClientRect();
       if (q.width) out.push({ left: q.left - c.left, top: q.top - c.top, right: q.right - c.left, bottom: q.bottom - c.top });
@@ -616,7 +656,7 @@
     const a = areaDe(n);
     if (!a) return vistaDoEstado();
     const f = folga(), cel = celular(), topo = n.reg && !n.pol ? (cel ? 30 : 44) : 0;
-    const col = [aviso, cartaoMun].filter(e => e && !e.hidden && lado && !lado.hidden && e.getClientRects().length)
+    const col = [aviso, frCard, cartaoMun].filter(e => e && !e.hidden && lado && !lado.hidden && e.getClientRects().length)
       .map(e => e.getBoundingClientRect()), c = caixa.getBoundingClientRect();
     const opc = [];
     if (col.length) {
@@ -1000,7 +1040,8 @@
     const chaveDe = (n, na, mi) => chaveVista() + '|' + conteudo(n, na, mi);
     const depois = adiado(() => desenha());
     function desenha(forca) {                               // forca (true): mesmo com tudo igual ao último desenho (tema, abertura)
-      if (!map || !D || map._animatingZoom) return;
+      // (Fronteira desligada: os panes escondidos, nada a desenhar; ligada de novo, desenha(true))
+      if (!map || !D || map._animatingZoom || !fronteira) return;
       if (voandoN) { poeVoo(forca === true); return; }
       // (um desenho por passo do mapa: 'zoom' e 'move' vêm juntos)
       const ch = chaveDe(niv, nivAntes, mistura);
@@ -1043,12 +1084,12 @@
     // em movimento (fora do voo entre níveis, que tem o svg), os canvas só acompanham; refeitos se a caixa sair do desenho,
     // se esticarem demais ou se o que mostram mudou
     map.on('zoom move', () => {
-      if (!map || !D || map._animatingZoom) return;
+      if (!map || !D || map._animatingZoom || !fronteira) return;
       if (voandoN || noVoo || !vC || conteudo(niv, nivAntes, mistura) !== ctC) { desenha(); return; }
       const r = estica(vC, cvs.map(c => c.cv));
       if (!r.cobre || r.s > ESTICA) desenha(); else if (rsA || realceA) poeRealce();
     });
-    map.on('moveend', () => { if (vC && !voandoN && !noVoo && !parado(vC, 0.08)) depois.agenda(); });
+    map.on('moveend', () => { if (fronteira && vC && !voandoN && !noVoo && !parado(vC, 0.08)) depois.agenda(); });
     map.on('viewreset resize', desenha);
     map.on('zoomanim', e => {
       rsv.forEach(x => { x.style.display = 'none'; });       // (o realce volta no fim do zoom)
@@ -1070,24 +1111,26 @@
     if (desenho) desenho.realce();
   }
   // linhas: o T1 e o T2 de cada alimentador (polilinhas do Leaflet num canvas, que já sabe o mouse em cima da linha).
-  // Nos níveis, as de alimentadores de fora (escopo: os que têm rede na regional, no polo ou no município) ficam apagadas;
-  // no município, as dele mais fortes
+  // Nos níveis, as de alimentadores de fora (escopo: os que têm rede na regional, no polo ou no município) ficam um pouco
+  // esmaecidas, mas à vista (pedido do usuário: todas as linhas T1 e T2 visíveis também com a Fronteira ligada); no
+  // município, as dele mais fortes
+  const OP_FORA = () => (niv.mun ? 0.5 : 0.6);
   const peso = (c, z) => (c === 'T1' ? 1.7 : 1.15) * (z < 8 ? 1 : z < 10 ? 1.4 : z < 12 ? 1.8 : 2.3);
   // sit: a situação da faixa (visão Limpeza): a cor dela no lugar da do T1 ou do T2
   function estiloLinha(c, on, cod, sit) {
     const fora = !!(escopo && cod && !escopo.has(cod)), forte = !!(niv.mun && escopo && !fora), cor = sit ? SIT_COR[sit] : COR[c === 'PT' ? 'T1' : c];
     if (c === 'PT') return on ? { radius: 6.5, color: '#ffffff', weight: 2, opacity: 1, fillColor: cor, fillOpacity: 1 }
-      : { radius: 4.5, color: '#ffffff', weight: 1.5, opacity: fora ? 0.3 : 0.95, fillColor: cor, fillOpacity: fora ? 0.3 : 0.95 };
+      : { radius: 4.5, color: '#ffffff', weight: 1.5, opacity: fora ? OP_FORA() : 0.95, fillColor: cor, fillOpacity: fora ? OP_FORA() : 0.95 };
     const z = map.getZoom();
     return on ? { color: '#ffffff', weight: peso(c, z) + 2.4, opacity: 1 }
-      : { color: cor, weight: peso(c, z) * (forte ? 1.3 : 1), opacity: fora ? (niv.mun ? 0.2 : 0.28) : forte ? 1 : 0.9 };
+      : { color: cor, weight: peso(c, z) * (forte ? 1.3 : 1), opacity: fora ? OP_FORA() : forte ? 1 : 0.9 };
   }
   // vista Por ano: os traços da camada Faixa (limpeza.js: o vão sem OS 2,5 px, o ano 5 px, com o contorno escuro; criadas
   // tracejado branco, pendentes pontilhado), mais finos de longe
   const anoTopo = pl => pl._stAnos.find(a => !anosOff.has(a));
   function estiloAno(pl, on) {
     const cod = pl._stAl, fora = !!(escopo && cod && !escopo.has(cod)), z = map.getZoom(), k = z < 8 ? 0.42 : z < 10 ? 0.55 : z < 12 ? 0.75 : 1;
-    const f = fora ? (niv.mun ? 0.2 : 0.28) : 1, K = pl._stK;
+    const f = fora ? OP_FORA() : 1, K = pl._stK;
     if (K === 'cri' || K === 'pend') {
       const ligado = nexeOn.has(K === 'cri' ? 'c' : 'p');
       if (!ligado) return { color: '#fff', weight: 1, opacity: 0, contorno: null, dashArray: null, _dashArray: null };
@@ -1721,7 +1764,7 @@
   let ponteiro = 'mouse';
   function cliqueLinha(cod, e) {
     const oe = e && e.originalEvent, tipo = (oe && oe.pointerType) || ponteiro;
-    if (tipo === 'touch' && !niv.mun && e.latlng) { cliqueArea(e.latlng); return; }
+    if (tipo === 'touch' && fronteira && !niv.mun && e.latlng) { cliqueArea(e.latlng); return; }
     abreAl(cod);
   }
   // para onde o clique (ou o toque) num ponto leva: a área do nível de baixo, ou a vizinha (outra regional, outro polo,
@@ -1735,7 +1778,7 @@
     return { reg: m.reg, pol: m.polo, mun: m.cod };
   }
   function cliqueArea(ll) {
-    if (estado !== 'on' || voandoN) return;
+    if (estado !== 'on' || voandoN || !fronteira) return;
     const n = destino(ll);
     if (n) vaiPara(n);
   }
@@ -1790,7 +1833,7 @@
         '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
       return;
     }
-    const n = destino(e.latlng);
+    const n = fronteira ? destino(e.latlng) : null;            // (Fronteira desligada: sem a navegação por áreas)
     realceArea(n ? areaDe(n) : null);
     map.getContainer().style.cursor = n ? 'pointer' : '';
     if (!n) { balao.hidden = true; return; }
@@ -2027,7 +2070,7 @@
   function poeMarcas(quieto) {
     tiraMarcas();
     pedeRotulos();
-    if (estado !== 'on' || voandoN || !D) return;
+    if (estado !== 'on' || voandoN || !D || !fronteira) return;
     if (!niv.reg) {
       bandeiras(D.regs.map(r => ({ area: r, nome: r.nome, num: numGrupo(r.ms), ir: { reg: r.nome },
         rotulo: `Abrir a Regional ${r.nome}, ${numGrupo(r.ms)}` })), D.regs);
@@ -2111,7 +2154,7 @@
     if (!TO.length) throw new Error('sem o contorno do estado');
     limTO = L.latLngBounds([].concat(...TO));
     caixaSat = document.createElement('div');
-    caixaSat.className = 'st-sat';
+    caixaSat.className = 'st-sat' + (fronteira ? '' : ' st-semfr');
     caixaSat.setAttribute('role', 'region');
     caixaSat.setAttribute('aria-label', 'Satélite do Tocantins com as regionais, os polos, os municípios e as linhas T1 e T2 dos alimentadores');
     caixa.append(caixaSat);
@@ -2316,6 +2359,30 @@
     }
   }
   const sobe = () => vaiPara(sobeDe(niv), true);
+  // botão Fronteira: só troca classes e o que fica na tela (as linhas não são redesenhadas). Ligada: os contornos e os
+  // cartões do nível aberto (o Tocantins: as regionais). Desligada: some tudo isso e, num nível, o voo de volta ao estado
+  // inteiro (as linhas de todos, sem esmaecer, no pouso)
+  function poeFronteira(on) {
+    on = !!on;
+    if (on === fronteira) return;
+    fronteira = on;
+    lsSet('st-fronteira', on ? '1' : '0');
+    sincFr();
+    if (!map) return;
+    caixaSat.classList.toggle('st-semfr', !on);
+    tempos.fronteira = performance.now();
+    if (on) {
+      desenho.desenha(true);
+      if (estado === 'on' && !voandoN) poeMarcas();
+      return;
+    }
+    realceArea(null);
+    if (balao) balao.hidden = true;
+    map.getContainer().style.cursor = '';
+    tiraMarcas();
+    pedeRotulos();
+    if (estado === 'on' && niv.reg) vaiPara(NIV0);
+  }
   async function abre() {
     if (estado === 'on' || estado === 'abrindo' || estado === 'carregando') return;
     const raiox = alvo.classList.contains('raiox');
@@ -2344,9 +2411,9 @@
     map.invalidateSize({ pan: false });
     limites(false);
     interage(true);
-    // o nível do mapa dos municípios (a regional, o polo ou o município aberto nele)
+    // o nível do mapa dos municípios (a regional, o polo ou o município aberto nele); Fronteira desligada, o estado inteiro
     if (!voltando) {
-      const A = window.ARGOS_MAPA, s = A && A.nivel ? A.nivel() : null;
+      const A = window.ARGOS_MAPA, s = fronteira && A && A.nivel ? A.nivel() : null;
       niv = valida(s ? { reg: s.reg, pol: s.pol, mun: s.mun } : NIV0);
       nivAntes = niv;
       mistura = 1;
@@ -2444,7 +2511,7 @@
     paneL.style.opacity = '0';
     limites(false);
     interage(true);
-    await sincroniza();
+    if (fronteira) await sincroniza();                     // (desligada: o mapa dos municípios fica como estava)
     if (estado !== 'fechando') { caixa.classList.remove('st-salto'); return; }   // Ctrl+S de novo no meio: abre() tomou o lugar
     alvo.classList.remove('sat-to', 'st-cobre', 'st-nmun');   // nomes e bandeiras do mapa voltam enquanto o satélite se dissolve
     devolveLegenda();
@@ -2481,7 +2548,7 @@
   document.addEventListener('argos-visao', () => { if (estado !== 'on' || !D) return; poeNivel(); if (!voandoN) poeMarcas(); sincModo(); });
   // o mapa dos municípios trocou de nível por fora com o satélite aberto (busca da barra, Voltar): o satélite acompanha
   document.addEventListener('argos-nivel', e => {
-    if (meu || estado !== 'on' || !D) return;
+    if (meu || estado !== 'on' || !D || !fronteira) return;
     const d = e.detail || {}, n = valida({ reg: d.reg, pol: d.pol, mun: d.mun });
     if (!igual(n, niv)) vaiPara(n);
   });
@@ -2567,6 +2634,8 @@
       return { dif: n, px: a.length / 4, cheios, modo: rend._img ? 'imagem' : 'canvas' };
     },
     nivel: () => Object.assign({}, niv), vai: n => vaiPara(n), sobe, voando: () => voandoN,
+    // botão Fronteira: pede true/false (como o clique no botão, com o satélite aberto); devolve a escolha
+    fronteira: v => { if (v !== undefined && estado === 'on') poeFronteira(v); return fronteira; },
     // visão Limpeza: o conjunto na tela ('rede' ou 'faixa'), os km de cada situação no nível (ordem de SIT), o total do
     // nível somado dos municípios, a data de referência e o trecho mais perto de um ponto (px do quadro)
     modo: () => (ativo ? ativo.nome : null), quer: () => (querFaixa() ? (vistaFx === 'ano' ? 'ano' : 'faixa') : 'rede'),
