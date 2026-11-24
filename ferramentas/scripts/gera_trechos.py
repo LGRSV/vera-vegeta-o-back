@@ -11,6 +11,7 @@ relatório de validação. Determinístico: as mesmas entradas geram os mesmos a
     python scripts/gera_trechos.py --saida <pasta do site> --comparar <clone gh-pages publicado>
     python scripts/gera_trechos.py --saida <pasta do site> --so-faixa [--data AAAA-MM-DD]   só dados/redes/faixa.txt
     python scripts/gera_trechos.py --saida <pasta do site> --so-camadas        só dados/redes/inspecao.txt, executadas.txt, manutencao.txt
+    python scripts/gera_trechos.py --saida <pasta do site> --so-nae            só dados/redes/nae.txt (camada NAE do satélite)
     python scripts/gera_trechos.py --saida <pasta do site> --vizinhos [<destino>]   só dados/vizinhos/, das páginas
                                                                                (dados.js, chaves.js e ativos.js)
 
@@ -749,7 +750,7 @@ def pacote_trechos(destino):
 # ?v= dos assets da página inicial e da Queimadas: trocar quando o arquivo muda (o navegador guarda a versão anterior)
 V_MAPA = '20261124b'                                     # mapa-municipios.js (e busca-ativo.js)
 V_FOCOS = '20261116'
-V_SAT_TO = '20261124i'                                    # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
+V_SAT_TO = '20261125b'                                    # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
 V_RAIOX = '20261119'                                      # assets/mapa-raiox.js (raio-X da rede, Ctrl+X)
 
 
@@ -1878,6 +1879,128 @@ def resumo_camadas(res):
             f"({km(res['insp_m'])} km, {kb('inspecao.txt')} KB) · executadas.txt {res['exe_ativos']} ativos ({kb('executadas.txt')} KB) · "
             f"manutencao.txt {res['mnt_postes']} postes ({kb('manutencao.txt')} KB)")
 
+# dados/redes/nae.txt: a NAE-Vegetação (as ocorrências da Crítica do dados.js de cada alimentador, nae.oc, o período de
+# nae.meses) de cada trecho T1 e T2, com a forma dele, para a camada NAE do satélite da página inicial (assets/mapa-sat-to.js:
+# as linhas pela NAE do trecho, na rampa do mapa dos municípios; baixado só quando a camada é ligada). Cada ocorrência
+# conta no trecho dela (o campo trecho); a de um T3 conta também (à parte, n3) no T1 ou T2 de onde o ramal dele sai (o pai
+# do trecho, subindo até um T1 ou T2): a página escolhe se soma os ramais. Sem trecho, fica de fora (só no cabeçalho).
+# Nada de dado pessoal: só a contagem por trecho. Texto, uma linha por registro:
+#   #{"v": 1, "meses": [primeiro, último], "oc": ocorrências, "t12": no T1/T2, "t3": no T3, "sem": sem trecho}
+#   A<tab>alimentador
+#   T<tab>trecho<tab>classe<tab>NAE do trecho<tab>NAE dos ramais (T3) dele<tab>m<tab>linhas
+# As linhas como no faixa.txt (polyline, 1e-4 grau, a diferença acumulando pelo arquivo inteiro; Douglas–Peucker de
+# NAE_TOL m; separadas por espaço); alimentador cujas linhas somem todas (só uns metros de rede): no seu maior trecho, um
+# ponto ("!" e o ponto, como no faixa.txt).
+NAE_TOL = 60              # m do Douglas–Peucker das linhas (o meio do caminho entre o estado.txt e os pedaços da Faixa)
+
+
+def nae_txt(site, tol=None):
+    """Pasta do site (alimentadores/<AL>/dados.js com nae.oc) → (texto do nae.txt, resumo: {alimentadores, trechos, oc,
+    t12, t3, sem, meses})."""
+    site = Path(site)
+    tol = NAE_TOL if tol is None else tol
+    la0 = lo0 = 0
+
+    def enc(q):
+        nonlocal la0, lo0
+        t = ''
+        for la, lo in q:
+            t += _poli(la - la0) + _poli(lo - lo0)
+            la0, lo0 = la, lo
+        return t
+
+    def linhas(vaos):
+        ls = []
+        for linha, _ in _trilhas([((v[1], v[0]), (v[3], v[2])) for v in vaos], set()):
+            q = [(round(y * 1e4), round(x * 1e4)) for x, y in _dp(linha, tol)]
+            q = q[:1] + [b for a, b in zip(q, q[1:]) if b != a]
+            if len(q) >= 2:
+                ls.append(q)
+        return ls
+    corpo, meses = [], set()
+    res = dict(alimentadores=0, trechos=0, oc=0, t12=0, t3=0, sem=0)
+    for p in sorted(site.glob('alimentadores/*/dados.js')):
+        if not (p.parent / 'index.html').exists():
+            continue
+        d = le_js(p)
+        if not d or not d.get('vaos'):
+            continue
+        nae = d.get('nae') or {}
+        meses.update(m for m in nae.get('meses') or () if m)
+        trs = d.get('trechos') or []
+        nomes = [t.get('nome') for t in trs]
+        pai = {t.get('nome'): t.get('pai') for t in trs}
+
+        def de_t12(n):                            # o T1 ou T2 de onde sai o trecho n (ele mesmo, se é T1 ou T2)
+            vistos = set()
+            while n and n not in vistos and classe(n) not in ('T1', 'T2'):
+                vistos.add(n)
+                n = pai.get(n)
+            return n if n and classe(n) in ('T1', 'T2') else None
+        n_own, n_ram = {}, {}
+        for o in nae.get('oc') or ():
+            res['oc'] += 1
+            t = o.get('trecho')
+            if not t or t not in pai:
+                res['sem'] += 1
+            elif classe(t) in ('T1', 'T2'):
+                n_own[t] = n_own.get(t, 0) + 1
+                res['t12'] += 1
+            else:
+                res['t3'] += 1
+                a = de_t12(t)
+                if a:
+                    n_ram[a] = n_ram.get(a, 0) + 1
+        por, ordem = {}, []
+        for v in d['vaos']:
+            n = nomes[v[4]] if 0 <= v[4] < len(nomes) else None
+            if not n or classe(n) not in ('T1', 'T2'):
+                continue
+            if n not in por:
+                por[n] = []
+                ordem.append(n)
+            por[n].append(v)
+        if not ordem:
+            continue
+        ordem.sort(key=nomes.index)
+        geo = [linhas(por[n]) for n in ordem]
+        sem_linha = not any(geo)
+        maior = max(range(len(ordem)), key=lambda i: sum(v[8] for v in por[ordem[i]]))
+        corpo.append('A\t' + p.parent.name)
+        for i, (n, ls) in enumerate(zip(ordem, geo)):
+            if sem_linha and i == maior:
+                v = max(por[n], key=lambda v: v[8])
+                g = '!' + enc([(round((v[0] + v[2]) / 2 * 1e4), round((v[1] + v[3]) / 2 * 1e4))])
+            else:
+                g = ' '.join(enc(q) for q in ls)
+            corpo.append('\t'.join(('T', n, classe(n), str(n_own.get(n, 0)), str(n_ram.get(n, 0)),
+                                    str(round(sum(v[8] for v in por[n]))), g)))
+            res['trechos'] += 1
+        res['alimentadores'] += 1
+    ms = sorted(meses)
+    res['meses'] = [ms[0], ms[-1]] if ms else []
+    cab = '#' + json.dumps(dict(v=1, meses=res['meses'], oc=res['oc'], t12=res['t12'], t3=res['t3'], sem=res['sem']),
+                           separators=(',', ':'))
+    return '\n'.join([cab] + corpo) + '\n', res
+
+
+def nae_mapa(saida):
+    """Grava dados/redes/nae.txt (ver acima; só regrava se mudou) e devolve o resumo (com os bytes)."""
+    txt, res = nae_txt(saida)
+    b = txt.encode('utf-8')
+    arq = Path(saida) / 'dados' / 'redes' / 'nae.txt'
+    arq.parent.mkdir(parents=True, exist_ok=True)
+    if not arq.exists() or arq.read_bytes() != b:
+        arq.write_bytes(b)
+    res['bytes'] = len(b)
+    return res
+
+
+def resumo_nae_txt(res):
+    return (f"nae.txt: {res['alimentadores']} alimentador(es), {res['trechos']} trechos T1/T2 · {res['oc']} NAE "
+            f"({res['t12']} no T1/T2, {res['t3']} nos ramais T3, {res['sem']} sem trecho) · {math.ceil(res['bytes'] / 1e3)} KB")
+
+
 def _por_classe(trechos, vaos, lonlat):
     cl = [classe(t['nome']) if classe(t['nome']) in CLASSES else 'T3' for t in trechos]
     segs = {}
@@ -2590,6 +2713,7 @@ def interface(saida, malha=None):
     v_faixa, r_faixa = faixa_mapa(saida)              # (depois da limpeza: lê o limpeza.js de cada página)
     print(resumo_faixa(r_faixa))
     print(resumo_camadas(camadas_mapa(saida)))   # (Inspeção, Manutenção e Insp→manut dos outros no mapa do alimentador)
+    print(resumo_nae_txt(nae_mapa(saida)))       # (a camada NAE do satélite da página inicial)
     vizinhos_mapa(saida, vizinhos_dos_dados(dados))
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
@@ -2828,6 +2952,8 @@ def main(argv=None):
     g.add_argument('--so-camadas', action='store_true',
                    help='só refaz dados/redes/inspecao.txt, executadas.txt e manutencao.txt (Inspeção, Manutenção e Insp→manut dos outros alimentadores no '
                         'mapa do alimentador)')
+    g.add_argument('--so-nae', action='store_true',
+                   help='só refaz dados/redes/nae.txt (a NAE de cada trecho T1/T2, camada NAE do satélite da página inicial)')
     g.add_argument('--vizinhos', nargs='?', const='', metavar='DESTINO',
                    help='só refaz dados/vizinhos/ (rede e equipamentos dos alimentadores vizinhos) a partir das páginas '
                         'de --saida (dados.js, chaves.js e ativos.js); grava em DESTINO/dados/vizinhos/ (sem DESTINO, na '
@@ -2856,6 +2982,9 @@ def main(argv=None):
         return 0
     if a.so_camadas:
         print(resumo_camadas(camadas_mapa(saida, date.fromisoformat(a.data) if a.data else None)))
+        return 0
+    if a.so_nae:
+        print(resumo_nae_txt(nae_mapa(saida)))
         return 0
     if a.vizinhos is not None:
         als = vizinhos_mapa(saida, vizinhos_das_paginas(saida), a.vizinhos or None)

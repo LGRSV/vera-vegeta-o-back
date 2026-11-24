@@ -24,7 +24,7 @@
 // desenhados no mesmo canvas, por cima da rede dos vizinhos (cada símbolo uma imagem pronta, copiada no lugar), só os da
 // tela; os que chegam entram juntos e de uma vez, por cima do que já está no canvas (sem refazê-lo). O vizinho sob o
 // mouse fica mais forte num canvas à parte (mudar o realce não refaz o de baixo). Começa depois que a rede deste está
-// inteira no mapa (__al.rede): a carga da página não muda.
+// inteira no mapa (__al.rede) e a lista de trechos inteira (__al.lista): a carga da página não muda.
 // Alimentadores selecionados (selecionados.js, window.__alSel): a rede, o DJ, os religadores e os fusíveis deles são
 // desenhados lá, fortes; depois que a rede deles está lá (__alSel.desenha: baixando ou com erro, seguem aqui como vizinhos) eles ficam fora do orçamento e não baixam a rede (.1 .2 .3), só os equipamentos (.4 e .5,
 // primeiro), que selecionados.js pinta por cima da rede deles (pintaEqDe) e que o toque daqui ainda acha (transformador,
@@ -816,7 +816,7 @@
     naTelaEq: () => naTelaEq,
     pintaEqDe,
     refaz: () => { if (IDX && cam._map) { planeja(); redesenha(); } },   // a seleção mudou (selecionados.js)
-    indice: () => idxP,                                  // o indice.json lido (promessa; null antes de começar)
+    indice: () => baixaIdx(),                            // o indice.json lido (promessa; quem pedir primeiro baixa, o outro usa o mesmo)
     estado: () => ({ indice: IDX ? IDX.length : 0, desenhados: desenhados.map(e => e.cod), entram, selecionados: IDX ? IDX.filter(e => e.sel).map(e => e.cod) : [], niveis: desenhados.map(e => NIVEIS.filter(k => e.d[k]).join('')),
       fino: desenhados.map(e => !!e.fi), gasto, limite: { grosso: ORC_GROSSO, fino: ORC_FINO, desperdicio: DESPERDICIO, eq: ORC_EQ }, zMin,
       pontos, guardados: IDX ? IDX.reduce((t, e) => t + NIVEIS.reduce((u, k) => u + (e.d[k] ? e.d[k].pts : 0), 0), 0) : 0,
@@ -825,9 +825,11 @@
   };
 
   // ---------- começo: depois da rede deste inteira no mapa (até lá, nem o canvas existe) ----------
-  // (o índice lido fica em idxP: selecionados.js usa o mesmo, sem baixá-lo de novo)
+  // (o índice lido fica em idxP: selecionados.js usa o mesmo, sem baixá-lo de novo; se ele pedir antes daqui começar, o
+  // download sai na hora e este começo usa o mesmo)
   let idxP = null;
-  const comeca = () => (idxP = fetch(BASE + 'indice.json').then(r => r.ok ? r.json() : null).catch(() => null))
+  const baixaIdx = () => idxP || (idxP = fetch(BASE + 'indice.json').then(r => r.ok ? r.json() : null).catch(() => null));
+  const comeca = () => baixaIdx()
     .then(j => {
       const als = j && j.als;
       if (!als) return;
@@ -841,5 +843,7 @@
     })
     .catch(() => { /* sem o índice: nada aparece */ })
     .finally(() => { fim = true; if (!IDX) primeiro = true; });
-  if (AL) Promise.all([AL.rede, AL.pronto]).then(comeca); else if (document.readyState === 'complete') comeca(); else addEventListener('load', comeca);
+  // (depois da rede, do painel e da lista de trechos inteira: no celular, os vizinhos baixados e desenhados no meio da
+  // lista a atrasavam; a lista que não termina em 10 s não segura mais)
+  if (AL) Promise.all([AL.rede, AL.pronto]).then(() => Promise.race([AL.lista, new Promise(r => setTimeout(r, 10000))])).then(comeca); else if (document.readyState === 'complete') comeca(); else addEventListener('load', comeca);
 })();
