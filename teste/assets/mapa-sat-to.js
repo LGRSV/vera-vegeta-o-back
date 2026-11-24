@@ -267,6 +267,7 @@
       '.st-balao small{display:block;margin-top:3px;font:400 var(--t-xs,12px)/1.35 var(--f-body,sans-serif);color:var(--cartao-mute,#a9b2b8)}' +
       '.st-balao small.st-sit{color:var(--cartao-fg,#f2f3f2);font-weight:600}.st-balao .st-sit i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}' +
       '.st-aviso .st-fx{font-variant-numeric:tabular-nums}' +
+      '.st-balao .st-tr{margin-left:auto;font:600 var(--t-sm,13px)/1.2 var(--f-mono,monospace)}' +
       '.st-balao small.c{margin-top:6px;padding-top:6px;border-top:1px solid var(--cartao-borda,rgba(255,255,255,.16));color:var(--cartao-fg,#f2f3f2);opacity:.75}' +
       // bandeirinhas (regionais no Tocantins, polos na regional) e nomes dos municípios (polo): o desenho do mapa dos municípios
       '.st-mk{background:none;border:0}.st-band{position:absolute;left:0;top:0;width:0;height:0}' +
@@ -1551,7 +1552,7 @@
   function dicaLinha(cod) {
     const a = infoAl(cod), m = niv.mun && porCod[niv.mun], am = m && m.als.find(x => x.cod === cod), t = sobreTr && sobreTr._stAl === cod && sobreTr._stTr;
     if (t) {                                                // Limpeza de faixa: o trecho, a situação e a última limpeza
-      return `<span class="h"><b class="cod">${esc(cod)}</b><i>${esc(t.nome)}</i></span>` +
+      return `<span class="h"><b class="cod">${esc(cod)}</b><span class="st-tr">${esc(t.nome)}</span></span>` +
         `<small class="st-sit" data-sit="${t.sit}"><i style="background:${SITF[t.sit][1]}"></i>${esc(SITF[t.sit][0])} · ${kmTxt(t.m)}</small>` +
         `<small>${t.ult ? 'Última limpeza: ' + dataBr(t.ult) : 'Sem registro de limpeza'}</small>` +
         `<small class="c">${ponteiro === 'touch' ? 'Toque de novo' : 'Clique'} para abrir o painel do alimentador</small>`;
