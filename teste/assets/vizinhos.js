@@ -198,6 +198,16 @@
       this._ctxS = L.DomUtil.create('canvas', 'viz-sob', d).getContext('2d');
     },
     _destroyContainer() { L.DomUtil.remove(this._container); delete this._ctx; delete this._ctxN; delete this._ctxS; },
+    // a imagem no lugar pela região em que foi desenhada (tela: canto em px absolutos e zoom), e não pelo tamanho de agora
+    // do mapa (o do Leaflet: com o mapa de outro tamanho e a imagem de antes ainda no lugar, ela ia para fora dele); no
+    // viewreset, a imagem de antes na vista nova (o Leaflet a punha pelo centro dela: parada na tela até o desenho novo)
+    _updateTransform(c, z) {
+      const t = tela;
+      if (!t) return L.Renderer.prototype._updateTransform.call(this, c, z);
+      const s = Math.pow(2, z - t.z), o = this._map._getNewPixelOrigin(c, z), p = L.point(t.x * s - o.x, t.y * s - o.y);
+      if (L.Browser.any3d) L.DomUtil.setTransform(this._container, p, s); else L.DomUtil.setPosition(this._container, p);
+    },
+    _reset() { this._update(); this._updateTransform(this._map.getCenter(), this._map.getZoom()); },
     // a vista nova é desenhada numa tarefa separada, logo depois da do mapa (a da rede deste, no fim do arrasto ou do zoom,
     // não fica mais longa); até lá a imagem de antes continua no lugar certo, levada e esticada junto com o mapa
     _update() {

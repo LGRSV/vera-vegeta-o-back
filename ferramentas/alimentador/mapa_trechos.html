@@ -1430,12 +1430,18 @@ if (typeof L === 'undefined') {
   function fatiado(ren, liga) {
     const C = L.Canvas.prototype, R = L.Renderer.prototype, m = map, PEDIDO = -1;   // PEDIDO: "redesenho em curso" (_redrawRequest)
     const o0 = {update: C._update, reset: C._reset, zoomEnd: R._onZoomEnd, redraw: C._redraw, req: C._requestRedraw, ext: C._extendRedrawBounds,
-      click: C._onClick, hover: C._handleMouseHover, init: C._initPath, upd: C._updatePath, frente: C._bringToFront, fundo: C._bringToBack};
+      click: C._onClick, hover: C._handleMouseHover, init: C._initPath, upd: C._updatePath, frente: C._bringToFront, fundo: C._bringToBack,
+      tr: R._updateTransform};
     // voo: o desenho em curso; pend: desenho pedido nesta tarefa (começa no fim dela); incons: o canvas da página não mostra a
     // vista de agora (desenho em curso, ou interrompido por um gesto: o próximo fim de movimento refaz tudo)
     // reset: o último fim de movimento foi um viewreset (setView sem animação): o Leaflet, depois do _update, punha no canvas
     // a posição exata (com fração de pixel) do _updateTransform; nos outros, a posição inteira do canto
     let voo = null, pend = false, incons = false, nv = 0, reserva = null, quando = [], reset = false;
+    // a imagem que o canvas da página tem: canto (px absolutos do zoom z) e o tamanho do mapa quando foi desenhada. O
+    // _updateTransform do Leaflet põe o canvas pelo tamanho de agora: com o mapa de outro tamanho (tela cheia, gaveta, barra
+    // do navegador, giro) e a imagem de antes ainda no lugar, ela ia para fora do lugar (esticada no zoom)
+    let img = null;
+    const guarda = (a, z) => { img = a ? {a: a.add(m.getPixelOrigin()), z, t: m.getSize()} : null; };
     const ativo = () => !!ren._bounds && !!ren._map && liga();
     const chave = () => { const o = m.getPixelOrigin(); return m.getZoom() + '|' + o.x + '|' + o.y; };
     const caixa = () => {                                 // a mesma conta de L.Renderer._update
@@ -1545,6 +1551,7 @@ if (typeof L === 'undefined') {
       L.DomUtil.setPosition(v.c, v.nb.min);
       if (velho.parentNode) velho.parentNode.replaceChild(v.c, velho);
       ren._container = v.c; ren._ctx = v.ctx; ren._bounds = v.nb; ren._center = v.centro; ren._zoom = v.zoom;
+      guarda(v.nb.min, v.zoom);
       if (reset) ren._updateTransform(v.centro, v.zoom);
       reserva = velho; voo = null; incons = false;
       ren._redrawRequest = null; ren._redrawBounds = null;
@@ -1591,7 +1598,7 @@ if (typeof L === 'undefined') {
       v.sujo.extend(b.min.subtract([w, w])); v.sujo.extend(b.max.add([w, w]));
     };
     ren._update = function () {                           // fim de movimento (moveend) e viewreset
-      if (!ativo()) return o0.update.call(this);
+      if (!ativo()) { const r = o0.update.call(this); guarda(this._bounds && this._bounds.min, this._zoom); return r; }
       if (m._animatingZoom && this._bounds) return;
       if (voo) solta(voo);
       incons = true; reset = false;
@@ -1604,10 +1611,16 @@ if (typeof L === 'undefined') {
     ren._reset = function () {                            // viewreset: a projeção e o recorte das camadas ficam para o desenho
       if (!ativo()) return o0.reset.call(this);
       this._update();
-      this._updateTransform(this._center, this._zoom);
+      this._updateTransform(m.getCenter(), m.getZoom());   // (a imagem de antes na vista nova: com o _center dela, ficava parada na tela)
       reset = true;
     };
     ren._onZoomEnd = function () { if (!ativo()) return o0.zoomEnd.call(this); };   // idem
+    ren._updateTransform = function (c, z) {
+      const g = img;
+      if (!g || g.t.equals(m.getSize())) return o0.tr.call(this, c, z);
+      const s = m.getZoomScale(z, g.z), p = g.a.multiplyBy(s).subtract(m._getNewPixelOrigin(c, z));
+      if (L.Browser.any3d) L.DomUtil.setTransform(this._container, p, s); else L.DomUtil.setPosition(this._container, p);
+    };
     ren._redraw = function () {
       if (pend) inicia();
       if (voo) {                                          // redesenho pedido no meio do desenho em fatias: termina agora

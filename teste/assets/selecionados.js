@@ -6,13 +6,14 @@
 // Downloads e croqui continuam só do aberto.
 // Como entram: clique (ou toque) na linha de um vizinho (vizinhos.js) ou do estado (visao-tocantins.js): já seleciona, sem
 // balão (seleciona); a linha fica realçada lá enquanto baixa e o menu mostra o novo; com 10, um aviso curto (avisoVisivel).
-// Clique na linha de um já selecionado: o painel do trecho dele (como antes); tirar, só no ✕ do menu. O balão de equipamento
-// de vizinho segue com "Selecionar" (botao). Ou o menu "Alimentadores" no alto do mapa, à direita (os selecionados, ↗ Abrir,
-// busca pelo código, ✕ para tirar, Ver todos, Tirar todos).
+// Clique na linha de um já selecionado: o painel do trecho dele (como antes); tirar, só no chip dele no menu. O balão de equipamento
+// de vizinho segue com "Selecionar" (botao). Ou o menu "Alimentadores" no alto do mapa, à direita: chips lado a lado (o
+// aberto primeiro; tocar no chip de um selecionado o tira do mapa e da lista, no do aberto esconde e mostra), ↗ Abrir ao
+// lado de cada um, busca pelo código, Ver todos (enquadra o aberto e os selecionados), Tirar todos.
 // O endereço guarda a escolha (?sel=A,B: volta ao recarregar); "Abrir" um selecionado leva os outros junto, e o aberto de
 // agora vira selecionado na página dele.
-// O aberto também sai do mapa sem sair da página: ✕ na linha dele no menu (pedido do usuário: ver o mapa por baixo dele,
-// mesmo com um alimentador só); a linha fica "escondido", com "mostrar". O painel continua o dele e o endereço não guarda
+// O aberto também sai do mapa sem sair da página: o chip dele no menu (pedido do usuário: ver o mapa por baixo dele,
+// mesmo com um alimentador só); o chip fica apagado e riscado, "escondido" (aria-pressed=false). O painel continua o dele e o endereço não guarda
 // (recarregar mostra de novo). Como: "o aberto escondido", mais abaixo.
 // Para não pesar (medido no celular com a CPU 4x mais lenta):
 // - o dados.js de cada um (o mesmo arquivo e o mesmo cache da página dele) é lido e montado num worker ("dados"); nunca roda
@@ -912,9 +913,14 @@
     if (ev._viz || !sels.size || faixa() || !ev.containerPoint) return;
     const oe = ev.originalEvent || {}, toque = oe.pointerType ? oe.pointerType !== 'mouse' : MOVEL;
     const t0 = performance.now(), a = alvo(ev.containerPoint, toque ? 16 : 10);
-    if (!a || !a.nome) return;
+    if (!a || (!a.nome && a.fi == null)) return;
     mede(t0);
-    escolhe(a.s, a.nome, oe, false, a.vi);
+    if (a.nome) escolhe(a.s, a.nome, oe, false, a.vi);
+    // fusível: também o balão com Maps e Earth, como o do aberto (Ctrl + clique só soma o trecho, sem balão)
+    if (a.fi != null && window.__geo && !K.comCtrl(oe)) {
+      const g = a.s.g, f = a.s.fus.p, t = a.fus.t, pp = a.s.papel ? a.s.papel(a.fus.nome) : '';
+      window.__geo.balao([lat(g.y0 + f[2 * a.fi + 1]), lon(g.x0 + f[2 * a.fi])], a.fus.nome, `${K.TIPO[t] || t}${pp ? ' · ' + pp : ''} · ${a.s.cod}`);
+    }
   });
 
   // ---------- nomes dos trechos (os do aberto: alimentador.js, htmlRotulo) ----------
@@ -986,7 +992,7 @@
     if (sels.size) rotulos();
   }).observe(box, { attributes: true, attributeFilter: ['class'] });
 
-  // ---------- o aberto escondido no mapa (✕ na linha dele no menu) ----------
+  // ---------- o aberto escondido no mapa (o chip dele no menu) ----------
   // Fica na página e o painel continua o dele. Somem do mapa a rede (o canvas da rede, no overlayPane, com o que as camadas
   // dele desenham nele: Faixa, Inspeção, Insp→manut, Manutenção, realce, fusíveis, ativos de perto), os nomes, a NAE, DJ,
   // religadores, número operativo, pinos e marcas das camadas (markerPane) e as chaves (pane delas, chaves.js). Satélite,
@@ -999,7 +1005,7 @@
   // CSS; os pontos dos focos estão no canvas da rede (focos.js) e, enquanto ele está escondido, vão copiados, na mesma ordem,
   // para um canvas próprio (sel-focos; o clique na cópia abre o balão do ponto de verdade). Volta: "mostrar" na linha, um
   // trecho dele escolhido no painel, na lista ou na busca ('al:sel' com nomes; o realce refeito pelos T1 T2 T3 não conta) e
-  // o modo Limpeza de faixa (só o aberto). Enquadrar (o código dele no menu) só enquadra; o endereço não guarda
+  // o modo Limpeza de faixa (só o aberto). O endereço não guarda
   const renA = map.options.renderer;
   let oculto = false, naClasse = false, cercado = false, copias = null, renFocos = null;
   // os pontos da Queimadas no canvas da rede (focos.js: circleMarker sem bolha, contorno branco ou marrom, cor da idade)
@@ -1110,16 +1116,27 @@
     '.sel-lista{position:absolute;top:calc(100% + 6px);right:0;width:min(340px,calc(var(--sel-w,100vw) - 24px));overflow:auto;overscroll-behavior:contain;padding:var(--s1);' +
     'background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);font:var(--t-sm)/1.4 var(--f-body)}' +
     '.sel-t{margin:0;padding:var(--s2) var(--s3) 2px;font:700 var(--t-xs)/1.4 var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}.sel-t:focus{outline:none}' +
-    '.sel-als{list-style:none;margin:0;padding:0;display:grid}' +
-    '.sel-al{display:flex;align-items:center;gap:2px;min-height:48px;border-radius:var(--r2)}.sel-al:hover{background:var(--hover)}' +
-    '.sel-vai{flex:1;min-width:0;display:grid;gap:1px;min-height:48px;padding:var(--s1) var(--s3);border:0;border-radius:var(--r2);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}' +
-    '.sel-vai b{font:600 var(--t-base)/1.3 var(--f-mono)}.sel-vai small{font-size:var(--t-xs);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
-    '.sel-vai small.erro{color:var(--aviso)}' +
-    '.sel-ab,.sel-x{flex:none;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:var(--r1);background:none;color:var(--muted);' +
-    'font:400 var(--t-lg)/1 var(--f-body);text-decoration:none;cursor:pointer}.sel-ab:hover,.sel-x:hover{background:var(--hover);color:var(--fg)}' +
-    '.sel-ab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
-    '.sel-denovo{flex:none;min-height:40px;padding:0 var(--s2);border:0;border-radius:var(--r1);background:none;color:var(--accent);font:600 var(--t-xs) var(--f-body);' +
-    'text-decoration:underline;text-underline-offset:2px;cursor:pointer}.sel-denovo:hover{background:var(--hover)}' +
+    // os alimentadores no mapa em chips lado a lado (o aberto primeiro; quebram linha), como os chips do site (.mt-pchip):
+    // tocar no chip de um selecionado o tira do mapa; no do aberto, esconde e mostra (apagado e riscado, aria-pressed=false)
+    '.sel-als{list-style:none;margin:0;padding:var(--s1) var(--s1) var(--s2);display:flex;flex-wrap:wrap;gap:var(--s2) 6px}' +
+    '.sel-al{display:flex;align-items:stretch;max-width:100%;border:1px solid var(--line);border-radius:var(--rp);background:var(--paper)}' +
+    '.sel-al.ab{border-color:var(--accent)}.sel-al.ab.oc{border-color:var(--line);border-style:dashed}' +
+    '.sel-c{display:inline-flex;align-items:center;gap:5px;min-width:0;min-height:40px;padding:0 8px 0 10px;border:0;border-radius:var(--rp);background:none;color:var(--fg);' +
+    'font:inherit;text-align:left;cursor:pointer}.sel-c:hover{background:var(--hover)}' +
+    '.sel-c b{font:600 var(--t-sm)/1.2 var(--f-mono);white-space:nowrap}.sel-c small{font-size:var(--t-xs);color:var(--muted);white-space:nowrap}' +
+    '.sel-c small.erro{color:var(--aviso)}' +
+    '.sel-c svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--muted)}' +
+    '.sel-c .sel-xi{flex:none;font-size:var(--t-base);line-height:1;color:var(--muted)}.sel-c:hover .sel-xi,.sel-c:hover svg{color:var(--fg)}' +
+    '.sel-c[aria-pressed=false]{color:var(--muted)}.sel-c[aria-pressed=false] b{text-decoration:line-through}' +
+    '.sel-c[aria-busy=true] small::before{content:"";display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:50%;border:1.5px solid currentColor;border-right-color:transparent;' +
+    'vertical-align:-1px;animation:sel-gira .8s linear infinite}@keyframes sel-gira{to{transform:rotate(1turn)}}@media (prefers-reduced-motion:reduce){.sel-c[aria-busy=true] small::before{animation:none}}' +
+    // o ↗ discreto, separado do chip (não tira); "tentar de novo" no lugar dele
+    '.sel-ab{flex:none;display:grid;place-items:center;width:40px;min-height:40px;margin-left:-4px;padding:0;border:0;border-left:1px solid var(--line);border-radius:0 var(--rp) var(--rp) 0;' +
+    'color:var(--muted);text-decoration:none}.sel-ab:hover{background:var(--hover);color:var(--fg)}' +
+    '.sel-ab svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
+    '.sel-denovo{flex:none;min-height:40px;padding:0 var(--s3) 0 var(--s2);border:0;border-left:1px solid var(--line);border-radius:0 var(--rp) var(--rp) 0;background:none;color:var(--accent);' +
+    'font:600 var(--t-xs) var(--f-body);text-decoration:underline;text-underline-offset:2px;cursor:pointer}.sel-denovo:hover{background:var(--hover)}' +
+    '.sel-al :focus-visible{outline:2px solid var(--accent);outline-offset:1px}' +
     '.sel-de{margin:var(--s1) var(--s2) 0;padding-top:var(--s2);border-top:1px solid var(--line)}' +
     '.sel-q{width:100%;min-height:40px;padding:0 var(--s3);border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--paper);color:var(--fg);font:var(--t-base) var(--f-body)}' +
     '.sel-q:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}.sel-q:disabled{opacity:.6}' +
@@ -1180,18 +1197,20 @@
     bt.addEventListener('click', e => abre(lst.hidden, e.detail && (MOVEL || (e.pointerType && e.pointerType !== 'mouse')) ? 'titulo' : true));
     bt.addEventListener('keydown', e => { if (e.key === 'ArrowDown' && lst.hidden) { e.preventDefault(); abre(true, true); } });
     lst.addEventListener('click', e => {
-      const x = e.target.closest('[data-x]'), v = e.target.closest('[data-vai]'), o = e.target.closest('[data-poe]'), d = e.target.closest('[data-denovo]');
-      if (x) { const cod = x.dataset.x, li = x.closest('li'), prox = li && (li.nextElementSibling || li.previousElementSibling); tira(cod); (prox && prox.querySelector('.sel-x, .sel-vai') || q || bt).focus(); return; }
-      // o aberto: ✕ esconde, "mostrar" mostra; o foco fica no botão que entra no lugar
-      const oc = e.target.closest('[data-oculta], [data-mostra]');
-      if (oc) { esconde(oc.hasAttribute('data-oculta')); (lst.querySelector('[data-oculta], [data-mostra]') || bt).focus(); return; }
-      if (d) { deNovo(d.dataset.denovo); return; }
-      if (o) { adiciona(o.dataset.poe); return; }
-      if (v) {
-        const b = v.dataset.vai === EU ? window.__caixaRede : (sels.get(v.dataset.vai) ? caixaLL(sels.get(v.dataset.vai)) : null);
-        if (b) map.fitBounds(b.pad(0.04));
+      const x = e.target.closest('[data-x]'), o = e.target.closest('[data-poe]'), d = e.target.closest('[data-denovo]');
+      // chip de um selecionado: sai do mapa e da lista; o foco vai ao chip seguinte (ou ao de antes, ou à busca)
+      if (x) {
+        const cod = x.dataset.x, li = x.closest('li'), viz = li && (li.nextElementSibling || li.previousElementSibling), vc = viz && (viz.querySelector('[data-x]') ? viz.querySelector('[data-x]').dataset.x : 'aberto');
+        tira(cod);
+        const f = vc && lst.querySelector(vc === 'aberto' ? '[data-aberto]' : `[data-x="${CSS.escape(vc)}"]`);
+        (f || (q.disabled ? null : q) || bt).focus();
         return;
       }
+      // chip do aberto: esconde e mostra (o foco fica nele)
+      const oc = e.target.closest('[data-aberto]');
+      if (oc) { esconde(oc.hasAttribute('data-oculta')); (lst.querySelector('[data-aberto]') || bt).focus(); return; }
+      if (d) { deNovo(d.dataset.denovo); return; }
+      if (o) { adiciona(o.dataset.poe); return; }
       if (e.target.closest('[data-todos]')) { verTodos(); return; }
       if (e.target.closest('[data-tira]')) { [...sels.keys()].forEach(tira); q.focus(); }
     });
@@ -1230,7 +1249,7 @@
     lst.style.maxHeight = Math.max(160, m.bottom - b.bottom - 18) + 'px';
     menu();
     if (foco === 'titulo') lst.querySelector('.sel-t').focus({ preventScroll: true });
-    else if (foco) (q.disabled ? lst.querySelector('.sel-vai') : q).focus();
+    else if (foco) (q.disabled ? lst.querySelector('.sel-c') : q).focus();
   }
   function menu() {
     if (!canto) return;
@@ -1250,26 +1269,32 @@
     lst.querySelector('.sel-pe').hidden = !n;
     sugestoes();
   }
-  function linhaTxt(s) {
-    if (s.estado === 'baixando') return '<small>baixando…</small>';
-    if (s.estado === 'erro') return '<small class="erro">não carregou</small>';
+  // o que o chip diz além do código (pronto: nada; trechos e extensão no title)
+  function chipTxt(s) {
+    if (s.estado === 'baixando') return { tx: '<small>baixando…</small>', fala: 'baixando', title: 'Baixando' };
+    if (s.estado === 'erro') return { tx: '<small class="erro">não carregou</small>', fala: 'não carregou', title: 'Não carregou' };
     const r = (s.D.meta && s.D.meta.resumo) || {}, nt = r.trechos ?? s.D.trechos.length, m = r.extensao_m ?? s.D.trechos.reduce((a, t) => a + t.ext, 0);
-    return `<small>${nt.toLocaleString('pt-BR')} trecho${nt === 1 ? '' : 's'} · ${K.km(m)}</small>`;
+    const t = `${nt.toLocaleString('pt-BR')} trecho${nt === 1 ? '' : 's'} · ${K.km(m)}`;
+    return { tx: '', fala: t, title: t };
   }
+  const OLHO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>';
+  const OLHO_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><path d="M4 20 20 4"/></svg>';
+  // os chips: o aberto (esconde e mostra) e os selecionados (tocar tira), com o ↗ Abrir (ou "tentar de novo") ao lado
   function menuLinhas() {
     if (!canto || lst.hidden) return;
     const ul = lst.querySelector('.sel-als'), foco = document.activeElement && ul.contains(document.activeElement) ? document.activeElement : null;
-    // (o ✕ e o "mostrar" do aberto são o mesmo lugar: o foco passa de um ao outro)
-    const fk = foco && (foco.dataset.x ? `[data-x="${foco.dataset.x}"]` : foco.dataset.vai ? `[data-vai="${foco.dataset.vai}"]`
-      : foco.matches('[data-oculta], [data-mostra]') ? '[data-oculta], [data-mostra]' : null);
-    // o aberto: ✕ (esconder no mapa) ou, escondido, "mostrar"
-    const ab = !renA ? '' : oculto ? `<button type="button" class="sel-denovo" data-mostra title="Mostrar no mapa" aria-label="Mostrar ${esc(EU)} no mapa">mostrar</button>`
-      : `<button type="button" class="sel-x" data-oculta title="Esconder no mapa" aria-label="Esconder ${esc(EU)} do mapa">✕</button>`;
-    ul.innerHTML = `<li class="sel-al"><button type="button" class="sel-vai" data-vai="${esc(EU)}" title="Enquadrar"><b>${esc(EU)}</b><small>${oculto ? 'escondido' : 'aberto'}</small></button>${ab}</li>` +
-      [...sels.values()].map(s => `<li class="sel-al"><button type="button" class="sel-vai" data-vai="${esc(s.cod)}" title="Enquadrar"><b>${esc(s.cod)}</b>${linhaTxt(s)}</button>` +
-        (s.estado === 'erro' ? `<button type="button" class="sel-denovo" data-denovo="${esc(s.cod)}">tentar de novo</button>`
-          : `<a class="sel-ab" href="${esc(abreUrl(s.cod))}" title="Abrir ${esc(s.cod)}" aria-label="Abrir ${esc(s.cod)}">${SETA}</a>`) +
-        `<button type="button" class="sel-x" data-x="${esc(s.cod)}" title="Tirar do mapa" aria-label="Tirar ${esc(s.cod)} do mapa">✕</button></li>`).join('');
+    const fk = foco && (foco.dataset.x ? `[data-x="${CSS.escape(foco.dataset.x)}"]` : foco.hasAttribute('data-aberto') ? '[data-aberto]'
+      : foco.dataset.denovo ? `[data-denovo="${CSS.escape(foco.dataset.denovo)}"], [data-x="${CSS.escape(foco.dataset.denovo)}"]`
+      : foco.dataset.cod ? `.sel-ab[data-cod="${CSS.escape(foco.dataset.cod)}"]` : null);
+    const ab = !renA ? '' : `<li class="sel-al ab${oculto ? ' oc' : ''}"><button type="button" class="sel-c" data-aberto ${oculto ? 'data-mostra' : 'data-oculta'} aria-pressed="${!oculto}" ` +
+      `title="${oculto ? 'Mostrar no mapa' : 'Esconder no mapa'}" aria-label="${esc(EU)}, aberto, no mapa">${oculto ? OLHO_X : OLHO}<b>${esc(EU)}</b><small${oculto ? '' : ' class="vh"'}>${oculto ? 'escondido' : 'aberto'}</small></button></li>`;
+    ul.innerHTML = ab + [...sels.values()].map(s => {
+      const c = esc(s.cod), t = chipTxt(s);
+      return `<li class="sel-al"><button type="button" class="sel-c" data-x="${c}"${s.estado === 'baixando' ? ' aria-busy="true"' : ''} title="${esc(t.title)} · tocar tira do mapa" ` +
+        `aria-label="Tirar ${c} do mapa (${esc(t.fala)})"><b>${c}</b>${t.tx}<span class="sel-xi" aria-hidden="true">✕</span></button>` +
+        (s.estado === 'erro' ? `<button type="button" class="sel-denovo" data-denovo="${c}" aria-label="Tentar de novo ${c}">tentar de novo</button>`
+          : `<a class="sel-ab" data-cod="${c}" href="${esc(abreUrl(s.cod))}" title="Abrir ${c}" aria-label="Abrir ${c}">${SETA}</a>`) + '</li>';
+    }).join('');
     if (fk) { const el = ul.querySelector(fk); if (el) el.focus(); }
   }
   // sugestões: o pedaço digitado em qualquer parte do código, sem caixa; as da tela primeiro, depois as mais perto
@@ -1377,7 +1402,7 @@
     limpar: () => { travaLimpa(true); solta(); },
     eqMudou: cod => { if (eqs && sels.has(cod)) eqs.pinta(); },
     ativo: () => ativo ? { al: ativo.s.cod, nomes: ativo.nomes.slice() } : null,
-    // o aberto escondido no mapa (✕ do menu): esconde(true | false), oculto(), focos() (quantos pontos copiados)
+    // o aberto escondido no mapa (chip do menu): esconde(true | false), oculto(), focos() (quantos pontos copiados)
     esconde: sim => esconde(sim),
     oculto: () => oculto,
     focos: () => copias ? copias.size : 0,
