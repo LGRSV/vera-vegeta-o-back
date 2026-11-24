@@ -1172,6 +1172,8 @@
     '.sel-vazio{margin:0;padding:var(--s1) var(--s3) var(--s2);color:var(--muted);font-size:var(--t-xs)}' +
     // o aviso do limite (clique no 11º): no vidro dos controles, abaixo do botão; some sozinho
     '.sel-aviso{position:absolute;top:calc(100% + 6px);right:0;pointer-events:none}' +
+    // celular e tablet: a fileira das camadas (lupa-painel.js) passa embaixo do botão; o aviso desce para baixo dela
+    '@media (max-width:860px){.mapbox:has(>.lp-cams:not([hidden])) .sel-aviso{top:calc(100% + 60px)}}' +
     '.sel-aviso-t{display:block;width:max-content;max-width:min(300px,calc(100vw - 48px));padding:var(--s2) var(--s3);background:var(--vidro);' +
     '-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--vidro-fg);border:1px solid var(--vidro-borda);border-left:3px solid var(--aviso);' +
     'border-radius:var(--r2);box-shadow:var(--sh-vidro);font:600 var(--t-sm)/1.35 var(--f-body);animation:sel-aviso-in .18s var(--ease,ease) both;transition:opacity .25s var(--ease,ease)}' +
@@ -1232,7 +1234,11 @@
       if (d) { deNovo(d.dataset.denovo); return; }
       if (o) { adiciona(o.dataset.poe); return; }
       if (e.target.closest('[data-todos]')) { verTodos(); return; }
-      if (e.target.closest('[data-tira]')) { [...sels.keys()].forEach(tira); q.focus(); }
+      if (e.target.closest('[data-tira]')) {
+        [...sels.keys()].forEach(tira);
+        // no toque (como no botão: MOVEL cobre o Safari, cujo click não traz pointerType), o foco vai para o título (o botão some com a lista vazia): focar a busca subia o teclado sem pedir
+        if (e.detail && (MOVEL || (e.pointerType && e.pointerType !== 'mouse'))) lst.querySelector('.sel-t').focus({ preventScroll: true }); else q.focus();
+      }
     });
     // a roda do mouse (vertical) rola a fileira de lado: sem isso, no PC só arrastando a barra fina
     lst.querySelector('.sel-als').addEventListener('wheel', e => {
@@ -1263,6 +1269,8 @@
       abre(false); bt.focus();
     }, true);
     document.addEventListener('pointerdown', e => { if (!lst.hidden && !canto.contains(e.target)) abre(false); }, true);
+    let quadroLista = 0;
+    addEventListener('resize', () => { if (!lst.hidden && !quadroLista) quadroLista = requestAnimationFrame(() => { quadroLista = 0; if (!lst.hidden) medeLista(); }); });
     canto.addEventListener('focusout', e => { if (e.relatedTarget && !canto.contains(e.relatedTarget)) abre(false); });
     menu();
   }
@@ -1270,16 +1278,20 @@
     lst.hidden = !sim;
     bt.setAttribute('aria-expanded', String(sim));
     if (!sim) return;
-    // a lista cabe no mapa (até o pé dele), com rolagem própria
+    medeLista();
+    rolaPara = 'dir';                                    // a ponta direita: o aberto, junto do botão
+    menu();
+    if (foco === 'titulo') lst.querySelector('.sel-t').focus({ preventScroll: true });
+    else if (foco) (q.disabled ? lst.querySelector('[data-aberto]') || lst.querySelector('.sel-c') : q).focus();   // (sem a busca: o chip do aberto, junto do botão)
+  }
+  // a lista cabe no mapa (até o pé dele), com rolagem própria. Medido ao abrir e de novo quando a tela muda com ela aberta
+  // (girar o celular): senão a largura de antes a jogava para fora da tela
+  function medeLista() {
     const m = box.getBoundingClientRect(), b = bt.getBoundingClientRect();
     // a largura que cabe à esquerda do botão (a fileira cresce para a esquerda; na tela cheia do tablet o botão fica à
     // esquerda da gaveta): do lado direito da lista até a borda esquerda do mapa
     box.style.setProperty('--sel-w', Math.max(200, Math.min(m.width, b.right - m.left)) + 'px');
     lst.style.maxHeight = Math.max(160, m.bottom - b.bottom - 18) + 'px';
-    rolaPara = 'dir';                                    // a ponta direita: o aberto, junto do botão
-    menu();
-    if (foco === 'titulo') lst.querySelector('.sel-t').focus({ preventScroll: true });
-    else if (foco) (q.disabled ? lst.querySelector('[data-aberto]') || lst.querySelector('.sel-c') : q).focus();   // (sem a busca: o chip do aberto, junto do botão)
   }
   function menu() {
     if (!canto) return;

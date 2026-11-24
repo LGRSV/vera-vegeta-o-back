@@ -407,17 +407,21 @@
       // legendas no canto inferior esquerdo, uma sobre a outra, na largura da maior; cada uma no seu vidro (o das próprias
       // camadas), acima do crédito do mapa (28 px, como o Tela cheia). Alto: abaixo da linha T1 T2 T3/Menu (12 + 50 + folga);
       // o que não couber rola dentro delas
-      '.ctl-lgs{position:absolute;left:12px;bottom:28px;z-index:800;display:flex;flex-direction:column;align-items:stretch;gap:var(--s1);max-height:calc(100% - 28px - 76px);' +
+      // (--atr-h: a altura do crédito, medida em legendas(); no celular ele quebra em 2 linhas e passaria dos 28 px)
+      '.ctl-lgs{--lgs-b:max(28px,calc(var(--atr-h,0px) + 4px));position:absolute;left:12px;bottom:var(--lgs-b);z-index:800;display:flex;flex-direction:column;align-items:stretch;gap:var(--s1);max-height:calc(100% - var(--lgs-b) - 76px);' +
       'max-width:calc(100% - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}' +
       // celular: o chip da OS em foco vai da esquerda até o Tela cheia (limpeza.js); as legendas sobem acima dele
-      '@media (max-width:640px){.mapbox:has(>.limp-chip:not([hidden]))>.ctl-lgs{bottom:calc(28px + 56px);max-height:calc(100% - 84px - 76px)}}' +
+      '@media (max-width:640px){.mapbox:has(>.limp-chip:not([hidden]))>.ctl-lgs{bottom:calc(var(--lgs-b) + 56px);max-height:calc(100% - var(--lgs-b) - 56px - 76px)}}' +
       '.ctl-lgs:not(:has(>:not([hidden]))){display:none}' +
       '.ctl-lgs.sob-balao{visibility:hidden;opacity:0}' +
       '@media (prefers-reduced-motion:no-preference){.ctl-lgs{transition:opacity var(--dur) var(--ease),visibility 0s}.ctl-lgs.sob-balao{transition:opacity var(--dur) var(--ease),visibility 0s var(--dur)}}' +
       '.mapbox>.ctl-lgs>*{position:static;inset:auto;z-index:auto;flex:none;margin:0;max-width:none;float:none;clear:none}' +   // sem o canto antigo de cada uma
-      '@media (max-width:640px){.mapbox>.ctl-lgs>.limp-maplg>:is(.lg-cab,.lg-info){display:none}}' +   // celular: só o traço e o ano
+      // celular: sem o título; os itens lado a lado (quebrando a linha) até a coluna dos botões da direita (Tocantins, Tela
+      // cheia): uma linha por item, com o alvo de 40 px, cobria quase 2/3 do mapa
+      '@media (max-width:640px){.mapbox>.ctl-lgs>.limp-maplg>.lg-cab{display:none}' +
+      '.mapbox>.ctl-lgs{max-width:calc(100% - 24px - 56px)}.mapbox>.ctl-lgs>.limp-maplg{display:flex;flex-wrap:wrap}}' +
       // fileira das camadas sempre à vista no alto do mapa (lupa-painel.js): as legendas param abaixo dela
-      '.mapbox:has(>.lp-cams)>.ctl-lgs{max-height:calc(100% - 28px - 124px)}' +
+      '.mapbox:has(>.lp-cams)>.ctl-lgs{max-height:calc(100% - var(--lgs-b) - 124px)}' +
       // aba "Trechos" do painel: abre e fecha a lista
       '.lista-aba{display:flex;align-items:center;gap:var(--s2);width:100%;min-height:var(--alvo);padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);' +
       'background:var(--paper);color:var(--fg);font:var(--t-sm) var(--f-body);text-align:left;cursor:pointer}' +
@@ -493,6 +497,8 @@
     const map = window.__map;
     if (!map || box.dataset.balao) return;
     box.dataset.balao = '1';
+    const atr = map.attributionControl && map.attributionControl.getContainer();   // a coluna fica acima do crédito do mapa
+    if (atr && window.ResizeObserver) new ResizeObserver(() => mb.style.setProperty('--atr-h', atr.offsetHeight + 'px')).observe(atr);
     const confere = () => {
       const pop = map.getContainer().querySelector('.leaflet-popup');
       let cruza = false;

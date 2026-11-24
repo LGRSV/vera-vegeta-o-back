@@ -1207,13 +1207,16 @@
     // com a fileira de camadas, os avisos do mapa (satélite, Leaflet) descem para baixo dela e não ficam cobertos
     '.mapbox:has(>.lp-cams)>.banner{top:116px}' +
     '.lp-cams button{flex:none;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--vidro-fg);font:600 var(--t-xs)/1 var(--f-body);white-space:nowrap;cursor:pointer}' +
-    '@media (pointer:coarse){.lp-cams button{min-height:40px}}' +
+    '@media (pointer:coarse){.lp-cams button{min-height:40px;min-width:40px}}' +   // toque: alvo de 40 px (NAE e Insp. curtos no celular)
     '.lp-cams button:hover{background:var(--vidro-hover)}.lp-cams button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}' +
     '.lp-cams button[aria-pressed=true]{background:var(--accent);color:var(--on-accent)}' +
     // tela estreita: menos folga e o nome curto, para NAE | Faixa | Insp. | Insp→manut | Manut. | Queimadas caberem sem rolar
     // (os nomes inteiros pedem ~443 px: de 541 px em diante cabem com folga)
     '.lp-cams .lp-cc{display:none}' +
     '@media (max-width:540px){.mapbox>.lp-cams{gap:0}.lp-cams button{padding:0 5px}.lp-cams .lp-cl{display:none}.lp-cams .lp-cc{display:inline}}' +
+    // tablet em tela cheia com a gaveta aberta (ela cobre a direita do mapa): a fileira para antes dela, com os nomes curtos
+    '@media (min-width:701px) and (max-width:999px){body.tela-cheia.tc-gaveta .mapbox>.lp-cams{gap:0;max-width:calc(100% - min(420px,92vw) - 24px)}' +
+    'body.tela-cheia.tc-gaveta .lp-cams button{padding:0 6px}body.tela-cheia.tc-gaveta .lp-cams .lp-cl{display:none}body.tela-cheia.tc-gaveta .lp-cams .lp-cc{display:inline}}' +
     '.mapbox.fx-modo>.lp-cams{display:none}';
   document.head.append(s);
 })();

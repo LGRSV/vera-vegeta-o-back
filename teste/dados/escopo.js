@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.39",
+ "versao": "2.40",
  "atualizado": "2026-11-24",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -186,7 +186,8 @@ window.ARGOS_ESCOPO = {
    {"t": "Menu Alimentadores em fileira horizontal que cresce para a esquerda; visão Tocantins com as linhas fortes de longe (como o satélite)", "st": "ok", "d": "2026-11-24"},
    {"t": "Revisão de código do menu Alimentadores (largura, ordem do Tab, roda do mouse, novo à vista) e opacidade do estado sem degrau", "st": "ok", "d": "2026-11-24"},
    {"t": "Selecionados: a rede do último selecionado tirado some do mapa (ficava desenhada, presa à tela); menu sem a 2ª rolagem lateral", "st": "ok", "d": "2026-11-24"},
-   {"t": "Revisão como usuário (PC e celular): 7 defeitos menores a corrigir (toque no satélite, menu ao girar o celular, Queimadas sob a gaveta, aviso do limite, teclado, alvos de toque, crédito do satélite)", "st": "pend", "prazo": "2026-11-25", "resp": "dev"},
+   {"t": "Revisão como usuário (PC e celular), 12 defeitos corrigidos e retestados: toque no satélite, menu ao girar o celular, Queimadas sob a gaveta, aviso do limite, teclado, alvos de toque de 40 px, crédito do satélite, satélite e legenda da Faixa cabendo no celular, etiquetas sem empilhar no zoom", "st": "ok", "d": "2026-11-24"},
+   {"t": "Alvos de toque pequenos nas abas Faixa, Orçamento, Priorizador e Podas no celular", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
    {"t": "Revisão da reclassificação T1/T2 (conservação de km, NAE, UCs, Priorização e Faixa)", "st": "ok", "d": "2026-11-24"},
    {"t": "Priorização pelo mapa de hoje: T1 com o km do mapa e T3 novos como linhas próprias (não somam no T1)", "st": "ok", "d": "2026-11-24"},
    {"t": "Fora do site os 3 alimentadores divididos com a base do Rede Sentinela (PS01112193, LD01104052, LD01926241)", "st": "ok", "d": "2026-11-24"},

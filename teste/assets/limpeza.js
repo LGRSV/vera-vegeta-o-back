@@ -241,7 +241,7 @@
 /* anos (ou situações): uma lista só. Cada linha: cor (liga/desliga no mapa) · nome, OS e km (abre as OS logo abaixo) · "só" */
 .limp-anos{display:grid}
 .limp-ano-l{display:flex;align-items:stretch;min-height:var(--alvo);border-bottom:1px solid var(--line)}
-.limp-ano-l>button{all:unset;box-sizing:border-box;cursor:pointer;color:var(--fg)}
+.limp-ano-l>button{all:unset;box-sizing:border-box;min-height:var(--alvo);cursor:pointer;color:var(--fg)}   /* 40 px no botão (a borda da linha ficava com 1 px dele) */
 .limp-ano-l>button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .limp-ano-l>button:hover{background:var(--hover)}
 .limp-ano-l .liga,.limp-ano-l .cor{flex:none;display:grid;place-items:center;width:var(--alvo)}
@@ -309,6 +309,7 @@
 .limp-chip button:focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}
 .limp-tag{display:inline-flex;align-items:baseline;gap:6px;transform:translate(-50%,-140%);white-space:nowrap;pointer-events:none;
   font:700 12.5px/1 var(--f-mono);color:#111;background:var(--c);padding:5px 8px;border-radius:6px;border:2px solid #0b0f14;box-shadow:0 2px 6px #0008}
+.limp-voo .limp-tag{visibility:hidden!important}
 .limp-tag::after{content:'';position:absolute;left:50%;bottom:-8px;margin-left:-6px;border:6px solid transparent;border-top-color:#0b0f14;border-bottom:0}
 .limp-tag small{font:600 11px var(--f-body);opacity:.8}
 .limp-tag em{font:700 11px var(--f-body);font-style:normal;background:#0b0f14;color:#fff;padding:2px 5px;border-radius:4px;margin:-2px 0 -2px -4px}
@@ -702,7 +703,10 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){display:no
     tags.forEach((t, i) => { if (t.style.visibility !== some[i]) t.style.visibility = some[i]; });
   }
   let quadroEtiquetas = 0;
-  const pedeEtiquetas = () => { if (!quadroEtiquetas) quadroEtiquetas = requestAnimationFrame(() => { quadroEtiquetas = 0; desamontoa(); }); };
+  const pedeEtiquetas = () => { if (!quadroEtiquetas) quadroEtiquetas = requestAnimationFrame(() => { quadroEtiquetas = 0; desamontoa(); if (map) map.getContainer().classList.remove('limp-voo'); }); };
+  // no voo do zoom as etiquetas andam juntas e se cruzam até o fim dele (desamontoa mede no zoomend): somem no voo e voltam
+  // já sem se cobrir
+  if (map) map.on('zoomstart', () => map.getContainer().classList.add('limp-voo'));
   if (map) map.on('zoomend', () => {
     const ren = map.options.renderer, canvas = !!(window.L && L.Canvas && ren instanceof L.Canvas), pedido = canvas && ren._redrawRequest;
     fusiveis();

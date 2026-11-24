@@ -414,7 +414,8 @@
       '.st-sat .st-nitido img.leaflet-tile{mix-blend-mode:normal}' +
       // a lista do município aberto (busca-ativo.js) não fica por cima do satélite
       '.sat-to #ativo-res.lista-mun{visibility:hidden}' +
-      '.st-sat .leaflet-control-attribution{background:var(--vidro,rgba(15,20,23,.82));color:var(--vidro-fg,#f3f4f4);font:11px/1.4 var(--f-body,sans-serif);border-top-left-radius:var(--r1,6px)}' +
+      // .st-sat.leaflet-container na frente: o leaflet.css entra depois deste estilo e o fundo branco dele vencia (crédito ilegível)
+      '.st-sat.leaflet-container .leaflet-control-attribution{background:var(--vidro,rgba(15,20,23,.82));color:var(--vidro-fg,#f3f4f4);font:11px/1.4 var(--f-body,sans-serif);border-top-left-radius:var(--r1,6px)}' +
       '.st-linhas{transition:opacity .45s var(--ease,ease)}' +
       // os outros elementos do mapa (nomes, bandeiras, cartões) saem como no raio-X; o Tela cheia e o "Abrindo…" ficam
       '.sat-to .mt-mapa>:not(svg):not(.mt-tc):not(.st-sat):not(.st-lado):not(.st-lgs):not(.st-balao):not(.mt-abrindo){opacity:0;pointer-events:none}' +
@@ -464,7 +465,7 @@
       '.st-cams{display:flex;gap:2px;max-width:100%;padding:2px;overflow-x:auto;scrollbar-width:none;background:var(--vidro,rgba(15,20,23,.82));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);' +
       'border:1px solid var(--vidro-borda,rgba(255,255,255,.12));border-radius:var(--r2,10px);box-shadow:var(--sh-vidro,0 2px 8px rgb(0 0 0 / .35))}.st-cams[hidden]{display:none}' +
       '.st-cams button{flex:none;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--vidro-fg,#f3f4f4);font:600 var(--t-xs,12px)/1 var(--f-body,sans-serif);white-space:nowrap;cursor:pointer}' +
-      '@media (pointer:coarse){.st-cams button{min-height:40px}}' +
+      '@media (pointer:coarse){.st-cams button{min-height:40px;min-width:40px}}' +
       '.st-cams button:hover{background:var(--vidro-hover,rgba(255,255,255,.1))}.st-cams button:focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:-2px}' +
       '.st-cams button[aria-pressed=true]{background:var(--accent,#f08a5d);color:var(--on-accent,#14181b)}' +
       '.st-cams .st-cc{display:none}@media (max-width:540px){.st-cams{gap:0}.st-cams button{padding:0 5px}.st-cams .st-cl{display:none}.st-cams .st-cc{display:inline}}' +
@@ -550,10 +551,12 @@
       '.sem-nae .st-card i,.sem-nae .st-sat .mt-mn i,.sem-nae .st-balao .h i,.sem-nae .st-lado .st-sel{display:none}' +
       // celular: o aviso em coluna, só o nome e as cores (sem teclado; o resto não cabe sem cobrir a ponta norte do estado);
       // nos níveis, numa linha só (a trilha já diz onde se está)
-      '@media (max-width:640px){.st-lado{left:8px;top:8px;gap:6px;max-width:calc(100% - 64px)}.st-lgs{left:8px;bottom:22px;max-width:calc(100% - 16px)}.st-aviso{padding:6px 10px;gap:4px}.st-leg{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:2px}' +
+      // celular: só a 1ª linha (T1 T2 T3, Fronteira) para antes do Tela cheia; a fileira das camadas, embaixo dele, vai até a
+      // beira (com os alvos de 40 px ela não cabia e o Queimadas ficava cortado)
+      '@media (max-width:640px){.st-lado{left:8px;top:8px;gap:6px;max-width:calc(100% - 16px)}.st-lado>.st-topo{max-width:calc(100% - 48px)}.st-lgs{left:8px;bottom:22px;max-width:calc(100% - 16px)}.st-aviso{padding:6px 10px;gap:4px}.st-leg{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:2px}' +
       '.st-aviso .st-n,.st-aviso .st-tecla{display:none}.st-lgs.st-niv .st-leg{flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 10px}' +
       '.st-mun{width:auto;padding:9px 10px 10px;gap:4px}.st-mun-h b{font-size:var(--t-lg,17px)}.st-mun-l{max-height:30svh}.st-mun .st-mun-pr{display:none}' +
-      '.st-sat .leaflet-control-attribution{font-size:9px}}' +
+      '.st-sat.leaflet-container .leaflet-control-attribution{font-size:9px}}' +
       '@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .st-aviso .st-tecla{color:#b9c1c6}}' +
       ':root[data-theme="light"] .st-aviso .st-tecla{color:#b9c1c6}' +
       '@media (prefers-reduced-motion:reduce){.st-card,.st-sat .mt-mn,.st-sat .mt-fio,.st-sat .mt-pino{animation:none}.st-mun-b svg{transition:none}}';
@@ -2606,6 +2609,9 @@
   const ROT_MAX = [50, 18], ROT_FICA = 1200, ZROT = 12;   // ZROT: só de perto (pedido do usuário: "só com bastante zoom")
   let rotulos = [], quadroRot = 0, rotAl = null, rotT = 0;
   function rotDoAl(cod) {                                   // o alimentador do mouse mudou
+    // no toque, o mouseover de compatibilidade (vem antes do click) não mostra as etiquetas: senão o click já acharia
+    // rotAl === cod e o 1º toque abriria o alimentador; quem mostra no toque é o cliqueLinha
+    if (ponteiro === 'touch') return;
     clearTimeout(rotT);
     if (cod) { if (rotAl !== cod) { rotAl = cod; pedeRotulos(); } return; }
     if (ponteiro === 'touch') return;                       // (no toque, até tocar fora ou em outro)
@@ -2946,6 +2952,7 @@
       cliqueArea(e.latlng);
     });
     caixaSat.addEventListener('pointerdown', e => { ponteiro = e.pointerType || 'mouse'; }, true);
+    caixaSat.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') ponteiro = 'mouse'; }, true);   // mouse depois do dedo (tela com os dois)
     caixaSat.addEventListener('wheel', e => { if (voandoN) e.preventDefault(); }, { passive: false });   // no voo, a roda não rola a página
     // a espessura das linhas muda com o zoom: só as opções, sem pedir redesenho (o moveend que vem logo depois redesenha todas)
     map.on('zoomend', () => grupos.forEach(g => g.forEach(pl => { if (pl._stCls !== 'PT') L.setOptions(pl, estiloDe(pl, false)); })));
