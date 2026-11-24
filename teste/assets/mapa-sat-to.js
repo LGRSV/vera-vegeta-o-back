@@ -41,6 +41,8 @@
 //   por áreas (zoom, arrasto, a dica da linha e o clique que abre a página continuam); ligado, os níveis acima. A escolha
 //   fica guardada (localStorage st-fronteira). Desligado, o satélite não segue o nível do mapa dos municípios nem o muda
 //   ao fechar.
+//   Ligado, as divisas também seguem o zoom: de longe as regionais; aproximando, os polos (Z_FR_POL) e os municípios
+//   (Z_FR_MUN), em qualquer nível (porZoom).
 // - Raio-X (mapa-raiox.js, Ctrl+X) e satélite não ficam ligados juntos: Ctrl+S desliga o raio-X, e o raio-X ligado fecha o
 //   satélite.
 (function () {
@@ -974,7 +976,36 @@
       });
     }
     const BR = 'rgba(255,255,255,.92)';
-    function nivel(n, Pn) {                                 // o desenho de um nível com um pincel
+    // Fronteira pelo zoom (pedido do usuário: "a medida que eu vou dando o zoom ... vai vindo as outras fronteiras"): além
+    // das divisas do nível, aproximando entram os polos (de Z_FR_POL) e depois os municípios (de Z_FR_MUN), com a
+    // opacidade subindo em RAMPA de zoom (em passos de 0,2: o desenho só se refaz quando o passo muda); os de fora da
+    // regional aberta mais apagados (ficam sobre o véu)
+    const Z_FR_POL = 7.2, Z_FR_MUN = 8.1, RAMPA = 0.6;
+    const rampa = (z, z0) => Math.max(0, Math.min(1, Math.round((z - z0) / RAMPA * 5) / 5));
+    const faixaZ = () => map ? rampa(map.getZoom(), Z_FR_POL) + ',' + rampa(map.getZoom(), Z_FR_MUN) : '';
+    function porZoom(n, Pn) {
+      const z = map.getZoom(), aP = rampa(z, Z_FR_POL), aM = rampa(z, Z_FR_MUN);
+      if (!aP && !aM) return;
+      const fo = r => (n.reg && r !== n.reg ? 0.45 : 1);
+      if (aM) {                                             // municípios: as que o nível ainda não desenha
+        const ja = n.pol ? new Set(D.pol[n.pol].ms.map(m => m.cod)) : null, grupos = new Map();
+        for (const m of M.muns) {
+          const a = D.mun[m.cod];
+          if (!a || (ja && ja.has(m.cod))) continue;
+          const k = fo(m.reg);
+          if (!grupos.has(k)) grupos.set(k, []);
+          grupos.get(k).push(a);
+        }
+        grupos.forEach((as, k) => Pn.linha(as, 'rgba(255,255,255,.72)', 0.9, 1.8, aM * k));
+      }
+      if (aP) for (const r of D.regs) {                     // polos: os das regionais que o nível não mostra por polo
+        if (n.reg === r.nome) continue;
+        r.polos.forEach(p => Pn.porDentro(D.pol[p], corPolo(p), 2.2, 1.6, aP * fo(r.nome)));
+        Pn.linha(r.polos.map(p => D.pol[p]), BR, 0.9, 0, aP * fo(r.nome));
+      }
+    }
+    function nivel(n, Pn) { porZoom(n, Pn); nivel0(n, Pn); }
+    function nivel0(n, Pn) {                                // o desenho de um nível com um pincel
       const a = areaDe(n);
       if (a) Pn.veu(a);                                     // véu fora do nível
       if (!n.reg) { Pn.linha(D.regs, BR, 1.8, 3, 1); return; }
@@ -1006,7 +1037,7 @@
         grupos2.forEach(g => { g.v.remove(); g.c.remove(); });
         grupos2 = [nivAntes, niv].map(n => {
           const g = { v: el('g', {}), c: el('g', {}) };
-          nivel(n, pincelSvg(g.v, g.c));
+          nivel0(n, pincelSvg(g.v, g.c));                  // (no voo sem as divisas do zoom, porZoom: voltam no pouso)
           veu.sv.append(g.v); cont.sv.append(g.c);
           return g;
         });
@@ -1036,7 +1067,7 @@
     }
     // ---- parado: os canvas ----
     let chave = '', vC = null, ctC = '';                    // vC: a vista do desenho dos canvas; ctC: o que está desenhado neles
-    const conteudo = (n, na, mi) => [window.devicePixelRatio, mi, chN(n), chN(na)].join('|');
+    const conteudo = (n, na, mi) => [window.devicePixelRatio, mi, chN(n), chN(na), faixaZ()].join('|');
     const chaveDe = (n, na, mi) => chaveVista() + '|' + conteudo(n, na, mi);
     const depois = adiado(() => desenha());
     function desenha(forca) {                               // forca (true): mesmo com tudo igual ao último desenho (tema, abertura)
@@ -1750,13 +1781,14 @@
   function realca(cod) {
     if (sobre === cod) return;
     sobre = cod;
+    rotDoAl(cod);
     poeRealceLinha();
     if (cod && grupos.has(cod) && window.ARGOS_PAG && window.ARGOS_PAG.prepara) window.ARGOS_PAG.prepara(cod);   // a página dele começa a vir
     if (cartaoMun) cartaoMun.querySelectorAll('.st-al').forEach(b => b.classList.toggle('on', b.dataset.al === cod));
     if (!cod && balao) balao.hidden = true;
   }
-  function abreAl(cod) {
-    const p = `alimentadores/${encodeURIComponent(cod)}/`;
+  function abreAl(cod) {                                   // ?cheia=1: o mapa do alimentador já em tela cheia (telacheia.js; pedido do usuário)
+    const p = `alimentadores/${encodeURIComponent(cod)}/?cheia=1`;
     if (window.ARGOS_PAG && window.ARGOS_PAG.abre) window.ARGOS_PAG.abre(p); else location.href = RAIZ + p;
   }
   // toque (dedo) acima do município: a linha embaixo do dedo é difícil de evitar no mapa inteiro, então o toque entra na área
@@ -1765,6 +1797,10 @@
   function cliqueLinha(cod, e) {
     const oe = e && e.originalEvent, tipo = (oe && oe.pointerType) || ponteiro;
     if (tipo === 'touch' && fronteira && !niv.mun && e.latlng) { cliqueArea(e.latlng); return; }
+    if (oe) oe._stLinha = true;
+    // toque na vista Por ano da visão Limpeza: o 1º mostra as etiquetas das OS do alimentador (sem mouse, não há outro
+    // jeito de vê-las); o 2º, no mesmo, abre
+    if (tipo === 'touch' && ativo === conjA && rotAl !== cod) { clearTimeout(rotT); rotAl = cod; pedeRotulos(); return; }
     abreAl(cod);
   }
   // para onde o clique (ou o toque) num ponto leva: a área do nível de baixo, ou a vizinha (outra regional, outro polo,
@@ -1849,15 +1885,24 @@
   const tiraMarcas = () => { marcas.forEach(mk => mk.remove()); marcas = []; tiraRotulos(); };
 
   // ---------- etiquetas das OS (vista Por ano da visão Limpeza; as da camada Faixa, limpeza.js) ----------
-  // No polo e no município (ou de perto, a partir do zoom ZROT): as das OS dos alimentadores do nível dentro da vista, da
+  // As das OS do alimentador do mouse (rotAl) dentro da vista, da
   // mais recente para a mais antiga, cada uma só se couber sem cobrir outra, as bandeirinhas, os nomes ou a coluna da
   // esquerda (até ROT_MAX). No município, os trechos sem OS ganham o nome num rótulo leve, se couber. Refeitas no fim de
   // cada movimento, no pouso e ao ligar ou desligar um ano.
-  const ZROT = 9.5, ROT_MAX = [50, 18];
-  let rotulos = [], quadroRot = 0;
+  // Só as do alimentador embaixo do mouse (rotAl; pedido do usuário: as etiquetas só quando passar o mouse; clique abre),
+  // em qualquer zoom; ficam ROT_FICA ms depois que o mouse sai da linha (a linha é fina: sem piscar). No toque, o 1º
+  // toque numa linha (cliqueLinha).
+  const ROT_MAX = [50, 18], ROT_FICA = 1200;
+  let rotulos = [], quadroRot = 0, rotAl = null, rotT = 0;
+  function rotDoAl(cod) {                                   // o alimentador do mouse mudou
+    clearTimeout(rotT);
+    if (cod) { if (rotAl !== cod) { rotAl = cod; pedeRotulos(); } return; }
+    if (ponteiro === 'touch') return;                       // (no toque, até tocar fora ou em outro)
+    rotT = setTimeout(() => { if (!sobre && rotAl) { rotAl = null; pedeRotulos(); } }, ROT_FICA);
+  }
   function tiraRotulos() { rotulos.forEach(mk => mk.remove()); rotulos = []; }
   const pedeRotulos = () => { if (!quadroRot) quadroRot = requestAnimationFrame(() => { quadroRot = 0; poeRotulos(); }); };
-  const querRotulos = () => !!map && estado === 'on' && !voandoN && ativo === conjA && !!F && (!!niv.pol || map.getZoom() >= ZROT);
+  const querRotulos = () => !!map && estado === 'on' && !voandoN && ativo === conjA && !!F && !!rotAl;
   const htmlOS = o => `<div class="st-os" style="--c:${corAno(o.ano)}"><em>${esc(o.tr)}</em>${o.datas.map(dataBr).join(' · ')}` +
     `<small>${o.n > 1 ? o.n + ' OS · ' : ''}${NF1.format(o.feito / 1000)} de ${kmTxt(o.total)}</small></div>`;
   function meioDe(ls, fr = 0.5) {                           // o ponto a fr do comprimento da maior linha (0,5: o meio)
@@ -1888,13 +1933,13 @@
     const ar = areaDe(niv), naArea = ll => (ar ? dentro(ar, PA * ll[1] + PB, PC * ll[0] + PD) : !!munEm(L.latLng(ll)));
     const cands = [];
     for (const o of conjA.os || []) {
-      if (anosOff.has(o.ano) || (escopo && !escopo.has(o.al)) || !vb.contains(o.ll) || !naArea(o.ll)) continue;
+      if (o.al !== rotAl || anosOff.has(o.ano) || !vb.contains(o.ll) || !naArea(o.ll)) continue;
       cands.push({ ll: o.ll, html: htmlOS(o), cls: 'st-os', dy: 1.4, extra: 8 });
       if (cands.length >= 6 * max) break;
     }
-    if (niv.mun && escopo) {
+    if (niv.mun) {
       for (const a of F.als) {
-        if (!escopo.has(a.cod)) continue;
+        if (a.cod !== rotAl) continue;
         for (const tr of a.tr) {
           if (tr.limpo > 0 || tr.pec.some(pc => pc.mk) || !tr.ls.length) continue;
           const lls = [0.5, 0.3, 0.7, 0.15, 0.85].map(fr => meioDe(tr.ls, fr)).filter(ll => ll && vb.contains(ll) && naArea(ll));
@@ -2181,7 +2226,10 @@
     map.on('mouseout', () => { realca(null); realceArea(null); balao.hidden = true; });
     // (o mouse saindo pelo canvas das linhas não chega ao mouseout do mapa: o Leaflet entrega esse evento só à linha)
     caixaSat.addEventListener('pointerleave', () => { realca(null); realceArea(null); balao.hidden = true; map.getContainer().style.cursor = ''; });
-    map.on('click', e => cliqueArea(e.latlng));
+    map.on('click', e => {
+      if (rotAl && ponteiro === 'touch' && !(e.originalEvent && e.originalEvent._stLinha)) { rotAl = null; pedeRotulos(); }
+      cliqueArea(e.latlng);
+    });
     caixaSat.addEventListener('pointerdown', e => { ponteiro = e.pointerType || 'mouse'; }, true);
     caixaSat.addEventListener('wheel', e => { if (voandoN) e.preventDefault(); }, { passive: false });   // no voo, a roda não rola a página
     // a espessura das linhas muda com o zoom: só as opções, sem pedir redesenho (o moveend que vem logo depois redesenha todas)

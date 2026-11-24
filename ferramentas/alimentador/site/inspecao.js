@@ -202,8 +202,14 @@ body.insp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){visibility
   });
   function clicavel(ls, vs) { const l = ls[ls.length - 1]; l.options.interactive = true; l.on('click', e => balao(e, vs)); return ls; }
 
+  // a camada para os outros alimentadores (visao-tocantins.js pinta o T1 e o T2 deles com as cores dela): o estado dela e,
+  // quando ele muda, o aviso al:camada
+  window.__inspCam = () => ({ ligado: st.ligado, anos: [...st.anos], todos: ANOS.slice(), comFaixa: document.body.classList.contains('limp-on') });
+  let camAvisado = '';
+  const avisaCam = () => { const k = JSON.stringify(window.__inspCam()); if (k !== camAvisado) { camAvisado = k; document.dispatchEvent(new Event('al:camada')); } };
   function desenha() {
     if (!map) return;
+    avisaCam();
     if (camada) camada.remove();
     camada = null;
     document.body.classList.toggle('insp-on', st.ligado);

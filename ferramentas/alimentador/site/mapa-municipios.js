@@ -20,7 +20,18 @@
     if (noSite && al) abrindo(decodeURIComponent(al[1]), p);
     else if (noSite) location.href = p; else window.open(SITE + p, '_blank', 'noopener');
   };
-  window.ARGOS_PAG = { url: pag, alvo: alvoA, abre: vaiPag, prepara: al => queroAl(al) };
+  // "Abrir <município>" (pedido do usuário): o mapa do alimentador com mais km no município, com os 10 seguintes (por km
+  // nele) já selecionados (?sel=, assets/selecionados.js: até 10 além do aberto), enquadrado no município (?mun=) e com o
+  // aviso de quantos ficaram de fora (?fora=). Município sem alimentador: a página dele, como antes
+  const LIM_SEL = 10;
+  const pagMun = m => {
+    const als = (m.als || []).slice().sort((a, b) => b.m - a.m);
+    if (!als.length) return `municipios/${m.slug}/`;
+    const sel = als.slice(1, 1 + LIM_SEL).map(a => a.cod), fora = Math.max(0, als.length - 1 - LIM_SEL);
+    return `alimentadores/${encodeURIComponent(als[0].cod)}/?` + (sel.length ? `sel=${sel.map(encodeURIComponent).join(',')}&` : '') +
+      `mun=${encodeURIComponent(m.cod)}` + (fora ? `&fora=${fora}` : '');
+  };
+  window.ARGOS_PAG = { url: pag, alvo: alvoA, abre: vaiPag, prepara: al => queroAl(al), mun: pagMun };
   // troca suave entre as páginas do site (transição entre documentos; navegador sem suporte ignora a regra).
   // A página de chegada precisa da mesma regra no HTML dela; sem ela o navegador cancela a transição e a página nova
   // acusa erro no console. Por isso só segue a transição para página que a pré-carga viu com a regra (comVT); as outras
@@ -1243,7 +1254,7 @@
     const m = porCod[mun];
     legAl.querySelectorAll('.mt-al.foco').forEach(a => a.classList.remove('foco'));
     const ab = legAl.querySelector('.mt-amun');
-    if (ab) { ab.href = pag(`municipios/${m.slug}/`); ab.textContent = `Abrir ${m.nome} →`; }
+    if (ab) { ab.href = pag(pagMun(m)); ab.textContent = `Abrir ${m.nome} →`; }
     trilhaMun();
     volta.setAttribute('aria-label', `${m.nome}. Voltar ao polo ${pol}`);
     volta.title = `Voltar ao polo ${pol}`;
@@ -1477,8 +1488,9 @@
   }).observe(caixa);
 
   // no estado inteiro, escolher um município abre a regional dele; com a regional aberta, abre o polo dele; com o polo
-  // aberto, abre o município (a rede dos alimentadores); com o município aberto, abre a página dele
-  const abre = cod => { const m = porCod[cod]; if (m && m.slug) vaiPag(`municipios/${m.slug}/`); };
+  // aberto, abre o município (a rede dos alimentadores); com o município aberto, abre o mapa do alimentador dele com mais
+  // rede, com os seguintes selecionados (pagMun; sem alimentador, a página do município)
+  const abre = cod => { const m = porCod[cod]; if (m && m.slug) vaiPag(pagMun(m)); };
   const escolhe = (cod, teclado) => {
     const m = porCod[cod];
     if (!reg && m.reg) entra(m.reg, teclado, cod);

@@ -212,4 +212,19 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
   });
   window.__telaCheia = alterna;
   window.__gaveta = abrir => gaveta(!!abrir);             // modo Limpeza de faixa: fecha ao começar e devolve ao sair
+  // ?cheia=1: chegou pelo clique numa linha do satélite do Tocantins (mapa-sat-to.js; pedido do usuário: direto no mapa
+  // do alimentador em tela cheia): a tela cheia do CSS (a do navegador pede um gesto na própria página), com a gaveta
+  // fechada (a aba abre) e a rede enquadrada no mapa maior. Vale só na chegada (sai do endereço)
+  const PQ = new URLSearchParams(location.search);
+  if (PQ.get('cheia') === '1') {
+    PQ.delete('cheia');
+    const q = PQ.toString();
+    try { history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash); } catch (e) { /* sem history: fica no endereço */ }
+    aplica(true);
+    gaveta(false);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      map.invalidateSize();
+      if (window.__caixaRede) map.fitBounds(window.__caixaRede.pad(0.04), { animate: false });
+    }));
+  }
 })();

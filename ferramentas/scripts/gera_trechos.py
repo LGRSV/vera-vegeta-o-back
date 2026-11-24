@@ -9,6 +9,8 @@ relatório de validação. Determinístico: as mesmas entradas geram os mesmos a
     python scripts/gera_trechos.py --saida <pasta do site> --validar           só confere dados e páginas já gerados
     python scripts/gera_trechos.py --saida <pasta do site> --so-interface      refaz páginas, índice e relatório
     python scripts/gera_trechos.py --saida <pasta do site> --comparar <clone gh-pages publicado>
+    python scripts/gera_trechos.py --saida <pasta do site> --so-faixa [--data AAAA-MM-DD]   só dados/redes/faixa.txt
+    python scripts/gera_trechos.py --saida <pasta do site> --so-camadas        só dados/redes/inspecao.txt, executadas.txt, manutencao.txt
     python scripts/gera_trechos.py --saida <pasta do site> --vizinhos [<destino>]   só dados/vizinhos/, das páginas
                                                                                (dados.js, chaves.js e ativos.js)
 
@@ -729,9 +731,9 @@ def pacote_trechos(destino):
 
 
 # ?v= dos assets da página inicial e da Queimadas: trocar quando o arquivo muda (o navegador guarda a versão anterior)
-V_MAPA = '20261119'                                     # mapa-municipios.js (e busca-ativo.js)
+V_MAPA = '20261124'                                     # mapa-municipios.js (e busca-ativo.js)
 V_FOCOS = '20261116'
-V_SAT_TO = '20261119d'                                     # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
+V_SAT_TO = '20261124h'                                    # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
 V_RAIOX = '20261119'                                      # assets/mapa-raiox.js (raio-X da rede, Ctrl+X)
 
 
@@ -1328,6 +1330,537 @@ def estado_txt(redes):
             out.append(al + '\t' + '\t'.join(cls))
     return ''.join(x + '\n' for x in out)
 
+
+# ---------------------------------------------------------------- limpeza de faixa no satélite da página inicial
+
+# dados/redes/faixa.txt: a situação da limpeza de faixa de HOJE (a data de geração, no cabeçalho) de cada trecho T1 e T2,
+# com a forma dele, para o satélite da página inicial (assets/mapa-sat-to.js) pintar as linhas na visão "Limpeza de
+# faixa" (baixado só quando essa visão é escolhida com o satélite aberto). A regra é a da camada Faixa do mapa do
+# alimentador (alimentador/site/limpeza.js), a mesma conta: a situação de cada vão pela data da OS executada mais recente
+# dele (limpeza.js: vaos → os) e o prazo da classe (regra_anos do limpeza.js: T1 3 anos, T2 4, T3 5): vencida, vence em
+# até 12 meses ou em dia; vão sem OS, sem registro. A do trecho é a PIOR com extensão relevante (mais de 300 m ou de 10%
+# do trecho; sitTrecho). A classe sai do nome do trecho (T1, T2-A → T2): os trechos reclassificados entram sem mudar nada.
+# Texto, uma linha por registro:
+#   #{"v": 2, "hoje": "AAAA-MM-DD", "sit": ["dia", "vence", "vencida", "sem"], "anos": [2026, ...]}   cabeçalho (JSON)
+#   M<tab>município (IBGE)<tab>m em dia<tab>m vence<tab>m vencida<tab>m sem registro    (a soma é a de todos os T1 e T2)
+#   Y<tab>município<tab>ano:m,...,sem:m,c:m,p:m   vista Por ano: m de cada vão no ano mais recente dele (ou sem registro;
+#                                                 a soma é a de todos os T1 e T2) e, à parte, os de OS criada (c) e pendente (p)
+#   A<tab>alimentador
+#   T<tab>trecho<tab>classe<tab>situação (0-3)<tab>última limpeza (AAAA-MM-DD ou vazio)<tab>m<tab>prazo (anos)<tab>linhas
+#   P<tab>anos (do mais recente; vazio: sem registro)<tab>marcas (c criada, p pendente)<tab>m<tab>linhas
+#       os pedaços do trecho acima na vista Por ano da camada Faixa (os vãos com os mesmos anos e marcas; Douglas–Peucker
+#       de FAIXA_TOL m): a cor do vão é a do ano mais recente entre os ligados; criadas e pendentes, o traço por cima
+#   O<tab>lat<tab>lon<tab>data<tab>ano<tab>nº de OS<tab>datas (vírgula)<tab>trechos (" / ")<tab>m limpos deles<tab>m deles
+#       as etiquetas das OS do alimentador (limpeza.js, etiquetas(), com todos os anos e só T1 e T2 à vista): no ponto, a
+#       cor do ano, "<trechos> <datas> <nº de OS ·> <m limpos> de <m> km"; as que se cruzam, a mais recente fica
+# As linhas do trecho como no estado.txt (polyline, 1e-4 grau, a diferença acumulando pelo arquivo inteiro; Douglas–Peucker
+# de ESTADO_TOL m; separadas por espaço); alimentador cujas linhas somem todas (só uns metros de rede): no seu maior
+# trecho, um ponto ("!" e o ponto; não "@", que é um caractere do polyline: a linha que começava com ele era lida como
+# ponto e desalinhava o acumulado do resto do arquivo). Os metros de cada trecho vão ao município de cada vão: o do
+# trecho (trecho_mun) se é um só; senão o meio do vão nas divisas do alimentador (divisas.js), e fora delas a mais perto.
+FAIXA_SIT = ('dia', 'vence', 'vencida', 'sem')
+FAIXA_PIOR = ('vencida', 'sem', 'vence', 'dia')
+FAIXA_REGRA = {'T1': 3, 'T2': 4, 'T3': 5}            # (só se o limpeza.js não trouxer a dele)
+FAIXA_TOL = 30            # m do Douglas–Peucker dos pedaços da vista Por ano (P): no zoom 13 1 pixel tem ~19 m
+
+
+def _mais_anos(d, n):
+    """d + n anos como o setFullYear do JavaScript (29/02 num ano que não é bissexto vira 01/03)."""
+    try:
+        return d.replace(year=d.year + n)
+    except ValueError:
+        return date(d.year + n, 3, 1)
+
+
+def faixa_trechos(d, lp, hoje):
+    """dados.js e limpeza.js de um alimentador → [{nome, classe, sit, ult, ext, prazo, vaos, m, pec}] dos trechos T1 e
+    T2, na ordem do dados.js (a conta de limpeza.js: situacao, resumoTrecho e sitTrecho). pec: os vãos do trecho por
+    (anos, marcas) da vista Por ano da camada Faixa (ver faixa_vao)."""
+    lp = lp or {}
+    regra = dict(FAIXA_REGRA, **(lp.get('regra_anos') or {}))
+    oss = lp.get('os') or []
+    ult_vao = {}
+    for vid, ks in (lp.get('vaos') or {}).items():
+        ds = [oss[k]['data'][:10] for k in ks if 0 <= k < len(oss) and oss[k].get('data')]
+        ult_vao[vid] = max(ds) if ds else None
+    um_ano, memo = _mais_anos(hoje, 1), {}
+    pv = faixa_vao(lp)
+
+    def situacao(data, cl):
+        if not data:
+            return 'sem'
+        if (data, cl) not in memo:
+            v = _mais_anos(date.fromisoformat(data), regra[cl])
+            memo[data, cl] = 'vencida' if v < hoje else 'vence' if v < um_ano else 'dia'
+        return memo[data, cl]
+    nomes = [t['nome'] for t in d['trechos']]
+    por, ordem = {}, []
+    for v in d['vaos']:
+        n = nomes[v[4]]
+        if n not in por:
+            por[n] = []
+            ordem.append(n)
+        por[n].append(v)
+    out = []
+    for n in sorted(ordem, key=nomes.index):
+        cl = classe(n)
+        if cl not in ('T1', 'T2'):
+            continue
+        m, ult, ext, pec = dict.fromkeys(FAIXA_SIT, 0.0), None, 0.0, {}
+        for v in por[n]:
+            u = ult_vao.get(str(v[5]))
+            ext += v[8]
+            m[situacao(u, cl)] += v[8]
+            if u and (not ult or u > ult):
+                ult = u
+            pec.setdefault(pv.get(str(v[5]), FAIXA_SEM_OS), []).append(v)
+        rel = lambda k: m[k] > 300 or m[k] > 0.1 * ext
+        sit = next((k for k in FAIXA_PIOR if m[k] and rel(k)), None) or next((k for k in FAIXA_PIOR if m[k]), 'sem')
+        out.append(dict(nome=n, classe=cl, sit=sit, ult=ult, ext=ext, prazo=regra[cl], vaos=por[n], m=m,
+                        pec=sorted(pec.items(), key=lambda kv: (len(kv[0][0]) > 0, kv[0][0][:1], kv[0]))))
+    return out
+
+
+# Vista Por ano da camada Faixa (limpeza.js: linhas e etiquetas) no satélite. Cada vão: os anos das OS executadas que
+# contam (sem as parciais, campo "mae": elas não pintam vãos) com ele (a cor é a do mais recente entre os anos ligados) e as
+# marcas das não executadas que contam: c criada (CRIADA), p pendente (a reprogramar, reprogramada e qualquer outra).
+FAIXA_SEM_OS = ((), '')
+
+
+def _anoOS(o):
+    return int(o['data'][:4]) if o.get('data') else None
+
+
+def faixa_vao(lp):
+    """limpeza.js → {id do vão: (anos, do mais recente ao mais antigo; marcas 'c', 'p' ou 'cp')} dos vãos com OS que conta."""
+    oss = (lp or {}).get('os') or []
+    out = {}
+    for vid, ks in ((lp or {}).get('vaos') or {}).items():
+        anos, c, p = set(), False, False
+        for k in ks:
+            if not 0 <= k < len(oss) or oss[k].get('mae'):
+                continue
+            o = oss[k]
+            if o.get('data'):
+                anos.add(_anoOS(o))
+            if o.get('sit') != 'EXECUTADA':
+                if o.get('sit') == 'CRIADA':
+                    c = True
+                else:
+                    p = True
+        ch = (tuple(sorted(anos, reverse=True)), ('c' if c else '') + ('p' if p else ''))
+        if ch != FAIXA_SEM_OS:
+            out[vid] = ch
+    return out
+
+
+def _chaves_js(d):
+    """As chaves de um objeto na ordem do Object.keys do JavaScript: as de índice inteiro primeiro, em ordem crescente."""
+    idx = lambda k: k.isdigit() and (k == '0' or k[0] != '0') and int(k) < 2 ** 32 - 1
+    return sorted((k for k in d if idx(k)), key=int) + [k for k in d if not idx(k)]
+
+
+def faixa_rotulos(d, lp, classes=('T1', 'T2')):
+    """As etiquetas das OS da camada Faixa (limpeza.js, etiquetas(), com todos os anos ligados e só as classes `classes`
+    à vista) → [(lat, lon, data da 1ª OS, ano dela, nº de OS, datas, trechos, m limpos deles, m deles)]."""
+    lp = lp or {}
+    oss = lp.get('os') or []
+    if not oss:
+        return []
+    nomes = [t['nome'] for t in d['trechos']]
+    por_id = {str(v[5]): v for v in d['vaos']}
+    vaos_os = [[] for _ in oss]
+    for vid in _chaves_js(lp.get('vaos') or {}):
+        v = por_id.get(vid)
+        if v is not None:
+            for k in lp['vaos'][vid]:
+                if 0 <= k < len(oss):
+                    vaos_os[k].append(v)
+    prin = [k for k, o in enumerate(oss) if not o.get('mae')]
+    anos = sorted({_anoOS(oss[k]) for k in prin if oss[k].get('data')}, reverse=True)
+    os_ano = {a: sorted((k for k in prin if oss[k].get('data') and _anoOS(oss[k]) == a), key=lambda k: oss[k]['data'], reverse=True) for a in anos}
+    topo = {}
+    for a in anos:
+        for k in os_ano[a]:
+            for v in vaos_os[k]:
+                if topo.get(v[5], 0) < a:
+                    topo[v[5]] = a
+    ext = {}
+    for v in d['vaos']:
+        ext[nomes[v[4]]] = ext.get(nomes[v[4]], 0.0) + v[8]
+    vis = lambda v: classe(nomes[v[4]]) in classes
+    ms, usados = [], {}
+    for a in anos:
+        for k in os_ano[a]:
+            vs = [v for v in vaos_os[k] if vis(v) and topo.get(v[5]) == a]
+            if not vs:
+                continue
+            lat, lon = sum(v[0] for v in vs) / len(vs), sum(v[1] for v in vs) / len(vs)
+            c, melhor, dmin = math.cos(lat * math.pi / 180), None, math.inf
+            for v in vs:                                          # maisPerto()
+                ax, ay, bx, by, px, py = v[1] * c, v[0], v[3] * c, v[2], lon * c, lat
+                dx, dy = bx - ax, by - ay
+                l2 = dx * dx + dy * dy
+                f = max(0, min(1, ((px - ax) * dx + (py - ay) * dy) / l2)) if l2 else 0
+                dd = (ax + f * dx - px) ** 2 + (ay + f * dy - py) ** 2
+                if dd < dmin:
+                    dmin, melhor = dd, v
+            if melhor[5] in usados:
+                usados[melhor[5]].append(k)
+                continue
+            usados[melhor[5]] = [k]
+            ms.append((melhor, usados[melhor[5]]))
+    out = []
+    for v, ks in ms:
+        mt = {}
+        for x in vaos_os[ks[0]]:
+            n = nomes[x[4]]
+            mt[n] = mt.get(n, 0.0) + x[8]
+        ns = sorted(mt, key=lambda n: -mt[n])
+        tronco = [n for n in ns if classe(n) != 'T3']
+        ns = tronco[:2] if tronco else ns[:1]
+        un = {}
+        for k in ks:
+            for x in vaos_os[k]:
+                un[id(x)] = x
+        feito = sum(x[8] for x in un.values() if nomes[x[4]] in ns)
+        out.append(((v[0] + v[2]) / 2, (v[1] + v[3]) / 2, oss[ks[0]]['data'], _anoOS(oss[ks[0]]), len(ks),
+                    [oss[k]['data'] for k in ks], ns, feito, sum(ext[n] for n in ns)))
+    return out
+
+
+class _Divisas:
+    """Peças do divisas.js de um alimentador (o município recortado na caixa dele, [lat, lon]): o município de um ponto
+    (par/ímpar, com as arestas em faixas de 0,01° de latitude) ou, fora de todas, o da peça mais perto."""
+    F = 0.01
+
+    def __init__(self, pecas):
+        self.pecas = []
+        for p in pecas or ():
+            faixas = {}
+            for r in p.get('linhas') or ():
+                for (a1, o1), (a2, o2) in zip(r, r[1:] + r[:1]):
+                    if a1 == a2:
+                        continue
+                    for f in range(math.floor(min(a1, a2) / self.F), math.floor(max(a1, a2) / self.F) + 1):
+                        faixas.setdefault(f, []).append((a1, o1, a2, o2))
+            if faixas:
+                self.pecas.append((p['cod'], faixas, [q for r in p['linhas'] for q in r]))
+
+    def em(self, la, lo, cands=None):
+        for cod, faixas, _ in self.pecas:
+            if cands and cod not in cands:
+                continue
+            d = False
+            for a1, o1, a2, o2 in faixas.get(math.floor(la / self.F), ()):
+                if (a1 > la) != (a2 > la) and lo < (o2 - o1) * (la - a1) / (a2 - a1) + o1:
+                    d = not d
+            if d:
+                return cod
+        return None
+
+    def perto(self, la, lo, cands=None):
+        c, melhor = math.cos(math.radians(la)), (math.inf, None)
+        for cod, _, pts in self.pecas:
+            if cands and cod not in cands:
+                continue
+            for a, o in pts:
+                dd = (a - la) ** 2 + ((o - lo) * c) ** 2
+                if dd < melhor[0]:
+                    melhor = (dd, cod)
+        return melhor[1]
+
+
+def faixa_txt(site, hoje, tol=None):
+    """Pasta do site (com alimentadores/<AL>/dados.js, limpeza.js e divisas.js) → (texto do faixa.txt, resumo:
+    {alimentadores, trechos, m por situação, fora: vãos fora das divisas, pedacos, rotulos, anos: m por ano})."""
+    site = Path(site)
+    tol = FAIXA_TOL if tol is None else tol
+    la0 = lo0 = 0
+
+    def enc(q):
+        nonlocal la0, lo0
+        t = ''
+        for la, lo in q:
+            t += _poli(la - la0) + _poli(lo - lo0)
+            la0, lo0 = la, lo
+        return t
+
+    def linhas(vaos, t):
+        segs = [((v[1], v[0]), (v[3], v[2])) for v in vaos]
+        ls = []
+        for linha, _ in _trilhas(segs, set()):
+            q = [(round(y * 1e4), round(x * 1e4)) for x, y in _dp(linha, t)]
+            q = q[:1] + [b for a, b in zip(q, q[1:]) if b != a]
+            if len(q) >= 2:
+                ls.append(q)
+        return ls
+    nova = lambda: dict.fromkeys(FAIXA_SIT, 0.0)
+    muns, anos_mun, corpo = {}, {}, []
+    res = dict(alimentadores=0, trechos=0, m=nova(), fora=0, pedacos=0, rotulos=0, anos={})
+
+    def soma_ano(cod, ch, m):                    # m da vista Por ano no município: o ano mais recente do vão, sem, c, p
+        y = anos_mun.setdefault(cod, {})
+        k = str(ch[0][0]) if ch[0] else 'sem'
+        y[k] = y.get(k, 0.0) + m
+        res['anos'][k] = res['anos'].get(k, 0.0) + m
+        for f in ch[1]:
+            y[f] = y.get(f, 0.0) + m
+            res['anos'][f] = res['anos'].get(f, 0.0) + m
+    for p in sorted(site.glob('alimentadores/*/dados.js')):
+        if not (p.parent / 'index.html').exists():
+            continue
+        d = le_js(p)
+        if not d or not d.get('vaos'):
+            continue
+        lp = le_js(p.parent / 'limpeza.js')
+        trs = faixa_trechos(d, lp, hoje)
+        if not trs:
+            continue
+        pv = faixa_vao(lp)
+        tm = (d.get('meta') or {}).get('trecho_mun') or {}
+        div = None
+        geo = []
+        for t in trs:
+            geo.append(linhas(t['vaos'], ESTADO_TOL))
+            # metros por município (a situação do trecho; e, de cada vão, a vista Por ano)
+            cands = [c for c in tm.get(t['nome']) or () if c and c != 'None']
+            if len(cands) == 1:
+                muns.setdefault(cands[0], nova())[t['sit']] += t['ext']
+                for v in t['vaos']:
+                    soma_ano(cands[0], pv.get(str(v[5]), FAIXA_SEM_OS), v[8])
+            else:
+                if div is None:
+                    div = _Divisas(le_js(p.parent / 'divisas.js'))
+                cs = set(cands) or None
+                for v in t['vaos']:
+                    la, lo = (v[0] + v[2]) / 2, (v[1] + v[3]) / 2
+                    cod = div.em(la, lo, cs) or div.em(la, lo)
+                    if not cod:
+                        res['fora'] += 1
+                        cod = div.perto(la, lo, cs) or (cands[0] if cands else None)
+                    if cod:
+                        muns.setdefault(cod, nova())[t['sit']] += v[8]
+                        soma_ano(cod, pv.get(str(v[5]), FAIXA_SEM_OS), v[8])
+        sem_linha = not any(geo)
+        corpo.append('A\t' + p.parent.name)
+        maior = max(range(len(trs)), key=lambda i: trs[i]['ext'])
+        for i, (t, ls) in enumerate(zip(trs, geo)):
+            if sem_linha and i == maior:
+                v = max(t['vaos'], key=lambda v: v[8])
+                g = '!' + enc([(round((v[0] + v[2]) / 2 * 1e4), round((v[1] + v[3]) / 2 * 1e4))])
+            else:
+                g = ' '.join(enc(q) for q in ls)
+            corpo.append('\t'.join(('T', t['nome'], t['classe'], str(FAIXA_SIT.index(t['sit'])), t['ult'] or '',
+                                    str(round(t['ext'])), str(t['prazo']), g)))
+            res['m'][t['sit']] += t['ext']
+            if sem_linha:
+                continue
+            for (anos, marcas), vs in t['pec']:
+                ps = linhas(vs, tol)
+                if ps:
+                    corpo.append('\t'.join(('P', ','.join(map(str, anos)), marcas, str(round(sum(v[8] for v in vs))),
+                                            ' '.join(enc(q) for q in ps))))
+                    res['pedacos'] += 1
+        for r in faixa_rotulos(d, lp):
+            corpo.append('\t'.join(('O', f'{r[0]:.6f}', f'{r[1]:.6f}', r[2], str(r[3]), str(r[4]), ','.join(r[5]),
+                                    ' / '.join(r[6]), str(round(r[7])), str(round(r[8])))))
+            res['rotulos'] += 1
+        res['alimentadores'] += 1
+        res['trechos'] += len(trs)
+    anos = sorted((int(k) for k in res['anos'] if k.isdigit()), reverse=True)
+    cab = '#' + json.dumps(dict(v=2, hoje=hoje.isoformat(), sit=list(FAIXA_SIT), anos=anos), separators=(',', ':'))
+    ms = ['\t'.join(['M', cod] + [str(round(m[k])) for k in FAIXA_SIT]) for cod, m in sorted(muns.items())]
+    ys = ['\t'.join(['Y', cod, ','.join(f'{k}:{round(v)}' for k, v in sorted(y.items()))]) for cod, y in sorted(anos_mun.items())]
+    return '\n'.join([cab] + ms + ys + corpo) + '\n', res
+
+
+def faixa_mapa(saida, hoje=None):
+    """Grava dados/redes/faixa.txt (ver acima; só regrava se mudou) e devolve (versão: 8 hex do arquivo, resumo)."""
+    txt, res = faixa_txt(saida, hoje or date.today())
+    b = txt.encode('utf-8')
+    arq = Path(saida) / 'dados' / 'redes' / 'faixa.txt'
+    arq.parent.mkdir(parents=True, exist_ok=True)
+    if not arq.exists() or arq.read_bytes() != b:
+        arq.write_bytes(b)
+    res['bytes'] = len(b)
+    return hashlib.sha1(b).hexdigest()[:8], res
+
+
+def resumo_faixa(res):
+    return (f"faixa.txt: {res['alimentadores']} alimentador(es), {res['trechos']} trechos T1/T2 · "
+            + ' · '.join(f"{k} {km(res['m'][k])} km" for k in FAIXA_SIT)
+            + f" · {res.get('pedacos', 0)} pedaços por ano · {res.get('rotulos', 0)} rótulos de OS · {math.ceil(res['bytes'] / 1e3)} KB"
+            + (f" · {res['fora']} vão(s) fora das divisas (no município mais perto)" if res['fora'] else ''))
+
+
+# dados/redes/inspecao.txt, executadas.txt e manutencao.txt: as camadas Inspeção, Manutenção (executadas) e Insp→manut
+# (manutenção da inspeção) do mapa do alimentador, só no T1 e no T2 de cada alimentador, para o mapa de um alimentador
+# pintar as dos OUTROS (assets/visao-tocantins.js; cada arquivo baixado só com a camada dele ligada). As contas são as das
+# camadas (alimentador/site/inspecao.js, executadas.js e manutencao.js); o filtro (anos, situações) fica para a página, com
+# o que o aberto tem ligado. Texto, uma linha por registro; cabeçalho #{"v": 1, ...} (JSON) e, por alimentador:
+#   A<tab>alimentador
+# inspecao.txt  (cabeçalho: "anos")
+#   I<tab>anos (do mais recente)<tab>m<tab>linhas   os vãos T1/T2 inspecionados com esses anos (inspecao.js: vaos → os; a
+#                                                   cor é a do ano mais recente entre os ligados); as linhas como no
+#                                                   faixa.txt (polyline 1e-4 grau, a diferença acumulando pelo arquivo
+#                                                   inteiro, Douglas–Peucker de FAIXA_TOL m, separadas por espaço)
+# executadas.txt  (cabeçalho: "anos")
+#   E<tab>pontos<tab>serviços   os ativos do T1/T2 com manutenção executada (executadas.js): os pontos em polyline (1e-5
+#                               grau, a diferença acumulando pelo arquivo inteiro) e, de cada um (separados por espaço), os
+#                               serviços por ano (OS com o mesmo tipo, ativo, data e descrição contam uma vez), do mais
+#                               recente: "ano[:n]" separados por vírgula, o ano menos 2000 (n omitido: 1); d: NAE DEOP
+#                               (data padrão), z: sem data
+# manutencao.txt  (cabeçalho: "sit": a ordem das contagens)
+#   M<tab>pontos<tab>OS   os postes do T1/T2 com OS de manutenção da inspeção (manutencao.js), os pontos como no
+#                         executadas.txt e, de cada um, as OS por situação na data do OS status (situacao_ate) do
+#                         alimentador: venc,pend,fora,exec
+CAMADAS_SIT = ('venc', 'pend', 'fora', 'exec')
+
+
+def _sit_mnt(o, hoje):
+    """A situação de uma OS da manutenção da inspeção (manutencao.js, sitDe)."""
+    if o.get('sit') == 'EXECUTADA':
+        return 'fora' if o.get('limite') and o.get('exec') and o['exec'] > o['limite'] else 'exec'
+    return 'venc' if o.get('limite') and o['limite'] < hoje else 'pend'
+
+
+class _Poli:
+    """Polyline com a diferença acumulando pelo arquivo inteiro (na escala `esc`)."""
+    def __init__(self, esc):
+        self.esc, self.la, self.lo = esc, 0, 0
+
+    def __call__(self, pts):
+        t = ''
+        for la, lo in pts:
+            a, o = round(la * self.esc), round(lo * self.esc)
+            t += _poli(a - self.la) + _poli(o - self.lo)
+            self.la, self.lo = a, o
+        return t
+
+
+def camadas_txt(site, hoje=None, tol=None):
+    """Pasta do site (alimentadores/<AL>/dados.js, inspecao.js, executadas.js, manutencao.js) → ({nome do arquivo: texto},
+    resumo: {alimentadores, insp_pedacos, insp_m, exe_ativos, mnt_postes})."""
+    site = Path(site)
+    tol = FAIXA_TOL if tol is None else tol
+    hoje = (hoje or date.today()).isoformat()
+    pi, pe, pm = _Poli(1e4), _Poli(1e5), _Poli(1e5)
+
+    def linhas(vaos):
+        ls = []
+        for linha, _ in _trilhas([((v[1], v[0]), (v[3], v[2])) for v in vaos], set()):
+            q = [(round(y * 1e4), round(x * 1e4)) for x, y in _dp(linha, tol)]
+            q = q[:1] + [b for a, b in zip(q, q[1:]) if b != a]
+            if len(q) >= 2:
+                ls.append([(a / 1e4, b / 1e4) for a, b in q])
+        return ls
+    ano_txt = lambda a: 'd' if a == -1 else 'z' if a == 0 else str(a - 2000)
+    corpo = {'inspecao.txt': [], 'executadas.txt': [], 'manutencao.txt': []}
+    anos_i, anos_e = set(), set()
+    res = dict(alimentadores=0, insp_pedacos=0, insp_m=0.0, exe_ativos=0, mnt_postes=0)
+    for p in sorted(site.glob('alimentadores/*/dados.js')):
+        if not (p.parent / 'index.html').exists():
+            continue
+        pasta = p.parent
+        ins, exe, mnt = (le_js(pasta / f) for f in ('inspecao.js', 'executadas.js', 'manutencao.js'))
+        if not (ins or exe or mnt):
+            continue
+        d = le_js(p)
+        if not d or not d.get('vaos'):
+            continue
+        nomes = [t['nome'] for t in d['trechos']]
+        t12 = lambda n: classe(n or '') in ('T1', 'T2')
+        algum = False
+        # Inspeção: os vãos T1/T2 com OS (com data), por conjunto de anos
+        if ins and ins.get('vaos'):
+            oss, por, reg = ins.get('os') or [], {}, []
+            for v in d['vaos']:
+                ks = ins['vaos'].get(str(v[5]))
+                if not ks or not t12(nomes[v[4]]):
+                    continue
+                anos = tuple(sorted({int(oss[k]['data'][:4]) for k in ks if 0 <= k < len(oss) and oss[k].get('data')}, reverse=True))
+                if anos:
+                    por.setdefault(anos, []).append(v)
+            for anos in sorted(por, key=lambda a: (a[0], a)):
+                ls = linhas(por[anos])
+                if ls:
+                    m = sum(v[8] for v in por[anos])
+                    reg.append('\t'.join(('I', ','.join(map(str, anos)), str(round(m)), ' '.join(pi(q) for q in ls))))
+                    anos_i.update(anos)
+                    res['insp_pedacos'] += 1
+                    res['insp_m'] += m
+            if reg:
+                corpo['inspecao.txt'] += ['A\t' + pasta.name] + reg
+                algum = True
+        # Manutenção (executadas): os serviços de cada ativo do T1/T2, por ano
+        if exe and exe.get('ativos'):
+            at, rep, por = exe['ativos'], set(), {}
+            for o in exe.get('os') or []:
+                i = o[4] if len(o) > 4 else -1
+                if not isinstance(i, int) or not 0 <= i < len(at) or not t12(at[i][2]):
+                    continue
+                ch = (o[5], o[1], o[2], i)
+                if ch in rep:
+                    continue
+                rep.add(ch)
+                a = -1 if re.search(r'\bNAE DEOP\b', o[5] or '', re.I) else (int((o[2] or '')[:4]) if (o[2] or '')[:4].isdigit() else 0)
+                c = por.setdefault(i, {})
+                c[a] = c.get(a, 0) + 1
+            if por:
+                ids = sorted(por)
+                cont = ' '.join(','.join(ano_txt(a) + (f':{n}' if n > 1 else '') for a, n in sorted(por[i].items(), reverse=True)) for i in ids)
+                corpo['executadas.txt'] += ['A\t' + pasta.name, '\t'.join(('E', pe([(at[i][3], at[i][4]) for i in ids]), cont))]
+                for i in ids:
+                    anos_e.update(por[i])
+                res['exe_ativos'] += len(ids)
+                algum = True
+        # Insp→manut: as OS de cada poste do T1/T2 (com posição), por situação
+        if mnt and mnt.get('os'):
+            dia = mnt.get('situacao_ate') or hoje
+            postes12 = set()
+            for v in d['vaos']:
+                if t12(nomes[v[4]]):
+                    postes12.update((str(v[6]), str(v[7])))
+            por, ll = {}, {}
+            for o in mnt['os']:
+                if not o.get('ll') or str(o.get('poste')) not in postes12:
+                    continue
+                c = por.setdefault(str(o['poste']), dict.fromkeys(CAMADAS_SIT, 0))
+                ll.setdefault(str(o['poste']), o['ll'])
+                c[_sit_mnt(o, dia)] += 1
+            if por:
+                ids = sorted(por)
+                corpo['manutencao.txt'] += ['A\t' + pasta.name, '\t'.join(('M', pm([ll[i] for i in ids]),
+                                                                         ' '.join(','.join(str(por[i][s]) for s in CAMADAS_SIT) for i in ids)))]
+                res['mnt_postes'] += len(ids)
+                algum = True
+        res['alimentadores'] += algum
+    cab = {'inspecao.txt': dict(v=1, anos=sorted(anos_i, reverse=True)), 'executadas.txt': dict(v=1, anos=sorted(anos_e, reverse=True)),
+           'manutencao.txt': dict(v=1, sit=list(CAMADAS_SIT))}
+    return {n: '\n'.join(['#' + json.dumps(cab[n], separators=(',', ':'))] + corpo[n]) + '\n' for n in corpo}, res
+
+
+def camadas_mapa(saida, hoje=None):
+    """Grava dados/redes/inspecao.txt, executadas.txt e manutencao.txt (ver acima; cada um só é regravado se mudou) e
+    devolve o resumo (com os bytes de cada um)."""
+    txts, res = camadas_txt(saida, hoje)
+    res['bytes'] = {}
+    for n, txt in txts.items():
+        b = txt.encode('utf-8')
+        arq = Path(saida) / 'dados' / 'redes' / n
+        arq.parent.mkdir(parents=True, exist_ok=True)
+        if not arq.exists() or arq.read_bytes() != b:
+            arq.write_bytes(b)
+        res['bytes'][n] = len(b)
+    return res
+
+
+def resumo_camadas(res):
+    kb = lambda n: math.ceil(res['bytes'][n] / 1e3)
+    return (f"camadas dos outros: {res['alimentadores']} alimentador(es) · inspecao.txt {res['insp_pedacos']} pedaços T1/T2 "
+            f"({km(res['insp_m'])} km, {kb('inspecao.txt')} KB) · executadas.txt {res['exe_ativos']} ativos ({kb('executadas.txt')} KB) · "
+            f"manutencao.txt {res['mnt_postes']} postes ({kb('manutencao.txt')} KB)")
 
 def _por_classe(trechos, vaos, lonlat):
     cl = [classe(t['nome']) if classe(t['nome']) in CLASSES else 'T3' for t in trechos]
@@ -2038,6 +2571,9 @@ def interface(saida, malha=None):
                            rodape=f'<p>Malha do IBGE, amostra a cada {PASSO_M}&nbsp;m; mínimo de {MIN_M}&nbsp;m.</p>'), encoding='utf-8')
     vb = mapa_e_ranking(saida, dados, man)
     v_raiox = raiox_mapa(saida, redes_mapa(saida, dados), man)
+    v_faixa, r_faixa = faixa_mapa(saida)              # (depois da limpeza: lê o limpeza.js de cada página)
+    print(resumo_faixa(r_faixa))
+    print(resumo_camadas(camadas_mapa(saida)))   # (Inspeção, Manutenção e Insp→manut dos outros no mapa do alimentador)
     vizinhos_mapa(saida, vizinhos_dos_dados(dados))
     ranking_polos(saida, dados, man)
     manutencao_polos(saida, dados)
@@ -2073,7 +2609,8 @@ def interface(saida, malha=None):
              f'<script src="assets/busca-ativo.js?v={V_MAPA}"></script>\n'
              # zoom → tela cheia e raio-X (Ctrl+X) no mapa; data-rede: a versão do dados/redes/raiox.txt (baixado no 1º Ctrl+X)
              f'<script src="assets/mapa-raiox.js?v={V_RAIOX}" data-rede="{v_raiox}"></script>\n'
-             f'<script src="assets/mapa-sat-to.js?v={V_SAT_TO}"></script>')   # satélite do Tocantins (Ctrl+S); Leaflet só no 1º uso
+             # satélite do Tocantins (Ctrl+S); Leaflet só no 1º uso; data-faixa: a versão do dados/redes/faixa.txt (visão Limpeza)
+             f'<script src="assets/mapa-sat-to.js?v={V_SAT_TO}" data-faixa="{v_faixa}"></script>')
     (saida / 'index.html').write_text(casca('ARGOS Manutenção', corpo, '', sem_rodape=True, topo=TOPO_CENTRAL,   # página inicial sem rodapé (pedido do usuário)
                                             estilos=f'<link rel="stylesheet" href="assets/focos.css?v={V_FOCOS}">'),
                                       encoding='utf-8')
@@ -2269,6 +2806,12 @@ def main(argv=None):
     g.add_argument('--validar', action='store_true', help='só confere o que já foi gerado')
     g.add_argument('--so-interface', action='store_true', help='só refaz páginas, índice e relatório')
     g.add_argument('--comparar', help='compara com as páginas publicadas nesta pasta (clone do gh-pages)')
+    g.add_argument('--so-faixa', action='store_true',
+                   help='só refaz dados/redes/faixa.txt (limpeza de faixa no satélite da página inicial; situação na data '
+                        'de --data ou hoje) e a versão dele (data-faixa) no index.html')
+    g.add_argument('--so-camadas', action='store_true',
+                   help='só refaz dados/redes/inspecao.txt, executadas.txt e manutencao.txt (Inspeção, Manutenção e Insp→manut dos outros alimentadores no '
+                        'mapa do alimentador)')
     g.add_argument('--vizinhos', nargs='?', const='', metavar='DESTINO',
                    help='só refaz dados/vizinhos/ (rede e equipamentos dos alimentadores vizinhos) a partir das páginas '
                         'de --saida (dados.js, chaves.js e ativos.js); grava em DESTINO/dados/vizinhos/ (sem DESTINO, na '
@@ -2283,6 +2826,20 @@ def main(argv=None):
         return 0 if validar_saida(saida) else 1
     if a.comparar:
         comparar(saida, a.comparar)
+        return 0
+    if a.so_faixa:
+        v, r = faixa_mapa(saida, date.fromisoformat(a.data) if a.data else None)
+        print(resumo_faixa(r))
+        ini = saida / 'index.html'
+        if ini.exists():
+            h = ini.read_text(encoding='utf-8')
+            n = re.sub(r'(<script src="assets/mapa-sat-to\.js[^"]*")(?: data-faixa="[^"]*")?>', rf'\1 data-faixa="{v}">', h)
+            if n != h:
+                ini.write_text(n, encoding='utf-8')
+            print(f'index.html: data-faixa="{v}"')
+        return 0
+    if a.so_camadas:
+        print(resumo_camadas(camadas_mapa(saida, date.fromisoformat(a.data) if a.data else None)))
         return 0
     if a.vizinhos is not None:
         als = vizinhos_mapa(saida, vizinhos_das_paginas(saida), a.vizinhos or None)

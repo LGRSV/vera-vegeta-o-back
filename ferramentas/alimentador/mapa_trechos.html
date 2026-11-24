@@ -1070,9 +1070,9 @@ window.__visivel = visivel;                               // a camada de limpeza
 let fusMarcas = null;                                     // pontos dos fusíveis: somem junto com o T3          // botões T1 / T2 / T3 sobre o mapa
 // de longe (abaixo do zoom 12) o mapa mostra só as linhas: sem DJ, religador e pontos dos fusíveis; o número operativo do
 // DJ e do religador só do zoom 15 em diante (antes, a caixinha do tipo)
-const Z_EQUIP = 12, Z_NUM = 15, Z_EQ_LONGE = 7;   // Z_EQ_LONGE: abaixo dele (visão do estado inteiro) o aberto fica sem DJ, religador e fusíveis
+const Z_EQUIP = 12, Z_NUM = 15, Z_EQ_LONGE = 7, Z_FUS = 13;   // Z_FUS: os pontos dos fusíveis (T3) só daqui para perto (pedido do usuário: sem a "chuva de pontos brancos" de longe)   // Z_EQ_LONGE: abaixo dele (visão do estado inteiro) o aberto fica sem DJ, religador e fusíveis
 // (Z_EQUIP segue valendo para os selecionados: abaixo dele, só a etiqueta do código no DJ)
-let fusLonge = false;                                     // abaixo do Z_EQ_LONGE: os pontos dos fusíveis não são pintados nem tocados
+let fusLonge = false;                                     // abaixo do Z_FUS: os pontos dos fusíveis não são pintados nem tocados
 const classeDe = nome => nome.split('-')[0];          // nome do trecho → [polyline com todos os vãos, vãos]; rótulos no mapa
 let halo = null, marcas = null;
 // papel de uma chave nos trechos dos dados d ("início do T2-A · fim do T2"): os índices (sem eles cada um dos ~2.000
@@ -1778,7 +1778,7 @@ if (typeof L === 'undefined') {
   // depois das linhas na ordem de desenho. Se o grupo sair e voltar ao mapa antes disso (limpeza.js ao aproximar, botões
   // T1 T2 T3), os que faltam são criados nessa hora: voltam todos juntos para o fim da ordem, como sempre foi
   let iFus = 0, fusAncora, fusVoltou = false;
-  // de longe (fusLonge, abaixo do zoom 7) os pontos ficam no mapa e no lugar deles na ordem de desenho, mas o canvas não
+  // de longe (fusLonge, abaixo do Z_FUS) os pontos ficam no mapa e no lugar deles na ordem de desenho, mas o canvas não
   // os pinta e o mouse e o toque não os acham: a rede fica só com as linhas, sem tirar e pôr ~2.000 pontos a cada zoom
   const fusPinta = function () { if (!fusLonge) L.CircleMarker.prototype._updatePath.call(this); };
   const fusToca = function (p) { return !fusLonge && L.CircleMarker.prototype._containsPoint.call(this, p); };
@@ -1873,12 +1873,12 @@ if (typeof L === 'undefined') {
     }
     lv.fim();
   }
-  // longe: rótulos de T3 e fusíveis só de perto (15,5); eq-longe: sem DJ e religador (abaixo do 7, visão do estado; os pontos dos
-  // fusíveis também não, fusLonge); eq-sem-num: DJ e religador só com a caixinha do tipo, sem o número operativo (abaixo do 15)
+  // longe: rótulos de T3 e fusíveis só de perto (15,5); eq-longe: sem DJ e religador (abaixo do 7, visão do estado); os pontos
+  // dos fusíveis só do Z_FUS (fusLonge); eq-sem-num: DJ e religador só com a caixinha do tipo, sem o número operativo (abaixo do 15)
   const zoomClasse = () => {
     const z = map.getZoom(), c = $('map').classList;
     c.toggle('longe', z < 15.5); c.toggle('eq-longe', z < Z_EQ_LONGE); c.toggle('eq-sem-num', z < Z_NUM);
-    fusLonge = z < Z_EQ_LONGE;                               // (o canvas é refeito no fim do zoom, logo depois deste aviso)
+    fusLonge = z < Z_FUS;                                    // (o canvas é refeito no fim do zoom, logo depois deste aviso)
   };
   map.on('zoomend', zoomClasse); zoomClasse();
   map.on('moveend', rotulosT3);
@@ -2219,7 +2219,7 @@ window.__limpar = limpar;
 // O que os alimentadores selecionados (assets/selecionados.js) usam daqui para ficar iguais a este no mapa e no painel:
 // as mesmas funções, com o alimentador (cx, os dados d, a NAE N, os trechos T) como argumento; o padrão de todas é este
 window.__alKit = {EU, prepara, rotNae, papelDe, cadeias, vaoPerto, htmlRotulo, zRot, pinosDe, camadaNae, principal, contagem, doTrecho,
-  periodo, detalhe, detalheVarios, mostraDet, naeMapa: () => naeMapa, comCtrl, COR_Z, TIPO, esc, km, fimTxt, Z_EQUIP, Z_NUM, Z_EQ_LONGE};
+  periodo, detalhe, detalheVarios, mostraDet, naeMapa: () => naeMapa, comCtrl, COR_Z, TIPO, esc, km, fimTxt, Z_EQUIP, Z_NUM, Z_EQ_LONGE, Z_FUS};
 // Sem o mapa (Leaflet não carregou) a rede já "está pronta": só o resumo e a lista
 if (!map) { AL.espera(comeco(AL.cede).catch(e => console.error(e))); fimLinhas(); fimRede(); document.dispatchEvent(new Event('al:linhas')); document.dispatchEvent(new Event('al:rede')); }
 AL.rede.then(listaAosPoucos);

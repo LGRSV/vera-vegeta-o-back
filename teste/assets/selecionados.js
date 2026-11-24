@@ -420,7 +420,7 @@
       this._v = versao; this._p = reg;
       const id = ++this._id;
       const m = { t: 'pinta', id, r: reg, cods: prontos().map(s => s.cod), vivos: [...sels.keys()], vis: [false, visivel('T1'), visivel('T2'), visivel('T3')],
-        fus: reg.z >= K.Z_EQUIP && visivel('T3') && !!(window.__fusMarcas && map.hasLayer(window.__fusMarcas)), apaga: ativo ? ativo.s.cod : null };
+        fus: reg.z >= (K.Z_FUS || K.Z_EQUIP) && visivel('T3') && !!(window.__fusMarcas && map.hasLayer(window.__fusMarcas)), apaga: ativo ? ativo.s.cod : null };
       med.pinturas.push({ id, z: reg.z, t0: performance.now(), t1: 0, pag: 0, vis: m.vis.slice(1), fus: m.fus, apaga: m.apaga, cods: m.cods.length });
       if (med.pinturas.length > 60) med.pinturas.shift();
       this._ids.set(id, m.cods);
@@ -729,7 +729,7 @@
   }
 
   // ---------- toque e mouse: o trecho ou o fusível do selecionado no ponto (x, y) do mapa ----------
-  const fusVisivel = z => z >= K.Z_EQUIP && visivel('T3') && !!(window.__fusMarcas && map.hasLayer(window.__fusMarcas));
+  const fusVisivel = z => z >= (K.Z_FUS || K.Z_EQUIP) && visivel('T3') && !!(window.__fusMarcas && map.hasLayer(window.__fusMarcas));
   function alvo(pt, tol) {
     if (!sels.size || map._animatingZoom) return null;
     const z = map.getZoom(), s = 256 * Math.pow(2, z), a = map.containerPointToLayerPoint(pt).add(map.getPixelOrigin());

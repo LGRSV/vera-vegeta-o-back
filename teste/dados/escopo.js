@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.29",
+ "versao": "2.30",
  "atualizado": "2026-11-24",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -173,7 +173,9 @@ window.ARGOS_ESCOPO = {
    {"t": "Mapa do alimentador: camada Faixa pinta também o T1/T2 dos outros alimentadores (estado e vizinhos), com as OS de perto", "st": "ok", "d": "2026-11-24"},
    {"t": "Mapa do alimentador: Inspeção, Insp→manut e Manutenção também no T1/T2 dos outros alimentadores", "st": "ok", "d": "2026-11-24"},
    {"t": "Visão satélite: botão Fronteira (sem divisões por padrão; ligado, regional/polo/município com a navegação)", "st": "ok", "d": "2026-11-24"},
-   {"t": "Visão satélite: Fronteira pelo zoom (de longe as regionais; aproximando, os polos e depois os municípios)", "st": "and", "prazo": "2026-11-25", "resp": "dev"},
+   {"t": "Visão satélite: Fronteira pelo zoom (de longe as regionais; aproximando, os polos e depois os municípios)", "st": "ok", "d": "2026-11-24"},
+   {"t": "Visão satélite: clique na linha abre o mapa do alimentador em tela cheia; etiquetas das OS só com o mouse (no toque, o 1º toque)", "st": "ok", "d": "2026-11-24"},
+   {"t": "Mapa do alimentador: pontos dos fusíveis (T3) só do zoom 13", "st": "ok", "d": "2026-11-24"},
    {"t": "Revisão da reclassificação T1/T2 (conservação de km, NAE, UCs, Priorização e Faixa)", "st": "and", "prazo": "2026-11-25", "resp": "dev"},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
