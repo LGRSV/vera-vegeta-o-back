@@ -165,8 +165,14 @@
     return losango(ll, ' grupo' + (fa >= 0 ? ' apaga' : ''), corAno(c.ano), c.n, `${nf(c.is.length)} ativos, ${nf(c.n)} serviços: toque para aproximar`, 1300)
       .on('click', e => { L.DomEvent.stopPropagation(e); map.fitBounds(L.latLngBounds(lls), { padding: [60, 60], maxZoom: ZOOM_SOLTO }); });
   }
+  // a camada para os outros alimentadores (visao-tocantins.js pinta o T1 e o T2 deles com as cores dela): o estado dela e,
+  // quando ele muda, o aviso al:camada
+  window.__exeCam = () => ({ ligado: st.ligado, anos: [...st.anos], todos: ANOS.slice() });
+  let camAvisado = '';
+  const avisaCam = () => { const k = JSON.stringify(window.__exeCam()); if (k !== camAvisado) { camAvisado = k; document.dispatchEvent(new Event('al:camada')); } };
   function desenha() {
     if (!map) return;
+    avisaCam();
     camada.clearLayers();
     if (!st.ligado) { camada.remove(); return; }
     dados();

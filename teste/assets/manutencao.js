@@ -110,8 +110,14 @@
   let camada = null;
   const marcadores = new Map();                       // poste -> marcador
   const visiveis = p => p.ks.filter(k => st.sits.has(sitDe(MN.os[k])));
+  // a camada para os outros alimentadores (visao-tocantins.js pinta o T1 e o T2 deles com as cores dela): o estado dela e,
+  // quando ele muda, o aviso al:camada
+  window.__mntCam = () => ({ ligado: st.ligado, sits: [...st.sits] });
+  let camAvisado = '';
+  const avisaCam = () => { const k = JSON.stringify(window.__mntCam()); if (k !== camAvisado) { camAvisado = k; document.dispatchEvent(new Event('al:camada')); } };
   function desenha() {
     if (!map) return;
+    avisaCam();
     if (camada) camada.remove();
     camada = null; marcadores.clear();
     if (!st.ligado) return;

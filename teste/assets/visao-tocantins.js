@@ -35,8 +35,8 @@
 // fortes), a linha deles no ponto tem a vez sobre a do estado e, no voo, o canvas deles some e volta como o dos vizinhos.
 // Enquanto um recém-selecionado baixa, as linhas dele aqui ficam realçadas (opacas, com um contorno claro: forte, no
 // desenho do estado), até selecionados.js desenhá-lo; com 10, o clique não seleciona (o aviso é de lá).
-// Faixa nos outros (camada Faixa do aberto ligada): o T1 e o T2 dos outros alimentadores, do estado aos vizinhos, com a
-// pintura dela (dados/redes/faixa.txt, lido no worker; ver "Faixa nos outros alimentadores" mais abaixo).
+// Camadas nos outros (Faixa, Inspeção, Manutenção e Insp→manut ligadas no aberto): o T1 e o T2 dos outros alimentadores,
+// do estado aos vizinhos, com a pintura delas (dados/redes/, lidos no worker; ver "camadas dos outros alimentadores" abaixo).
 // Sem o contorno do estado ou fora do site, não faz nada.
 (function () {
   const map = window.__map, L = window.L, D = window.D, AL = window.__al || null, eu = document.currentScript;
@@ -167,17 +167,23 @@
       ctx.strokeStyle = 'rgba(243,244,244,.32)'; ctx.lineWidth = 1.2; ctx.stroke();
     } else if (op.cheia) ctx.fill();
   }
-  // ---------- Faixa dos outros alimentadores (dados/redes/faixa.txt, o mesmo do satélite da página inicial) ----------
-  // faixa.txt (scripts/gera_trechos.py, faixa_txt) → as linhas dos pedaços (P) do T1 e do T2 de cada alimentador, menos o
-  // aberto (eu), em unidades de Mercator, com o alimentador, a classe e a situação do trecho (T) e os anos e as marcas do
-  // pedaço (chave em anos: a lista dos anos, o mais recente primeiro); as etiquetas das OS (O). A forma acumula a diferença
-  // pelo arquivo inteiro (as linhas T e as do aberto também são lidas); "!" no T: um ponto só
-  function decodificaFx(txt, eu) {
+  // ---------- camadas dos outros alimentadores (Faixa, Inspeção, Manutenção, Insp→manut) ----------
+  // Arquivos de dados/redes/ (scripts/gera_trechos.py: faixa_txt, o mesmo do satélite da página inicial, e camadas_txt), lidos
+  // aqui (no worker): por alimentador (A), menos o aberto (eu). Polyline com a diferença acumulando pelo arquivo inteiro (as
+  // linhas do aberto e as T do faixa.txt também são lidas). Devolvem {cods, ...} com os índices dos alimentadores em al.
+  //   faixa:    as linhas dos pedaços (P) do T1 e do T2, com a classe e a situação do trecho (T), a chave dos anos (ak, em
+  //             anos: a lista dos anos, o mais recente primeiro) e as marcas (mk: 1 criada, 2 pendente); as etiquetas (O)
+  //   inspecao: as linhas (I) com a chave dos anos; executadas: os ativos (E) e os serviços de cada um por ano (de ini[i] a
+  //   ini[i+1] em ys e ns; -1 NAE DEOP, 0 sem data); manutencao: os postes (M) e as OS de cada um por situação (n, 4 por poste)
+  function decodificaCam(tipo, txt, eu) {
     const ux = lon => (lon + 180) / 360, uy = lat => 0.5 - Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) / (2 * Math.PI);
+    const esc = tipo === 'executadas' || tipo === 'manutencao' ? 1e5 : 1e4;
     const p = [], ini = [0], cx = [], al = [], cl = [], sit = [], ak = [], mk = [], cods = [], chaves = new Map(), anos = [], os = [];
+    const px = [], py = [], pal = [], ys = [], ns = [], ip = [0];
     let la = 0, lo = 0, ia = -1, meu = true, tcl = 0, tsit = 3, hoje = '';
-    const le = (s, guarda, a, m) => {
-      const n = s.length, n0 = p.length;
+    // os pontos do texto s (guarda: em p, como uma linha; senão só acumula, ou devolve a lista se lista)
+    const le = (s, guarda, a, m, lista) => {
+      const n = s.length, n0 = p.length, out = lista ? [] : null;
       let i = 0, x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
       while (i < n) {
         let v = 0, sh = 0, b;
@@ -186,15 +192,18 @@
         v = 0; sh = 0;
         do { b = s.charCodeAt(i++) - 63; v |= (b & 31) << sh; sh += 5; } while (b >= 32);
         lo += v & 1 ? ~(v >> 1) : v >> 1;
+        if (out) { out.push(ux(lo / esc), uy(la / esc)); continue; }
         if (!guarda) continue;
-        const x = ux(lo / 1e4), y = uy(la / 1e4);
+        const x = ux(lo / esc), y = uy(la / esc);
         p.push(x, y);
         if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
       }
+      if (out) return out;
       if (!guarda) return;
       if (p.length - n0 < 4) { p.length = n0; return; }
       ini.push(p.length / 2); cx.push(x0, y0, x1, y1); al.push(ia); cl.push(tcl); sit.push(tsit); ak.push(a); mk.push(m);
     };
+    const chave = k => { let a = chaves.get(k); if (a === undefined) { chaves.set(k, a = anos.length); anos.push(k ? k.split(',').map(Number) : []); } return a; };
     for (const ln of txt.split('\n')) {
       if (!ln) continue;
       if (ln[0] === '#') { try { hoje = JSON.parse(ln.slice(1)).hoje || ''; } catch (e) { /* cabeçalho estranho */ } continue; }
@@ -205,39 +214,56 @@
         const g = c[7] || '';
         if (g[0] === '!') le(g.slice(1), false);
         else for (const x of g.split(' ')) if (x) le(x, false);
-      } else if (c[0] === 'P') {
-        const k = c[1] || '';
-        let a = chaves.get(k);
-        if (a === undefined) { chaves.set(k, a = anos.length); anos.push(k ? k.split(',').map(Number) : []); }
-        const m = (/c/.test(c[2] || '') ? 1 : 0) | (/p/.test(c[2] || '') ? 2 : 0);
-        for (const x of (c[4] || '').split(' ')) if (x) le(x, !meu, a, m);
+      } else if (c[0] === 'P' || c[0] === 'I') {
+        const a = chave(c[1] || ''), m = c[0] === 'P' ? (/c/.test(c[2] || '') ? 1 : 0) | (/p/.test(c[2] || '') ? 2 : 0) : 0;
+        for (const x of ((c[0] === 'P' ? c[4] : c[3]) || '').split(' ')) if (x) le(x, !meu, a, m);
       } else if (c[0] === 'O' && !meu) {
-        const lat = +c[1], lon = +c[2];
-        os.push({ x: ux(lon), y: uy(lat), ano: +c[4], datas: (c[6] || c[3] || '').split(','), tr: c[7] || '', al: ia });
+        os.push({ x: ux(+c[2]), y: uy(+c[1]), ano: +c[4], datas: (c[6] || c[3] || '').split(','), tr: c[7] || '', al: ia });
+      } else if (c[0] === 'E' || c[0] === 'M') {
+        const q = le(c[1] || '', false, 0, 0, true);
+        if (meu) continue;
+        const cs = (c[2] || '').split(' ');
+        for (let i = 0; i < q.length / 2; i++) {
+          px.push(q[2 * i]); py.push(q[2 * i + 1]); pal.push(ia);
+          if (c[0] === 'M') { const n = (cs[i] || '').split(',').map(Number); for (let j = 0; j < 4; j++) ns.push(n[j] || 0); continue; }
+          for (const t of (cs[i] || '').split(',')) {
+            if (!t) continue;
+            const [y, n] = t.split(':');
+            ys.push(y === 'd' ? -1 : y === 'z' ? 0 : 2000 + +y); ns.push(n ? +n : 1);
+          }
+          ip.push(ys.length);
+        }
       }
     }
+    if (tipo === 'executadas' || tipo === 'manutencao')
+      return { cods, x: Float64Array.from(px), y: Float64Array.from(py), al: Uint16Array.from(pal), ini: Uint32Array.from(ip), ys: Int16Array.from(ys), ns: Uint16Array.from(ns), pontos: px.length };
     os.sort((a, b) => (b.datas[0] || '').localeCompare(a.datas[0] || ''));   // a mais recente tem a vez
     return { p: Float64Array.from(p), ini: Uint32Array.from(ini), cx: Float64Array.from(cx), al: Uint16Array.from(al), cl: Uint8Array.from(cl),
-      sit: Uint8Array.from(sit), ak: Uint16Array.from(ak), mk: Uint8Array.from(mk), cods, anos, os, hoje };
+      sit: Uint8Array.from(sit), ak: Uint16Array.from(ak), mk: Uint8Array.from(mk), cods, anos, os, hoje, linhas: ini.length - 1, pontos: p.length / 2 };
   }
-  // as linhas da Faixa dos outros na região r (op: k; vista 'ano' ou 'sit'; cores, de baixo para cima, e a largura de cada
-  // uma (larg); corK: a cor (índice) de cada chave de anos, -1 fora; corS: a de cada situação; cls: T1 e T2 à vista; fora:
-  // os alimentadores que ficam de fora; contorno (o escuro por baixo, como linhaDupla); alfa; nexe: c, p (o traço das
-  // criadas e das pendentes por cima); rot: as cores dos anos das etiquetas (null: sem etiquetas); evita: caixas (Mercator)
-  // das etiquetas do aberto). Cada cor: o contorno e a linha, a mais recente por cima. Devolve o que desenhou (testes)
-  function pintaFaixa(ctx, r, F, op) {
-    const s = 256 * Math.pow(2, r.z), bx = -r.x, by = -r.y, W = r.w + 8, H = r.h + 8, n = F.ini.length - 1, p = F.p, cx = F.cx;
-    const fora = op.fora && op.fora.length ? new Set(op.fora) : null, ci = new Int16Array(n), conta = op.cores.map(() => 0);
-    for (let l = 0; l < n; l++) {
-      if (!op.cls[F.cl[l]] || (fora && fora.has(F.al[l])) || cx[4 * l] * s + bx > W || cx[4 * l + 2] * s + bx < -8 || cx[4 * l + 1] * s + by > H || cx[4 * l + 3] * s + by < -8) { ci[l] = -1; continue; }
-      ci[l] = op.vista === 'sit' ? op.corS[F.sit[l]] : op.corK[F.ak[l]];
-      if (ci[l] >= 0) conta[ci[l]]++;
-    }
-    const traca = q => {
-      ctx.beginPath();
+  // As camadas dos outros na região r (Dd: os dados lidos de cada uma; op: k, z, fora (códigos que ficam de fora: os
+  // selecionados) e, das camadas ligadas: faixa, inspecao, executadas, manutencao). De baixo para cima: a Inspeção como borda
+  // larga (com a Faixa, como no aberto), as linhas da Faixa, a Inspeção como linha (sem a Faixa), as criadas e pendentes, os
+  // losangos da Manutenção e os do Insp→manut e as etiquetas das OS da Faixa. Devolve o que desenhou (testes)
+  function pintaOutros(ctx, r, Dd, op) {
+    const s = 256 * Math.pow(2, r.z), bx = -r.x, by = -r.y, W = r.w + 8, H = r.h + 8, info = {};
+    const foraDe = G => { if (!op.fora || !op.fora.length) return null; const f = new Set(); op.fora.forEach(c => { const i = G.cods.indexOf(c); if (i >= 0) f.add(i); }); return f; };
+    ctx.setTransform(op.k, 0, 0, op.k, 0, 0);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // a cor (índice em cores) de cada linha de G na região (cor(l): -1 fica de fora)
+    const corDas = (G, cor, fora) => {
+      const n = G.ini.length - 1, ci = new Int16Array(n), cx = G.cx;
       for (let l = 0; l < n; l++) {
+        ci[l] = (fora && fora.has(G.al[l])) || cx[4 * l] * s + bx > W || cx[4 * l + 2] * s + bx < -8 || cx[4 * l + 1] * s + by > H || cx[4 * l + 3] * s + by < -8 ? -1 : cor(l);
+      }
+      return ci;
+    };
+    const traca = (G, q) => {
+      const p = G.p;
+      ctx.beginPath();
+      for (let l = 0, n = G.ini.length - 1; l < n; l++) {
         if (!q(l)) continue;
-        const a = F.ini[l], b = F.ini[l + 1];
+        const a = G.ini[l], b = G.ini[l + 1];
         let lx = p[2 * a] * s + bx, ly = p[2 * a + 1] * s + by;
         ctx.moveTo(lx, ly);
         for (let k = a + 1; k < b; k++) {
@@ -248,26 +274,106 @@
       }
       ctx.stroke();
     };
-    ctx.setTransform(op.k, 0, 0, op.k, 0, 0);
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    op.cores.forEach((cor, c) => {
-      if (!conta[c]) return;
-      if (op.contorno) { ctx.globalAlpha = 0.75 * op.alfa; ctx.strokeStyle = '#0b0f14'; ctx.lineWidth = op.larg[c] + 3; traca(l => ci[l] === c); }
-      ctx.globalAlpha = op.alfa; ctx.strokeStyle = cor; ctx.lineWidth = op.larg[c]; traca(l => ci[l] === c);
-    });
-    if (op.vista === 'ano' && op.nexe) {                 // criadas tracejado branco; pendentes pontilhado branco com borda
-      const w = op.larg[op.larg.length - 1];
-      if (op.nexe.c) { ctx.globalAlpha = op.alfa; ctx.setLineDash([6, 7]); ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(1.5, w * 0.8); traca(l => ci[l] >= 0 && (F.mk[l] & 1)); }
-      if (op.nexe.p) {
-        ctx.setLineDash([1, 11]); ctx.lineCap = 'round';
-        ctx.globalAlpha = 0.8 * op.alfa; ctx.strokeStyle = '#0b0f14'; ctx.lineWidth = w + 3; traca(l => ci[l] >= 0 && (F.mk[l] & 2));
-        ctx.globalAlpha = op.alfa; ctx.strokeStyle = '#fff'; ctx.lineWidth = w + 1; traca(l => ci[l] >= 0 && (F.mk[l] & 2));
+    // cada cor, de baixo para cima: o contorno escuro (se pedido) e a linha; conta as linhas de cada cor
+    const linhas = (G, ci, o, contorno) => {
+      const conta = o.cores.map(() => 0);
+      for (let l = 0; l < ci.length; l++) if (ci[l] >= 0) conta[ci[l]]++;
+      o.cores.forEach((cor, c) => {
+        if (!conta[c]) return;
+        if (contorno) { ctx.globalAlpha = 0.75 * o.alfa; ctx.strokeStyle = '#0b0f14'; ctx.lineWidth = o.larg[c] + 3; traca(G, l => ci[l] === c); }
+        ctx.globalAlpha = o.alfa; ctx.strokeStyle = cor; ctx.lineWidth = o.larg[c]; traca(G, l => ci[l] === c);
+      });
+      return Object.fromEntries(o.cores.map((c, i) => [c, conta[i]]));
+    };
+    const F = op.faixa && Dd.faixa, I = op.inspecao && Dd.inspecao;
+    const fF = F && foraDe(F), fI = I && foraDe(I);
+    const ciF = F && corDas(F, l => !op.faixa.cls[F.cl[l]] ? -1 : op.faixa.vista === 'sit' ? op.faixa.corS[F.sit[l]] : op.faixa.corK[F.ak[l]], fF);
+    const ciI = I && corDas(I, l => op.inspecao.corK[I.ak[l]], fI);
+    if (I && op.inspecao.borda) info.inspecao = linhas(I, ciI, op.inspecao, false);
+    if (F) info.cores = linhas(F, ciF, op.faixa, op.faixa.contorno);
+    if (I && !op.inspecao.borda) info.inspecao = linhas(I, ciI, op.inspecao, op.inspecao.contorno);
+    if (F && op.faixa.vista === 'ano' && op.faixa.nexe) {   // criadas tracejado branco; pendentes pontilhado branco com borda
+      const w = op.faixa.larg[op.faixa.larg.length - 1];
+      if (op.faixa.nexe.c) { ctx.globalAlpha = op.faixa.alfa; ctx.setLineDash([6, 7]); ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(1.5, w * 0.8); traca(F, l => ciF[l] >= 0 && (F.mk[l] & 1)); }
+      if (op.faixa.nexe.p) {
+        ctx.setLineDash([1, 11]);
+        ctx.globalAlpha = 0.8 * op.faixa.alfa; ctx.strokeStyle = '#0b0f14'; ctx.lineWidth = w + 3; traca(F, l => ciF[l] >= 0 && (F.mk[l] & 2));
+        ctx.globalAlpha = op.faixa.alfa; ctx.strokeStyle = '#fff'; ctx.lineWidth = w + 1; traca(F, l => ciF[l] >= 0 && (F.mk[l] & 2));
       }
       ctx.setLineDash([]);
     }
-    // etiquetas das OS (de perto): a cor do ano, o alimentador e o trecho num fundo escuro e as datas; as que batem numa do
-    // aberto ou numa já posta ficam de fora (a mais recente tem a vez)
-    const rots = [];
+    // losangos (Manutenção e Insp→manut): os pontos da região juntos numa célula de o.celula px (o do aberto: 44 px), no
+    // meio deles; a cor e o número (o.numeros: de perto) como no aberto. G: os pontos; val(i): [cor (índice em o.cores), n]
+    // ou null; a da célula: a de maior índice (o.maior) ou a de menor
+    const losangos = (G, o, val, dx) => {
+      const fora = foraDe(G), cel = new Map(), lado = o.lado;
+      let m = 0;
+      for (let i = 0, n = G.x.length; i < n; i++) {
+        if (fora && fora.has(G.al[i])) continue;
+        const x = G.x[i] * s + bx, y = G.y[i] * s + by;
+        if (x < -30 || y < -30 || x > r.w + 30 || y > r.h + 30) continue;
+        const v = val(i);
+        if (!v) continue;
+        const k = o.celula ? Math.floor((G.x[i] * s) / o.celula) + ',' + Math.floor((G.y[i] * s) / o.celula) : i;
+        let c = cel.get(k);
+        if (!c) cel.set(k, c = { x: 0, y: 0, q: 0, n: 0, cor: v[0], i0: i });
+        c.x += x; c.y += y; c.q++; c.n += v[1];
+        if (o.maior ? v[0] > c.cor : v[0] < c.cor) c.cor = v[0];   // (Manutenção: o ano mais recente; Insp→manut: a pior situação)
+      }
+      ctx.globalAlpha = 1;
+      const quadrado = (x, y, h, cor) => {
+        ctx.beginPath(); ctx.moveTo(x, y - h); ctx.lineTo(x + h, y); ctx.lineTo(x, y + h); ctx.lineTo(x - h, y); ctx.closePath();
+        ctx.lineWidth = lado > 5 ? 4.5 : 3; ctx.strokeStyle = '#0b0f14'; ctx.stroke();
+        ctx.lineWidth = lado > 5 ? 2 : 1.3; ctx.strokeStyle = '#fff'; ctx.stroke();
+        ctx.fillStyle = cor; ctx.fill();
+      };
+      const lista = [...cel.values()];
+      for (const c of lista) {
+        const x = c.x / c.q + dx, y = c.y / c.q + dx, h = c.q > 1 ? lado * 1.25 : lado;
+        if (c.q > 1) quadrado(x + 3, y + 3, h, '#fff');      // grupo: losango empilhado
+        quadrado(x, y, h, o.cores[c.cor]);
+        m++;
+      }
+      if (o.numeros) {
+        ctx.font = '700 10px ui-monospace,Menlo,Consolas,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        for (const c of lista) {
+          if (c.n < 2) continue;
+          const t = String(c.n), w = Math.max(16, ctx.measureText(t).width + 8), x = c.x / c.q + dx + (c.q > 1 ? 8 : 6), y = c.y / c.q + dx - (c.q > 1 ? 21 : 18);
+          ctx.beginPath(); ctx.moveTo(x + 8, y); ctx.arcTo(x + w, y, x + w, y + 16, 8); ctx.arcTo(x + w, y + 16, x, y + 16, 8); ctx.arcTo(x, y + 16, x, y, 8); ctx.arcTo(x, y, x + w, y, 8); ctx.closePath();
+          ctx.fillStyle = '#0b0f14'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+          ctx.fillStyle = '#fff'; ctx.fillText(t, x + w / 2, y + 8.5);
+        }
+        ctx.textAlign = 'start';
+      }
+      // (amostra para os testes: o losango e o 1º ponto dele, com o alimentador)
+      return { losangos: m, amostra: lista.slice(0, 12).map(c => ({ x: (c.x / c.q - bx) / s, y: (c.y / c.q - by) / s, cor: o.cores[c.cor], n: c.n, q: c.q, al: G.cods[G.al[c.i0]], px: G.x[c.i0], py: G.y[c.i0] })) };
+    };
+    const E = op.executadas && Dd.executadas, M = op.manutencao && Dd.manutencao;
+    if (E) {
+      const o = op.executadas, on = o.on;                  // on: ano → índice da cor (os anos ligados)
+      info.executadas = losangos(E, o, i => {
+        let n = 0, ano = -Infinity;
+        for (let j = E.ini[i]; j < E.ini[i + 1]; j++) if (E.ys[j] in on) { n += E.ns[j]; if (E.ys[j] > ano) ano = E.ys[j]; }
+        return n ? [on[ano], n] : null;
+      }, M ? 7 : 0);
+    }
+    if (M) {
+      const o = op.manutencao;                             // sits: as situações ligadas (0 venc … 3 exec), da pior
+      info.manutencao = losangos(M, o, i => {
+        let n = 0, pior = -1;
+        for (const j of o.sits) { const v = M.ns[4 * i + j]; if (v) { n += v; if (pior < 0) pior = j; } }
+        return n ? [pior, n] : null;
+      }, 0);
+    }
+    if (F) Object.assign(info, rotulosFaixa(ctx, r, F, op.faixa, fF, ciF, s, bx, by));
+    ctx.globalAlpha = 1;
+    return info;
+  }
+  // etiquetas das OS da Faixa (de perto): a cor do ano, o alimentador e o trecho num fundo escuro e as datas; as que batem
+  // numa do aberto (op.evita: caixas em Mercator) ou numa já posta ficam de fora (a mais recente tem a vez). E a amostra
+  // para os testes: até 24 linhas desenhadas (o ponto do meio de cada uma, a cor e o alimentador)
+  function rotulosFaixa(ctx, r, F, op, fora, ci, s, bx, by) {
+    const rots = [], p = F.p, n = F.ini.length - 1;
     if (op.rot) {
       const caixas = (op.evita || []).map(b => [b[0] * s + bx, b[1] * s + by, b[2] * s + bx, b[3] * s + by]);
       const bate = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
@@ -294,22 +400,27 @@
         ctx.font = F2; ctx.fillStyle = '#111'; ctx.fillText(dt, l + we + 12, t + h / 2 + 0.5);
       }
     }
-    ctx.globalAlpha = 1;
-    // amostra para os testes: até 24 linhas desenhadas (o ponto do meio de cada uma, a cor e o alimentador)
-    const amostra = [];
-    for (let l = 0, passo = Math.max(1, Math.floor(n / 4000)); l < n && amostra.length < 24; l += passo) {
+    const cands = [];                                    // (espalhada pelas linhas desenhadas da região)
+    for (let l = 0; l < n; l++) {
       if (ci[l] < 0 || F.ini[l + 1] - F.ini[l] < 3) continue;
       const k = (F.ini[l] + F.ini[l + 1]) >> 1, x = p[2 * k] * s + bx, y = p[2 * k + 1] * s + by;
-      if (x < 40 || y < 40 || x > r.w - 40 || y > r.h - 40) continue;
-      amostra.push({ x: p[2 * k], y: p[2 * k + 1], cor: op.cores[ci[l]], al: F.cods[F.al[l]], l });
+      if (x >= 40 && y >= 40 && x <= r.w - 40 && y <= r.h - 40) cands.push([l, k]);
     }
-    return { cores: Object.fromEntries(op.cores.map((c, i) => [c, conta[i]])), rotulos: rots.length, amostra };
+    const amostra = [];                                  // (16 das cores de cima: as do fundo são finas)
+    for (const [q, m] of [[cands.filter(([l]) => ci[l] > 0), 16], [cands.filter(([l]) => ci[l] === 0), 8]]) {
+      for (let i = 0, passo = Math.max(1, q.length / m), j = 0; i < q.length && j < m; i += passo, j++) {
+        const [l, k] = q[Math.floor(i)];
+        amostra.push({ x: p[2 * k], y: p[2 * k + 1], cor: op.cores[ci[l]], al: F.cods[F.al[l]], l });
+      }
+    }
+    return { rotulos: rots.length, amostra };
   }
   // o pintor: desenha os pedidos das camadas (só o último de cada uma, se chegarem vários juntos) e devolve a imagem
   // (ImageBitmap); baixa os quadros do fundo do satélite (grupos: os de cada zoom; junta: montar a imagem do fundo, senão só
   // para o cache do navegador), parando enquanto o mapa mexe (menos com pressa: o botão foi tocado antes do fundo chegar)
   function Pintor(posta) {
-    let D = null, P = null, FX = null, vez = 0, pausa = false, pressa = false, ativos = 0;
+    const CAM = {};                                      // as camadas dos outros, lidas (decodificaCam)
+    let D = null, P = null, vez = 0, pausa = false, pressa = false, ativos = 0;
     const pedidos = new Map(), telas = new Map(), fila = [];
     const pinta = () => {
       vez = 0;
@@ -319,7 +430,7 @@
         if (!oc || oc.width !== W || oc.height !== H) telas.set(m.camada, oc = new OffscreenCanvas(W, H));
         const ctx = oc.getContext('2d');
         let info = null;
-        if (m.t === 'estado') { if (D) pintaEstado(ctx, m.r, D, m.op); } else if (m.t === 'faixa') { if (FX) info = pintaFaixa(ctx, m.r, FX, m.op); } else if (P) pintaMascara(ctx, m.r, P, m.op);
+        if (m.t === 'estado') { if (D) pintaEstado(ctx, m.r, D, m.op); } else if (m.t === 'outros') info = pintaOutros(ctx, m.r, CAM, m.op); else if (P) pintaMascara(ctx, m.r, P, m.op);
         const bm = oc.transferToImageBitmap();
         posta({ t: 'tela', camada: m.camada, id: m.id, r: m.r, bm, info }, [bm]);
       }
@@ -347,9 +458,9 @@
     };
     return m => {
       if (m.t === 'dados') D = m.D;
-      else if (m.t === 'fxtexto') {                      // faixa.txt: lido aqui (no worker, fora da página); devolve o resumo
-        FX = decodificaFx(m.txt, m.eu);
-        posta({ t: 'fx', cods: FX.cods, anos: FX.anos, linhas: FX.ini.length - 1, pontos: FX.p.length / 2, os: FX.os.length, hoje: FX.hoje });
+      else if (m.t === 'camtexto') {                     // um arquivo das camadas dos outros: lido aqui (no worker); devolve o resumo
+        const G = CAM[m.tipo] = decodificaCam(m.tipo, m.txt, m.eu);
+        posta({ t: 'cam', tipo: m.tipo, cods: G.cods, anos: G.anos || null, linhas: G.linhas || 0, pontos: G.pontos, os: G.os ? G.os.length : 0, hoje: G.hoje || '' });
       }
       else if (m.t === 'contorno') P = m.P;
       else if (m.t === 'quadros') {
@@ -364,10 +475,10 @@
   // OffscreenCanvas: as camadas desenham no canvas da página, na hora, e não há fundo do satélite)
   const camadas = new Map();                             // id da camada → camada (as imagens que o pintor devolve)
   let fundoChegou = () => {};
-  let fxChegou = () => {};
+  let camChegou = () => {};
   const chega = m => {
     if (m.t === 'tela') { const l = camadas.get(m.camada); if (l) { if (m.info) l._info = m.info; l._chegou(m.id, m.bm, m.r); } else m.bm.close(); }
-    else if (m.t === 'fx') fxChegou(m);
+    else if (m.t === 'cam') camChegou(m);
     else if (m.t === 'fundo') fundoChegou(m);
   };
   let MODO = null, PINTOR = null;
@@ -378,7 +489,7 @@
       if (window.Worker) {
         try {
           const fonte = `'use strict';\nconst tracaLinhas = ${tracaLinhas};\nconst pintaEstado = ${pintaEstado};\nconst recorta = ${recorta};\n` +
-            `const pintaMascara = ${pintaMascara};\nconst decodificaFx = ${decodificaFx};\nconst pintaFaixa = ${pintaFaixa};\nconst recebe = (${Pintor})((m, t) => postMessage(m, t || []));\nonmessage = e => recebe(e.data);\n`;
+            `const pintaMascara = ${pintaMascara};\nconst decodificaCam = ${decodificaCam};\nconst pintaOutros = ${pintaOutros};\nconst rotulosFaixa = ${rotulosFaixa};\nconst recebe = (${Pintor})((m, t) => postMessage(m, t || []));\nonmessage = e => recebe(e.data);\n`;
           const url = URL.createObjectURL(new Blob([fonte], { type: 'text/javascript' }));
           PINTOR = new Worker(url);
           URL.revokeObjectURL(url);
@@ -395,7 +506,7 @@
   // desenho na hora, aqui (antes da animação do zoom; worker que caiu)
   function pintaAqui(m) {
     const oc = new OffscreenCanvas(Math.max(1, Math.ceil(m.r.w * m.r.k)), Math.max(1, Math.ceil(m.r.h * m.r.k))), ctx = oc.getContext('2d');
-    if (m.t === 'estado') { if (dados) pintaEstado(ctx, m.r, dados, m.op); } else if (m.t !== 'faixa') pintaMascara(ctx, m.r, PTOf, m.op);   // (a Faixa só no pintor)
+    if (m.t === 'estado') { if (dados) pintaEstado(ctx, m.r, dados, m.op); } else if (m.t !== 'outros') pintaMascara(ctx, m.r, PTOf, m.op);   // (as camadas dos outros só no pintor)
     return oc.transferToImageBitmap();
   }
 
@@ -739,31 +850,49 @@
   });
   estado = new Estado().addTo(map);
 
-  // ---------- Faixa nos outros alimentadores ----------
-  // Com a camada Faixa do aberto ligada (limpeza.js: window.__faixaCam e o aviso al:faixa), o T1 e o T2 dos outros
-  // alimentadores, do estado inteiro aos vizinhos de perto, ganham a pintura dela: na vista Por ano a cor do ano da limpeza
-  // mais recente entre os anos ligados (o ano que o aberto não tem fica sempre ligado), o vão sem OS neutro e, ligadas no
-  // aberto, as criadas e as pendentes por cima; na Vencimento, a situação do trecho. Os pedaços vêm de dados/redes/faixa.txt
-  // (o do satélite da página inicial: Douglas–Peucker de 30 m), baixado só com a Faixa ligada e lido no worker (a página não
-  // passa pelo arquivo). Um canvas só, acima dos vizinhos e abaixo das divisas e da rede deste, desenhado pelo pintor como o
-  // do estado (no zoom e no arrasto ele só estica e move; refeito no fim do movimento, se a vista sai da região, e quando a
-  // camada muda). De longe, só as linhas finas; do zoom 10 o contorno escuro; do 11 (parado, na vista Por ano) as
-  // etiquetas das OS deles, mais leves que as do aberto e fora de cima delas. Os selecionados ficam como estão
-  // (selecionados.js). Sem OffscreenCanvas: nada.
-  const paneF = map.createPane('faixa-outros');
+  // ---------- camadas dos outros alimentadores: Faixa, Inspeção, Manutenção e Insp→manut ----------
+  // Com uma dessas camadas ligada no aberto (limpeza.js, inspecao.js, executadas.js, manutencao.js: window.__faixaCam,
+  // __inspCam, __exeCam, __mntCam e os avisos al:faixa e al:camada), o T1 e o T2 dos outros alimentadores, do estado
+  // inteiro aos vizinhos de perto, ganham a pintura dela, com o filtro do aberto (anos, situações; o ano que o aberto não
+  // tem fica sempre ligado):
+  //   Faixa: Por ano, a cor do ano da limpeza mais recente entre os ligados, o vão sem OS neutro e, ligadas no aberto, as
+  //          criadas e as pendentes por cima; Vencimento, a situação do trecho. Do zoom 11 (parado, Por ano), as etiquetas
+  //          das OS, mais leves que as do aberto e fora de cima delas
+  //   Inspeção: os vãos inspecionados na cor do ano (com a Faixa, a borda larga em volta dela, como no aberto)
+  //   Manutenção e Insp→manut: os losangos (a cor do ano mais recente / da pior situação), juntos numa célula de 44 px
+  //          como os da Manutenção do aberto, com o número só do zoom 11
+  // Os dados vêm de dados/redes/ (faixa.txt, o do satélite da página inicial; inspecao.txt, executadas.txt e manutencao.txt:
+  // scripts/gera_trechos.py, faixa_txt e camadas_txt), cada um baixado só com a camada dele ligada e lido no worker (a
+  // página não passa pelos arquivos). Um canvas só, acima dos vizinhos e abaixo das divisas e da rede deste, desenhado pelo
+  // pintor como o do estado (no zoom e no arrasto ele só estica e move; refeito no fim do movimento, se a vista sai da
+  // região, e quando uma camada muda). Os selecionados ficam como estão (selecionados.js). Sem OffscreenCanvas: nada.
+  const paneF = map.createPane('camadas-outros');
   paneF.style.zIndex = 345;                              // acima dos vizinhos (340); abaixo das divisas (350) e da rede (400)
   paneF.style.pointerEvents = 'none';
   paneF.hidden = true;
   const FX_COR_ANO = { 2021: '#a78bfa', 2022: '#60a5fa', 2023: '#22d3ee', 2024: '#4ade80', 2025: '#facc15', 2026: '#fb923c', 2027: '#f87171', 2028: '#f472b6' };
-  const fxCorAno = a => FX_COR_ANO[a] || (a < 2021 ? '#c4b5fd' : '#fb7185');   // as de limpeza.js
+  const fxCorAno = a => FX_COR_ANO[a] || (a < 2021 ? '#c4b5fd' : '#fb7185');   // as de limpeza.js (e executadas.js)
+  const exCorAno = a => (a === -1 ? '#9ca3af' : fxCorAno(a));   // executadas.js: NAE DEOP (data padrão) cinza
+  const IN_COR_ANO = { 2024: '#c084fc', 2025: '#818cf8', 2026: '#2dd4bf', 2027: '#a3e635' };
+  const inCorAno = a => IN_COR_ANO[a] || (a < 2024 ? '#e879f9' : '#bef264');   // as de inspecao.js
   const FX_FUNDO = '#cbd5e1', FX_SIT = ['#22c55e', '#facc15', '#ef4444', '#d946ef'];   // dia, vence, vencida, sem (limpeza.js)
   const FX_SIT_ORDEM = [3, 0, 1, 2];                     // de baixo para cima: sem registro, em dia, vence, vencida
-  const Z_FX_CONTORNO = 10, Z_FX_ROT = 11, FOLGA_F = 0.15;
+  const MN_SIT = ['venc', 'pend', 'fora', 'exec'], MN_COR = ['#ef4444', '#f59e0b', '#0ea5e9', '#22c55e'];   // manutencao.js, da pior
+  const Z_FX_CONTORNO = 10, Z_FX_ROT = 11, Z_NUM = 11, FOLGA_F = 0.15;
   const fxLarg = z => z < 8 ? 1.5 : z < 10 ? 2.2 : z < 12 ? 3 : z < 14 ? 3.8 : 4.4;   // (o aberto: 5)
-  let fx = null, fxCarga = null, fxForaVisto = '';
-  const camF = () => (window.__faixaCam ? window.__faixaCam() : null);
-  const fxLigada = () => { const c = camF(); return !!(c && c.ligado && MODO && PINTOR); };
-  const foraF = () => { const S = window.__alSel, l = S && fx ? (S.desenhados ? S.desenhados() : S.lista()) : []; return l.map(c => fx.cods.indexOf(c)).filter(i => i >= 0); };
+  // cada camada: o estado dela no aberto, o arquivo e o que o worker devolveu ao lê-lo
+  const CAMS = {
+    faixa: { cam: () => window.__faixaCam, arq: 'faixa.txt' },
+    inspecao: { cam: () => window.__inspCam, arq: 'inspecao.txt' },
+    executadas: { cam: () => window.__exeCam, arq: 'executadas.txt' },
+    manutencao: { cam: () => window.__mntCam, arq: 'manutencao.txt' }
+  };
+  const camDe = n => { const f = CAMS[n].cam(); return f ? f() : null; };
+  const ligada = n => { const c = camDe(n); return !!(c && c.ligado && MODO && PINTOR); };
+  const ligadas = () => Object.keys(CAMS).filter(ligada);
+  const prontas = () => ligadas().filter(n => CAMS[n].dados);
+  let foraVisto = '';
+  const foraF = () => { const S = window.__alSel; return S ? (S.desenhados ? S.desenhados() : S.lista()) : []; };
   // as etiquetas da Faixa do aberto (as caixas na tela, em Mercator): as dos outros não ficam em cima delas
   function evitaF() {
     const m = mc.getBoundingClientRect(), z = map.getZoom(), s = 256 * Math.pow(2, z), o = map.getPixelOrigin(), out = [];
@@ -775,68 +904,104 @@
     }
     return out;
   }
-  function opFaixa(z, comRot) {
-    const c = camF(), todos = new Set(c.todos), lig = new Set(c.anos), on = a => !todos.has(a) || lig.has(a), w = fxLarg(z);
-    const op = { vista: c.vista === 'sit' ? 'sit' : 'ano', cls: [visivel('T1'), visivel('T2')], fora: foraF(), contorno: z >= Z_FX_CONTORNO, alfa: 0.9 };
-    fxForaVisto = op.fora.join();
-    if (op.vista === 'sit') {
-      op.cores = FX_SIT_ORDEM.map(i => FX_SIT[i]);
-      op.larg = FX_SIT_ORDEM.map(i => (i === 3 ? 0.8 : 1) * w);
-      op.corS = [0, 1, 2, 3].map(i => FX_SIT_ORDEM.indexOf(i));
-      op.corK = [];
-      return op;
-    }
-    // a cor de cada chave de anos: a do ano mais recente ligado; as cores na ordem dos anos (o neutro embaixo, o mais
-    // recente por cima)
-    const rank = new Map();
-    const corDe = anos => { const a = anos.find(on); const cor = a === undefined ? FX_FUNDO : fxCorAno(a), k = a === undefined ? -1 : a; if (!rank.has(cor) || rank.get(cor) > k) rank.set(cor, k); return cor; };
-    const porK = fx.anos.map(corDe);
-    op.cores = [...rank.keys()].sort((a, b) => rank.get(a) - rank.get(b));
-    op.larg = op.cores.map(cor => (cor === FX_FUNDO ? 0.55 : 1) * w);
-    op.corK = porK.map(cor => op.cores.indexOf(cor));
-    op.corS = [];
-    op.nexe = { c: c.nexe.includes('cri'), p: c.nexe.includes('pend') };
-    if (comRot) {
-      op.rot = {};
-      for (const o of fx.anos) for (const a of o) if (on(a)) op.rot[a] = fxCorAno(a);
-      op.evita = evitaF();
+  // ano ligado no aberto c (o que o aberto não tem fica ligado)
+  const anoOn = c => { const todos = new Set(c.todos), lig = new Set(c.anos); return a => !todos.has(a) || lig.has(a); };
+  // cores de chaves de anos (a do ano mais recente ligado; sem nenhum: fundo, ou -1 se não há fundo), de baixo para cima
+  function porChave(chaves, on, corDo, fundo) {
+    const rank = new Map(), por = chaves.map(anos => {
+      const a = anos.find(on), cor = a === undefined ? fundo : corDo(a);
+      if (cor && (!rank.has(cor) || rank.get(cor) > (a === undefined ? -Infinity : a))) rank.set(cor, a === undefined ? -Infinity : a);
+      return cor;
+    });
+    const cores = [...rank.keys()].sort((a, b) => rank.get(a) - rank.get(b));
+    return { cores, corK: por.map(cor => (cor ? cores.indexOf(cor) : -1)) };
+  }
+  function opOutros(z, comRot) {
+    const op = { z, fora: foraF() }, w = fxLarg(z), num = z >= Z_NUM;
+    foraVisto = op.fora.join();
+    const fxOn = ligada('faixa') && !!CAMS.faixa.dados;
+    for (const n of prontas()) {
+      const c = camDe(n), G = CAMS[n].dados;
+      if (n === 'faixa') {
+        const o = op.faixa = { vista: c.vista === 'sit' ? 'sit' : 'ano', cls: [visivel('T1'), visivel('T2')], contorno: z >= Z_FX_CONTORNO, alfa: 0.9, corS: [], corK: [] };
+        if (o.vista === 'sit') {
+          o.cores = FX_SIT_ORDEM.map(i => FX_SIT[i]);
+          o.larg = FX_SIT_ORDEM.map(i => (i === 3 ? 0.8 : 1) * w);
+          o.corS = [0, 1, 2, 3].map(i => FX_SIT_ORDEM.indexOf(i));
+        } else {
+          const on = anoOn(c);
+          Object.assign(o, porChave(G.anos, on, fxCorAno, FX_FUNDO));
+          o.larg = o.cores.map(cor => (cor === FX_FUNDO ? 0.55 : 1) * w);
+          o.nexe = { c: c.nexe.includes('cri'), p: c.nexe.includes('pend') };
+          if (comRot) {
+            o.rot = {};
+            for (const as of G.anos) for (const a of as) if (on(a)) o.rot[a] = fxCorAno(a);
+            o.evita = evitaF();
+          }
+        }
+      } else if (n === 'inspecao') {
+        const o = op.inspecao = Object.assign({ borda: fxOn, contorno: z >= Z_FX_CONTORNO, alfa: 0.9 }, porChave(G.anos, anoOn(c), inCorAno, null));
+        o.larg = o.cores.map(() => (fxOn ? 3 : 1) * w);  // (o aberto: borda de 15 em volta da Faixa de 5; sem ela, 5)
+      } else if (n === 'executadas') {
+        const on = anoOn(c), anos = [...new Set([...c.todos, ...G.anos])].filter(on).sort((a, b) => a - b);
+        op.executadas = { cores: anos.map(exCorAno), on: Object.fromEntries(anos.map((a, i) => [a, i])), maior: true, celula: z < 17 ? 44 : 0, lado: z < 9 ? 4 : z < 12 ? 5.5 : 6.5, numeros: num };
+      } else {
+        const sits = MN_SIT.map((s, i) => i).filter(i => c.sits.includes(MN_SIT[i]));
+        op.manutencao = { cores: MN_COR, sits, maior: false, celula: z < 15 ? 44 : 0, lado: z < 9 ? 4 : z < 12 ? 5.5 : 6.5, numeros: num };
+      }
     }
     return op;
   }
-  function carregaFx() {
-    if (fxCarga) return;
-    fxCarga = fetch(new URL('../dados/redes/faixa.txt', eu.src).href, { cache: 'no-cache' })   // (sem ?v=: confere a versão com o servidor)
+  // os anos de cada arquivo (Inspeção, Manutenção) vêm no cabeçalho; os da Faixa nas chaves dos pedaços
+  function carregaCam(n) {
+    const C = CAMS[n];
+    if (C.carga) return;
+    C.carga = fetch(new URL('../dados/redes/' + C.arq, eu.src).href, { cache: 'no-cache' })   // (sem ?v=: confere a versão com o servidor)
       .then(r => (r.ok ? r.text() : null))
-      .then(t => { if (t && PINTOR) PINTOR.postMessage({ t: 'fxtexto', txt: t, eu: EU }); })
+      .then(t => {
+        if (!t || !PINTOR) return;
+        if (n === 'executadas') { try { C.anosArq = JSON.parse(t.slice(1, t.indexOf('\n'))).anos || []; } catch (e) { C.anosArq = []; } }
+        PINTOR.postMessage({ t: 'camtexto', tipo: n, txt: t, eu: EU });
+      })
       .catch(() => { /* sem o arquivo: os outros ficam como estão */ });
   }
-  fxChegou = m => { fx = m; faixaO.vista(true); };
-  const FaixaO = Tela.extend({
-    options: { pane: 'faixa-outros' },
+  camChegou = m => {
+    const C = CAMS[m.tipo];
+    C.dados = Object.assign(m, { anos: m.anos || C.anosArq || [] });
+    outros.vista(true);
+  };
+  const Outros = Tela.extend({
+    options: { pane: 'camadas-outros' },
     vista(forca) {
       if (voo) return;
-      if (!fxLigada()) { this.apaga(); return; }
-      if (!fx) { carregaFx(); return; }
+      const ls = ligadas();
+      ls.forEach(n => { if (!CAMS[n].dados) carregaCam(n); });
+      if (!ls.some(n => CAMS[n].dados)) { this.apaga(); return; }
       const c = map.getCenter(), z = map.getZoom(), r = this._p || this._r;
       if (!forca && r && r.z === z && r.k >= R && this.cobreR(r, c, z, 0.04)) return;
-      const rot = z >= Z_FX_ROT;
-      this.pinta((!rot && this.regiaoTO(c, z, R, MAXPX_E, 0.25)) || this.regiao(c, z, FOLGA_F), R, 'faixa', opFaixa(z, rot));
+      const perto = z >= Z_NUM;                          // (etiquetas e números: a região da vista, no zoom dela)
+      this.pinta((!perto && this.regiaoTO(c, z, R, MAXPX_E, 0.25)) || this.regiao(c, z, FOLGA_F), R, 'outros', opOutros(z, z >= Z_FX_ROT));
     },
     // no arrasto, se a vista sai da região (de perto): a vista de agora, com folga
-    mexe() { if (fx && !paneF.hidden && !map._animatingZoom && !voo && !this.cobreP(map.getCenter(), map.getZoom(), 0)) this.vista(true); },
-    // no voo: a região do trecho seguinte (sem etiquetas)
+    mexe() { if (!paneF.hidden && !map._animatingZoom && !voo && !this.cobreP(map.getCenter(), map.getZoom(), 0)) this.vista(true); },
+    // no voo: a região do trecho seguinte (sem etiquetas nem números)
     quadro() {
-      if (!voo || !fx || !fxLigada()) return;
+      if (!voo || !prontas().length) return;
       const r = this.trechoDoVoo();
-      if (r) this.pinta(r, Math.min(R, Math.sqrt(MAXPX_E_ANIM / (r.w * r.h))), 'faixa', opFaixa(r.z, false));
+      if (!r) return;
+      const op = opOutros(r.z, false);
+      ['executadas', 'manutencao'].forEach(n => { if (op[n]) op[n].numeros = false; });
+      this.pinta(r, Math.min(R, Math.sqrt(MAXPX_E_ANIM / (r.w * r.h))), 'outros', op);
     },
-    _mostrou() { paneF.hidden = !fxLigada(); },
+    _mostrou() { paneF.hidden = !prontas().length; },
     apaga() { this.esquece(); if (!paneF.hidden) { paneF.hidden = true; this.soltaDepois(() => paneF.hidden); } }
   });
-  const faixaO = new FaixaO().addTo(map);
-  function refazF() { faixaO.esquece(); faixaO.vista(true); }
-  document.addEventListener('al:faixa', () => { clearTimeout(refazF.t); refazF.t = setTimeout(refazF, 0); });   // (vários avisos juntos: um desenho)
-  const foraMudou = () => fx && !paneF.hidden && foraF().join() !== fxForaVisto;
+  const outros = new Outros().addTo(map);
+  function refazF() { outros.esquece(); outros.vista(true); }
+  const avisoF = () => { clearTimeout(refazF.t); refazF.t = setTimeout(refazF, 0); };   // (vários avisos juntos: um desenho)
+  document.addEventListener('al:faixa', avisoF);
+  document.addEventListener('al:camada', avisoF);
+  const foraMudou = () => !paneF.hidden && foraF().join() !== foraVisto;
   const corBt = c => { const b = document.querySelector(`#classes button[data-c="${c}"]`); return b && b.style.getPropertyValue('--c').trim(); };
   const cls = document.getElementById('classes');
   if (cls) {
@@ -1301,7 +1466,7 @@
     }
     const vez = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 200));
     vez(() => { carrega().then(() => vez(() => { leZm(); estado.vista(true); })); });
-    vez(() => faixaO.vista(true));                       // a Faixa nos outros (com a camada ligada: baixa o faixa.txt)
+    vez(() => outros.vista(true));                       // as camadas nos outros (as ligadas: baixa o arquivo de cada uma)
   });
 
   // para os testes e as medidas
@@ -1316,8 +1481,12 @@
     vistaEstado: () => { const v = vistaEstado(); return { c: [v.center.lat, v.center.lng], z: v.zoom, controles: controles() }; },
     // as camadas (medidas)
     // a Faixa nos outros: ligada, lida (o resumo do worker), na tela e o último desenho (cores, etiquetas, amostra)
-    faixa: () => ({ ligada: fxLigada(), dados: fx ? { als: fx.cods.length, linhas: fx.linhas, pontos: fx.pontos, os: fx.os, hoje: fx.hoje } : null,
-      naTela: !paneF.hidden && !!faixaO._r, r: faixaO._r, ultimo: faixaO._info || null }),
-    _camadas: { estado, mascara, fundo, faixaO }
+    // as camadas nos outros: as ligadas, as lidas (o resumo do worker), na tela e o último desenho (cores, etiquetas,
+    // losangos, amostras); faixa(): o mesmo, com o resumo da Faixa (o teste da fase 1)
+    outros: () => ({ ligadas: ligadas(), dados: Object.fromEntries(Object.entries(CAMS).filter(([, C]) => C.dados).map(([n, C]) => [n, { als: C.dados.cods.length, linhas: C.dados.linhas, pontos: C.dados.pontos, os: C.dados.os }])),
+      naTela: !paneF.hidden && !!outros._r, r: outros._r, ultimo: outros._info || null }),
+    faixa: () => { const d = CAMS.faixa.dados; return { ligada: ligada('faixa'), dados: d ? { als: d.cods.length, linhas: d.linhas, pontos: d.pontos, os: d.os, hoje: d.hoje } : null,
+      naTela: ligada('faixa') && !!d && !paneF.hidden && !!outros._r, r: outros._r, ultimo: outros._info && outros._info.cores ? outros._info : null }; },
+    _camadas: { estado, mascara, fundo, outros }
   };
 })();
