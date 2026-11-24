@@ -2546,14 +2546,14 @@
         const i = classeNae(naeDe(t), faixasNae());
         poeBalao(cabA + `<small class="st-fx-t"><i style="background:${i ? corNae(i) : FUNDOCOR}"></i>Trecho ${esc(t.nome)} · ${NF0.format(t.n)} NAE` +
           `${t.n3 ? ` (+${NF0.format(t.n3)} nos ramais T3${naeRam.on ? '' : ', fora da cor'})` : ''}</small>` +
-          `<small>${esc(t.cls)} · ${kmTxt(t.m)} · ${esc(mesesTxt(DADOS.nae && DADOS.nae.meses))}</small>` + extraPts(e) + '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
+          `<small>${esc(t.cls)} · ${kmTxt(t.m)} · ${esc(mesesTxt(DADOS.nae && DADOS.nae.meses))}</small>` + extraPts(e) + '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
         return;
       }
       if (t && ativo === conjI) {                          // Inspeção: o pedaço embaixo do mouse
         const a0 = t.base ? null : t.anos.find(x => !inspOff.has(x));
         poeBalao(cabA + `<small class="st-fx-t"><i style="background:${a0 ? inCorAno(a0) : FUNDOCOR}"></i>${a0 ? 'Inspecionado em ' + a0 +
           (t.anos.length > 1 ? ' (também ' + t.anos.filter(x => x !== a0).join(', ') + ')' : '') : 'Sem inspeção registrada aqui'}</small>` +
-          extraPts(e) + '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
+          extraPts(e) + '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
         return;
       }
       if (t && ativo === conjA) {                           // vista Por ano: o trecho, o ano do pedaço, a última limpeza e os km limpos
@@ -2562,7 +2562,7 @@
           `<small class="st-fx-t"><i style="background:${a0 ? corAno(a0) : FUNDOCOR}"></i>Trecho ${esc(t.nome)} · ${a0 ? 'limpo em ' + a0 + (pc.anos.length > 1 ? ' (antes ' + pc.anos.slice(1).join(', ') + ')' : '') : 'sem registro de limpeza aqui'}</small>` +
           (pc && pc.mk ? `<small>${[pc.mk.includes('c') ? 'OS criada' : '', pc.mk.includes('p') ? 'OS pendente' : ''].filter(Boolean).join(' · ')} neste pedaço</small>` : '') +
           `<small>${t.ult ? 'Última limpeza do trecho ' + dataBr(t.ult) : 'Trecho sem registro de limpeza'} · ${t.limpo < 1000 ? Math.round(t.limpo) + " m" : NF1.format(t.limpo / 1000)} de ${kmTxt(t.m)} limpos · ${esc(t.cls)} a cada ${t.prazo} anos</small>` +
-          '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
+          '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
         return;
       }
       poeBalao(`<span class="h"><b class="cod">${esc(sobre)}</b>${am ? `<i>${esc(numAl(sobre, m))}</i>` : ''}</span>` +
@@ -2570,14 +2570,14 @@
         (t && ativo === conjF ? `<small class="st-fx-t" data-sit="${t.sit}"><i style="background:${SIT_COR[t.sit]}"></i>Trecho ${esc(t.nome)} · ${SIT_NOME[t.sit]}</small>` +
           `<small>${t.ult ? 'Última limpeza ' + dataBr(t.ult) : 'Sem registro de limpeza'} · ${esc(t.cls)} a cada ${t.prazo} anos · ${kmTxt(t.m)}</small>` : '') +
         (semRede.has(sobre) && (!t || t.semDado || t.base) ? '<small>Sem rede no cadastro (só o ponto)</small>' : '') + extraPts(e) +
-        '<small class="c">Clique para abrir o painel do alimentador</small>', ev);
+        '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
       return;
     }
     const pt = pontos.em(e.containerPoint);                 // um losango ou foco embaixo do mouse
     if (pt) {
       realceArea(null);
       map.getContainer().style.cursor = pt.al ? 'pointer' : '';
-      poeBalao(pt.html + (pt.al ? '<small class="c">Clique para abrir o painel do alimentador</small>' : ''), ev);
+      poeBalao(pt.html + (pt.al ? '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>' : ''), ev);
       return;
     }
     const n = fronteira ? destino(e.latlng) : null;            // (Fronteira desligada: sem a navegação por áreas)
@@ -2856,7 +2856,7 @@
       `<span class="st-mun-x">${m.slug ? `<a class="st-mun-a" href="${esc(url)}" data-p="${esc(href)}"${dica}${fora}>Abrir ${esc(m.nome)} →</a>` : ''}` +
       (lista.length ? `<button type="button" class="st-mun-b" aria-expanded="false" aria-controls="st-mun-l">Alimentadores<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>` : '') +
       (m.slug && noMapa ? `<a class="st-mun-p" href="${esc(ir(hPag))}"${fora}>Página do município</a>` : '') +
-      '</span><div class="st-mun-l" id="st-mun-l" hidden>' + lista.map(a => `<button type="button" class="st-al" data-al="${esc(a.cod)}" title="Clique para abrir o painel do alimentador">` +
+      '</span><div class="st-mun-l" id="st-mun-l" hidden>' + lista.map(a => `<button type="button" class="st-al" data-al="${esc(a.cod)}" title="Clique para abrir o mapa do alimentador em tela cheia">` +
         `<b>${esc(a.cod)}</b><i class="st-sel">${esc(numAl(a.cod, m))}</i><em>${kmTxt(a.m)} aqui${a.se ? ' · ' + esc(a.se) : ''}</em></button>`).join('') + '</div>';
     cartaoMun.hidden = false;
     lado.hidden = false;

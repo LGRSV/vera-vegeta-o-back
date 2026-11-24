@@ -783,7 +783,10 @@
   // os selecionados que ainda não estão lá (baixando ou com erro): realçados aqui
   const forteSel = () => { const S = window.__alSel; if (!S || !dados) return []; const d = S.desenhados ? S.desenhados() : []; return S.lista().filter(c => !d.includes(c)).map(c => dados.cods.indexOf(c)).filter(i => i >= 0); };
   let forteVisto = '';                                   // os realçados do último desenho pedido
-  const opEstado = z => { const forte = forteSel(); forteVisto = forte.join(); return { alfa: ALFA, cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })), fora: foraSel(), forte }; };   // o tronco por cima
+  // do estado inteiro (abaixo do zoom 8) as linhas fortes, como no satélite da página inicial (pedido do usuário: "aquela
+  // visão satélite original"); de perto, apagadas como as dos vizinhos
+  const ALFA_ESTADO = 0.9, Z_FORTE = 8;
+  const opEstado = z => { const forte = forteSel(); forteVisto = forte.join(); return { alfa: z < Z_FORTE ? ALFA_ESTADO : ALFA, cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })), fora: foraSel(), forte }; };   // o tronco por cima
   const Estado = Tela.extend({
     options: { pane: 'estado-to' },
     // fim de cada movimento: abaixo dos vizinhos, o estado inteiro (sem esmaecer: os vizinhos saem no mesmo quadro; se a
