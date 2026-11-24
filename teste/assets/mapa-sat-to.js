@@ -286,6 +286,8 @@
       '.st-mun-x{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:3px}' +
       '.st-mun-a{display:inline-flex;align-items:center;min-height:32px;padding:0 11px;border-radius:var(--r1,6px);background:var(--selo,#b8431f);color:#fff;' +
       'font:600 var(--t-sm,13px)/1 var(--f-body,sans-serif);text-decoration:none;white-space:nowrap}.st-mun-a:hover{filter:brightness(1.12);text-decoration:none}' +
+      '.st-mun-p{display:inline-flex;align-items:center;min-height:32px;padding:0 2px;color:var(--cartao-mute,#a9b2b8);font:500 var(--t-xs,12px)/1 var(--f-body,sans-serif);' +
+      'text-decoration:underline;text-underline-offset:2px;white-space:nowrap}.st-mun-p:hover{color:var(--vidro-fg,#f3f4f4)}' +
       '.st-mun-b{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 10px;border:1px solid var(--vidro-borda,rgba(255,255,255,.16));border-radius:var(--r1,6px);' +
       'background:transparent;color:var(--vidro-fg,#f3f4f4);font:500 var(--t-sm,13px)/1 var(--f-body,sans-serif);cursor:pointer}.st-mun-b:hover{background:var(--vidro-hover,rgba(255,255,255,.1))}' +
       '#mapa-to .st-mun-b svg{display:block;width:12px;height:12px;min-height:0;max-height:none;max-width:none;margin:0;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}' +
@@ -2035,20 +2037,25 @@
         rotulo: `Abrir o polo ${p}, ${numGrupo(D.pol[p].ms)}` })), [r]);
     } else if (!niv.mun) nomes(D.pol[niv.pol], quieto);
   }
-  // cartão do município aberto (na coluna da esquerda): nome e número, o resumo, o link da página do município (como o
-  // "Abrir … →" do mapa dos municípios) e a lista dos alimentadores dele (mouse realça a linha; clique abre a página)
+  // cartão do município aberto (na coluna da esquerda): nome e número, o resumo, o "Abrir … →" (como o do mapa dos
+  // municípios, window.ARGOS_PAG.mun: o mapa do alimentador com mais rede nele, com os seguintes selecionados; ao lado, o
+  // link menor da página do município) e a lista dos alimentadores dele (mouse realça a linha; clique abre a página)
   function poeCartaoMun() {
     poeLado();
     const m = niv.mun && porCod[niv.mun];
     lado.classList.toggle('st-niv', !!niv.reg);
     if (!m) { cartaoMun.hidden = true; cartaoMun.innerHTML = ''; lado.hidden = aviso.hidden; return; }
-    const lista = m.als.slice().sort((a, b) => b.m - a.m), pg = window.ARGOS_PAG, href = `municipios/${m.slug}/`;
-    const url = pg && pg.url ? pg.url(href) : RAIZ + href, fora = pg && pg.alvo ? pg.alvo : '';
+    const lista = m.als.slice().sort((a, b) => b.m - a.m), pg = window.ARGOS_PAG, hPag = `municipios/${m.slug}/`;
+    const href = pg && pg.mun ? pg.mun(m) : hPag, ir = h => (pg && pg.url ? pg.url(h) : RAIZ + h);
+    const url = ir(href), fora = pg && pg.alvo ? pg.alvo : '', noMapa = href !== hPag;
+    const nSel = Math.min(lista.length - 1, 10);
+    const dica = noMapa && lista.length ? ` title="${esc(`Mapa do ${lista[0].cod}, o de mais rede em ${m.nome}` + (nSel > 0 ? `, com mais ${nSel} alimentador${nSel > 1 ? 'es' : ''} do município` : ''))}"` : '';
     cartaoMun.setAttribute('aria-label', `Município ${m.nome}`);
     cartaoMun.innerHTML = `<span class="st-mun-h"><b>${esc(m.nome)}</b><i class="st-sel">${esc(numMun(m))}</i></span>` +
       `<small>${m.slug ? `${nAls(m.als.length)} · ${kmTxt(kmMun(m))} de rede` : 'sem dados ainda'}</small><small class="st-mun-pr">Polo ${esc(m.polo)} · Regional ${esc(m.reg)}</small>` +
-      `<span class="st-mun-x">${m.slug ? `<a class="st-mun-a" href="${esc(url)}"${fora}>Abrir ${esc(m.nome)} →</a>` : ''}` +
+      `<span class="st-mun-x">${m.slug ? `<a class="st-mun-a" href="${esc(url)}" data-p="${esc(href)}"${dica}${fora}>Abrir ${esc(m.nome)} →</a>` : ''}` +
       (lista.length ? `<button type="button" class="st-mun-b" aria-expanded="false" aria-controls="st-mun-l">Alimentadores<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>` : '') +
+      (m.slug && noMapa ? `<a class="st-mun-p" href="${esc(ir(hPag))}"${fora}>Página do município</a>` : '') +
       '</span><div class="st-mun-l" id="st-mun-l" hidden>' + lista.map(a => `<button type="button" class="st-al" data-al="${esc(a.cod)}" title="Clique para abrir o painel do alimentador">` +
         `<b>${esc(a.cod)}</b><i class="st-sel">${esc(numAl(a.cod, m))}</i><em>${kmTxt(a.m)} aqui${a.se ? ' · ' + esc(a.se) : ''}</em></button>`).join('') + '</div>';
     cartaoMun.hidden = false;
@@ -2503,6 +2510,12 @@
     if (!cartaoMun || !cartaoMun.contains(e.target)) return;
     const al = e.target.closest('.st-al');
     if (al) { abreAl(al.dataset.al); return; }
+    // "Abrir …": no site, pelo aviso "Abrindo…" do mapa dos municípios (a página do alimentador vem para o cache antes);
+    // Ctrl, ⌘, Shift e o botão do meio seguem o link como sempre
+    const ab = e.target.closest('.st-mun-a[data-p^="alimentadores/"]');
+    if (ab && window.ARGOS_PAG && window.ARGOS_PAG.abre && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && !e.button) {
+      e.preventDefault(); window.ARGOS_PAG.abre(ab.dataset.p); return;
+    }
     const b = e.target.closest('.st-mun-b');
     if (!b) return;
     const l = cartaoMun.querySelector('.st-mun-l'), sim = l.hidden;

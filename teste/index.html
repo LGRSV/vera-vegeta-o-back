@@ -24,10 +24,10 @@
 <script src="assets/mapa-municipios-dados.js"></script>
 <script src="assets/mapa-municipios-visoes.js"></script>
 <script src="assets/focos.js?v=20261116"></script>
-<script src="assets/mapa-municipios.js?v=20261119"></script>
-<script src="assets/busca-ativo.js?v=20261119"></script>
+<script src="assets/mapa-municipios.js?v=20261124"></script>
+<script src="assets/busca-ativo.js?v=20261124"></script>
 <script src="assets/mapa-raiox.js?v=20261119" data-rede="cc1f8a9e"></script>
-<script src="assets/mapa-sat-to.js?v=20261124e" data-faixa="3a1dee89"></script>
+<script src="assets/mapa-sat-to.js?v=20261124f" data-faixa="3a1dee89"></script>
 </div>
 <script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();document.querySelectorAll("[data-busca]").forEach(e=>{e.hidden=!e.dataset.busca.includes(q)});document.querySelectorAll(".grade").forEach(g=>{let v=g.nextElementSibling;if(!v||!v.classList.contains("sem-res")){v=document.createElement("p");v.className="sem-res";v.setAttribute("role","status");g.after(v)}v.textContent=!q||g.querySelector("[data-busca]:not([hidden])")?"":"Nada encontrado para “"+b.value.trim()+"”."})});</script>
 <script src="assets/menu.js"></script>

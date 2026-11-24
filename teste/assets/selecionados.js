@@ -12,6 +12,10 @@
 // lado de cada um, busca pelo código, Ver todos (enquadra o aberto e os selecionados), Tirar todos.
 // O endereço guarda a escolha (?sel=A,B: volta ao recarregar); "Abrir" um selecionado leva os outros junto, e o aberto de
 // agora vira selecionado na página dele.
+// "Abrir <município>" da página inicial (mapa-municipios.js, mapa-sat-to.js) chega com ?sel=…&mun=<código IBGE>&fora=N:
+// o aberto é o de mais km no município e os selecionados os 10 seguintes; o mapa enquadra o município (window.MUNICIPIOS,
+// de divisas.js; sem ele, o aberto e os selecionados) e, com N > 0, o menu avisa quantos do município ficaram de fora.
+// O ?mun e o ?fora saem do endereço depois (o ?sel fica).
 // O aberto também sai do mapa sem sair da página: o chip dele no menu (pedido do usuário: ver o mapa por baixo dele,
 // mesmo com um alimentador só); o chip fica apagado e riscado, "escondido" (aria-pressed=false). O painel continua o dele e o endereço não guarda
 // (recarregar mostra de novo). Como: "o aberto escondido", mais abaixo.
@@ -714,7 +718,7 @@
   // ---------- endereço: ?sel=A,B (o resto do endereço fica) e o link "Abrir" (leva os outros junto) ----------
   function gravaUrl() {
     const ps = new URLSearchParams(location.search);
-    ps.delete('sel');
+    ps.delete('sel'); ps.delete('mun'); ps.delete('fora');   // ?mun e ?fora valem só na chegada (enquadra e avisa uma vez)
     let q = ps.toString();
     if (sels.size) q += (q ? '&' : '') + 'sel=' + [...sels.keys()].join(',');
     try { history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash); } catch (e) { /* sem history: só não guarda */ }
@@ -1146,6 +1150,9 @@
     '.sel-op b{font:600 var(--t-sm) var(--f-mono)}.sel-op small{color:var(--muted);font-size:var(--t-xs)}' +
     '.sel-op:hover,.sel-op[aria-selected=true]{background:var(--hover)}.sel-op[aria-selected=true]{box-shadow:inset 3px 0 0 var(--accent)}.sel-op:disabled{cursor:default;opacity:.7}' +
     '.sel-lim{margin:var(--s2) 0 0;font-size:var(--t-xs);color:var(--aviso)}' +
+    // veio do "Abrir <município>": quantos do município ficaram de fora (limite de 11 no mapa)
+    '.sel-mun{margin:2px var(--s2) var(--s1);padding:var(--s2) var(--s3);border-left:3px solid var(--aviso);border-radius:0 var(--r1) var(--r1) 0;background:var(--hover);' +
+    'font:var(--t-xs)/1.4 var(--f-body);color:var(--fg)}.sel-mun b{font-weight:700}' +
     '.sel-pe{display:flex;gap:var(--s2);justify-content:space-between;margin:var(--s2) var(--s1) var(--s1)}' +
     '.sel-pe button{min-height:40px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);background:var(--paper);color:var(--fg);font:600 var(--t-sm) var(--f-body);cursor:pointer}' +
     '.sel-pe button:hover{background:var(--hover)}.sel-lista :focus-visible{outline:2px solid var(--accent);outline-offset:1px}' +
@@ -1180,7 +1187,7 @@
     canto.innerHTML = `<div class="ctl-card"><button type="button" class="sel-bt" aria-expanded="false" aria-controls="sel-lista">${ICONE}<span class="sel-tx">Alimentadores</span>` +
       '<span class="sel-n zero" aria-hidden="true">+</span><span class="sel-seta" aria-hidden="true">▾</span></button></div>' +
       '<div class="sel-lista" id="sel-lista" role="group" aria-label="Alimentadores no mapa" hidden>' +
-      '<p class="sel-t" tabindex="-1"></p><ul class="sel-als"></ul>' +
+      '<p class="sel-t" tabindex="-1"></p><p class="sel-mun" hidden></p><ul class="sel-als"></ul>' +
       '<div class="sel-de"><label class="vh" for="sel-q">Adicionar alimentador pelo código</label>' +
       '<input class="sel-q" id="sel-q" type="search" placeholder="Código do alimentador" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-controls="sel-sug">' +
       '<div class="sel-sug" id="sel-sug" role="listbox" aria-label="Alimentadores encontrados"></div><p class="sel-lim" hidden></p></div>' +
@@ -1261,6 +1268,9 @@
     bt.title = (n ? `Alimentadores no mapa: ${n} de ${MAX}` : 'Pôr outros alimentadores no mapa') + oc;
     if (lst.hidden) return;
     lst.querySelector('.sel-t').textContent = `No mapa · ${n} de ${MAX}`;
+    const nm = lst.querySelector('.sel-mun');
+    nm.hidden = !munNota;
+    if (munNota && nm.innerHTML !== munNota) nm.innerHTML = munNota;
     menuLinhas();
     const cheio = n >= MAX, lim = lst.querySelector('.sel-lim');
     q.disabled = cheio;
@@ -1362,6 +1372,37 @@
     alterna(b.dataset.sel);
   });
 
+  // ---------- ?mun=<código IBGE>&fora=N: chegou pelo "Abrir <município>" da página inicial ----------
+  // O mapa enquadra o município (a caixa dele em window.MUNICIPIOS, de divisas.js, que roda depois deste: por isso no
+  // DOMContentLoaded, antes da rede inteira, para não pular depois); sem ele lá, na chegada dos ?sel=, a caixa do aberto e
+  // dos selecionados. Com N > 0: o aviso no menu (e um curto, visível, embaixo do botão).
+  const PQ = new URLSearchParams(location.search), MUNQ = (PQ.get('mun') || '').trim(), FORA = Math.max(0, parseInt(PQ.get('fora'), 10) || 0);
+  let munFeito = false, munNota = '';
+  const munDe = cod => (Array.isArray(window.MUNICIPIOS) ? window.MUNICIPIOS : []).find(m => m && String(m.cod) === cod) || null;
+  const munNome = cod => { const m = munDe(cod) || ((window.D && window.D.meta && window.D.meta.municipios) || []).find(x => String(x.cod) === cod); return m ? m.nome : ''; };
+  function enquadraMun(cods) {
+    if (munFeito || !MUNQ) return;
+    const m = munDe(MUNQ);
+    let b = null;
+    if (m && Array.isArray(m.corte) && m.corte.length === 2) b = L.latLngBounds(m.corte);
+    else if (cods) {                                     // sem a divisa do município: o aberto e os selecionados
+      b = window.__caixaRede ? L.latLngBounds(window.__caixaRede.getSouthWest(), window.__caixaRede.getNorthEast()) : null;
+      cods.forEach(cod => { const x = caixaIdx(cod); if (x) b = b ? b.extend(x) : x; });
+    } else return;                                       // espera o índice (chegaMun)
+    munFeito = true;
+    if (b && b.isValid()) map.fitBounds(b.pad(0.03), { animate: false });
+  }
+  function chegaMun(cods) {
+    enquadraMun(cods);
+    if (!FORA) return;
+    const nome = munNome(MUNQ);
+    munNota = `<b>+${FORA.toLocaleString('pt-BR')}</b> alimentador${FORA === 1 ? '' : 'es'} ${nome ? 'de ' + esc(nome) : 'do município'} fora do mapa ` +
+      `(no mapa, os ${MAX + 1} com mais rede nele). Para trocar, tire um e ponha outro pelo código.`;
+    menu();
+    avisoVisivel(`+${FORA.toLocaleString('pt-BR')} ${nome ? 'de ' + nome : 'do município'} fora do mapa; troque pelo menu Alimentadores`);
+  }
+  if (MUNQ) { if (document.readyState === 'loading') addEventListener('DOMContentLoaded', () => enquadraMun(null), { once: true }); else enquadraMun(null); }
+
   // ---------- começo: depois da rede do aberto, do painel e da lista dele (al:lista: no celular os downloads e a montagem
   // dos ?sel= atrasariam a lista) ----------
   // o índice é o que o vizinhos.js já leu (o mesmo arquivo; sem ele, baixado aqui)
@@ -1376,8 +1417,10 @@
       criaMenu();
       // ?sel=: os válidos (do índice), sem repetidos, sem o aberto, até 10; o endereço fica com eles
       const pedidos = (new URLSearchParams(location.search).get('sel') || '').split(',').map(x => x.trim().toUpperCase()).filter(Boolean);
-      [...new Set(pedidos)].filter(valido).slice(0, MAX).forEach(cod => poe(cod, false));
-      if (pedidos.length) gravaUrl();
+      const vao = [...new Set(pedidos)].filter(valido).slice(0, MAX);
+      if (MUNQ) chegaMun(vao);                         // antes de pôr: a fila de downloads começa pelos da tela
+      vao.forEach(cod => poe(cod, false));
+      if (pedidos.length || MUNQ) gravaUrl();
     })
     .catch(() => { /* sem o índice: sem menu */ });
   if (AL) Promise.all([AL.rede, AL.pronto, AL.lista]).then(comeca); else if (document.readyState === 'complete') comeca(); else addEventListener('load', comeca);

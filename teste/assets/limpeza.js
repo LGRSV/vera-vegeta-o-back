@@ -218,6 +218,10 @@
     grupos: new Set(),       // linhas (anos, 'cri', 'pend') abertas, com as OS embaixo
     sel: null,               // trecho selecionado no mapa
   };
+  // a camada para os outros alimentadores (visao-tocantins.js pinta o T1 e o T2 deles com as cores dela): o estado dela e,
+  // a cada desenho, o aviso al:faixa (ligar, vista, anos, criadas/pendentes)
+  window.__faixaCam = () => ({ ligado: st.ligado, vista: st.vista, anos: [...st.anos], todos: ANOS.slice(), nexe: [...st.nexe] });
+  const avisaCam = () => document.dispatchEvent(new Event('al:faixa'));
 
   const css = document.createElement('style');
   css.textContent = `
@@ -526,6 +530,7 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){display:no
   function desenha() {
     if (!map) return;
     desenho++; primeiro = null; munDaCarga = null;
+    avisaCam();
     if (camada) camada.remove();
     camada = null;
     document.body.classList.toggle('limp-on', st.ligado);

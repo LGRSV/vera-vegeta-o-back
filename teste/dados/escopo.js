@@ -169,6 +169,10 @@ window.ARGOS_ESCOPO = {
    {"t": "Correção: pedaço da rede desenhado fora do lugar na visão Tocantins; T1/T2 que parecem ficar com o aberto escondido; pontinhos brancos sem a rede", "st": "and", "prazo": "2026-11-26", "resp": "dev", "obs": "Rede fora do lugar ao mudar o tamanho do mapa (tela cheia, gaveta) e no viewreset corrigida em 24/11; o T1/T2 com o aberto escondido é rede de vizinhos; pontinhos brancos ainda sem reproduzir."},
    {"t": "Visão Tocantins do mapa do alimentador com as divisas das regionais (Norte, Centro, Sul) e, aproximando, dos polos", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
    {"t": "Balão com Maps/Earth no fusível de alimentador selecionado", "st": "ok", "d": "2026-11-24"},
+   {"t": "Abrir município abre o mapa do alimentador com mais rede nele, os 10 seguintes já selecionados e enquadrado no município (aviso de quantos ficaram de fora)", "st": "ok", "d": "2026-11-24"},
+   {"t": "Mapa do alimentador: camada Faixa pinta também o T1/T2 dos outros alimentadores (estado e vizinhos), com as OS de perto", "st": "ok", "d": "2026-11-24"},
+   {"t": "Mapa do alimentador: Inspeção, Insp→manut e Manutenção também no T1/T2 dos outros alimentadores", "st": "and", "prazo": "2026-11-25", "resp": "dev"},
+   {"t": "Visão satélite: botão Fronteira (sem divisões por padrão; ligado, regional/polo/município com a navegação)", "st": "and", "prazo": "2026-11-25", "resp": "dev"},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},
