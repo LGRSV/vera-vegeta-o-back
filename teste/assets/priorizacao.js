@@ -133,7 +133,7 @@ const VERA = (() => {
       const lente = ctx.img ? ctx.img[al] : undefined, sol = ctx.solT && ctx.solT[al] && ctx.solT[al][t.n];
       return Object.assign(t, {
         i, al, se: a[2], reg: a[3] || 'Sem regional', polo: a[4] || 'Sem polo', equipe: a[4] || '',
-        cls: t.c === 1 ? 'T1' : t.c === 2 ? (t.tr ? 'T2t' : 'T2r') : 'T3',
+        cls: t.c === 1 ? 'T1' : t.c === 2 ? 'T2' : 'T3',   // T1 do DJ ao fim do tronco; T2 só ramal de religador (24/11/2026)
         urb: ctx.urb ? (ctx.urb[al] && ctx.urb[al][t.n]) || 0 : null,
         mun: t.mu >= 0 ? D.muns[t.mu] : '—', id: al + ' · ' + t.n,
         dfc, exp: ex ? new Set(ex) : null,
@@ -513,7 +513,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
   // ---------- controles ----------
   function tituloRef() { $('#pz-tit').title = 'Limpeza de faixa · referência ' + S.P.ref.split('-').reverse().join('/'); }
   $('#ref').value = S.P.ref;
-  // filtro de seleção múltipla: botão com o resumo ("Todas", "Norte", "T1 e T2 tronco", "Norte e mais 2") e lista de caixas
+  // filtro de seleção múltipla: botão com o resumo ("Todas", "Norte", "T1 e T2", "Norte e mais 2") e lista de caixas
   const MS = {};
   const nomeReg = (p) => (p === 'Sem regional' ? p : p[0] + p.slice(1).toLowerCase());
   function rotuloMs(k) {
@@ -576,7 +576,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
   const filtroMudou = () => renderRanking();
   multi('reg', 'Todas', REGIONAIS.map((p) => [p, nomeReg(p)]), () => { opcoesMs('polo', opsPolo()); renderRanking(); });
   multi('polo', 'Todos', opsPolo(), filtroMudou);
-  multi('cls', 'Todas', [['T1', 'T1'], ['T2t', 'T2 tronco'], ['T2r', 'T2 ramal'], ['T3', 'T3']], filtroMudou);
+  multi('cls', 'Todas', [['T1', 'T1'], ['T2', 'T2'], ['T3', 'T3']], filtroMudou);
   multi('zona', 'Todos', [['urbano', 'Urbano'], ['rural', 'Rural']], filtroMudou);
   multi('sol', 'Todas', [['com', 'Com solicitação'], ['sem', 'Sem solicitação']], filtroMudou);
   multi('mun', 'Todos', [...new Set(ctx.trechos.map((t) => t.mun))].filter((m) => m !== '—').sort((a, b) => a.localeCompare(b, 'pt-BR')).map((m) => [m, m]), filtroMudou, true);
@@ -804,7 +804,7 @@ if (typeof module !== 'undefined') module.exports = VERA;
   $('#copiar').addEventListener('click', (e) => {
     const todos = filtrar(false), lista = todos.slice(0, 500);
     const q = (s) => '"' + String(s).replace(/"/g, '""') + '"';
-    const CLS = { T1: 'T1', T2t: 'T2 tronco', T2r: 'T2 ramal', T3: 'T3' };
+    const CLS = { T1: 'T1', T2: 'T2', T3: 'T3' };
     const linhas = ['posicao;trecho;classe;regional;polo;municipio;km;nota;faixa;nae;dec_h;fec;lente_imagem;ucs_jusante;' + V.CRIT.map((c) => 'parcela_' + ({ img: 'lente', cli: 'clientes' }[c.k] || c.k)).join(';') + ';soma_t1_f5;soma_plano;situacao;regras;solicitacoes;ultima_solicitacao;justificativa'];
     for (const r of lista) {
       const sl = r.t.sol, s0 = sl ? sl[0] : null;

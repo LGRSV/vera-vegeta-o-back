@@ -51,8 +51,8 @@
   const doSite = p => noSite ? raiz + p : 'https://lgrsv.github.io/vera-vegeta-o-back/teste/' + p;
   const outraAba = noSite ? '' : ' target="_blank" rel="noopener"';
   const TRECHOS = [
-    ['T1', '#3b82f6', 'do DJ ao 1º religador', ''],
-    ['T2', '#22c55e', 'de religador a religador', 'T2-A, T2-B…'],
+    ['T1', '#3b82f6', 'do DJ ao fim do tronco', ''],
+    ['T2', '#22c55e', 'de cada religador seguinte', 'T2-A, T2-B…'],
     ['T3', '#facc15', 'depois de cada fusível', 'T3-A, T3-B…'],
   ];
   const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

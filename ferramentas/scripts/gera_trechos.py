@@ -620,7 +620,8 @@ def validar(c):
         av.append(f'{len(c["limitrofes"])} vão(s) na divisa entre municípios (medidos por amostragem de {PASSO_M} m)')
     # chave de proteção que não abriu trecho: era o defeito que mais escondia
     # erro de fonte (90 religadores sumindo sem um aviso)
-    inicios = {t['inicio']['chave'] for t in c['trechos']}
+    # religador do tronco no meio do T1 (T1 do DJ ao fim do tronco, regra de 24/11/2026: scripts/unifica_t1.py) também secciona
+    inicios = {t['inicio']['chave'] for t in c['trechos']} | {p for t in c['trechos'] for p in t.get('passa') or []}
     orfas = [a['nome'] for a in c['chaves']
              if a['tipo'] in regras.FUSIVEIS + ('79',) and a['nome'] not in inicios]
     if orfas:
@@ -652,7 +653,7 @@ def validar(c):
     # (um alimentador pequeno de verdade é legítimo; o que denuncia os casos
     # de 7 m publicados é a perda de rede acima, não o tamanho absoluto)
     n_rl = sum(1 for a in c['chaves'] if a['tipo'] == '79')
-    if n_rl and not c['resumo']['T2']['n']:
+    if n_rl and not c['resumo']['T2']['n'] and not any(p[:2] == '79' for t in c['trechos'] for p in t.get('passa') or []):
         cri.append(f'{n_rl} religador(es) no cadastro e nenhum T2: nenhum deles secciona a rede')
     if any(t['confianca'] != 'alta' for t in c['trechos']):
         av.append('trechos a revisar: ' + ', '.join(t['nome'] for t in c['trechos'] if t['confianca'] != 'alta'))

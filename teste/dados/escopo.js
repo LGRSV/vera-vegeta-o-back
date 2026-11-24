@@ -6,8 +6,8 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.27",
- "atualizado": "2026-11-23",
+ "versao": "2.28",
+ "atualizado": "2026-11-24",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
@@ -162,6 +162,12 @@ window.ARGOS_ESCOPO = {
    {"t": "Mapa do alimentador: abrir no Google Maps ou no Google Earth pelo balão de cada ativo e poste, e por clique direito ou toque longo em qualquer ponto (com a coordenada em graus e UTM para copiar)", "st": "ok", "d": "2026-11-19"},
    {"t": "Mapa do alimentador: números dos ativos sem se cobrir (cada um procura um lado livre; sem lugar, vai um pouco mais longe com uma linha até o ativo; nenhum some)", "st": "ok", "d": "2026-11-19", "obs": "Exemplo do usuário: LD03046026, chave 8861256257 junto do poste 44142842 (São Félix do Tocantins)."},
    {"t": "Limpeza de faixa: OS executada que veio de uma inspeção sai da Faixa (sem número de obra e com a tarefa \"VEGETAÇÃO > LIMPEZA DE FAIXA > …\" de outra OS na descrição)", "st": "ok", "d": "2026-11-23", "obs": "Saem 1.099 OS executadas. Ficam as executadas sem obra com o texto de limpeza programada (297, a obra só faltou na base) e as pendentes. No mapa inicial, de 2.617 para 1.614 OS executadas (35.766 para 30.896 km). A regra vale também nas próximas atualizações da base."},
+   {"t": "Reclassificação dos trechos: o T1 e o T2 do tronco viram um T1 só (DJ até o fim do tronco); T2 passa a ser só ramal (sem \"T2 ramal\"); T3 igual. Faixa pela classe nova (T1 3 anos) e Priorização com o T1 unificado", "st": "ok", "d": "2026-11-24", "obs": "248 alimentadores com o T2 do tronco unido ao T1; km, vãos e NAE iguais nos 325. T1 3.896 → 7.170 km; T2 16.346 → 13.072 km. Script scripts/unifica_t1.py (rodar de novo depois de uma geração completa)."},
+   {"t": "Visão satélite (Ctrl+S) com a Limpeza de faixa: T1/T2 pintados pela situação (em dia, vence em 12 meses, vencida, sem registro), legenda em km por nível", "st": "and", "prazo": "2026-11-25", "resp": "dev"},
+   {"t": "Mapa do alimentador: menu Alimentadores em chips lado a lado (toque tira da lista; no aberto, esconde/mostra)", "st": "pend", "prazo": "2026-11-26", "resp": "dev"},
+   {"t": "Correção: pedaço da rede desenhado fora do lugar na visão Tocantins; T1/T2 que parecem ficar com o aberto escondido; pontinhos brancos sem a rede", "st": "and", "prazo": "2026-11-26", "resp": "dev", "obs": "Ainda sem reproduzir; investigação em curso."},
+   {"t": "Visão Tocantins do mapa do alimentador com as divisas das regionais (Norte, Centro, Sul) e, aproximando, dos polos", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
+   {"t": "Balão com Maps/Earth no fusível de alimentador selecionado", "st": "pend", "prazo": "2026-11-27", "resp": "dev"},
    {"t": "Camadas (Faixa, Inspeção, Insp→manut, Manutenção e Queimadas) também nos alimentadores selecionados", "st": "pend", "prazo": "2026-11-20", "resp": "dev"},
    {"t": "Lista de trechos por alimentador (o aberto e cada selecionado), busca e filtro de município com os selecionados; arquivo mais leve para a seleção em campo", "st": "pend", "prazo": "2026-11-23", "resp": "dev", "obs": "Hoje, com 10 selecionados, o mapa baixa cerca de 6 MB."}
   ]},

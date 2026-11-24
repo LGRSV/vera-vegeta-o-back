@@ -143,7 +143,7 @@ window.__alPronto = AL.pronto;
 
 // legenda
 const nRamal = D.trechos.filter(t => t.tipo === 'ramal').length;
-const leg = [['T1', COR_Z[1], ''], [nRamal > 1 ? 'T2, T2-A, T2-B…' : nRamal ? 'T2, T2-A' : 'T2', COR_Z[2], '']];
+const leg = [['T1', COR_Z[1], ''], [nRamal > 1 ? 'T2-A, T2-B…' : nRamal ? 'T2-A' : 'T2', COR_Z[2], '']];
 [3, 4, 5].forEach(z => { if (D.trechos.some(t => t.zona === z)) leg.push([`T${z}-…`, COR_Z[z], 'fino']); });
 if (D.trechos.some(t => t.zona > 5)) leg.push(['T6+', '#d946ef', 'fino']);
 $('legenda').innerHTML = leg.map(([n, c, k]) => `<span><i class="${k}" style="--c:${c}"></i>${esc(n)}</span>`).join('');
@@ -335,7 +335,7 @@ document.addEventListener('pointerdown', e => { if (!$('mes-lista').hidden && !$
 $('mes').parentElement.addEventListener('focusout', e => { if (e.relatedTarget && !$('mes').parentElement.contains(e.relatedTarget)) abreMes(false); });
 
 // lista
-const GRUPOS = [['principal', 'T1 e T2'], ['ramal', 'T2-A, T2-B… (um por religador)'], ['fusivel', 'Depois de fusível']];
+const GRUPOS = [['principal', 'T1'], ['ramal', 'T2 (T2-A, T2-B…, um por religador)'], ['fusivel', 'Depois de fusível']];
 // ordem da lista: maior NAE primeiro (padrão), menor NAE primeiro, ou T1 › T2 › T3 (os grupos acima). Empate e sem NAE: a ordem
 // dos trechos (T1, T2, T2-A…, T3-A…). Fica guardada no navegador.
 let ordemLista = (() => { try { return localStorage.getItem('ordem-lista') || 'nae'; } catch (e) { return 'nae'; } })();
@@ -559,7 +559,7 @@ function detalhe(t, vao, cx = EU) {
   const chip = n => `<button class="chip" data-t="${esc(n)}"${daAl(cx)}>${esc(n)}</button>`;
   const chips = l => l.length ? `<div class="chips">${l.slice(0, 8).map(chip).join('')}` +   // muitos: os 8 primeiros e o resto ao pedir
     (l.length > 8 ? `<details class="mais"><summary>mais ${l.length - 8}</summary><div class="chips">${l.slice(8).map(chip).join('')}</div></details>` : '') + '</div>' : '—';
-  const tipoTxt = {principal: t.zona === 1 ? 'tronco T1' : 'tronco T2', ramal: t.tronco ? 'T2 · tronco' : 'T2 · ramal', fusivel: `depois de fusível · T${t.zona}`}[t.tipo];
+  const tipoTxt = {principal: 'T1', ramal: 'T2', fusivel: `depois de fusível · T${t.zona}`}[t.tipo];
   $('det').innerHTML = `<h2 tabindex="-1"><i style="--c:${t.cor}"></i>${esc(t.nome)} <small>${tipoTxt}</small></h2>${detDe(cx, [t.nome])}${FECHA}<dl>
     <dt>Início</dt><dd><span class="mono">${esc(t.inicio)}</span> · ${TIPO[t.inicio_tipo] || t.inicio_tipo} · poste ${esc(t.inicio_poste)}</dd>
     ${t.passa.length ? `<dt>Passa por</dt><dd class="mono">${t.passa.map(esc).join(', ')}</dd>` : ''}
