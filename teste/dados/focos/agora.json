@@ -1,4 +1,11 @@
-{"gerado":"2026-11-24T13:00Z","janela_h":84,"ramo":"focos","fontes":{"inpe":{"ultimo_arquivo":"2026-11-24T13:00Z","arquivos":505,"ultimo_foco":"2026-11-24T12:40Z"},"firms":{"modo":"csv","atualizado":"2026-11-24T12:47Z","arquivos":["J1_VIIRS_C2_South_America_7d.csv","J2_VIIRS_C2_South_America_7d.csv","MODIS_C6_1_South_America_7d.csv"],"ultimo_foco":"2026-11-24T11:44Z"}},"faixas":{"sob":"Sob a rede: o pixel do satélite cobre a rede (até 200 m no VIIRS, 500 m no MODIS, 1 km no GOES)","1km":"Até 1 km da rede","5km":"De 1 a 5 km da rede"},"sensores":{"AQUA":"MODIS, pixel de 1 km","NOAA-20":"VIIRS, pixel de 375 m","NOAA-21":"VIIRS, pixel de 375 m","TERRA":"MODIS, pixel de 1 km"},"contagem":{"to":205,"sob":34,"1km":98,"5km":70},"focos":[
+{"gerado":"2026-11-24T14:01Z","janela_h":84,"ramo":"focos","fontes":{"inpe":{"ultimo_arquivo":"2026-11-24T14:00Z","arquivos":504,"ultimo_foco":"2026-11-24T13:40Z"},"firms":{"modo":"csv","atualizado":"2026-11-24T13:47Z","arquivos":["J1_VIIRS_C2_South_America_7d.csv","J2_VIIRS_C2_South_America_7d.csv","MODIS_C6_1_South_America_7d.csv"],"ultimo_foco":"2026-11-24T11:49Z"}},"faixas":{"sob":"Sob a rede: o pixel do satélite cobre a rede (até 200 m no VIIRS, 500 m no MODIS, 1 km no GOES)","1km":"Até 1 km da rede","5km":"De 1 a 5 km da rede"},"sensores":{"AQUA":"MODIS, pixel de 1 km","NOAA-20":"VIIRS, pixel de 375 m","NOAA-21":"VIIRS, pixel de 375 m","TERRA":"MODIS, pixel de 1 km"},"contagem":{"to":212,"sob":37,"1km":99,"5km":73},"focos":[
+[-9.04752,-47.10283,"2026-11-24T11:46Z","TERRA","IF",1103,"LD01065015","T3-AWC","5km",39.3,"1712405"],
+[-9.04897,-47.09216,"2026-11-24T11:46Z","TERRA","IF",2198,"LD01065015","T3-AWC","5km",7.1,"1712405"],
+[-9.0557,-47.11477,"2026-11-24T11:46Z","TERRA","IF",281,"LD01065015","T3-AWC","sob",22.6,"1712405"],
+[-9.05714,-47.10414,"2026-11-24T11:46Z","TERRA","IF",859,"LD01065015","T3-AWC","1km",28.5,"1712405"],
+[-9.17802,-47.28292,"2026-11-24T11:46Z","TERRA","IF",2693,"LD01065015","T3-APH","5km",9.2,"1704105"],
+[-11.32601,-48.48594,"2026-11-24T11:46Z","TERRA","IF",477,"LD02001037","T3-JC","sob",7.9,"1703701"],
+[-5.78882,-47.95347,"2026-11-24T11:44Z","TERRA","IF",151,"LD03109039","T2-A","sob",4.4,"1702208"],
 [-9.0504,-47.11156,"2026-11-24T06:33Z","AQUA","IF",95,"LD01065015","T3-AWC","sob",6.5,"1712405"],
 [-9.05185,-47.10349,"2026-11-24T06:33Z","AQUA","IF",913,"LD01065015","T3-AWC","1km",14.7,"1712405"],
 [-9.05277,-47.09675,"2026-11-24T06:33Z","AQUA","IF",1623,"LD01065015","T3-AWC","5km",9.7,"1712405"],
