@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.31",
+ "versao": "2.32",
  "atualizado": "2026-11-24",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -176,6 +176,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Visão satélite: Fronteira pelo zoom (de longe as regionais; aproximando, os polos e depois os municípios)", "st": "ok", "d": "2026-11-24"},
    {"t": "Visão satélite: clique na linha abre o mapa do alimentador em tela cheia; etiquetas das OS só com o mouse (no toque, o 1º toque)", "st": "ok", "d": "2026-11-24"},
    {"t": "Mapa do alimentador: pontos dos fusíveis (T3) só do zoom 13", "st": "ok", "d": "2026-11-24"},
+   {"t": "Visão satélite pelo celular: link direto (central/?sat=1#mapa) abre o satélite sem teclado", "st": "ok", "d": "2026-11-24"},
    {"t": "Revisão da reclassificação T1/T2 (conservação de km, NAE, UCs, Priorização e Faixa)", "st": "ok", "d": "2026-11-24"},
    {"t": "Priorização pelo mapa de hoje: T1 com o km do mapa e T3 novos como linhas próprias (não somam no T1)", "st": "ok", "d": "2026-11-24"},
    {"t": "Fora do site os 3 alimentadores divididos com a base do Rede Sentinela (PS01112193, LD01104052, LD01926241)", "st": "ok", "d": "2026-11-24"},

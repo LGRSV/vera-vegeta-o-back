@@ -2620,6 +2620,16 @@
     }
   }
   window.addEventListener('keydown', tecla, true);
+  // ?sat=1 (link direto, para o celular sem teclado: …/teste/central/?sat=1#mapa, a casca passa o ?… ao mapa): abre o
+  // satélite assim que o mapa dos municípios estiver desenhado (até 20 s)
+  if (new URLSearchParams(location.search).get('sat') === '1') {
+    const t0 = Date.now();
+    const tenta = () => {
+      if (svg.querySelectorAll('path').length > 100) { if (estado !== 'on' && estado !== 'abrindo' && estado !== 'carregando') abre(); return; }
+      if (Date.now() - t0 < 20000) setTimeout(tenta, 200);
+    };
+    setTimeout(tenta, 300);
+  }
   // cartão do município: lista (abre e fecha), mouse num alimentador realça a linha dele, clique abre a página
   caixa.addEventListener('click', e => {
     if (!cartaoMun || !cartaoMun.contains(e.target)) return;
