@@ -93,7 +93,7 @@
   };
   const item = {
     reg: (r, n) => ({ s: { reg: r.nome }, tipo: 'reg', t: realce(r.nome, n), c: `${plural(r.polos.size, 'polo', 'polos')} · ${r.n} municípios`, nae: valor(r) }),
-    polo: (p, n) => ({ s: { polo: p.nome }, tipo: 'polo', t: realce(p.nome, n), c: `Regional ${esc(p.reg)} · ${plural(p.muns.length, 'município', 'municípios')}`, nae: valor(p) }),
+    polo: (p, n) => ({ s: { polo: p.nome }, tipo: 'polo', t: 'POLO ' + realce(p.nome, n) /* "POLO" na frente: o polo não se confunde com o município de mesmo nome (pedido do usuário) */, c: `Regional ${esc(p.reg)} · ${plural(p.muns.length, 'município', 'municípios')}`, nae: valor(p) }),
     mun: (m, n) => ({ s: { cod: m.cod }, tipo: 'mun', t: realce(m.nome, n), c: `Polo ${esc(m.polo)} · ${esc(m.reg)} · ${plural(m.als.length, 'alimentador', 'alimentadores')}`, nae: valor(m) }),
     al: (a, n, k) => ({ s: { al: a.cod }, tipo: 'al', t: realce(a.cod, k), c: `${realce(a.se, n)} · ${plural(a.muns.length, 'município', 'municípios')} · ${kmTxt(a.m)}`, nae: valor(a) }),
     // alimentador do município aberto (a lista que ficava ao lado do mapa): miniatura da rede, código e NAE (sem km e SE,
