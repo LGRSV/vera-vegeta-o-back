@@ -340,12 +340,28 @@ def divisas_js(malha, c):
 
 # ---------------------------------------------------------------- fontes
 
+SENTINELA = 'Rede Sentinela'     # regra do usuário: a divisão dos circuitos nunca usa a versão do Rede Sentinela
+
+
+def de_sentinela(kml):
+    """KML convertido da base do Rede Sentinela (a descrição do Document diz de onde veio; ver alimentador/daimon.py)."""
+    with open(kml, encoding='utf-8', errors='replace') as f:
+        cab = f.read(65536)
+    m = re.search(r'<description>(.*?)</description>', cab, re.S)
+    return bool(m) and SENTINELA.lower() in m.group(1).lower()
+
+
 class Fontes:
     def __init__(self, a):
         self.kmls = {}
+        self.sentinela = set()
         for pasta in a.kml or []:
             for k in sorted(Path(pasta).rglob('*_Circ-*.kml')):
                 al = nomes_kml(k)[1]
+                if de_sentinela(k):
+                    print(f'aviso: {k.name} convertido da base do {SENTINELA}: fica fora (a divisão não usa essa base)')
+                    self.sentinela.add(al)
+                    continue
                 if al in self.kmls:
                     print(f'aviso: {al} em dois KMLs; fica {self.kmls[al]}')
                     continue
@@ -2854,9 +2870,9 @@ def main(argv=None):
         print(f'{a.municipio}: {len(alvos)} alimentador(es) com poste no município: {" ".join(alvos)}')
     else:
         alvos = sorted(fontes.kmls)
-    sem_kml = [al for al in alvos if al not in fontes.kmls]
+    sem_kml = [al for al in alvos if al not in fontes.kmls and al not in fontes.sentinela]
     if a.todos:
-        sem_kml = sorted(set(fontes.indice) - set(fontes.kmls))
+        sem_kml = sorted(set(fontes.indice) - set(fontes.kmls) - fontes.sentinela)
     for al in alvos:
         if al not in fontes.kmls:
             continue

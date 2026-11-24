@@ -4,7 +4,8 @@ Roda sozinho depois de cada Crítica enviada pelo menu (atualiza_bases.py); tamb
 alimentador da Priorização (dados/alimentadores/<AL>.json, a mesma do mapa e dos rankings) e refaz:
   - oc de cada trecho: [dia desde d0, clientes, duração (min), coletiva 1/0, regra 0 chave de início · 1 vão mais
     próximo do ativo · 2 abrangência DJ]. Trecho criado depois da segmentação da Priorização vai para o trecho que o
-    contém (`sobe`); T3 fora do recorte que passa a ter ocorrência entra no fim de trechos (dados do mapa de hoje).
+    contém (`sobe`, vazio desde 24/11/2026: prio_recorte.py faz dele linha própria); T3 fora do recorte que passa a ter
+    ocorrência entra no fim de trechos (dados do mapa de hoje).
   - saz, saz_assoc, nae_fora e oc_ate (último dia com ocorrência; ou o fim da extração da Crítica, dados/bases.json).
   - tr de cada T2: 1 se é tronco no mapa de hoje (trecho do caminho principal), 0 se é ramal (filtro de classe).
   - decfec-trechos.js: DEC (h) e FEC do conjunto ANEEL de cada ocorrência, na ordem de oc. Vem da própria ocorrência
@@ -184,7 +185,7 @@ def main(site, conferir=False, hoje=None):
         nota = (f"// Ocorrências (oc) até {ate[8:10]}/{ate[5:7]}/{ate[:4]} (oc_ate), refeitas em {hoje} pela NAE dos "
                 f"alimentadores (scripts/priorizacao_indicadores.py, roda a cada Crítica do menu); trechos_0710 = os do "
                 f"Artifact; T3 que passaram a ter ocorrência estão no fim de trechos. saz, saz_assoc, nae_fora e "
-                f"fora_recorte vão até oc_ate; estat e total_trechos são da rede de 07/10. DEC/FEC de cada ocorrência: "
+                f"fora_recorte vão até oc_ate; estat e total_trechos são do mapa de hoje (prio_recorte.py). DEC/FEC de cada ocorrência: "
                 f"dados/decfec-trechos.js.\n")
         cab = NOTA.sub(lambda _: nota, cab, count=1) if NOTA.search(cab) else cab.rstrip('\n') + '\n' + nota
         grava_js(site / DADOS, cab, 'window.DADOS', D)
