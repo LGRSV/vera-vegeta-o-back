@@ -1397,16 +1397,18 @@
   }
   // as linhas da visão escolhida: Limpeza de faixa (por trecho, na cor da situação) ou as de sempre; sem o faixa.txt,
   // as de sempre
-  let pedL = 0;
+  let pedL = 0, esperaL = false;                         // esperaL: o arquivo das linhas da visão ainda vindo
   async function acertaLinhas() {
     if (!map) return;
     const quer = ehFaixa() ? 'faixa' : 'to';
     if (quer === modoL) return;
     const minha = ++pedL;
+    esperaL = true;
     if (quer === 'faixa' && estado === 'on') poeAviso('<b>Satélite</b><span class="st-n">carregando a limpeza de faixa…</span>');
     const F = quer === 'faixa' ? await carregaFaixa() : null;
     const lista = F ? F.lista : await carregaLinhas();
     if (minha !== pedL || !map) return;
+    esperaL = false;
     const modo = F ? 'faixa' : 'to';
     if (modo === modoL) { if (estado === 'on') poeAviso(legenda()); return; }
     if (modoL) tiraLinhas();
@@ -2246,7 +2248,7 @@
     dicaTrecho: (al, nome) => { const g = grupos.get(al), pl = g && g.find(x => x._stTr && x._stTr.nome === nome); if (!pl) return null; sobreTr = pl; const h = dicaLinha(al); sobreTr = null; return h; },
     vistaSvg: () => (L ? vistaDoSvg() : null), tempos,
     // parado: sem linhas entrando, sem desenho das linhas em curso, sem desenho adiado da máscara e da divisão
-    ocioso: () => !!map && !pondo && !(rend && rend._job) && !(mascara && mascara.pendente()) && !(desenho && desenho.pendente()),
+    ocioso: () => !!map && !pondo && !esperaL && !(rend && rend._job) && !(mascara && mascara.pendente()) && !(desenho && desenho.pendente()),
     pintor: () => (pintor ? 'worker' : rend && rend._img ? 'pagina' : 'canvas'),
     forca: () => { if (mascara) mascara.desenha(true); if (desenho) desenho.desenha(true); },
     // o canvas das linhas como está (feito pelo pintor ou em partes) contra o redesenho inteiro do Leaflet nele mesmo:
