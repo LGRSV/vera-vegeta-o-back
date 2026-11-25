@@ -143,7 +143,12 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
     document.body.classList.toggle('tc-encolhe', sim);
     map.invalidateSize({ pan: false });
   }
+  // aberto por cima do satélite do Tocantins da página inicial (mapa-sat-to.js, abreAl: este documento num quadro
+  // iframe.st-alfr dela; pedido do usuário): sempre em tela cheia; sair dela (o botão, o Esc, Ctrl+S) volta ao satélite
+  const EMB = (() => { try { const f = window.frameElement; return !!(f && f.classList.contains('st-alfr')); } catch (e) { return false; } })();
+  const avisa = tipo => { try { window.frameElement.dispatchEvent(new CustomEvent('st-al', { detail: { tipo } })); } catch (e) { /* o satélite já saiu */ } };
   function aplica(ligado) {
+    if (!ligado && EMB) { avisa('sai'); return; }
     if (document.body.classList.contains('tela-cheia') === ligado) return;
     centro = [map.getCenter(), map.getZoom()];           // com a gaveta aberta no PC o mapa já é só a parte livre
     if (ligado) yAntes = window.scrollY;               // em tela cheia a página encolhe e a rolagem vai a 0: ao sair, volta ao mesmo lugar
@@ -160,9 +165,9 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
       // a gaveta só anima depois de já estar no lugar (sem isso, ela passaria deslizando ao entrar na tela cheia)
       void painel.offsetWidth; document.body.classList.add('tc-anima');
     }
-    btn.title = ligado ? 'Sair da tela cheia (Esc)' : 'Tela cheia';
+    btn.title = EMB ? 'Voltar ao satélite (Esc)' : ligado ? 'Sair da tela cheia (Esc)' : 'Tela cheia';
     btn.setAttribute('aria-pressed', ligado);
-    btn.setAttribute('aria-label', ligado ? 'Sair da tela cheia' : 'Mapa em tela cheia');
+    btn.setAttribute('aria-label', EMB ? 'Voltar ao satélite' : ligado ? 'Sair da tela cheia' : 'Mapa em tela cheia');
     requestAnimationFrame(() => {
       map.invalidateSize(); map.setView(centro[0], centro[1], { animate: false });   // entrou com a gaveta aberta: no meio da parte livre
       if (!ligado) volta();
@@ -175,7 +180,8 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
   function alterna() {
     const ligar = !document.body.classList.contains('tela-cheia');
     const el = document.documentElement;
-    if (ligar) {
+    if (ligar && EMB) aplica(true);
+    else if (ligar) {
       const req = el.requestFullscreen || el.webkitRequestFullscreen;
       if (req) { try { const p = req.call(el); if (p && p.then) { pede++; p.then(fimPede, fimPede); } } catch (e) { /* sem tela cheia nativa: fica só o CSS */ } }
       aplica(true);
@@ -202,7 +208,10 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
     aplica(false); volta(); voltar = null;
   }));
   document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape' || !document.body.classList.contains('tela-cheia')) return;
+    if (EMB && (e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.code === 'KeyS' || e.key === 's' || e.key === 'S')) {
+      e.preventDefault(); if (!e.repeat) avisa('sai'); return;   // o Ctrl+S do satélite: volta a ele (sem o "Salvar página")
+    }
+    if (e.key !== 'Escape' || !document.body.classList.contains('tela-cheia') || (EMB && e.defaultPrevented)) return;
     if (document.body.classList.contains('tc-gaveta')) gaveta(false, painel.contains(document.activeElement)); else if (!nativo()) aplica(false);
   });
   // tocar numa OS ou trecho dentro da gaveta no celular: fecha a gaveta para mostrar o mapa
@@ -212,19 +221,51 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
   });
   window.__telaCheia = alterna;
   window.__gaveta = abrir => gaveta(!!abrir);             // modo Limpeza de faixa: fecha ao começar e devolve ao sair
-  // ?cheia=1: chegou pelo clique numa linha do satélite do Tocantins (mapa-sat-to.js; pedido do usuário: direto no mapa
-  // do alimentador em tela cheia): a tela cheia do CSS (a do navegador pede um gesto na própria página), com a gaveta
-  // fechada (a aba abre) e a rede enquadrada no mapa maior. Vale só na chegada (sai do endereço)
+  // ?cheia=1 (link de fora, como o do satélite antes) e o quadro do satélite (EMB): a tela cheia do CSS (a do navegador
+  // pede um gesto na própria página), com a rede enquadrada no mapa maior. Vale só na chegada (sai do endereço).
+  // - ?cheia=1 avulso: a gaveta fechada (a aba abre).
+  // - No quadro do satélite: no PC a gaveta aberta (como a tela cheia de sempre), no celular a aba; com ?vista=lat,lon,zoom
+  //   (o ponto do canto de cima à esquerda da janela e o zoom do satélite) o mapa nasce no mesmo lugar, pixel a pixel (o
+  //   zoom fracionário do satélite, sem o passo de 0,25 deste). Quando a rede está inteira no mapa, o painel montado e o
+  //   satélite baixado (até 1,5 s), avisa o satélite ('pronto'), que mostra este quadro; já à vista ('st-al-visivel'), se
+  //   a rede não aparece na vista, voa suave até ela.
   const PQ = new URLSearchParams(location.search);
-  if (PQ.get('cheia') === '1') {
-    PQ.delete('cheia');
+  const vista = EMB && /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(\d+(?:\.\d+)?)$/.exec(PQ.get('vista') || '');
+  if (PQ.get('cheia') === '1' || EMB) {
+    PQ.delete('cheia'); PQ.delete('vista');
     const q = PQ.toString();
     try { history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash); } catch (e) { /* sem history: fica no endereço */ }
     aplica(true);
-    gaveta(false);
+    if (!EMB) gaveta(false);
     requestAnimationFrame(() => requestAnimationFrame(() => {
       map.invalidateSize();
-      if (window.__caixaRede) map.fitBounds(window.__caixaRede.pad(0.04), { animate: false });
+      if (vista) {
+        const zs = map.options.zoomSnap, z = Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), +vista[3]));
+        map.options.zoomSnap = 0;
+        try { map.setView(map.unproject(map.project([+vista[1], +vista[2]], z).add(map.getSize().divideBy(2)), z), z, { animate: false }); }
+        finally { map.options.zoomSnap = zs; }
+        const b = window.__caixaRede;
+        window.__alVista = { z: map.getZoom(), ve: !b || map.getBounds().intersects(b), voou: false };   // (para os testes)
+      } else if (window.__caixaRede) map.fitBounds(window.__caixaRede.pad(0.04), { animate: false });
+      if (EMB) pronto();
     }));
   }
+  function pronto() {
+    const A = window.__al || {}, sat = window.__satelite;
+    const fotos = () => new Promise(ok => {
+      if (!sat || !map.hasLayer(sat) || !sat.isLoading()) { ok(); return; }
+      const t = setTimeout(ok, 1500);
+      sat.once('load', () => { clearTimeout(t); ok(); });
+    });
+    const tudo = Promise.all([A.pronto, A.linhas].map(p => Promise.resolve(p).catch(() => {}))).then(fotos);
+    Promise.race([tudo, new Promise(ok => setTimeout(ok, 12000))])
+      .then(() => requestAnimationFrame(() => requestAnimationFrame(() => avisa('pronto'))));
+  }
+  if (EMB) document.addEventListener('st-al-visivel', () => {
+    const b = window.__caixaRede;
+    if (!vista || !b || map.getBounds().intersects(b)) return;   // à vista: fica onde nasceu
+    window.__alVista.voou = true;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) map.fitBounds(b.pad(0.04), { animate: false });
+    else map.flyToBounds(b.pad(0.04), { duration: 1.1 });
+  }, { once: true });
 })();
