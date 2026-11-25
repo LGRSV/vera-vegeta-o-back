@@ -402,13 +402,14 @@
     }
   }
   // os transformadores, chaves e outros do selecionado cod, fortes, no canvas ctx de selecionados.js (já na resolução R; t:
-  // a região dele, como a tela daqui). DJ, religadores e fusíveis ficam com selecionados.js
-  function pintaEqDe(ctx, t, cod) {
+  // a região dele, como a tela daqui). DJ, religadores e fusíveis ficam com selecionados.js; grupos: só esses (com o
+  // ativos.js dele, os transformadores e outros são de ativos-zoom.js)
+  function pintaEqDe(ctx, t, cod, grupos = 'tec') {
     const e = IDX && IDX.find(x => x.cod === cod);
     if (!e || t.z < Z_EQ[4]) return;
     const S = simbolos(), s = t.s, W = t.w, H = t.h, bx = e.x0 * s - t.x, by = e.y0 * s - t.y;
     ctx.globalAlpha = 1;
-    for (const gr of 'tec') {                            // na ordem de ORDEM
+    for (const gr of grupos) {                           // na ordem de ORDEM
       const sp = S[gr], dd = eqDe(e, NIVEL[gr], t.z), g = dd && dd.g[gr];
       if (!g) continue;
       const p = g.p, cx = g.cx, n = p.length / 2;
@@ -789,6 +790,8 @@
     const a = alvoEm(ev.containerPoint, toque ? 14 : 7);
     if (!a) return;
     if (!a.q && S && S.em(ev.containerPoint, toque ? 16 : 10)) return;   // a linha de um selecionado tem a vez
+    const AZ = window.__ativosZoom;
+    if (!a.q && AZ && AZ.selEm && AZ.selEm(ev.containerPoint, toque ? 10 : 4)) return;   // o poste de um selecionado também
     if (a.q) ev._viz = 1;                                // equipamento: o balão dele (a seleção não escolhe a linha embaixo)
     if (!a.q && S && S.seleciona && S.seleciona(a.e.cod)) { map.closePopup(); return; }   // (o realce vem pelo al:selecao)
     paira(null);

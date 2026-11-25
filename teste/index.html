@@ -27,7 +27,7 @@
 <script src="assets/mapa-municipios.js?v=20261124b"></script>
 <script src="assets/busca-ativo.js?v=20261124b"></script>
 <script src="assets/mapa-raiox.js?v=20261119" data-rede="d5c56ddb"></script>
-<script src="assets/mapa-sat-to.js?v=20261125g" data-faixa="d2c750c8"></script>
+<script src="assets/mapa-sat-to.js?v=20261125h" data-faixa="d2c750c8"></script>
 </div>
 <script>const b=document.getElementById("busca");if(b)b.addEventListener("input",()=>{const q=b.value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();document.querySelectorAll("[data-busca]").forEach(e=>{e.hidden=!e.dataset.busca.includes(q)});document.querySelectorAll(".grade").forEach(g=>{let v=g.nextElementSibling;if(!v||!v.classList.contains("sem-res")){v=document.createElement("p");v.className="sem-res";v.setAttribute("role","status");g.after(v)}v.textContent=!q||g.querySelector("[data-busca]:not([hidden])")?"":"Nada encontrado para “"+b.value.trim()+"”."})});</script>
 <script src="assets/menu.js"></script>

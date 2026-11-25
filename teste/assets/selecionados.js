@@ -40,6 +40,8 @@
   const ALS = new URL('../alimentadores/', eu.src).href, VIZ = new URL('../dados/vizinhos/', eu.src).href, UCS = new URL('../dados/ucs/', eu.src).href;
   const EU = K.EU.al || (/\/alimentadores\/([^/]+)\//.exec(location.pathname) || [])[1] || '';
   const MOVEL = L.Browser.mobile || matchMedia('(pointer:coarse)').matches;
+  // aberto por cima do satélite do Tocantins (mapa-sat-to.js, abreAl: esta página no quadro iframe.st-alfr)
+  const EMB = (() => { try { const f = window.frameElement; return !!(f && f.classList.contains('st-alfr')); } catch (e) { return false; } })();
   const MAX = 10;                                        // além do aberto (pedido do usuário: até 11 no mapa)
   const PARALELO = MOVEL ? 2 : 3;                        // downloads ao mesmo tempo
   const R = L.Browser.retina && !MOVEL ? 2 : 1;          // resolução da imagem (a dos vizinhos)
@@ -545,7 +547,9 @@
       if (!quer) return;
       const tela = { x: o.x + b.min.x, y: o.y + b.min.y, z, s: 256 * Math.pow(2, z), w: t.x, h: t.y };
       ctx.setTransform(R, 0, 0, R, 0, 0);
-      for (const s of prontos()) V.pintaEqDe(ctx, tela, s.cod);
+      // (com o ativos.js dele em ativos-zoom.js, os transformadores e outros são de lá: o desenho e os códigos do aberto)
+      const AZ = window.__ativosZoom;
+      for (const s of prontos()) V.pintaEqDe(ctx, tela, s.cod, AZ && AZ.selTem && AZ.selTem(s.cod) ? 'c' : 'tec');
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
     }
   });
@@ -791,6 +795,19 @@
     const [a, b] = k > 0 ? [pt(k - 1), pt(k)] : [[0, 0], [0, 0]];
     return [a[0], a[1], b[0], b[1], k > 0 ? g.ct[cadeiaDe(g, k)] : -1, ids[i], p1[i], p2[i], v.m[i]];
   }
+  // os postes das pontas dos vãos (os "N…" são nós sem poste), como os do aberto em ativos-zoom.js: [código, lat, lon,
+  // trecho], uma vez por selecionado (no 1º zoom 17,5 com ele na tela)
+  function postesDe(s) {
+    if (s.postes) return s.postes;
+    const g = s.g, v = s.vaos, T = s.D.trechos, m = new Map(), p1 = v._p1 || (v._p1 = v.p1.split('\n')), p2 = v._p2 || (v._p2 = v.p2.split('\n'));
+    const nao = c => !c || c === 'undefined' || c === 'null' || /^N\d+$/.test(c);
+    const poe = (c, j, t) => { if (!nao(c) && !m.has(c)) m.set(c, [c, lat(g.y0 + g.p[2 * j + 1]), lon(g.x0 + g.p[2 * j]), t]); };
+    for (let l = 0, nl = g.ini.length - 1; l < nl; l++) {
+      const t = T[g.ct[l]] ? T[g.ct[l]].nome : '';
+      for (let k = g.ini[l] + 1; k < g.ini[l + 1]; k++) { const i = g.sv[k]; if (i >= 0) { poe(p1[i], k - 1, t); poe(p2[i], k, t); } }
+    }
+    return (s.postes = [...m.values()]);
+  }
   function cadeiaDe(g, k) { let a = 0, b = g.ini.length - 1; while (b - a > 1) { const m = (a + b) >> 1; if (g.ini[m] <= k) a = m; else b = m; } return a; }
 
   // ---------- escolher um trecho de um selecionado (mapa, rótulo, chip do detalhe, menu) ----------
@@ -896,7 +913,10 @@
     if (ev && sels.size && !faixa() && !map.dragging.moving() && t && (t === mc || t.tagName === 'CANVAS') && !t.classList.contains('leaflet-interactive') && !(ren && ren._hoveredLayer))
       a = alvo(pt = map.mouseEventToContainerPoint(ev), 10);
     if (a && window.__vizinhos && window.__vizinhos.eqEm && window.__vizinhos.eqEm(pt.x, pt.y)) a = null;   // equipamento por cima: a dica é a dele
+    const AZ = window.__ativosZoom, at = a && AZ && AZ.selEm ? AZ.selEm(pt, 4) : null;   // o poste (ou outro ativo) dele, de perto
+    if (at) a = null;
     sob(a);
+    if (at) { mc.classList.add('sel-mao'); dica.textContent = at.dica; dica.style.left = pt.x + 'px'; dica.style.top = pt.y + 'px'; dica.hidden = false; return; }
     mc.classList.toggle('sel-mao', !!a);
     const m = a && !(map._popup && map._popup._map && map._popup.options.className === 'viz-popup');
     if (m) {
@@ -920,6 +940,9 @@
   map.on('click', ev => {
     if (ev._viz || !sels.size || faixa() || !ev.containerPoint) return;
     const oe = ev.originalEvent || {}, toque = oe.pointerType ? oe.pointerType !== 'mouse' : MOVEL;
+    // poste, transformador ou outro equipamento dele (ativos-zoom.js, de perto): o balão com Maps e Earth, como no aberto
+    const AZ = window.__ativosZoom, at = AZ && AZ.selEm && !K.comCtrl(oe) ? AZ.selEm(ev.containerPoint, toque ? 10 : 4) : null;
+    if (at && window.__geo) { window.__geo.balao(at.ll, at.cod, at.sub); return; }
     const t0 = performance.now(), a = alvo(ev.containerPoint, toque ? 16 : 10);
     if (!a || (!a.nome && a.fi == null)) return;
     mede(t0);
@@ -1073,9 +1096,20 @@
     oculto = sim;
     mc.classList.toggle('al-oculto', sim);
     focos(sim);
+    document.dispatchEvent(new CustomEvent('al:oculto', { detail: { oculto: sim } }));   // (ativos-zoom.js: os códigos dele)
     if (cods && cods.getLayers().length) ajeita();
     menu();
     aviso(sim ? `${EU} escondido no mapa` : `${EU} de volta no mapa`);
+    return true;
+  }
+  // ---------- tirar o aberto e voltar ao satélite (pedido do usuário: "voltar a ficar sem seleção, como no 1º Ctrl+S") ----------
+  // Só no quadro do satélite: o ✕ ao lado do olho no chip do aberto avisa o satélite ('limpa', com a vista deste mapa: o
+  // ponto do canto de cima à esquerda da janela e o zoom, como o ?vista= da ida), que tira o quadro (o aberto e os
+  // selecionados com ele), fica na mesma vista, sem nenhum alimentador realçado, e tira o ?al do endereço
+  function sai() {
+    if (!EMB) return false;
+    const r = mc.getBoundingClientRect(), c = map.containerPointToLatLng([-r.left, -r.top]);
+    try { window.frameElement.dispatchEvent(new CustomEvent('st-al', { detail: { tipo: 'limpa', vista: [c.lat, c.lng, map.getZoom()] } })); } catch (e) { return false; }
     return true;
   }
   document.addEventListener('al:sel', e => { if (oculto && !naClasse && e.detail && e.detail.length) esconde(false); });   // trecho dele escolhido
@@ -1149,6 +1183,11 @@
     '.sel-c[aria-pressed=false] b{text-decoration:line-through}' +
     '.sel-c[aria-busy=true] small::before{content:"";display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:50%;border:1.5px solid currentColor;border-right-color:transparent;' +
     'vertical-align:-1px;animation:sel-gira .8s linear infinite}@keyframes sel-gira{to{transform:rotate(1turn)}}@media (prefers-reduced-motion:reduce){.sel-c[aria-busy=true] small::before{animation:none}}' +
+    // o ✕ do aberto no quadro do satélite (tira e volta a ele), separado do olho
+    '.sel-sai{flex:none;display:grid;place-items:center;width:40px;min-height:40px;padding:0;border:0;border-left:1px solid var(--vidro-borda);border-radius:0 var(--r1) var(--r1) 0;' +
+    'background:none;color:var(--vidro-fg);font:var(--t-base)/1 var(--f-body);cursor:pointer}.sel-sai:hover{background:var(--vidro-hover)}' +
+    // os ativos dos selecionados de perto (ativos-zoom.js): somem com os nomes deles
+    '.vto-voando .leaflet-sel-atv-pane,.mapbox.fx-modo .leaflet-sel-atv-pane{display:none}' +
     // o ↗ discreto, separado do chip (não tira); "tentar de novo" no lugar dele
     '.sel-ab{flex:none;display:grid;place-items:center;width:40px;min-height:40px;padding:0;border-left:1px solid var(--vidro-borda);border-radius:0 var(--r1) var(--r1) 0;' +
     'color:var(--vidro-fg);text-decoration:none}.sel-ab:hover{background:var(--vidro-hover)}' +
@@ -1244,6 +1283,8 @@
         (f || mais).focus();
         return;
       }
+      // o ✕ do aberto (só aberto pelo satélite): tira tudo e volta ao satélite limpo
+      if (e.target.closest('[data-sai]')) { sai(); return; }
       // chip do aberto: esconde e mostra (o foco fica nele)
       const oc = e.target.closest('[data-aberto]');
       if (oc) { esconde(oc.hasAttribute('data-oculta')); (lst.querySelector('[data-aberto]') || bt).focus(); return; }
@@ -1403,7 +1444,8 @@
       : foco.dataset.denovo ? `[data-denovo="${CSS.escape(foco.dataset.denovo)}"], [data-x="${CSS.escape(foco.dataset.denovo)}"]`
       : foco.dataset.cod ? `.sel-ab[data-cod="${CSS.escape(foco.dataset.cod)}"]` : null);
     const ab = !renA ? '' : `<li class="sel-al ab${oculto ? ' oc' : ''}"><button type="button" class="sel-c" data-aberto ${oculto ? 'data-mostra' : 'data-oculta'} aria-pressed="${!oculto}" ` +
-      `title="${oculto ? 'Mostrar no mapa' : 'Esconder no mapa'}" aria-label="${esc(EU)}, aberto, no mapa">${oculto ? OLHO_X : OLHO}<b>${esc(EU)}</b><small${oculto ? '' : ' class="vh"'}>${oculto ? 'escondido' : 'aberto'}</small></button></li>`;
+      `title="${oculto ? 'Mostrar no mapa' : 'Esconder no mapa'}" aria-label="${esc(EU)}, aberto, no mapa">${oculto ? OLHO_X : OLHO}<b>${esc(EU)}</b><small${oculto ? '' : ' class="vh"'}>${oculto ? 'escondido' : 'aberto'}</small></button>` +
+      (EMB ? `<button type="button" class="sel-sai" data-sai title="Tirar e voltar ao satélite" aria-label="Tirar ${esc(EU)} e voltar ao satélite">✕</button>` : '') + '</li>';
     ul.innerHTML = [...sels.values()].reverse().map(s => {
       const c = esc(s.cod), t = chipTxt(s);
       return `<li class="sel-al${s.estado === 'erro' ? ' erro' : ''}"><button type="button" class="sel-c" data-x="${c}"${s.estado === 'baixando' ? ' aria-busy="true"' : ''} title="${esc(t.title)} · tocar tira do mapa" ` +
@@ -1563,6 +1605,12 @@
     focos: () => copias ? copias.size : 0,
     ocioso: () => !tRot && ![...sels.values()].some(s => s.estado === 'baixando') && !(rede && (rede._t || rede._p || rede._guarda)),
     geo: cod => { const s = sels.get(cod); return s && s.g ? s.g : null; },
+    // para ativos-zoom.js: os prontos, a caixa (lat, lon) de cada um, os postes e o endereço de um arquivo dele
+    prontos: () => prontos().map(s => s.cod),
+    caixa: cod => { const s = sels.get(cod); return s && s.bb ? s.bb : null; },
+    postes: cod => { const s = sels.get(cod); return s && s.estado === 'pronto' ? postesDe(s) : null; },
+    arquivo: (cod, nome) => `${ALS}${encodeURIComponent(cod)}/${nome}`,
+    sai: () => sai(),
     latlngs: (cod, nome) => { const s = sels.get(cod); return s && s.g ? latlngsDe(s, nome) : null; },
     vao: (cod, i) => { const s = sels.get(cod); return s && s.g ? vaoDe(s, i) : null; },
     principais: cod => { const s = sels.get(cod); return s && s.D ? s.D.principais.map(a => [a.lat, a.lon, a.t]) : null; },

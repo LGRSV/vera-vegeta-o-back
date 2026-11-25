@@ -2570,6 +2570,18 @@
       };
       if (calmo()) fim(); else setTimeout(fim, 200);
     } else if (d.tipo === 'sai') fechaAl();
+    else if (d.tipo === 'limpa') limpaAl(d.vista);
+  }
+  // o ✕ do aberto no menu Alimentadores dele (selecionados.js): fecha o quadro (o aberto e os selecionados saem com ele) e
+  // o satélite fica limpo, como num Ctrl+S novo: na vista em que estava o mapa dele (o ponto do canto de cima à esquerda da
+  // janela e o zoom, como o ?vista= da ida), sem nenhum alimentador realçado e sem o ?al no endereço
+  function limpaAl(v) {
+    fechaAl();
+    realca(null);
+    if (balao) balao.hidden = true;
+    if (!map || !Array.isArray(v) || !v.every(Number.isFinite)) return;
+    const r = caixaSat.getBoundingClientRect(), z = Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), v[2]));
+    map.setView(map.unproject(map.project([v[0], v[1]], z).add(map.getSize().divideBy(2)).add([r.left, r.top]), z), z, { animate: false });
   }
   function carregouSob(s) {
     if (sob !== s) return;
