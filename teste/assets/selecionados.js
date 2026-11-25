@@ -1121,41 +1121,47 @@
     '.sel-n{min-width:22px;padding:1px 6px;border-radius:var(--rp);background:var(--accent);color:var(--on-accent);font:700 var(--t-xs)/1.4 var(--f-mono);text-align:center}' +
     '.sel-n.zero{background:none;color:var(--vidro-fg);padding:0;min-width:0;font-size:var(--t-lg);font-weight:600}' +
     '.sel-tx,.sel-seta{display:none}@media (min-width:861px){.sel-tx{display:inline}.sel-seta{display:inline;font-size:var(--t-xs);opacity:.8}}' +
-    '.sel-lista{position:absolute;top:calc(100% + 6px);right:0;overflow:auto;overscroll-behavior:contain;padding:var(--s1);' +
-    'background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);font:var(--t-sm)/1.4 var(--f-body)}' +
-    '.sel-t{margin:0;padding:var(--s2) var(--s3) 2px;font:700 var(--t-xs)/1.4 var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}.sel-t:focus{outline:none}' +
-    // os alimentadores no mapa numa fileira horizontal, presa à direita (no botão): o aberto junto do botão e cada novo
-    // selecionado entra à esquerda, e a lista cresce para a esquerda (pedido do usuário: "lista suspensa na horizontal,
-    // quanto mais eu seleciono mais à esquerda vai"); sem caber, rola de lado (a roda do mouse também). Tocar num
-    // selecionado o tira do mapa; no aberto, esconde e mostra (apagado e riscado, aria-pressed=false).
-    // A ordem dos <li> é a da tela (o mais novo primeiro, o aberto por último): o Tab anda da esquerda para a direita;
-    // presa à direita pela margem do 1º (justify-content:flex-end deixaria o que sobra à esquerda fora da rolagem).
-    // Só a fileira decide a largura da lista: os textos (nota do município, limite, sem resultado) quebram dentro dela
-    '.sel-lista{width:max-content;min-width:min(300px,calc(var(--sel-w,100vw) - 24px));max-width:calc(var(--sel-w,100vw) - 24px)}' +
-    '.sel-mun,.sel-lim,.sel-vazio{contain:inline-size}' +
-    '.sel-als{list-style:none;margin:0;padding:var(--s1) var(--s1) var(--s2);display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;' +
-    'overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;position:relative}.sel-al:first-child{margin-left:auto}' +   // (relative: os textos .vh dos chips, absolutos, ficam recortados pela fileira e não criam uma 2ª rolagem na lista)
-    '.sel-al{flex:none;display:flex;align-items:stretch;border:1px solid var(--line);border-radius:var(--r2);background:var(--paper)}' +
-    '.sel-al .sel-c{border-radius:var(--r2)}' +
-    '.sel-al.ab{border-color:var(--accent)}.sel-al.ab.oc{border-color:var(--line);border-style:dashed}' +
-    '.sel-c{display:inline-flex;align-items:center;gap:5px;min-width:0;min-height:40px;padding:0 8px 0 10px;border:0;border-radius:var(--rp);background:none;color:var(--fg);' +
-    'font:inherit;text-align:left;cursor:pointer}.sel-c:hover{background:var(--hover)}' +
-    '.sel-c b{font:600 var(--t-sm)/1.2 var(--f-mono);white-space:nowrap}.sel-c small{font-size:var(--t-xs);color:var(--muted);white-space:nowrap}' +
-    '.sel-c small.erro{color:var(--aviso)}' +
-    '.sel-c svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:var(--muted)}' +
-    '.sel-c .sel-xi{flex:none;font-size:var(--t-base);line-height:1;color:var(--muted)}.sel-c:hover .sel-xi,.sel-c:hover svg{color:var(--fg)}' +
-    '.sel-c[aria-pressed=false]{color:var(--muted)}.sel-c[aria-pressed=false] b{text-decoration:line-through}' +
+    // a fileira "ao lado do botão" (pedido do usuário): na linha dele, saindo dele para a esquerda (o aberto encostado no
+    // botão, cada novo selecionado mais à esquerda), só no espaço livre à esquerda dele (sem cobrir o olho nem o T1 T2 T3);
+    // sem lugar na linha, logo abaixo do botão (e da fileira das camadas), alinhada à direita. medeLista põe o top e a largura.
+    // Sem caber, rola de lado (a roda do mouse também). A busca, Ver todos e Tirar todos, o aviso do município e o do
+    // limite ficam no painel pequeno da lupa, no começo (à esquerda) da fileira.
+    // A ordem dos <li> é a da tela (o mais novo primeiro, o aberto por último): o Tab anda da esquerda para a direita
+    '.sel-lista{position:absolute;top:0;right:calc(100% + 6px);display:flex;flex-direction:column;align-items:flex-end;max-width:calc(100vw - 24px)}' +
+    '.sel-lista.desce{right:0}.sel-lista[hidden]{display:none}.sel-lista:focus{outline:none}' +
+    '.ctl-card.sel-fila{padding:0;gap:2px;align-items:stretch;max-width:100%;box-sizing:border-box}' +
+    '.sel-fila .sel-mais{flex:none;position:relative;justify-content:center;width:40px;padding:0;border-radius:var(--r1) 0 0 var(--r1);box-shadow:1px 0 0 var(--vidro-borda)}' +
+    '.sel-fila .sel-mais[aria-expanded=true]{background-color:var(--vidro-hover)}' +
+    '.sel-mais svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;pointer-events:none}' +
+    '.sel-mais.nota::after{content:"";position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--aviso)}' +
+    '.sel-als{list-style:none;margin:0;padding:0 1px 0 2px;display:flex;flex-direction:row;flex-wrap:nowrap;gap:2px;min-width:0;align-items:center;' +
+    'overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;position:relative}.sel-als::-webkit-scrollbar{display:none}.sel-al:first-child{margin-left:auto}' +   // (relative: os textos .vh dos chips ficam recortados pela fileira)
+    // mais chips além da borda: a borda some aos poucos
+    '.sel-als.me{-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px);mask-image:linear-gradient(90deg,transparent,#000 28px)}' +
+    '.sel-als.md{-webkit-mask-image:linear-gradient(270deg,transparent,#000 28px);mask-image:linear-gradient(270deg,transparent,#000 28px)}' +
+    '.sel-als.me.md{-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent)}' +
+    '.sel-al{flex:none;display:flex;align-items:stretch;border-radius:var(--r1);background:var(--vidro-hover)}' +
+    '.sel-al.ab{outline:2px solid var(--accent);outline-offset:-2px}.sel-al.ab.oc{background:none;outline:1px dashed var(--vidro-fg);outline-offset:-1px}.sel-al.erro{outline:1px solid var(--aviso);outline-offset:-1px}' +
+    '.sel-fila .sel-c{gap:5px;min-width:0;min-height:40px;padding:0 8px 0 10px;border-radius:var(--r1);color:var(--vidro-fg);text-align:left}' +
+    '.sel-c b{font:600 var(--t-sm)/1.2 var(--f-mono);white-space:nowrap}.sel-c small{font:var(--t-xs) var(--f-body);opacity:.85;white-space:nowrap}' +
+    '.sel-c svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
+    '.sel-c .sel-xi{flex:none;font-size:var(--t-base);line-height:1;opacity:.8}' +
+    '.sel-c[aria-pressed=false] b{text-decoration:line-through}' +
     '.sel-c[aria-busy=true] small::before{content:"";display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:50%;border:1.5px solid currentColor;border-right-color:transparent;' +
     'vertical-align:-1px;animation:sel-gira .8s linear infinite}@keyframes sel-gira{to{transform:rotate(1turn)}}@media (prefers-reduced-motion:reduce){.sel-c[aria-busy=true] small::before{animation:none}}' +
     // o ↗ discreto, separado do chip (não tira); "tentar de novo" no lugar dele
-    '.sel-ab{flex:none;display:grid;place-items:center;width:40px;min-height:40px;margin-left:-4px;padding:0;border:0;border-left:1px solid var(--line);border-radius:0 var(--r2) var(--r2) 0;' +
-    'color:var(--muted);text-decoration:none}.sel-ab:hover{background:var(--hover);color:var(--fg)}' +
+    '.sel-ab{flex:none;display:grid;place-items:center;width:40px;min-height:40px;padding:0;border-left:1px solid var(--vidro-borda);border-radius:0 var(--r1) var(--r1) 0;' +
+    'color:var(--vidro-fg);text-decoration:none}.sel-ab:hover{background:var(--vidro-hover)}' +
     '.sel-ab svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}' +
-    '.sel-denovo{flex:none;min-height:40px;padding:0 var(--s3) 0 var(--s2);border:0;border-left:1px solid var(--line);border-radius:0 var(--rp) var(--rp) 0;background:none;color:var(--accent);' +
-    'font:600 var(--t-xs) var(--f-body);text-decoration:underline;text-underline-offset:2px;cursor:pointer}.sel-denovo:hover{background:var(--hover)}' +
-    '.sel-al :focus-visible{outline:2px solid var(--accent);outline-offset:1px}' +
-    '.sel-de{margin:var(--s1) var(--s2) 0;padding-top:var(--s2);border-top:1px solid var(--line)}' +
-    '.sel-q{width:100%;min-height:40px;padding:0 var(--s3);border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--paper);color:var(--fg);font:var(--t-base) var(--f-body)}' +
+    '.sel-fila .sel-denovo{flex:none;padding:0 var(--s3) 0 var(--s2);border-left:1px solid var(--vidro-borda);border-radius:0 var(--r1) var(--r1) 0;color:var(--vidro-fg);' +
+    'font:600 var(--t-xs) var(--f-body);text-decoration:underline;text-underline-offset:2px}' +
+    '.sel-fila :focus-visible{outline:2px solid var(--foco-mapa);outline-offset:-2px}' +
+    // o painel da lupa: pequeno, embaixo da fileira, a partir da lupa (medeLista põe o lado e a largura)
+    '.sel-painel{position:absolute;top:calc(100% + 6px);left:var(--sel-px,0);width:var(--sel-pw,300px);box-sizing:border-box;overflow:auto;overscroll-behavior:contain;padding:var(--s1);' +
+    'background:var(--paper);color:var(--fg);border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh2);font:var(--t-sm)/1.4 var(--f-body)}.sel-painel[hidden]{display:none}' +
+    '.sel-t{margin:0;padding:var(--s2) var(--s3) 2px;font:700 var(--t-xs)/1.4 var(--f-body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}.sel-t:focus{outline:none}' +
+    '.sel-de{margin:var(--s1) var(--s2) 0}' +
+    '.sel-q{width:100%;box-sizing:border-box;min-height:40px;padding:0 var(--s3);border:1px solid var(--line-forte);border-radius:var(--r2);background:var(--paper);color:var(--fg);font:var(--t-base) var(--f-body)}' +
     '.sel-q:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}.sel-q:disabled{opacity:.6}' +
     '@media (max-width:980px){.sel-q{min-height:44px;font-size:16px}}' +
     '.sel-sug{display:grid;margin-top:var(--s1)}.sel-sug:empty{display:none}' +
@@ -1168,7 +1174,7 @@
     'font:var(--t-xs)/1.4 var(--f-body);color:var(--fg)}.sel-mun b{font-weight:700}' +
     '.sel-pe{display:flex;gap:var(--s2);justify-content:space-between;margin:var(--s2) var(--s1) var(--s1)}' +
     '.sel-pe button{min-height:40px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r2);background:var(--paper);color:var(--fg);font:600 var(--t-sm) var(--f-body);cursor:pointer}' +
-    '.sel-pe button:hover{background:var(--hover)}.sel-lista :focus-visible{outline:2px solid var(--accent);outline-offset:1px}' +
+    '.sel-pe button:hover{background:var(--hover)}.sel-painel :focus-visible{outline:2px solid var(--accent);outline-offset:1px}' +
     '.sel-vazio{margin:0;padding:var(--s1) var(--s3) var(--s2);color:var(--muted);font-size:var(--t-xs)}' +
     // o aviso do limite (clique no 11º): no vidro dos controles, abaixo do botão; some sozinho
     '.sel-aviso{position:absolute;top:calc(100% + 6px);right:0;pointer-events:none}' +
@@ -1184,7 +1190,8 @@
   // ---------- menu "Alimentadores" ----------
   const ICONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h7M12 12l4-6h3M12 12l4 6h3M12 12h7"/><circle cx="4.5" cy="12" r="2.2"/><circle cx="19.5" cy="6" r="1.8"/><circle cx="19.5" cy="12" r="1.8"/><circle cx="19.5" cy="18" r="1.8"/></svg>';
   const SETA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 16 8M10 8h6v6"/></svg>';
-  let canto = null, bt = null, lst = null, q = null, sug = null, falado = null, avisoEl = null, iSug = -1, tAviso = 0;
+  const LUPA = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>';
+  let canto = null, bt = null, lst = null, fila = null, ul = null, mais = null, pn = null, q = null, sug = null, falado = null, avisoEl = null, iSug = -1, tAviso = 0;
   const aviso = t => { if (falado) { falado.textContent = ''; setTimeout(() => { falado.textContent = t; }, 30); } };
   // aviso visível e falado (role=status), logo abaixo do botão do menu; some sozinho (a região fica na página, vazia)
   function avisoVisivel(t) {
@@ -1196,36 +1203,45 @@
     avisoEl.append(s);
     tAviso = setTimeout(() => { s.classList.add('sai'); tAviso = setTimeout(() => { if (s.isConnected) s.remove(); }, 260); }, 4500);
   }
+  // toque (no Safari o click não traz pointerType: MOVEL cobre) ou teclado (detail 0)
+  const toque = e => !!(e.detail && (MOVEL || (e.pointerType && e.pointerType !== 'mouse')));
   function criaMenu() {
     canto = document.createElement('div');
     canto.className = 'sel-canto';
     canto.innerHTML = `<div class="ctl-card"><button type="button" class="sel-bt" aria-expanded="false" aria-controls="sel-lista">${ICONE}<span class="sel-tx">Alimentadores</span>` +
       '<span class="sel-n zero" aria-hidden="true">+</span><span class="sel-seta" aria-hidden="true">▾</span></button></div>' +
-      '<div class="sel-lista" id="sel-lista" role="group" aria-label="Alimentadores no mapa" hidden>' +
-      '<p class="sel-t" tabindex="-1"></p><p class="sel-mun" hidden></p><ul class="sel-als"></ul>' +
+      '<div class="sel-lista" id="sel-lista" role="group" aria-label="Alimentadores no mapa" tabindex="-1" hidden>' +
+      `<div class="ctl-card sel-fila"><button type="button" class="sel-mais" aria-expanded="false" aria-controls="sel-painel" aria-label="Buscar alimentador pelo código, Ver todos, Tirar todos" title="Buscar pelo código · Ver todos · Tirar todos">${LUPA}</button>` +
+      '<ul class="sel-als"></ul></div>' +
+      '<div class="sel-painel" id="sel-painel" role="group" aria-label="Buscar e mais" hidden><p class="sel-t" tabindex="-1"></p><p class="sel-mun" hidden></p>' +
       '<div class="sel-de"><label class="vh" for="sel-q">Adicionar alimentador pelo código</label>' +
       '<input class="sel-q" id="sel-q" type="search" placeholder="Código do alimentador" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-controls="sel-sug">' +
       '<div class="sel-sug" id="sel-sug" role="listbox" aria-label="Alimentadores encontrados"></div><p class="sel-lim" hidden></p></div>' +
-      '<div class="sel-pe"><button type="button" data-todos>Ver todos</button><button type="button" data-tira>Tirar todos</button></div></div>' +
+      '<div class="sel-pe"><button type="button" data-todos>Ver todos</button><button type="button" data-tira>Tirar todos</button></div></div></div>' +
       // (fora da lista: escondida, ela calaria o aviso) o falado só para o leitor de tela; o visível, com o limite, some sozinho
       '<p class="vh" aria-live="polite"></p><div class="sel-aviso" role="status" aria-live="polite"></div>';
     box.append(canto);
-    bt = canto.querySelector('.sel-bt'); lst = canto.querySelector('.sel-lista'); q = canto.querySelector('.sel-q'); sug = canto.querySelector('.sel-sug');
+    bt = canto.querySelector('.sel-bt'); lst = canto.querySelector('.sel-lista'); fila = canto.querySelector('.sel-fila'); ul = canto.querySelector('.sel-als');
+    mais = canto.querySelector('.sel-mais'); pn = canto.querySelector('.sel-painel'); q = canto.querySelector('.sel-q'); sug = canto.querySelector('.sel-sug');
     falado = canto.querySelector('p.vh[aria-live]'); avisoEl = canto.querySelector('.sel-aviso');
     L.DomEvent.disableClickPropagation(canto);
     L.DomEvent.disableScrollPropagation(canto);
     canto.addEventListener('click', e => e.stopPropagation());   // o clique não chega ao mapa (que limparia a seleção)
-    // no toque o foco vai ao título (o teclado do celular só sobe ao tocar na busca); pelo teclado e no mouse, à busca
-    bt.addEventListener('click', e => abre(lst.hidden, e.detail && (MOVEL || (e.pointerType && e.pointerType !== 'mouse')) ? 'titulo' : true));
+    // no toque o foco vai à fileira (o teclado do celular só sobe ao tocar na busca); pelo teclado, ao chip do aberto, junto
+    // do botão; no mouse fica no botão
+    bt.addEventListener('click', e => abre(lst.hidden, toque(e) ? 'grupo' : !e.detail));
     bt.addEventListener('keydown', e => { if (e.key === 'ArrowDown' && lst.hidden) { e.preventDefault(); abre(true, true); } });
+    // a lupa: o painel pequeno com a busca (no toque o foco vai ao título dele; no mouse e no teclado, à busca)
+    mais.addEventListener('click', e => painel(pn.hidden, toque(e) ? 'titulo' : true));
+    mais.addEventListener('keydown', e => { if (e.key === 'ArrowDown' && pn.hidden) { e.preventDefault(); painel(true, true); } });
     lst.addEventListener('click', e => {
       const x = e.target.closest('[data-x]'), o = e.target.closest('[data-poe]'), d = e.target.closest('[data-denovo]');
-      // chip de um selecionado: sai do mapa e da lista; o foco vai ao chip seguinte (ou ao de antes, ou à busca)
+      // chip de um selecionado: sai do mapa e da fileira; o foco vai ao chip seguinte (ou ao de antes, ou à lupa)
       if (x) {
         const cod = x.dataset.x, li = x.closest('li'), viz = li && (li.nextElementSibling || li.previousElementSibling), vc = viz && (viz.querySelector('[data-x]') ? viz.querySelector('[data-x]').dataset.x : 'aberto');
         tira(cod);
         const f = vc && lst.querySelector(vc === 'aberto' ? '[data-aberto]' : `[data-x="${CSS.escape(vc)}"]`);
-        (f || (q.disabled ? null : q) || bt).focus();
+        (f || mais).focus();
         return;
       }
       // chip do aberto: esconde e mostra (o foco fica nele)
@@ -1236,17 +1252,17 @@
       if (e.target.closest('[data-todos]')) { verTodos(); return; }
       if (e.target.closest('[data-tira]')) {
         [...sels.keys()].forEach(tira);
-        // no toque (como no botão: MOVEL cobre o Safari, cujo click não traz pointerType), o foco vai para o título (o botão some com a lista vazia): focar a busca subia o teclado sem pedir
-        if (e.detail && (MOVEL || (e.pointerType && e.pointerType !== 'mouse'))) lst.querySelector('.sel-t').focus({ preventScroll: true }); else q.focus();
+        // no toque o foco vai para o título do painel (focar a busca subia o teclado sem pedir)
+        if (toque(e)) pn.querySelector('.sel-t').focus({ preventScroll: true }); else q.focus();
       }
     });
-    // a roda do mouse (vertical) rola a fileira de lado: sem isso, no PC só arrastando a barra fina
-    lst.querySelector('.sel-als').addEventListener('wheel', e => {
-      const ul = e.currentTarget;
+    // a roda do mouse (vertical) rola a fileira de lado: sem isso, no PC só arrastando
+    ul.addEventListener('wheel', e => {
       if (ul.scrollWidth <= ul.clientWidth + 1 || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
       e.preventDefault();
       ul.scrollLeft += e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY;
     }, { passive: false });
+    ul.addEventListener('scroll', bordas, { passive: true });
     q.addEventListener('input', () => { iSug = -1; sugestoes(); });
     q.addEventListener('keydown', e => {
       const os = [...sug.querySelectorAll('.sel-op:not(:disabled)')];
@@ -1261,11 +1277,15 @@
         if (o) adiciona(o.dataset.poe);
       }
     });
-    // fecha: Esc (antes do Esc da tela cheia; o foco volta ao botão), clique fora ou o foco saindo do menu
+    // fecha: Esc (antes do Esc da tela cheia): o painel da lupa primeiro (o foco volta à lupa), depois a fileira (o foco
+    // volta ao botão); clique fora ou o foco saindo do menu fecham tudo
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape' || lst.hidden) return;
       e.stopPropagation();
-      if (q.value && document.activeElement === q) { q.value = ''; sugestoes(); return; }
+      if (!pn.hidden) {
+        if (q.value && document.activeElement === q) { q.value = ''; sugestoes(); return; }
+        painel(false); mais.focus(); return;
+      }
       abre(false); bt.focus();
     }, true);
     document.addEventListener('pointerdown', e => { if (!lst.hidden && !canto.contains(e.target)) abre(false); }, true);
@@ -1277,21 +1297,67 @@
   function abre(sim, foco) {
     lst.hidden = !sim;
     bt.setAttribute('aria-expanded', String(sim));
-    if (!sim) return;
-    medeLista();
+    if (!sim) { painel(false); return; }
     rolaPara = 'dir';                                    // a ponta direita: o aberto, junto do botão
     menu();
-    if (foco === 'titulo') lst.querySelector('.sel-t').focus({ preventScroll: true });
-    else if (foco) (q.disabled ? lst.querySelector('[data-aberto]') || lst.querySelector('.sel-c') : q).focus();   // (sem a busca: o chip do aberto, junto do botão)
+    if (foco === 'grupo') lst.focus({ preventScroll: true });
+    else if (foco) (lst.querySelector('[data-aberto]') || lst.querySelector('.sel-c') || mais).focus();
   }
-  // a lista cabe no mapa (até o pé dele), com rolagem própria. Medido ao abrir e de novo quando a tela muda com ela aberta
-  // (girar o celular): senão a largura de antes a jogava para fora da tela
+  function painel(sim, foco) {
+    if (!pn) return;
+    pn.hidden = !sim;
+    mais.setAttribute('aria-expanded', String(sim));
+    if (!sim) return;
+    menu();
+    // sem lugar até o pé da tela (celular deitado, o mapa mais abaixo): a página sobe o que falta, até o topo da fileira
+    const falta = Math.min(pn.scrollHeight - pn.clientHeight, lst.getBoundingClientRect().top - 8);
+    if (falta > 0) { scrollBy(0, falta); medeLista(); }
+    if (foco === 'titulo') pn.querySelector('.sel-t').focus({ preventScroll: true });
+    else if (foco) (q.disabled ? pn.querySelector('.sel-pe:not([hidden]) button') || pn.querySelector('.sel-t') : q).focus();
+  }
+  // Onde a fileira fica: na linha do botão, à esquerda dele, até o controle mais à direita na mesma linha (o olho, o T1 T2
+  // T3); sem lugar ali (pelo menos o que ela pede, até 240 px), logo abaixo do botão, alinhada à direita, descendo também
+  // da fileira das camadas. O painel da lupa embaixo dela, a partir da lupa, dentro do mapa. Medido ao abrir, quando os
+  // chips mudam e quando a tela muda (girar o celular; na tela cheia do tablet o botão fica à esquerda da gaveta)
+  const OBST = '.mapbox>.barra-busca, #classes, .mapbox>.lp-cams';
   function medeLista() {
-    const m = box.getBoundingClientRect(), b = bt.getBoundingClientRect();
-    // a largura que cabe à esquerda do botão (a fileira cresce para a esquerda; na tela cheia do tablet o botão fica à
-    // esquerda da gaveta): do lado direito da lista até a borda esquerda do mapa
-    box.style.setProperty('--sel-w', Math.max(200, Math.min(m.width, b.right - m.left)) + 'px');
-    lst.style.maxHeight = Math.max(160, m.bottom - b.bottom - 18) + 'px';
+    if (!lst || lst.hidden) return;
+    const m = box.getBoundingClientRect(), c = bt.parentElement.getBoundingClientRect(), k = canto.getBoundingClientRect();
+    const esq = m.left + 12, h = fila.offsetHeight, precisa = fila.offsetWidth - ul.clientWidth + ul.scrollWidth;
+    const daDir = ul.scrollWidth - ul.clientWidth - ul.scrollLeft;   // a rolagem medida da ponta direita (o aberto, junto do botão) fica
+    const obs = [...box.querySelectorAll(OBST)].filter(e => !e.hidden && e.offsetParent).map(e => e.getBoundingClientRect()).filter(r => r.width && r.height);
+    const topoLinha = c.top + (c.height - h) / 2;
+    let lim = esq;
+    for (const r of obs) if (r.top < topoLinha + h && r.bottom > topoLinha && r.left < c.left) lim = Math.max(lim, r.right + 8);
+    const livre = c.left - 6 - lim, naLinha = livre >= Math.min(precisa, 240);
+    let topo = topoLinha, larg = livre;
+    if (!naLinha) {
+      topo = c.bottom + 6; larg = c.right - esq;
+      for (let i = 0; i < 4; i++) {
+        const r = obs.find(r => r.top < topo + h && r.bottom > topo && r.left < c.right && r.right > esq);
+        if (!r) break;
+        topo = r.bottom + 6;
+      }
+    }
+    lst.classList.toggle('desce', !naLinha);
+    lst.style.top = Math.round(topo - k.top) + 'px';
+    lst.style.maxWidth = Math.max(120, Math.floor(larg)) + 'px';
+    ul.scrollLeft = Math.max(0, ul.scrollWidth - ul.clientWidth - daDir);
+    bordas();
+    if (pn.hidden) return;
+    const l = lst.getBoundingClientRect(), a = mais.getBoundingClientRect(), pw = Math.min(320, c.right - esq);
+    const px = Math.max(esq, Math.min(a.left, c.right - pw));
+    lst.style.setProperty('--sel-px', Math.round(px - l.left) + 'px');
+    lst.style.setProperty('--sel-pw', Math.floor(pw) + 'px');
+    // até o pé do mapa ou da tela (o que vier antes: celular deitado), com rolagem própria
+    pn.style.maxHeight = Math.max(0, Math.floor(Math.min(m.bottom, innerHeight) - l.bottom - 18)) + 'px';
+  }
+  // as pontas da fileira com mais chips além delas
+  function bordas() {
+    if (!ul) return;
+    const max = ul.scrollWidth - ul.clientWidth;
+    ul.classList.toggle('me', ul.scrollLeft > 1);
+    ul.classList.toggle('md', ul.scrollLeft < max - 1);
   }
   function menu() {
     if (!canto) return;
@@ -1301,17 +1367,19 @@
     const oc = oculto ? ` · ${EU} escondido` : '';
     bt.setAttribute('aria-label', `Alimentadores no mapa: ${n} de ${MAX}${oc}`);
     bt.title = (n ? `Alimentadores no mapa: ${n} de ${MAX}` : 'Pôr outros alimentadores no mapa') + oc;
+    mais.classList.toggle('nota', !!munNota);
     if (lst.hidden) return;
-    lst.querySelector('.sel-t').textContent = `No mapa · ${n} de ${MAX}`;
-    const nm = lst.querySelector('.sel-mun');
+    lst.setAttribute('aria-label', `Alimentadores no mapa: ${n} de ${MAX}`);
+    pn.querySelector('.sel-t').textContent = `No mapa · ${n} de ${MAX}`;
+    const nm = pn.querySelector('.sel-mun');
     nm.hidden = !munNota;
     if (munNota && nm.innerHTML !== munNota) nm.innerHTML = munNota;
-    menuLinhas();
-    const cheio = n >= MAX, lim = lst.querySelector('.sel-lim');
+    const cheio = n >= MAX, lim = pn.querySelector('.sel-lim');
     q.disabled = cheio;
     lim.hidden = !cheio;
     lim.textContent = cheio ? `Limite de ${MAX} alimentadores. Tire um para pôr outro.` : '';
-    lst.querySelector('.sel-pe').hidden = !n;
+    pn.querySelector('.sel-pe').hidden = !n;
+    menuLinhas();
     sugestoes();
   }
   // o que o chip diz além do código (pronto: nada; trechos e extensão no title)
@@ -1329,8 +1397,8 @@
   let rolaPara = null;
   function menuLinhas() {
     if (!canto || lst.hidden) return;
-    const ul0 = lst.querySelector('.sel-als'), daDir = ul0.scrollWidth - ul0.clientWidth - ul0.scrollLeft;
-    const ul = ul0, foco = document.activeElement && ul.contains(document.activeElement) ? document.activeElement : null;
+    const daDir = ul.scrollWidth - ul.clientWidth - ul.scrollLeft;
+    const foco = document.activeElement && ul.contains(document.activeElement) ? document.activeElement : null;
     const fk = foco && (foco.dataset.x ? `[data-x="${CSS.escape(foco.dataset.x)}"]` : foco.hasAttribute('data-aberto') ? '[data-aberto]'
       : foco.dataset.denovo ? `[data-denovo="${CSS.escape(foco.dataset.denovo)}"], [data-x="${CSS.escape(foco.dataset.denovo)}"]`
       : foco.dataset.cod ? `.sel-ab[data-cod="${CSS.escape(foco.dataset.cod)}"]` : null);
@@ -1338,19 +1406,21 @@
       `title="${oculto ? 'Mostrar no mapa' : 'Esconder no mapa'}" aria-label="${esc(EU)}, aberto, no mapa">${oculto ? OLHO_X : OLHO}<b>${esc(EU)}</b><small${oculto ? '' : ' class="vh"'}>${oculto ? 'escondido' : 'aberto'}</small></button></li>`;
     ul.innerHTML = [...sels.values()].reverse().map(s => {
       const c = esc(s.cod), t = chipTxt(s);
-      return `<li class="sel-al"><button type="button" class="sel-c" data-x="${c}"${s.estado === 'baixando' ? ' aria-busy="true"' : ''} title="${esc(t.title)} · tocar tira do mapa" ` +
+      return `<li class="sel-al${s.estado === 'erro' ? ' erro' : ''}"><button type="button" class="sel-c" data-x="${c}"${s.estado === 'baixando' ? ' aria-busy="true"' : ''} title="${esc(t.title)} · tocar tira do mapa" ` +
         `aria-label="Tirar ${c} do mapa (${esc(t.fala)})"><b>${c}</b>${t.tx}<span class="sel-xi" aria-hidden="true">✕</span></button>` +
         (s.estado === 'erro' ? `<button type="button" class="sel-denovo" data-denovo="${c}" aria-label="Tentar de novo ${c}">tentar de novo</button>`
           : `<a class="sel-ab" data-cod="${c}" href="${esc(abreUrl(s.cod))}" title="Abrir ${c}" aria-label="Abrir ${c}">${SETA}</a>`) + '</li>';
     }).join('') + ab;
+    medeLista();
     const max = ul.scrollWidth - ul.clientWidth;
     ul.scrollLeft = rolaPara === 'esq' ? 0 : rolaPara === 'dir' ? max : Math.max(0, max - daDir);
     rolaPara = null;
+    bordas();
     if (fk) { const el = ul.querySelector(fk); if (el) el.focus(); }
   }
   // sugestões: o pedaço digitado em qualquer parte do código, sem caixa; as da tela primeiro, depois as mais perto
   function sugestoes() {
-    if (!canto || lst.hidden) return;
+    if (!canto || lst.hidden || pn.hidden) return;
     const t = q.value.trim().toUpperCase().replace(/\s+/g, '');
     if (!t || !CAIXA) { sug.innerHTML = ''; return; }
     const b = map.getBounds(), c = map.getCenter();
