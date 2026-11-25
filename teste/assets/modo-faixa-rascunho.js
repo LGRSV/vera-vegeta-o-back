@@ -14,7 +14,7 @@
 // mouse e, depois do inicial, a prévia tracejada do caminho com o km. Cada caminho marcado é uma alteração: o Ctrl+Z
 // desfaz a última (ou o último trecho escolhido/tirado; com um início à espera, tira ele); Ctrl+Shift+Z, Ctrl+Y ou o botão refaz.
 // Arrastar move o mapa normalmente (o clique que vem depois de arrastar não conta).
-// Atalhos: Ctrl+M liga/desliga · L leve · P pesada · B apagar · Ctrl+Z desfaz · Esc tira o poste inicial (de novo: solta a
+// Atalhos: Ctrl+M liga/desliga · L leve · P pesada · B apagar · S parte do trecho · Ctrl+Z desfaz · Esc tira o poste inicial (de novo: solta a
 // ferramenta; de novo: sai). Abre em tela cheia (PC e celular) e só existe nela: sair da tela cheia sai do modo (o
 // escolhido e o marcado ficam guardados). Celular: tocar no poste inicial e no final; 2 dedos dão zoom.
 // Faixa a partir do ativo (pedido do usuário): a ferramenta "Do ativo" (A) marca do ativo até o fim do trecho dele — a rede a
@@ -22,6 +22,12 @@
 // no ativo (DJ, religador, fusível, chave, transformador) ou num ponto da linha, ou digitar o código ou o poste no campo ao
 // lado; com Leve ou Pesada escolhido marca na hora, sem, a faixa fica tracejada (pendente) esperando L ou P. A busca do
 // olho (lupa-painel.js) abre o modo assim pelo "Faixa a partir daqui"; ?modo=faixa&de=<código> também.
+// Parte do trecho (pedido do usuário: "selecionar qualquer parte do trecho"): a ferramenta "Parte" (S; na pílula e no painel)
+// escolhe só um pedaço da rede, com os mesmos cliques do Leve/Pesada (início e fim, poste ou pontinho de 5 em 5 m, em
+// qualquer trecho, escolhido ou não, passando de um trecho para outro). O contorno branco fica só na parte; os km do
+// painel, o Leve/Pesada (que só marca dentro da escolha) e o croqui passam a valer só para ela. Num trecho inteiro já
+// escolhido, a parte o reduz a ela; num trecho já em parte, soma. Com a "Parte" ligada as alças brancas nas pontas da
+// parte encurtam ou esticam. Clicar (sem ferramenta) num trecho em parte tira ele todo. Ctrl+Z desfaz cada parte.
 // Roda depois de alimentador.js (window.__map, window.D). Os km são a soma dos vãos (D.vaos[i][8], metros).
 (function () {
   const map = window.__map, D = window.D, L = window.L, box = document.querySelector('.mapbox');
@@ -40,6 +46,10 @@
   const np = new Int32Array(V.length), off = new Int32Array(V.length + 1);
   V.forEach((v, i) => { np[i] = Math.max(1, Math.ceil(v[8] / PASSO)); off[i + 1] = off[i] + np[i]; });
   const sel = new Set(), marca = new Uint8Array(off[V.length]), undo = [], redo = [];
+  // parte do trecho: excl[q] = 1 é o pedaço q fora da escolha, num trecho escolhido só em parte (nEx: quantos por trecho)
+  const excl = new Uint8Array(off[V.length]), nEx = new Int32Array(T.length);
+  const pedT = vaosDe.map(l => l.reduce((s, i) => s + np[i], 0));   // pedaços de cada trecho
+  const mk = q => excl[q] ? 0 : marca[q];                        // a marca que vale (fora da parte não conta)
   // pedaço → vão: ~460 mil pedaços num alimentador grande, montado na 1ª vez que o modo pede (não na carga da página)
   let vaoDeT = null;
   const vaoDe = q => { if (!vaoDeT) { vaoDeT = new Int32Array(off[V.length]); V.forEach((_, i) => vaoDeT.fill(i, off[i], off[i + 1])); } return vaoDeT[q]; };
@@ -126,13 +136,14 @@
       L.DomUtil.setPosition(c, m.containerPointToLayerPoint([-F, -F]));
       c.width = w * r; c.height = h * r; c.style.width = w + 'px'; c.style.height = h + 'px';
       const z = m.getZoom();
-      if (!ativo || (ferr === null && !doAt && !arrasto) || !sel.size || z < 13) return;   // longe demais: os postes viram uma linha só
+      const tudo = ferr === 'parte' || (arrasto && arrasto.parte);   // "Parte": os pontos de toda a rede (escolhida ou não)
+      if (!ativo || (ferr === null && !doAt && !arrasto) || (!sel.size && !tudo) || z < 13) return;   // longe demais: os postes viram uma linha só
       const g = c.getContext('2d'), s = 256 * Math.pow(2, z), o = m.getPixelBounds().min, R = z >= 17 ? 3.5 : z >= 15 ? 3 : 2.5, Q = 2 * R + 3, usado = new Set();
       g.setTransform(r, 0, 0, r, 0, 0);
       // pontinhos no meio dos vãos (menores e mais claros que os postes), nos pontos onde o clique e as alças param
       const r2 = R - 0.9, pts = new Set();
       g.beginPath();
-      for (const i of selV) {
+      for (const i of tudo ? TODOS || (TODOS = V.map((_, j) => j)) : selV) {
         const v = V[i], x1 = mx(v[1], s) - o.x + F, y1 = my(v[0], s) - o.y + F, x2 = mx(v[3], s) - o.x + F, y2 = my(v[2], s) - o.y + F;
         if (Math.max(x1, x2) < -R || Math.min(x1, x2) > w + R || Math.max(y1, y2) < -R || Math.min(y1, y2) > h + R) continue;
         const n = np[i], st = Math.max(1, Math.ceil(PX_PT() / Math.max(1e-9, Math.hypot(x2 - x1, y2 - y1) / n)));
@@ -145,7 +156,7 @@
       }
       g.fillStyle = '#e2e8f0'; g.fill(); g.lineWidth = 1.2; g.strokeStyle = '#0b1220'; g.stroke();
       g.beginPath();
-      for (const p of grafo().keys()) {                          // um ponto por célula de Q px: não empilha onde há muitos
+      for (const p of (tudo ? grafoT() : grafo()).keys()) {                          // um ponto por célula de Q px: não empilha onde há muitos
         const [la, lo] = pos().get(p), x = mx(lo, s) - o.x + F, y = my(la, s) - o.y + F;
         if (x < -R || y < -R || x > w + R || y > h + R) continue;
         const k = Math.floor(x / Q) * 65536 + Math.floor(y / Q); if (usado.has(k)) continue; usado.add(k);
@@ -186,11 +197,11 @@
     const sem = c => { if (!porCor.has(c)) porCor.set(c, []); return porCor.get(c); };
     for (const i of selV) {
       const v = V[i], n = np[i], o = off[i], ponto = t => [v[0] + (v[2] - v[0]) * t, v[1] + (v[3] - v[1]) * t];
-      todos.push([[v[0], v[1]], [v[2], v[3]]]);
-      for (let j = 0; j < n;) {                                   // corridas de pedaços com a mesma marca
-        const m = marca[o + j]; let k = j + 1; while (k < n && marca[o + k] === m) k++;
+      if (!nEx[v[4]]) todos.push([[v[0], v[1]], [v[2], v[3]]]);
+      for (let j = 0; j < n;) {                                   // corridas de pedaços com a mesma marca (fora da parte: nada)
+        const x = excl[o + j], m = mk(o + j); let k = j + 1; while (k < n && excl[o + k] === x && mk(o + k) === m) k++;
         const seg = [ponto(j / n), ponto(k / n)];
-        (m === 1 ? le : m === 2 ? pe : sem(T[v[4]].cor)).push(seg);
+        if (!x) { (m === 1 ? le : m === 2 ? pe : sem(T[v[4]].cor)).push(seg); if (nEx[v[4]]) todos.push(seg); }
         j = k;
       }
     }
@@ -200,16 +211,18 @@
   }
   // pontas dos pedaços marcados: dentro de um vão, onde a marca muda; num poste, a ponta marcada de um vão quando nenhum
   // outro vão escolhido que chega nele continua com a mesma marca
-  function pontas() {
-    const r = [];
+  // parte: as pontas da parte escolhida (m = 3: alça branca), só nos trechos escolhidos em parte
+  function pontas(parte) {
+    const r = [], val = parte ? q => excl[q] ? 0 : 3 : mk;
     for (const i of selV) {
+      if (parte && !nEx[V[i][4]]) continue;
       const n = np[i], o = off[i];
-      for (let j = 1; j < n; j++) { const a = marca[o + j - 1], b = marca[o + j]; if (a !== b) { if (a) r.push({ i, q: j, m: a }); if (b) r.push({ i, q: j, m: b }); } }
+      for (let j = 1; j < n; j++) { const a = val(o + j - 1), b = val(o + j); if (a !== b) { if (a) r.push({ i, q: j, m: a }); if (b) r.push({ i, q: j, m: b }); } }
     }
     for (const [p, lista] of grafo()) {
       // a ponta de cada vão que chega no poste p: no começo do vão (q = 0, 1º pedaço) ou no fim (q = np, último pedaço)
-      const es = lista.map(([, i]) => { const noIni = V[i][6] === p; return { i, q: noIni ? 0 : np[i], m: marca[noIni ? off[i] : off[i + 1] - 1] }; });
-      for (const x of es) if (x.m && !es.some(y => y !== x && y.m === x.m)) r.push(x);
+      const es = lista.map(([, i]) => { const noIni = V[i][6] === p; return { i, q: noIni ? 0 : np[i], m: val(noIni ? off[i] : off[i + 1] - 1) }; });
+      for (const x of es) if (x.m && (!parte || nEx[V[x.i][4]]) && !es.some(y => y !== x && y.m === x.m)) r.push(x);
     }
     return r;
   }
@@ -219,11 +232,12 @@
     if (!ativo || !sel.size) return;
     const b = map.getBounds().pad(0.1), tq = matchMedia('(pointer:coarse)').matches;
     let n = 0;
-    for (const pt of pontas()) {
+    const pa = ferr === 'parte';                                   // com a "Parte" ligada, as alças da parte (brancas)
+    for (const pt of pontas(pa)) {
       const ll = llPt(pt); if (!b.contains(ll) || ++n > 400) continue;
-      const mk = L.marker(ll, { pane: 'faixa-a', keyboard: false, bubblingMouseEvents: false, zIndexOffset: pt.m * 10,
-        icon: L.divIcon({ className: 'fx-alca', iconSize: tq ? [36, 36] : [26, 26], html: `<i style="--c:${COR[pt.m]}"></i>` }) }).addTo(lAlcas);
-      const el = mk.getElement(); el.title = 'Arraste pela linha para encurtar ou esticar';
+      const mkr = L.marker(ll, { pane: 'faixa-a', keyboard: false, bubblingMouseEvents: false, zIndexOffset: pt.m * 10,
+        icon: L.divIcon({ className: 'fx-alca' + (pa ? ' fx-alca-p' : ''), iconSize: tq ? [36, 36] : [26, 26], html: `<i style="--c:${pa ? '#fff' : COR[pt.m]}"></i>` }) }).addTo(lAlcas);
+      const el = mkr.getElement(); el.title = pa ? 'Arraste pela linha para encurtar ou esticar a parte' : 'Arraste pela linha para encurtar ou esticar';
       el.addEventListener('pointerdown', e => comecaArrasto(e, pt, el));
     }
   }
@@ -234,11 +248,15 @@
   const idxDe = new Map(T.map((t, i) => [t.nome, i]));
   window.__rotuloFixo = n => ativo && sel.has(idxDe.get(n));
   const rotulosSel = () => { if (mc.classList.contains('sem-nae') && window.__refazRotulos) window.__refazRotulos(); };
+  // os vãos escolhidos: os dos trechos inteiros e, dos trechos em parte, os que têm algum pedaço dentro dela
+  const temDentro = i => { for (let q = off[i]; q < off[i + 1]; q++) if (!excl[q]) return true; return false; };
+  const refazSelV = () => { selV = []; [...sel].sort((a, b) => a - b).forEach(t => vaosDe[t].forEach(i => { if (!nEx[t] || temDentro(i)) selV.push(i); })); selP = null; };
   function muda() {
-    selV = []; [...sel].sort((a, b) => a - b).forEach(t => vaosDe[t].forEach(i => selV.push(i))); selP = null;
-    G = null; arv = null; if (ini !== null && !sel.has(V[ini.i][4])) ini = null;   // o início saiu da escolha (desfazer)
+    refazSelV();
+    G = null; arv = null; if (ini !== null && ferr !== 'parte' && !sel.has(V[ini.i][4])) ini = null;   // o início saiu da escolha (desfazer)
     if (pend && !sel.has(pend.t)) { pend = null; desenhaPend(); }
-    if (!sel.size && !doAt) ferr = null;                           // com o "Do ativo" o Leve/Pesada escolhido fica (o trecho entra sozinho)
+    if (!sel.size && !doAt && ferr !== 'parte') ferr = null; 
+    window.dispatchEvent(new Event('faixa-sel'));                   // o botão "Croqui da faixa" do Downloads acompanha                          // com o "Do ativo" o Leve/Pesada escolhido fica (o trecho entra sozinho)
     aplicaFerr(); agenda(); rotulosSel();
   }
 
@@ -248,6 +266,13 @@
     G = new Map(); const ad = (a, b, i) => { let l = G.get(a); if (!l) G.set(a, l = []); l.push([b, i]); };
     for (const i of selV) { ad(V[i][6], V[i][7], i); ad(V[i][7], V[i][6], i); }
     return G;
+  };
+  let GT = null;                                                  // a rede toda (a "Parte" escolhe em qualquer trecho)
+  const grafoT = () => {
+    if (GT) return GT;
+    GT = new Map(); const ad = (a, b, i) => { let l = GT.get(a); if (!l) GT.set(a, l = []); l.push([b, i]); };
+    V.forEach((v, i) => { ad(v[6], v[7], i); ad(v[7], v[6], i); });
+    return GT;
   };
   // Dijkstra a partir de um ou mais postes com distância inicial (peso = metros do vão): distância e de onde veio (poste,
   // vão) cada poste alcançado. Um ponto no meio do vão sai pelas duas pontas do vão, cada uma com o pedaço até ela.
@@ -269,18 +294,26 @@
   }
   // pedaços do caminho mais curto de A até B (na ordem, de A para B) e o comprimento (m); null se não há caminho pelos
   // trechos escolhidos
-  function entre(A, B) {
+  // todo: pela rede toda (a "Parte"); sem ele, só pelos escolhidos e só os pedaços dentro da escolha (fora da parte não)
+  let arvTd = null;
+  function entre(A, B, todo) {
+    const k = entre0(A, B, todo);
+    if (!k || todo || !k.qs.some(q => excl[q])) return k;
+    const qs = k.qs.filter(q => !excl[q]); return { qs, m: metrosDe(qs) };
+  }
+  function entre0(A, B, todo) {
     if (A.i === B.i) return { qs: pedacos(A.i, A.q, B.q), m: Math.abs(B.q - A.q) * mpp(A.i) };   // no mesmo vão: direto
     const pa = posteDe(A), pb = posteDe(B), vA = V[A.i], vB = V[B.i];
     const saidas = pa !== null ? [[pa, 0, []]] : [[vA[6], A.q * mpp(A.i), pedacos(A.i, A.q, 0)], [vA[7], (np[A.i] - A.q) * mpp(A.i), pedacos(A.i, A.q, np[A.i])]];
     const chegadas = pb !== null ? [[pb, 0, []]] : [[vB[6], B.q * mpp(B.i), pedacos(B.i, 0, B.q)], [vB[7], (np[B.i] - B.q) * mpp(B.i), pedacos(B.i, np[B.i], B.q)]];
     const o = chavePt(A);
-    if (!arv || arv.o !== o) arv = arvoreDe(saidas, o);
-    let melhor = null;
-    for (const [p, d, qs] of chegadas) if (arv.dist.has(p) && (!melhor || arv.dist.get(p) + d < melhor.m)) melhor = { p, m: arv.dist.get(p) + d, fim: qs };
+    let arv0 = todo ? arvTd : arv;
+    if (!arv0 || arv0.o !== o) { arv0 = arvoreDe(saidas, o, todo ? grafoT() : null); if (todo) arvTd = arv0; else arv = arv0; }
+    const arv1 = arv0; let melhor = null;
+    for (const [p, d, qs] of chegadas) if (arv1.dist.has(p) && (!melhor || arv1.dist.get(p) + d < melhor.m)) melhor = { p, m: arv1.dist.get(p) + d, fim: qs };
     if (!melhor) return null;
     const vaos = []; let u = melhor.p;
-    while (arv.prev.has(u)) { const [w, i] = arv.prev.get(u); vaos.push([i, w]); u = w; }   // o vão e o poste de onde veio
+    while (arv1.prev.has(u)) { const [w, i] = arv1.prev.get(u); vaos.push([i, w]); u = w; }   // o vão e o poste de onde veio
     const qs = [...((saidas.find(([p]) => p === u) || [0, 0, []])[2])];
     for (let k = vaos.length - 1; k >= 0; k--) { const [i, de] = vaos[k]; qs.push(...(V[i][6] === de ? pedacos(i, 0, np[i]) : pedacos(i, np[i], 0))); }
     qs.push(...melhor.fim);
@@ -289,20 +322,48 @@
   // marca os pedaços com a ferramenta (cobre a outra cor; so: só os que têm essa marca): uma alteração só para o desfazer
   function marcaPedacos(qs, alvo, so) {
     const rec = new Map();
-    for (const q of qs) if (marca[q] !== alvo && (so === undefined || marca[q] === so)) { rec.set(q, marca[q]); marca[q] = alvo; }
+    for (const q of qs) if (!excl[q] && marca[q] !== alvo && (so === undefined || marca[q] === so)) { rec.set(q, marca[q]); marca[q] = alvo; }
     if (rec.size) { guarda({ m: rec }); agenda(); }
     return rec.size;
   }
   // desfazer: cada alteração é um item — um caminho marcado ({m: pedaço → marca de antes}), um trecho escolhido/tirado ({t})
   // ou a faixa de um ativo com o trecho dela, que entrou na escolha junto ({m, t})
   const guarda = a => { undo.push(a); if (undo.length > 500) undo.shift(); redo.length = 0; };
+  // parte do trecho: inc entra na escolha, exc sai; estreita: o trecho inteiro já escolhido em que a parte entra fica só
+  // com ela. Trecho novo entra só com a parte; trecho que fica sem nada sai. Uma alteração só para o desfazer:
+  // {x: pedaço → excl de antes, s: trechos que entraram ou saíram da escolha}. Devolve os metros que mudaram
+  const trDe = q => V[vaoDe(q)][4];
+  function mudaParte(inc, exc, estreita) {
+    const x = new Map(), s = [], toc = new Set();
+    const ex = (q, v) => { if (excl[q] !== v) { if (!x.has(q)) x.set(q, excl[q]); excl[q] = v; nEx[trDe(q)] += v ? 1 : -1; } };
+    const tudoFora = t => { for (const i of vaosDe[t]) for (let q = off[i]; q < off[i + 1]; q++) ex(q, 1); };
+    let mud = 0;
+    for (const q of inc) if (!(sel.has(trDe(q)) && !excl[q])) mud += mpp(vaoDe(q));   // o que entra de novo
+    for (const q of inc) {
+      const t = trDe(q);
+      if (!toc.has(t)) { toc.add(t); if (!sel.has(t)) { sel.add(t); s.push(t); tudoFora(t); } else if (estreita && !nEx[t]) tudoFora(t); }
+    }
+    for (const q of inc) ex(q, 0);
+    for (const q of exc) { const t = trDe(q); if (sel.has(t) && !excl[q]) { ex(q, 1); mud += mpp(vaoDe(q)); toc.add(t); } }
+    for (const t of toc) if (sel.has(t) && nEx[t] >= pedT[t]) { for (const i of vaosDe[t]) for (let q = off[i]; q < off[i + 1]; q++) ex(q, 0); sel.delete(t); s.push(t); }
+    if (x.size || s.length) { guarda({ x, s }); muda(); }
+    return { mud: x.size || s.length, m: mud };
+  }
+  // tira da escolha um trecho escolhido em parte (o clique sem ferramenta): ele todo, com a parte, numa alteração só
+  function tiraParcial(t) {
+    const x = new Map();
+    for (const i of vaosDe[t]) for (let q = off[i]; q < off[i + 1]; q++) if (excl[q]) { x.set(q, 1); excl[q] = 0; }
+    nEx[t] = 0; sel.delete(t); guarda({ x, s: [t] }); muda();
+  }
   function troca(de, para) {
     const a = de.pop(); if (!a) return false;
     const b = {};
     if (a.m) { const volta = new Map(); a.m.forEach((antes, q) => { volta.set(q, marca[q]); marca[q] = antes; }); b.m = volta; }
     if (a.t !== undefined) { sel.has(a.t) ? sel.delete(a.t) : sel.add(a.t); b.t = a.t; }   // escolher/tirar desfaz a si mesmo
+    if (a.x) { const volta = new Map(); a.x.forEach((antes, q) => { volta.set(q, excl[q]); if (excl[q] !== antes) { nEx[trDe(q)] += antes ? 1 : -1; excl[q] = antes; } }); b.x = volta; }
+    if (a.s) { a.s.forEach(t => sel.has(t) ? sel.delete(t) : sel.add(t)); b.s = a.s.slice().reverse(); }
     para.push(b);
-    if (b.t !== undefined) muda(); else agenda();
+    if (b.t !== undefined || b.x || b.s) muda(); else agenda();
     return true;
   }
   // faixa pendente ou poste inicial à espera: desfazer tira só ele
@@ -311,7 +372,7 @@
     let le = 0, pe = 0, s = 0;
     for (const i of selV) {
       const n = np[i], o = off[i], ml = V[i][8] / n;
-      for (let j = 0; j < n; j++) { const m = marca[o + j]; if (m === 1) le += ml; else if (m === 2) pe += ml; else s += ml; }
+      for (let j = 0; j < n; j++) { if (excl[o + j]) continue; const m = marca[o + j]; if (m === 1) le += ml; else if (m === 2) pe += ml; else s += ml; }
     }
     return { leve: le, pesada: pe, falta: s };
   }
@@ -499,7 +560,7 @@
   // marca a faixa com alvo (1 leve, 2 pesada); novo: o trecho entra na escolha junto (uma alteração só para o desfazer)
   function marcaFaixa(A, F, alvo, novo) {
     const rec = new Map();
-    for (const q of F.qs) if (marca[q] !== alvo) { rec.set(q, marca[q]); marca[q] = alvo; }
+    for (const q of F.qs) if (!excl[q] && marca[q] !== alvo) { rec.set(q, marca[q]); marca[q] = alvo; }
     if (novo) sel.add(A.t);
     if (rec.size || novo) guarda(novo ? { m: rec, t: A.t } : { m: rec });
     if (novo) muda(); else agenda();
@@ -535,7 +596,7 @@
     if (on === doAt) return;
     doAt = on;
     // desligado sem trecho escolhido, o Leve/Pesada também sai (a regra do muda): senão o clique não escolhe trecho nenhum
-    if (on) { ini = null; if (ferr === 'apagar') ferr = null; cargaAtivos(); } else { tiraPend(); if (!sel.size) ferr = null; }
+    if (on) { ini = null; if (ferr === 'apagar' || ferr === 'parte') ferr = null; cargaAtivos(); } else { tiraPend(); if (!sel.size) ferr = null; }
     aplicaFerr();
   }
 
@@ -552,6 +613,7 @@
 .fx-pat small{font:600 11px var(--f-mono);color:var(--muted)}
 @media (pointer:coarse){.fx-pill .fx-pat{min-height:36px}}
 @media (max-width:700px){.fx-pill{left:68px;right:12px;transform:none;max-width:none}.fx-pill>span{flex:1;white-space:normal;line-height:1.25}}
+@media (max-width:480px){.fx-pill{flex-wrap:wrap;row-gap:6px;border-radius:18px;padding:6px 6px 6px 12px}.fx-pill>span{flex:1 1 100%}.fx-pill .fx-x{margin-left:auto}}
 .fx-modo:not(.fx-tem) .fx-pill{display:flex}
 .fx-modo:has(>.barra-busca:not(.lp-fechada)) .fx-pill{display:none}
 .fx-dash{position:absolute;left:12px;bottom:28px;z-index:1002;width:min(320px,calc(100% - 24px));display:none;gap:8px;padding:10px;border-radius:16px;background:var(--paper);color:var(--fg);border:1px solid var(--line);box-shadow:var(--sh2);font:500 13px/1.3 var(--f-body)}
@@ -595,6 +657,7 @@
 .fx-croqui-km{margin:0 0 8px;padding:8px 10px;border-radius:8px;background:var(--hover);font-size:13px}.fx-croqui-km b{font-family:var(--f-mono)}
 .fx-alca{display:grid;place-items:center;cursor:grab;touch-action:none}
 .fx-alca i{display:block;width:13px;height:13px;border-radius:50%;background:var(--c);border:2.5px solid #fff;box-shadow:0 0 0 1.5px #0b1220,0 2px 6px #0009;transition:transform .12s}
+.fx-alca-p i{border-color:#0b1220;box-shadow:0 0 0 1.5px #fff,0 2px 6px #0009}
 .fx-alca:hover i,.fx-alca.fx-pega i{transform:scale(1.3)}.fx-alca.fx-pega{cursor:grabbing}
 @media (pointer:coarse){.fx-alca i{width:17px;height:17px}}
 `;
@@ -605,7 +668,8 @@
     refaz: '<svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/></svg>',
     apagar: '<svg viewBox="0 0 24 24"><path d="M4 16l9-10 7 6-6 7H8zM10 19h10"/></svg>',
     baixa: '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
-    ativo: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><path d="M9 12h11M16 8l4 4-4 4"/></svg>'
+    ativo: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><path d="M9 12h11M16 8l4 4-4 4"/></svg>',
+    parte: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3M18 12h3" stroke-dasharray="2 2.5"/><path d="M8 12h8"/><path d="M8 8v8M16 8v8"/></svg>'
   };
   const pill = document.createElement('div');
   pill.className = 'fx-pill'; pill.setAttribute('role', 'status');
@@ -614,11 +678,14 @@
   pill.innerHTML = `<span>${grosso ? 'Toque nos trechos' : 'Clique nos trechos da limpeza de faixa'}</span>` +
     `<button type="button" class="fx-pat" id="fx-ativo2" aria-pressed="false" title="Do ativo (A): ${grosso ? 'toque' : 'clique'} num ativo ou num ponto da linha; a faixa vai dali até o fim do trecho">` +
     `${SVG.ativo}Do ativo${grosso ? '' : ' <small>A</small>'}</button>` +
+    `<button type="button" class="fx-pat" id="fx-parte2" aria-pressed="false" title="Parte (S): ${grosso ? 'toque' : 'clique'} no início e no fim de qualquer parte da rede; só ela fica escolhida">` +
+    `${SVG.parte}Parte${grosso ? '' : ' <small>S</small>'}</button>` +
     `<button type="button" class="fx-ic" id="fx-refaz2" title="Refazer (Ctrl+Y)" aria-label="Refazer" hidden>${SVG.refaz}</button>` +
     `<button type="button" class="fx-ic fx-x" title="Sair (Esc)" aria-label="Sair do modo limpeza de faixa">✕</button>`;
   const dash = document.createElement('div');
   dash.className = 'fx-dash'; dash.setAttribute('role', 'region'); dash.setAttribute('aria-label', 'Limpeza de faixa');
   dash.innerHTML = `<div class="fx-cab"><span class="fx-info" id="fx-info"></span>
+  <button type="button" class="fx-ic" id="fx-parte" aria-pressed="false" title="Parte (S): escolher só uma parte do trecho (clique no início e no fim)" aria-label="Escolher parte do trecho">${SVG.parte}</button>
   <button type="button" class="fx-ic" id="fx-apagar" aria-pressed="false" title="Apagar marca (B)" aria-label="Apagar marca">${SVG.apagar}</button>
   <button type="button" class="fx-ic" id="fx-desfaz" title="Desfazer (Ctrl+Z)" aria-label="Desfazer">${SVG.desfaz}</button>
   <button type="button" class="fx-ic" id="fx-refaz" title="Refazer (Ctrl+Y)" aria-label="Refazer">${SVG.refaz}</button>
@@ -646,10 +713,14 @@
   let tAviso = 0;
   function ui() {
     const t = totais(), tot = t.leve + t.pesada + t.falta, n = sel.size;
-    box.classList.toggle('fx-tem', ativo && (n > 0 || doAt));        // "Do ativo" ligado: o painel fica, mesmo sem trecho
+    const pa = ferr === 'parte', nP = [...sel].filter(i => nEx[i]).length;
+    box.classList.toggle('fx-tem', ativo && (n > 0 || doAt || pa));  // "Do ativo" ou "Parte" ligado: o painel fica, mesmo sem trecho
     pill.querySelector('#fx-refaz2').hidden = !redo.length;          // desfez até tirar o último trecho: refazer pela pílula
-    if (!n && !doAt) return;
-    $('fx-info').innerHTML = n ? `<b>${n} trecho${n > 1 ? 's' : ''}</b> · ${km(tot)} km<br>falta marcar ${km(t.falta)} km` : '<b>Nenhum trecho</b><br>o do ativo entra sozinho';
+    pill.querySelector('#fx-parte2').setAttribute('aria-pressed', String(pa));
+    $('fx-parte').setAttribute('aria-pressed', String(pa));
+    if (!n && !doAt && !pa) return;
+    $('fx-info').innerHTML = n ? `<b>${n} trecho${n > 1 ? 's' : ''}</b>${nP ? ` (${nP === n ? (n > 1 ? 'em parte' : 'parte') : nP + ' em parte'})` : ''} · ${km(tot)} km<br>falta marcar ${km(t.falta)} km` :
+      pa ? '<b>Nenhum trecho</b><br>a parte escolhida entra sozinha' : '<b>Nenhum trecho</b><br>o do ativo entra sozinho';
     $('fx-L').innerHTML = `${km(t.leve)} <small>km</small>`; $('fx-P').innerHTML = `${km(t.pesada)} <small>km</small>`;
     $('fx-barra').innerHTML = tot ? `<span style="width:${t.leve / tot * 100}%;background:${COR[1]}"></span><span style="width:${t.pesada / tot * 100}%;background:${COR[2]}"></span>` : '';
     $('fx-desfaz').disabled = !undo.length && ini === null && !pend; $('fx-refaz').disabled = !redo.length;
@@ -662,6 +733,8 @@
     const temMarca = t.leve + t.pesada > 0;
     $('fx-dica-p').textContent = doAt ? (pend ? `${pend.nome} até o fim do ${T[pend.t].nome}: ${metros(pend.m)}. ${toque() ? 'Toque em Leve ou Pesada.' : 'Leve (L) ou Pesada (P)?'}` :
       `${cq} num ativo ou num ponto da linha: a faixa vai dali até o fim do trecho` + (ferr ? ` (${nomeF()}).` : ', depois Leve ou Pesada.')) :
+      pa ? (ini === null ? `Parte: ${cq.toLowerCase()} no início (poste ou pontinho, em qualquer trecho) e depois no fim.` + (nP ? ' Arraste as bolinhas brancas para ajustar.' : '') :
+      `Agora ${cq.toLowerCase()} no fim da parte${toque() ? ' (no início de novo cancela).' : '. Esc cancela o início.'}`) + (map.getZoom() < 15 ? ' Aproxime para acertar o ponto.' : '') :
       ferr ? (ini === null ? `${cq} no início (num poste ou num pontinho da linha) e depois no fim.` :
       `Agora ${cq.toLowerCase()} no fim${toque() ? ' (no início de novo cancela).' : '. Esc cancela o início.'}`) +
       (map.getZoom() < 15 ? ' Aproxime para acertar o ponto.' : '') :
@@ -686,8 +759,9 @@
   // escolhido para os próximos ativos); Apagar solta o "Do ativo"
   const setFerr = f => {
     if (pend && ALVO[f]) { const p = pend; pend = null; ferr = f; aplicaFerr(); desenhaPend(); marcaFaixa(p, p, ALVO[f], p.novo); return; }
-    if (f === 'apagar' && doAt) { doAt = false; tiraPend(); }
-    ferr = ferr === f ? null : f; aplicaFerr();
+    if ((f === 'apagar' || f === 'parte') && doAt) { doAt = false; tiraPend(); }
+    if (ferr === 'parte' || f === 'parte') ini = null;              // o início da parte não vale para o Leve/Pesada (e vice-versa)
+    ferr = ferr === f ? null : f; aplicaFerr(); alcas();
   };
 
   // com Leve/Pesada/Apagar ligado: o clique cai numa linha escolhida (até TOL px dela): no poste, se está perto dele (ÍMÃ
@@ -730,7 +804,7 @@
       tIni.setLatLng(llPt(ini)); if (!map.hasLayer(tIni)) tIni.addTo(map);
       tIni.getElement().style.setProperty('--c', c);
     } else { mIni.setStyle(some); tIni.remove(); }
-    const s = on ? sob : null, k = s !== null && ini !== null && !igual(s, ini) ? entre(ini, s) : null;
+    const s = on ? sob : null, k = s !== null && ini !== null && !igual(s, ini) ? entre(ini, s, ferr === 'parte') : null;
     if (s !== null) mSob.setLatLng(llPt(s)).setStyle({ opacity: 1, fillOpacity: .5, fillColor: c }); else mSob.setStyle(some);
     const segs = k ? segsDe(k.qs) : [];
     lPrevF.setLatLngs(segs); lPrev.setStyle({ color: c }).setLatLngs(segs);
@@ -738,7 +812,7 @@
   }
   function tiraIni() { ini = null; calaAviso(); ponta(); ui(); }
   function clicaPoste(e) {
-    const [x, y] = abs(e), p = pontoEm(x, y, TOL(e), IMA(e));
+    const [x, y] = abs(e), p = pontoEm(x, y, TOL(e), IMA(e), ferr === 'parte');
     if (p === null) {                                             // fora das linhas escolhidas: nada (num trecho não escolhido, avisa)
       calaAviso();
       if (vaoPerto(x, y, TOL(e)) >= 0) aviso(`Trecho não escolhido. Solte a ferramenta (${toque(e) ? 'toque nela de novo' : 'Esc'}) para escolher mais trechos.`);
@@ -750,6 +824,12 @@
     calaAviso();
     if (ini === null) ini = p;
     else if (igual(p, ini)) ini = null;
+    else if (ferr === 'parte') {
+      const k = entre(ini, p, true);
+      if (!k) { aviso('Não há caminho entre esses pontos na rede.'); return; }
+      const r = mudaParte(k.qs, [], true); ini = null;
+      aviso(r.mud ? `Parte escolhida: ${metros(k.m)}.` : 'Essa parte já estava escolhida.', 'var(--fg)');
+    }
     else {
       const k = entre(ini, p);
       if (!k) { aviso('Não há caminho entre esses pontos pelos trechos escolhidos.'); return; }
@@ -762,12 +842,12 @@
   function paira(e) {
     if (!ativo || !ferr) return;
     if (arrasto) return;
-    const [x, y] = abs(e); sob = pontoEm(x, y, 14, 9);
+    const pa = ferr === 'parte', [x, y] = abs(e); sob = pontoEm(x, y, 14, 9, pa);
     const k = ponta(), f = nomeF(); mc.style.cursor = sob === null ? '' : 'pointer';
     if (sob === null) { bDica.style.display = 'none'; return; }
     const r = box.getBoundingClientRect();
-    bDica.textContent = ini === null ? `${posteDe(sob) !== null ? 'Poste' : 'Ponto'} de início · ${f || 'Apagar'}` : igual(sob, ini) ? 'Clique de novo para tirar o início' :
-      k ? `${metros(k.m)} · clique para ${f ? 'marcar ' + f : 'apagar'}` : 'Sem caminho pelos trechos escolhidos';
+    bDica.textContent = ini === null ? `${posteDe(sob) !== null ? 'Poste' : 'Ponto'} de início · ${pa ? 'Parte' : f || 'Apagar'}` : igual(sob, ini) ? 'Clique de novo para tirar o início' :
+      k ? `${metros(k.m)} · clique para ${pa ? 'escolher a parte' : f ? 'marcar ' + f : 'apagar'}` : pa ? 'Sem caminho pela rede' : 'Sem caminho pelos trechos escolhidos';
     bDica.style.cssText = `display:block;left:${Math.min(e.clientX - r.left + 14, r.width - 230)}px;top:${e.clientY - r.top + 16}px`;
   }
   // "Do ativo" com o mouse: o ativo (ou ponto) onde o clique vai cair, a prévia tracejada da faixa dele e o km
@@ -813,9 +893,10 @@
     if (ferr) return clicaPoste(e);
     const [x, y] = abs(e), k = vaoPerto(x, y, toque(e) ? 22 : 12);
     if (k < 0) return;
-    const ti = V[k][4]; sel.has(ti) ? sel.delete(ti) : sel.add(ti);
-    guarda({ t: ti });
-    muda(); lHover.setLatLngs([]); bDica.style.display = 'none';
+    const ti = V[k][4];
+    if (sel.has(ti) && nEx[ti]) tiraParcial(ti);                    // trecho em parte: sai todo (com a parte)
+    else { sel.has(ti) ? sel.delete(ti) : sel.add(ti); guarda({ t: ti }); muda(); }
+    lHover.setLatLngs([]); bDica.style.display = 'none';
   }, true);
   mc.addEventListener('dblclick', e => { if (ativo) e.stopPropagation(); }, true);
   mc.addEventListener('mousemove', e => {                         // passar o mouse: o trecho acende, com nome e km
@@ -826,7 +907,7 @@
       if (k < 0) { lHover.setLatLngs([]); bDica.style.display = 'none'; return; }
       const ti = V[k][4], r = box.getBoundingClientRect();
       lHover.setLatLngs(vaosDe[ti].map(i => [[V[i][0], V[i][1]], [V[i][2], V[i][3]]]));
-      bDica.textContent = `${T[ti].nome} · ${km(extDe[ti])} km${sel.has(ti) ? ' · clique para tirar' : ''}`;
+      bDica.textContent = `${T[ti].nome} · ${km(extDe[ti])} km${sel.has(ti) ? (nEx[ti] ? ' · em parte · clique para tirar' : ' · clique para tirar') : ''}`;
       bDica.style.cssText = `display:block;left:${Math.min(e.clientX - r.left + 14, r.width - 200)}px;top:${e.clientY - r.top + 16}px`;
     });
   });
@@ -840,7 +921,7 @@
   function comecaArrasto(e, E, el) {
     if (!ativo || e.button) return;
     e.preventDefault(); e.stopPropagation();
-    arrasto = { E, m: E.m, el, id: e.pointerId, x: e.clientX, y: e.clientY, mexeu: false, plano: null };
+    arrasto = { E, m: E.m, el, id: e.pointerId, x: e.clientX, y: e.clientY, mexeu: false, plano: null, parte: E.m === 3 };
     el.classList.add('fx-pega'); bDica.style.display = 'none'; lHover.setLatLngs([]);
     map.dragging.disable(); lPostes.desenha();
     window.addEventListener('pointermove', moveArrasto, true);
@@ -851,20 +932,27 @@
   function outraCor(E, q0, m) {
     const p = posteDe(E), viz = p === null ? [off[E.i] + E.q - 1, off[E.i] + E.q]
       : (grafo().get(p) || []).map(([, j]) => V[j][6] === p ? off[j] : off[j + 1] - 1);
-    for (const q of viz) if (q !== q0 && q >= 0 && marca[q] && marca[q] !== m) return marca[q];
+    for (const q of viz) if (q !== q0 && q >= 0 && mk(q) && mk(q) !== m) return mk(q);
     return 0;
   }
   // o que muda soltando em N: trocas = [[pedaços, marca nova], ...]
+  const dentroP = q => sel.has(trDe(q)) && !excl[q];               // o pedaço está na escolha
   function planoAte(N) {
-    const { E, m } = arrasto, k = igual(N, E) ? null : entre(E, N);
+    const { E, m } = arrasto, k = igual(N, E) ? null : entre(E, N, arrasto.parte);
     if (!k || !k.qs.length) return null;
     const qs = k.qs;
-    if (marca[qs[0]] !== m) {                                       // para fora: estica (cobre a outra cor)
-      const mud = qs.filter(q => marca[q] !== m);
+    if (arrasto.parte) {                                            // parte: para fora estica, para dentro encurta
+      if (!dentroP(qs[0])) { const inc = qs.filter(q => !dentroP(q)); return inc.length ? { parte: [inc, []], cor: 3, sinal: '+', metros: metrosDe(inc), mais: 0 } : null; }
+      let j = 0; while (j < qs.length && dentroP(qs[j])) j++;
+      const dentro = qs.slice(0, j), alem = qs.slice(j).filter(q => !dentroP(q));
+      return { parte: [alem, dentro], cor: 3, sinal: '−', metros: metrosDe(dentro), mais: metrosDe(alem) };
+    }
+    if (mk(qs[0]) !== m) {                                          // para fora: estica (cobre a outra cor)
+      const mud = qs.filter(q => mk(q) !== m);
       return mud.length ? { trocas: [[mud, m]], cor: m, sinal: '+', metros: metrosDe(mud), mais: 0 } : null;
     }
-    let j = 0; while (j < qs.length && marca[qs[j]] === m) j++;     // o pedaço marcado que o arrasto atravessa
-    const dentro = qs.slice(0, j), alem = qs.slice(j).filter(q => marca[q] !== m);
+    let j = 0; while (j < qs.length && mk(qs[j]) === m) j++;        // o pedaço marcado que o arrasto atravessa
+    const dentro = qs.slice(0, j), alem = qs.slice(j).filter(q => mk(q) !== m);
     const o = outraCor(E, qs[0], m);
     // na divisa com a outra cor: a divisa anda (a outra cor avança), em vez de abrir um buraco
     if (o) return { trocas: [[dentro, o]], cor: o, sinal: '+', metros: metrosDe(dentro), mais: 0 };
@@ -891,13 +979,13 @@
     if (!arrasto.mexeu && Math.hypot(e.clientX - arrasto.x, e.clientY - arrasto.y) < 4) return;
     arrasto.mexeu = true;
     const lp = map.containerPointToLayerPoint(map.mouseEventToContainerPoint(e)), o = map.getPixelOrigin();
-    const N = pontoEm(lp.x + o.x, lp.y + o.y, toque(e) ? 70 : 48, toque(e) ? 10 : 6);
+    const N = pontoEm(lp.x + o.x, lp.y + o.y, toque(e) ? 70 : 48, toque(e) ? 10 : 6, arrasto.parte);
     if (!N) return;                                               // longe das linhas: fica onde estava
-    const pl = arrasto.plano = planoAte(N), cor = pl ? (pl.sinal === '−' ? '#94a3b8' : COR[pl.cor]) : '#fff';
+    const pl = arrasto.plano = planoAte(N), cor = pl ? (pl.sinal === '−' ? '#94a3b8' : COR[pl.cor] || '#fff') : '#fff';
     const p = map.latLngToLayerPoint(llPt(N)); L.DomUtil.setPosition(arrasto.el, p);   // a alça vai junto, na linha
-    const segs = pl ? segsDe(pl.trocas.flatMap(([qs]) => qs)) : [];
+    const segs = pl ? segsDe(pl.parte ? pl.parte[0].concat(pl.parte[1]) : pl.trocas.flatMap(([qs]) => qs)) : [];
     lPrevF.setLatLngs(segs); lPrev.setStyle({ color: cor }).setLatLngs(segs);
-    const r = box.getBoundingClientRect(), nome = c => c === 1 ? 'Leve' : 'Pesada';
+    const r = box.getBoundingClientRect(), nome = c => c === 1 ? 'Leve' : c === 2 ? 'Pesada' : 'Parte';
     bDica.textContent = !pl ? `${nome(arrasto.m)}: sem mudança` :
       `${nome(pl.cor)} ${pl.sinal}${metros(pl.metros)}` + (pl.mais ? ` e +${metros(pl.mais)} depois da outra ponta` : '');
     bDica.style.cssText = `display:block;left:${Math.min(e.clientX - r.left + 16, r.width - 200)}px;top:${e.clientY - r.top + 18}px`;
@@ -922,8 +1010,8 @@
       return;
     }
     if (e.type === 'pointerup' && a.plano) {
-      const pl = a.plano, nome = pl.cor === 1 ? 'Leve' : 'Pesada';
-      aplicaTrocas(pl.trocas);
+      const pl = a.plano, nome = pl.cor === 1 ? 'Leve' : pl.cor === 2 ? 'Pesada' : 'Parte';
+      if (pl.parte) mudaParte(pl.parte[0], pl.parte[1], false); else aplicaTrocas(pl.trocas);
       aviso(`${nome}: ${pl.sinal === '−' ? 'menos' : 'mais'} ${metros(pl.metros)}` + (pl.mais ? `, mais ${metros(pl.mais)} depois da outra ponta.` : '.'), 'var(--fg)');
     }
     agenda();                                                     // redesenha as alças no lugar certo
@@ -932,6 +1020,7 @@
   // ---------- botões ----------
   pill.addEventListener('click', e => {
     if (e.target.closest('.fx-x')) desliga(); else if (e.target.closest('#fx-refaz2')) refaz();
+    else if (e.target.closest('#fx-parte2')) { setFerr('parte'); resgata(); }
     else if (e.target.closest('#fx-ativo2')) {                  // liga o "Do ativo": o painel aparece (a pílula some)
       const foco = document.activeElement === e.target.closest('#fx-ativo2');
       setAt(true);
@@ -943,6 +1032,7 @@
     if (b.classList.contains('fx-x')) return desliga();
     if (b.dataset.f) return setFerr(b.dataset.f);
     if (b.id === 'fx-apagar') return setFerr('apagar');
+    if (b.id === 'fx-parte') return setFerr('parte');
     if (b.id === 'fx-ativo') return setAt(!doAt);
     if (b.id === 'fx-desfaz') return desfaz();
     if (b.id === 'fx-refaz') return refaz();
@@ -952,13 +1042,35 @@
   // Convencional; croqui-rascunho.js, que nas páginas de rascunho entra no lugar do croqui.js)
   async function croqui() {
     if (!window.__croqui) { aviso('O croqui não está disponível nesta página.'); return; }
-    const t = totais();
-    if (!t.leve && !t.pesada) { aviso('Marque Leve ou Pesada antes de baixar o croqui.'); return; }
-    const nomes = [...sel].sort((a, b) => a - b).map(i => T[i].nome);
+    const a = croquiSel();
+    if (!a) { aviso('Escolha um trecho (ou uma parte) antes de baixar o croqui.'); return; }
     const bt = $('fx-croqui'); bt.disabled = true;
+    try { await window.__croqui(a.nomes, a.misto); } finally { bt.disabled = false; }
+  }
+  // o que vai para o croqui: só os trechos escolhidos (e, dos que estão em parte, só a parte); com Leve/Pesada marcado, o
+  // croqui misto com os km marcados. Também o Downloads › "Croqui da faixa" com o modo ligado (croqui-rascunho.js), que
+  // antes saía com o alimentador inteiro (pedido do usuário: "teria que ser só nos selecionados")
+  function croquiSel() {
+    if (!sel.size) return null;
+    const t = totais(), nomes = [...sel].sort((a, b) => a - b).map(i => T[i].nome);
     // soma dos pedaços arredondada uma vez só, no metro (o 1e-6 só absorve o erro de ponto flutuante de um x,5 m exato)
     const km3 = m => Math.round(m + 1e-6) / 1000;
-    try { await window.__croqui(nomes, { leve: km3(t.leve), pesada: km3(t.pesada), marcas: marcados() }); } finally { bt.disabled = false; }
+    return { nomes, misto: { leve: km3(t.leve), pesada: km3(t.pesada), marcas: t.leve || t.pesada ? marcados() : null, parte: partes() } };
+  }
+  // os trechos escolhidos em parte, para o croqui: nome → { m: metros da parte, segs: [[lat, lon], [lat, lon]] de cada
+  // sequência de pedaços dentro dela num vão }; null sem nenhum
+  function partes() {
+    const r = {}; let tem = false;
+    for (const t of sel) {
+      if (!nEx[t]) continue;
+      const o = r[T[t].nome] = { m: 0, segs: [] }; tem = true;
+      for (const i of vaosDe[t]) {
+        const n = np[i], b = off[i];
+        for (let j = 0; j < n;) { const x = excl[b + j]; let k = j + 1; while (k < n && excl[b + k] === x) k++; if (!x) { o.segs.push([llPt({ i, q: j }), llPt({ i, q: k })]); o.m += (k - j) * mpp(i); } j = k; }
+      }
+      o.m = Math.round(o.m * 1000) / 1000;
+    }
+    return tem ? r : null;
   }
   // o marcado nos trechos escolhidos, para o KMZ do croqui: por cor, [[lat, lon] do começo, [lat, lon] do fim] de cada
   // sequência de pedaços da mesma cor num vão
@@ -967,9 +1079,9 @@
     for (const i of selV) {
       const n = np[i], o = off[i];
       for (let j = 0; j < n;) {
-        const m = marca[o + j];
+        const m = mk(o + j);
         let k = j + 1;
-        while (k < n && marca[o + k] === m) k++;
+        while (k < n && mk(o + k) === m) k++;
         if (m) r[m === 1 ? 'leve' : 'pesada'].push([llPt({ i, q: j }), llPt({ i, q: k })]);
         j = k;
       }
@@ -1003,8 +1115,8 @@
     camadas.forEach(l => l.addTo(map));
     map.doubleClickZoom.disable();
     ferr = null; ini = null; doAt = false; pend = null; sobA = null;
-    selV = []; [...sel].sort((a, b) => a - b).forEach(t => vaosDe[t].forEach(i => selV.push(i))); selP = null;
-    desenha(); desenhaPend(); aplicaFerr(); resgata(); rotulosSel();
+    refazSelV();
+    desenha(); desenhaPend(); aplicaFerr(); resgata(); rotulosSel(); window.dispatchEvent(new Event('faixa-sel'));
   }
   function desliga() {
     if (!ativo) return;
@@ -1021,7 +1133,7 @@
     else if (gavAberta && tc && !document.body.classList.contains('tc-gaveta')) {   // já estava em tela cheia: o painel lateral volta
       if (window.__gaveta) window.__gaveta(true);
     }
-    gavAberta = false; resgata();
+    gavAberta = false; resgata(); window.dispatchEvent(new Event('faixa-sel'));
   }
   // o modo só existe em tela cheia: saiu dela (botão Tela cheia, Esc do navegador…) com o modo ligado, sai do modo também
   new MutationObserver(ms => {
@@ -1056,8 +1168,8 @@
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key.toLowerCase();
     if (k === 'a') { e.preventDefault(); if (!e.repeat) setAt(!doAt); return; }   // "Do ativo": também sem trecho escolhido (o do ativo entra)
-    const f = { l: 'leve', p: 'pesada', b: 'apagar' }[k];
-    if (f && (sel.size || (doAt && f !== 'apagar'))) { e.preventDefault(); setFerr(f); }
+    const f = { l: 'leve', p: 'pesada', b: 'apagar', s: 'parte' }[k];
+    if (f && (sel.size || f === 'parte' || (doAt && f !== 'apagar'))) { e.preventDefault(); if (!e.repeat || f !== 'parte') setFerr(f); }
   }, true);
 
   // ---------- "Do ativo" pelo código, pela busca do olho e pelo link ----------
@@ -1127,7 +1239,8 @@
   // faixa: a faixa do ativo até o fim do trecho (testes)
   const resumo = A => A && { trecho: T[A.t].nome, cod: A.cod, nome: A.nome, ponto: chavePt(A.P) };
   window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length, inicio: () => ini,
-    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt,
+    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt, excl, partes, croquiSel,
+    parte: () => Object.fromEntries([...sel].map(t => [T[t].nome, nEx[t] ? pedT[t] - nEx[t] : -1])),
     faixa: x => { const A = acha(x), F = A && faixaDe(A); return A && Object.assign(resumo(A), { m: F.m, pedacos: F.qs.length, vaos: F.segs.length }); },
     pendente: () => pend && Object.assign(resumo(pend), { m: pend.m, pedacos: pend.qs.length }) };
 })();
