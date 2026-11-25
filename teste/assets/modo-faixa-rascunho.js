@@ -28,8 +28,12 @@
 // painel, o Leve/Pesada (que só marca dentro da escolha) e o croqui passam a valer só para ela. Num trecho inteiro já
 // escolhido, a parte o reduz a ela; num trecho já em parte, soma. Com a "Parte" ligada as alças brancas nas pontas da
 // parte encurtam ou esticam. Clicar (sem ferramenta) num trecho em parte tira ele todo. Ctrl+Z desfaz cada parte.
+// Relatório de manutenção (pedido do usuário): o botão embaixo do croqui baixa relatorio-manutencao.js (só quando tocado)
+// e abre a janela dele com o escolhido no mapa (escolhaGeo: os trechos e, dos que estão em parte, só a parte) e o período.
 // Roda depois de alimentador.js (window.__map, window.D). Os km são a soma dos vãos (D.vaos[i][8], metros).
 (function () {
+  // pasta dos assets (o relatório vem dela, com a versão para o cache do navegador)
+  const BASE_JS = ((document.currentScript && document.currentScript.src) || '').replace(/[^/?#]*([?#].*)?$/, ''), V_REL = '20261125b';
   const map = window.__map, D = window.D, L = window.L, box = document.querySelector('.mapbox');
   if (!map || !L || !D || !Array.isArray(D.vaos) || !box) return;
   const mc = map.getContainer(), V = D.vaos, T = D.trechos;
@@ -651,9 +655,12 @@
 .leaflet-tooltip.fx-ini-tt{padding:1px 7px;border:0;border-radius:6px;background:var(--c,#fff);color:#0b1220;font:700 11px var(--f-body);box-shadow:0 1px 4px #0009}
 .leaflet-tooltip.fx-ini-tt:before{border-top-color:var(--c,#fff)}
 .fx-dica{position:absolute;z-index:1001;pointer-events:none;display:none;padding:4px 8px;border-radius:6px;background:#000d;color:#fff;font:600 12px var(--f-body);white-space:nowrap}
-.fx-entrada{position:absolute;top:64px;left:12px;z-index:900;display:none;place-items:center;width:48px;height:44px;border:1px solid var(--vidro-borda);border-radius:999px;background:var(--vidro);color:var(--vidro-fg);box-shadow:var(--sh-vidro)}
+.fx-entrada{position:absolute;top:118px;left:12px;z-index:900;display:none;place-items:center;width:48px;height:44px;border:1px solid var(--vidro-borda);border-radius:999px;background:var(--vidro);color:var(--vidro-fg);box-shadow:var(--sh-vidro)}
 .fx-entrada svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media (pointer:coarse){.fx-entrada{display:grid}}.fx-modo .fx-entrada{display:none!important}
+.fx-rel{display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1.5px solid var(--line);border-radius:12px;background:none;font-weight:700!important}
+.fx-rel:hover{background:var(--hover)}.fx-rel:disabled{opacity:.6;cursor:progress}
+.fx-rel svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .fx-croqui-km{margin:0 0 8px;padding:8px 10px;border-radius:8px;background:var(--hover);font-size:13px}.fx-croqui-km b{font-family:var(--f-mono)}
 .fx-alca{display:grid;place-items:center;cursor:grab;touch-action:none}
 .fx-alca i{display:block;width:13px;height:13px;border-radius:50%;background:var(--c);border:2.5px solid #fff;box-shadow:0 0 0 1.5px #0b1220,0 2px 6px #0009;transition:transform .12s}
@@ -669,7 +676,8 @@
     apagar: '<svg viewBox="0 0 24 24"><path d="M4 16l9-10 7 6-6 7H8zM10 19h10"/></svg>',
     baixa: '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
     ativo: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><path d="M9 12h11M16 8l4 4-4 4"/></svg>',
-    parte: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3M18 12h3" stroke-dasharray="2 2.5"/><path d="M8 12h8"/><path d="M8 8v8M16 8v8"/></svg>'
+    parte: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3M18 12h3" stroke-dasharray="2 2.5"/><path d="M8 12h8"/><path d="M8 8v8M16 8v8"/></svg>',
+    rel: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 17v-3M12 17v-6M15 17v-4"/></svg>'
   };
   const pill = document.createElement('div');
   pill.className = 'fx-pill'; pill.setAttribute('role', 'status');
@@ -700,7 +708,8 @@
 </div>
 <div class="fx-barra" id="fx-barra" aria-hidden="true"></div>
 <p class="fx-dica-p" id="fx-dica-p"></p>
-<button type="button" class="fx-croqui" id="fx-croqui">${SVG.baixa}Baixar croqui</button>`;
+<button type="button" class="fx-croqui" id="fx-croqui">${SVG.baixa}Baixar croqui</button>
+<button type="button" class="fx-rel" id="fx-rel" title="Manutenções executadas e ocorrências no que foi escolhido, num período (Excel e PDF)">${SVG.rel}Relatório de manutenção</button>`;
   // sem teclado (celular) não há Ctrl+M: um botão pequeno, embaixo do olho, só em tela de toque
   const entrada = document.createElement('button');
   entrada.type = 'button'; entrada.className = 'fx-entrada';
@@ -1037,7 +1046,34 @@
     if (b.id === 'fx-desfaz') return desfaz();
     if (b.id === 'fx-refaz') return refaz();
     if (b.id === 'fx-croqui') return croqui();
+    if (b.id === 'fx-rel') return relatorio();
   });
+  // relatório de manutenção: relatorio-manutencao.js só agora (window.__relManut), com o escolhido no mapa
+  const carregaRel = () => window.__relManut ? Promise.resolve() : new Promise((ok, erro) => {
+    const s = document.createElement('script'); s.src = BASE_JS + 'relatorio-manutencao.js?v=' + V_REL;
+    s.onload = () => window.__relManut ? ok() : erro(new Error('relatório')); s.onerror = () => erro(new Error('relatório'));
+    document.head.append(s);
+  });
+  async function relatorio() {
+    const e = escolhaGeo();
+    if (!e) { aviso('Escolha um trecho (ou uma parte) antes do relatório.'); return; }
+    const bt = $('fx-rel'); bt.disabled = true;
+    try { await carregaRel(); await window.__relManut.abre(e); }
+    catch (err) { aviso('Não foi possível abrir o relatório de manutenção.'); }
+    finally { bt.disabled = false; }
+  }
+  // o escolhido para o relatório: nomes dos trechos, os em parte, metros e, de cada vão, as sequências de pedaços dentro
+  // da escolha ([vão, fração inicial, fração final])
+  function escolhaGeo() {
+    if (!sel.size) return null;
+    const runs = [], parte = {}; let m = 0;
+    for (const i of selV) {
+      const n = np[i], o = off[i];
+      for (let j = 0; j < n;) { const x = excl[o + j]; let k = j + 1; while (k < n && excl[o + k] === x) k++; if (!x) { runs.push([i, j / n, k / n]); m += (k - j) * mpp(i); } j = k; }
+    }
+    for (const t of sel) if (nEx[t]) parte[T[t].nome] = true;
+    return runs.length ? { nomes: [...sel].sort((a, b) => a - b).map(t => T[t].nome), parte, m, runs } : null;
+  }
   // croqui: o do painel com os trechos escolhidos e o marcado no mapa no mesmo croqui (Leve = Expedita, Pesada =
   // Convencional; croqui-rascunho.js, que nas páginas de rascunho entra no lugar do croqui.js)
   async function croqui() {
@@ -1239,7 +1275,7 @@
   // faixa: a faixa do ativo até o fim do trecho (testes)
   const resumo = A => A && { trecho: T[A.t].nome, cod: A.cod, nome: A.nome, ponto: chavePt(A.P) };
   window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length, inicio: () => ini,
-    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt, excl, partes, croquiSel,
+    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt, excl, partes, croquiSel, escolhaGeo, relatorio,
     parte: () => Object.fromEntries([...sel].map(t => [T[t].nome, nEx[t] ? pedT[t] - nEx[t] : -1])),
     faixa: x => { const A = acha(x), F = A && faixaDe(A); return A && Object.assign(resumo(A), { m: F.m, pedacos: F.qs.length, vaos: F.segs.length }); },
     pendente: () => pend && Object.assign(resumo(pend), { m: pend.m, pedacos: pend.qs.length }) };

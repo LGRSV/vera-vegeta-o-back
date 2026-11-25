@@ -1,0 +1,1 @@
+window.OCORRENCIAS = {"gerado":"2026-11-25","meses":["2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11"],"causas":["Causa nao identificada"],"subs":["Causa nao identificada - especificar"],"oc":[["2026-10-26 18:01","CH FACA","8855592027",0,0,2,29,0.5,"",null,null,1]]};

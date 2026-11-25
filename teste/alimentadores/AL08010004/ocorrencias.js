@@ -1,0 +1,1 @@
+window.OCORRENCIAS = {"gerado":"2026-11-25","meses":["2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11"],"causas":["Nao-programadas meio ambiente","Meio ambiente"],"subs":["Descarga atmosferica"],"oc":[["2026-10-19 21:27","SE","84002",0,0,1,2,0.0,"",null,null,5],["2026-10-19 22:19","DJ","70016106",1,0,1,2,0.0,"T1",-48.237856,-7.19534,5]]};

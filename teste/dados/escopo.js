@@ -6,8 +6,8 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.45",
- "atualizado": "2026-11-24",
+ "versao": "2.46",
+ "atualizado": "2026-11-25",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
@@ -191,6 +191,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Menu Alimentadores ao lado do botão: chips na mesma linha, saindo para a esquerda; busca, Ver todos e Tirar todos na lupa", "st": "ok", "d": "2026-11-25"},
    {"t": "Satélite: clicar no alimentador abre o mapa do alimentador completo ali mesmo, na mesma posição, sem recarregar (seleção de outros, Voltar ao satélite)", "st": "ok", "d": "2026-11-25"},
    {"t": "Selecionados com postes (17,5), equipamentos (16) e códigos (18,5) como o aberto; ✕ no aberto (vindo do satélite) tira tudo e volta ao satélite limpo", "st": "ok", "d": "2026-11-25"},
+   {"t": "Relatório de manutenção no Ctrl+M: do escolhido (trechos ou a parte entre o ponto inicial e o final), num período, as manutenções executadas e as ocorrências de todas as causas no caminho; dados em Excel e relatório em PDF (mapa, números, gráfico por mês, causas, serviços, ativos e listas)", "st": "ok", "d": "2026-11-25", "obs": "Ocorrências de todas as causas da Crítica de mai/2026 a nov/2026 (os meses de antes ainda não estão no site)."},
    {"t": "Ctrl+M: croqui só com os trechos escolhidos (saía o alimentador inteiro); ferramenta Parte (S) para escolher só uma parte do trecho", "st": "ok", "d": "2026-11-25"},
    {"t": "Revisão da reclassificação T1/T2 (conservação de km, NAE, UCs, Priorização e Faixa)", "st": "ok", "d": "2026-11-24"},
    {"t": "Priorização pelo mapa de hoje: T1 com o km do mapa e T3 novos como linhas próprias (não somam no T1)", "st": "ok", "d": "2026-11-24"},
