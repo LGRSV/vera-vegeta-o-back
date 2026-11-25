@@ -220,7 +220,8 @@ header.cab h1 span{font-weight:400;font-size:.55em;letter-spacing:.14em;margin-t
 /* mapa do TO: o viewBox vem no HTML, então o svg já tem a altura certa antes de receber os contornos */
 .mt-mapa{position:relative;border:0;background:transparent;padding:0}
 .mt-mapa svg{display:block;height:min(calc(100svh - 170px),1100px);min-height:560px;width:auto;max-width:100%;margin:0 auto;overflow:visible}
-@media (max-width:860px){.mt-mapa svg{width:100%;height:auto;max-height:78svh;min-height:0}}
+/* celular: o mapa inteiro cabe abaixo da barra (no iframe da central, sem rolar a página e sem cortar a legenda do satélite) */
+@media (max-width:860px){.mt-mapa svg{width:100%;height:auto;max-height:min(78svh,calc(100svh - 176px));min-height:0}}
 /* cartão do ativo escolhido na busca (mapa-municipios.js, ponto()): em cima, no meio; no celular abaixo da seta de voltar (58 px,
    o TOPO_CART_CEL do script) e, com o celular deitado (classe lado), à esquerda, com o ativo à direita */
 .mt-ponto-c{left:50%;top:12px;transform:translateX(-50%);min-width:min(260px,calc(100% - 16px));max-width:calc(100% - 16px)}
@@ -623,6 +624,13 @@ header.cab>.cab-link:hover{background:var(--hover);text-decoration:none}
 .mt-vis-sep{height:1px;margin:3px 8px;background:var(--line)}
 .mt-vis-leg{display:block;min-height:38px;padding-left:32px;color:var(--muted);font-weight:500}
 @media (prefers-reduced-motion:reduce){.mt-vis-menu{animation:none}#mapa-to .mt-vis-b svg{transition:none}}
+/* toque: alvos de 40 px (trilha, título das visões e orelhinha da legenda) sem mudar o desenho no computador */
+@media (pointer:coarse){
+  .mt-passo{min-height:40px}
+  #mapa-to .mt-vis-b{min-height:40px;margin:-12px -6px}
+  .mt-regs-b,.mt-regs.fechada .mt-regs-b{height:40px}
+  .mt-vis-menu{top:calc(100% + 46px)}
+}
 .mt-regcards button{white-space:nowrap}   /* "49.129 OS" perto da beira do mapa não quebra em duas linhas */
 /* botão de tela cheia: canto de cima, à direita do mapa */
 .mt-tc{position:absolute;top:0;right:0;z-index:5;display:grid;place-items:center;width:var(--alvo);height:var(--alvo);padding:0;

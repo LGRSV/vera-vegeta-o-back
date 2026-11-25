@@ -575,7 +575,7 @@
     // chega depois) ou, com ja, na hora (antes da animação do zoom: tem que estar no lugar quando ela começa)
     pinta(r, k, tipo, op, ja) {
       const x = Math.floor(r.x), y = Math.floor(r.y);
-      r = { x, y, w: Math.ceil(r.x + r.w) - x, h: Math.ceil(r.y + r.h) - y, z: r.z, k };
+      r = { x, y, w: Math.ceil(r.x + r.w) - x, h: Math.ceil(r.y + r.h) - y, z: r.z, k, alfa: op && op.alfa };   // (alfa: a do estado, para o prepara)
       const id = ++this._id, m = { t: tipo, camada: L.stamp(this), id, r, op: Object.assign({ k }, op) };
       if (!MODO) { this._pinta2d(m); return; }
       if (ja || !PINTOR) { this._chegou(id, pintaAqui(m), r, ja); return; }
@@ -783,10 +783,13 @@
   // os selecionados que ainda não estão lá (baixando ou com erro): realçados aqui
   const forteSel = () => { const S = window.__alSel; if (!S || !dados) return []; const d = S.desenhados ? S.desenhados() : []; return S.lista().filter(c => !d.includes(c)).map(c => dados.cods.indexOf(c)).filter(i => i >= 0); };
   let forteVisto = '';                                   // os realçados do último desenho pedido
-  // do estado inteiro (abaixo do zoom 8) as linhas fortes, como no satélite da página inicial (pedido do usuário: "aquela
-  // visão satélite original"); de perto, apagadas como as dos vizinhos
+  // do estado inteiro as linhas fortes, como no satélite da página inicial (pedido do usuário: "aquela visão satélite
+  // original"); de perto, apagadas como as dos vizinhos. Sem degrau: a opacidade desce aos poucos de ALFA_ESTADO (até
+  // um zoom antes de Z_FORTE) a ALFA (de Z_FORTE em diante); zA: o zoom em que a imagem vai ser vista, quando não é o
+  // da pintura (a guardada do prepara, pintada no zoom zm - 1 e esticada na pinça e na roda)
   const ALFA_ESTADO = 0.9, Z_FORTE = 8;
-  const opEstado = z => { const forte = forteSel(); forteVisto = forte.join(); return { alfa: z < Z_FORTE ? ALFA_ESTADO : ALFA, cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })), fora: foraSel(), forte }; };   // o tronco por cima
+  const alfaZ = z => ALFA + (ALFA_ESTADO - ALFA) * Math.max(0, Math.min(1, Z_FORTE - z));
+  const opEstado = (z, zA = z) => { const forte = forteSel(); forteVisto = forte.join(); return { alfa: alfaZ(zA), cls: ['T2', 'T1'].filter(visivel).map(c => ({ c, cor: COR[c], larg: larg(c, z) })), fora: foraSel(), forte }; };   // o tronco por cima
   const Estado = Tela.extend({
     options: { pane: 'estado-to' },
     // fim de cada movimento: abaixo dos vizinhos, o estado inteiro (sem esmaecer: os vizinhos saem no mesmo quadro; se a
@@ -827,10 +830,10 @@
     // vista é refeita, nítida
     prepara(c, z) {
       if (!dados || !MODO || z >= zm + 1.5) return;
-      const zr = zm - 1, r = this._p || this._r;
-      if (r && r.z === zr && this.cobreR(r, c, zr, 0.1)) return;
+      const zr = zm - 1, r = this._p || this._r, zA = Math.min(z, zr), aA = alfaZ(zA);
+      if (r && r.z === zr && Math.abs((r.alfa || 0) - aA) < 0.06 && this.cobreR(r, c, zr, 0.1)) return;
       const g = this.regiao(c, zr, 0.35);
-      this.pinta(g, Math.min(R, Math.sqrt(MAXPX_E_ANIM / (g.w * g.h))), 'estado', opEstado(zr));
+      this.pinta(g, Math.min(R, Math.sqrt(MAXPX_E_ANIM / (g.w * g.h))), 'estado', opEstado(zr, zA));
     },
     // a guardada cobre a vista (c, z) abaixo dos vizinhos: entra (sem esmaecer; o canvas dos vizinhos ainda está por cima)
     entra(c, z) {
