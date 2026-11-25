@@ -750,7 +750,7 @@ def pacote_trechos(destino):
 # ?v= dos assets da página inicial e da Queimadas: trocar quando o arquivo muda (o navegador guarda a versão anterior)
 V_MAPA = '20261124b'                                     # mapa-municipios.js (e busca-ativo.js)
 V_FOCOS = '20261116'
-V_SAT_TO = '20261125e'                                    # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
+V_SAT_TO = '20261125g'                                    # assets/mapa-sat-to.js (satélite do Tocantins, Ctrl+S)
 V_RAIOX = '20261119'                                      # assets/mapa-raiox.js (raio-X da rede, Ctrl+X)
 
 

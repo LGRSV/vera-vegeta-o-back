@@ -10,7 +10,8 @@
 // - O que mostra: a imagem de satélite (Esri World Imagery, ou a Google com a chave de assets/mapa-satelite.js), só o Tocantins
 //   (fora do estado, a cor escura dos mapas, --mapbg) e o T1 e o T2 de todos os alimentadores (dados/vizinhos/estado.txt, o
 //   mesmo da visão Tocantins do mapa do alimentador; os do índice que não estão nele, só alguns metros de rede no cadastro,
-//   viram um ponto e também contam). Passar o mouse numa linha mostra o código do alimentador; clicar abre a página dele.
+//   viram um ponto e também contam). Passar o mouse numa linha mostra o código do alimentador; clicar abre o mapa dele
+//   ali mesmo, por cima do satélite, na mesma posição ("o mapa do alimentador completo", mais abaixo).
 //   Arrastar e zoom livres, com o estado de limite.
 // - A divisão do mapa dos municípios, nos mesmos níveis (pedido do usuário: "1- Regional, 2- Polo, 3- Municípios"):
 //   Tocantins (o contorno das regionais, claro com sombra, e a bandeirinha de cada uma) › Regional (voo até ela; fora,
@@ -418,7 +419,7 @@
       '.st-sat.leaflet-container .leaflet-control-attribution{background:var(--vidro,rgba(15,20,23,.82));color:var(--vidro-fg,#f3f4f4);font:11px/1.4 var(--f-body,sans-serif);border-top-left-radius:var(--r1,6px)}' +
       '.st-linhas{transition:opacity .45s var(--ease,ease)}' +
       // os outros elementos do mapa (nomes, bandeiras, cartões) saem como no raio-X; o Tela cheia e o "Abrindo…" ficam
-      '.sat-to .mt-mapa>:not(svg):not(.mt-tc):not(.st-sat):not(.st-lado):not(.st-lgs):not(.st-balao):not(.mt-abrindo){opacity:0;pointer-events:none}' +
+      '.sat-to .mt-mapa>:not(svg):not(.mt-tc):not(.st-sat):not(.st-lado):not(.st-lgs):not(.st-balao):not(.mt-abrindo):not(.st-abrindo){opacity:0;pointer-events:none}' +
       // com o satélite inteiro na tela, o mapa dos municípios embaixo dele não é pintado (nada de trabalho escondido)
       '.sat-to.st-cobre .mt-mapa>svg{visibility:hidden}' +
       // trilha: a do satélite no lugar da do mapa dos municípios (mesmo desenho); a legenda some no município, como lá
@@ -537,6 +538,15 @@
       '.st-balao b{font:600 var(--t-md,14px)/1.2 var(--f-body,sans-serif)}.st-balao b.cod{font:600 var(--t-sm,13px)/1.2 var(--f-mono,monospace)}' +
       '.st-balao small{display:block;margin-top:3px;font:400 var(--t-xs,12px)/1.35 var(--f-body,sans-serif);color:var(--cartao-mute,#a9b2b8)}' +
       '.st-balao small.c{margin-top:6px;padding-top:6px;border-top:1px solid var(--cartao-borda,rgba(255,255,255,.16));color:var(--cartao-fg,#f2f3f2);opacity:.75}' +
+      // o mapa do alimentador abrindo por cima (abreAl): o aviso curto embaixo, e o quadro dele (invisível até ficar pronto)
+      '.st-abrindo{position:absolute;left:50%;bottom:16px;z-index:9;transform:translateX(-50%);display:flex;align-items:center;gap:10px;max-width:calc(100% - 16px);' +
+      'padding:9px 14px;border:1px solid var(--cartao-borda,rgba(255,255,255,.16));border-radius:var(--r2,10px);background:var(--cartao,#111314);color:var(--cartao-fg,#f2f3f2);' +
+      'font:600 var(--t-sm,13px)/1.2 var(--f-body,sans-serif);white-space:nowrap;box-shadow:0 10px 24px -8px rgb(0 0 0 / .6);pointer-events:none}.st-abrindo[hidden]{display:none}' +
+      '.st-abrindo i{flex:none;width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:var(--accent,#fde047);animation:st-gira .8s linear infinite}' +
+      '@keyframes st-gira{to{transform:rotate(1turn)}}@media (prefers-reduced-motion:reduce){.st-abrindo i{animation:none}}' +
+      'iframe.st-alfr{position:fixed;inset:0;z-index:2147483000;width:100%;height:100%;border:0;margin:0;padding:0;opacity:0;pointer-events:none;background:transparent;color-scheme:normal}' +
+      'iframe.st-alfr.on{opacity:1;pointer-events:auto}' +
+      '@media (prefers-reduced-motion:no-preference){iframe.st-alfr{transition:opacity .18s ease-out}}' +
       // bandeirinhas (regionais no Tocantins, polos na regional) e nomes dos municípios (polo): o desenho do mapa dos municípios
       '.st-mk{background:none;border:0}.st-band{position:absolute;left:0;top:0;width:0;height:0}' +
       '.st-card{position:absolute;display:grid;justify-items:center;gap:2px;margin:0;padding:5px 12px 6px;border:1px solid var(--cartao-borda,rgba(255,255,255,.16));' +
@@ -2478,12 +2488,134 @@
     if (cartaoMun) cartaoMun.querySelectorAll('.st-al').forEach(b => b.classList.toggle('on', b.dataset.al === cod));
     if (!cod && balao) balao.hidden = true;
   }
-  function abreAl(cod) {                                   // ?cheia=1: o mapa do alimentador já em tela cheia (telacheia.js; pedido do usuário)
-    const p = `alimentadores/${encodeURIComponent(cod)}/?cheia=1`;
-    if (window.ARGOS_PAG && window.ARGOS_PAG.abre) window.ARGOS_PAG.abre(p); else location.href = RAIZ + p;
+  // ---------- o mapa do alimentador completo, aberto aqui mesmo (pedido do usuário) ----------
+  // Clique (ou toque) num alimentador (a linha, o losango ou o foco dele, a lista do cartão do município): sem trocar de
+  // página e sem piscar, a mesma tela vira o mapa do alimentador de sempre (a página alimentadores/<COD>/: painel com
+  // Trechos/Limpeza, camadas, menu Alimentadores e a seleção de outros, até 10), na mesma posição do satélite.
+  // - A página dele carrega num quadro (iframe.st-alfr) por cima do satélite, invisível, com ?cheia=1 (telacheia.js: a
+  //   tela cheia; no PC a gaveta aberta, no celular a aba) e ?vista=lat,lon,zoom: o ponto do canto de cima à esquerda da
+  //   janela e o zoom do satélite, para ele nascer com o mesmo lugar no mesmo pixel (com a gaveta do PC, o que fica
+  //   embaixo dela continua no lugar). Quando ele avisa que está pronto (a rede inteira no mapa, o painel montado e o
+  //   satélite dele baixado: evento 'st-al' no quadro), entra num esmaecer curto; o satélite fica embaixo, como estava.
+  //   Se o alimentador não aparece na vista (o cartão do município), a página dele voa suave até ele depois de aparecer.
+  // - Enquanto carrega o satélite continua vivo, com a linha realçada e o aviso "Abrindo …" (depois de 250 ms); Esc,
+  //   Voltar ou o clique noutro cancelam (o outro entra no lugar). O mouse parado na linha já adianta a página (ARGOS_PAG.prepara).
+  // - Endereço: uma entrada no histórico (?al=<COD> no endereço deste quadro e no da casca central/): o Voltar do
+  //   navegador volta ao satélite como estava; o ✕ (sair da tela cheia) e o Esc da página dele também (ela avisa 'sai').
+  //   Recarregar com ?sat=1&al=<COD> abre o satélite e o alimentador.
+  // - Links da página dele para outro alimentador continuam no quadro (em tela cheia); para outra página, ela abre no
+  //   lugar desta (a casca leva), e de volta à página inicial, o quadro só fecha.
+  // - Nada disso existe antes do 1º clique: a página inicial não fica mais pesada.
+  let sob = null;                                          // { cod, fr, t0, on, hist, aviso }
+  const urlAlP = (cod, extra) => `alimentadores/${encodeURIComponent(cod)}/?cheia=1${extra || ''}`;
+  const semAl = u => { const x = new URL(u, location.href); x.searchParams.delete('al'); return x.pathname + x.search + x.hash; };
+  function paiAl(cod) {                                    // ?al= no endereço da casca (sem tocar no #mapa dela)
+    try {
+      const P = window.parent;
+      if (P === window || P.location.hash !== '#mapa') return;
+      const u = new URL(P.location.href);
+      if (cod) u.searchParams.set('al', cod); else u.searchParams.delete('al');
+      const href = u.pathname + u.search + u.hash;
+      if (href !== P.location.pathname + P.location.search + P.location.hash) P.history.replaceState(P.history.state, '', href);
+    } catch (e) { /* casca de outra origem */ }
   }
+  function abreAl(cod, semHist) {
+    if (!map || estado !== 'on') { const p = urlAlP(cod); if (window.ARGOS_PAG && window.ARGOS_PAG.abre) window.ARGOS_PAG.abre(p); else location.href = RAIZ + p; return; }
+    if (sob && sob.cod === cod) return;                    // clique repetido não recomeça
+    let hist = false;
+    if (sob) { hist = sob.hist; tiraSob(sob, false); }    // outro no lugar (a entrada do histórico fica, com o novo)
+    const r = caixaSat.getBoundingClientRect(), c = map.containerPointToLatLng([-r.left, -r.top]);
+    const vista = `&vista=${c.lat.toFixed(6)},${c.lng.toFixed(6)},${map.getZoom().toFixed(4)}`;
+    const fr = document.createElement('iframe');
+    fr.className = 'st-alfr';
+    fr.title = `Mapa do alimentador ${cod}`;
+    fr.setAttribute('allow', 'fullscreen; clipboard-write');
+    fr.setAttribute('aria-hidden', 'true');
+    const s = sob = { cod, fr, t0: performance.now(), on: false, hist, aviso: 0, cargas: 0 };
+    tempos.alClique = s.t0; tempos.alPronto = tempos.alVisivel = null;
+    fr.addEventListener('st-al', e => recebeSob(s, e.detail || {}));
+    fr.addEventListener('load', () => carregouSob(s));
+    fr.src = RAIZ + urlAlP(cod, vista);
+    (document.fullscreenElement || document.webkitFullscreenElement || document.body).append(fr);
+    caixaSat.style.cursor = 'progress';
+    s.aviso = setTimeout(() => { if (sob === s && !s.on) avisoSob(`Abrindo ${cod}…`); }, 250);
+    try {
+      const u = new URL(location.href); u.searchParams.set('al', cod);
+      const st = Object.assign({}, history.state || {}, { stAl: cod });
+      if (hist || semHist) history.replaceState(st, '', u.href); else { history.pushState(st, '', u.href); s.hist = true; }
+      paiAl(cod);
+    } catch (e) { /* sem history: o Voltar não fecha */ }
+  }
+  function avisoSob(txt) {
+    let a = caixa.querySelector('.st-abrindo');
+    if (!txt) { if (a) a.hidden = true; return; }
+    if (!a) { a = document.createElement('div'); a.className = 'st-abrindo'; a.setAttribute('role', 'status'); a.innerHTML = '<i aria-hidden="true"></i><span></span>'; caixa.append(a); }
+    a.lastChild.textContent = txt;
+    a.hidden = false;
+  }
+  function recebeSob(s, d) {
+    if (sob !== s) return;
+    if (d.tipo === 'pronto' && !s.on) {
+      s.on = true;
+      clearTimeout(s.aviso); avisoSob(null);
+      tempos.alPronto = performance.now() - s.t0;
+      s.fr.removeAttribute('aria-hidden');
+      s.fr.classList.add('on');
+      caixaSat.style.cursor = '';
+      realca(null); balao.hidden = true;
+      const fim = () => {
+        if (sob !== s) return;
+        tempos.alVisivel = performance.now() - s.t0;
+        try { s.fr.contentWindow.focus(); s.fr.contentDocument.dispatchEvent(new Event('st-al-visivel')); } catch (e) { /* já saiu */ }
+      };
+      if (calmo()) fim(); else setTimeout(fim, 200);
+    } else if (d.tipo === 'sai') fechaAl();
+  }
+  function carregouSob(s) {
+    if (sob !== s) return;
+    let w = null;
+    try { w = s.fr.contentWindow; void w.location.pathname; } catch (e) { w = null; }
+    s.cargas++;
+    const ok = w && /\/alimentadores\/[^/]+\/$/.test(w.location.pathname) && w.document.querySelector('.mapbox');
+    if (ok) return;                                       // (a página avisa 'pronto' sozinha)
+    if (s.cargas === 1 || !w) {                            // não abriu (sem rede, página que não existe)
+      fechaAl();
+      avisoSob(`O mapa de ${s.cod} não abriu`);
+      setTimeout(() => { if (!sob) avisoSob(null); }, 3000);
+      return;
+    }
+    const href = w.location.href, aqui = new URL(location.href), u = new URL(href);
+    if (u.pathname === aqui.pathname || u.pathname === new URL(RAIZ).pathname) { fechaAl(); return; }   // de volta à página inicial: só fecha
+    fechaAl(true); location.href = href;                   // outra página: no lugar desta
+  }
+  // tira o quadro (com o esmaecer, se já estava à vista)
+  function tiraSob(s, suave) {
+    clearTimeout(s.aviso);
+    if (sob === s) { sob = null; avisoSob(null); caixaSat.style.cursor = ''; }
+    const fr = s.fr, foco = fr.contains(document.activeElement) || document.activeElement === fr;
+    fr.classList.remove('on');
+    fr.setAttribute('aria-hidden', 'true');
+    if (foco || document.activeElement === document.body) caixaSat.focus({ preventScroll: true });
+    if (suave && s.on && !calmo()) setTimeout(() => fr.remove(), 200); else fr.remove();
+  }
+  // fecha o mapa do alimentador: o satélite como estava (semHist: a entrada do histórico fica, ex.: vai trocar de página)
+  function fechaAl(semHist) {
+    const s = sob;
+    if (!s) return;
+    tiraSob(s, true);
+    try {
+      if (s.hist && !semHist && history.state && history.state.stAl === s.cod) { s.hist = false; history.back(); }
+      else if (!semHist) { const st = Object.assign({}, history.state || {}); delete st.stAl; history.replaceState(st, '', semAl(location.href)); paiAl(null); }
+    } catch (e) { /* sem history */ }
+  }
+  addEventListener('popstate', e => {
+    const st = e.state || {};
+    if (sob && st.stAl !== sob.cod) { const s = sob; s.hist = false; tiraSob(s, true); paiAl(st.stAl || null); if (st.stAl && estado === 'on') abreAl(st.stAl, true); return; }
+    if (!sob && st.stAl && estado === 'on') { abreAl(st.stAl, true); if (sob) sob.hist = true; return; }   // Avançar de volta a ele
+    if (!st.stAl) paiAl(null);
+  });
   // toque (dedo) acima do município: a linha embaixo do dedo é difícil de evitar no mapa inteiro, então o toque entra na área
-  // (sem o balão do mouse, o dedo não saberia que ia abrir um alimentador); no município, o toque na linha abre a página dele
+  // (sem o balão do mouse, o dedo não saberia que ia abrir um alimentador); no município, o toque na linha abre o mapa dele aqui (abreAl)
   let ponteiro = 'mouse';
   function cliqueLinha(cod, e) {
     const oe = e && e.originalEvent, tipo = (oe && oe.pointerType) || ponteiro;
@@ -2549,14 +2681,14 @@
         const i = classeNae(naeDe(t), faixasNae());
         poeBalao(cabA + `<small class="st-fx-t"><i style="background:${i ? corNae(i) : FUNDOCOR}"></i>Trecho ${esc(t.nome)} · ${NF0.format(t.n)} NAE` +
           `${t.n3 ? ` (+${NF0.format(t.n3)} nos ramais T3${naeRam.on ? '' : ', fora da cor'})` : ''}</small>` +
-          `<small>${esc(t.cls)} · ${kmTxt(t.m)} · ${esc(mesesTxt(DADOS.nae && DADOS.nae.meses))}</small>` + extraPts(e) + '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
+          `<small>${esc(t.cls)} · ${kmTxt(t.m)} · ${esc(mesesTxt(DADOS.nae && DADOS.nae.meses))}</small>` + extraPts(e) + '<small class="c">Clique para abrir o mapa do alimentador aqui</small>', ev);
         return;
       }
       if (t && ativo === conjI) {                          // Inspeção: o pedaço embaixo do mouse
         const a0 = t.base ? null : t.anos.find(x => !inspOff.has(x));
         poeBalao(cabA + `<small class="st-fx-t"><i style="background:${a0 ? inCorAno(a0) : FUNDOCOR}"></i>${a0 ? 'Inspecionado em ' + a0 +
           (t.anos.length > 1 ? ' (também ' + t.anos.filter(x => x !== a0).join(', ') + ')' : '') : 'Sem inspeção registrada aqui'}</small>` +
-          extraPts(e) + '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
+          extraPts(e) + '<small class="c">Clique para abrir o mapa do alimentador aqui</small>', ev);
         return;
       }
       if (t && ativo === conjA) {                           // vista Por ano: o trecho, o ano do pedaço, a última limpeza e os km limpos
@@ -2565,7 +2697,7 @@
           `<small class="st-fx-t"><i style="background:${a0 ? corAno(a0) : FUNDOCOR}"></i>Trecho ${esc(t.nome)} · ${a0 ? 'limpo em ' + a0 + (pc.anos.length > 1 ? ' (antes ' + pc.anos.slice(1).join(', ') + ')' : '') : 'sem registro de limpeza aqui'}</small>` +
           (pc && pc.mk ? `<small>${[pc.mk.includes('c') ? 'OS criada' : '', pc.mk.includes('p') ? 'OS pendente' : ''].filter(Boolean).join(' · ')} neste pedaço</small>` : '') +
           `<small>${t.ult ? 'Última limpeza do trecho ' + dataBr(t.ult) : 'Trecho sem registro de limpeza'} · ${t.limpo < 1000 ? Math.round(t.limpo) + " m" : NF1.format(t.limpo / 1000)} de ${kmTxt(t.m)} limpos · ${esc(t.cls)} a cada ${t.prazo} anos</small>` +
-          '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
+          '<small class="c">Clique para abrir o mapa do alimentador aqui</small>', ev);
         return;
       }
       poeBalao(`<span class="h"><b class="cod">${esc(sobre)}</b>${am ? `<i>${esc(numAl(sobre, m))}</i>` : ''}</span>` +
@@ -2573,14 +2705,14 @@
         (t && ativo === conjF ? `<small class="st-fx-t" data-sit="${t.sit}"><i style="background:${SIT_COR[t.sit]}"></i>Trecho ${esc(t.nome)} · ${SIT_NOME[t.sit]}</small>` +
           `<small>${t.ult ? 'Última limpeza ' + dataBr(t.ult) : 'Sem registro de limpeza'} · ${esc(t.cls)} a cada ${t.prazo} anos · ${kmTxt(t.m)}</small>` : '') +
         (semRede.has(sobre) && (!t || t.semDado || t.base) ? '<small>Sem rede no cadastro (só o ponto)</small>' : '') + extraPts(e) +
-        '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
+        '<small class="c">Clique para abrir o mapa do alimentador aqui</small>', ev);
       return;
     }
     const pt = pontos.em(e.containerPoint);                 // um losango ou foco embaixo do mouse
     if (pt) {
       realceArea(null);
       map.getContainer().style.cursor = pt.al ? 'pointer' : '';
-      poeBalao(pt.html + (pt.al ? '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>' : ''), ev);
+      poeBalao(pt.html + (pt.al ? '<small class="c">Clique para abrir o mapa do alimentador aqui</small>' : ''), ev);
       return;
     }
     const n = fronteira ? destino(e.latlng) : null;            // (Fronteira desligada: sem a navegação por áreas)
@@ -2862,7 +2994,7 @@
       `<span class="st-mun-x">${m.slug ? `<a class="st-mun-a" href="${esc(url)}" data-p="${esc(href)}"${dica}${fora}>Abrir ${esc(m.nome)} →</a>` : ''}` +
       (lista.length ? `<button type="button" class="st-mun-b" aria-expanded="false" aria-controls="st-mun-l">Alimentadores<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>` : '') +
       (m.slug && noMapa ? `<a class="st-mun-p" href="${esc(ir(hPag))}"${fora}>Página do município</a>` : '') +
-      '</span><div class="st-mun-l" id="st-mun-l" hidden>' + lista.map(a => `<button type="button" class="st-al" data-al="${esc(a.cod)}" title="Clique para abrir o mapa do alimentador em tela cheia">` +
+      '</span><div class="st-mun-l" id="st-mun-l" hidden>' + lista.map(a => `<button type="button" class="st-al" data-al="${esc(a.cod)}" title="Clique para abrir o mapa do alimentador aqui">` +
         `<b>${esc(a.cod)}</b><i class="st-sel">${esc(numAl(a.cod, m))}</i><em>${kmTxt(a.m)} aqui${a.se ? ' · ' + esc(a.se) : ''}</em></button>`).join('') + '</div>';
     cartaoMun.hidden = false;
     lado.hidden = false;
@@ -3262,6 +3394,7 @@
   }
   async function fecha() {
     if (estado === 'off' || estado === 'fechando') return;
+    if (sob) { sob.hist = false; fechaAl(); }              // (sem o Voltar: o mapa dos municípios ainda mexe no histórico ao fechar)
     if (estado === 'carregando') {
       ++vez; estado = 'off'; alvo.classList.remove('sat-to', 'st-cobre', 'st-nmun');
       devolveLegenda();
@@ -3338,7 +3471,10 @@
       if (!visivel()) return;
       e.preventDefault();                                  // sem o "Salvar página" do navegador
       if (e.repeat) return;
+      if (sob) { fechaAl(); return; }                      // o mapa do alimentador aberto por cima: volta ao satélite
       alterna();
+    } else if (e.key === 'Escape' && sob && !e.defaultPrevented) {
+      e.preventDefault(); e.stopPropagation(); fechaAl();  // o mapa do alimentador (carregando ou à vista) fecha antes
     } else if (e.key === 'Escape' && estado !== 'off' && estado !== 'fechando' && !e.defaultPrevented) {
       const ab = caixa.querySelector('.mt-abrindo');
       if (ab && !ab.hidden) return;                         // Esc cancela antes o "Abrindo…" do alimentador
@@ -3352,10 +3488,16 @@
   window.addEventListener('keydown', tecla, true);
   // ?sat=1 (link direto, para o celular sem teclado: …/teste/central/?sat=1#mapa, a casca passa o ?… ao mapa): abre o
   // satélite assim que o mapa dos municípios estiver desenhado (até 20 s)
-  if (new URLSearchParams(location.search).get('sat') === '1') {
+  // (com ?al=<COD>, o endereço do mapa do alimentador aberto aqui, abreAl: abre também o satélite e, nele, o alimentador)
+  const Q0 = new URLSearchParams(location.search), AL0 = Q0.get('al');
+  if (Q0.get('sat') === '1' || AL0) {
     const t0 = Date.now();
     const tenta = () => {
-      if (svg.querySelectorAll('path').length > 100) { if (estado !== 'on' && estado !== 'abrindo' && estado !== 'carregando') abre(); return; }
+      if (svg.querySelectorAll('path').length > 100) {
+        if (estado !== 'on' && estado !== 'abrindo' && estado !== 'carregando') abre();
+        if (AL0) { const t1 = Date.now(), al = () => { if (estado === 'on' && !voandoN) { if (!sob) abreAl(AL0, true); } else if (Date.now() - t1 < 20000) setTimeout(al, 150); }; al(); }
+        return;
+      }
       if (Date.now() - t0 < 20000) setTimeout(tenta, 200);
     };
     setTimeout(tenta, 300);
@@ -3423,6 +3565,8 @@
       return { dif: n, px: a.length / 4, cheios, modo: rend._img ? 'imagem' : 'canvas' };
     },
     nivel: () => Object.assign({}, niv), vai: n => vaiPara(n), sobe, voando: () => voandoN,
+    // o mapa do alimentador aberto por cima (abreAl): o código, se já está à vista, o quadro; abrir e fechar
+    alAberto: () => (sob ? { cod: sob.cod, on: sob.on, hist: sob.hist, src: sob.fr.getAttribute('src') } : null), abreAl: cod => abreAl(cod), fechaAl: () => fechaAl(), rotAl: () => rotAl,
     // botão Fronteira: pede true/false (como o clique no botão, com o satélite aberto); devolve a escolha
     fronteira: v => { if (v !== undefined && estado === 'on') poeFronteira(v); return fronteira; },
     // visão Limpeza: o conjunto na tela ('rede' ou 'faixa'), os km de cada situação no nível (ordem de SIT), o total do
