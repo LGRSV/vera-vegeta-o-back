@@ -1342,6 +1342,10 @@ if (typeof L === 'undefined') {
       try { return L.TileLayer.prototype._update.call(this, c); } finally { m.getZoom = g; }
     },
     createTile(c, done) { const t = L.TileLayer.prototype.createTile.call(this, c, done); t._xyz = c; t._k = 0; return t; },
+    // emendas: no zoom fracionário (6,4, 7,5…) a escala do pane deixa um fio entre os quadros (as retas finas que cruzavam
+    // o estado); cada quadro passa 1 px do vizinho e cobre a fresta, sem a soma de cores do Leaflet (plus-lighter), que
+    // clarearia a faixa sobreposta (o de erro, que usa a foto de cima, já é maior)
+    _initTile(t) { L.TileLayer.prototype._initTile.call(this, t); t.style.width = t.style.height = '257px'; t.style.mixBlendMode = 'normal'; },
     _tileOnError(done, t, e) {
       const c = t._xyz, k = ++t._k;
       if (!c || k > 6 || c.z - k < 0) return L.TileLayer.prototype._tileOnError.call(this, done, t, e);

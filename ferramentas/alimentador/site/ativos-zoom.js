@@ -9,6 +9,7 @@
 // pontos são desenhados no canvas do mapa (o mesmo das linhas: nenhum elemento na página por ativo) e só os que estão
 // na tela; os códigos escritos (elementos na página) são no máximo ROTULOS de uma vez. Os postes saem das pontas dos
 // vãos do dados.js (já carregado), sem arquivo novo.
+// Os alimentadores selecionados (selecionados.js) ganham o mesmo, nos mesmos zooms (pedido do usuário): ver abaixo.
 (function () {
   const map = window.__map, D = window.D;
   if (!map || !window.L || !D) return;
@@ -52,14 +53,57 @@
     return (postes = [...m.values()]);
   }
 
+  // ---------- selecionados (selecionados.js, window.__alSel: até 10 outros alimentadores no mapa) ----------
+  // Os mesmos ativos, nos mesmos zooms, com o mesmo desenho e os códigos escritos no mesmo arranjo: postes das pontas dos
+  // vãos deles (a geometria que selecionados.js já tem, __alSel.postes) e transformadores e outros equipamentos do ativos.js
+  // de cada um (baixado como texto, sem trocar o window.ATIVOS deste, só quando o mapa chega no zoom 16 com ele na tela).
+  // Pontos num canvas próprio (pane sel-atv, sem toque: o clique e o mouse são de selecionados.js, __ativosZoom.selEm; os
+  // transformadores e outros que vizinhos.js também conhece continuam com o balão de lá), códigos no pane sel-rotulos
+  // (fica à vista com o aberto escondido). Somem quando o selecionado sai.
+  const SELS = () => window.__alSel && window.__alSel.prontos ? window.__alSel.prontos() : [];
+  const faixa = () => !!(window.__faixa && window.__faixa.ativo && window.__faixa.ativo());
+  const SEL = new Map();                                    // código → { A (ativos.js dele), ok, pedindo }
+  const selDe = cod => SEL.get(cod) || (SEL.set(cod, { A: null, ok: false, pedindo: false }), SEL.get(cod));
+  function baixaSel(cod, o) {
+    if (o.A || o.pedindo || !window.__alSel.arquivo) return;
+    o.pedindo = true;
+    fetch(window.__alSel.arquivo(cod, 'ativos.js'))
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(t => { const a = JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1)); return { tr: a.tr || [], eq: a.eq || [], ok: true }; })
+      .catch(() => ({ tr: [], eq: [], ok: false }))
+      .then(a => {
+        if (SEL.get(cod) !== o) return;                     // saiu enquanto vinha
+        o.A = a; o.ok = a.ok;
+        atualiza();
+        if (o.ok && window.__alSel.eqMudou) window.__alSel.eqMudou(cod);   // o canvas de lá deixa os transformadores e outros para cá
+      });
+  }
+  let renSel = null, pontosSel = null;
+  function selPane() {
+    if (renSel) return true;
+    if (!map.getPane('sel-rotulos')) return false;          // (selecionados.js cria os panes deles na 1ª seleção)
+    const pn = map.createPane('sel-atv');
+    pn.style.zIndex = 396; pn.style.pointerEvents = 'none'; // por cima da rede e dos equipamentos deles (390, 395)
+    renSel = L.canvas({ pane: 'sel-atv' });
+    pontosSel = L.layerGroup().addTo(map);
+    return true;
+  }
+  document.addEventListener('al:selecao', e => {
+    const d = e.detail || {};
+    if (d.motivo === 'sai' && d.al) SEL.delete(d.al);
+    atualiza();
+  });
+  document.addEventListener('al:oculto', atualiza);
+
   // ---------- desenho ----------
   const ren = map.options.renderer || L.canvas();          // o canvas das linhas: um só, sem bloquear o toque nelas
   const pontos = L.layerGroup().addTo(map), rotulos = L.layerGroup().addTo(map);
   const vivos = new Map();                                  // chave -> circleMarker na tela
-  function ponto(k, tipo, lat, lon, txt, bal) {
-    const r = tipo === 'poste' ? (map.getZoom() >= Z_COD ? 3.5 : 2.5) : 4.5;
-    return L.circleMarker([lat, lon], { renderer: ren, radius: r, color: '#111', weight: tipo === 'poste' ? 1 : 1.5,
-      fillColor: COR[tipo], fillOpacity: 1, bubblingMouseEvents: false })
+  const raio = (tipo, z) => tipo === 'poste' ? (z >= Z_COD ? 3.5 : 2.5) : 4.5;
+  function ponto(k, tipo, lat, lon, txt, bal, sel) {
+    const o = { radius: raio(tipo, map.getZoom()), color: '#111', weight: tipo === 'poste' ? 1 : 1.5, fillColor: COR[tipo], fillOpacity: 1 };
+    if (sel) return L.circleMarker([lat, lon], Object.assign(o, { renderer: renSel, interactive: false }));   // (toque: selEm)
+    return L.circleMarker([lat, lon], Object.assign(o, { renderer: ren, bubblingMouseEvents: false }))
       .bindTooltip(txt, { direction: 'top', offset: [0, -4] })
       .on('click', e => {
         L.DomEvent.stopPropagation(e);
@@ -75,6 +119,7 @@
   const balEq = a => [a[0], `${TIPO[a[1]] || 'equipamento ' + a[1]}${a[4] ? ' · trecho ' + a[4] : ''}`];
   const balPoste = a => [a[0], `Poste${a[3] ? ' · trecho ' + a[3] : ''}`];
   const prio = (tipo, a) => tipo === 'poste' ? 6 : tipo === 'tr' ? 4 : a[1] === '40' || a[1] === '41' ? 2 : /^(02|Chave|ChaveNA)$/.test(a[1]) ? 3 : 5;
+  const ORD = { eq: 0, tr: 1, poste: 2 };                   // os códigos escritos: equipamentos, transformadores, postes
   let zAntes = null, pendente = false;
   function atualiza() {
     if (pendente) return;
@@ -87,16 +132,39 @@
     // só o que está na tela (a caixa do mapa lida uma vez; a chave e o texto de cada ativo só para os que entram: são
     // milhares de postes olhados a cada parada do mapa)
     const b = map.getBounds().pad(0.15), quer = new Map(), sul = b.getSouth(), norte = b.getNorth(), oeste = b.getWest(), leste = b.getEast();
-    const entra = (pre, tipo, a, lat, lon, txt, bal) => { if (lat >= sul && lat <= norte && lon >= oeste && lon <= leste) quer.set(pre + a[0], [tipo, lat, lon, () => txt(a), () => bal(a), a]); };
+    let al = null;                                          // null: o aberto; o código: um selecionado
+    const entra = (pre, tipo, a, lat, lon, txt, bal) => { if (lat >= sul && lat <= norte && lon >= oeste && lon <= leste) quer.set((al ? 's' + al + '|' : '') + pre + a[0], [tipo, lat, lon, () => txt(a), () => bal(a), a, al]); };
     if (z >= Z_POSTE) for (const a of listaPostes()) entra('p', 'poste', a, a[1], a[2], txtPoste, balPoste);
     if (z >= Z_EQ && A) {
       for (const a of A.tr) entra('t', 'tr', a, a[1], a[2], txtTr, balTr);
       for (const a of A.eq) entra('e', 'eq', a, a[2], a[3], txtEq, balEq);
     }
+    const S = window.__alSel;
+    if (z >= Z_EQ && S && !faixa() && SELS().length && selPane()) {
+      for (const cod of SELS()) {
+        const cx = S.caixa(cod);
+        if (!cx || !b.intersects(cx)) continue;
+        al = cod;
+        const o = selDe(cod);
+        baixaSel(cod, o);
+        if (z >= Z_POSTE) for (const a of S.postes(cod) || []) entra('p', 'poste', a, a[1], a[2], txtPoste, balPoste);
+        if (o.A) {
+          for (const a of o.A.tr) entra('t', 'tr', a, a[1], a[2], txtTr, balTr);
+          for (const a of o.A.eq) entra('e', 'eq', a, a[2], a[3], txtEq, balEq);
+        }
+      }
+      al = null;
+    }
     const mudouRaio = zAntes !== null && (zAntes >= Z_COD) !== (z >= Z_COD);
     zAntes = z;
-    vivos.forEach((m, k) => { if (!quer.has(k) || (mudouRaio && k[0] === 'p')) { pontos.removeLayer(m); vivos.delete(k); } });
-    quer.forEach(([tipo, lat, lon, txt, bal], k) => { if (!vivos.has(k)) { const m = ponto(k, tipo, lat, lon, txt(), bal); vivos.set(k, m); pontos.addLayer(m); } });
+    // (o raio dos postes mudou: todos saem e voltam na ordem, postes embaixo dos transformadores e equipamentos)
+    vivos.forEach((m, k) => { if (!quer.has(k) || mudouRaio) { (m._sel ? pontosSel : pontos).removeLayer(m); vivos.delete(k); } });
+    quer.forEach(([tipo, lat, lon, txt, bal, , sel], k) => {
+      if (vivos.has(k)) return;
+      const m = ponto(k, tipo, lat, lon, sel ? '' : txt(), bal, sel);
+      m._tipo = tipo; m._sel = sel; m._q = quer.get(k);
+      vivos.set(k, m); (sel ? pontosSel : pontos).addLayer(m);
+    });
     if (lg) {                                               // a legenda antes dos códigos: ela também tampa o mapa
       lg.hidden = z < Z_EQ;
       lg.querySelector('.atv-p').hidden = z < Z_POSTE;
@@ -104,21 +172,38 @@
     // códigos escritos: só bem de perto e no máximo ROTULOS (elementos na página): equipamentos e transformadores antes dos
     // postes (o trafo fica no poste: o número do poste não pode tomar o lugar do código do trafo) e, em cada tipo, os do meio
     // da tela antes. Nenhum fica de fora por cair em cima de outro ou de um controle do mapa: o arranjo dos números
-    // (alimentador.js) põe cada um num lado livre, logo em seguida, no mesmo quadro
+    // (alimentador.js) põe cada um num lado livre, logo em seguida, no mesmo quadro. Os do aberto escondido (chip do menu
+    // Alimentadores) não entram; os dos selecionados, no pane dos nomes deles
     rotulos.clearLayers();
     if (z >= Z_COD) {
-      const tela = map.getSize(), cx = tela.x / 2, cy = tela.y / 2, l = [];
-      quer.forEach(([tipo, lat, lon, , , a], k) => {
+      const tela = map.getSize(), cx = tela.x / 2, cy = tela.y / 2, l = [], oculto = !!(S && S.oculto && S.oculto());
+      quer.forEach(([tipo, lat, lon, , , a, sel], k) => {
+        if (!sel && oculto) return;
         const p = map.latLngToContainerPoint([lat, lon]);
         if (p.x < 0 || p.y < 0 || p.x > tela.x || p.y > tela.y) return;
-        l.push([k, lat, lon, 'etp'.indexOf(k[0]), (p.x - cx) ** 2 + (p.y - cy) ** 2, prio(tipo, a), tipo === 'poste' ? (z >= Z_COD ? 3.5 : 2.5) : 4.5]);
+        l.push([a[0], lat, lon, ORD[tipo], (p.x - cx) ** 2 + (p.y - cy) ** 2, prio(tipo, a), raio(tipo, z), sel]);
       });
-      l.sort((x, y) => x[3] - y[3] || x[4] - y[4]).slice(0, ROTULOS).forEach(([k, lat, lon, , , np, r]) => {
-        rotulos.addLayer(L.marker([lat, lon], { interactive: false, keyboard: false,
-          icon: L.divIcon({ className: '', iconSize: null, html: `<div class="atv-cod num-at" data-np="${np}" data-nr="${r + 1}">${esc(k.slice(1))}</div>` }) }));
+      l.sort((x, y) => x[3] - y[3] || x[4] - y[4]).slice(0, ROTULOS).forEach(([cod, lat, lon, , , np, r, sel]) => {
+        rotulos.addLayer(L.marker([lat, lon], { interactive: false, keyboard: false, pane: sel ? 'sel-rotulos' : 'markerPane',
+          icon: L.divIcon({ className: '', iconSize: null, html: `<div class="atv-cod num-at" data-np="${np}" data-nr="${r + 1}"${sel ? ` data-al="${esc(sel)}"` : ''}>${esc(cod)}</div>` }) }));
       });
     }
     if (window.__numAtivos) window.__numAtivos.ja();     // o arranjo dos números já com os códigos novos (antes de pintar)
+  }
+  // o ativo de um selecionado no ponto pt do mapa (px do contêiner), a até tol px da borda dele: o mais perto; transformador
+  // e equipamento antes do poste (o trafo fica no poste)
+  function selEm(pt, tol) {
+    if (!renSel || map._animatingZoom || !pt) return null;
+    const q = map.containerPointToLayerPoint(pt);
+    let melhor = null, dm = Infinity;
+    vivos.forEach(m => {
+      if (!m._sel || !m._point) return;
+      const d = Math.hypot(m._point.x - q.x, m._point.y - q.y) - m.options.radius, pe = m._tipo === 'poste' ? 1 : 0;
+      if (d <= tol && (pe < (melhor ? melhor._pe : 2) || (pe === melhor._pe && d < dm))) { melhor = m; melhor._pe = pe; dm = d; }
+    });
+    if (!melhor) return null;
+    const [tipo, lat, lon, , bal, , al] = melhor._q, [cod, sub] = bal();
+    return { al, tipo, cod, ll: [lat, lon], sub: `${sub} · ${al}`, dica: `${cod} · ${sub} · ${al}` };
   }
 
   // ---------- legenda (só de perto) ----------
@@ -136,6 +221,11 @@
   atualiza();
   // para teste; pendente e pontos: o arranjo dos números (alimentador.js) espera o desenho deste quadro e não põe código em
   // cima dos pontos (os que estão na tela, com o raio)
+  // (selecionados: selEm o toque e o mouse; selTem: o ativos.js dele chegou; sel: o que está na tela de cada um)
   window.__ativosZoom = { vivos: () => vivos.size, rotulos: () => rotulos.getLayers().length, carregado: () => !!A, pendente: () => pendente,
-    pontos: () => [...vivos.values()].map(m => { const l = m.getLatLng(); return [l.lat, l.lng, m.options.radius]; }) };
+    pontos: () => [...vivos.values()].map(m => { const l = m.getLatLng(); return [l.lat, l.lng, m.options.radius]; }),
+    selEm: (pt, tol = 7) => selEm(pt, tol), selTem: cod => !!(SEL.get(cod) && SEL.get(cod).ok),
+    sel: () => { const r = {}; vivos.forEach(m => { if (m._sel) { const o = r[m._sel] || (r[m._sel] = { poste: 0, tr: 0, eq: 0 }); o[m._tipo]++; } }); return r; },
+    selPontos: cod => [...vivos.values()].filter(m => m._sel === cod).map(m => { const l = m.getLatLng(); return [l.lat, l.lng, m._tipo, m._q[5][0]]; }),
+    selBaixados: () => [...SEL].filter(([, o]) => o.A).map(([c]) => c) };
 })();
