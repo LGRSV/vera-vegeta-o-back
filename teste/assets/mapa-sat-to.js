@@ -10,7 +10,9 @@
 // - O que mostra: a imagem de satélite (Esri World Imagery, ou a Google com a chave de assets/mapa-satelite.js), só o Tocantins
 //   (fora do estado, a cor escura dos mapas, --mapbg) e o T1 e o T2 de todos os alimentadores (dados/vizinhos/estado.txt, o
 //   mesmo da visão Tocantins do mapa do alimentador; os do índice que não estão nele, só alguns metros de rede no cadastro,
-//   viram um ponto e também contam). Passar o mouse numa linha mostra o código do alimentador; clicar abre a página dele.
+//   viram um ponto e também contam). Passar o mouse numa linha mostra o código do alimentador; clicar carrega o alimentador
+//   ali mesmo, no satélite (a rede T1/T2/T3 e o painel dele, com o botão que abre a página; "o alimentador carregado ali
+//   mesmo", mais abaixo).
 //   Arrastar e zoom livres, com o estado de limite.
 // - A divisão do mapa dos municípios, nos mesmos níveis (pedido do usuário: "1- Regional, 2- Polo, 3- Municípios"):
 //   Tocantins (o contorno das regionais, claro com sombra, e a bandeirinha de cada uma) › Regional (voo até ela; fora,
@@ -38,7 +40,7 @@
 // - Botão "Fronteira" (no alto, ao lado do aviso; o desenho do botão NAE do mapa do alimentador; pedido do usuário):
 //   desligado (o padrão), a visão limpa, como a visão Tocantins do mapa do alimentador: o estado inteiro com o T1 e o T2 de
 //   todos os alimentadores, sem as divisas, os cartões e o véu (os panes deles escondidos e sem desenho), e sem a navegação
-//   por áreas (zoom, arrasto, a dica da linha e o clique que abre a página continuam); ligado, os níveis acima. A escolha
+//   por áreas (zoom, arrasto, a dica da linha e o clique que carrega o alimentador continuam); ligado, os níveis acima. A escolha
 //   fica guardada (localStorage st-fronteira). Desligado, o satélite não segue o nível do mapa dos municípios nem o muda
 //   ao fechar.
 //   Ligado, as divisas também seguem o zoom: de longe as regionais; aproximando, os polos (Z_FR_POL) e os municípios
@@ -378,6 +380,7 @@
     sincModo();
     pontos.sinc();
     if (estado === 'on') poeAviso(legenda());
+    rotulosAl();                                           // (a NAE ligada: os números nos nomes do alimentador carregado)
   }
   // a visão do mapa dos municípios mudou (por fora, ou com o satélite fechado): aqui, só a camada dela (a NAE, a visão de
   // sempre, ao abrir não liga nada: o satélite abre com o T1 e o T2 de antes)
@@ -418,7 +421,7 @@
       '.st-sat.leaflet-container .leaflet-control-attribution{background:var(--vidro,rgba(15,20,23,.82));color:var(--vidro-fg,#f3f4f4);font:11px/1.4 var(--f-body,sans-serif);border-top-left-radius:var(--r1,6px)}' +
       '.st-linhas{transition:opacity .45s var(--ease,ease)}' +
       // os outros elementos do mapa (nomes, bandeiras, cartões) saem como no raio-X; o Tela cheia e o "Abrindo…" ficam
-      '.sat-to .mt-mapa>:not(svg):not(.mt-tc):not(.st-sat):not(.st-lado):not(.st-lgs):not(.st-balao):not(.mt-abrindo){opacity:0;pointer-events:none}' +
+      '.sat-to .mt-mapa>:not(svg):not(.mt-tc):not(.st-sat):not(.st-lado):not(.st-lgs):not(.st-balao):not(.st-alp):not(.mt-abrindo){opacity:0;pointer-events:none}' +
       // com o satélite inteiro na tela, o mapa dos municípios embaixo dele não é pintado (nada de trabalho escondido)
       '.sat-to.st-cobre .mt-mapa>svg{visibility:hidden}' +
       // trilha: a do satélite no lugar da do mapa dos municípios (mesmo desenho); a legenda some no município, como lá
@@ -559,9 +562,50 @@
       '.st-sat.leaflet-container .leaflet-control-attribution{font-size:9px}}' +
       '@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .st-aviso .st-tecla{color:#b9c1c6}}' +
       ':root[data-theme="light"] .st-aviso .st-tecla{color:#b9c1c6}' +
-      '@media (prefers-reduced-motion:reduce){.st-card,.st-sat .mt-mn,.st-sat .mt-fio,.st-sat .mt-pino{animation:none}.st-mun-b svg{transition:none}}';
+      '@media (prefers-reduced-motion:reduce){.st-card,.st-sat .mt-mn,.st-sat .mt-fio,.st-sat .mt-pino{animation:none}.st-mun-b svg{transition:none}}' + CSS_AL;
     document.head.append(css);
   }
+
+  // o alimentador carregado: as outras linhas esmaecidas (o canvas delas; os pontos das camadas não), os nomes dos trechos
+  // e o DJ/religador (os do mapa do alimentador: .lb e .at de mapa_trechos.html) e o painel (a gaveta do mapa do
+  // alimentador: telacheia.js e .det/.resumo-classe de mapa_trechos.html; o botão de abrir, o .st-mun-a do cartão do município)
+  const CSS_AL =
+    '.st-sat.st-alon .leaflet-st-linhas-pane>canvas.st-img,.st-sat.st-alon .leaflet-st-linhas-pane>canvas.st-rede{opacity:.38}' +
+    '.st-lb{display:inline-block;transform:translate(-50%,-50%);font:700 13px/1 var(--f-display,sans-serif);color:#fff;background:rgba(0,0,0,.66);border-left:4px solid var(--c);' +
+    'padding:4px 7px;border-radius:3px;white-space:nowrap;pointer-events:none}.st-lb.fus{font-size:11.5px;padding:3px 5px;border-left-width:3px}' +
+    '.st-lb .n{display:inline-block;margin-left:5px;padding:0 5px;border-radius:8px;background:#b91c1c;color:#fff;font:700 11px/16px var(--f-mono,monospace)}' +
+    '.st-at{display:flex;align-items:center;gap:4px;white-space:nowrap;transform:translate(-14px,-50%);pointer-events:none}' +
+    '.st-at b{display:inline-grid;place-items:center;box-sizing:border-box;min-width:28px;height:20px;padding:0 4px;background:#fbfbf9;color:#1b2024;border:2px solid #1b2024;border-radius:3px;font:600 11.5px/1 var(--f-mono,monospace)}' +
+    '.st-at span{display:none;font:600 11.5px/1 var(--f-mono,monospace);color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}.st-alnum .st-at span{display:inline}.st-sat:not(.st-aleq) .st-at.rl{display:none}' +
+    '.st-alp{position:absolute;right:12px;top:64px;z-index:7;display:grid;align-content:start;gap:var(--s3,12px);box-sizing:border-box;width:min(340px,calc(100% - 24px));max-height:calc(100% - 94px);' +
+    'overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:var(--s3,12px) var(--s4,16px) var(--s4,16px);background:var(--paper,#111314);color:var(--fg,#e7eaeb);' +
+    'border:1px solid var(--line,#2a2f33);border-radius:var(--r3,14px);box-shadow:-12px 0 32px rgb(0 0 0 / .35);font:400 var(--t-sm,13px)/1.4 var(--f-body,sans-serif)}.st-alp[hidden]{display:none}' +
+    '.st-alp-h{display:flex;align-items:flex-start;gap:8px}.st-alp-t{flex:1;min-width:0}.st-alp-t small{font:500 var(--t-xs,12px)/1.2 var(--f-body,sans-serif);color:var(--muted,#9aa4ab)}' +
+    '.st-alp-t h2{margin:2px 0 0;font:600 var(--t-lg,17px)/1.2 var(--f-mono,monospace);letter-spacing:0;color:var(--fg,#e7eaeb)}.st-alp-t h2:focus{outline:0}' +
+    '.st-alp-t p{margin:3px 0 0;font:400 var(--t-xs,12px)/1.35 var(--f-body,sans-serif);color:var(--muted,#9aa4ab)}' +
+    '.st-alp-x{flex:none;display:grid;place-items:center;width:40px;height:40px;margin:-4px -8px 0 0;padding:0;border:0;border-radius:var(--r2,10px);background:var(--paper,#111314);' +
+    'color:var(--fg,#e7eaeb);font:400 var(--t-lg,17px)/1 var(--f-body,sans-serif);cursor:pointer}.st-alp-x:hover{background:color-mix(in srgb,var(--fg,#e7eaeb) 6%,var(--paper,#111314))}' +
+    '.st-alp-tb{width:100%;border-collapse:collapse;font-size:var(--t-sm,13px)}.st-alp-tb td,.st-alp-tb th{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line,#2a2f33)}' +
+    '.st-alp-tb tr:first-child th{font:500 var(--t-xs,12px) var(--f-body,sans-serif);color:var(--muted,#9aa4ab)}' +
+    '.st-alp-tb td+td,.st-alp-tb th+th{text-align:right;font-family:var(--f-mono,monospace);font-variant-numeric:tabular-nums}.st-alp-tb td:first-child{font:600 var(--t-sm,13px) var(--f-mono,monospace)}' +
+    '.st-alp-dl{margin:0;display:grid;grid-template-columns:minmax(0,6.5rem) minmax(0,1fr);gap:6px var(--s3,12px)}' +
+    '.st-alp-dl dt{font:500 var(--t-xs,12px)/1.6 var(--f-body,sans-serif);color:var(--muted,#9aa4ab);overflow-wrap:anywhere;padding-top:1px}.st-alp-dl dd{margin:0;min-width:0;overflow-wrap:anywhere}' +
+    '.st-alp-dl small{font-size:var(--t-xs,12px);color:var(--muted,#9aa4ab)}' +
+    '.st-alp-leg{display:flex;flex-wrap:wrap;gap:4px 12px;margin:0;font:600 var(--t-xs,12px)/1.4 var(--f-mono,monospace);color:var(--muted,#9aa4ab)}' +
+    '.st-alp-leg i{display:inline-block;width:16px;height:4px;margin-right:5px;border-radius:2px;background:var(--c);vertical-align:middle}.st-alp-leg i.fino{height:2px}' +
+    '.st-alp-a{justify-self:start;display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:var(--r1,6px);background:var(--selo,#b8431f);color:#fff;' +
+    'font:600 var(--t-sm,13px)/1 var(--f-body,sans-serif);text-decoration:none;white-space:nowrap}.st-alp-a:hover{filter:brightness(1.12);text-decoration:none}' +
+    '.st-alp-st{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0;color:var(--muted,#9aa4ab)}' +
+    '.st-alp-st button{min-height:36px;padding:0 12px;border:1px solid var(--line,#2a2f33);border-radius:var(--r1,6px);background:transparent;color:var(--fg,#e7eaeb);font:500 var(--t-sm,13px)/1 var(--f-body,sans-serif);cursor:pointer}' +
+    '.st-gira{flex:none;width:14px;height:14px;box-sizing:border-box;border-radius:50%;border:2px solid var(--line,#2a2f33);border-top-color:var(--accent,#f08a5d)}' +
+    '.st-alp :focus-visible{outline:2px solid var(--foco-mapa,#fde047);outline-offset:2px}' +
+    // celular: embaixo, por cima da legenda (que some); o botão de abrir logo abaixo do título
+    // (compacto: o código e a SE numa linha, o botão logo abaixo; a tabela e a NAE rolando por dentro)
+    '.st-alp.st-baixo{left:8px;right:8px;top:auto;bottom:22px;width:auto;max-height:min(40%,280px);gap:8px;padding:6px 10px 10px;box-shadow:0 -10px 28px rgb(0 0 0 / .35)}' +
+    '.st-alp.st-baixo .st-alp-h{order:-2;align-items:center}.st-alp.st-baixo .st-alp-a{order:-1;min-height:40px}.st-alp.st-baixo .st-alp-tb td,.st-alp.st-baixo .st-alp-tb th{padding:4px 8px}' +
+    '.st-alp.st-baixo .st-alp-t small,.st-alp.st-baixo .st-alp-t p+p{display:none}.st-alp.st-baixo .st-alp-t h2{margin:0;font-size:var(--t-md,15px)}' +
+    '.st-alp.st-baixo .st-alp-t p{margin:1px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.st-alp.st-baixo .st-alp-x{margin:0 -4px 0 0}' +
+    '#mapa-to.st-alcel .st-lgs{display:none}';
 
   // ---------- telas: coluna (aviso e município), balão e trilha ----------
   let lado = null, lgs = null, clsCard = null, aviso = null, legEl = null, camsEl = null, cartaoMun = null, balao = null, trilha = null, frCard = null, frBt = null;
@@ -583,13 +627,15 @@
     clsCard.setAttribute('aria-label', 'Classes das linhas');
     clsCard.hidden = true;
     clsCard.innerHTML = ['T1', 'T2'].map(c => `<button type="button" data-c="${c}" aria-pressed="true" style="--c:${COR[c]}" title="Mostrar ou esconder ${c}">${c}</button>`).join('') +
-      '<button type="button" data-c="T3" aria-disabled="true" style="--c:#facc15" title="T3 só no mapa do alimentador">T3</button>';
+      '<button type="button" data-c="T3" aria-disabled="true" style="--c:#facc15" title="T3 só no alimentador aberto (clique num alimentador)">T3</button>';
     clsCard.addEventListener('click', e => {
       const b = e.target.closest('button[data-c]');
       if (!b || b.getAttribute('aria-disabled') === 'true' || estado !== 'on') return;
       const c = b.dataset.c;
       if (clsOff.has(c)) clsOff.delete(c); else clsOff.add(c);
       b.setAttribute('aria-pressed', String(!clsOff.has(c)));
+      estiloAl();                                          // (o alimentador carregado; o T3 só existe nele)
+      if (c === 'T3') return;
       realca(null);
       estilizaLinhas();
       pontos.pede();
@@ -687,6 +733,7 @@
     sincCams();
     lado.hidden = false;
     lgsMax();
+    posPainel();
   }
   function sincCams() {                                     // a fileira como estão as camadas
     if (!camsEl) return;
@@ -2428,7 +2475,7 @@
   // inteiro (2× a caixa, ×4 na tela de alta densidade) a cada linha que o mouse cruzava
   let rlCv = null;
   function poeRealceLinha() {
-    const g = sobre && grupos.get(sobre);
+    const g = sobre && !(alC && alC.cod === sobre && alC.r) && grupos.get(sobre);   // (o carregado já está realçado)
     if (!g || !map || !rend || !rend._bounds || map._animatingZoom) { if (rlCv) rlCv.style.display = 'none'; return; }
     if (!rlCv) { rlCv = document.createElement('canvas'); rlCv.className = 'st-realce'; rlCv.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none'; }
     if (rlCv.parentNode !== paneL) paneL.append(rlCv);
@@ -2478,21 +2525,425 @@
     if (cartaoMun) cartaoMun.querySelectorAll('.st-al').forEach(b => b.classList.toggle('on', b.dataset.al === cod));
     if (!cod && balao) balao.hidden = true;
   }
-  function abreAl(cod) {                                   // ?cheia=1: o mapa do alimentador já em tela cheia (telacheia.js; pedido do usuário)
-    const p = `alimentadores/${encodeURIComponent(cod)}/?cheia=1`;
+  // a página do alimentador (o botão "Abrir mapa do alimentador" do painel; antes, o clique na linha): ?cheia=1, o mapa do
+  // alimentador já em tela cheia (telacheia.js; pedido do usuário)
+  function abreAl(cod) {
+    const p = urlAl(cod);
     if (window.ARGOS_PAG && window.ARGOS_PAG.abre) window.ARGOS_PAG.abre(p); else location.href = RAIZ + p;
   }
+  // ---------- o alimentador carregado ali mesmo (pedido do usuário: "Carregar ali mesmo") ----------
+  // Clique (ou toque) num alimentador (a linha, o losango ou o foco dele, a lista do cartão do município) não troca mais de
+  // página: a rede dele entra no próprio satélite, por cima das outras (que ficam esmaecidas), com o T1, o T2 e o T3 nas
+  // cores e nos pesos do mapa do alimentador (a cor pela zona, COR_Z de mapa_trechos.html; o peso pelo tipo, mais fino de
+  // longe) e um contorno escuro por baixo, o DJ (sempre) e os religadores (do zoom Z_EQ_AL; a caixinha, e o número do
+  // Z_NUM_AL) e, de perto, os nomes dos trechos (T1/T2 do Z_ROT_AL, T3 do Z_ROT_T3; com a camada NAE ligada, o número
+  // vermelho e os T3 com NAE já do Z_ROT_AL), cada um no ponto do rótulo do trecho ou, se ele estiver fora da vista, no
+  // ponto do trecho mais perto do meio da parte livre da vista (o nome segue o trecho de perto); um nome que cobriria
+  // outro (ou a caixinha do DJ/religador) fica de fora, o do tronco antes do ramal. Ao lado, o painel dele (o desenho da
+  // gaveta do mapa do alimentador: código, SE, a tabela Classe / Trechos / Extensão, a NAE e "Abrir mapa do
+  // alimentador", que leva à página dele em tela cheia, como o clique fazia antes).
+  // Fechar (✕, Esc, clique ou toque no vazio do mapa) tira tudo e o satélite fica como estava; clicar noutro troca.
+  // - O dados.js (o mesmo arquivo e o mesmo cache da página dele) só é baixado no clique, e lido num worker (montaAl): a
+  //   página recebe só as cadeias de vãos (os seguidos numa linha só, como alimentador.js) em Float64, os trechos, o DJ e os
+  //   religadores, a NAE contada por trecho e o resumo. Nada disso existe antes do 1º clique (a página inicial não pesa).
+  // - O desenho: um canvas próprio (CanvasAl, o L.Canvas com o contorno) no pane das linhas, logo acima do canvas delas
+  //   (os losangos e os focos continuam por cima; o esmaecer e o sumir do pane no voo entre níveis e ao fechar valem
+  //   para ele também), sem mouse (o mouse e o clique seguem nas linhas de baixo); os nomes e o DJ num pane de
+  //   marcadores só deles, sem mouse.
+  // - Enquadramento (decisão): o mapa não se mexe sozinho, a não ser que o alimentador esteja todo fora da parte livre da
+  //   vista (sem o painel): aí voa suave até ele (o voo dos níveis; sem animação com prefers-reduced-motion). Fechar volta
+  //   voando à vista de antes só se o mapa não foi mexido depois desse voo.
+  // - Celular: o painel embaixo (a legenda some enquanto ele está aberto) e o botão de abrir logo abaixo do título. Com a
+  //   Faixa Por ano, o 1º toque mostra as etiquetas das OS do alimentador e o 2º carrega (cliqueLinha).
+  const COR_Z = { 1: '#3b82f6', 2: '#22c55e', 3: '#facc15', 4: '#f97316', 5: '#ef4444' }, COR_Z6 = '#d946ef';
+  const PESO_T = { principal: 6, ramal: 4.5, fusivel: 3 }, ORDEM_T = { fusivel: 0, ramal: 1, principal: 2 };
+  const Z_ROT_AL = 10, Z_ROT_T3 = 13.5, Z_EQ_AL = 10, Z_NUM_AL = 13, ROT_AL_MAX = 160;
+  const kAl = z => (z < 8 ? 0.5 : z < 10 ? 0.62 : z < 12 ? 0.8 : 1);
+  const MES3 = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const mes1 = m => `${MES3[+m.slice(5, 7) - 1]}/${m.slice(0, 4)}`;
+  const periodoAl = ms => (!ms || !ms.length ? '' : ms.length === 1 ? mes1(ms[0]) : (ms[0].slice(0, 4) === ms[ms.length - 1].slice(0, 4) ? MES3[+ms[0].slice(5, 7) - 1] : mes1(ms[0])) + ' a ' + mes1(ms[ms.length - 1]));
+  // texto do dados.js (`window.D = {…};`) → o que o satélite desenha e mostra (no worker; só usa o que recebe)
+  function montaAl(txt) {
+    const D = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+    const V = D.vaos || [], T = D.trechos || [], nt = T.length, por = [];
+    for (let t = 0; t < nt; t++) por.push([]);
+    for (const v of V) if (por[v[4]]) por[v[4]].push(v);
+    const pts = [], ini = [], ct = [], cb = [];
+    let s = 90, w = 180, n = -90, e = -180, cs = 0, cw = 0, cn = 0, ce = 0;
+    const poe = (la, lo) => { pts.push(la, lo); if (la < cs) cs = la; if (la > cn) cn = la; if (lo < cw) cw = lo; if (lo > ce) ce = lo; };
+    const fecha = () => { cb.push(cs, cw, cn, ce); if (cs < s) s = cs; if (cn > n) n = cn; if (cw < w) w = cw; if (ce > e) e = ce; };
+    for (let t = 0; t < nt; t++) {
+      let aberta = false, la = NaN, lo = NaN;
+      for (const v of por[t]) {
+        if (aberta && v[0] === la && v[1] === lo) poe(v[2], v[3]);
+        else {
+          if (aberta) fecha();
+          ini.push(pts.length / 2); ct.push(t);
+          cs = cw = Infinity; cn = ce = -Infinity;
+          poe(v[0], v[1]); poe(v[2], v[3]);
+          aberta = true;
+        }
+        la = v[2]; lo = v[3];
+      }
+      if (aberta) fecha();
+    }
+    ini.push(pts.length / 2);
+    const N = D.nae || null, oc = N ? N.oc || [] : [], ex = N ? N.ext || [] : [], tr = {}, tipos = { mt: 0, tr: 0, djrl: 0 };
+    for (const o of oc.concat(ex)) if (o.trecho) tr[o.trecho] = (tr[o.trecho] || 0) + 1;
+    for (const o of oc) tipos[o.abr === 'DJ' || o.abr === 'RL' ? 'djrl' : o.abr === 'TR' || !o.col ? 'tr' : 'mt']++;
+    const meta = D.meta || {}, res = meta.resumo || {};
+    return {
+      pts: Float64Array.from(pts), ini: Uint32Array.from(ini), ct: Uint32Array.from(ct), cb: Float64Array.from(cb), caixa: [s, w, n, e],
+      trechos: T.map(t => ({ nome: String(t.nome), zona: t.zona, tipo: t.tipo, ext: +t.ext || 0, rotulo: Array.isArray(t.rotulo) ? t.rotulo : null })),
+      principais: (D.principais || []).filter(a => isFinite(a.lat) && isFinite(a.lon)).map(a => ({ nome: String(a.nome || ''), t: a.t, lat: +a.lat, lon: +a.lon })),
+      nae: N ? { meses: N.meses || [], total: oc.length, tr, tipos, rot: (meta.origem || {}).nae_filtro === 'arvore' ? 'NAE - vegetação' : 'NAE' } : null,
+      meta: { al: meta.al || '', se: meta.se || '', se_nome: meta.se_nome || '', polo: meta.polo || '', ext: res.extensao_m, muns: (meta.municipios || []).map(m => m.nome).filter(Boolean) }
+    };
+  }
+  // o leitor do dados.js: um worker (criado no 1º clique; sem ele, aqui mesmo); o download de quem saiu antes de chegar é
+  // cancelado
+  let leitorAl = null, nAl = 0;
+  const esperaAl = new Map();
+  function baixaAl(c) {
+    const url = `${RAIZ}alimentadores/${encodeURIComponent(c.cod)}/dados.js`;
+    if (leitorAl === null && typeof Worker === 'function' && !window.__satSemLeitor) {
+      try {
+        const u = URL.createObjectURL(new Blob([`'use strict';\nconst montaAl = ${montaAl};\nconst vindo = new Map();\n` +
+          'onmessage = e => { const m = e.data; if (m.cancela) { const c = vindo.get(m.cancela); if (c) { c.abort(); vindo.delete(m.cancela); } return; } ' +
+          'const c = new AbortController(); vindo.set(m.id, c); fetch(m.url, { signal: c.signal }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })' +
+          '.then(t => { vindo.delete(m.id); const r = montaAl(t); r.bytes = t.length; postMessage({ id: m.id, r }, [r.pts.buffer, r.ini.buffer, r.ct.buffer, r.cb.buffer]); })' +
+          '.catch(er => { vindo.delete(m.id); if (er && er.name === "AbortError") return; postMessage({ id: m.id, erro: String(er && er.message || er) }); }); };'], { type: 'text/javascript' }));
+        leitorAl = new Worker(u);
+        URL.revokeObjectURL(u);
+        leitorAl.onmessage = e => { const p = esperaAl.get(e.data.id); if (!p) return; esperaAl.delete(e.data.id); if (e.data.erro) p[1](new Error(e.data.erro)); else p[0](e.data.r); };
+        leitorAl.onerror = e => { e.preventDefault(); leitorAl = false; esperaAl.forEach(p => p[1](new Error('leitor'))); esperaAl.clear(); };
+      } catch (e) { leitorAl = false; }
+    }
+    return new Promise((ok, falha) => {
+      if (leitorAl) { esperaAl.set(c.id, [ok, falha]); leitorAl.postMessage({ id: c.id, url }); return; }
+      fetch(url).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }).then(t => { const r = montaAl(t); r.bytes = t.length; ok(r); }, falha);
+    });
+  }
+  function cancelaAl(c) {
+    if (!esperaAl.has(c.id)) return;
+    esperaAl.delete(c.id);
+    if (leitorAl) leitorAl.postMessage({ cancela: c.id });
+  }
+
+  let alC = null, rendAl = null, paneAlR = null, alPainel = null, alLigado = false;
+  let vooAl = 0;                                           // o voo até o alimentador (ou de volta) em andamento (o nº dele)
+  // voo suave do alimentador (o dos níveis, anima): sem arrastar nem zoom no meio; devolve a promessa do fim
+  function voaAl(v) {
+    const meu = ++vooAl;
+    interage(false);
+    return anima(v, calmo() ? 0 : duracao(v), () => 1).then(ok => {
+      if (meu !== vooAl) return ok;
+      vooAl = 0;
+      if (estado === 'on' && !voandoN) interage(true);
+      return ok;
+    });
+  }
+  const urlAl = cod => `alimentadores/${encodeURIComponent(cod)}/?cheia=1`;
+  function carregaAl(cod) {
+    if (!map || estado !== 'on' || voandoN || !cod) return;
+    if (alC && alC.cod === cod && alC.estado !== 'erro') return;   // o mesmo: fica (o erro tenta de novo)
+    if (alC) tiraAl(false);
+    if (!alLigado) {
+      alLigado = true;
+      paneAlR = map.createPane('st-alr');
+      paneAlR.style.zIndex = 590;                          // abaixo dos marcadores (600: etiquetas das OS, cartões)
+      paneAlR.style.pointerEvents = 'none';
+      map.on('zoomend', () => { if (alC && alC.r) estiloAl(); });
+      map.on('moveend', () => { if (alC && alC.r) rotulosAl(); });
+      map.on('movestart', () => { if (alC && !alC.voando && !vooAl) alC.mexeu = true; });
+    }
+    const c = alC = { cod, id: ++nAl, estado: 'baixando', r: null, ls: [], mk: [], rot: new Map(), vistaAntes: { c: map.getCenter(), z: map.getZoom(), k: +caixaSat.dataset.k || 1 },
+      voou: false, mexeu: false, voando: false, t0: performance.now() };
+    realca(null);
+    if (balao) balao.hidden = true;
+    poePainel();
+    baixaAl(c).then(r => {
+      if (alC !== c) return;
+      c.r = r; c.estado = 'pronto'; c.ms = performance.now() - c.t0;
+      poePainel();
+      // a rede num quadro à parte (o painel já aparece pronto; a carga não vira uma tarefa longa só)
+      requestAnimationFrame(() => setTimeout(() => {
+        if (alC !== c) return;
+        desenhaAl(c);
+        c.msRede = performance.now() - c.t0;
+        voaSeFora(c);
+      }, 0));
+    }, er => {
+      if (alC !== c) return;
+      c.estado = 'erro'; c.erro = String(er && er.message || er);
+      poePainel();
+    });
+  }
+  // fecha o alimentador carregado (volta: o voo de volta, se o carregar voou e o mapa não foi mexido depois)
+  function tiraAl(volta) {
+    const c = alC;
+    if (!c) return;
+    alC = null;
+    if (c.estado === 'baixando') cancelaAl(c);
+    c.ls.forEach(l => l.remove());
+    c.mk.forEach(m => m.remove());
+    c.rot.forEach(m => m.remove());
+    if (rendAl && map && map.hasLayer(rendAl)) map.removeLayer(rendAl);   // (o canvas dele sai da memória)
+    if (caixaSat) caixaSat.classList.remove('st-alon', 'st-alnum', 'st-aleq');
+    clsOff.delete('T3');
+    sincT3();
+    const tinhaFoco = alPainel && alPainel.contains(document.activeElement);
+    if (alPainel) alPainel.hidden = true;
+    alvo.classList.remove('st-alcel');
+    if (tinhaFoco && caixaSat) caixaSat.focus({ preventScroll: true });
+    if (volta && c.voou && !c.mexeu && map && estado === 'on' && !voandoN) voaAl(c.vistaAntes);
+  }
+  // a rede: um grupo por classe, tipo e zona (cada um uma linha só com as cadeias dele, T3 embaixo, o tronco por cima),
+  // cada linha com o contorno escuro por baixo dela, no mesmo traçado (o canvas dela traça duas vezes: sem uma segunda
+  // linha, o Leaflet projeta e recorta os pontos uma vez só)
+  let CanvasAl = null;
+  function desenhaAl(c) {
+    const r = c.r, G = new Map(), LL = L.LatLng;
+    for (let k = 0; k < r.ct.length; k++) {
+      const t = r.trechos[r.ct[k]], cls = t.nome.split('-')[0], ch = `${cls}|${t.tipo}|${t.zona}`;
+      let g = G.get(ch);
+      if (!g) G.set(ch, g = { cls, tipo: t.tipo, cor: COR_Z[t.zona] || COR_Z6, base: PESO_T[t.tipo] || 3, ord: ORDEM_T[t.tipo] ?? 0, ls: [] });
+      const a = r.ini[k], b = r.ini[k + 1], l = new Array(b - a);
+      for (let i = a; i < b; i++) l[i - a] = new LL(r.pts[2 * i], r.pts[2 * i + 1]);
+      g.ls.push(l);
+    }
+    const gs = [...G.values()].sort((a, b) => a.ord - b.ord);
+    if (!CanvasAl) CanvasAl = L.Canvas.extend({
+      _updatePoly(layer, closed) {
+        const h = layer._stHalo, parts = layer._parts;
+        if (this._drawing && h && h.opacity > 0 && parts && parts.length) {
+          const x = this._ctx;
+          x.beginPath();
+          for (const q of parts) for (let j = 0; j < q.length; j++) { if (j) x.lineTo(q[j].x, q[j].y); else x.moveTo(q[j].x, q[j].y); }
+          x.globalAlpha = h.opacity; x.lineWidth = h.weight; x.strokeStyle = h.color; x.lineCap = 'round'; x.lineJoin = 'round';
+          x.stroke();
+        }
+        L.Canvas.prototype._updatePoly.call(this, layer, closed);
+      }
+    });
+    if (!rendAl) rendAl = new CanvasAl({ pane: 'st-linhas', padding: 0.3, tolerance: 3 });
+    c.ls = gs.map(g => { const l = L.polyline(g.ls, { renderer: rendAl, interactive: false, smoothFactor: 1, lineCap: 'round', lineJoin: 'round', color: g.cor }); l._stG = g; l._stHalo = { color: '#0b0f14' }; return l; });
+    estiloAl(true);
+    c.ls.forEach(l => l.addTo(map));
+    const cv = rendAl._container;                          // logo acima do canvas das linhas: os pontos das camadas por cima
+    if (cv) {
+      cv.style.pointerEvents = 'none';
+      cv.classList.add('st-alcv');
+      const pts = paneL.querySelector('canvas.st-pts');
+      if (pts) pts.before(cv);
+    }
+    if (rend && rend._container) rend._container.classList.add('st-rede');
+    caixaSat.classList.add('st-alon');
+    // DJ e religadores (a caixinha do mapa do alimentador; o número de perto)
+    c.mk = r.principais.map(a => L.marker([a.lat, a.lon], { pane: 'st-alr', interactive: false, keyboard: false,
+      icon: L.divIcon({ className: 'st-mk', iconSize: null, html: `<div class="st-at${a.t === 'DJ' ? '' : ' rl'}"><b>${a.t === 'DJ' ? 'DJ' : '79'}</b><span>${esc(a.nome)}</span></div>` }) }).addTo(map));
+    rotulosAl();
+    sincT3();
+  }
+  // o estilo pelo zoom (o peso) e pelos botões T1 T2 T3 (a classe desligada some)
+  function estiloAl(semPedir) {
+    const c = alC;
+    if (!c || !map) return;
+    const k = kAl(map.getZoom());
+    for (const l of c.ls) {
+      const g = l._stG, fora = clsOff.has(g.cls), st = { weight: g.base * k, opacity: fora ? 0 : 1 };
+      Object.assign(l._stHalo, { weight: g.base * k + 3, opacity: fora ? 0 : 0.55 });
+      if (semPedir) L.setOptions(l, st); else l.setStyle(st);
+    }
+    caixaSat.classList.toggle('st-alnum', map.getZoom() >= Z_NUM_AL);
+    caixaSat.classList.toggle('st-aleq', map.getZoom() >= Z_EQ_AL);
+    if (!semPedir) rotulosAl();
+  }
+  // nomes dos trechos (só os da vista, com folga): T1/T2 do Z_ROT_AL, T3 do Z_ROT_T3 (com a NAE ligada, os T3 com NAE já
+  // do Z_ROT_AL); o número vermelho da NAE com a camada NAE ligada
+  function rotulosAl() {
+    const c = alC;
+    if (!c || !c.r || !map) return;
+    const z = map.getZoom(), r = c.r, N = cams.has('nae') && r.nae ? r.nae.tr : null, quer = new Map();
+    if (z >= Z_ROT_AL) {
+      // a parte livre da vista (sem o painel e sem a beira), em graus; o meio dela
+      const A = areaLivre(), m = 24, a = map.containerPointToLatLng([A.x0 + m, A.y0 + m]), b = map.containerPointToLatLng([A.x1 - m, A.y1 - m]);
+      const vS = b.lat, vN = a.lat, vW = a.lng, vE = b.lng, cLa = (vS + vN) / 2, cLo = (vW + vE) / 2;
+      if (!r.tc) {                                           // a 1ª cadeia de cada trecho (as cadeias vêm na ordem dos trechos)
+        r.tc = new Int32Array(r.trechos.length + 1).fill(-1);
+        for (let k = r.ct.length - 1; k >= 0; k--) r.tc[r.ct[k]] = k;
+      }
+      const ponto = ti => {                                 // o ponto do trecho na vista mais perto do meio dela
+        let best = null, bd = Infinity;
+        for (let k = r.tc[ti]; k >= 0 && k < r.ct.length && r.ct[k] === ti; k++) {
+          if (r.cb[4 * k] > vN || r.cb[4 * k + 2] < vS || r.cb[4 * k + 1] > vE || r.cb[4 * k + 3] < vW) continue;
+          for (let i = r.ini[k]; i < r.ini[k + 1]; i++) {
+            const la = r.pts[2 * i], lo = r.pts[2 * i + 1];
+            if (la < vS || la > vN || lo < vW || lo > vE) continue;
+            const d = (la - cLa) ** 2 + (lo - cLo) ** 2;
+            if (d < bd) { bd = d; best = [la, lo]; }
+          }
+        }
+        return best;
+      };
+      const dentro = ll => ll && ll[0] >= vS && ll[0] <= vN && ll[1] >= vW && ll[1] <= vE;
+      // sem um nome cobrir outro ou a caixinha do DJ/religador (na tela, com folga): o tronco primeiro, o T3 por último
+      const feitos = [], eq = map.getZoom() >= Z_EQ_AL;
+      for (const a of r.principais) if (eq || a.t === 'DJ') { const q = map.latLngToContainerPoint([a.lat, a.lon]); feitos.push([q.x - 16, q.y - 12, q.x + 16, q.y + 12]); }
+      const ordem = r.trechos.map((t, i) => i).sort((a, b) => (ORDEM_T[r.trechos[b].tipo] ?? 0) - (ORDEM_T[r.trechos[a].tipo] ?? 0) || a - b);
+      for (const ti of ordem) {
+        if (quer.size >= ROT_AL_MAX) break;
+        const t = r.trechos[ti];
+        if (clsOff.has(t.nome.split('-')[0])) continue;
+        const n = N ? N[t.nome] || 0 : 0;
+        if (t.tipo === 'fusivel' && z < Z_ROT_T3 && !n) continue;
+        const ll = dentro(t.rotulo) ? t.rotulo : ponto(ti);
+        if (!ll) continue;
+        const q = map.latLngToContainerPoint(ll), w = (t.nome.length + (n ? String(n).length + 2 : 0)) * 4.4 + 12, R = [q.x - w - 3, q.y - 13, q.x + w + 3, q.y + 13];
+        if (feitos.some(o => R[0] < o[2] && R[2] > o[0] && R[1] < o[3] && R[3] > o[1])) continue;
+        feitos.push(R);
+        quer.set(t.nome + '|' + n + '|' + ll[0].toFixed(5) + ',' + ll[1].toFixed(5), { t, n, ll });
+      }
+    }
+    c.rot.forEach((mk, k) => { if (!quer.has(k)) { mk.remove(); c.rot.delete(k); } });
+    quer.forEach(({ t, n, ll }, k) => {
+      if (c.rot.has(k)) return;
+      c.rot.set(k, L.marker(ll, { pane: 'st-alr', interactive: false, keyboard: false, zIndexOffset: t.tipo === 'fusivel' ? 0 : 100,
+        icon: L.divIcon({ className: 'st-mk', iconSize: null, html: `<div class="st-lb${t.tipo === 'fusivel' ? ' fus' : ''}" style="--c:${COR_Z[t.zona] || COR_Z6}">${esc(t.nome)}${n ? `<span class="n">${NF0.format(n)}</span>` : ''}</div>` }) }).addTo(map));
+    });
+  }
+  // o botão T3 (desabilitado sem alimentador carregado: o satélite só tem o T1 e o T2 de todos)
+  function sincT3() {
+    const b = clsCard && clsCard.querySelector('button[data-c="T3"]');
+    if (!b) return;
+    if (alC && alC.r) { b.removeAttribute('aria-disabled'); b.setAttribute('aria-pressed', String(!clsOff.has('T3'))); b.title = `Mostrar ou esconder o T3 de ${alC.cod}`; }
+    else { b.setAttribute('aria-disabled', 'true'); b.removeAttribute('aria-pressed'); b.title = 'T3 só no alimentador aberto (clique num alimentador)'; }
+  }
+  // o clique (ou o toque) caiu na rede do alimentador carregado? (o T3 dele não tem linha embaixo: sem isso, o clique nele
+  // fecharia o alimentador como um clique no vazio)
+  function naRedeAl(cp, tol = 10) {
+    const c = alC;
+    if (!c || !c.r || !map || !cp) return false;
+    const r = c.r, ll = map.containerPointToLatLng(cp), z = map.getZoom(), dg = tol * 360 / (256 * Math.pow(2, z)) * 1.5;
+    for (let k = 0; k < r.ct.length; k++) {
+      if (ll.lat < r.cb[4 * k] - dg || ll.lat > r.cb[4 * k + 2] + dg || ll.lng < r.cb[4 * k + 1] - dg || ll.lng > r.cb[4 * k + 3] + dg) continue;
+      if (clsOff.has(r.trechos[r.ct[k]].nome.split('-')[0])) continue;
+      let p = map.latLngToContainerPoint([r.pts[2 * r.ini[k]], r.pts[2 * r.ini[k] + 1]]);
+      for (let i = r.ini[k] + 1; i < r.ini[k + 1]; i++) {
+        const q = map.latLngToContainerPoint([r.pts[2 * i], r.pts[2 * i + 1]]), dx = q.x - p.x, dy = q.y - p.y, L2 = dx * dx + dy * dy;
+        const f = L2 ? Math.max(0, Math.min(1, ((cp.x - p.x) * dx + (cp.y - p.y) * dy) / L2)) : 0;
+        if (Math.hypot(cp.x - p.x - f * dx, cp.y - p.y - f * dy) <= tol) return true;
+        p = q;
+      }
+    }
+    return false;
+  }
+  // a parte da caixa que o painel não cobre (px da caixa)
+  function areaLivre() {
+    const t = map.getSize();
+    if (!alPainel || alPainel.hidden) return { x0: 0, y0: 0, x1: t.x, y1: t.y };
+    if (celular()) return { x0: 0, y0: 0, x1: t.x, y1: Math.max(80, alPainel.offsetTop - 4) };
+    return { x0: 0, y0: 0, x1: Math.max(120, alPainel.offsetLeft - 4), y1: t.y };
+  }
+  function voaSeFora(c) {
+    const [s, w, n, e] = c.r.caixa;
+    if (!(n >= s) || !(e >= w)) return;
+    const A = areaLivre(), p0 = map.latLngToContainerPoint([n, w]), p1 = map.latLngToContainerPoint([s, e]);
+    c.fora = p1.x < A.x0 || p0.x > A.x1 || p1.y < A.y0 || p0.y > A.y1;
+    if (!c.fora) return;
+    const bAl = L.latLngBounds([s, w], [n, e]), t = map.getSize(), pad = 40;
+    let z = map.getBoundsZoom(bAl, false, L.point(t.x - (A.x1 - A.x0) + 2 * pad, t.y - (A.y1 - A.y0) + 2 * pad));
+    z = Math.max(map.getMinZoom(), Math.min(z, 14));
+    const meio = map.project(bAl.getCenter(), z), off = L.point((A.x0 + A.x1) / 2, (A.y0 + A.y1) / 2).subtract(t.divideBy(2));
+    const v = { c: map.unproject(meio.subtract(off), z), z, k: +caixaSat.dataset.k || 1 };
+    c.voou = c.voando = true;
+    voaAl(v).then(() => {
+      c.voando = false;
+      if (alC === c) rotulosAl();
+    });
+  }
+  // o painel (o desenho da gaveta do mapa do alimentador): à direita no computador, embaixo no celular
+  function poePainel() {
+    const c = alC;
+    if (!c) return;
+    if (!alPainel) {
+      alPainel = document.createElement('section');
+      alPainel.className = 'st-alp';
+      alPainel.hidden = true;
+      caixa.append(alPainel);
+      alPainel.addEventListener('click', e => {
+        if (e.target.closest('.st-alp-x')) { tiraAl(true); return; }
+        if (e.target.closest('.st-alp-de-novo') && alC) { const cod = alC.cod; tiraAl(false); carregaAl(cod); return; }
+        const a = e.target.closest('.st-alp-a');
+        if (a && alC && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && !e.button) { e.preventDefault(); abreAl(alC.cod); }
+      });
+    }
+    const r = c.r, inf = infoAl(c.cod), m = r && r.meta;
+    const se = m ? [m.se_nome, m.se].filter(Boolean).join(' · ') : inf.se || '';
+    const sub = m ? [m.polo ? 'Polo ' + m.polo : '', m.muns.length ? m.muns.slice(0, 3).join(', ') + (m.muns.length > 3 ? ` e mais ${m.muns.length - 3}` : '') : ''].filter(Boolean).join(' · ') : '';
+    let corpo = '';
+    if (c.estado === 'baixando') corpo = '<p class="st-alp-st" role="status"><i class="st-gira" aria-hidden="true"></i>Carregando a rede…</p>';
+    else if (c.estado === 'erro') corpo = '<p class="st-alp-st" role="status">A rede não carregou. <button type="button" class="st-alp-de-novo">Tentar de novo</button></p>';
+    else {
+      const cl = { T1: [0, 0], T2: [0, 0], T3: [0, 0] };
+      r.trechos.forEach(t => { const x = cl[t.nome.split('-')[0]]; if (x) { x[0]++; x[1] += t.ext; } });
+      const total = m.ext ?? r.trechos.reduce((s, t) => s + t.ext, 0);
+      const zonas = new Set(r.trechos.map(t => t.zona)), nRam = r.trechos.filter(t => t.tipo === 'ramal').length;
+      const leg = [['T1', COR_Z[1], ''], [nRam > 1 ? 'T2-A, T2-B…' : nRam ? 'T2-A' : 'T2', COR_Z[2], '']];
+      [3, 4, 5].forEach(z => { if (zonas.has(z)) leg.push([`T${z}-…`, COR_Z[z], 'fino']); });
+      if ([...zonas].some(z => z > 5)) leg.push(['T6+', COR_Z6, 'fino']);
+      const N = r.nae, top = N ? Object.entries(N.tr).sort((a, b) => b[1] - a[1]).slice(0, 3) : [];
+      const tip = N ? [N.tipos.mt ? `${N.tipos.mt} rede MT` : '', N.tipos.tr ? `${N.tipos.tr} trafo` : '', N.tipos.djrl ? `${N.tipos.djrl} de disjuntor/religador` : ''].filter(Boolean).join(' · ') : '';
+      corpo = `<table class="st-alp-tb"><tr><th>Classe</th><th>Trechos</th><th>Extensão</th></tr>` +
+        Object.entries(cl).map(([k, [n, x]]) => `<tr><td>${k}</td><td>${NF0.format(n)}</td><td>${kmTxt(x)}</td></tr>`).join('') +
+        `<tr><th>Total</th><th>${NF0.format(r.trechos.length)}</th><th>${kmTxt(total)}</th></tr></table>` +
+        `<dl class="st-alp-dl"><dt>${esc(N ? N.rot : 'NAE')}</dt><dd>${N ? `<b>${NF0.format(N.total)}</b> no alimentador${N.meses.length ? ' · ' + esc(periodoAl(N.meses)) : ''}` +
+          (tip ? `<br><small>${esc(tip)}</small>` : '') + (top.length ? `<br><small>Mais NAE: ${top.map(([t, n]) => `${esc(t)} ${NF0.format(n)}`).join(' · ')}</small>` : '') : 'sem dados da Crítica'}</dd></dl>` +
+        `<p class="st-alp-leg">${leg.map(([nm, cor, k]) => `<span><i class="${k}" style="--c:${cor}"></i>${esc(nm)}</span>`).join('')}</p>`;
+    }
+    const href = window.ARGOS_PAG && window.ARGOS_PAG.url ? window.ARGOS_PAG.url(urlAl(c.cod)) : RAIZ + urlAl(c.cod);
+    const novo = alPainel.hidden;
+    alPainel.setAttribute('aria-label', 'Alimentador ' + c.cod);
+    alPainel.innerHTML = `<div class="st-alp-h"><div class="st-alp-t"><small>Alimentador</small><h2 tabindex="-1">${esc(c.cod)}</h2>${se ? `<p>${esc(se)}</p>` : ''}` +
+      `${sub ? `<p>${esc(sub)}</p>` : ''}</div><button type="button" class="st-alp-x" aria-label="Fechar o alimentador ${esc(c.cod)}" title="Fechar (Esc)">✕</button></div>` + corpo +
+      `<a class="st-alp-a" href="${esc(href)}"${window.ARGOS_PAG && window.ARGOS_PAG.alvo ? window.ARGOS_PAG.alvo : ''}>Abrir mapa do alimentador</a>`;
+    const g = alPainel.querySelector('.st-gira');
+    if (g && !calmo() && g.animate) g.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(1turn)' }], { duration: 800, iterations: Infinity });
+    alPainel.hidden = false;
+    posPainel();
+    if (novo) alPainel.scrollTop = 0;
+  }
+  // o lugar do painel: no computador, à direita, abaixo do Tela cheia (e abaixo da coluna da esquerda, se não couber ao
+  // lado dela); no celular, embaixo, por cima da legenda (que some)
+  function posPainel() {
+    if (!alPainel || alPainel.hidden) return;
+    const cel = celular();
+    alPainel.classList.toggle('st-baixo', cel);
+    alvo.classList.toggle('st-alcel', cel);
+    if (cel) { alPainel.style.top = ''; alPainel.style.maxHeight = ''; return; }
+    const W = caixa.clientWidth, pw = Math.min(340, W - 24), cr = caixa.getBoundingClientRect();
+    let top = 64, dir = 0, pe = 0;
+    if (lado && !lado.hidden) for (const el of lado.querySelectorAll('.st-cls, .st-fr, .st-cams, .st-mun')) {
+      if (el.hidden || !el.offsetParent) continue;
+      const q = el.getBoundingClientRect();
+      dir = Math.max(dir, q.right - cr.left); pe = Math.max(pe, q.bottom - cr.top);
+    }
+    if (dir + 12 > W - pw - 12) top = Math.max(top, Math.round(pe + 8));
+    alPainel.style.top = top + 'px';
+    alPainel.style.maxHeight = `calc(100% - ${top + 30}px)`;
+  }
   // toque (dedo) acima do município: a linha embaixo do dedo é difícil de evitar no mapa inteiro, então o toque entra na área
-  // (sem o balão do mouse, o dedo não saberia que ia abrir um alimentador); no município, o toque na linha abre a página dele
+  // (sem o balão do mouse, o dedo não saberia que ia abrir um alimentador); no município, o toque na linha carrega o
+  // alimentador ali mesmo (carregaAl)
   let ponteiro = 'mouse';
   function cliqueLinha(cod, e) {
     const oe = e && e.originalEvent, tipo = (oe && oe.pointerType) || ponteiro;
     if (tipo === 'touch' && fronteira && !niv.mun && e.latlng) { cliqueArea(e.latlng); return; }
     if (oe) oe._stLinha = true;
     // toque na vista Por ano da visão Limpeza: o 1º mostra as etiquetas das OS do alimentador (sem mouse, não há outro
-    // jeito de vê-las); o 2º, no mesmo, abre
+    // jeito de vê-las); o 2º, no mesmo, carrega
     if (tipo === 'touch' && ativo === conjA && rotAl !== cod) { clearTimeout(rotT); rotAl = cod; pedeRotulos(); return; }
-    abreAl(cod);
+    carregaAl(cod);
   }
   // para onde o clique (ou o toque) num ponto leva: a área do nível de baixo, ou a vizinha (outra regional, outro polo,
   // outro município do polo); no próprio município aberto, nada (só as linhas)
@@ -2533,6 +2984,8 @@
     balao.style.left = Math.max(4, Math.min(x, r.width - w - 6)) + 'px';
     balao.style.top = Math.max(4, y + h > r.height - 4 ? ev.clientY - r.top - h - 12 : y) + 'px';
   }
+  // a última linha do balão do alimentador: o que o clique faz
+  const dicaAl = cod => (alC && alC.cod === cod ? '<small class="c">Aberto aqui · ✕ ou Esc fecha</small>' : '<small class="c">Clique para ver o alimentador aqui</small>');
   function aoMover(e) {
     if (estado !== 'on' || voandoN) { balao.hidden = true; return; }
     const ev = e.originalEvent;
@@ -2549,14 +3002,14 @@
         const i = classeNae(naeDe(t), faixasNae());
         poeBalao(cabA + `<small class="st-fx-t"><i style="background:${i ? corNae(i) : FUNDOCOR}"></i>Trecho ${esc(t.nome)} · ${NF0.format(t.n)} NAE` +
           `${t.n3 ? ` (+${NF0.format(t.n3)} nos ramais T3${naeRam.on ? '' : ', fora da cor'})` : ''}</small>` +
-          `<small>${esc(t.cls)} · ${kmTxt(t.m)} · ${esc(mesesTxt(DADOS.nae && DADOS.nae.meses))}</small>` + extraPts(e) + '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
+          `<small>${esc(t.cls)} · ${kmTxt(t.m)} · ${esc(mesesTxt(DADOS.nae && DADOS.nae.meses))}</small>` + extraPts(e) + dicaAl(sobre), ev);
         return;
       }
       if (t && ativo === conjI) {                          // Inspeção: o pedaço embaixo do mouse
         const a0 = t.base ? null : t.anos.find(x => !inspOff.has(x));
         poeBalao(cabA + `<small class="st-fx-t"><i style="background:${a0 ? inCorAno(a0) : FUNDOCOR}"></i>${a0 ? 'Inspecionado em ' + a0 +
           (t.anos.length > 1 ? ' (também ' + t.anos.filter(x => x !== a0).join(', ') + ')' : '') : 'Sem inspeção registrada aqui'}</small>` +
-          extraPts(e) + '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
+          extraPts(e) + dicaAl(sobre), ev);
         return;
       }
       if (t && ativo === conjA) {                           // vista Por ano: o trecho, o ano do pedaço, a última limpeza e os km limpos
@@ -2565,7 +3018,7 @@
           `<small class="st-fx-t"><i style="background:${a0 ? corAno(a0) : FUNDOCOR}"></i>Trecho ${esc(t.nome)} · ${a0 ? 'limpo em ' + a0 + (pc.anos.length > 1 ? ' (antes ' + pc.anos.slice(1).join(', ') + ')' : '') : 'sem registro de limpeza aqui'}</small>` +
           (pc && pc.mk ? `<small>${[pc.mk.includes('c') ? 'OS criada' : '', pc.mk.includes('p') ? 'OS pendente' : ''].filter(Boolean).join(' · ')} neste pedaço</small>` : '') +
           `<small>${t.ult ? 'Última limpeza do trecho ' + dataBr(t.ult) : 'Trecho sem registro de limpeza'} · ${t.limpo < 1000 ? Math.round(t.limpo) + " m" : NF1.format(t.limpo / 1000)} de ${kmTxt(t.m)} limpos · ${esc(t.cls)} a cada ${t.prazo} anos</small>` +
-          '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
+          dicaAl(sobre), ev);
         return;
       }
       poeBalao(`<span class="h"><b class="cod">${esc(sobre)}</b>${am ? `<i>${esc(numAl(sobre, m))}</i>` : ''}</span>` +
@@ -2573,14 +3026,14 @@
         (t && ativo === conjF ? `<small class="st-fx-t" data-sit="${t.sit}"><i style="background:${SIT_COR[t.sit]}"></i>Trecho ${esc(t.nome)} · ${SIT_NOME[t.sit]}</small>` +
           `<small>${t.ult ? 'Última limpeza ' + dataBr(t.ult) : 'Sem registro de limpeza'} · ${esc(t.cls)} a cada ${t.prazo} anos · ${kmTxt(t.m)}</small>` : '') +
         (semRede.has(sobre) && (!t || t.semDado || t.base) ? '<small>Sem rede no cadastro (só o ponto)</small>' : '') + extraPts(e) +
-        '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>', ev);
+        dicaAl(sobre), ev);
       return;
     }
     const pt = pontos.em(e.containerPoint);                 // um losango ou foco embaixo do mouse
     if (pt) {
       realceArea(null);
       map.getContainer().style.cursor = pt.al ? 'pointer' : '';
-      poeBalao(pt.html + (pt.al ? '<small class="c">Clique para abrir o mapa do alimentador em tela cheia</small>' : ''), ev);
+      poeBalao(pt.html + (pt.al ? dicaAl(pt.al) : ''), ev);
       return;
     }
     const n = fronteira ? destino(e.latlng) : null;            // (Fronteira desligada: sem a navegação por áreas)
@@ -2862,11 +3315,12 @@
       `<span class="st-mun-x">${m.slug ? `<a class="st-mun-a" href="${esc(url)}" data-p="${esc(href)}"${dica}${fora}>Abrir ${esc(m.nome)} →</a>` : ''}` +
       (lista.length ? `<button type="button" class="st-mun-b" aria-expanded="false" aria-controls="st-mun-l">Alimentadores<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>` : '') +
       (m.slug && noMapa ? `<a class="st-mun-p" href="${esc(ir(hPag))}"${fora}>Página do município</a>` : '') +
-      '</span><div class="st-mun-l" id="st-mun-l" hidden>' + lista.map(a => `<button type="button" class="st-al" data-al="${esc(a.cod)}" title="Clique para abrir o mapa do alimentador em tela cheia">` +
+      '</span><div class="st-mun-l" id="st-mun-l" hidden>' + lista.map(a => `<button type="button" class="st-al" data-al="${esc(a.cod)}" title="Clique para ver o alimentador aqui">` +
         `<b>${esc(a.cod)}</b><i class="st-sel">${esc(numAl(a.cod, m))}</i><em>${kmTxt(a.m)} aqui${a.se ? ' · ' + esc(a.se) : ''}</em></button>`).join('') + '</div>';
     cartaoMun.hidden = false;
     lado.hidden = false;
     lgsMax();
+    posPainel();
   }
   function poeTrilha() {
     if (!trilha) {
@@ -2948,7 +3402,9 @@
     map.on('click', e => {
       if (rotAl && ponteiro === 'touch' && !(e.originalEvent && e.originalEvent._stLinha)) { rotAl = null; pedeRotulos(); }
       const pt = !(e.originalEvent && e.originalEvent._stLinha) && pontos.em(e.containerPoint);   // um ponto: o alimentador dele
-      if (pt && pt.al && estado === 'on' && !voandoN && !(ponteiro === 'touch' && fronteira && !niv.mun)) { abreAl(pt.al); return; }
+      if (pt && pt.al && estado === 'on' && !voandoN && !(ponteiro === 'touch' && fronteira && !niv.mun)) { carregaAl(pt.al); return; }
+      // com um alimentador carregado: o clique no vazio só o fecha (na rede dele, nada)
+      if (alC && !(e.originalEvent && e.originalEvent._stLinha) && !(pt && pt.al)) { if (!naRedeAl(e.containerPoint)) tiraAl(true); return; }
       cliqueArea(e.latlng);
     });
     caixaSat.addEventListener('pointerdown', e => { ponteiro = e.pointerType || 'mouse'; }, true);
@@ -2971,6 +3427,7 @@
       tamAntes = k;
       map.invalidateSize({ pan: false });
       lgsMax();
+      posPainel();
       if (estado !== 'on' || voandoN) return;
       limites(true);
       if (niv.reg) { const v = vistaDoNivel(niv); poeVista(v.c, v.z); }
@@ -3269,6 +3726,7 @@
       if (trilha) trilha.hidden = true;
       return;
     }
+    tiraAl(false);                                         // o alimentador carregado sai junto
     estado = 'fechando';
     tempos.fecha = performance.now();
     cancelAnimationFrame(quadro);
@@ -3346,7 +3804,8 @@
       if (ao && ao.closest && ao.closest('#ativo, .mt-vis-menu')) return;   // Esc na busca ou no menu da legenda: é deles
       e.preventDefault();
       e.stopPropagation();                                  // o mapa não sobe de nível nem sai da tela cheia por este Esc
-      if (estado === 'on' && niv.reg) sobe(); else fecha();
+      if (alC && estado === 'on') tiraAl(true);             // o alimentador carregado fecha antes
+      else if (estado === 'on' && niv.reg) sobe(); else fecha();
     }
   }
   window.addEventListener('keydown', tecla, true);
@@ -3364,7 +3823,7 @@
   caixa.addEventListener('click', e => {
     if (!cartaoMun || !cartaoMun.contains(e.target)) return;
     const al = e.target.closest('.st-al');
-    if (al) { abreAl(al.dataset.al); return; }
+    if (al) { carregaAl(al.dataset.al); return; }
     // "Abrir …": no site, pelo aviso "Abrindo…" do mapa dos municípios (a página do alimentador vem para o cache antes);
     // Ctrl, ⌘, Shift e o botão do meio seguem o link como sempre
     const ab = e.target.closest('.st-mun-a[data-p^="alimentadores/"]');
@@ -3398,6 +3857,20 @@
   // para os testes (scripts/teste_sat_to_tela.js)
   const rectCaixa = e => { const c = caixaSat.getBoundingClientRect(), q = e.getBoundingClientRect(); return { x: q.left - c.left, y: q.top - c.top, w: q.width, h: q.height }; };
   window.__satTo = { estado: () => estado, mapa: () => map, alterna, abre, fecha, linhas: () => nLinhas, semRede: () => semRede.size, sobre: () => sobre,
+    // o alimentador carregado ali mesmo: o estado, a rede (cadeias e pontos), os nomes e o DJ na tela, o voo
+    al: () => (alC ? { cod: alC.cod, estado: alC.estado, ms: alC.ms, msRede: alC.msRede, bytes: alC.r ? alC.r.bytes : 0, cadeias: alC.r ? alC.r.ct.length : 0, pontos: alC.r ? alC.r.pts.length / 2 : 0,
+      trechos: alC.r ? alC.r.trechos.length : 0, camadas: alC.ls.filter(l => map.hasLayer(l)).length, rotulos: [...alC.rot.keys()].map(k => k.split('|').slice(0, 2).join('|')), marcas: alC.mk.length, fora: !!alC.fora, voou: alC.voou,
+      painel: !!(alPainel && !alPainel.hidden), erro: alC.erro || null } : null),
+    carregaAl: cod => carregaAl(cod), tiraAl: v => tiraAl(v !== false), rotAl: () => rotAl, naRedeAl: (x, y, tol) => naRedeAl(L.point(x, y), tol), areaLivre: () => (map ? areaLivre() : null),
+    pontoAl: () => {                                        // um ponto da rede carregada no meio da área livre (px da caixa)
+      if (!alC || !alC.r) return null;
+      const r = alC.r, A = areaLivre(), lista = [];
+      for (let i = 0; i < r.pts.length / 2; i++) {
+        const p = map.latLngToContainerPoint([r.pts[2 * i], r.pts[2 * i + 1]]);
+        if (p.x > A.x0 + 60 && p.x < A.x1 - 60 && p.y > A.y0 + 60 && p.y < A.y1 - 60) lista.push({ x: Math.round(p.x), y: Math.round(p.y) });
+      }
+      return lista.length ? lista[Math.floor(lista.length / 2)] : null;
+    },
     vistaSvg: () => (L ? vistaDoSvg() : null), tempos,
     // parado: sem linhas entrando, sem desenho das linhas em curso, sem desenho adiado da máscara e da divisão
     ocioso: () => !!map && !montando() && !(rend && rend._job) && !(mascara && mascara.pendente()) && !(desenho && desenho.pendente()),
@@ -3422,7 +3895,7 @@
       for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) n++; if ((i & 3) === 3 && a[i]) cheios++; }
       return { dif: n, px: a.length / 4, cheios, modo: rend._img ? 'imagem' : 'canvas' };
     },
-    nivel: () => Object.assign({}, niv), vai: n => vaiPara(n), sobe, voando: () => voandoN,
+    nivel: () => Object.assign({}, niv), vai: n => vaiPara(n), sobe, voando: () => voandoN || !!vooAl,
     // botão Fronteira: pede true/false (como o clique no botão, com o satélite aberto); devolve a escolha
     fronteira: v => { if (v !== undefined && estado === 'on') poeFronteira(v); return fronteira; },
     // visão Limpeza: o conjunto na tela ('rede' ou 'faixa'), os km de cada situação no nível (ordem de SIT), o total do
