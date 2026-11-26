@@ -1,6 +1,8 @@
 // RASCUNHO (só nas páginas faixa-rascunho.html): cópia do croqui.js com o croqui MISTO do modo Limpeza de faixa
 // (modo-faixa-rascunho.js): __croqui(nomes, { leve, pesada }) em km preenche o mesmo croqui com Leve = Expedita e
 // Pesada = Convencional (pedido do usuário). Ver misto() abaixo. O resto é igual ao croqui.js.
+// Parte do trecho (misto.parte: nome → { m, segs }, os trechos escolhidos só em parte no modo): a extensão, a figura e o
+// KMZ desses trechos são só os da parte.
 // Croqui de limpeza de faixa: do trecho selecionado (ou de vários, com Ctrl+clique; sem nenhum, do alimentador inteiro)
 // sai o Excel do modelo da Energisa
 // já preenchido — chave inicial e final, coordenadas UTM (SIRGAS 2000, fuso do ponto), alimentador, extensão,
@@ -33,7 +35,10 @@
   const dist = (a, b) => { const k = Math.cos(a[0] * Math.PI / 180); return Math.hypot(a[0] - b[0], (a[1] - b[1]) * k) * 111320; };
 
   // ---------- o que está selecionado no mapa ----------
+  // no modo Limpeza de faixa (Ctrl+M) ligado, vale o que foi escolhido nele (window.__faixa)
+  const daFaixa = () => window.__faixa && window.__faixa.ativo() && window.__faixa.croquiSel ? window.__faixa.croquiSel() : null;
   function selecionados() {
+    const fx = daFaixa(); if (fx) return fx.nomes.filter(n => TR[n]);
     if (window.__selecao) return window.__selecao().filter(n => TR[n]);
     const varios = [...det.querySelectorAll('.varios [data-t]')].map(b => b.dataset.t);
     if (varios.length) return varios.filter(n => TR[n]);
@@ -43,7 +48,9 @@
   }
 
   // dados do croqui a partir dos trechos
-  function dados(nomes) {
+  // a linha do trecho n: os pedaços da parte (pt: misto.parte) ou os vãos dele
+  const segsDe = (n, pt) => pt && pt[n] ? pt[n].segs : D.vaos.filter(v => v[4] === TR[n].i).map(v => [[v[0], v[1]], [v[2], v[3]]]);
+  function dados(nomes, pt) {
     const ts = nomes.map(n => TR[n]);
     const inicios = ts.map(t => ({ cod: t.inicio, ll: [t.inicio_lat, t.inicio_lon], d: t.dist_inicio ?? 0, t: t.nome }));
     const deles = new Set(ts.map(t => t.inicio));
@@ -54,7 +61,7 @@
     const nomeMun = Object.fromEntries((M.municipios || []).map(m => [m.cod, m.nome]));
     const ordem = Object.fromEntries((M.municipios || []).map((m, i) => [m.cod, -(m.m || 0)]));
     const muns = [...new Set(ts.flatMap(t => (M.trecho_mun || {})[t.nome] || []))].sort((a, b) => (ordem[a] || 0) - (ordem[b] || 0)).map(c => nomeMun[c] || c);
-    const ext = ts.reduce((s, t) => s + t.ext, 0);
+    const ext = ts.reduce((s, t) => s + (pt && pt[t.nome] ? pt[t.nome].m : t.ext), 0);
     return { ts, inicios: inicios.sort((a, b) => a.d - b.d), fins, ext, muns };
   }
   // comprimento (m) do caminho pela rede, só nos vãos dos trechos escolhidos, da chave inicial até a final
@@ -107,16 +114,18 @@
   // ---------- figuras do trecho (canvas) ----------
   const TILE = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/';
   const mx = lon => (lon + 180) / 360 * 256, my = lat => { const s = Math.sin(lat * Math.PI / 180); return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * 256; };
-  function enquadra(nomes, W, H, pad) {
+  function enquadra(nomes, W, H, pad, pt) {
     const idx = new Set(nomes.map(n => TR[n].i));
-    const meus = D.vaos.filter(v => idx.has(v[4]));
+    const meus = nomes.flatMap(n => segsDe(n, pt)).map(([a, b]) => [a[0], a[1], b[0], b[1]]);
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
     meus.forEach(v => [[v[0], v[1]], [v[2], v[3]]].forEach(([la, lo]) => { const x = mx(lo), y = my(la); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }));
     const uw = W * (1 - pad.l - pad.r), uh = H * (1 - pad.t - pad.b);
     const z = Math.min(18, Math.log2(Math.min(uw / Math.max(x1 - x0, 1e-9), uh / Math.max(y1 - y0, 1e-9))));
     const k = 2 ** z, cx = (x0 + x1) / 2 * k, cy = (y0 + y1) / 2 * k;
     const ox = cx - (pad.l * W + uw / 2), oy = cy - (pad.t * H + uh / 2);
-    return { z, k, ox, oy, idx, p: (la, lo) => [mx(lo) * k - ox, my(la) * k - oy] };
+    // sel: a linha escolhida ([lat, lon, lat, lon] por pedaço); parc: trechos em parte (a parte de fora entra como rede comum)
+    const parc = new Set(nomes.filter(n => pt && pt[n]).map(n => TR[n].i));
+    return { z, k, ox, oy, idx, parc, sel: meus, p: (la, lo) => [mx(lo) * k - ox, my(la) * k - oy] };
   }
   function satelite(ctx, W, H, q) {
     const zt = Math.min(18, Math.ceil(q.z)), s = 2 ** (q.z - zt), tam = 256 * s;
@@ -141,9 +150,9 @@
       return true;
     });
   }
-  function linhas(ctx, q, filtro, estilo) {
+  function linhas(ctx, q, filtro, estilo) {                // filtro true: a linha escolhida (q.sel)
     ctx.beginPath();
-    D.vaos.forEach(v => { if (!filtro(v)) return; const a = q.p(v[0], v[1]), b = q.p(v[2], v[3]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); });
+    (filtro === true ? q.sel : D.vaos).forEach(v => { if (filtro !== true && !filtro(v)) return; const a = q.p(v[0], v[1]), b = q.p(v[2], v[3]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); });
     Object.assign(ctx, estilo); ctx.stroke(); ctx.setLineDash([]);
   }
   function pino(ctx, x, y, rotulo, cor) {
@@ -171,24 +180,24 @@
     ctx.strokeText(txt, x0, y0 - 10); ctx.fillText(txt, x0, y0 - 10);
     ctx.restore();
   }
-  async function figura(nomes, ini, fim, tipo, prop) {      // prop: largura/altura da caixa da figura no modelo
+  async function figura(nomes, ini, fim, tipo, prop, pt) {      // prop: largura/altura da caixa da figura no modelo
     const W = tipo === 'sat' ? 1100 : 900, H = Math.round(W / (prop || (tipo === 'sat' ? 1100 / 996 : 900 / 866)));
     // no satélite, o trecho fica na faixa do meio: as etiquetas do Excel ficam em cima e embaixo da figura
     const pad = tipo === 'sat' ? { l: .12, r: .12, t: .27, b: .24 } : { l: .15, r: .15, t: .15, b: .15 };
     const novo = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
     let cv = novo(), ctx = cv.getContext('2d'), comSat = false;
-    const q = enquadra(nomes, W, H, pad);
+    const q = enquadra(nomes, W, H, pad, pt), fora = v => !q.idx.has(v[4]) || q.parc.has(v[4]);
     if (tipo === 'sat') {
       try { comSat = await satelite(ctx, W, H, q); } catch (e) { comSat = false; }
       if (!comSat) { cv = novo(); ctx = cv.getContext('2d'); ctx.fillStyle = '#e8ece4'; ctx.fillRect(0, 0, W, H); }
-      linhas(ctx, q, v => !q.idx.has(v[4]), { strokeStyle: comSat ? 'rgba(255,255,255,.55)' : 'rgba(60,70,80,.45)', lineWidth: 2 });
-      linhas(ctx, q, v => q.idx.has(v[4]), { strokeStyle: comSat ? 'rgba(255,255,255,.9)' : '#fff', lineWidth: 8, lineCap: 'round', lineJoin: 'round' });
-      linhas(ctx, q, v => q.idx.has(v[4]), { strokeStyle: '#1d3cf5', lineWidth: 4.5, lineCap: 'round', lineJoin: 'round' });
+      linhas(ctx, q, fora, { strokeStyle: comSat ? 'rgba(255,255,255,.55)' : 'rgba(60,70,80,.45)', lineWidth: 2 });
+      linhas(ctx, q, true, { strokeStyle: comSat ? 'rgba(255,255,255,.9)' : '#fff', lineWidth: 8, lineCap: 'round', lineJoin: 'round' });
+      linhas(ctx, q, true, { strokeStyle: '#1d3cf5', lineWidth: 4.5, lineCap: 'round', lineJoin: 'round' });
     } else {
       ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-      ctx.setLineDash([6, 5]); linhas(ctx, q, v => !q.idx.has(v[4]), { strokeStyle: '#22c55e', lineWidth: 1.6, lineCap: 'butt' });
-      linhas(ctx, q, v => q.idx.has(v[4]), { strokeStyle: '#7dd3fc', lineWidth: 7, lineCap: 'round', lineJoin: 'round' });
-      linhas(ctx, q, v => q.idx.has(v[4]), { strokeStyle: '#fff', lineWidth: 3.5, lineCap: 'round', lineJoin: 'round' });
+      ctx.setLineDash([6, 5]); linhas(ctx, q, fora, { strokeStyle: '#22c55e', lineWidth: 1.6, lineCap: 'butt' });
+      linhas(ctx, q, true, { strokeStyle: '#7dd3fc', lineWidth: 7, lineCap: 'round', lineJoin: 'round' });
+      linhas(ctx, q, true, { strokeStyle: '#fff', lineWidth: 3.5, lineCap: 'round', lineJoin: 'round' });
       [...(D.fusiveis || []), ...(D.principais || [])].forEach(a => {
         const [x, y] = q.p(a.lat, a.lon); if (x < 0 || y < 0 || x > W || y > H) return;
         ctx.fillStyle = '#22d3ee'; ctx.fillRect(x - 4, y - 4, 8, 8);
@@ -392,13 +401,13 @@
     `<LineString><tessellate>1</tessellate><coordinates>${l.map(kpt).join(' ')}</coordinates></LineString>`).join('') + '</MultiGeometry>';
   const arqKmz = s => String(s ?? '').replace(/[^\w.-]+/g, '_');
   const nomeKmz = nomes => nomes.length > 3 ? nomes.length + '_trechos' : nomes.join('-');
-  function salvaKmz(nomes, todos, misto, nome) {
+  function salvaKmz(nomes, todos, misto, nome, pt) {
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(kmz(nomes, todos, misto)); link.download = nome;
+    link.href = URL.createObjectURL(kmz(nomes, todos, misto, pt)); link.download = nome;
     document.body.append(link); link.click(); link.remove();
     setTimeout(() => URL.revokeObjectURL(link.href), 30000);
   }
-  function kmz(nomes, todos, misto) {
+  function kmz(nomes, todos, misto, pt) {
     const marcas = misto && misto.marcas;
     const sel = new Set(nomes.map(n => TR[n].i)), vs = D.vaos.filter(v => sel.has(v[4]));
     let a0 = 90, a1 = -90, o0 = 180, o1 = -180;
@@ -415,10 +424,10 @@
       '<Style id="po"><IconStyle><scale>0.45</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/shaded_dot.png</href></Icon></IconStyle><LabelStyle><scale>0</scale></LabelStyle></Style>');
     k.push('<Folder><name>Trechos</name><open>1</open>');
     nomes.forEach(n => {
-      const t = TR[n], segs = vs.filter(v => v[4] === t.i).map(v => [[v[0], v[1]], [v[2], v[3]]]);
+      const t = TR[n], segs = segsDe(n, pt), pa = pt && pt[n], ext = pa ? pa.m : t.ext;
       if (!segs.length) return;
-      const balao = `<![CDATA[<b>Início:</b> ${xml(t.inicio)}<br><b>Fim:</b> ${xml((t.fim || []).join(' / ') || '—')}<br><b>Extensão:</b> ${kmTxt(t.ext)}]]>`;
-      k.push(`<Placemark><name>${xml(t.nome)} · ${xml(t.inicio)} → ${xml((t.fim || []).join(' / ') || 'fim')} · ${kmTxt(t.ext)}</name>` +
+      const balao = `<![CDATA[<b>Início:</b> ${xml(t.inicio)}<br><b>Fim:</b> ${xml((t.fim || []).join(' / ') || '—')}<br><b>Extensão:</b> ${kmTxt(ext)}${pa ? ` (parte escolhida; trecho inteiro ${kmTxt(t.ext)})` : ''}]]>`;
+      k.push(`<Placemark><name>${xml(t.nome)}${pa ? ' (parte)' : ''} · ${xml(t.inicio)} → ${xml((t.fim || []).join(' / ') || 'fim')} · ${kmTxt(ext)}</name>` +
         `<description>${balao}</description><styleUrl>#t${t.zona || +String(t.nome)[1] || 3}</styleUrl>${multi(segs)}</Placemark>`);
     });
     k.push('</Folder>');
@@ -522,15 +531,21 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
     return municipiosDoTrecho;
   }
   // nomes: os trechos do croqui; sem eles, os selecionados no mapa; sem seleção, o alimentador inteiro
+  // misto (modo Limpeza de faixa): { leve, pesada, marcas, parte }; sem Leve/Pesada marcado, só a parte vale (croqui comum)
   async function abre(nomesPedidos, misto) {
+    if (!Array.isArray(nomesPedidos)) { const fx = daFaixa(); if (fx) { nomesPedidos = fx.nomes; misto = fx.misto; } }   // Downloads com o modo ligado
+    const pt = misto && misto.parte;
+    if (misto && !(misto.leve || misto.pesada)) misto = null;
     const sel = Array.isArray(nomesPedidos) ? nomesPedidos.filter(n => TR[n]) : selecionados();
     const todos = !sel.length, nomes = todos ? D.trechos.map(t => t.nome) : sel;
     if (!nomes.length) return;
-    const d = dados(nomes);
+    const d = dados(nomes, pt);
     // marcado no mapa (modo Limpeza de faixa): as pontas do croqui são as do pedaço marcado, não as do trecho inteiro.
     // Começo = a ponta marcada mais perto da chave de início do trecho; fim = a mais longe dela; cada uma com o poste
     // mais perto (o pedaço quase nunca começa numa chave). Entram como 1ª opção; as chaves do trecho seguem na lista
-    const pontas = misto && misto.marcas ? [...(misto.marcas.leve || []), ...(misto.marcas.pesada || [])].flat() : [];
+    // sem marcado, com parte escolhida: as pontas da parte
+    const daParte = !(misto && misto.marcas) && pt && Object.keys(pt).length > 0;
+    const pontas = misto && misto.marcas ? [...(misto.marcas.leve || []), ...(misto.marcas.pesada || [])].flat() : daParte ? Object.values(pt).flatMap(o => o.segs).flat() : [];
     if (pontas.length) {
       const ref = d.inicios[0].ll, idx = new Set(nomes.map(n => TR[n].i));
       const ini = pontas.reduce((a, b) => dist(b, ref) < dist(a, ref) ? b : a), fim = pontas.reduce((a, b) => dist(b, ini) > dist(a, ini) ? b : a);
@@ -539,8 +554,8 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
         D.vaos.forEach(v => { if (!idx.has(v[4])) return; [[v[0], v[1], v[6]], [v[2], v[3], v[7]]].forEach(([la, lo, p]) => { const x = dist([la, lo], ll); if (x < dm) { dm = x; melhor = p; } }); });
         return melhor ? 'poste ' + melhor : 'ponto marcado';
       };
-      d.inicios.unshift({ cod: poste(ini), ll: ini, d: -1, t: 'começo do marcado' });
-      d.fins.unshift({ cod: poste(fim), ll: fim, t: 'fim do marcado' });
+      d.inicios.unshift({ cod: poste(ini), ll: ini, d: -1, t: daParte ? 'começo da parte' : 'começo do marcado' });
+      d.fins.unshift({ cod: poste(fim), ll: fim, t: daParte ? 'fim da parte' : 'fim do marcado' });
     }
     let prop = {};
     try { await carregaModelo(); prop = proporcoes(); } catch (e) { /* sem o modelo, a janela abre e o erro aparece ao baixar */ }
@@ -560,13 +575,13 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       <p>Preenchido a partir do mapa. Confira e complete OS e obra (dá para completar depois no Excel). O deslocamento vem da rota de carro até a base do polo e pode ser corrigido.</p>
       <div class="fig" role="img" aria-label="Figura do trecho no croqui"></div>
       <dl><dt>Alimentador</dt><dd>${esc(M.al)} · ${esc(M.se_nome || M.se || '')}</dd>
-        <dt>Trecho${nomes.length > 1 ? 's' : ''}</dt><dd>${todos ? `alimentador inteiro (${nomes.length} trechos)` : esc(nomes.join(', '))}</dd>
+        <dt>Trecho${nomes.length > 1 ? 's' : ''}</dt><dd>${todos ? `alimentador inteiro (${nomes.length} trechos)` : esc(nomes.map(n => pt && pt[n] ? n + ' (parte)' : n).join(', '))}</dd>
         <dt>Extensão</dt><dd class="u-ext">${nf(d.ext / 1000, 2)} km</dd>
         <dt>Município</dt><dd>${esc(listaMun(d.muns)) || '—'}</dd>
         <dt>Início</dt><dd class="u-ini"></dd><dt>Fim</dt><dd class="u-fim"></dd></dl>
       <div class="campos">
         <label>Chave inicial<select name="ini">${opt(d.inicios, x => x.cod + (nomes.length > 1 || x.d === -1 ? ' · ' + x.t : ''))}</select></label>
-        <label>Chave final<select name="fim">${opt(d.fins, x => textoFim(x.cod) + (nomes.length > 1 || /marcado/.test(x.t) ? ' · ' + x.t : ''))}</select></label>
+        <label>Chave final<select name="fim">${opt(d.fins, x => textoFim(x.cod) + (nomes.length > 1 || /marcado|parte/.test(x.t) ? ' · ' + x.t : ''))}</select></label>
         <label>Faixa a limpar<select name="base"><option value="total">Trecho inteiro</option><option value="caminho">Só entre as chaves</option></select></label>
         <label>Tamanho da faixa (km)<input name="km" type="number" step="0.01" min="0" value="${(Math.round(d.ext / 10) / 100).toFixed(2)}"></label>
         <label>Tipo<select name="tipo"><option>Convencional</option><option>Expedita</option></select></label>
@@ -583,7 +598,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
     dlg.querySelectorAll('.fecha, .cancela').forEach(b => b.addEventListener('click', () => dlg.close()));
     // KMZ dos trechos do croqui (com o marcado no mapa, no modo Limpeza de faixa), nome como o do Excel
     dlg.querySelector('.kmz').addEventListener('click', () => {
-      try { salvaKmz(nomes, todos, misto, `CROQUI_${arqKmz(M.al)}_${arqKmz(todos ? 'alimentador' : nomeKmz(nomes))}.kmz`); }
+      try { salvaKmz(nomes, todos, misto, `CROQUI_${arqKmz(M.al)}_${arqKmz(todos ? 'alimentador' : nomeKmz(nomes))}.kmz`, pt); }
       catch (err) { alert('Não foi possível gerar o KMZ: ' + err.message); }
     });
     const escolha = () => ({ ini: d.inicios[+f.ini.value], fim: d.fins[+f.fim.value] });
@@ -598,7 +613,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
     const desenha = () => {
       const { ini, fim } = escolha();
       fig.style.backgroundImage = '';
-      gerando = Promise.all([figura(nomes, ini, fim, 'sat', prop.sat), figura(nomes, ini, fim, 'gis', prop.gis)]).then(r => {
+      gerando = Promise.all([figura(nomes, ini, fim, 'sat', prop.sat, pt), figura(nomes, ini, fim, 'gis', prop.gis, pt)]).then(r => {
         fig.style.backgroundImage = `url(${URL.createObjectURL(r[0].blob)})`; return r;
       });
       return gerando;
@@ -613,7 +628,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       entre = caminho(nomes, ini, fim);
       if (misto) f.base.options[0].textContent = 'Marcado no mapa (leve + pesada)';   // os km vêm do mapa, não do trecho
       else {
-        f.base.options[0].textContent = `Trecho inteiro (${nf(d.ext / 1000, 2)} km)`;
+        f.base.options[0].textContent = `${pt ? 'Escolhido no mapa' : 'Trecho inteiro'} (${nf(d.ext / 1000, 2)} km)`;
         f.base.options[1].textContent = entre === null ? 'Só entre as chaves (sem ligação)' : `Só entre as chaves (${nf(entre / 1000, 2)} km)`;
         f.base.options[1].disabled = entre === null;
         if (entre === null && f.base.value === 'caminho') f.base.value = 'total';
@@ -721,7 +736,8 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       const n = selecionados();
       if (!n.length) return;
       e.preventDefault();
-      try { salvaKmz(n, false, null, `${arqKmz(M.al)}-${arqKmz(nomeKmz(n))}.kmz`); }
+      const fx = daFaixa();
+      try { salvaKmz(n, false, fx && (fx.misto.leve || fx.misto.pesada) ? fx.misto : null, `${arqKmz(M.al)}-${arqKmz(nomeKmz(n))}.kmz`, fx && fx.misto.parte); }
       catch (err) { alert('Não foi possível gerar o KMZ: ' + err.message); }
     });
     const atualiza = () => {
@@ -736,6 +752,7 @@ dialog.croqui::backdrop{background:rgb(10 14 17 / .5)}
       }
     };
     new MutationObserver(atualiza).observe(det, { childList: true });
+    window.addEventListener('faixa-sel', atualiza);
     if (lista) new MutationObserver(atualiza).observe(lista, { attributes: true, subtree: true, attributeFilter: ['aria-current'] });
     atualiza();
   }
