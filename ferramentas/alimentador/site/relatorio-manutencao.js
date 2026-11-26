@@ -4,6 +4,9 @@
 //   · Dados (Excel): resumo, manutenções executadas, ocorrências, por mês e por ativo;
 //   · Relatório (PDF): capa com o mapa do caminho, números, gráfico por mês, causas, serviços, ativos com mais registros
 //     e as listas completas. Não havia modelo da distribuidora: o formato é este.
+// Modo manutenção (Ctrl+I, pedido do usuário): o mesmo escolher do Ctrl+M, com este relatório embutido no painel do modo
+// (painel(): período, números, Excel e PDF) e as manutenções e ocorrências do escolhido marcadas no mapa (passar o mouse
+// mostra o que é), atualizados a cada trecho escolhido ou tirado.
 // Este arquivo só é baixado quando o botão "Relatório de manutenção" do painel do modo é tocado (window.__relManut).
 // Fontes: as OS executadas do alimentador (executadas.js, scripts/executadas.py: corretivas MC e preventivas MP) e as
 // ocorrências de todas as causas da Crítica (ocorrencias.js do alimentador, scripts/ocorrencias.py), baixadas aqui.
@@ -647,7 +650,97 @@ dialog.relm::backdrop{background:rgb(10 14 17 / .5)}
     dlg.showModal();
     return true;
   }
-  window.__relManut = { abre, coleta: (e, de, ate) => fontes().then(([EX, OC]) => coleta(e, de, ate, EX, OC)),
+  // ---------- modo manutenção: o relatório embutido no painel do modo e as marcas no mapa ----------
+  const cssM = document.createElement('style');
+  cssM.textContent = `.fx-mn{display:grid;gap:8px}
+.fx-mn .mn-per{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fx-mn label{display:grid;gap:3px;font-size:11.5px;color:var(--muted)}
+.fx-mn select{font:500 13px var(--f-body);color:var(--fg);background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:0 8px;min-height:36px;color-scheme:light dark}
+.fx-mn .mn-at{display:flex;flex-wrap:wrap;gap:6px}
+.fx-mn .mn-at button{font:600 12px var(--f-body);min-height:30px;padding:0 10px;border-radius:999px;border:1.5px solid var(--line);background:none;color:var(--fg);cursor:pointer}
+.fx-mn .mn-at button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+.fx-mn .mn-n{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fx-mn .mn-n div{padding:6px 8px;border-radius:10px;background:var(--hover)}
+.fx-mn .mn-n b{display:block;font:700 15px var(--f-mono);font-variant-numeric:tabular-nums}.fx-mn .mn-n span{font-size:11px;color:var(--muted)}
+.fx-mn .mn-n i{display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:2px;background:var(--c)}
+.fx-mn .mn-av{margin:0;font-size:11.5px;color:var(--accent)}.fx-mn .mn-ok{margin:0;font-size:11.5px;font-weight:600}
+.fx-mn .mn-ac{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fx-mn .mn-ac button{display:flex;align-items:center;justify-content:center;min-height:40px;border-radius:12px;font:700 13px var(--f-body);cursor:pointer;border:1.5px solid var(--line);background:none;color:var(--fg)}
+.fx-mn .mn-ac button.pdf{border:0;background:var(--accent);color:var(--on-accent)}.fx-mn .mn-ac button:disabled{opacity:.5;cursor:default}
+@media (pointer:coarse){.fx-mn .mn-at button{min-height:40px}.fx-mn select{min-height:44px;font-size:16px}}`;
+  document.head.append(cssM);
+  // root: onde o painel entra; pegaE(): o escolhido agora (window.__faixa.escolhaGeo). Devolve {atualiza, fecha}
+  async function painel(root, pegaE) {
+    const [EX, OC] = await fontes(), map = window.__map;
+    const ultimos = [EX && EX.ate && EX.ate.slice(0, 7), OC && OC.meses.length && OC.meses[OC.meses.length - 1]].filter(Boolean).sort();
+    const fimDados = ultimos.length ? ultimos[ultimos.length - 1] : somaMes(new Date().toISOString().slice(0, 7), 0);
+    const iniDados = [EX && EX.de && EX.de.slice(0, 7), OC && OC.meses[0]].filter(Boolean).sort()[0] || somaMes(fimDados, -11);
+    const opMes = mesesEntre(iniDados, fimDados).reverse().map(m => `<option value="${m}">${mesTxt(m)}</option>`).join('');
+    root.innerHTML = `<div class="mn-per"><label>De<select name="de">${opMes}</select></label><label>Até<select name="ate">${opMes}</select></label></div>
+      <div class="mn-at" role="group" aria-label="Períodos prontos"><button type="button" data-p="12">12 meses</button><button type="button" data-p="ano">${fimDados.slice(0, 4)}</button><button type="button" data-p="oc">Com ocorrências</button><button type="button" data-p="tudo">Tudo</button></div>
+      <div class="mn-n" aria-live="polite"><div><b class="n-os">–</b><span><i style="--c:#f59e0b"></i>manut.</span></div><div><b class="n-oc">–</b><span><i style="--c:#dc2626"></i>ocorr.</span></div><div><b class="n-cons">–</b><span>consum.</span></div><div><b class="n-chi">–</b><span>CHI (h)</span></div></div>
+      <p class="mn-av" hidden></p><p class="mn-ok" role="status" hidden></p>
+      <div class="mn-ac"><button type="button" class="xls">Excel</button><button type="button" class="pdf">Relatório PDF</button></div>`;
+    const q = x => root.querySelector(x), sDe = q('[name=de]'), sAte = q('[name=ate]');
+    const prontos = { 12: [somaMes(fimDados, -11), fimDados], ano: [fimDados.slice(0, 4) + '-01', fimDados], tudo: [iniDados, fimDados],
+      oc: OC && OC.meses.length ? [OC.meses[0], OC.meses[OC.meses.length - 1]] : [somaMes(fimDados, -11), fimDados] };
+    const lim = m => m < iniDados ? iniDados : m > fimDados ? fimDados : m;
+    sDe.value = lim(prontos[12][0]); sAte.value = fimDados;
+    // marcas no mapa: manutenção = quadrado laranja, ocorrência = círculo vermelho (no mesmo ativo, ao lado); o mouse mostra o que é
+    map.createPane('mn-marcas').style.zIndex = 455;
+    const ren = L.canvas({ pane: 'mn-marcas', tolerance: 6 }), cam = L.layerGroup().addTo(map);
+    let r = null, e = null;
+    const marcas = () => {
+      cam.clearLayers();
+      if (!r) return;
+      const porPt = new Map(), k = (la, lo) => la.toFixed(5) + ',' + lo.toFixed(5);
+      r.os.forEach(o => { const c = k(o.lat, o.lon); (porPt.get(c) || porPt.set(c, { ll: [o.lat, o.lon], os: [], oc: [] }).get(c)).os.push(o); });
+      r.oc.forEach(o => { const c = k(o.lat, o.lon); (porPt.get(c) || porPt.set(c, { ll: [o.lat, o.lon], os: [], oc: [] }).get(c)).oc.push(o); });
+      porPt.forEach(pt => {
+        const lin = [...pt.os.slice(0, 6).map(o => `${br(o.data)} · ${esc(nomeTipo(o.tipo))} · ${esc(o.os)}`), pt.os.length > 6 ? `… e mais ${pt.os.length - 6} manutenção(ões)` : '',
+          ...pt.oc.slice(0, 6).map(o => `${br(o.abert)} ${o.abert.slice(11, 16)} · ${esc(causaTxt(o))} · ${nf(o.cons)} UC`), pt.oc.length > 6 ? `… e mais ${pt.oc.length - 6} ocorrência(s)` : ''].filter(Boolean);
+        const ativo = (pt.os[0] || pt.oc[0]).ativo, dica = `<b>${esc(ativo)}</b><br>${lin.join('<br>')}`;
+        if (pt.os.length) L.circleMarker(pt.ll, { renderer: ren, pane: 'mn-marcas', radius: 6 + Math.min(6, pt.os.length), color: '#1b2024', weight: 2, fillColor: '#f59e0b', fillOpacity: 1 })
+          .bindTooltip(dica, { direction: 'top', className: 'mn-dica' }).addTo(cam);
+        if (pt.oc.length) L.circleMarker(pt.ll, { renderer: ren, pane: 'mn-marcas', radius: 5 + Math.min(6, pt.oc.length), color: '#fff', weight: 2, fillColor: '#dc2626', fillOpacity: 1 })
+          .bindTooltip(dica, { direction: 'top', className: 'mn-dica', offset: [0, -4] }).addTo(cam);
+      });
+    };
+    const conta = () => {
+      let de = sDe.value, ate = sAte.value;
+      if (de > ate) { [de, ate] = [ate, de]; sDe.value = de; sAte.value = ate; }
+      e = pegaE();
+      root.querySelectorAll('.mn-at button').forEach(b => { const [a, z] = prontos[b.dataset.p]; b.setAttribute('aria-pressed', String(lim(a) === de && z === ate)); });
+      q('.mn-ok').hidden = true;
+      if (!e || !e.runs || !e.runs.length) {
+        r = null; ['.n-os', '.n-oc', '.n-cons', '.n-chi'].forEach(x => { q(x).textContent = '–'; });
+        q('.xls').disabled = q('.pdf').disabled = true; q('.mn-av').hidden = true; marcas(); return;
+      }
+      r = coleta(e, de, ate, EX, OC);
+      q('.n-os').textContent = nf(r.tot.os); q('.n-oc').textContent = nf(r.tot.oc); q('.n-cons').textContent = nf(r.tot.cons); q('.n-chi').textContent = nf(r.tot.chi, 1);
+      q('.xls').disabled = q('.pdf').disabled = false;
+      const sem = OC ? r.meses.filter(x => !OC.meses.includes(x.m)).length : r.meses.length;
+      q('.mn-av').hidden = !sem;
+      q('.mn-av').textContent = sem ? `Ocorrências só de ${OC && OC.meses.length ? mesTxt(OC.meses[0]) + ' a ' + mesTxt(OC.meses[OC.meses.length - 1]) : '—'} (${sem} dos ${r.meses.length} meses sem dados).` : '';
+      marcas();
+    };
+    let t = 0;
+    const atualiza = () => { clearTimeout(t); t = setTimeout(conta, 120); };
+    sDe.addEventListener('change', conta); sAte.addEventListener('change', conta);
+    root.querySelector('.mn-at').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; const [a, z] = prontos[b.dataset.p]; sDe.value = lim(a); sAte.value = z; conta(); });
+    const nomeArq = ext => `RELATORIO_MANUTENCAO_${arq(M.al)}_${arq(e.nomes.length > 3 ? e.nomes.length + '_trechos' : e.nomes.join('-'))}_${r.de.replace('-', '')}-${r.ate.replace('-', '')}.${ext}`;
+    const age = async (b, faz) => {
+      if (!r) return;
+      b.disabled = true; const t0 = b.textContent; b.textContent = 'Gerando…';
+      try { const n = nomeArq(b.classList.contains('pdf') ? 'pdf' : 'xlsx'); baixa(await faz(), n); q('.mn-ok').textContent = `Baixado: ${n}`; q('.mn-ok').hidden = false; }
+      catch (err) { alert('Não foi possível gerar: ' + err.message); } finally { b.disabled = false; b.textContent = t0; }
+    };
+    q('.xls').addEventListener('click', ev => age(ev.currentTarget, async () => planilha(e, r, EX, OC)));
+    q('.pdf').addEventListener('click', ev => age(ev.currentTarget, () => relatorioPdf(e, r, EX, OC)));
+    conta();
+    return { atualiza, conta, fecha: () => { clearTimeout(t); cam.remove(); root.innerHTML = ''; }, numeros: () => r && r.tot, marcas: () => cam.getLayers().length };
+  }
+  window.__relManut = { abre, painel, coleta: (e, de, ate) => fontes().then(([EX, OC]) => coleta(e, de, ate, EX, OC)),
     pdf: (e, de, ate) => fontes().then(async ([EX, OC]) => relatorioPdf(e, coleta(e, de, ate, EX, OC), EX, OC)),
     xlsx: (e, de, ate) => fontes().then(([EX, OC]) => planilha(e, coleta(e, de, ate, EX, OC), EX, OC)) };
 })();

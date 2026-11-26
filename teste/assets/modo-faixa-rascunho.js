@@ -35,6 +35,10 @@
 // ?modo=faixa&faixa=<id>); Apagar tira. Salvar uma faixa aberta atualiza a mesma.
 // Outro alimentador (pedido do usuário: "não consigo selecionar mais de um alimentador"): no modo, tocar na rede de um
 // vizinho oferece abrir o Ctrl+M dele; a faixa daqui é salva antes e as duas aparecem no mapa.
+// Modo manutenção (Ctrl+I; no celular, o botão da chave inglesa; ?modo=manut): o mesmo escolher (trechos, Parte, Do ativo),
+// sem Leve/Pesada, croqui e faixas salvas; no painel, o relatório de manutenção embutido (relatorio-manutencao.js,
+// painel(): período, números, Excel e PDF) e, no mapa, as manutenções e ocorrências do escolhido. Ctrl+M e Ctrl+I trocam
+// de um modo para o outro sem perder a escolha.
 // Relatório de manutenção (pedido do usuário): o botão embaixo do croqui baixa relatorio-manutencao.js (só quando tocado)
 // e abre a janela dele com o escolhido no mapa (escolhaGeo: os trechos e, dos que estão em parte, só a parte) e o período.
 // Roda depois de alimentador.js (window.__map, window.D). Os km são a soma dos vãos (D.vaos[i][8], metros).
@@ -595,6 +599,12 @@
   function usaAtivo(A, pendente) {
     const F = faixaDe(A), alvo = pendente ? 0 : ALVO[ferr] || 0;
     if (!F.qs.length) { aviso(`Nada a jusante: ${A.nome} fica no fim do ${T[A.t].nome}.`); return false; }
+    if (manut) {                                                  // modo manutenção: a faixa do ativo vira a escolha (uma parte do trecho)
+      tiraPend();
+      const r = mudaParte(F.qs, [], true);
+      aviso(r.mud ? `Escolhido: ${A.nome} até o fim do ${T[A.t].nome} (${metros(F.m)}).` : 'Esse pedaço já estava escolhido.', 'var(--fg)');
+      return true;
+    }
     if (alvo) {
       const mesmo = pend && pend.t === A.t, novo = mesmo ? pend.novo : !sel.has(A.t);
       if (mesmo) pend.novo = false;                               // o trecho fica: entra na alteração da marca
@@ -698,6 +708,11 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
 .fx-outro button{font:700 13px var(--f-body);min-height:38px;padding:0 12px;border:0;border-radius:10px;background:var(--accent);color:var(--on-accent);cursor:pointer}
 .leaflet-tooltip.fs-rot{padding:1px 6px;border:0;border-radius:6px;background:rgba(11,18,32,.82);color:#fff;font:600 11px var(--f-body);box-shadow:none}
 .leaflet-tooltip.fs-rot:before{display:none}
+.fx-mn{display:none}.fx-manut .fx-mn{display:grid}
+.fx-manut .fx-tools,.fx-manut #fx-apagar,.fx-manut #fx-salva,.fx-manut #fx-lista,.fx-manut .fx-barra,.fx-manut #fx-croqui,.fx-manut #fx-rel,.fx-manut #fx-lista2,.fx-manut .fx-salvas{display:none!important}
+.fx-entrada2{position:absolute;top:170px;left:12px;z-index:900;display:none;place-items:center;width:48px;height:44px;border:1px solid var(--vidro-borda);border-radius:999px;background:var(--vidro);color:var(--vidro-fg);box-shadow:var(--sh-vidro)}
+.fx-entrada2 svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media (pointer:coarse){.fx-entrada2{display:grid}}.fx-modo .fx-entrada2{display:none!important}
 .fx-croqui-km{margin:0 0 8px;padding:8px 10px;border-radius:8px;background:var(--hover);font-size:13px}.fx-croqui-km b{font-family:var(--f-mono)}
 .fx-alca{display:grid;place-items:center;cursor:grab;touch-action:none}
 .fx-alca i{display:block;width:13px;height:13px;border-radius:50%;background:var(--c);border:2.5px solid #fff;box-shadow:0 0 0 1.5px #0b1220,0 2px 6px #0009;transition:transform .12s}
@@ -750,6 +765,7 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
 </div>
 <div class="fx-barra" id="fx-barra" aria-hidden="true"></div>
 <p class="fx-dica-p" id="fx-dica-p"></p>
+<div class="fx-mn" id="fx-mn" aria-label="Relatório de manutenção"></div>
 <button type="button" class="fx-croqui" id="fx-croqui">${SVG.baixa}Baixar croqui</button>
 <button type="button" class="fx-rel" id="fx-rel" title="Manutenções executadas e ocorrências no que foi escolhido, num período (Excel e PDF)">${SVG.rel}Relatório de manutenção</button>`;
   // sem teclado (celular) não há Ctrl+M: um botão pequeno, embaixo do olho, só em tela de toque
@@ -757,7 +773,12 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
   entrada.type = 'button'; entrada.className = 'fx-entrada';
   entrada.title = 'Limpeza de faixa'; entrada.setAttribute('aria-label', 'Limpeza de faixa: escolher trechos e marcar leve e pesada');
   entrada.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l3-1 11-11-2-2L5 17zM14 6l2 2"/></svg>';
-  box.append(pill, dash, entrada);
+  // modo manutenção no celular (sem teclado: sem Ctrl+I): a chave inglesa, embaixo do lápis
+  const entrada2 = document.createElement('button');
+  entrada2.type = 'button'; entrada2.className = 'fx-entrada2';
+  entrada2.title = 'Modo manutenção'; entrada2.setAttribute('aria-label', 'Modo manutenção: escolher trechos e ver manutenções e ocorrências');
+  entrada2.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8 6.2 21l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>';
+  box.append(pill, dash, entrada, entrada2);
   const $ = id => dash.querySelector('#' + id);
   const bDica = L.DomUtil.create('div', 'fx-dica', box);
 
@@ -770,7 +791,7 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
     pill.querySelector('#fx-parte2').setAttribute('aria-pressed', String(pa));
     $('fx-parte').setAttribute('aria-pressed', String(pa));
     if (!n && !doAt && !pa) return;
-    $('fx-info').innerHTML = n ? `<b>${n} trecho${n > 1 ? 's' : ''}</b>${nP ? ` (${nP === n ? (n > 1 ? 'em parte' : 'parte') : nP + ' em parte'})` : ''} · ${km(tot)} km<br>falta marcar ${km(t.falta)} km` :
+    $('fx-info').innerHTML = n ? `<b>${manut ? 'Manutenção · ' : ''}${n} trecho${n > 1 ? 's' : ''}</b>${nP ? ` (${nP === n ? (n > 1 ? 'em parte' : 'parte') : nP + ' em parte'})` : ''} · ${km(tot)} km` + (manut ? '' : `<br>falta marcar ${km(t.falta)} km`) :
       pa ? '<b>Nenhum trecho</b><br>a parte escolhida entra sozinha' : '<b>Nenhum trecho</b><br>o do ativo entra sozinho';
     $('fx-L').innerHTML = `${km(t.leve)} <small>km</small>`; $('fx-P').innerHTML = `${km(t.pesada)} <small>km</small>`;
     $('fx-barra').innerHTML = tot ? `<span style="width:${t.leve / tot * 100}%;background:${COR[1]}"></span><span style="width:${t.pesada / tot * 100}%;background:${COR[2]}"></span>` : '';
@@ -789,7 +810,8 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
       ferr ? (ini === null ? `${cq} no início (num poste ou num pontinho da linha) e depois no fim.` :
       `Agora ${cq.toLowerCase()} no fim${toque() ? ' (no início de novo cancela).' : '. Esc cancela o início.'}`) +
       (map.getZoom() < 15 ? ' Aproxime para acertar o ponto.' : '') :
-      `${cq} em outro trecho para somar, ou ligue Leve ou Pesada.` + (temMarca ? ' Arraste as bolinhas nas pontas para ajustar.' : '');
+      (manut ? `${cq} em outro trecho para somar, S para só uma parte ou A para do ativo até o fim do trecho.` :
+      `${cq} em outro trecho para somar, ou ligue Leve ou Pesada.` + (temMarca ? ' Arraste as bolinhas nas pontas para ajustar.' : ''));
   }
   function aviso(t, cor) {
     const p = $('fx-dica-p'); p.textContent = t; p.style.color = cor || '#f59e0b';
@@ -1409,8 +1431,30 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
   // o foco estava num botão que some (Tela cheia, lápis, ✕ do painel mínimo): vai para o mapa, não se perde
   const resgata = () => requestAnimationFrame(() => { const a = document.activeElement; if (!a || a === document.body || !a.getClientRects().length) mc.focus({ preventScroll: true }); });
   entrada.addEventListener('click', () => liga());
-  function liga() {
-    if (ativo) return;
+  entrada2.addEventListener('click', () => liga('manut'));
+  // modo manutenção: o relatório embutido no painel (relatorio-manutencao.js, carregado agora) e as marcas no mapa
+  let manut = false, pmn = null, pmPede = 0;
+  const textoPilula = () => { const sp = pill.querySelector('span'); if (sp) sp.textContent = manut ? (grosso ? 'Toque nos trechos' : 'Clique nos trechos do relatório de manutenção') : (grosso ? 'Toque nos trechos' : 'Clique nos trechos da limpeza de faixa'); };
+  async function poeModo(m) {
+    manut = m === 'manut';
+    box.classList.toggle('fx-manut', manut); textoPilula();
+    if (manut) {
+      if (ferr === 'leve' || ferr === 'pesada' || ferr === 'apagar') ferr = null;
+      tiraPend(); listaFS(false);
+      const eu = ++pmPede;
+      try {
+        await carregaRel();
+        if (eu !== pmPede || !manut || !ativo) return;
+        if (!pmn) pmn = await window.__relManut.painel($('fx-mn'), () => escolhaGeo());
+        if (eu !== pmPede || !manut || !ativo) { if (pmn) { pmn.fecha(); pmn = null; } return; }
+        pmn.atualiza();
+      } catch (err) { aviso('Não foi possível abrir o relatório de manutenção.'); }
+    } else if (pmn) { pmPede++; pmn.fecha(); pmn = null; }
+    aplicaFerr(); ui();
+  }
+  window.addEventListener('faixa-sel', () => { if (manut && pmn) pmn.atualiza(); });
+  function liga(modo) {
+    if (ativo) { if ((modo === 'manut') !== manut) poeModo(modo); return; }
     ativo = true;
     // 1) visualização normal dos trechos: desliga as camadas (Faixa, Inspeção…) e guarda quais eram, para religar ao sair
     // (a NAE fica como está: ela é o rótulo dos trechos, parte da visualização normal)
@@ -1433,6 +1477,7 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
     ferr = null; ini = null; doAt = false; pend = null; sobA = null;
     refazSelV();
     desenha(); desenhaPend(); aplicaFerr(); resgata(); rotulosSel(); window.dispatchEvent(new Event('faixa-sel'));
+    poeModo(modo);
   }
   function desliga() {
     if (!ativo) return;
@@ -1441,6 +1486,7 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
     box.classList.remove('fx-modo', 'fx-tem', 'fx-ferr'); mc.style.cursor = '';
     camadas.forEach(l => l.remove()); tIni.remove(); tPend.remove();
     lFS.remove(); listaFS(false); fechaOutro();
+    if (pmn) { pmPede++; pmn.fecha(); pmn = null; } manut = false; box.classList.remove('fx-manut'); textoPilula();
     if (kb && kb.unlock) kb.unlock();
     map.dragging.enable(); map.doubleClickZoom.enable();
     bDica.style.display = 'none';
@@ -1463,7 +1509,11 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
   window.addEventListener('keydown', e => {
     if (e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && (e.key === 'm' || e.key === 'M')) {
       if (document.querySelector('dialog[open]')) return;          // com uma caixa aberta (menu, croqui) o modo não liga por baixo dela
-      e.preventDefault(); e.stopPropagation(); ativo ? desliga() : liga(); return;
+      e.preventDefault(); e.stopPropagation(); ativo && !manut ? desliga() : liga(); return;   // no modo manutenção, troca para a faixa
+    }
+    if (e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && (e.key === 'i' || e.key === 'I')) {   // modo manutenção
+      if (document.querySelector('dialog[open]')) return;
+      e.preventDefault(); e.stopPropagation(); ativo && manut ? desliga() : liga('manut'); return;
     }
     if (!ativo || document.querySelector('dialog[open]')) return;
     if (e.key === 'Escape') {
@@ -1487,7 +1537,7 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key.toLowerCase();
     if (k === 'a') { e.preventDefault(); if (!e.repeat) setAt(!doAt); return; }   // "Do ativo": também sem trecho escolhido (o do ativo entra)
-    const f = { l: 'leve', p: 'pesada', b: 'apagar', s: 'parte' }[k];
+    const f = (manut ? { s: 'parte' } : { l: 'leve', p: 'pesada', b: 'apagar', s: 'parte' })[k];
     if (f && (sel.size || f === 'parte' || (doAt && f !== 'apagar'))) { e.preventDefault(); if (!e.repeat || f !== 'parte') setFerr(f); }
   }, true);
 
@@ -1531,7 +1581,7 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
     if (!ativo) return false;
     if (!A) { aviso('Esse ativo não está na rede deste alimentador.'); return false; }
     if (!usaAtivo(A, true)) return false;
-    enquadra(pend.segs);
+    enquadra(pend ? pend.segs : faixaDe(A).segs);
     return true;
   }
 
@@ -1539,6 +1589,10 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
   // de antes, com o aviso no alto) já abre no modo; o botão do aviso ([data-faixa-abre]) também liga. Sem gesto do usuário a tela cheia do navegador é
   // recusada e o mapa cobre a janela (telacheia.js), com o mesmo modo.
   document.querySelectorAll('[data-faixa-abre]').forEach(b => b.addEventListener('click', () => liga()));
+  if (/[?&]modo=manut(&|$)/.test(location.search)) {
+    const vaiM = () => setTimeout(() => { if (!ativo) liga('manut'); }, 0);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', vaiM); else vaiM();
+  }
   if (/[?&]modo=faixa(&|$)/.test(location.search)) {
     const de = new URLSearchParams(location.search).get('de');   // ?modo=faixa&de=<código>: já com a faixa do ativo
     const qf = new URLSearchParams(location.search).get('faixa');   // ?modo=faixa&faixa=<id>: abre a faixa salva
@@ -1563,7 +1617,7 @@ dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
   // faixa: a faixa do ativo até o fim do trecho (testes)
   const resumo = A => A && { trecho: T[A.t].nome, cod: A.cod, nome: A.nome, ponto: chavePt(A.P) };
   window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length, inicio: () => ini,
-    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt, excl, partes, croquiSel, escolhaGeo, relatorio, salvaFaixa, restaura: id => { const f = leFS().find(x => x.id === id); if (f) restaura(f); return !!f; }, salvas: leFS, aberta: () => aberta, listaFS,
+    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt, excl, partes, croquiSel, escolhaGeo, relatorio, manut: () => manut, painelManut: () => pmn, salvaFaixa, restaura: id => { const f = leFS().find(x => x.id === id); if (f) restaura(f); return !!f; }, salvas: leFS, aberta: () => aberta, listaFS,
     parte: () => Object.fromEntries([...sel].map(t => [T[t].nome, nEx[t] ? pedT[t] - nEx[t] : -1])),
     faixa: x => { const A = acha(x), F = A && faixaDe(A); return A && Object.assign(resumo(A), { m: F.m, pedacos: F.qs.length, vaos: F.segs.length }); },
     pendente: () => pend && Object.assign(resumo(pend), { m: pend.m, pedacos: pend.qs.length }) };
