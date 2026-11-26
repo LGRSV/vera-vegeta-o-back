@@ -28,6 +28,13 @@
 // painel, o Leve/Pesada (que só marca dentro da escolha) e o croqui passam a valer só para ela. Num trecho inteiro já
 // escolhido, a parte o reduz a ela; num trecho já em parte, soma. Com a "Parte" ligada as alças brancas nas pontas da
 // parte encurtam ou esticam. Clicar (sem ferramenta) num trecho em parte tira ele todo. Ctrl+Z desfaz cada parte.
+// Faixas salvas (pedido do usuário: "salvar aquela faixa… ver outras faixas que ele já fez no dia"): o escolhido e o
+// marcado (Leve/Pesada) ficam guardados no navegador (localStorage, sem servidor: só neste aparelho; Exportar/Importar leva
+// para outro). No modo, as salvas aparecem no mapa (as de qualquer alimentador, com nome e data) e numa lista (hoje e
+// anteriores): Abrir volta a escolha e o marcado para editar (a de outro alimentador abre a página dele já no modo,
+// ?modo=faixa&faixa=<id>); Apagar tira. Salvar uma faixa aberta atualiza a mesma.
+// Outro alimentador (pedido do usuário: "não consigo selecionar mais de um alimentador"): no modo, tocar na rede de um
+// vizinho oferece abrir o Ctrl+M dele; a faixa daqui é salva antes e as duas aparecem no mapa.
 // Relatório de manutenção (pedido do usuário): o botão embaixo do croqui baixa relatorio-manutencao.js (só quando tocado)
 // e abre a janela dele com o escolhido no mapa (escolhaGeo: os trechos e, dos que estão em parte, só a parte) e o período.
 // Roda depois de alimentador.js (window.__map, window.D). Os km são a soma dos vãos (D.vaos[i][8], metros).
@@ -623,8 +630,8 @@
 .fx-dash{position:absolute;left:12px;bottom:28px;z-index:1002;width:min(320px,calc(100% - 24px));display:none;gap:8px;padding:10px;border-radius:16px;background:var(--paper);color:var(--fg);border:1px solid var(--line);box-shadow:var(--sh2);font:500 13px/1.3 var(--f-body)}
 .fx-modo.fx-tem .fx-dash{display:grid}
 .fx-modo .ctl-lgs,.fx-modo .tc-canto,.fx-modo .limp-chip{display:none!important}
-.fx-cab{display:flex;align-items:center;gap:4px;min-width:0}
-.fx-cab .fx-info{flex:1;min-width:0;padding-left:2px;font-size:12px;line-height:1.35;color:var(--muted)}.fx-cab .fx-info b{color:var(--fg);font-weight:700}
+.fx-cab{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:2px 4px;min-width:0}
+.fx-cab .fx-info{flex:1 1 100%;min-width:0;padding-left:2px;font-size:12px;line-height:1.35;color:var(--muted)}.fx-cab .fx-info b{color:var(--fg);font-weight:700}
 .fx-ic{flex:none;display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:none}
 .fx-ic:hover{background:var(--hover)}.fx-ic:disabled{opacity:.35;cursor:default}.fx-ic[aria-pressed=true]{background:var(--hover);color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
 .fx-ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -661,6 +668,36 @@
 .fx-rel{display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1.5px solid var(--line);border-radius:12px;background:none;font-weight:700!important}
 .fx-rel:hover{background:var(--hover)}.fx-rel:disabled{opacity:.6;cursor:progress}
 .fx-rel svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fx-salvas{position:absolute;top:64px;right:12px;z-index:1003;width:min(340px,calc(100% - 24px));max-height:calc(100% - 140px);display:none;flex-direction:column;border-radius:16px;background:var(--paper);color:var(--fg);border:1px solid var(--line);box-shadow:var(--sh2);font:500 13px/1.35 var(--f-body)}
+.fx-salvas.aberta{display:flex}
+.fx-salvas header{display:flex;align-items:center;gap:6px;padding:10px 6px 8px 14px;border-bottom:1px solid var(--line)}
+.fx-salvas header h3{flex:1;margin:0;font:700 14px/1.2 var(--f-body)}
+.fx-salvas .fs-op{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.fx-salvas .fs-op label{display:flex;align-items:center;gap:6px;cursor:pointer;min-height:32px}
+.fx-salvas .fs-lista{overflow:auto;padding:4px 8px 8px}
+.fx-salvas h4{margin:10px 6px 4px;font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.fx-salvas .fs-it{display:grid;gap:3px;padding:8px;border-radius:10px}
+.fx-salvas .fs-it:hover{background:var(--hover)}.fx-salvas .fs-it.atual{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.fx-salvas .fs-it b{font-weight:700}.fx-salvas .fs-it small{color:var(--muted);font-size:11.5px}
+.fx-salvas .fs-km{display:flex;gap:10px;font:600 12px var(--f-mono)}.fx-salvas .fs-km i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;background:var(--c)}
+.fx-salvas .fs-ac{display:flex;gap:6px;margin-top:2px}
+.fx-salvas button,.fx-nome button{font:600 12.5px var(--f-body);min-height:32px;padding:0 10px;border:1.5px solid var(--line);border-radius:9px;background:none;color:var(--fg);cursor:pointer}
+.fx-salvas button:hover,.fx-nome button:hover{background:var(--hover)}.fx-salvas button.perigo{color:#ef4444}.fx-salvas button.confirma{background:#ef4444;border-color:#ef4444;color:#fff}
+.fx-salvas .fs-pe{display:flex;gap:6px;padding:8px 14px 10px;border-top:1px solid var(--line)}
+.fx-salvas .fs-vazio{padding:14px 6px;color:var(--muted)}
+@media (pointer:coarse){.fx-salvas button{min-height:40px}}
+@media (max-width:700px){.fx-salvas{top:auto;bottom:12px;left:12px;right:12px;width:auto;max-height:55%}}
+.fx-modo:not(.fx-tem) .fx-pill [data-n]::after{content:attr(data-n);margin-left:2px;font:700 11px var(--f-mono);color:var(--accent)}
+dialog.fx-nome{border:1px solid var(--line);border-radius:14px;padding:18px;width:min(420px,calc(100vw - 24px));background:var(--paper);color:var(--fg);box-shadow:var(--sh2)}
+dialog.fx-nome::backdrop{background:rgb(10 14 17 / .5)}
+.fx-nome form{display:grid;gap:12px}.fx-nome h3{margin:0;font:700 16px var(--f-body)}.fx-nome p{margin:0;font-size:12.5px;color:var(--muted)}
+.fx-nome input{font:15px var(--f-body);color:var(--fg);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:0 12px;min-height:42px}
+.fx-nome .ac{display:flex;justify-content:flex-end;gap:8px}.fx-nome button[value=ok]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.fx-outro{position:absolute;z-index:1004;display:none;max-width:260px;padding:10px;border-radius:12px;background:var(--paper);color:var(--fg);border:1px solid var(--line);box-shadow:var(--sh2);font:500 12.5px/1.35 var(--f-body)}
+.fx-outro b{display:block;font-size:14px}.fx-outro small{display:block;color:var(--muted);margin:2px 0 8px}
+.fx-outro button{font:700 13px var(--f-body);min-height:38px;padding:0 12px;border:0;border-radius:10px;background:var(--accent);color:var(--on-accent);cursor:pointer}
+.leaflet-tooltip.fs-rot{padding:1px 6px;border:0;border-radius:6px;background:rgba(11,18,32,.82);color:#fff;font:600 11px var(--f-body);box-shadow:none}
+.leaflet-tooltip.fs-rot:before{display:none}
 .fx-croqui-km{margin:0 0 8px;padding:8px 10px;border-radius:8px;background:var(--hover);font-size:13px}.fx-croqui-km b{font-family:var(--f-mono)}
 .fx-alca{display:grid;place-items:center;cursor:grab;touch-action:none}
 .fx-alca i{display:block;width:13px;height:13px;border-radius:50%;background:var(--c);border:2.5px solid #fff;box-shadow:0 0 0 1.5px #0b1220,0 2px 6px #0009;transition:transform .12s}
@@ -677,7 +714,9 @@
     baixa: '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
     ativo: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="3"/><path d="M9 12h11M16 8l4 4-4 4"/></svg>',
     parte: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h3M18 12h3" stroke-dasharray="2 2.5"/><path d="M8 12h8"/><path d="M8 8v8M16 8v8"/></svg>',
-    rel: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 17v-3M12 17v-6M15 17v-4"/></svg>'
+    rel: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 17v-3M12 17v-6M15 17v-4"/></svg>',
+    salva: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></svg>',
+    lista: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>'
   };
   const pill = document.createElement('div');
   pill.className = 'fx-pill'; pill.setAttribute('role', 'status');
@@ -688,11 +727,14 @@
     `${SVG.ativo}Do ativo${grosso ? '' : ' <small>A</small>'}</button>` +
     `<button type="button" class="fx-pat" id="fx-parte2" aria-pressed="false" title="Parte (S): ${grosso ? 'toque' : 'clique'} no início e no fim de qualquer parte da rede; só ela fica escolhida">` +
     `${SVG.parte}Parte${grosso ? '' : ' <small>S</small>'}</button>` +
+    `<button type="button" class="fx-pat" id="fx-lista2" aria-expanded="false" title="Faixas salvas: as de hoje e as anteriores">${SVG.lista}Salvas</button>` +
     `<button type="button" class="fx-ic" id="fx-refaz2" title="Refazer (Ctrl+Y)" aria-label="Refazer" hidden>${SVG.refaz}</button>` +
     `<button type="button" class="fx-ic fx-x" title="Sair (Esc)" aria-label="Sair do modo limpeza de faixa">✕</button>`;
   const dash = document.createElement('div');
   dash.className = 'fx-dash'; dash.setAttribute('role', 'region'); dash.setAttribute('aria-label', 'Limpeza de faixa');
   dash.innerHTML = `<div class="fx-cab"><span class="fx-info" id="fx-info"></span>
+  <button type="button" class="fx-ic" id="fx-salva" title="Salvar a faixa (fica no navegador e aparece no mapa)" aria-label="Salvar a faixa">${SVG.salva}</button>
+  <button type="button" class="fx-ic" id="fx-lista" aria-expanded="false" title="Faixas salvas" aria-label="Faixas salvas">${SVG.lista}</button>
   <button type="button" class="fx-ic" id="fx-parte" aria-pressed="false" title="Parte (S): escolher só uma parte do trecho (clique no início e no fim)" aria-label="Escolher parte do trecho">${SVG.parte}</button>
   <button type="button" class="fx-ic" id="fx-apagar" aria-pressed="false" title="Apagar marca (B)" aria-label="Apagar marca">${SVG.apagar}</button>
   <button type="button" class="fx-ic" id="fx-desfaz" title="Desfazer (Ctrl+Z)" aria-label="Desfazer">${SVG.desfaz}</button>
@@ -901,7 +943,8 @@
     if (doAt) return clicaAtivo(e);
     if (ferr) return clicaPoste(e);
     const [x, y] = abs(e), k = vaoPerto(x, y, toque(e) ? 22 : 12);
-    if (k < 0) return;
+    if (k < 0) { outroAl(e); return; }
+    fechaOutro();
     const ti = V[k][4];
     if (sel.has(ti) && nEx[ti]) tiraParcial(ti);                    // trecho em parte: sai todo (com a parte)
     else { sel.has(ti) ? sel.delete(ti) : sel.add(ti); guarda({ t: ti }); muda(); }
@@ -913,7 +956,14 @@
     mov = requestAnimationFrame(() => {
       mov = 0;
       const [x, y] = abs(e), k = vaoPerto(x, y, 12);
-      if (k < 0) { lHover.setLatLngs([]); bDica.style.display = 'none'; return; }
+      if (k < 0) {
+        lHover.setLatLngs([]);
+        const cod = vizEm(e), r = box.getBoundingClientRect();
+        if (!cod) { bDica.style.display = 'none'; return; }
+        bDica.textContent = `${cod} · clique para abrir no Ctrl+M`;
+        bDica.style.cssText = `display:block;left:${Math.min(e.clientX - r.left + 14, r.width - 240)}px;top:${e.clientY - r.top + 16}px`;
+        return;
+      }
       const ti = V[k][4], r = box.getBoundingClientRect();
       lHover.setLatLngs(vaosDe[ti].map(i => [[V[i][0], V[i][1]], [V[i][2], V[i][3]]]));
       bDica.textContent = `${T[ti].nome} · ${km(extDe[ti])} km${sel.has(ti) ? (nEx[ti] ? ' · em parte · clique para tirar' : ' · clique para tirar') : ''}`;
@@ -1030,6 +1080,7 @@
   pill.addEventListener('click', e => {
     if (e.target.closest('.fx-x')) desliga(); else if (e.target.closest('#fx-refaz2')) refaz();
     else if (e.target.closest('#fx-parte2')) { setFerr('parte'); resgata(); }
+    else if (e.target.closest('#fx-lista2')) listaFS(!fsPainel.classList.contains('aberta'));
     else if (e.target.closest('#fx-ativo2')) {                  // liga o "Do ativo": o painel aparece (a pílula some)
       const foco = document.activeElement === e.target.closest('#fx-ativo2');
       setAt(true);
@@ -1047,6 +1098,8 @@
     if (b.id === 'fx-refaz') return refaz();
     if (b.id === 'fx-croqui') return croqui();
     if (b.id === 'fx-rel') return relatorio();
+    if (b.id === 'fx-salva') return salvaFaixa();
+    if (b.id === 'fx-lista') return listaFS(!fsPainel.classList.contains('aberta'));
   });
   // relatório de manutenção: relatorio-manutencao.js só agora (window.__relManut), com o escolhido no mapa
   const carregaRel = () => window.__relManut ? Promise.resolve() : new Promise((ok, erro) => {
@@ -1125,6 +1178,232 @@
     return r;
   }
 
+  // ---------- faixas salvas (no navegador) ----------
+  const AL_COD = (D.meta && D.meta.al) || '', CH_FS = 'argos-faixas-salvas', CH_FS_VER = 'argos-faixas-salvas-ver';
+  const leFS = () => { try { const x = JSON.parse(localStorage.getItem(CH_FS) || '[]'); return Array.isArray(x) ? x.filter(f => f && f.id && f.al) : []; } catch (e) { return []; } };
+  const gravaFS = l => { try { localStorage.setItem(CH_FS, JSON.stringify(l)); return true; } catch (e) { return false; } };
+  let verFS = true;
+  try { verFS = localStorage.getItem(CH_FS_VER) !== '0'; } catch (e) { /* sem armazenamento */ }
+  let aberta = null, salvoEm = null;                              // a salva que está aberta para editar e o retrato dela ao abrir/salvar
+  const dd = n => String(n).padStart(2, '0');
+  const dataTxt = iso => { const d = new Date(iso); return `${dd(d.getDate())}/${dd(d.getMonth() + 1)}`; };
+  const horaTxt = iso => { const d = new Date(iso); return `${dd(d.getHours())}:${dd(d.getMinutes())}`; };
+  const hojeD = () => { const d = new Date(); return `${d.getFullYear()}-${dd(d.getMonth() + 1)}-${dd(d.getDate())}`; };
+  const diaDe = iso => { const d = new Date(iso); return `${d.getFullYear()}-${dd(d.getMonth() + 1)}-${dd(d.getDate())}`; };
+  const r6 = x => Math.round(x * 1e6) / 1e6;
+  // segmentos → linhas contínuas (menos pontos guardados): segue de ponta em ponta enquanto o ponto liga só dois segmentos
+  function linhasDe(segs) {
+    const kp = ll => ll[0].toFixed(6) + ',' + ll[1].toFixed(6), viz = new Map(), usado = new Uint8Array(segs.length), out = [];
+    segs.forEach((sg, j) => sg.forEach(ll => { const c = kp(ll); if (viz.has(c)) viz.get(c).push(j); else viz.set(c, [j]); }));
+    const anda = (c, j) => {
+      const l = [];
+      while (j !== null && !usado[j]) {
+        usado[j] = 1;
+        const sg = segs[j], o = kp(sg[0]) === c ? 1 : 0;
+        if (!l.length) l.push(sg[1 - o]);
+        l.push(sg[o]); c = kp(sg[o]);
+        const prox = viz.get(c).filter(x => !usado[x]);
+        j = viz.get(c).length === 2 && prox.length === 1 ? prox[0] : null;
+      }
+      return l.map(ll => [r6(ll[0]), r6(ll[1])]);
+    };
+    viz.forEach((js, c) => { if (js.length !== 2) js.forEach(j => { if (!usado[j]) out.push(anda(c, j)); }); });
+    segs.forEach((sg, j) => { if (!usado[j]) out.push(anda(kp(sg[0]), j)); });
+    return out;
+  }
+  // o escolhido e o marcado agora: por vão (id e postes, para achar de novo), as sequências de pedaços dentro da escolha com a
+  // marca (0 só escolhido, 1 leve, 2 pesada), em frações do vão; e as linhas de cada marca para o mapa
+  function retrato() {
+    if (!sel.size) return null;
+    const runs = [], segs = [[], [], []];
+    for (const i of selV) {
+      const n = np[i], o = off[i], v = V[i];
+      for (let j = 0; j < n;) {
+        const x = excl[o + j], m = marca[o + j]; let k = j + 1;
+        while (k < n && excl[o + k] === x && marca[o + k] === m) k++;
+        if (!x) { runs.push([String(v[5]), String(v[6]), String(v[7]), +(j / n).toFixed(6), +(k / n).toFixed(6), m]); segs[m].push([llPt({ i, q: j }), llPt({ i, q: k })]); }
+        j = k;
+      }
+    }
+    const t = totais(), nomes = [...sel].sort((a, b) => a - b).map(i => T[i].nome), parte = [...sel].filter(i => nEx[i]).map(i => T[i].nome);
+    return { trechos: nomes, parte, runs, km: { l: +(t.leve / 1000).toFixed(3), p: +(t.pesada / 1000).toFixed(3), t: +((t.leve + t.pesada + t.falta) / 1000).toFixed(3) },
+      geo: { s: linhasDe(segs[0]), l: linhasDe(segs[1]), p: linhasDe(segs[2]) } };
+  }
+  const chaveR = r => r ? JSON.stringify(r.runs) : '';
+  const mudouDesdeSalvo = () => sel.size > 0 && chaveR(retrato()) !== salvoEm;
+  const nomePadrao = r => `${AL_COD} · ${r.trechos.length > 3 ? r.trechos.length + ' trechos' : r.trechos.join(', ')} · ${dataTxt(new Date().toISOString())} ${horaTxt(new Date().toISOString())}`;
+  // pede o nome numa caixa (Enter salva, Esc cancela); devolve o nome ou null
+  function pedeNome(padrao) {
+    return new Promise(ok => {
+      const dlg = document.createElement('dialog'); dlg.className = 'fx-nome';
+      dlg.innerHTML = `<form method="dialog"><h3>Salvar faixa</h3><p>Fica neste navegador e aparece no mapa, em qualquer alimentador, enquanto o Ctrl+M estiver ligado.</p>
+        <input name="n" maxlength="80" autocomplete="off" aria-label="Nome da faixa"><div class="ac"><button value="nao" type="button">Cancelar</button><button value="ok">Salvar</button></div></form>`;
+      document.body.append(dlg);
+      const f = dlg.querySelector('form'), inp = f.n;
+      inp.value = padrao;
+      let r = null;
+      f.addEventListener('submit', e => { e.preventDefault(); r = inp.value.trim() || padrao; dlg.close(); });
+      dlg.querySelector('[value=nao]').addEventListener('click', () => dlg.close());
+      dlg.addEventListener('close', () => { dlg.remove(); ok(r); resgata(); });
+      dlg.showModal(); inp.select();
+    });
+  }
+  // salva o escolhido: atualiza a aberta (mesmo alimentador) ou cria uma nova (com nome); sem pergunta (auto), nome padrão
+  async function salvaFaixa(auto) {
+    const r = retrato();
+    if (!r) { aviso('Escolha um trecho (ou uma parte) antes de salvar.'); return null; }
+    const l = leFS(), agora = new Date().toISOString();
+    let f = aberta && l.find(x => x.id === aberta);
+    if (f) Object.assign(f, r, { atualizado: agora });
+    else {
+      const nome = auto ? nomePadrao(r) : await pedeNome(nomePadrao(r));
+      if (nome === null) return null;
+      f = Object.assign({ v: 1, id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), nome, al: AL_COD, criado: agora, atualizado: agora }, r);
+      l.push(f);
+    }
+    if (!gravaFS(l)) { aviso('Não consegui salvar: o navegador está sem espaço (ou bloqueou o armazenamento).'); return null; }
+    aberta = f.id; salvoEm = chaveR(r);
+    aviso(`Faixa salva: ${f.nome}.`, 'var(--fg)');
+    desenhaFS(); listaFS(); return f;
+  }
+  // volta uma salva deste alimentador para a escolha (substitui a de agora)
+  function restaura(f) {
+    const porId = new Map(), porPar = new Map();
+    V.forEach((v, i) => { porId.set(String(v[5]), i); porPar.set(v[6] + '|' + v[7], [i, false]); porPar.set(v[7] + '|' + v[6], [i, true]); });
+    tiraPend(); ini = null; ferr = null; doAt = false;
+    sel.clear(); excl.fill(0); nEx.fill(0); marca.fill(0); undo.length = 0; redo.length = 0;
+    const tr = new Set(), inc = [];
+    let faltou = 0;
+    for (const [id, p6, p7, t0, t1, m] of f.runs || []) {
+      let i = porId.get(String(id)), inv = false;
+      if (i === undefined || String(V[i][6]) !== p6 || String(V[i][7]) !== p7) { const x = porPar.get(p6 + '|' + p7); if (!x) { faltou++; continue; } [i, inv] = x; }
+      const a = inv ? 1 - t1 : t0, b = inv ? 1 - t0 : t1;
+      tr.add(V[i][4]); inc.push([i, Math.round(a * np[i]), Math.round(b * np[i]), m]);
+    }
+    tr.forEach(t => sel.add(t));
+    const parte = new Set(f.parte || []);
+    for (const t of tr) if (parte.has(T[t].nome)) for (const i of vaosDe[t]) for (let q = off[i]; q < off[i + 1]; q++) { excl[q] = 1; nEx[t]++; }
+    for (const [i, a, b, m] of inc) for (let q = off[i] + a; q < off[i] + b; q++) { if (excl[q]) { excl[q] = 0; nEx[V[i][4]]--; } marca[q] = m; }
+    aberta = f.id; muda(); aplicaFerr();
+    salvoEm = chaveR(retrato());
+    desenhaFS(); listaFS();
+    const lls = (f.geo ? [...f.geo.s, ...f.geo.l, ...f.geo.p] : []).flat();
+    if (lls.length) enquadra([[lls[0], lls[lls.length - 1]], ...lls.map(ll => [ll, ll])].slice(0, 2000));
+    aviso(faltou ? `Faixa aberta: ${f.nome} (${faltou} pedaço(s) não estão mais na rede de hoje).` : `Faixa aberta: ${f.nome}.`, 'var(--fg)');
+  }
+  // ---------- no mapa: as salvas de qualquer alimentador (menos a aberta, que já está à vista no modo) ----------
+  map.createPane('faixa-salvas').style.zIndex = 449;
+  map.getPane('faixa-salvas').style.pointerEvents = 'none';
+  const lFS = L.layerGroup(), rendFS = L.canvas({ pane: 'faixa-salvas' });
+  function desenhaFS() {
+    lFS.clearLayers();
+    if (!ativo || !verFS) return;
+    const st = { renderer: rendFS, pane: 'faixa-salvas', interactive: false, lineCap: 'round', lineJoin: 'round' };
+    for (const f of leFS()) {
+      if (f.id === aberta && f.al === AL_COD) continue;
+      const g = f.geo || {}, tudo = [...(g.s || []), ...(g.l || []), ...(g.p || [])];
+      if (!tudo.length) continue;
+      L.polyline(tudo, Object.assign({}, st, { color: '#0b1220', weight: 9, opacity: .55 })).addTo(lFS);
+      if ((g.s || []).length) L.polyline(g.s, Object.assign({}, st, { color: '#e2e8f0', weight: 4.5, opacity: .9, dashArray: '2 7' })).addTo(lFS);
+      if ((g.l || []).length) L.polyline(g.l, Object.assign({}, st, { color: COR[1], weight: 5, opacity: .85, dashArray: '10 6' })).addTo(lFS);
+      if ((g.p || []).length) L.polyline(g.p, Object.assign({}, st, { color: COR[2], weight: 5, opacity: .85, dashArray: '10 6' })).addTo(lFS);
+      const meio = tudo[Math.floor(tudo.length / 2)], ll = meio[Math.floor(meio.length / 2)];
+      L.tooltip({ permanent: true, direction: 'top', className: 'fs-rot', interactive: false, pane: 'faixa-salvas' }).setLatLng(ll)
+        .setContent(`${esc(f.nome)} · ${dataTxt(f.atualizado || f.criado)}`).addTo(lFS);
+    }
+  }
+  const esc = x => String(x ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // ---------- a lista ----------
+  const fsPainel = document.createElement('section');
+  fsPainel.className = 'fx-salvas'; fsPainel.setAttribute('aria-label', 'Faixas salvas');
+  fsPainel.innerHTML = `<header><h3>Faixas salvas</h3><button type="button" class="fs-nova" title="Tirar a escolha e começar outra faixa (a de agora, se mudou, é salva antes)">Nova</button>
+    <button type="button" class="fx-ic fs-x" aria-label="Fechar a lista">✕</button></header>
+    <div class="fs-op"><label><input type="checkbox" class="fs-ver"> Mostrar no mapa</label><span class="fs-n"></span></div>
+    <div class="fs-lista"></div>
+    <div class="fs-pe"><button type="button" class="fs-exp" title="Baixar as faixas salvas num arquivo (para levar a outro computador)">Exportar</button><button type="button" class="fs-imp" title="Juntar as faixas de um arquivo exportado">Importar</button><input type="file" accept=".json,application/json" hidden></div>`;
+  const fsLista = fsPainel.querySelector('.fs-lista'), fsVer = fsPainel.querySelector('.fs-ver');
+  fsVer.checked = verFS;
+  function listaFS(abre) {
+    if (abre !== undefined) {
+      fsPainel.classList.toggle('aberta', !!abre && ativo);
+      [pill.querySelector('#fx-lista2'), $('fx-lista')].forEach(b => b && b.setAttribute('aria-expanded', String(!!abre)));
+    }
+    const l = leFS().sort((a, b) => (b.atualizado || b.criado).localeCompare(a.atualizado || a.criado)), hoje = hojeD();
+    const n = l.length, b2 = pill.querySelector('#fx-lista2');
+    if (b2) { if (n) b2.dataset.n = n; else delete b2.dataset.n; }
+    if (!fsPainel.classList.contains('aberta')) return;
+    fsPainel.querySelector('.fs-n').textContent = n ? `${n} faixa${n > 1 ? 's' : ''} · neste navegador` : '';
+    const item = f => {
+      const aqui = f.al === AL_COD, k = f.km || {};
+      return `<div class="fs-it${f.id === aberta && aqui ? ' atual' : ''}" data-id="${esc(f.id)}"><b>${esc(f.nome)}</b>
+        <small>${diaDe(f.atualizado || f.criado) === hoje ? horaTxt(f.atualizado || f.criado) : dataTxt(f.atualizado || f.criado) + ' ' + horaTxt(f.atualizado || f.criado)} · ${esc(f.al)} · ${esc((f.trechos || []).slice(0, 6).join(', '))}${(f.trechos || []).length > 6 ? '…' : ''}</small>
+        <span class="fs-km"><span style="--c:${COR[1]}"><i></i>${km((k.l || 0) * 1000)}</span><span style="--c:${COR[2]}"><i></i>${km((k.p || 0) * 1000)}</span><span>${km((k.t || 0) * 1000)} km</span></span>
+        <span class="fs-ac"><button type="button" data-a="abre">${aqui ? (f.id === aberta ? 'Aberta' : 'Abrir') : 'Abrir no ' + esc(f.al)}</button><button type="button" data-a="ver">Ver</button><button type="button" data-a="apaga" class="perigo">Apagar</button></span></div>`;
+    };
+    const hj = l.filter(f => diaDe(f.atualizado || f.criado) === hoje), ant = l.filter(f => diaDe(f.atualizado || f.criado) !== hoje);
+    fsLista.innerHTML = !n ? '<p class="fs-vazio">Nenhuma faixa salva ainda. Escolha os trechos, marque Leve/Pesada e toque em Salvar (o disquete do painel).</p>' :
+      (hj.length ? '<h4>Hoje</h4>' + hj.map(item).join('') : '<h4>Hoje</h4><p class="fs-vazio">Nenhuma hoje.</p>') + (ant.length ? '<h4>Anteriores</h4>' + ant.map(item).join('') : '');
+  }
+  fsPainel.addEventListener('click', async e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.classList.contains('fs-x')) return listaFS(false);
+    if (b.classList.contains('fs-nova')) {
+      if (mudouDesdeSalvo()) await salvaFaixa(true);
+      tiraPend(); sel.clear(); excl.fill(0); nEx.fill(0); marca.fill(0); undo.length = 0; redo.length = 0; ini = null;
+      aberta = null; salvoEm = null; muda(); desenhaFS(); listaFS(); aviso('Escolha os trechos da nova faixa.', 'var(--fg)'); return;
+    }
+    if (b.classList.contains('fs-exp')) {
+      const blob = new Blob([JSON.stringify({ argos: 'faixas-salvas', v: 1, faixas: leFS() }, null, 1)], { type: 'application/json' }), a = document.createElement('a');
+      const d = new Date(); a.href = URL.createObjectURL(blob); a.download = `faixas-salvas-argos-${d.getFullYear()}${dd(d.getMonth() + 1)}${dd(d.getDate())}.json`;
+      document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 30000); return;
+    }
+    if (b.classList.contains('fs-imp')) return fsPainel.querySelector('input[type=file]').click();
+    const it = b.closest('.fs-it'), f = it && leFS().find(x => x.id === it.dataset.id);
+    if (!f) return;
+    if (b.dataset.a === 'abre') {
+      if (f.al !== AL_COD) { if (mudouDesdeSalvo()) await salvaFaixa(true); location.href = `../${encodeURIComponent(f.al)}/?modo=faixa&faixa=${encodeURIComponent(f.id)}`; return; }
+      if (f.id !== aberta || mudouDesdeSalvo()) { if (mudouDesdeSalvo() && aberta !== f.id) await salvaFaixa(true); restaura(f); }
+      return;
+    }
+    if (b.dataset.a === 'ver') { const lls = [...(f.geo.s || []), ...(f.geo.l || []), ...(f.geo.p || [])].flat(); if (lls.length) enquadra(lls.map(ll => [ll, ll])); return; }
+    if (b.dataset.a === 'apaga') {
+      if (!b.classList.contains('confirma')) { b.classList.add('confirma'); b.textContent = 'Confirmar'; setTimeout(() => { if (b.isConnected) { b.classList.remove('confirma'); b.textContent = 'Apagar'; } }, 3000); return; }
+      gravaFS(leFS().filter(x => x.id !== f.id));
+      if (aberta === f.id) { aberta = null; salvoEm = null; }
+      desenhaFS(); listaFS(); aviso(`Faixa apagada: ${f.nome}.`, 'var(--fg)');
+    }
+  });
+  fsVer.addEventListener('change', () => { verFS = fsVer.checked; try { localStorage.setItem(CH_FS_VER, verFS ? '1' : '0'); } catch (e) { /* */ } desenhaFS(); });
+  fsPainel.querySelector('input[type=file]').addEventListener('change', async e => {
+    const arq = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!arq) return;
+    try {
+      const j = JSON.parse(await arq.text()), novas = (Array.isArray(j) ? j : j.faixas || []).filter(f => f && f.id && f.al && Array.isArray(f.runs));
+      const l = leFS(), por = new Map(l.map(f => [f.id, f]));
+      let n = 0;
+      novas.forEach(f => { const x = por.get(f.id); if (!x || (f.atualizado || '') > (x.atualizado || '')) { por.set(f.id, f); n++; } });
+      if (!gravaFS([...por.values()])) throw new Error('sem espaço');
+      desenhaFS(); listaFS(); aviso(`${n} faixa(s) importada(s).`, 'var(--fg)');
+    } catch (err) { aviso('Arquivo de faixas inválido.'); }
+  });
+  window.addEventListener('storage', e => { if (e.key === CH_FS) { desenhaFS(); listaFS(); } });   // outra aba salvou
+  // ---------- rede de outro alimentador no modo ----------
+  const vizEm = e => { const V2 = window.__vizinhos; if (!V2 || !V2.em) return null; const p = map.mouseEventToContainerPoint(e), c = V2.em(p.x, p.y); return c && c !== AL_COD ? c : null; };
+  const fsOutro = document.createElement('div'); fsOutro.className = 'fx-outro'; fsOutro.setAttribute('role', 'dialog');
+  const fechaOutro = () => { fsOutro.style.display = 'none'; };
+  function outroAl(e) {
+    const cod = vizEm(e);
+    if (!cod) { fechaOutro(); return; }
+    const r = box.getBoundingClientRect(), tem = sel.size > 0;
+    fsOutro.innerHTML = `<b>${esc(cod)}</b><small>Outro alimentador. ${tem ? 'A faixa daqui fica salva e aparece no mapa dele.' : 'Abre a página dele já no Ctrl+M.'}</small><button type="button">Abrir no Ctrl+M</button>`;
+    fsOutro.style.cssText = `display:block;left:${Math.max(8, Math.min(e.clientX - r.left + 10, r.width - 270))}px;top:${Math.max(8, Math.min(e.clientY - r.top + 10, r.height - 130))}px`;
+    fsOutro.querySelector('button').onclick = async () => {
+      if (mudouDesdeSalvo()) { const f = await salvaFaixa(true); if (!f) return; }
+      location.href = `../${encodeURIComponent(cod)}/?modo=faixa`;
+    };
+  }
+  map.on('movestart zoomstart', fechaOutro);
+
   // ---------- ligar e desligar ----------
   const kb = navigator.keyboard;
   // o foco estava num botão que some (Tela cheia, lápis, ✕ do painel mínimo): vai para o mapa, não se perde
@@ -1149,6 +1428,7 @@
     // inicial, solta a ferramenta, sai do modo) e segurar o Esc sai da tela cheia (Chrome/Edge; nos outros o Esc sai do modo)
     if (kb && kb.lock) kb.lock(['Escape']).catch(() => {});
     camadas.forEach(l => l.addTo(map));
+    box.append(fsPainel, fsOutro); lFS.addTo(map); desenhaFS(); listaFS();
     map.doubleClickZoom.disable();
     ferr = null; ini = null; doAt = false; pend = null; sobA = null;
     refazSelV();
@@ -1160,6 +1440,7 @@
     cancelaArrasto(); ativo = false; ferr = null; ini = null; sob = null; doAt = false; sobA = null; lAlcas.clearLayers(); rotulosSel();
     box.classList.remove('fx-modo', 'fx-tem', 'fx-ferr'); mc.style.cursor = '';
     camadas.forEach(l => l.remove()); tIni.remove(); tPend.remove();
+    lFS.remove(); listaFS(false); fechaOutro();
     if (kb && kb.unlock) kb.unlock();
     map.dragging.enable(); map.doubleClickZoom.enable();
     bDica.style.display = 'none';
@@ -1191,7 +1472,9 @@
       // o que está aberto por cima fecha antes: a barra/listas do olho (lupa-painel.js cuida) e o painel lateral
       if (document.querySelector('.mapbox>.barra-busca:not(.lp-fechada)') || [...document.querySelectorAll('.lp-drop,.lp-fdrop,.lp-sug,#mes-lista')].some(x => !x.hidden && x.getClientRects().length)) return;
       e.preventDefault(); e.stopImmediatePropagation();
-      if (document.body.classList.contains('tc-gaveta') && window.__gaveta) window.__gaveta(false);
+      if (fsOutro.style.display === 'block') fechaOutro();
+      else if (fsPainel.classList.contains('aberta')) listaFS(false);
+      else if (document.body.classList.contains('tc-gaveta') && window.__gaveta) window.__gaveta(false);
       else if (pend) tiraPend(); else if (ini !== null) tiraIni(); else if (ferr || doAt) { ferr = null; doAt = false; aplicaFerr(); } else desliga();
       return;
     }
@@ -1258,7 +1541,12 @@
   document.querySelectorAll('[data-faixa-abre]').forEach(b => b.addEventListener('click', () => liga()));
   if (/[?&]modo=faixa(&|$)/.test(location.search)) {
     const de = new URLSearchParams(location.search).get('de');   // ?modo=faixa&de=<código>: já com a faixa do ativo
-    const vai = () => setTimeout(() => { if (de) doAtivo(de); else if (!ativo) liga(); }, 0);
+    const qf = new URLSearchParams(location.search).get('faixa');   // ?modo=faixa&faixa=<id>: abre a faixa salva
+    const vai = () => setTimeout(() => {
+      if (de) doAtivo(de); else if (!ativo) liga();
+      const f = qf && leFS().find(x => x.id === qf && x.al === AL_COD);
+      if (f && ativo) { const r = () => restaura(f); if (window.__al && window.__al.rede) window.__al.rede.then(() => setTimeout(r, 0)); else r(); }
+    }, 0);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', vai); else vai();
   }
 
@@ -1275,7 +1563,7 @@
   // faixa: a faixa do ativo até o fim do trecho (testes)
   const resumo = A => A && { trecho: T[A.t].nome, cod: A.cod, nome: A.nome, ponto: chavePt(A.P) };
   window.__faixa = { liga, desliga, ativo: () => ativo, sel: () => [...sel].map(i => T[i].nome), totais, marca, np, off, ferr: () => ferr, desfeitos: () => undo.length, inicio: () => ini,
-    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt, excl, partes, croquiSel, escolhaGeo, relatorio,
+    doAtivo, acha: x => resumo(acha(x)), doAt: () => doAt, excl, partes, croquiSel, escolhaGeo, relatorio, salvaFaixa, restaura: id => { const f = leFS().find(x => x.id === id); if (f) restaura(f); return !!f; }, salvas: leFS, aberta: () => aberta, listaFS,
     parte: () => Object.fromEntries([...sel].map(t => [T[t].nome, nEx[t] ? pedT[t] - nEx[t] : -1])),
     faixa: x => { const A = acha(x), F = A && faixaDe(A); return A && Object.assign(resumo(A), { m: F.m, pedacos: F.qs.length, vaos: F.segs.length }); },
     pendente: () => pend && Object.assign(resumo(pend), { m: pend.m, pedacos: pend.qs.length }) };

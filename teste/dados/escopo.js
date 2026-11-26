@@ -6,7 +6,7 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.47",
+ "versao": "2.48",
  "atualizado": "2026-11-26",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
@@ -191,6 +191,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Menu Alimentadores ao lado do botão: chips na mesma linha, saindo para a esquerda; busca, Ver todos e Tirar todos na lupa", "st": "ok", "d": "2026-11-25"},
    {"t": "Satélite: clicar no alimentador abre o mapa do alimentador completo ali mesmo, na mesma posição, sem recarregar (seleção de outros, Voltar ao satélite)", "st": "ok", "d": "2026-11-25"},
    {"t": "Selecionados com postes (17,5), equipamentos (16) e códigos (18,5) como o aberto; ✕ no aberto (vindo do satélite) tira tudo e volta ao satélite limpo", "st": "ok", "d": "2026-11-25"},
+   {"t": "Ctrl+M: faixas salvas (disquete no painel; lista de hoje e anteriores; no mapa de qualquer alimentador; abrir, apagar, exportar/importar) e rede de outro alimentador abre o Ctrl+M dele sem perder a faixa", "st": "ok", "d": "2026-11-26", "obs": "Ficam no navegador de quem salvou (sem servidor); Exportar/Importar leva para outro computador."},
    {"t": "Mapa do alimentador no PC: zoom pela roda mais leve (cerca de 1 nível por giro), rede nítida mais cedo depois do zoom, satélite do nível seguinte pré-carregado e etiquetas da Faixa sem piscar", "st": "ok", "d": "2026-11-26", "obs": "Medido no LD01059122 com CPU 4x: rede nítida 0,71 → 0,49 s depois do giro; satélite do nível seguinte 0,60 s → 0,02 s."},
    {"t": "Relatório de manutenção no Ctrl+M: do escolhido (trechos ou a parte entre o ponto inicial e o final), num período, as manutenções executadas e as ocorrências de todas as causas no caminho; dados em Excel e relatório em PDF (mapa, números, gráfico por mês, causas, serviços, ativos e listas)", "st": "ok", "d": "2026-11-25", "obs": "Ocorrências de todas as causas da Crítica de mai/2026 a nov/2026 (os meses de antes ainda não estão no site)."},
    {"t": "Ctrl+M: croqui só com os trechos escolhidos (saía o alimentador inteiro); ferramenta Parte (S) para escolher só uma parte do trecho", "st": "ok", "d": "2026-11-25"},
