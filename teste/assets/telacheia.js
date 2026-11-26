@@ -245,7 +245,8 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
         try { map.setView(map.unproject(map.project([+vista[1], +vista[2]], z).add(map.getSize().divideBy(2)), z), z, { animate: false }); }
         finally { map.options.zoomSnap = zs; }
         const b = window.__caixaRede;
-        window.__alVista = { z: map.getZoom(), ve: !b || map.getBounds().intersects(b), voou: false };   // (para os testes)
+        const c = map.getCenter();
+        window.__alVista = { z: map.getZoom(), c: [c.lat, c.lng], ve: !b || map.getBounds().intersects(b), voou: false, pousou: false };   // (para os testes)
       } else if (window.__caixaRede) map.fitBounds(window.__caixaRede.pad(0.04), { animate: false });
       if (EMB) pronto();
     }));
@@ -261,11 +262,43 @@ body.tela-cheia .panel .barra-linha{display:grid;grid-template-columns:minmax(0,
     Promise.race([tudo, new Promise(ok => setTimeout(ok, 12000))])
       .then(() => requestAnimationFrame(() => requestAnimationFrame(() => avisa('pronto'))));
   }
+  // Centrar no alimentador (pedido do usuário: aberto da vista do estado, ficava pequeno no canto, com as etiquetas umas
+  // sobre as outras e a rede do estado por cima): voa até a rede inteira no meio do mapa, abaixo dos controles de cima.
+  // Fica onde nasceu só se a rede já está inteira à vista e grande (no máximo 0,75 nível de zoom abaixo do enquadrado),
+  // ou se o satélite estava mais perto que o enquadrado e a rede está à vista (o usuário olhava um ponto dela).
+  // A legenda (embaixo à esquerda) e os botões Tocantins e Tela cheia (embaixo à direita) não cobrem a caixa da rede: como na
+  // visão do estado, a rede mais para um lado (se sobrar largura) ou até 2 passos de zoom menor; se nada servir, no meio.
+  function vistaRede(b) {
+    const V = window.__visaoTO, topo = V && V.folgaTopo ? V.folgaTopo() : 72, t = map.getSize();
+    const tl = L.point(16, topo), br = L.point(16, 16), op = { paddingTopLeft: tl, paddingBottomRight: br };
+    const v0 = map._getBoundsCenterZoom(b, op), rs = V && V.controles ? V.controles() : [];
+    const cobre = (c, z) => {
+      const o = map.project(c, z).subtract(t.divideBy(2)), a = map.project(b.getNorthWest(), z).subtract(o), d = map.project(b.getSouthEast(), z).subtract(o);
+      return rs.some(q => q[0] < d.x && q[2] > a.x && q[1] < d.y && q[3] > a.y);
+    };
+    if (!rs.length || !cobre(v0.center, v0.zoom)) return { op, v: v0 };
+    const passo = map.options.zoomSnap || 0.25;
+    for (let i = 0; i <= 2; i++) {
+      const z = v0.zoom - i * passo, sw = map.project(b.getSouthWest(), z), ne = map.project(b.getNorthEast(), z);
+      const meio = sw.add(ne).divideBy(2).add(br.subtract(tl).divideBy(2)), sobra = Math.max(0, t.x - tl.x - br.x - (ne.x - sw.x)) / 2;
+      for (const dx of [0, sobra, -sobra, sobra / 2, -sobra / 2]) {
+        const c = map.unproject(meio.subtract([dx, 0]), z);
+        if (!cobre(c, z)) return { op, v: { center: c, zoom: z } };
+      }
+    }
+    return { op, v: v0 };
+  }
   if (EMB) document.addEventListener('st-al-visivel', () => {
-    const b = window.__caixaRede;
-    if (!vista || !b || map.getBounds().intersects(b)) return;   // à vista: fica onde nasceu
+    const b0 = window.__caixaRede;
+    if (!vista || !b0) { if (window.__alVista) window.__alVista.pousou = true; return; }
+    const b = b0.pad(0.04), { op, v } = vistaRede(b), z = map.getZoom();
+    const area = L.latLngBounds(map.containerPointToLatLng(op.paddingTopLeft), map.containerPointToLatLng(map.getSize().subtract(op.paddingBottomRight)));
+    const inteira = area.contains(b0), perto = z > v.zoom + 0.5 && map.getBounds().intersects(b0);
+    window.__alVista.alvo = { z: v.zoom, c: [v.center.lat, v.center.lng] };
+    if ((inteira && z >= v.zoom - 0.75) || perto) { window.__alVista.pousou = true; return; }   // já enquadrada, ou de perto num ponto dela
     window.__alVista.voou = true;
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) map.fitBounds(b.pad(0.04), { animate: false });
-    else map.flyToBounds(b.pad(0.04), { duration: 1.1 });
+    map.once('moveend', () => { window.__alVista.pousou = true; });
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) map.setView(v.center, v.zoom, { animate: false });
+    else map.flyTo(v.center, v.zoom, { duration: 1.1 });
   }, { once: true });
 })();

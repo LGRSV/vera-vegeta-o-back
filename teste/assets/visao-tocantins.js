@@ -1487,7 +1487,7 @@
 
   // para os testes e as medidas
   window.__visaoTO = {
-    alterna, noEstado, refaz, voando: () => !!voo, zAbre: () => vistaAl().zoom, zEstado: () => zEst, em: (x, y) => alvoEm(L.point(x, y), 7),
+    alterna, noEstado, refaz, folgaTopo, controles, voando: () => !!voo, zAbre: () => vistaAl().zoom, zEstado: () => zEst, em: (x, y) => alvoEm(L.point(x, y), 7),
     estado: () => ({ dados: !!dados, linhas: dados ? dados.T1.ini.length + dados.T2.ini.length - 2 : 0, pontos: dados ? dados.pts : 0, mostra,
       opacidade: +paneE.style.opacity, forte: forteVisto, zMin: zm, zEstado: zEst, mascara: mascara._r && !mascara._c.hidden ? { k: mascara._r.k, w: mascara._r.w, h: mascara._r.h } : null,
       fundo: fundoPronto(), zFundo: fundoPronto() ? fundo._r.z : null, botao: btTx.textContent, modo: MODO }),
