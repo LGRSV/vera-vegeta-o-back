@@ -1372,7 +1372,7 @@ if (typeof L === 'undefined') {
     const feitos = new Set();
     const pre = () => {
       const eu = ++rodada, z0 = Math.round(map.getZoom());
-      if (z0 < 10 || !map.hasLayer(satelite) || satelite._quieto) return;
+      if (map.getZoom() < 10 || !map.hasLayer(satelite) || satelite._quieto) return;   // (o zoom de verdade: no 9,5 o arredondado já é 10)
       const z = Math.min(18, z0 + 1), b = map.getPixelBounds(), k = 2 ** (z - map.getZoom());
       const x0 = Math.floor(b.min.x * k / 256), x1 = Math.floor(b.max.x * k / 256), y0 = Math.floor(b.min.y * k / 256), y1 = Math.floor(b.max.y * k / 256);
       const lista = [], cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
