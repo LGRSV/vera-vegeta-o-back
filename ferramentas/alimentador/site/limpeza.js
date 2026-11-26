@@ -704,9 +704,8 @@ body.limp-on #map.longe .leaflet-marker-icon:has(>.at,>.lb:not(.sel)){display:no
   }
   let quadroEtiquetas = 0;
   const pedeEtiquetas = () => { if (!quadroEtiquetas) quadroEtiquetas = requestAnimationFrame(() => { quadroEtiquetas = 0; desamontoa(); if (map) map.getContainer().classList.remove('limp-voo'); }); };
-  // no voo do zoom as etiquetas andam juntas e se cruzam até o fim dele (desamontoa mede no zoomend): somem no voo e voltam
-  // já sem se cobrir
-  if (map) map.on('zoomstart', () => map.getContainer().classList.add('limp-voo'));
+  // no voo do zoom as etiquetas andam juntas com a rede e ficam à vista (pedido do usuário: "rótulos piscando"); no fim
+  // dele, desamontoa tira as que passaram a se cobrir. (Antes elas sumiam no voo e voltavam no fim: piscavam a cada zoom.)
   if (map) map.on('zoomend', () => {
     const ren = map.options.renderer, canvas = !!(window.L && L.Canvas && ren instanceof L.Canvas), pedido = canvas && ren._redrawRequest;
     fusiveis();

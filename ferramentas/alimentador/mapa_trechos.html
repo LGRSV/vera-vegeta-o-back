@@ -1317,7 +1317,9 @@ if (typeof L === 'undefined') {
   $('nolib').hidden = false;
 } else {
   // área de toque em volta das linhas: não precisa acertar em cima do trecho (mais larga no celular)
-  map = L.map('map', {preferCanvas: true, renderer: L.canvas({tolerance: L.Browser.mobile ? 16 : 10}), zoomSnap: 0.25, zoomDelta: 0.5});
+  // roda do mouse: cerca de um nível de zoom por giro (com 60 px por nível, o padrão, cada giro pulava 1,5 nível) e resposta mais rápida
+  map = L.map('map', {preferCanvas: true, renderer: L.canvas({tolerance: L.Browser.mobile ? 16 : 10}), zoomSnap: 0.25, zoomDelta: 0.5,
+    wheelPxPerZoomLevel: 90, wheelDebounceTime: 20});
   window.__map = map;
   let falhas = 0;
   // Satélite da Esri: onde não há foto num zoom, o servidor manda o quadro cinza "Map data not yet available".
@@ -1360,6 +1362,37 @@ if (typeof L === 'undefined') {
     maxZoom: 19, maxNativeZoom: 18, attribution: ATR_SAT
   }).on('tileerror', () => { if (++falhas > 3) $('nosat').hidden = false; });   // entra no mapa na 1ª fatia da montagem (montaRede)
   window.__satelite = satelite;                           // visao-tocantins.js: o fundo (quadros de longe) e o voo
+  // Satélite do próximo nível já baixado (pedido do usuário: "satélite borrado demora" no zoom): com o mapa parado, os
+  // quadros do nível de cima (o da roda para dentro) da área à vista vão para o cache do navegador; no zoom, chegam na hora
+  // em vez da foto esticada. Só no PC (no celular gastaria dados), até 48 quadros, sem economia de dados ligada, e para
+  // de pedir se o mapa mexe. Abaixo do zoom 10 (máscara do Tocantins e voo) não pede.
+  (() => {
+    if (L.Browser.mobile || (navigator.connection && navigator.connection.saveData)) return;
+    let tPre = 0, rodada = 0;
+    const feitos = new Set();
+    const pre = () => {
+      const eu = ++rodada, z0 = Math.round(map.getZoom());
+      if (z0 < 10 || !map.hasLayer(satelite) || satelite._quieto) return;
+      const z = Math.min(18, z0 + 1), b = map.getPixelBounds(), k = 2 ** (z - map.getZoom());
+      const x0 = Math.floor(b.min.x * k / 256), x1 = Math.floor(b.max.x * k / 256), y0 = Math.floor(b.min.y * k / 256), y1 = Math.floor(b.max.y * k / 256);
+      const lista = [], cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) if (!feitos.has(`${z}/${y}/${x}`)) lista.push([x, y]);
+      lista.sort((a, c) => (a[0] - cx) ** 2 + (a[1] - cy) ** 2 - (c[0] - cx) ** 2 - (c[1] - cy) ** 2);   // do meio para fora
+      let i = 0, ativos = 0;
+      const pede = () => {
+        while (ativos < 4 && i < Math.min(lista.length, 48)) {
+          if (eu !== rodada) return;
+          const [x, y] = lista[i++], k2 = `${z}/${y}/${x}`, im = new Image();
+          feitos.add(k2); ativos++;
+          im.onload = im.onerror = () => { ativos--; pede(); };
+          im.src = `${SAT}${z}/${y}/${x}?blankTile=false`;
+        }
+      };
+      pede();
+    };
+    map.on('movestart zoomstart', () => { clearTimeout(tPre); rodada++; });
+    map.on('moveend', () => { clearTimeout(tPre); tPre = setTimeout(pre, 700); });   // depois dos quadros da tela
+  })();
   // Datas das fotos de satélite na legenda, com o que está na tela (pedido do usuário): o próprio World_Imagery tem, por
   // escala, de quando é cada pedaço da foto (camadas "… Resolution Metadata": SRC_DATE e o fornecedor, NICE_DESC). A cada
   // parada do mapa consulta a camada do nível dos quadros mostrados e põe na legenda a data (ou de qual a qual, se a tela
@@ -1512,7 +1545,7 @@ if (typeof L === 'undefined') {
       const M = 64, sw = m.layerPointToLatLng([nb.min.x - M, nb.max.y + M]), ne = m.layerPointToLatLng([nb.max.x + M, nb.min.y - M]);
       if (ren._redrawRequest && ren._redrawRequest !== PEDIDO) L.Util.cancelAnimFrame(ren._redrawRequest);
       ren._redrawRequest = PEDIDO; ren._redrawBounds = null;
-      voo = {c, ctx, nb, vb: L.latLngBounds(sw, ne), centro: m.getCenter(), zoom: m.getZoom(), chave: chave(), id: ++nv};
+      voo = {c, ctx, nb, vb: L.latLngBounds(sw, ne), centro: m.getCenter(), zoom: m.getZoom(), chave: chave(), id: ++nv, nf: 0};
       limpa(voo);
     }
     // desenha a partir de onde parou, até ms de JS ou un de custo. Camada grande (a rede inteira da Faixa) é preparada numa
@@ -1579,10 +1612,11 @@ if (typeof L === 'undefined') {
       canal(() => {
         if (v.morto) return;
         if (v.u > 400) FT.un = Math.min(0.05, Math.max(0.0003, 0.5 * FT.un + 0.5 * (performance.now() - t1) / v.u));
-        v.raf = requestAnimationFrame(() => {
-          v.raf = 0;
-          canal(() => { if (v.morto) return; fatia(v, 8, 20 / FT.un); if (voo) segue(voo); });
-        });
+        // o mapa está parado (um gesto novo interrompe o desenho): a fatia seguinte vem logo, sem esperar o quadro (o canvas
+        // de trás não aparece até a troca); a cada 3 fatias, um quadro, para o navegador pintar o resto da página e atender
+        // o próximo gesto. Fatias maiores terminam antes, e a imagem esticada do zoom (linhas grossas) sai mais cedo
+        const vai = () => canal(() => { if (v.morto) return; fatia(v, 16, 34 / FT.un); if (voo) segue(voo); });
+        if (++v.nf % 3) vai(); else v.raf = requestAnimationFrame(() => { v.raf = 0; vai(); });
       });
     }
     // as linhas para o toque: todas prontas na vista nova (o desenho em curso não precisa refazê-las)
