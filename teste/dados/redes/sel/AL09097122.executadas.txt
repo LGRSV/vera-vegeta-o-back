@@ -1,0 +1,3 @@
+#{"v":1,"anos":[2026,2025,2024,2023,2022,-1]}
+A	AL09097122
+E	lhi}@h{_fHqo@yIj`CsOyqA`Jdx@AxMGfa@YqaBx@f}Ag@sjBNtE}@z\tLcHcJgt@MvmBtJyd@_Kyc@pJmEcJhs@xJtA_KgL~JzmA{KkqCb@tXxLnQeABHfB@xJ{JpiAc@_`Bl@nBpJqx@_G~wAv@gNuDuc@Krg@HqMDtH@hB?ds@zEgs@sEnb@a@~oE{QmmFlRrOzJc@A}p@kJvi@z@}b@tHtlA{KkWlKu|@_DQkI|{HsTazGrX{`@sCnnArB	26:2,25:3,24,23:2,22:2 22:4 25:4,23:6,22:17 26:2,25:4,24,23,22:7 25,24:2,23:2,22:6 22 22:9 24,22 25:4,22:2,d 23:2,22,d 23,22 22:2 25:3,24,22:6 22 26:8,24,23:2,22 26,24,23:4,d 26:2,25,23:5 25:3,24,23 25,23:2 23:4 26:7,23:2 23 26,23 23:4 23:2 24,23:2 23 23 24:2 24 25,24 24 24 24 24 24 24 24 24 24 24 24,d 24 25 25:3,d 25:3 25 25:2 25 26 26 26:2 26:2 26:2 26:6 26 d

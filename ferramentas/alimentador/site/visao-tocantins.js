@@ -210,11 +210,12 @@
       const c = ln.split('\t');
       if (c[0] === 'A') { meu = c[1] === eu; if (!meu) { ia = cods.length; cods.push(c[1]); } }
       else if (c[0] === 'T') {
-        tcl = c[2] === 'T1' ? 0 : 1; tsit = +c[3] || 0;
+        tcl = c[2] === 'T1' ? 0 : c[2] === 'T3' ? 2 : 1; tsit = +c[3] || 0;   // (T3: só nos arquivos dos selecionados, dados/redes/sel/)
         const g = c[7] || '';
         if (g[0] === '!') le(g.slice(1), false);
         else for (const x of g.split(' ')) if (x) le(x, false);
       } else if (c[0] === 'P' || c[0] === 'I') {
+        if (c[0] === 'I') tcl = c[4] === 'T1' ? 0 : c[4] === 'T2' ? 1 : c[4] === 'T3' ? 2 : 255;   // (a classe: só nos dos selecionados; 255 sem ela)
         const a = chave(c[1] || ''), m = c[0] === 'P' ? (/c/.test(c[2] || '') ? 1 : 0) | (/p/.test(c[2] || '') ? 2 : 0) : 0;
         for (const x of ((c[0] === 'P' ? c[4] : c[3]) || '').split(' ')) if (x) le(x, !meu, a, m);
       } else if (c[0] === 'O' && !meu) {
@@ -288,7 +289,7 @@
     const F = op.faixa && Dd.faixa, I = op.inspecao && Dd.inspecao;
     const fF = F && foraDe(F), fI = I && foraDe(I);
     const ciF = F && corDas(F, l => !op.faixa.cls[F.cl[l]] ? -1 : op.faixa.vista === 'sit' ? op.faixa.corS[F.sit[l]] : op.faixa.corK[F.ak[l]], fF);
-    const ciI = I && corDas(I, l => op.inspecao.corK[I.ak[l]], fI);
+    const ciI = I && corDas(I, l => (op.inspecao.cls && op.inspecao.cls[I.cl[l]] === false ? -1 : op.inspecao.corK[I.ak[l]]), fI);
     if (I && op.inspecao.borda) info.inspecao = linhas(I, ciI, op.inspecao, false);
     if (F) info.cores = linhas(F, ciF, op.faixa, op.faixa.contorno);
     if (I && !op.inspecao.borda) info.inspecao = linhas(I, ciI, op.inspecao, op.inspecao.contorno);
@@ -381,6 +382,8 @@
       for (const o of F.os) {
         const cor = op.rot[o.ano];
         if (!cor || (fora && fora.has(o.al)) || rots.length >= 80) continue;
+        // (só as dos trechos das classes à vista, como as do aberto: "T1 / T2-G" fica se o T1 ou o T2 está ligado)
+        if (op.cls && o.tr && !o.tr.split('/').some(t => { const k = t.trim().split('-')[0]; return !['T1', 'T2', 'T3'].includes(k) || op.cls[['T1', 'T2', 'T3'].indexOf(k)]; })) continue;
         const x = o.x * s + bx, y = o.y * s + by;
         if (x < -60 || y < -40 || x > r.w + 60 || y > r.h + 40) continue;
         const em = F.cods[o.al] + (o.tr ? ' ' + o.tr : ''), dt = o.datas.map(d => d.split('-').reverse().join('/')).join(' · ');
@@ -420,6 +423,7 @@
   // para o cache do navegador), parando enquanto o mapa mexe (menos com pressa: o botão foi tocado antes do fundo chegar)
   function Pintor(posta) {
     const CAM = {};                                      // as camadas dos outros, lidas (decodificaCam)
+    const SEL = {};                                      // as dos selecionados (dados/redes/sel/): tipo → código → lida
     let D = null, P = null, vez = 0, pausa = false, pressa = false, ativos = 0;
     const pedidos = new Map(), telas = new Map(), fila = [];
     const pinta = () => {
@@ -430,7 +434,14 @@
         if (!oc || oc.width !== W || oc.height !== H) telas.set(m.camada, oc = new OffscreenCanvas(W, H));
         const ctx = oc.getContext('2d');
         let info = null;
-        if (m.t === 'estado') { if (D) pintaEstado(ctx, m.r, D, m.op); } else if (m.t === 'outros') info = pintaOutros(ctx, m.r, CAM, m.op); else if (P) pintaMascara(ctx, m.r, P, m.op);
+        if (m.t === 'estado') { if (D) pintaEstado(ctx, m.r, D, m.op); } else if (m.t === 'outros') info = pintaOutros(ctx, m.r, CAM, m.op);
+        else if (m.t === 'sel') {                       // cada selecionado com as camadas dele (o mesmo desenho dos outros)
+          for (const [cod, op] of Object.entries(m.op.porAl)) {
+            const Dd = {};
+            for (const tipo of ['faixa', 'inspecao', 'executadas', 'manutencao']) { const G = SEL[tipo] && SEL[tipo].get(cod); if (G) Dd[tipo] = G; }
+            pintaOutros(ctx, m.r, Dd, Object.assign({ k: m.op.k }, op));
+          }
+        } else if (P) pintaMascara(ctx, m.r, P, m.op);
         const bm = oc.transferToImageBitmap();
         posta({ t: 'tela', camada: m.camada, id: m.id, r: m.r, bm, info }, [bm]);
       }
@@ -471,6 +482,22 @@
           })
           .catch(() => { /* sem o arquivo: os outros ficam como estão */ });
       }
+      else if (m.t === 'selurl') {                       // um arquivo das camadas de um selecionado (como o camurl, só dele)
+        fetch(m.url)
+          .then(r => (r.ok ? r.text() : null))
+          .then(txt => {
+            if (!txt) throw new Error('vazio');
+            const G = decodificaCam(m.tipo, txt, '');
+            (SEL[m.tipo] = SEL[m.tipo] || new Map()).set(m.cod, G);
+            let anos = G.anos || null;
+            if (m.tipo === 'executadas') { try { anos = JSON.parse(txt.slice(1, txt.indexOf('\n'))).anos || []; } catch (e) { anos = []; } }
+            posta({ t: 'selcam', tipo: m.tipo, cod: m.cod, anos, linhas: G.linhas || 0, pontos: G.pontos });
+          })
+          .catch(() => posta({ t: 'selcam', tipo: m.tipo, cod: m.cod, falhou: true }));
+      } else if (m.t === 'selvivos') {                   // os que saíram da seleção: a memória deles sai
+        const vivo = new Set(m.cods);
+        for (const g of Object.values(SEL)) for (const c of [...g.keys()]) if (!vivo.has(c)) g.delete(c);
+      }
       else if (m.t === 'contorno') P = m.P;
       else if (m.t === 'quadros') {
         for (const g of m.grupos) { const o = { z: g.z, junta: g.junta, pressa: g.pressa, cor: m.cor, bms: [], falta: g.itens.length, falhou: false }; g.itens.forEach(q => fila.push([o, q])); }
@@ -484,10 +511,11 @@
   // OffscreenCanvas: as camadas desenham no canvas da página, na hora, e não há fundo do satélite)
   const camadas = new Map();                             // id da camada → camada (as imagens que o pintor devolve)
   let fundoChegou = () => {};
-  let camChegou = () => {};
+  let camChegou = () => {}, selChegou = () => {};
   const chega = m => {
     if (m.t === 'tela') { const l = camadas.get(m.camada); if (l) { if (m.info) l._info = m.info; l._chegou(m.id, m.bm, m.r); } else m.bm.close(); }
     else if (m.t === 'cam') camChegou(m);
+    else if (m.t === 'selcam') selChegou(m);
     else if (m.t === 'fundo') fundoChegou(m);
   };
   let MODO = null, PINTOR = null;
@@ -880,7 +908,7 @@
   // scripts/gera_trechos.py, faixa_txt e camadas_txt), cada um baixado só com a camada dele ligada e lido no worker (a
   // página não passa pelos arquivos). Um canvas só, acima dos vizinhos e abaixo das divisas e da rede deste, desenhado pelo
   // pintor como o do estado (no zoom e no arrasto ele só estica e move; refeito no fim do movimento, se a vista sai da
-  // região, e quando uma camada muda). Os selecionados ficam como estão (selecionados.js). Sem OffscreenCanvas: nada.
+  // região, e quando uma camada muda). Os selecionados ficam de fora (as camadas deles: mais abaixo). Sem OffscreenCanvas: nada.
   // Só depois da carga (a rede, o painel e a lista de trechos inteira, e o navegador à toa: o começo, no fim): antes
   // disso os avisos das camadas (al:faixa, al:camada, que saem já na montagem delas) e os fins de movimento não baixam
   // nem desenham nada (medido no celular: o faixa.txt baixado e desenhado no meio da carga atrasava o painel e a lista)
@@ -912,6 +940,7 @@
   const prontas = () => ligadas().filter(n => CAMS[n].dados);
   let foraVisto = '';
   const foraF = () => { const S = window.__alSel; return S ? (S.desenhados ? S.desenhados() : S.lista()) : []; };
+  let foraOutros = foraF;                                // (as camadas dos selecionados, mais abaixo: só os que já têm a camada lida)
   // as etiquetas da Faixa do aberto (as caixas na tela, em Mercator): as dos outros não ficam em cima delas
   function evitaF() {
     const m = mc.getBoundingClientRect(), z = map.getZoom(), s = 256 * Math.pow(2, z), o = map.getPixelOrigin(), out = [];
@@ -936,13 +965,19 @@
     return { cores, corK: por.map(cor => (cor ? cores.indexOf(cor) : -1)) };
   }
   function opOutros(z, comRot) {
-    const op = { z, fora: foraF() }, w = fxLarg(z), num = z >= Z_NUM;
-    foraVisto = op.fora.join();
-    const fxOn = ligada('faixa') && !!CAMS.faixa.dados;
-    for (const n of prontas()) {
-      const c = camDe(n), G = CAMS[n].dados;
+    const fora = foraOutros();
+    foraVisto = fora.join();
+    return opCams(z, comRot, n => CAMS[n].dados, fora);
+  }
+  // as opções do desenho das camadas ligadas com os dados de dadosDe(tipo) (os resumos: anos, ...): as dos outros, ou as de
+  // um selecionado (fora: nenhum; o T3 também, com o botão dele)
+  function opCams(z, comRot, dadosDe, fora) {
+    const op = { z, fora }, w = fxLarg(z), num = z >= Z_NUM;
+    const fxOn = ligada('faixa') && !!dadosDe('faixa');
+    for (const n of ligadas().filter(dadosDe)) {
+      const c = camDe(n), G = dadosDe(n);
       if (n === 'faixa') {
-        const o = op.faixa = { vista: c.vista === 'sit' ? 'sit' : 'ano', cls: [visivel('T1'), visivel('T2')], contorno: z >= Z_FX_CONTORNO, alfa: 0.9, corS: [], corK: [] };
+        const o = op.faixa = { vista: c.vista === 'sit' ? 'sit' : 'ano', cls: [visivel('T1'), visivel('T2'), visivel('T3')], contorno: z >= Z_FX_CONTORNO, alfa: 0.9, corS: [], corK: [] };
         if (o.vista === 'sit') {
           o.cores = FX_SIT_ORDEM.map(i => FX_SIT[i]);
           o.larg = FX_SIT_ORDEM.map(i => (i === 3 ? 0.8 : 1) * w);
@@ -959,7 +994,7 @@
           }
         }
       } else if (n === 'inspecao') {
-        const o = op.inspecao = Object.assign({ borda: fxOn, contorno: z >= Z_FX_CONTORNO, alfa: 0.9 }, porChave(G.anos, anoOn(c), inCorAno, null));
+        const o = op.inspecao = Object.assign({ borda: fxOn, contorno: z >= Z_FX_CONTORNO, alfa: 0.9, cls: [visivel('T1'), visivel('T2'), visivel('T3')] }, porChave(G.anos, anoOn(c), inCorAno, null));
         o.larg = o.cores.map(() => (fxOn ? 3 : 1) * w);  // (o aberto: borda de 15 em volta da Faixa de 5; sem ela, 5)
       } else if (n === 'executadas') {
         const on = anoOn(c), anos = [...new Set([...c.todos, ...G.anos])].filter(on).sort((a, b) => a - b);
@@ -1015,18 +1050,108 @@
   const avisoF = () => { clearTimeout(refazF.t); refazF.t = setTimeout(refazF, 0); };   // (vários avisos juntos: um desenho)
   document.addEventListener('al:faixa', avisoF);
   document.addEventListener('al:camada', avisoF);
-  const foraMudou = () => !paneF.hidden && foraF().join() !== foraVisto;
+
+  // ---------- as camadas dos selecionados (pedido do usuário: o selecionado pintado pela camada ligada, como o aberto) ----------
+  // Cada selecionado já desenhado (selecionados.js: os mesmos que ficam fora das camadas dos outros, foraF: nenhum fica de
+  // fora nem é desenhado duas vezes) com as camadas ligadas, do arquivo dele em dados/redes/sel/ (scripts/gera_trechos.py,
+  // sel_mapa: o mesmo formato e a mesma conta dos outros, com o T3), baixado e lido no pintor só quando a camada está
+  // ligada e ele selecionado. O desenho é o dos outros (pintaOutros), num canvas acima da rede dos selecionados (390) e
+  // abaixo dos equipamentos deles (395) e da rede do aberto (400). Com a Faixa ou a Inspeção dele no mapa, a rede do
+  // selecionado fica neutra embaixo (selecionados.js, selLinhas): as cores das zonas não se misturam com as da camada.
+  const paneS = map.createPane('sel-camadas');
+  paneS.style.zIndex = 392;
+  paneS.style.pointerEvents = 'none';
+  paneS.hidden = true;
+  const SELD = {};                                       // tipo → código → { anos, ... } (o resumo do pintor) ou 'vindo' / 'falhou'
+  let selIndice = null, selIndiceP = null;
+  const carregaIndiceSel = () => selIndiceP || (selIndiceP = fetch(new URL('../dados/redes/sel/indice.json', eu.src).href, { cache: 'no-cache' })
+    .then(r => (r.ok ? r.json() : {})).catch(() => ({})).then(j => { selIndice = j || {}; selCams.vista(true); if (foraMudou()) refazF(); }));
+  const selDados = (cod, n) => { const x = SELD[n] && SELD[n][cod]; return x && typeof x === 'object' ? x : null; };
+  // os selecionados que a camada dos outros deixa de fora: os já desenhados cuja camada (as ligadas que ele tem) já está
+  // lida ou falhou; enquanto o arquivo dele baixa, a dos outros continua com ele (não fica um instante só com a rede)
+  const selPronto = c => ligadas().every(n => { if (!selIndice) return false; if (!(selIndice[n] && selIndice[n][c])) return true; const x = SELD[n] && SELD[n][c]; return !!x && x !== 'vindo'; });
+  foraOutros = () => { const f = foraF(); return MODO && PINTOR ? f.filter(selPronto) : f; };
+  // algum selecionado sem a camada (o arquivo dele não veio): selecionados.js mostra o aviso "só a rede"
+  const selFalhou = () => foraF().some(c => ligadas().some(n => SELD[n] && SELD[n][c] === 'falhou'));
+  let selVivosVisto = '';
+  function selPede(cods) {
+    if (cods.join() !== selVivosVisto) { selVivosVisto = cods.join(); PINTOR.postMessage({ t: 'selvivos', cods }); for (const g of Object.values(SELD)) for (const c of Object.keys(g)) if (!cods.includes(c)) delete g[c]; }
+    const ls = ligadas();
+    if (!ls.length || !cods.length) return;
+    if (!selIndice) { carregaIndiceSel(); return; }
+    for (const n of ls) for (const cod of cods) {
+      const v = selIndice[n] && selIndice[n][cod], g = SELD[n] = SELD[n] || {};
+      if (!v || g[cod]) continue;
+      g[cod] = 'vindo';
+      PINTOR.postMessage({ t: 'selurl', tipo: n, cod, url: new URL(`../dados/redes/sel/${encodeURIComponent(cod)}.${n}.txt?v=${v}`, eu.src).href });
+    }
+  }
+  selChegou = m => {
+    const g = SELD[m.tipo] = SELD[m.tipo] || {};
+    if (!foraF().includes(m.cod)) { delete g[m.cod]; return; }   // (saiu da seleção enquanto baixava)
+    g[m.cod] = m.falhou ? 'falhou' : Object.assign(m, { anos: m.anos || [] });
+    selCams.vista(true);
+    if (foraMudou()) refazF();                           // (agora a camada dos outros o deixa de fora)
+    avisaSel();
+  };
+  // os selecionados com linhas de camada (Faixa, Inspeção) no mapa: selecionados.js deixa a rede deles neutra
+  const selLinhas = () => { if (!MODO || !PINTOR || paneS.hidden) return []; return foraF().filter(c => ['faixa', 'inspecao'].some(n => ligada(n) && selDados(c, n))); };
+  let selLinhasVisto = '';
+  function avisaSel() { const v = selLinhas().join(); if (v !== selLinhasVisto) { selLinhasVisto = v; document.dispatchEvent(new CustomEvent('al:selcam')); } }
+  function opSel(z, comRot) {
+    const porAl = {};
+    for (const cod of foraF()) {
+      const op = opCams(z, comRot, n => selDados(cod, n), []);
+      if (op.faixa || op.inspecao || op.executadas || op.manutencao) {
+        for (const n of ['faixa', 'inspecao']) if (op[n]) op[n].alfa = 1;   // (o selecionado é forte, como a rede dele)
+        porAl[cod] = op;
+      }
+    }
+    return { porAl, n: Object.keys(porAl).length };
+  }
+  const SelCams = Tela.extend({
+    options: { pane: 'sel-camadas' },
+    vista(forca) {
+      if (voo || !comecouF || !MODO || !PINTOR) return;
+      const cods = foraF();
+      selPede(cods);
+      const op = cods.length && ligadas().length ? opSel(map.getZoom(), map.getZoom() >= Z_FX_ROT) : null;
+      if (!op || !op.n) { this.apaga(); return; }
+      const c = map.getCenter(), z = map.getZoom(), r = this._p || this._r;
+      if (!forca && r && r.z === z && r.k >= R && this.cobreR(r, c, z, 0.04)) return;
+      this.pinta(this.regiao(c, z, FOLGA_F), R, 'sel', op);
+    },
+    mexe() { if (!paneS.hidden && !map._animatingZoom && !voo && !this.cobreP(map.getCenter(), map.getZoom(), 0)) this.vista(true); },
+    quadro() {
+      if (!voo || paneS.hidden) return;
+      const r = this.trechoDoVoo();
+      if (!r) return;
+      const op = opSel(r.z, false);
+      for (const o of Object.values(op.porAl)) ['executadas', 'manutencao'].forEach(n => { if (o[n]) o[n].numeros = false; });
+      if (op.n) this.pinta(r, Math.min(R, Math.sqrt(MAXPX_E_ANIM / (r.w * r.h))), 'sel', op);
+    },
+    _mostrou() { paneS.hidden = false; avisaSel(); },
+    apaga() { this.esquece(); if (!paneS.hidden) { paneS.hidden = true; this.soltaDepois(() => paneS.hidden); avisaSel(); } }
+  });
+  const selCams = new SelCams().addTo(map);
+  function refazS() { selCams.esquece(); selCams.vista(true); }
+  const avisoS = () => { clearTimeout(refazS.t); refazS.t = setTimeout(refazS, 0); };
+  document.addEventListener('al:faixa', avisoS);
+  document.addEventListener('al:camada', avisoS);
+  // (sem olhar se o canvas está à vista: uma imagem pedida antes, ainda a caminho, pode ter saído com a lista velha)
+  const foraMudou = () => ligadas().length > 0 && foraOutros().join() !== foraVisto;
   const corBt = c => { const b = document.querySelector(`#classes button[data-c="${c}"]`); return b && b.style.getPropertyValue('--c').trim(); };
   const cls = document.getElementById('classes');
   if (cls) {
     COR.T1 = corBt('T1') || COR.T1; COR.T2 = corBt('T2') || COR.T2;
     // T1 ou T2 ligado ou desligado: a imagem guardada não vale mais
-    cls.addEventListener('click', e => { if (!e.target.closest('button')) return; refaz(); refazF(); });
+    cls.addEventListener('click', e => { if (!e.target.closest('button')) return; refaz(); refazF(); refazS(); });
   }
   // (também quando a seleção muda: selecionados.js, e o al:selecao: o realce de quem entra ou sai enquanto baixa)
-  function refaz() { estado.esquece(); if (mostra) estado.desenha(map.getCenter(), map.getZoom(), true); else estado._r = null; if (foraMudou()) refazF(); }
+  function refaz() { estado.esquece(); if (mostra) estado.desenha(map.getCenter(), map.getZoom(), true); else estado._r = null; if (foraMudou()) refazF(); avisoS(); }
   document.addEventListener('al:selecao', () => {
     if (foraMudou()) refazF();
+    avisoS();
     if (dados && forteSel().join() !== forteVisto) refaz();
     if (cod0 && !dica.hidden) poeDica(cod0);
   });
@@ -1482,11 +1607,15 @@
     }
     const vez = f => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 200));
     vez(() => { carrega().then(() => vez(() => { leZm(); estado.vista(true); })); });
-    vez(() => { comecouF = true; outros.vista(true); });   // as camadas nos outros (as ligadas: baixa o arquivo de cada uma)
+    vez(() => { comecouF = true; outros.vista(true); selCams.vista(true); });   // as camadas nos outros (as ligadas: baixa o arquivo de cada uma)
   });
 
   // para os testes e as medidas
   window.__visaoTO = {
+    selLinhas: () => selLinhas(), selPode: () => !!(MODO && PINTOR) && !selFalhou(),
+    // as camadas dos selecionados: os lidos de cada tipo, na tela, o canvas e a região
+    sel: () => ({ dados: Object.fromEntries(Object.entries(SELD).map(([n, g]) => [n, Object.fromEntries(Object.entries(g).map(([c, x]) => [c, typeof x === 'object' ? { linhas: x.linhas, pontos: x.pontos, anos: x.anos.length } : x]))])),
+      naTela: !paneS.hidden && !!selCams._r, r: selCams._r, linhas: selLinhas() }),
     alterna, noEstado, refaz, folgaTopo, controles, voando: () => !!voo, zAbre: () => vistaAl().zoom, zEstado: () => zEst, em: (x, y) => alvoEm(L.point(x, y), 7),
     estado: () => ({ dados: !!dados, linhas: dados ? dados.T1.ini.length + dados.T2.ini.length - 2 : 0, pontos: dados ? dados.pts : 0, mostra,
       opacidade: +paneE.style.opacity, forte: forteVisto, zMin: zm, zEstado: zEst, mascara: mascara._r && !mascara._c.hidden ? { k: mascara._r.k, w: mascara._r.w, h: mascara._r.h } : null,
@@ -1499,7 +1628,7 @@
     // a Faixa nos outros: ligada, lida (o resumo do worker), na tela e o último desenho (cores, etiquetas, amostra)
     // as camadas nos outros: as ligadas, as lidas (o resumo do worker), na tela e o último desenho (cores, etiquetas,
     // losangos, amostras); faixa(): o mesmo, com o resumo da Faixa (o teste da fase 1)
-    outros: () => ({ ligadas: ligadas(), dados: Object.fromEntries(Object.entries(CAMS).filter(([, C]) => C.dados).map(([n, C]) => [n, { als: C.dados.cods.length, linhas: C.dados.linhas, pontos: C.dados.pontos, os: C.dados.os }])),
+    outros: () => ({ ligadas: ligadas(), fora: foraVisto, dados: Object.fromEntries(Object.entries(CAMS).filter(([, C]) => C.dados).map(([n, C]) => [n, { als: C.dados.cods.length, linhas: C.dados.linhas, pontos: C.dados.pontos, os: C.dados.os }])),
       naTela: !paneF.hidden && !!outros._r, r: outros._r, ultimo: outros._info || null }),
     faixa: () => { const d = CAMS.faixa.dados; return { ligada: ligada('faixa'), dados: d ? { als: d.cods.length, linhas: d.linhas, pontos: d.pontos, os: d.os, hoje: d.hoje } : null,
       naTela: ligada('faixa') && !!d && !paneF.hidden && !!outros._r, r: outros._r, ultimo: outros._info && outros._info.cores ? outros._info : null }; },

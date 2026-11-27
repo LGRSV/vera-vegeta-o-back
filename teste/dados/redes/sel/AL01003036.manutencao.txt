@@ -1,0 +1,3 @@
+#{"v":1,"sit":["venc","pend","fora","exec"]}
+A	AL01003036
+M	h_xjAxizjHs|JrsOwwAkM|^ciE?dPAtTmZshEnZhbEtgSi~JihQtkD`{A}h@vvBou@pEgB~KyD}jHv|MlNpDxDbAnX|GxxKoqOghI|qBbiQwtCdEQ	1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 2,0,0,0 1,0,0,0 2,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 2,0,0,0 2,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0

@@ -1,0 +1,16 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	LD04050008
+T	T1	T1	3		11674	3	heyDl}s\Fo@ lDcZy@JyBfJcAnKhAbB `Mqx@kAtIkCjDuBrM
+P			11674	{Bf[Fo@ lDcZy@JY`BiAjDUxA_AxICt@v@z@Pf@ `Mqx@LBCz@ShAs@~AMjBkCjDIZHBUlAKl@GA}@|EMzA
+T	T3-A	T3	3		6444	5	lIu]C[ ~AyH{A~H fAgIFH qCcDaEsBeC}D @B?A ?@?A ?@A? zMjMb@iAwDsA
+P			6444	`AvNC[ ~AyHICAFw@zFE|@Q@ fAgIFH qCcDuCqAk@a@eC}D @B?A ?@?A ?@A? zMjMb@iAuASaB_A
+T	T3-B	T3	3		121	5	|@zMC? DAA? @?A?
+P			121	?@C? DAA? @?A?
+T	T3-C	T3	3		252	5	jA_I?m@
+P			252	?l@?m@
+T	T3-D	T3	3		101	5	??@Q
+P			101	AP@Q
+T	T3-E	T3	3		11	5	kCwA?A
+P			11	?@?A
+T	T3-F	T3	3		30	5	sBy@BC
+P			30	CBBC

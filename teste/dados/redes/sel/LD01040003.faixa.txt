@@ -1,0 +1,30 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	LD01040003
+T	T1	T1	3	2026-05-29	10513	3	hydFhs~\S}CxBaGtC^qQiH rIfTA? KQA? SIDE hO{Cu@Yf@y@~Ah@ gB^A@ fB_@?A cHmCdEbB mY{LV`@ nRvHYI
+P			4297	{F~J_@c@RSGeBxBaGtC^ }F|JA? KQA? SIDE hO{Cu@Yf@y@ GhAA@ fB_@?A cHkC?A kRqHCC Y_@@A
+P	2026		6216	l\dNwXgK{@{@YMMPa@OLS
+T	T2-A	T2	0	2026-05-29	12118	4	`zAtk@q|@q\ fK|D?@
+P			11	hp@pV?A ip@oV?A
+P	2026		12107	hp@pVmCy@cx@uZ
+T	T2-B	T2	3		2819	4	sZ`QhC_BbAmEbAgA cEtHAA
+P			2819	kA`AzBiBLHCQj@c@ZwCbAgA cEtHAA
+T	T3-A	T3	3		35	5	lEyH?E
+P			35	?D?E
+T	T3-B	T3	3		26	5	LT?C
+P			26	?B?C
+T	T3-C	T3	3		45	5	LT@C
+P			45	AB@C
+T	T3-D	T3	3		194	5	b]e@N]
+P			194	O\N]
+T	T3-E	T3	3		38	5	cd@lIC? B?C?
+P			38	B?C? B?C?
+T	T3-F	T3	3		5	5	
+T	T3-G	T3	3		14	5	q@h@@A
+P			14	A@@A
+T	T3-H	T3	3		20	5	UTAA
+P			20	@@AA
+T	T3-I	T3	3		18	5	WV?C
+P			18	?B?C
+T	T3-J	T3	3		83	5	|vAnJBI CH@@
+P			83	AABI CH@@
+O	-11.810611	-49.128999	2026-05-29	2026	1	2026-05-29	T2-A / T1	18323	22631

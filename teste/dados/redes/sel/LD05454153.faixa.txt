@@ -1,0 +1,119 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	LD05454153
+T	T1	T1	3	2026-07-31	35570	3	~}xCvcz\{BwA gFmImDQP_CmAiFzFiMeb@_c@MwGtAwF{D{HUgEcGoD]wCuDsHaHiKoCIyIeE xk@ht@HI BCA? iBsCDA MIDC yAiHAB eG{CFM fu@vmBEoFaCuA}AI
+P			10063	bJdL@E }r@alBiEgC]wCuDsHcBeD}DcFoCIaFkCwBy@ v]t`@FM
+P	2024		3209	|LdRcDoFUgEy@g@ pCxIDA MIDC yAiHAB
+P	2026		18900	hq@|jB@EgCo@F[ gFmImDQP_CmAiFXoAf@sAlDqFLc@AOgCcCIQWIq@aA_TkTIQCB}D{D]g@AY zh@nhAGM@aF[CeBqA}AI
+P	2026,2024		3399	ua@_~@BUOgFtAuFWmA CZHI BCA?
+T	T3-A	T3	0	2026-07-31	94	5	z_@roA@Q
+P	2026		94	AP@Q
+T	T3-B	T3	3	2026-07-31	7669	5	aYc`Ay@mD?iEuALiAsB vEtM?A pJ{GJM }N]MW |OmD_BzFgJ{A ~JdBd@W e@VWI
+P			2424	mHzGMg@ J^?A pJ{GJM gBLp@Rd@W `@mFYvBeAbC
+P	2024		5035	{HrFk@eC?iEm@Eg@Ru@sA xMvCsBs@yE] gAd@MW
+P	2026,2024		210	u@sAS_@
+T	T3-C	T3	0	2024-07-26	1188	5	iEhAxCS`@g@ m@j@?A
+P	2024		1188	mCPRHdC]`@g@ m@j@?A
+T	T3-D	T3	0	2024-07-26	46	5	@HAG
+P	2024		46	@FAG
+T	T3-E	T3	0	2024-07-26	8	5	mAN?A
+P	2024		8	?@?A
+T	T3-F	T3	0	2024-07-26	130	5	`FbAVA
+P	2024		130	W@VA
+T	T3-G	T3	0	2024-07-26	910	5	wIqDzBkB
+P	2024		910	{BjBzBkB
+T	T3-H	T3	0	2024-07-26	329	5	cACz@G
+P	2024		329	{@Fz@G
+T	T3-I	T3	0	2024-07-26	86	5	uAhFI?
+P	2024		86	H?I?
+T	T3-J	T3	0	2024-07-26	140	5	c@}ANS
+P	2024		140	ORNS
+T	T3-K	T3	3	2024-07-26	5792	5	`@_LnQuFbKr@ qIo@AF
+P			5463	gQrEvO_FnDj@rEF qIo@AF
+P	2024		329	_ShFv@U
+T	T3-L	T3	3		32	5	??CE
+P			32	BDCE
+T	T3-M	T3	3		3094	5	k@j`@tKqB sLK\|B
+P			3094	??rAi@j@CnBm@dDU sLK\|B
+T	T3-N	T3	3		72	5	zK}ACK
+P			72	BJCK
+T	T3-O	T3	3		3682	5	tR[eGiG tLn@yEjD
+P			3682	h@l@mF_FWi@ tLn@eA~@oATUl@m@f@
+T	T3-P	T3	3		88	5	oEiFJG
+P			88	KFJG
+T	T3-Q	T3	3		2	5	
+T	T3-R	T3	3		141	5	fA~CFW
+P			141	GVFW
+T	T3-S	T3	3		122	5	iAcJBU
+P			122	CTBU
+T	T3-T	T3	3		76	5	yKuOKE
+P			76	JDKE
+T	T3-U	T3	3		6302	5	uLzz@HkCxD}EzFhE uJsPxBhJ
+P			6302	cEhJHkCvA}A`B_CfBzArClB uJsPXnBhA~ETX
+T	T3-V	T3	3		151	5	iDqIVK
+P			151	WJVK
+T	T3-W	T3	3		62	5	t_@}BGG
+P			62	FFGG
+T	T3-X	T3	3		67	5	nDyEFG
+P			67	GFFG
+T	T3-Y	T3	3		352	5	uKoZ\w@
+P			352	]v@\w@
+T	T3-Z	T3	3		45	5	qk@sOFA
+P			45	G@FA
+T	T3-AA	T3	3		46481	5	teB|e@aAqB{CtAaEUiCkEp@iCj@ie@aCoD_AYmA[qDf@kGaC{L`TM~FeD~Et@dC b^nQdEcE aD|C?A lUiCSdBo@R zK_IyHqGgGyBoF}E ob@fLuCe@ hw@o@KD qOwJ?A Ga@D@ |@mEO@ kDeDbDV p@aCo@C yNyF?A hLEk@fA oVyAzAl@ jWkBm@Ci@zA yg@oCvGBpFpB nC_FL~C @{FOzA rD_LeDbI dEmJ_@h@ cI}ElDvDjDH
+P			46481	|]lnAaAqBiA\qAv@aEUaB_Bg@kBh@uAFs@HaLJs@H}DYOAq@l@iEMm@F{FyAaBg@mA_AYmA[qDf@wCaBsB_@{@dB_BhC}@hAYbAgEbHM~Fw@|AsAvAYh@L~@f@dA b^nQxBcCbAo@FO aD|C?A lUiCSdBo@R zK_I{AoAo@q@mDoCu@[}@QsCkA}CmDqAo@ ob@fLcCg@Q@ hw@o@KD qOwJ?A Ga@D@ |@mEO@ kDeDj@NvBF p@aCo@C yNyF?A hLEKF_@~@ oVyAzAl@ jWkBm@Co@vADB yg@oCxAL|DIl@NzBdAfAZ nC_FPjCCR @{FOzA rD_LuAxBaAxBMnA dEmJ_@h@ cI}EhC|Cb@Xf@F`BK`@L
+T	T3-AB	T3	3		2309	5	ajAlc@x@aA |H`@eIY
+P			2309	q@x@x@aA |H`@yBCaCWiA@
+T	T3-AC	T3	3		154	5	du@dXNW
+P			154	OVNW
+T	T3-AD	T3	3		114	5	mu@uWLO
+P			114	MNLO
+T	T3-AE	T3	3		60	5	zHp@K?
+P			60	J?K?
+T	T3-AF	T3	3		44	5	vj@bCEC
+P			44	DBEC
+T	T3-AG	T3	3		684	5	bBeCmBy@
+P			684	lBx@mBy@
+T	T3-AH	T3	3		121	5	??SG
+P			121	RFSG
+T	T3-AI	T3	3		438	5	hKaEkAW
+P			438	jAVkAW
+T	T3-AJ	T3	3		85	5	|BmELE
+P			85	MDLE
+T	T3-AK	T3	3		53	5	mCb@GE
+P			53	FDGE
+T	T3-AL	T3	3		40	5	vCyEFA
+P			40	G@FA
+T	T3-AM	T3	3		186	5	~DrGXW
+P			186	YVXW
+T	T3-AN	T3	3		89	5	qEuI@O
+P			89	AN@O
+T	T3-AO	T3	3		108	5	xFxKLK
+P			108	MJLK
+T	T3-AP	T3	3		138	5	jOvEYA
+P			138	X@YA
+T	T3-AQ	T3	3		62	5	YlGHC
+P			62	IBHC
+T	T3-AR	T3	3		128	5	eE_DIS
+P			128	HRIS
+T	T3-AS	T3	3		2082	5	`CbKyIoC
+P			2082	xInCyIoC
+T	T3-AT	T3	3		132	5	rIdELQ
+P			132	MPLQ
+T	T3-AU	T3	3		1754	5	fEtDfFwE
+P			1754	gFvEfFwE
+T	T3-AV	T3	3		1891	5	qLpQiIqA
+P			1891	hIpAsAGuFiA
+T	T3-AW	T3	3		111	5	zV_ONM
+P			111	OLNM
+T	T3-AX	T3	3		61	5	{Ox[@I
+P			61	AH@I
+T	T3-AY	T3	3		2465	5	eFdNlDiFgA_C
+P			2465	eBhJlBgB~@aCgA_C
+T	T3-AZ	T3	3		83	5	p`@gIKI
+P			83	JHKI
+T	T3-BA	T3	3		117	5	ya@fKNO
+P			117	ONNO
+T	T3-BB	T3	3		4701	5	h_@rR}F}@IqAjBeE_CgF
+P			4701	zG|PgBKuCq@IqAl@qA\sA^_@?Qm@k@qAuC?S
+O	-7.857817	-48.832601	2026-07-31	2026	1	2026-07-31	T1	22298	35570
+O	-7.811081	-48.750861	2024-07-26	2024	1	2024-07-26	T1	6608	35570

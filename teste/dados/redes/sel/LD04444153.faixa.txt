@@ -1,0 +1,9 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	LD04444153
+T	T1	T1	0	2026-07-24	439	3	d`yCddz\gAM
+P			18	???C
+P	2026		420	fAPY?m@Q
+T	T3-A	T3	3	2026-07-24	647	5	fCh@_AW z@N@F _@IAH AI@B
+P			178	b@DA? a@?AI b@HAI ?@?A ]?AB
+P	2026		468	`@Dy@?CW
+O	-7.886382	-48.904308	2026-07-24	2026	1	2026-07-24	T1	420	439

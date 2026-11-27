@@ -2,8 +2,10 @@
 // window.__alKit de alimentador.js): até 10 outros alimentadores além do aberto, mostrados como ele. A rede nas cores das
 // classes e opaca, os nomes dos trechos e a NAE (o botão NAE vale para eles), DJ e religadores, fusíveis do zoom 12; tocar
 // num trecho de um deles mostra no painel o mesmo detalhe do aberto, com "No alimentador LD… · Abrir". A rede com T1, T2
-// e T3 em qualquer zoom (pedido do usuário); de longe, os nomes dos T3 só do 12 e o desenho com menos pontos. Camadas (Faixa, Inspeção…), lista de trechos, busca do olho, modo Limpeza de faixa,
-// Downloads e croqui continuam só do aberto.
+// e T3 em qualquer zoom (pedido do usuário); de longe, os nomes dos T3 só do 12 e o desenho com menos pontos. As camadas Faixa,
+// Inspeção, Insp→manut e Manutenção também pintam os selecionados (visao-tocantins.js, as camadas dos selecionados: o
+// arquivo de cada um em dados/redes/sel/, com o T3; a rede dele fica neutra embaixo da Faixa e da Inspeção). Lista de
+// trechos, busca do olho, modo Limpeza de faixa, Downloads e croqui continuam só do aberto.
 // Como entram: clique (ou toque) na linha de um vizinho (vizinhos.js) ou do estado (visao-tocantins.js): já seleciona, sem
 // balão (seleciona); a linha fica realçada lá enquanto baixa e o menu mostra o novo; com 10, um aviso curto (avisoVisivel).
 // Clique na linha de um já selecionado: o painel do trecho dele (como antes); tirar, só no chip dele no menu. O balão de equipamento
@@ -194,8 +196,10 @@
     }
     return algo;
   }
-  // um alimentador inteiro (as cadeias por estilo, na ordem principal → ramal → fusível), com a opacidade alfa
-  function pintaAl(ctx, e, r, op, alfa) {
+  // um alimentador inteiro (as cadeias por estilo, na ordem principal → ramal → fusível), com a opacidade alfa. neutro: com
+  // a Faixa ou a Inspeção dele no mapa (visao-tocantins.js, as camadas dos selecionados), a rede fica embaixo, fina e numa cor
+  // só (a do fundo da Faixa do aberto): as cores das zonas não se misturam com as da camada
+  function pintaAl(ctx, e, r, op, alfa, neutro) {
     if (!e.porSt) {                                      // as cadeias de cada estilo (uma vez)
       const n = {};
       for (let l = 0; l < e.cs.length; l++) (n[e.cs[l]] = n[e.cs[l]] || []).push(l);
@@ -207,7 +211,7 @@
     for (const [st, lista] of e.porSt) {
       ctx.beginPath();
       if (!tracaRede(ctx, e, lista, r, op)) continue;
-      ctx.strokeStyle = COR_ST[st % 6]; ctx.lineWidth = PESO_ST[(st / 6) | 0];
+      ctx.strokeStyle = neutro ? '#cbd5e1' : COR_ST[st % 6]; ctx.lineWidth = neutro ? 2 : PESO_ST[(st / 6) | 0];
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
@@ -250,7 +254,7 @@
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
       ctx.setTransform(r.k, 0, 0, r.k, 0, 0);
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      for (const cod of m.cods) { const e = als.get(cod); if (e) pintaAl(ctx, e, r, m, cod === m.apaga ? 0.28 : 1); }
+      for (const cod of m.cods) { const e = als.get(cod); if (e) pintaAl(ctx, e, r, m, cod === m.apaga ? 0.28 : 1, m.neutro && m.neutro.includes(cod)); }
       if (m.fus) {
         if (!sp || spk !== r.k) { sp = bolinhas(r.k, (w, h) => new OffscreenCanvas(w, h)); spk = r.k; }
         for (const cod of m.cods) { const e = als.get(cod); if (e) pintaFus(ctx, e, r, sp); }
@@ -422,6 +426,7 @@
       this._v = versao; this._p = reg;
       const id = ++this._id;
       const m = { t: 'pinta', id, r: reg, cods: prontos().map(s => s.cod), vivos: [...sels.keys()], vis: [false, visivel('T1'), visivel('T2'), visivel('T3')],
+        neutro: window.__visaoTO && window.__visaoTO.selLinhas ? window.__visaoTO.selLinhas() : [],
         fus: reg.z >= (K.Z_FUS || K.Z_EQUIP) && visivel('T3') && !!(window.__fusMarcas && map.hasLayer(window.__fusMarcas)), apaga: ativo ? ativo.s.cod : null };
       med.pinturas.push({ id, z: reg.z, t0: performance.now(), t1: 0, pag: 0, vis: m.vis.slice(1), fus: m.fus, apaga: m.apaga, cods: m.cods.length });
       if (med.pinturas.length > 60) med.pinturas.shift();
@@ -470,8 +475,8 @@
     if (window.__visaoTO && window.__visaoTO.refaz) window.__visaoTO.refaz();
     notaLg();
   }
-  // Na coluna das legendas das camadas (extras.js), com alguma ligada (a Faixa vem ligada): os selecionados ainda só têm a
-  // rede, nas cores das classes, que não são as cores de ano da Faixa e da Inspeção
+  // Na coluna das legendas das camadas (extras.js), com alguma ligada (a Faixa vem ligada): só se o navegador não pinta as
+  // camadas dos selecionados (visao-tocantins.js, sem OffscreenCanvas): aí eles só têm a rede, nas cores das classes
   let nota = null;
   function notaLg() {
     const lgs = box.querySelector('.ctl-lgs');
@@ -483,7 +488,8 @@
       lgs.prepend(nota);
       new MutationObserver(notaLg).observe(lgs, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
     }
-    const quer = [...sels.values()].some(s => s.desenhado) && [...lgs.children].some(c => c !== nota && !c.hidden);
+    const V = window.__visaoTO, comCam = !!(V && V.selPode && V.selPode());   // (as camadas dos selecionados: visao-tocantins.js)
+    const quer = !comCam && [...sels.values()].some(s => s.desenhado) && [...lgs.children].some(c => c !== nota && !c.hidden);
     if (nota.hidden === quer) nota.hidden = !quer;
   }
   // a imagem que chegou do pintor
@@ -505,7 +511,7 @@
       const e = GEO.get(cod);
       if (!e) continue;
       const a = performance.now();
-      pintaAl(ctx, e, r, m, cod === m.apaga ? 0.28 : 1);
+      pintaAl(ctx, e, r, m, cod === m.apaga ? 0.28 : 1, m.neutro && m.neutro.includes(cod));
       pag += performance.now() - a;
       if (AL) await AL.cede();
       if (minha !== fila2d) return;
@@ -521,6 +527,7 @@
     rede._chegou(m.id, c, r);
   }
   const pede = () => { versao++; if (rede && !map._animatingZoom) rede._fim(); };
+  document.addEventListener('al:selcam', pede);           // (as camadas de um selecionado entraram ou saíram: a rede dele neutra ou não)
 
   // Transformadores, chaves e outros equipamentos dos selecionados (os do vizinhos.js, que os baixa): por cima da rede deles,
   // fortes (os dos vizinhos ficam apagados no canvas deles, abaixo). Um canvas do Leaflet (move e estica com o mapa),

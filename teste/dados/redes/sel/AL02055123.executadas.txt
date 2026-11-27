@@ -1,0 +1,3 @@
+#{"v":1,"anos":[2026,2025,2024,2023,2022]}
+A	AL02055123
+E	z_bg@n_x`HgbHivBgKdhChrHaVo{IMbqD~p@re@{RelBvFj`@zEkcCoYvjFcG??atAle@yhCy~CnYb@q_@r_CbzDxQjCc@ipDoM{BYdeEzA]z@xBkBeFrDmeD_jClIePoJjQsAAsCgByk@hpBn{IcEunHejB_UbB	22:3 24,22:2 23 23 25:5,23 23 25,23 23 23 23 24:2 24:4 24 25:9,24:2 24:2 24 24:2 24:2 24:2 24:2 24:2 24 24:2 24:2 24 24:2 24 25 25:3 25 25 25 26

@@ -11,6 +11,7 @@ relatório de validação. Determinístico: as mesmas entradas geram os mesmos a
     python scripts/gera_trechos.py --saida <pasta do site> --comparar <clone gh-pages publicado>
     python scripts/gera_trechos.py --saida <pasta do site> --so-faixa [--data AAAA-MM-DD]   só dados/redes/faixa.txt
     python scripts/gera_trechos.py --saida <pasta do site> --so-camadas        só dados/redes/inspecao.txt, executadas.txt, manutencao.txt
+                                                                              e dados/redes/sel/ (as camadas de cada um, com o T3)
     python scripts/gera_trechos.py --saida <pasta do site> --so-nae            só dados/redes/nae.txt (camada NAE do satélite)
     python scripts/gera_trechos.py --saida <pasta do site> --vizinhos [<destino>]   só dados/vizinhos/, das páginas
                                                                                (dados.js, chaves.js e ativos.js)
@@ -1389,9 +1390,9 @@ def _mais_anos(d, n):
         return date(d.year + n, 3, 1)
 
 
-def faixa_trechos(d, lp, hoje):
-    """dados.js e limpeza.js de um alimentador → [{nome, classe, sit, ult, ext, prazo, vaos, m, pec}] dos trechos T1 e
-    T2, na ordem do dados.js (a conta de limpeza.js: situacao, resumoTrecho e sitTrecho). pec: os vãos do trecho por
+def faixa_trechos(d, lp, hoje, classes=('T1', 'T2')):
+    """dados.js e limpeza.js de um alimentador → [{nome, classe, sit, ult, ext, prazo, vaos, m, pec}] dos trechos das
+    classes `classes` (T1 e T2; os selecionados do mapa do alimentador: também o T3), na ordem do dados.js (a conta de limpeza.js: situacao, resumoTrecho e sitTrecho). pec: os vãos do trecho por
     (anos, marcas) da vista Por ano da camada Faixa (ver faixa_vao)."""
     lp = lp or {}
     regra = dict(FAIXA_REGRA, **(lp.get('regra_anos') or {}))
@@ -1421,7 +1422,7 @@ def faixa_trechos(d, lp, hoje):
     out = []
     for n in sorted(ordem, key=nomes.index):
         cl = classe(n)
-        if cl not in ('T1', 'T2'):
+        if cl not in classes:
             continue
         m, ult, ext, pec = dict.fromkeys(FAIXA_SIT, 0.0), None, 0.0, {}
         for v in por[n]:
@@ -1588,9 +1589,11 @@ class _Divisas:
         return melhor[1]
 
 
-def faixa_txt(site, hoje, tol=None):
+def faixa_txt(site, hoje, tol=None, classes=('T1', 'T2'), pastas=None, municipios=True):
     """Pasta do site (com alimentadores/<AL>/dados.js, limpeza.js e divisas.js) → (texto do faixa.txt, resumo:
-    {alimentadores, trechos, m por situação, fora: vãos fora das divisas, pedacos, rotulos, anos: m por ano})."""
+    {alimentadores, trechos, m por situação, fora: vãos fora das divisas, pedacos, rotulos, anos: m por ano}).
+    classes: as dos trechos (o faixa.txt: T1 e T2); pastas: só estes alimentadores (as pastas deles); municipios=False:
+    sem as linhas M e Y (os metros por município: o arquivo de um selecionado, sel_mapa, não usa)."""
     site = Path(site)
     tol = FAIXA_TOL if tol is None else tol
     la0 = lo0 = 0
@@ -1624,14 +1627,14 @@ def faixa_txt(site, hoje, tol=None):
         for f in ch[1]:
             y[f] = y.get(f, 0.0) + m
             res['anos'][f] = res['anos'].get(f, 0.0) + m
-    for p in sorted(site.glob('alimentadores/*/dados.js')):
+    for p in (sorted(Path(x) / 'dados.js' for x in pastas) if pastas is not None else sorted(site.glob('alimentadores/*/dados.js'))):
         if not (p.parent / 'index.html').exists():
             continue
         d = le_js(p)
         if not d or not d.get('vaos'):
             continue
         lp = le_js(p.parent / 'limpeza.js')
-        trs = faixa_trechos(d, lp, hoje)
+        trs = faixa_trechos(d, lp, hoje, classes)
         if not trs:
             continue
         pv = faixa_vao(lp)
@@ -1640,6 +1643,8 @@ def faixa_txt(site, hoje, tol=None):
         geo = []
         for t in trs:
             geo.append(linhas(t['vaos'], ESTADO_TOL))
+            if not municipios:
+                continue
             # metros por município (a situação do trecho; e, de cada vão, a vista Por ano)
             cands = [c for c in tm.get(t['nome']) or () if c and c != 'None']
             if len(cands) == 1:
@@ -1679,7 +1684,7 @@ def faixa_txt(site, hoje, tol=None):
                     corpo.append('\t'.join(('P', ','.join(map(str, anos)), marcas, str(round(sum(v[8] for v in vs))),
                                             ' '.join(enc(q) for q in ps))))
                     res['pedacos'] += 1
-        for r in faixa_rotulos(d, lp):
+        for r in faixa_rotulos(d, lp, classes):
             corpo.append('\t'.join(('O', f'{r[0]:.6f}', f'{r[1]:.6f}', r[2], str(r[3]), str(r[4]), ','.join(r[5]),
                                     ' / '.join(r[6]), str(round(r[7])), str(round(r[8])))))
             res['rotulos'] += 1
@@ -1687,7 +1692,7 @@ def faixa_txt(site, hoje, tol=None):
         res['trechos'] += len(trs)
     anos = sorted((int(k) for k in res['anos'] if k.isdigit()), reverse=True)
     cab = '#' + json.dumps(dict(v=2, hoje=hoje.isoformat(), sit=list(FAIXA_SIT), anos=anos), separators=(',', ':'))
-    ms = ['\t'.join(['M', cod] + [str(round(m[k])) for k in FAIXA_SIT]) for cod, m in sorted(muns.items())]
+    ms = ['\t'.join(['M', cod] + [str(round(m[k])) for k in FAIXA_SIT]) for cod, m in sorted(muns.items())]   # (sem municipios: vazias)
     ys = ['\t'.join(['Y', cod, ','.join(f'{k}:{round(v)}' for k, v in sorted(y.items()))]) for cod, y in sorted(anos_mun.items())]
     return '\n'.join([cab] + ms + ys + corpo) + '\n', res
 
@@ -1756,9 +1761,9 @@ class _Poli:
         return t
 
 
-def camadas_txt(site, hoje=None, tol=None):
+def camadas_txt(site, hoje=None, tol=None, classes=('T1', 'T2'), pastas=None):
     """Pasta do site (alimentadores/<AL>/dados.js, inspecao.js, executadas.js, manutencao.js) → ({nome do arquivo: texto},
-    resumo: {alimentadores, insp_pedacos, insp_m, exe_ativos, mnt_postes})."""
+    resumo: {alimentadores, insp_pedacos, insp_m, exe_ativos, mnt_postes}). classes e pastas: como no faixa_txt."""
     site = Path(site)
     tol = FAIXA_TOL if tol is None else tol
     hoje = (hoje or date.today()).isoformat()
@@ -1776,7 +1781,7 @@ def camadas_txt(site, hoje=None, tol=None):
     corpo = {'inspecao.txt': [], 'executadas.txt': [], 'manutencao.txt': []}
     anos_i, anos_e = set(), set()
     res = dict(alimentadores=0, insp_pedacos=0, insp_m=0.0, exe_ativos=0, mnt_postes=0)
-    for p in sorted(site.glob('alimentadores/*/dados.js')):
+    for p in (sorted(Path(x) / 'dados.js' for x in pastas) if pastas is not None else sorted(site.glob('alimentadores/*/dados.js'))):
         if not (p.parent / 'index.html').exists():
             continue
         pasta = p.parent
@@ -1787,7 +1792,8 @@ def camadas_txt(site, hoje=None, tol=None):
         if not d or not d.get('vaos'):
             continue
         nomes = [t['nome'] for t in d['trechos']]
-        t12 = lambda n: classe(n or '') in ('T1', 'T2')
+        t12 = lambda n: classe(n or '') in classes      # (o nome: o das classes do arquivo, T1 e T2 nos dos outros)
+        por_cls = tuple(classes) != ('T1', 'T2')       # (os dos selecionados: os pedaços da Inspeção por classe, 5ª coluna)
         algum = False
         # Inspeção: os vãos T1/T2 com OS (com data), por conjunto de anos
         if ins and ins.get('vaos'):
@@ -1798,12 +1804,13 @@ def camadas_txt(site, hoje=None, tol=None):
                     continue
                 anos = tuple(sorted({int(oss[k]['data'][:4]) for k in ks if 0 <= k < len(oss) and oss[k].get('data')}, reverse=True))
                 if anos:
-                    por.setdefault(anos, []).append(v)
-            for anos in sorted(por, key=lambda a: (a[0], a)):
-                ls = linhas(por[anos])
+                    por.setdefault((classe(nomes[v[4]]) if por_cls else '', anos), []).append(v)
+            for ch in sorted(por, key=lambda a: (a[1][0], a[1], a[0])):
+                cl, anos = ch
+                ls = linhas(por[ch])
                 if ls:
-                    m = sum(v[8] for v in por[anos])
-                    reg.append('\t'.join(('I', ','.join(map(str, anos)), str(round(m)), ' '.join(pi(q) for q in ls))))
+                    m = sum(v[8] for v in por[ch])
+                    reg.append('\t'.join(('I', ','.join(map(str, anos)), str(round(m)), ' '.join(pi(q) for q in ls))) + (f'\t{cl}' if cl else ''))
                     anos_i.update(anos)
                     res['insp_pedacos'] += 1
                     res['insp_m'] += m
@@ -1871,6 +1878,69 @@ def camadas_mapa(saida, hoje=None):
             arq.write_bytes(b)
         res['bytes'][n] = len(b)
     return res
+
+
+# dados/redes/sel/: as camadas de cada alimentador para quando ele é um dos selecionados no mapa de outro (selecionados.js e
+# visao-tocantins.js): o faixa.txt, o inspecao.txt, o executadas.txt e o manutencao.txt só dele (o mesmo formato, a mesma
+# conta), mas com o T3 também (os dos outros só têm T1 e T2), e o faixa sem as linhas M e Y (os metros por município).
+# <AL>.<tipo>.txt, só os que têm alguma coisa; indice.json: {tipo: {alimentador: versão (8 hex do arquivo)}}. Pedido do
+# usuário: o selecionado pintado pela camada ligada, como o aberto (antes, só a rede nas cores das classes).
+SEL_CLASSES = ('T1', 'T2', 'T3')
+SEL_TIPOS = ('faixa', 'inspecao', 'executadas', 'manutencao')
+
+
+def sel_txts(site, pasta, hoje=None, hoje_camadas=None):
+    """A pasta de um alimentador → {tipo: texto} das camadas dele para o mapa de outro (só os que têm o alimentador).
+    hoje: a data da situação da Faixa (a do faixa.txt); hoje_camadas: a do Insp→manut sem situacao_ate (a do camadas_mapa)."""
+    hoje = hoje or date.today()
+    out = {}
+    fx, _ = faixa_txt(site, hoje, classes=SEL_CLASSES, pastas=[pasta], municipios=False)
+    if '\nA\t' in '\n' + fx:
+        out['faixa'] = fx
+    cams, _ = camadas_txt(site, hoje_camadas, classes=SEL_CLASSES, pastas=[pasta])
+    for n, txt in cams.items():
+        if '\nA\t' in '\n' + txt:
+            out[n[:-4]] = txt
+    return out
+
+
+def sel_mapa(saida, hoje=None, hoje_camadas=None):
+    """Grava dados/redes/sel/ (ver acima; cada arquivo só é regravado se mudou, e os que sobraram saem) e devolve o resumo
+    {alimentadores, arquivos, bytes por tipo}. As datas são as dos arquivos dos outros: a da Faixa (hoje; sem ela, a do
+    cabeçalho do faixa.txt) e a das camadas (hoje_camadas; sem ela, a de hoje, como no camadas_mapa)."""
+    saida = Path(saida)
+    if hoje is None:                                     # a mesma data do faixa.txt (a situação igual à dos outros)
+        try:
+            hoje = date.fromisoformat(json.loads((saida / 'dados' / 'redes' / 'faixa.txt').open(encoding='utf-8').readline()[1:])['hoje'])
+        except (OSError, ValueError, KeyError, TypeError):
+            hoje = date.today()
+    pasta_sel = saida / 'dados' / 'redes' / 'sel'
+    pasta_sel.mkdir(parents=True, exist_ok=True)
+    indice, bytes_, feitos = {t: {} for t in SEL_TIPOS}, dict.fromkeys(SEL_TIPOS, 0), set()
+    for p in sorted(saida.glob('alimentadores/*/dados.js')):
+        if not (p.parent / 'index.html').exists():
+            continue
+        for tipo, txt in sel_txts(saida, p.parent, hoje, hoje_camadas).items():
+            b = txt.encode('utf-8')
+            arq = pasta_sel / f'{p.parent.name}.{tipo}.txt'
+            if not arq.exists() or arq.read_bytes() != b:
+                arq.write_bytes(b)
+            feitos.add(arq.name)
+            indice[tipo][p.parent.name] = hashlib.sha1(b).hexdigest()[:8]
+            bytes_[tipo] += len(b)
+    for arq in pasta_sel.glob('*.txt'):
+        if arq.name not in feitos:
+            arq.unlink()
+    j = json.dumps(indice, separators=(',', ':'), sort_keys=True).encode('utf-8')
+    arq = pasta_sel / 'indice.json'
+    if not arq.exists() or arq.read_bytes() != j:
+        arq.write_bytes(j)
+    return dict(alimentadores=len({n.split('.')[0] for n in feitos}), arquivos=len(feitos), bytes=bytes_)
+
+
+def resumo_sel(res):
+    return (f"camadas dos selecionados (dados/redes/sel/): {res['alimentadores']} alimentador(es), {res['arquivos']} arquivos · "
+            + ' · '.join(f"{t} {math.ceil(b / 1e3)} KB" for t, b in res['bytes'].items()))
 
 
 def resumo_camadas(res):
@@ -2713,6 +2783,7 @@ def interface(saida, malha=None):
     v_faixa, r_faixa = faixa_mapa(saida)              # (depois da limpeza: lê o limpeza.js de cada página)
     print(resumo_faixa(r_faixa))
     print(resumo_camadas(camadas_mapa(saida)))   # (Inspeção, Manutenção e Insp→manut dos outros no mapa do alimentador)
+    print(resumo_sel(sel_mapa(saida)))           # (as mesmas camadas de cada um, com o T3, para quando ele é selecionado)
     print(resumo_nae_txt(nae_mapa(saida)))       # (a camada NAE do satélite da página inicial)
     vizinhos_mapa(saida, vizinhos_dos_dados(dados))
     ranking_polos(saida, dados, man)
@@ -2972,6 +3043,7 @@ def main(argv=None):
     if a.so_faixa:
         v, r = faixa_mapa(saida, date.fromisoformat(a.data) if a.data else None)
         print(resumo_faixa(r))
+        print(resumo_sel(sel_mapa(saida)))           # (os dos selecionados na mesma data do faixa.txt)
         ini = saida / 'index.html'
         if ini.exists():
             h = ini.read_text(encoding='utf-8')
@@ -2981,7 +3053,9 @@ def main(argv=None):
             print(f'index.html: data-faixa="{v}"')
         return 0
     if a.so_camadas:
-        print(resumo_camadas(camadas_mapa(saida, date.fromisoformat(a.data) if a.data else None)))
+        hoje = date.fromisoformat(a.data) if a.data else None
+        print(resumo_camadas(camadas_mapa(saida, hoje)))
+        print(resumo_sel(sel_mapa(saida, hoje_camadas=hoje)))   # (a Faixa na data do faixa.txt)
         return 0
     if a.so_nae:
         print(resumo_nae_txt(nae_mapa(saida)))

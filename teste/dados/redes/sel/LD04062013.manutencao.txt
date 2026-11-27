@@ -1,0 +1,3 @@
+#{"v":1,"sit":["venc","pend","fora","exec"]}
+A	LD04062013
+M	jgd{@pcdjHyiGa\jgErkF|gQn{H_ySj~P{jAu`_@zTft_@xg@av_@}hAbELn@kLdFuEpBiJbE|hEluB}vBmyCyxA_h@tA}ObBqRhkAjjb@grAmi`@?_GG}JRt{@EeNnjR`jJuVx@uP[_zP{kMvwO~_M}_L`aTvhFaaVasB{{@an@ytDgaAwd@rExBjMbG{]uPzq@~[vFlCrIbErfBltEoFcBqlJ~xXthNyhFbNaLDBtR}Oj}Dm`D{hE}dU{mAyG`gDlmX	0,1,0,0 0,1,0,1 0,1,0,1 0,0,0,1 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0 1,1,0,0 0,1,0,1 0,1,0,0 1,1,0,0 0,1,0,0 1,0,0,0 0,1,0,0 0,1,0,0 0,2,0,0 1,1,0,0 1,1,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 1,0,0,0 0,1,0,0 0,1,0,0 1,0,0,0 1,0,0,0 0,0,0,1 1,0,0,0 0,0,0,1 0,1,0,0 1,1,0,0 0,1,0,0 0,0,0,1 0,1,0,0 0,0,0,1 0,1,0,0 0,1,0,0 0,1,0,0 1,1,0,0 0,0,0,1 0,0,0,1 0,0,0,1 0,0,0,1 0,0,0,1

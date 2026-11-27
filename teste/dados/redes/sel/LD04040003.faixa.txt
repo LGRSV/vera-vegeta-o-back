@@ -1,0 +1,1935 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	LD04040003
+T	T1	T1	2	2026-04-15	42079	3	~aeFpg~\fAiApJsc@aCyGkGg_@~MqM _\xvAAG qA_@HQ GNa@u@ Pj@CE k@AY}@ Vz@LE ABGU \G[J g@ULQ IP_AY hX_@B? bAqEA? JSCA LaAD@ XoACA pByJD@ `@uBJG ??A? w@cBE@ c@{@BA k@cCC? [_B@E ?OCA ASA? s@sDBA ]_CA@ kCcOBA CCBA R_AAC pEgFHF b@]AC |CqC@? r@m@OL Tc@GT Py@CA Ns@CA b@kFw@fI ~EuUCC |CmI|B{EzS{E~EgUvCoF yb@li@AA |FyFDN xD}@?C @BA? xJkGCA hDkOEA ZaADB g|@`eDcNiG ja@a`BpHoV
+P			1058	{[|_C@A uKuEAG qA_@@A OICE VDBE gAAAA JA@C GMAC \GAA aAGB? HQC? eAG?M`@L jW_@C? fAqEA? JSCA R_AEA ^mACA vBwJEA f@sBJG ??A? }@aBDA i@y@BA o@cCB? _@_B@E ?OCA CS@? u@sDBA
+P	2023		10003	`XakATg@zS{E~EgUvCoF }Zpa@DN xD}@?C @BA? xJkGCA hDkOEA ZaADB
+P	2024		58	iv@tfB@A mCaOBA CCBA
+P	2024,2023		11547	Bu@|G_HpDaD _MvLAC pEgFHF b@]AC |CqC@? r@m@OL Tc@GT Py@CA Ns@CA b@kFPNiAvH ~EuUCC |CmIfBsD oApCAA eIrWNoAnEoOpAoC
+P	2026		15883	_o@buBDADRLD?IJCTx@JCEOXIL`@RLBGp@RVX|K|Ep@a@`K{d@kBsEcCqN
+P	2026,2024		3529	??}C{QNO
+T	T2-A	T2	3		53681	4	|Ylj@BE fAB{LgBgB`@ lNbA?@ nHCfFoEpDcFpHoAbYeVyFkNuPaG iZn}@hCF yN}@AF aHK?A HI?@ bk@sFe@cD }Dx@B@ |z@SsSsTeC}A pVdVA? i`@kMDD |IwG[U ~s@_KT}@aAqAkAgIiA{C{Ag@Yy@`BgEsDmF hIha@z@[ cAJVC fAAnByBpCq@ krA`Dh@}E fLrECB }MI@O bhACNI uf@m@tIaMbHoE`@bArIdA u^fOD? rq@kC[dA aj@wEA? `[C|@i@ o@_CUL `A_@k@P kCw@@@ wFcA?@ gvAhjAsBG zt@ej@`LiJXkA lh@nBLK
+P			53681	_oBxt@BE fABiAA_@WqImAkAF[X lNbA?@ nHCfFoEpDcFpHoAvIaI`Bs@hKoJwBsDaCwHmC}AgLcD iZn}@BRvABX@RQ yN}@AF aHK?A HI?@ bk@sFe@cD }Dx@B@ |z@SsSsTeC}A pVdVA? i`@kMDD |IwG[U ~s@_KT}@aAqAk@_F_@gBiA{C{Ag@Yy@`BgEsDmF hIha@NSj@G cAJVC fAAhBgBDQpCq@ krA`DM_@v@_D?] fLrECB }MI@O bhACNI uf@m@tIaMbHoEXLFt@rAJhEdAt@K u^fOD? rq@kC?V[l@ aj@wEA? `[C|@i@ o@_CUL `A_@k@P kCw@@@ wFcA?@ gvAhjAsBG zt@ej@n@Yt@w@VAbHuGL}@JM lh@nBLK
+T	T2-B	T2	0	2024-03-14	3465	4	}bCtA}AsB ZIOZ wEiI_@e@ LR@A pF`IaFmH
+P	2024,2023		3465	hHjL}AsB ZIE?IZ wEiI_@e@ LR@A pF`ID]gFoG
+T	T2-C	T2	3	2024-10-01	20339	4	xs@~c@xA}JnEeCn@}E i@`Nv@mAFcFfA{BSeD yHrQs@K wEuA|CGeAlFyHmAKuA|C_IrCGb@u@Yo@ dNvB?A mDo@JmB p@[Iv@e@G {ExS_Bs@ `KiC[oF ~@sDcAo@
+P			4081	_TtNG{@|C_IrCG^_@BUYo@ mAjJt@I
+P	2024		16258	jBjJ\gB?}Az@wDnEeCp@iCAsA aV|NBZTAlCp@|@SvDbB xGwDd@YPs@OuBRi@BcAf@k@Ja@IY\SSeD yHrQs@K aD_BfB@KdCy@fB zMyM?A mDo@JmB p@[Iv@e@G dAzMByA_@uC ~@sDc@QS[KA
+T	T2-D	T2	1	2023-02-12	511	4	fCatAh@cA Uh@EC D@?@ HY?@
+P	2023		511	]p@h@cA Uh@EC D@?@ HY?@
+T	T2-E	T2	3	2023-02-12	13537	4	~{@hk@i|@qj@ rx@|g@@C qDaC?@ mCaBBA u@e@?A yBqA@C _C_BA@ }GgE@C aHmEBA gNoIDG mDeB@?
+P			202	px@|g@@C qD_C?A mC_BBA u@e@?A yBqA@C aC}A@A _HeE@C aHmEBA gNoIDG
+P		c	12817	zv@jg@uy@ki@
+P	2023		4	qAe@A?
+P	2023	c	515	rAd@sAe@
+T	T2-F	T2	2	2023-02-12	23338	4	Ti@lr@uwA mr@twA?A vGyLAC `@m@CC pHqOBB pFcLuEgD}NeB tXbBC? iXyA?E T@@F l^yGEC b@kADB dAcCBB LOCA JQ?A pAqC?@ C_A`@J i@QTH |@u@EC NWA? d@u@CC nAqC@@ JW@?
+P			5310	ee@paA`NcY sF|KBB
+P	2017		3500	kQl]tHoN {@dBAC `@m@CC l@eATe@
+P	2017	c	142	c@z@LU
+P	2022		1956	fb@m|@~CyGBU kCpGCC nAqC@@ JW@?
+P	2022	c	12111	cVlg@xDcIQQfAmA~J_T mR`a@uEgD_Jy@cC]YM tXbBC? iXyA?E T@@F l^yGEC b@kADB dAcCBB LOCA JQ?A pAqC?@ C_A`@J i@QT@?F |@u@EC NWA?
+P	2023,2017		320	{l@lmA\q@ ]p@?A
+T	T2-G	T2	3		25	4	n{@~k@BA
+P			25	C@BA
+T	T2-H	T2	2	2022-11-17	16488	4	mv@gaBcFgFwB\{IsFmEz@}CaDoEeJqCoAgP_Q pYj\BC gHsIHI sAsAE@ sGmSFG eEjD|DcD
+P			9449	vUnd@yAiCw@gCuAwBqCoA}CyCiKeL pYj\BC gHsIHI sAsAE@ sGmSFG eEjDf@UtCmC
+P	2022		4339	fj@lm@eBmAuEmCmE|@eC_C
+P	2022	c	2700	j_@~NeDaD}@eAwB\_@W
+T	T2-I	T2	2	2022-11-17	19491	4	by@g[fBsQtGyEbPs]nGeWZyIxAi@ }f@`uAGC HBA? A_AD? pBaKBD fGaGB@ nEwJ@? lCsFGC R_@@? xCoH@? hAeEGA pHsOVE eC{C?@ ?W@? fBoDA? yBdK~B]
+P			16930	af@bbAZuCtGyEbPs]nGeWZyIxAi@ gc@~fABD fGaGB@ nEwJ@? lCsFGC R_@@? xCoH@? hAeEGA pHsOVE eC{C?@ ?W@? fBoDA? yBdK~B]
+P	2022		2561	mh@`pAjA}L a@rFGC HBA? A_AD?
+T	T2-J	T2	3	2024-01-30	20903	4	hcAhh@Rw@y@w@aFmAgCKiDxAuC}C{EAmJwO{DuCkKuAkHuE b~@r`@KR _Fe@?@ {PwBBA xj@_Ax@e@ u@b@qDgBgJpAQdDm@z@ |SeFOG qP@?B nHkA?@ _l@{DA? aGyGS? sN_DA@
+P			5345	tw@x\x@oAPeDrHmAr@CpDfB eYzD?A {PuBBA xj@_Ax@e@ LHOG qP@?B nHkA?@ al@{D@? cGyGS? uN}C@A
+P	2024		14223	h}@|a@NQBe@y@w@gB]yBo@gCKiDxAuC}C{EAmJwOaAu@yB_BqCOyFeAiBgA
+P	2024,2022		1328	??aEmC
+T	T2-K	T2	3	2025-04-08	6272	4	mlB|]MoGh@_@xEj@nAUx@qAQ_@ cB`CA? qFg@D@ fJw@CC Bq@QR jAiAy@t@ rBuA@qA`Ai@ }B|Cv@e@
+P			5028	mO`HHy@f@_@p@XhDPnAUx@qAQ_@ cB`CA? qFg@D@ fJw@CC Bq@QR jAiAy@t@ rBuAIm@Jc@`@_@^I }B|Cv@e@
+P	2025		1244	uNvNNo@o@uBFo@
+T	T2-L	T2	3		29752	4	frEzKZiGxCq@jKE }PfHA? dPgH?C xZAeJOiIaGaFlG zZBAA i|@KdBjAzEj@xFk@ {PkA@? taA_BwClB hLoEqG`B pGaB|FwA si@TA? `i@M?A yQiZ`CzO~CzL iIyc@XuN kHtIvGL b@lJm@[B_E h@zE@A
+P		c	29752	}m@zl@ZiGxCq@hIS`AL }PfHA? dPgH?C xZAeJOiIaGi@\wDnF zZBAA i|@K`@LbA|@n@EjDp@vEk@PDNE {PkA@? taA_Bc@J{AbBWA hLoEqG`B pGaB|FwA si@TA? `i@M?A yQiZfAvFCV|@jG~CzL iIyc@XuN kHtIvGL b@lJm@[B_E h@zE@A
+T	T3-A	T3	3		18	5	cwGhnG?C
+P			18	?B?C
+T	T3-B	T3	3		463	5	tMnDlAO
+P			463	mANLD~@U
+T	T3-C	T3	3		17	5	??AA
+P			17	@@AA
+T	T3-D	T3	3		661	5	wAiGnBi@
+P			661	oBh@nBi@
+T	T3-E	T3	3		56	5	RMIC
+P			56	HBIC
+T	T3-F	T3	3		1205	5	Nu@_C_AMgA
+P			1205	lCfC_C_AMgA
+T	T3-G	T3	3		44	5	CzFFA
+P			44	G@FA
+T	T3-H	T3	3		2304	5	hPeCgJiC lCdAQE
+P			2304	jFhAw@a@mDq@EH{B_A lCdAQE
+T	T3-I	T3	3		141	5	aIi@MU
+P			141	LTMU
+T	T3-J	T3	3		1889	5	|EcAiHuC jHrCA@ uFwB?B
+P			1889	tFrBkE{A}Ay@ jHrCA@ uFwB?B
+T	T3-K	T3	3		218	5	zHt@e@O
+P			218	d@Ne@O
+T	T3-L	T3	3		96	5	rB~EOG
+P			96	NFOG
+T	T3-M	T3	3		1722	5	yJaGyA}G b@|ADA Em@EB
+P			1722	z@jFaAaGW[ b@|ADA Em@EB
+T	T3-N	T3	3		133	5	bT|PSK
+P			133	RJSK
+T	T3-O	T3	3		436	5	}EwQiAU
+P			436	hATiAU
+T	T3-P	T3	3		91	5	vAi@OC
+P			91	NBOC
+T	T3-Q	T3	3		75	5	iLdBHI
+P			75	IHHI
+T	T3-R	T3	3		36	5	m@c@CC
+P			36	BBCC
+T	T3-S	T3	3		76	5	~OwDAK
+P			76	@JAK
+T	T3-T	T3	3		174	5	aAkAZI
+P			174	[HZI
+T	T3-U	T3	3		210	5	k@EPa@
+P			210	Q`@Pa@
+T	T3-V	T3	3		89	5	vDxBCO
+P			89	BNCO
+T	T3-W	T3	3		17	5	VV@A
+P			17	A@@A
+T	T3-X	T3	3		104	5	mE_CFO
+P			104	GNFO
+T	T3-Y	T3	3		2875	5	jErCzFsE iCzCgAI i@g@e@K hB`@cAU
+P			2875	?hBh@cAhCsAfA{@ iCzCgAI i@g@e@K hB`@cAU
+T	T3-Z	T3	3		1757	5	_Ga@}Di@uBP lED?@
+P			1757	dBN}Di@uBP lED?@
+T	T3-AA	T3	3		25	5	?A@C
+P			25	AB@C
+T	T3-AB	T3	3		1162	5	hFi@i@}@cCG
+P			1162	lDdAi@}@mAJu@S
+T	T3-AC	T3	3		140	5	nLfHBY
+P			140	CXBY
+T	T3-AD	T3	3		106	5	gCqACS
+P			106	BRCS
+T	T3-AE	T3	3		35	5	WG?E
+P			35	?D?E
+T	T3-AF	T3	3		50	5	M@GC
+P			50	FBGC
+T	T3-AG	T3	3		34	5	mDgCAE
+P			34	@DAE
+T	T3-AH	T3	3		390	5	iBiBy@e@
+P			390	x@d@y@e@
+T	T3-AI	T3	3		1040	5	bFdBgDuA
+P			1040	fDtAgDuA
+T	T3-AJ	T3	3		37	5	sFbFD?
+P			37	E?D?
+T	T3-AK	T3	3		146	5	nXo@RQ
+P			146	SPRQ
+T	T3-AL	T3	3		1548	5	v@zQK{G
+P			1548	JzGK{G
+T	T3-AM	T3	3		131	5	BENQ
+P			131	OPNQ
+T	T3-AN	T3	3		2466	5	o^iMUmA\UtGeB mHrDDS Vw@AC bCm@CA
+P			2466	kCtCUmA\UhAe@V?rD_A mHrDDS Vw@AC bCm@CA
+T	T3-AO	T3	3	2024-10-14	2250	5	vBuDjHsG
+P			1566	oE~DnE_E
+P	2024		683	kHrGzAsA
+T	T3-AP	T3	3		30	5	hS`d@AC
+P			30	@BAC
+T	T3-AQ	T3	3		1346	5	lN_CsDaD
+P			1346	rD`DcCkBo@u@
+T	T3-AR	T3	3		521	5	wb@iP_A{@
+P			521	~@z@?M_Am@
+T	T3-AS	T3	3		70	5	tf@|SMA
+P			70	L@MA
+T	T3-AT	T3	3		339	5	wb@gQo@e@
+P			339	n@d@o@e@
+T	T3-AU	T3	3		203	5	xFsIa@M
+P			203	`@La@M
+T	T3-AV	T3	3		37	5	sJzI@C
+P			37	AB@C
+T	T3-AW	T3	3		876	5	WbFGsC
+P			876	FrC[a@RqB
+T	T3-AX	T3	3		576	5	rm@~IeAmA
+P			576	dAlAeAmA
+T	T3-AY	T3	3		61	5	`BfKIE
+P			61	HDIE
+T	T3-AZ	T3	3		25	5	wAaKCC
+P			25	BBCC
+T	T3-BA	T3	3		5249	5	iIqE_@Wf@c@sEcLuCg@mDoB dGtCQG
+P			5249	zGhN_@Wf@c@iAgDiC{F]Kq@@eA]mDoB dGtCQG
+T	T3-BB	T3	3		429	5	qFoCs@y@
+P			429	r@x@s@y@
+T	T3-BC	T3	3		39	5	`Al@DE
+P			39	EDDE
+T	T3-BD	T3	3		106	5	oPrVMO
+P			106	LNMO
+T	T3-BE	T3	3	2024-10-14	6671	5	qWuMfAgBxSuNlDfB i[pLTF tPuLEK
+P			5955	kQ|NLk@h@m@rOcLtC_B~@h@ {WnNTF tPuLEK
+P	2024		716	bIFO@}A_A
+T	T3-BF	T3	3	2024-10-14	10365	5	eWpK|J}FdDwFcLiCcD{D v[`NcEuB dBz@?F u@]@C {@ONO qFgA?@ aH}A?A hOlDgCo@
+P			9597	cPtN`@OBDfBy@nFyDdDwFcLiCcD{D hXdLuAy@ n@d@@C {@ONO qFgA?@ aH}A?A hOlDgCo@
+P	2024		768	nIzCMB_B_A N@?F
+T	T3-BG	T3	0	2024-10-14	688	5	dFb@oBs@
+P	2024,2023		688	nBr@oBs@
+T	T3-BH	T3	3	2024-10-14	300	5	uBFBs@
+P			162	CZB[
+P	2024		138	Cr@?W
+T	T3-BI	T3	3		3652	5	ts@v]H_E DBEB eJ}FtATlG|F
+P			3652	G`DH_E DBEB eJ}FtATrFzFX@
+T	T3-BJ	T3	3		180	5	qZ_I]K
+P			180	\J]K
+T	T3-BK	T3	3		218	5	yYgMT_@
+P			218	U^T_@
+T	T3-BL	T3	3		857	5	kC`AbCkA
+P			857	cCjAbCkA
+T	T3-BM	T3	3		363	5	bv@bXx@[
+P			363	y@Zx@[
+T	T3-BN	T3	3		103	5	??PG
+P			103	QFPG
+T	T3-BO	T3	3		28	5	q}@{SBA
+P			28	C@BA
+T	T3-BP	T3	0	2024-03-14	1104	5	tT}CeBmD
+P	2024,2023		1104	dBlDeBmD
+T	T3-BQ	T3	3		39	5	fo@xh@AE
+P			39	@DAE
+T	T3-BR	T3	3		480	5	keAkd@AwA
+P			480	@vAAwA
+T	T3-BS	T3	0	2024-03-14	100	5	tQkBLK
+P	2024,2023		100	MJLK
+T	T3-BT	T3	3		168	5	qS|EVS
+P			168	WRVS
+T	T3-BU	T3	0	2024-03-14	18	5	lRiFBA
+P	2024,2023		18	C@BA
+T	T3-BV	T3	3		115	5	{QxC?S
+P			115	?R?S
+T	T3-BW	T3	3		577	5	eDbDn@}A
+P			577	o@|An@}A
+T	T3-BX	T3	0	2024-03-14	1156	5	jXgFbCw@ h@f@_@_@
+P	2024,2023		1156	mCn@lCo@IG h@f@_@_@
+T	T3-BY	T3	0	2024-03-14	30	5	Z`@BC
+P	2024,2023		30	CBBC
+T	T3-BZ	T3	3		56	5	a\`QEI
+P			56	DHEI
+T	T3-CA	T3	3		98	5	bm@pVKO
+P			98	JNKO
+T	T3-CB	T3	0	2024-03-14	40	5	yP_i@EC
+P	2024,2023		40	DBEC
+T	T3-CC	T3	3		18	5	xYt]C?
+P			18	B?C?
+T	T3-CD	T3	3		130	5	iGvLSM
+P			130	RLSM
+T	T3-CE	T3	0	2024-03-14	424	5	wJcl@iAW
+P	2024,2023		424	hAViAW
+T	T3-CF	T3	3		1906	5	mo@|JdBH|E}A
+P			1906	cIrAdBH|E}A
+T	T3-CG	T3	3		382	5	lChOc@{@
+P			382	b@z@c@{@
+T	T3-CH	T3	0	2024-03-14	6326	5	hs@h@sEkIu@}Ej@q@ pEbQE@ eIsTfBdB mHsFbEpC
+P	2024		4235	xIdUsEkIg@cEMYf@KUe@DIRH pEbQE@ _FaR@R
+P	2024,2023		2091	ASkH_F dElCAB
+T	T3-CI	T3	0	2024-03-14	26	5	gM\BA
+P	2024,2023		26	C@BA
+T	T3-CJ	T3	3		146	5	yXrUMW
+P			146	LVMW
+T	T3-CK	T3	0	2024-03-14	2013	5	rXi]{@B}B{AwBtA
+P	2024		502	pH@{@BWQ
+P	2024,2023		1511	}EJvBuAdBhA
+T	T3-CL	T3	3	2025-03-03	45544	5	oFEqO[ MiGxAlG uAeO@A dC[z@cCF{C~BgELoB pSuAsGqOoANsDbQeCjB `KyWFxA kJgFtGfG g\oMjEcE`MnK mSkEkAmA_@sE{IeDeCuBeBaEsGmF_LeEoKyByMk@ fhAtg@A? b@g@A? |GIgBD cCiBTR sjAyVs@cBSV `i@v@DE gh@wFv@cC fSrBA@ bAAKJ qGsA@C |_ApdB?uF ??fC] wsAssAlAkA}@eB
+P			30261	lrAjyAp@Kb@}BF{C~BgELoB pSuAsGqOoANqDnNArAeCjB `KyWFxA kJgFCBxGbG g\oMTJfDqEL@`MnK mSkEy@g@Qe@YyBEyAiD}@qDgBeCuBeBaE{Ak@ dZfVA? b@g@A? |GIgBD cCiBTR sjAyVm@c@Le@SYSV `i@v@DE gh@wFv@cCk@C hVbCJK cA@@A {EgA@C qNhGlAkA}@eB
+P	2024		5316	byAnjByHI MiGxAlG uAeO@A jBUmBV?tF
+P	2024,2023		1205	zOfHu@KaDE
+P	2025		8762	yj@e}AwDaE_LeEwDk@wEmAmLg@
+T	T3-CM	T3	0	2024-03-14	42	5	x}AlnBCE
+P	2024,2023		42	BDCE
+T	T3-CN	T3	3		63	5	cTp`@CK
+P			63	BJCK
+T	T3-CO	T3	3		363	5	KxAG_A
+P			363	F~@GQ?m@
+T	T3-CP	T3	3		29	5	uB{WCC
+P			29	BBCC
+T	T3-CQ	T3	0	2024-03-14	168	5	d]aIC]
+P	2024,2023		168	B\C]
+T	T3-CR	T3	0	2024-03-14	1176	5	|N_@qEE
+P	2024		532	~AH_BI
+P	2024,2023		644	~AHpBC
+T	T3-CS	T3	0	2024-03-14	574	5	dDzJnA_A
+P	2024,2023		574	oA~@nA_A
+T	T3-CT	T3	3		417	5	jq@d\s@w@
+P			417	r@v@s@w@
+T	T3-CU	T3	3		104	5	eaBfAEQ
+P			104	DPEQ
+T	T3-CV	T3	3		88	5	kB~AIG
+P			88	HFIG
+T	T3-CW	T3	3		30	5	kCsSDA
+P			30	E@DA
+T	T3-CX	T3	3		240	5	jDxO]_@
+P			240	\^]_@
+T	T3-CY	T3	3		1451	5	i@bAwDc@ tFB}@^
+P			1451	??GBoDg@ tFB}@^
+T	T3-CZ	T3	3		35	5	\fCBE
+P			35	CDBE
+T	T3-DA	T3	3		128	5	`eBwDOO
+P			128	NNOO
+T	T3-DB	T3	0	2024-03-14	33	5	go@}YDC
+P	2024,2023		33	EBDC
+T	T3-DC	T3	3		52	5	qu@f\AG
+P			52	@FAG
+T	T3-DD	T3	3		80	5	YFCM
+P			80	BLCM
+T	T3-DE	T3	0	2024-03-14	41	5	|w@gVG?
+P	2024		41	F?G?
+T	T3-DF	T3	0	2024-03-14	64	5	qNoNKA
+P	2024		64	J@KA
+T	T3-DG	T3	3		48	5	ei@ze@?G
+P			48	?F?G
+T	T3-DH	T3	0	2024-03-14	74	5	hf@}`@FC
+P	2024		74	GBFC
+T	T3-DI	T3	3		41	5	yh@`a@@G
+P			41	AF@G
+T	T3-DJ	T3	3		1284	5	IA`@cF
+P			1284	a@bFNw@EIVaD
+T	T3-DK	T3	3		267	5	kAhGVi@
+P			267	Wh@Vi@
+T	T3-DL	T3	3		31	5	GAEA
+P			31	D@EA
+T	T3-DM	T3	0	2024-03-14	18	5	lRwa@AC
+P	2024		18	@BAC
+T	T3-DN	T3	3		97	5	}Rxc@FO
+P			97	GNFO
+T	T3-DO	T3	0	2024-03-14	474	5	`y@yr@eAg@ JH@A
+P	2024,2023		474	v@^eAg@ JH@A
+T	T3-DP	T3	0	2024-03-14	42	5	uf@nOG?
+P	2024		42	F?G?
+T	T3-DQ	T3	0	2024-03-14	3295	5	zf@mOeKL_D}B
+P	2023		452	~@p@_Aq@
+P	2024,2023		2843	dPnBeKL_BkA
+T	T3-DR	T3	3		1	5	
+T	T3-DS	T3	3		107	5	ue@jm@BS
+P			107	CRBS
+T	T3-DT	T3	3		168	5	xwBv@H[
+P			168	IZH[
+T	T3-DU	T3	3	2024-03-14	4068	5	g~Bq_@jDmBAa@hCk@zEpAhBU yHw@?@ AAA?
+P			1979	{HvDjDmBAa@nBc@
+P	2024		2089	xE|@aC_A}@EYF ~Ir@iBT[K sDaA?@ AAA?
+T	T3-DV	T3	3		346	5	bmBx^|@K
+P			346	}@J|@K
+T	T3-DW	T3	3		96	5	mALNA
+P			96	O@NA
+T	T3-DX	T3	0	2024-03-14	19	5	kgBu\?A
+P	2024		19	?@?A
+T	T3-DY	T3	0	2024-03-14	1502	5	~q@}PgE{D
+P	2023		390	t@n@u@o@
+P	2024,2023		1112	fEzDqCkC
+T	T3-DZ	T3	0	2024-03-14	1732	5	vHfGJeB}A?{@w@ dA`AII
+P	2023		647	pAdBJeBMC
+P	2024,2023		1085	eALeAaA jCr@eAQIT
+T	T3-EA	T3	0	2024-03-14	702	5	zAvv@pBu@
+P	2024		702	qBt@pBu@
+T	T3-EB	T3	0	2024-03-14	18	5	eBpA?C
+P	2024		18	?B?C
+T	T3-EC	T3	0	2024-03-14	17	5	qs@in@A?
+P	2024		17	@?A?
+T	T3-ED	T3	3	2024-03-14	3917	5	BAiAuH}BkFwAmA zG|OB?
+P			3242	Gc@aA_Eg@a@uAiEwAmA
+P	2024		675	~GnRBe@KoA Bb@B?
+T	T3-EE	T3	0	2024-03-14	5	5	
+T	T3-EF	T3	0	2024-03-14	264	5	C?o@A
+P	2024		263	n@@o@A
+T	T3-EG	T3	0	2024-03-14	16	5	kGtG@A
+P	2024		16	A@@A
+T	T3-EH	T3	0	2024-03-14	20	5	r`A|e@@A
+P	2024		20	A@@A
+T	T3-EI	T3	3	2024-03-14	716	5	y`Aye@G_C
+P			611	JjB?}@Km@
+P	2024		105	F~BBS
+T	T3-EJ	T3	0	2023-02-12	111	5	n|@aMDS
+P	2023		111	ERDS
+T	T3-EK	T3	3		24	5	ot@rEB?
+P			24	C?B?
+T	T3-EL	T3	3		101	5	nbBf]LI
+P			101	MHLI
+T	T3-EM	T3	3		19	5	a}Aa[AC
+P			19	@BAC
+T	T3-EN	T3	0	2023-02-12	418	5	do@eM}@k@
+P	2023		418	|@j@}@k@
+T	T3-EO	T3	0	2023-02-12	134	5	fArGSO
+P	2023		134	RNSO
+T	T3-EP	T3	0	2023-02-12	406	5	]qGWcA ???@
+P	2023		406	V`AQYEi@ ???@
+T	T3-EQ	T3	3		132	5	jm@rl@NS
+P			132	ORNS
+T	T3-ER	T3	0	2023-02-12	96	5	{w@wh@KK
+P	2023		96	JJKK
+T	T3-ES	T3	3		18	5	ss@xUAA
+P			18	@@AA
+T	T3-ET	T3	3		1695	5	vkBpRnFaE
+P			1695	oF`EzAqArCoB
+T	T3-EU	T3	0	2023-02-12	39	5	{oA_WEC
+P	2023		39	DBEC
+T	T3-EV	T3	0	2023-02-12	140	5	n]uISM
+P	2023		140	RLSM
+T	T3-EW	T3	0	2023-02-12	144	5	YvHFS
+P	2023		144	GRFS
+T	T3-EX	T3	3		22	5	wl@\CA
+P			22	B@CA
+T	T3-EY	T3	0	2023-02-12	3899	5	hp@uLyGwK cDdCnDuB
+P	2023		3900	lGfKEQsGeK cDdCnDuB
+T	T3-EZ	T3	3		20	5	oq@fSB?
+P			20	C?B?
+T	T3-FA	T3	3		6262	5	tqC|x@{A}EmVeN bYrTA? kXeT?@
+P			6262	rXrT{A}EmVeN bYrTA? kXeT?@
+T	T3-FB	T3	3		111	5	_iCiLNM
+P			111	OLNM
+T	T3-FC	T3	3		1170	5	pzBjGr@oE
+P			1170	s@nEr@oE
+T	T3-FD	T3	0	2023-02-12	384	5	ij@w^ScA
+P	2023		384	RbAScA
+T	T3-FE	T3	3		8094	5	nbBhlBaA[cBkIwHyGmJ@kDyB_@h@
+P			8094	v_@nUaA[cBkIwHyGmJ@kDyB_@h@
+T	T3-FF	T3	3		2748	5	oDrMKgAfE}J
+P			2748	{DdMKgArCgHr@uA
+T	T3-FG	T3	3		35	5	`@b@EE
+P			35	DDEE
+T	T3-FH	T3	3		23	5	giCovACA
+P			23	B@CA
+T	T3-FI	T3	3		1531	5	hqBf`@Ga@jEqB }DfCC?
+P			1531	AJ@MISlDkB\E }DfCC?
+T	T3-FJ	T3	3		75	5	rQ~AKE
+P			75	JDKE
+T	T3-FK	T3	3		16	5	JD@?
+P			16	A?@?
+T	T3-FL	T3	3		127	5	ck@xAUG
+P			127	TFUG
+T	T3-FM	T3	3		19	5	kcAoe@@C
+P			19	AB@C
+T	T3-FN	T3	3		104	5	zfAvn@BQ
+P			104	CPBQ
+T	T3-FO	T3	0	2023-02-12	86	5	oh@wu@MA
+P	2023		86	L@MA
+T	T3-FP	T3	3		9722	5	bx@jkCbA?P}@hKoEbHsHlBaM{A}A sHd[Wc@ dKuFaB}@
+P			9722	mVrPbA?P}@~Bk@`CgAfC{Al@cAnEsEd@[G_AbAoDp@qE{A}A sHd[Wc@ dKuFg@e@y@W
+T	T3-FQ	T3	0	2023-02-12	1079	5	wi@{xBsDaA jCn@?B
+P	2023		1079	f@LsDaA jCn@?B
+T	T3-FR	T3	0	2024-10-01	262	5	fE|~@]c@
+P	2024		262	\b@]c@
+T	T3-FS	T3	3		147	5	xf@dm@AY
+P			147	@XAY
+T	T3-FT	T3	0	2024-10-01	130	5	ie@uj@OQ
+P	2024		130	NPOQ
+T	T3-FU	T3	3		37	5	_bAaaADA
+P			37	E@DA
+T	T3-FV	T3	0	2023-02-12	3959	5	tlA`LgBqCoDm@sDoDwAN fOnI@?
+P	2023		3960	XNM@yAsCoDm@kAo@GU_BiBwAN fOnI@?
+T	T3-FW	T3	3		41	5	dm@|w@BG
+P			41	CFBG
+T	T3-FX	T3	3		48	5	DXFC
+P			48	GBFC
+T	T3-FY	T3	0	2023-02-12	19	5	k~@_qACA
+P	2023		19	B@CA
+T	T3-FZ	T3	3		38	5	z}@bo@CC
+P			38	BBCC
+T	T3-GA	T3	3		49	5	qvBcl@BI
+P			49	CHBI
+T	T3-GB	T3	0	2023-02-12	106	5	vw@qBHG
+P	2023		106	IFHG
+T	T3-GC	T3	3		5667	5	jyApeBaFeAeJsLqElA fWdL?@ }FwB?A mCkD@?
+P			5667	zKhHaFeAeJsLqElA fWdL?@ }FwB?A mCkD@?
+T	T3-GD	T3	0	2024-10-01	40	5	kjA_CDE
+P	2024		40	EDDE
+T	T3-GE	T3	3		35	5	n~@XAE
+P			35	@DAE
+T	T3-GF	T3	0	2023-02-12	274	5	cw@ibACq@
+P	2023		274	Bp@Cq@
+T	T3-GG	T3	0	2023-02-12	1944	5	yGkV{I[
+P	2023		1944	zIZ{I[
+T	T3-GH	T3	3		108	5	hv@flCOI
+P			108	NHOI
+T	T3-GI	T3	0	2023-02-12	66	5	ol@ekC?G CBBC
+P	2023		66	?F?G CBBC
+T	T3-GJ	T3	0	2023-02-12	269	5	lAu@Yg@
+P	2023		269	Xf@OKI[
+T	T3-GK	T3	3		108	5	~kAx|BNK
+P			108	OJNK
+T	T3-GL	T3	3		138	5	edCwuBAW
+P			138	@VAW
+T	T3-GM	T3	0	2023-02-12	501	5	ls@{Af@sA
+P	2023		501	g@rAf@sA
+T	T3-GN	T3	0	2023-02-12	1015	5	tCr@Vs@fAb@ sBy@j@T
+P	2023		1015	Wr@Vs@fAb@ sBy@j@T
+T	T3-GO	T3	3		152	5	vbAh{AF[
+P			152	GZF[
+T	T3-GP	T3	3		30	5	{W|t@CC
+P			30	BBCC
+T	T3-GQ	T3	0	2023-02-12	40	5	mo@gpC@E
+P	2023		40	AD@E
+T	T3-GR	T3	3		78	5	~gAvy@HI
+P			78	IHHI
+T	T3-GS	T3	3		292	5	Rdd@b@e@
+P			292	c@d@b@e@
+T	T3-GT	T3	0	2023-02-12	149	5	uaAw{AWK
+P	2023		149	VJWK
+T	T3-GU	T3	3		198	5	paAvy@Fc@
+P			198	Gb@Fc@
+T	T3-GV	T3	3		328	5	gjC}w@E{@
+P			328	Dz@E{@
+T	T3-GW	T3	0	2023-02-12	916	5	xqApb@u@{@l@gA
+P			38	FbCCE
+P	2023		877	??q@u@l@gA
+T	T3-GX	T3	3		28	5	jy@lZCE
+P			28	BDCE
+T	T3-GY	T3	3	2023-02-12	1263	5	kx@wYb@a@t@RjAsA
+P			680	mArAlAw@?[
+P	2023		583	eD`Bb@a@r@R
+T	T3-GZ	T3	3	2023-02-12	706	5	u_@e\lBE
+P			113	wADU?
+P	2023		593	T?tAJ@Q
+T	T3-HA	T3	3	2023-02-12	1710	5	rH{Dd@yB Lz@@I a@@hDC c@C?@
+P			1226	yCjAd@yB Lz@@I a@@x@DXG
+P	2023		484	??XEz@B c@C?@
+T	T3-HB	T3	0	2023-02-12	126	5	r@YSG
+P	2023		126	RFSG
+T	T3-HC	T3	3		199	5	bdA~bA\Q
+P			199	]P\Q
+T	T3-HD	T3	3		86	5	GcANA
+P			86	O@NA
+T	T3-HE	T3	3	2023-02-12	1147	5	ifAg_Ag@gE
+P			843	l@pCm@}B?S
+P	2023		304	f@fEDu@
+T	T3-HF	T3	0	2023-02-12	166	5	`Hji@RU
+P	2023		166	STRU
+T	T3-HG	T3	3		272	5	`{@dPo@K
+P			272	n@Jo@K
+T	T3-HH	T3	0	2023-02-12	77	5	iy@gOFA
+P	2023		77	G@FA
+T	T3-HI	T3	0	2024-10-01	104	5	{Jdl@AS
+P	2024		104	@RAS
+T	T3-HJ	T3	3		2365	5	~aAb^zEgJ
+P			2365	{EfJRAfEeJ
+T	T3-HK	T3	3		74	5	e|@g~@F?
+P			74	G?F?
+T	T3-HL	T3	3		88	5	g\e`@MA
+P			88	L@MA
+T	T3-HM	T3	3		165	5	np@|uCUS
+P			165	TRUS
+T	T3-HN	T3	3		238	5	s`@q}CLe@ AF?A
+P			238	K^Le@ AF?A
+T	T3-HO	T3	3		11	5	~dAdv@@?
+P			11	A?@?
+T	T3-HP	T3	0	2024-10-01	49	5	qeAx\@G
+P	2024		49	AF@G
+T	T3-HQ	T3	0	2024-10-01	52	5	s@b@AI
+P	2024		52	@HAI
+T	T3-HR	T3	3		379	5	xdAs]~@G
+P			379	_AFHDt@M
+T	T3-HS	T3	3		140	5	l@xORO
+P			140	SNRO
+T	T3-HT	T3	3		1454	5	ehA}dAX}BmAwA
+P			1454	r@tEQGj@uBmAwA
+T	T3-HU	T3	3		87	5	nsA|tCME
+P			87	LDME
+T	T3-HV	T3	3		303	5	khAijCd@g@
+P			303	e@f@d@g@
+T	T3-HW	T3	3		29	5	j{@vq@BC
+P			29	CBBC
+T	T3-HX	T3	3		81	5	}b@jjBAM
+P			81	@LAM
+T	T3-HY	T3	3		138	5	oWc{CNU
+P			138	OTNU
+T	T3-HZ	T3	0	2024-10-01	49	5	iNh`BGA
+P	2024		49	F@GA
+T	T3-IA	T3	0	2024-10-01	49	5	vB}J@I
+P	2024		49	AH@I
+T	T3-IB	T3	3		90	5	wl@ew@GM
+P			90	FLGM
+T	T3-IC	T3	3		281	5	m\}\Xe@
+P			281	Yd@CI\[
+T	T3-ID	T3	3		46	5	`oC|p@DE
+P			46	EDDE
+T	T3-IE	T3	3		361	5	rI~{@t@c@
+P			361	u@b@t@c@
+T	T3-IF	T3	3		160	5	yBeb@ZA
+P			160	[@ZA
+T	T3-IG	T3	3		315	5	qq@byAMy@
+P			315	Lx@My@
+T	T3-IH	T3	0	2024-10-01	49	5	eb@mu@@G
+P	2024		49	AF@G
+T	T3-II	T3	3		4	5	duAm[@?
+P			4	A?@?
+T	T3-IJ	T3	3		46	5	wG|b@FA
+P			46	G@FA
+T	T3-IK	T3	3		128	5	qoCauBT?
+P			128	U?T?
+T	T3-IL	T3	3		4146	5	}EmASE |AsAsApA zDmBgBZ rE{@qB`@ cEg@zAfA eAkBUb@ dByAoAr@ dB_AUJ Yu@B`A
+P			4146	w@hFIGI@ |AsAy@dAYJ zDmBgBZ rE{@g@IkAP@X cEg@TTj@TXZ eAkBUb@ dByAcA`@KP dB_AUJ Yu@B`A
+T	T3-IM	T3	2	2017-12-13	4316	5	h}AsBgKcJ xIbETU eBOg@h@ aBaE{@j@ hFzEl@iA
+P			2831	wA`@kF}EWG xIbETU eBOg@h@ aBaE{@j@
+P	2017		1485	bIpHcC}B vAa@m@hA
+T	T3-IN	T3	3		143	5	k}A|KSO
+P			143	RNSO
+T	T3-IO	T3	3		49	5	fbD|vAGC
+P			49	FBGC
+T	T3-IP	T3	3		1392	5	xGv^xBmD c@MPb@
+P			1392	gBvCxBmD c@MPb@
+T	T3-IQ	T3	3		99	5	cAbDQE
+P			99	PDQE
+T	T3-IR	T3	3		120	5	yKq^TA
+P			120	U@TA
+T	T3-IS	T3	3		542	5	FN{A?
+P			542	zA?QJiAK
+T	T3-IT	T3	2	2017-12-13	3947	5	sd@q_BoINsIwB pTfBM?
+P			3280	??oINaFoA ~P~@M?
+P	2017		667	qP_AqBg@
+T	T3-IU	T3	3		93	5	l~@jeBDO
+P			93	ENDO
+T	T3-IV	T3	3		351	5	s`DytAw@]
+P			351	v@\w@]
+T	T3-IW	T3	3		18	5	|CqD?C
+P			18	?B?C
+T	T3-IX	T3	3		101	5	pxCjyAQA
+P			101	P@QA
+T	T3-IY	T3	3		129	5	cv@bsAT?
+P			129	U?T?
+T	T3-IZ	T3	3		253	5	ifB{eDg@S
+P			253	f@Rg@S
+T	T3-JA	T3	3		17100	5	`cExjCgEwBaEoFk@sEuDwJ |DhS`@}@ pTsDF}EeBuA vG|AwAt@yAk@ zM_GgHtF `JsJVb@yAxA wd@jL`QiHx@T
+P			17100	eEnYgEwBaEoFk@sEeDcJOS |DhS`@}@ pTsDF}EmAuAWC?B vG|AWXEPy@HyAk@ zM_GgHtF `JsJVb@yAxA wd@jL`QiHx@T
+T	T3-JB	T3	3		1062	5	m}A}|A~@wD
+P			1062	_AvD~@wD
+T	T3-JC	T3	3		15	5	hz@h`A?A
+P			15	?@?A
+T	T3-JD	T3	3		100	5	eeDwvAMM
+P			100	LLMM
+T	T3-JE	T3	3		92	5	x~AsIMG
+P			92	LFMG
+T	T3-JF	T3	3		308	5	iaBnVc@k@
+P			308	b@j@c@k@
+T	T3-JG	T3	3		510	5	loBjKfA{@
+P			510	gAz@fA{@
+T	T3-JH	T3	3		94	5	l_An_BFM
+P			94	GLFM
+T	T3-JI	T3	3		182	5	ymAc`CVW
+P			182	WVVW
+T	T3-JJ	T3	3		116	5	tkAz`CKO
+P			116	JNKO
+T	T3-JK	T3	3		377	5	egAw`Cm@q@
+P			377	l@p@m@q@
+T	T3-JL	T3	3		669	5	}JvCfBaA
+P			669	gB`AfBaA
+T	T3-JM	T3	3		13	5	???A
+P			13	?@?A
+T	T3-JN	T3	3		9170	5	qjBjo@cCuE lDpBDu@iBZ vCg@m@J vEoBeAfAcBZ gCyGwAbF fDkI|HiG eKbDtAvA xHsDm@m@ kJvIpAgB
+P			9170	e@fPKo@_AmBu@}@AD lDpBDu@iBZ vCg@m@J vEoBeAfAcBZ gCyGwAbF fDkInBkBlE}C eKbDtAvA xHsDm@m@ kJvIPk@~@{@
+T	T3-JO	T3	3		48	5	lkBq^DE
+P			48	EDDE
+T	T3-JP	T3	3		30	5	_BFBC
+P			30	CBBC
+T	T3-JQ	T3	3		49	5	wTfvBHA
+P			49	I@HA
+T	T3-JR	T3	3		106	5	v]ixBMM
+P			106	LLMM
+T	T3-JS	T3	3		84	5	zFpIDM
+P			84	ELDM
+T	T3-JT	T3	3		138	5	gfBp@LU
+P			138	MTLU
+T	T3-JU	T3	3		111	5	eHnPMK
+P			111	LJMK
+T	T3-JV	T3	3		56	5	dmBhN?I
+P			56	?H?I
+T	T3-JW	T3	3		222	5	_qBaRb@S
+P			222	c@Rb@S
+T	T3-JX	T3	3		25	5	n~AeQ@A
+P			25	A@@A
+T	T3-JY	T3	3		1379	5	jUdj@AsB|AaB
+P			1379	{AtEAsB|AaB
+T	T3-JZ	T3	3		141	5	gWyj@RM
+P			141	SLRM
+T	T3-KA	T3	3		156	5	sCFYI
+P			156	XHYI
+T	T3-KB	T3	3		2195	5	f[hx@xC_I oAlGi@M
+P			2195	_@~@xC_I oAlGi@M
+T	T3-KC	T3	3		3367	5	uD_}@sMyJ
+P			3367	rMxJsFoEaFyC@O
+T	T3-KD	T3	3		70	5	fPzdA?K
+P			70	?J?K
+T	T3-KE	T3	3		114	5	a|BuLMO
+P			114	LNMO
+T	T3-KF	T3	3		227	5	bfCxLb@U
+P			227	c@Tb@U
+T	T3-KG	T3	3		2076	5	WyW]{J
+P			2076	\zJMsAOgH
+T	T3-KH	T3	3		19	5	L?@?
+P			19	A?@?
+T	T3-KI	T3	3		108	5	ihCjSMM
+P			108	LLMM
+T	T3-KJ	T3	3		48	5	DzEF?
+P			48	G?F?
+T	T3-KK	T3	3		117	5	ddEltBHS
+P			117	IRHS
+T	T3-KL	T3	3		1426	5	o`Ay{AM}Dm@o@
+P			1426	z@lFNk@]qCm@o@
+T	T3-KM	T3	3		1817	5	sdCy^|@sA^aF
+P			1817	}AtH|@sA^aF
+T	T3-KN	T3	3		2667	5	doCje@vGkK
+P			2667	wGjKvGkK
+T	T3-KO	T3	3		34	5	sUjO@E
+P			34	AD@E
+T	T3-KP	T3	3		48	5	yg@tv@CG
+P			48	BFCG
+T	T3-KQ	T3	3		4563	5	obBqlAxA_@oAqFzFuK
+P			4563	eGfTxA_@{@{BW}ABWzFuK
+T	T3-KR	T3	3		31	5	CC?E
+P			31	?D?E
+T	T3-KS	T3	3		89	5	[ba@JK
+P			89	KJJK
+T	T3-KT	T3	3		5706	5	qIgStBgHlDyD mU~IvDRrFfB |@eC?@
+P			5706	_AhCh@mAjAyElDyD mU~ITCjBf@t@O|B`AtBd@ |@eC?@
+T	T3-KU	T3	3		1498	5	xxClg@jDsE
+P			1498	kDrEjDsE
+T	T3-KV	T3	3		125	5	uHw]CW
+P			125	BVCW
+T	T3-KW	T3	3		155	5	oiCyAYM
+P			155	XLYM
+T	T3-KX	T3	3		84	5	ldCri@BM
+P			84	CLBM
+T	T3-KY	T3	3		97	5	}iCut@HM
+P			97	ILHM
+T	T3-KZ	T3	3		6339	5	KWfDq@pGTz@gDSiA{GeI tF|PAE
+P			6339	yLZbAi@bBGpGTz@gDSiAgEqFsAsA tF|PAE
+T	T3-LA	T3	3		17157	5	zg@dG|EUfCiBnI_JtC}@|DuHbJqAlDx@nFUfFyD ay@j`@?A lTaKSiC ~EdAuBt@wAM fEsA{B}D
+P			17157	i\`U|EUfCiB~@iAfGcGFQtC}@fBuDnAeBDYb@AjDcAbA@nAMlDx@hDGj@UXFxEcDLU ay@j`@?A lTaKSiC ~EdAuBt@wAM fEsADQaCkD
+T	T3-LB	T3	3		209	5	gtAxMZY
+P			209	[XZY
+T	T3-LC	T3	3		1151	5	ryCzv@bCaD
+P			1151	cC`DbCaD
+T	T3-LD	T3	3		67	5	k~Cmj@GI
+P			67	FHGI
+T	T3-LE	T3	3		216	5	`CjITa@
+P			216	U`@Ta@
+T	T3-LF	T3	3		101	5	~pBij@?Q
+P			101	?P?Q
+T	T3-LG	T3	3		979	5	~e@|rAlBkC
+P			979	mBjClBkC
+T	T3-LH	T3	3		27	5	g|Cus@AC
+P			27	@BAC
+T	T3-LI	T3	3		112	5	rD~m@ES
+P			112	DRES
+T	T3-LJ	T3	3		108	5	|AeDBS
+P			108	CRBS
+T	T3-LK	T3	1	2022-11-17	392	5	j`CehAfAA
+P	2022	c	392	gA@fAA
+T	T3-LL	T3	3		106	5	odCpkABS
+P			106	CRBS
+T	T3-LM	T3	3		61	5	mKw_@IC
+P			61	HBIC
+T	T3-LN	T3	3		44	5	n|EfsCEC
+P			44	DBEC
+T	T3-LO	T3	3		46	5	}cAweBDE
+P			46	EDDE
+T	T3-LP	T3	3		7016	5	~HwTlKeDvJgLD_D kRjTA? zNaRnBD
+P			7016	iW|SV?tJeDnCuChCwD|AyAD_D kRjTA? zNaRnBD
+T	T3-LQ	T3	1	2022-11-17	161	5	{j@ml@ZA
+P	2022	c	161	[@ZA
+T	T3-LR	T3	3		126	5	zQ`aAHM @@?A
+P			126	KLHM @@?A
+T	T3-LS	T3	3		57	5	qbDyc@?K
+P			57	?J?K
+T	T3-LT	T3	3		902	5	|{Ct_AbAeBWa@
+P			902	k@fCbAeBWa@
+T	T3-LU	T3	3		95	5	{rCew@FO
+P			95	GNFO
+T	T3-LV	T3	3		4	5	iJuB?A
+P			4	?@?A
+T	T3-LW	T3	3		1613	5	xgD~z@z@}G
+P			1613	{@|GHOZoFT]
+T	T3-LX	T3	3		29	5	yHlI@C
+P			29	AB@C
+T	T3-LY	T3	3		29	5	c`Dci@CA
+P			29	B@CA
+T	T3-LZ	T3	3		276	5	phDbj@^g@
+P			276	_@f@^g@
+T	T3-MA	T3	3		154	5	otCyQVQ
+P			154	WPVQ
+T	T3-MB	T3	3		82	5	t{Agw@CM
+P			82	BLCM
+T	T3-MC	T3	3		8043	5	`mAp_AaCgBg@ZoEs@sCkDaFgC dd@nH}Hc@gD`C
+P			8043	n@d@aCgBg@ZoEs@sCkDaFgC dd@nH}Hc@oCzBWD
+T	T3-MD	T3	3		134	5	i_EuXQQ
+P			134	PPQQ
+T	T3-ME	T3	3		3086	5	|aDpt@zJ}K
+P			3086	{J|KhEoEpDmE
+T	T3-MF	T3	3		34	5	ymD_f@@C
+P			34	AB@C
+T	T3-MG	T3	3		2026	5	vrF~}B}HoD
+P			2026	|HnDc@IkFuCm@O
+T	T3-MH	T3	3		81	5	yx@opAFK
+P			81	GJFK
+T	T3-MI	T3	3		164	5	izCkx@M[
+P			164	LZM[
+T	T3-MJ	T3	3		81	5	dtEflC@M
+P			81	AL@M
+T	T3-MK	T3	3		79	5	xDuEGK
+P			79	FJGK
+T	T3-ML	T3	3		276	5	w~@khA\e@
+P			276	]d@\e@
+T	T3-MM	T3	1	2022-11-17	340	5	cm@c}AXw@
+P	2022	c	340	Yv@Xw@
+T	T3-MN	T3	1	2022-11-17	238	5	rUyEj@?
+P	2022	c	238	k@?j@?
+T	T3-MO	T3	3		2398	5	}eD~j@|@mCvDuE
+P			2398	uFbJ|@mCvDuE
+T	T3-MP	T3	3		40	5	lrDdfADE
+P			40	EDDE
+T	T3-MQ	T3	1	2022-11-17	510	5	ym@s~AF}A
+P	2022	c	510	G|AF}A
+T	T3-MR	T3	3		5784	5	ceClYbB{CfAeOsDuG vDfHE? Kk@?@ ]kA?@ }@cBA@
+P			5784	_AdZj@wAv@cA^eEVe@NyGa@y@OcAaCwC vDfHE? Kk@?@ ]kA?@ }@cBA@
+T	T3-MS	T3	1	2022-11-17	135	5	heCfANQ
+P	2022	c	135	OPNQ
+T	T3-MT	T3	1	2022-11-17	506	5	zY_EiAw@
+P	2022	c	506	hAv@iAw@
+T	T3-MU	T3	3		48	5	oxCvfAFA
+P			48	G@FA
+T	T3-MV	T3	3		31	5	gFmg@B?
+P			31	C?B?
+T	T3-MW	T3	1	2022-11-17	52	5	n`D_`@IA
+P	2022	c	52	H@IA
+T	T3-MX	T3	3		482	5	dXhmBeAs@
+P			482	dAr@eAs@
+T	T3-MY	T3	3		190	5	y|CubA\O
+P			190	]N\O
+T	T3-MZ	T3	1	2022-11-17	138	5	xhB{^RO
+P	2022	c	138	SNRO
+T	T3-NA	T3	3		239	5	~p@|dBXc@
+P			239	Yb@Xc@
+T	T3-NB	T3	1	2022-11-17	16	5	uu@caB?C
+P	2022	c	16	?B?C
+T	T3-NC	T3	3	2022-11-17	15103	5	l^kJqCkD _R]tBsAh@aBkEcHyCCaGjDuDS}EgL n_@jV`B`ChKM k^uNAA tJaCkAv@ vElM}@qA
+P			5832	kS{EiBUuAuBm@oAwAaF nOhJ{@\}@r@oA@ |KkDmAAgCvA
+P	2022		5652	nQpNaAaAO{@}@eAl@}Ao@wA{CkEkAA vBzMtBsA mAsLkAv@
+P	2022	c	3619	tWxSWOyB{C }IlARRxA@fAJfF[
+T	T3-ND	T3	1	2022-11-17	60	5	dCdFGE
+P	2022	c	60	FDGE
+T	T3-NE	T3	3		529	5	|QvjBbAg@ oAb@LB
+P			529	A?p@OPW oAb@LB
+T	T3-NF	T3	3		289	5	jBEVe@ ITEE
+P			289	GTVe@ ITEE
+T	T3-NG	T3	1	2022-11-17	53	5	wUyoBGE
+P	2022	c	53	FDGE
+T	T3-NH	T3	1	2022-11-17	102	5	ka@pLFO
+P	2022	c	102	GNFO
+T	T3-NI	T3	1	2022-11-17	57	5	GIIC
+P	2022	c	57	HBIC
+T	T3-NJ	T3	3		8578	5	xiApmBqKkEoB}B fYxEeInB bIqBz@Q OBA? sYmD~MmB kGt@?B
+P			8578	pG`JODwEqCiD_Aa@cAmAy@ fYxEeInB bIqBz@Q OBA? sYmDPUVDtL}A kGt@?B
+T	T3-NK	T3	3		1477	5	iH|Br@kA B`A^i@ PTLQ IPoA}@
+P			1477	]zAr@kA B`A^i@ PTLQ IPoA}@
+T	T3-NL	T3	1	2022-11-17	3042	5	_aAmsAlGeN
+P	2022		530	mGdNn@sA
+P	2022	c	2513	??xDaIb@oA
+T	T3-NM	T3	1	2022-11-17	59	5	h^kLH?
+P	2022	c	59	I?H?
+T	T3-NN	T3	1	2022-11-17	13	5	zBq@AA
+P	2022	c	13	@@AA
+T	T3-NO	T3	3		326	5	rOjrBr@A
+P			326	s@@r@A
+T	T3-NP	T3	3		114	5	k|CeiALM
+P			114	MLLM
+T	T3-NQ	T3	3		36	5	p{CniAE?
+P			36	D?E?
+T	T3-NR	T3	1	2022-11-17	359	5	kP{rBe@u@
+P	2022	c	359	d@t@e@u@
+T	T3-NS	T3	1	2022-11-17	4784	5	hFpG`@a@k@wBnFkD _JzEnBo@ wC}@OO hIe@?A QgCn@rB mGnCiAcA
+P	2022		1525	vG]nBoA mAv@?A QgCK`@z@pA
+P	2022	c	3260	uDbH`@a@k@wB~B{A oFjC`@i@LD~@K wC}@OO xArAiAcA
+T	T3-NT	T3	1	2022-11-17	30	5	Ca@CA
+P	2022	c	30	B@CA
+T	T3-NU	T3	1	2022-11-17	111	5	Bv@BS
+P	2022	c	111	CRBS
+T	T3-NV	T3	3		67	5	~RjuBEI
+P			67	DHEI
+T	T3-NW	T3	3		18	5	}mAkvA?A
+P			18	?@?A
+T	T3-NX	T3	3		36	5	fpAr|@?G
+P			36	?F?G
+T	T3-NY	T3	1	2022-11-17	140	5	kWy|ASO
+P	2022	c	140	RNSO
+T	T3-NZ	T3	1	2022-11-17	294	5	{Cd@`@i@
+P	2022	c	294	a@h@`@i@
+T	T3-OA	T3	3		3577	5	{fDxd@pE{MjBx@
+P			3577	}H`LvAgDPiBJ_@zAiDrAZV\
+T	T3-OB	T3	1	2022-11-17	82	5	r{CyVII
+P	2022	c	82	HHII
+T	T3-OC	T3	3		77	5	aeDxbALA
+P			77	M@LA
+T	T3-OD	T3	1	2022-11-17	223	5	|mDmdA_@U
+P	2022	c	223	^T_@U
+T	T3-OE	T3	3		84	5	i`Dh_@EM
+P			84	DLEM
+T	T3-OF	T3	1	2022-11-17	46	5	n`D{^EA
+P	2022	c	46	D@EA
+T	T3-OG	T3	3		98	5	`At}BJK
+P			98	KJJK
+T	T3-OH	T3	3		680	5	zYaG`@kB
+P			680	a@jBIm@j@}@
+T	T3-OI	T3	1	2022-11-17	117	5	m\wiBNM
+P	2022	c	117	OLNM
+T	T3-OJ	T3	1	2022-11-17	196	5	`@eHYW
+P	2022	c	196	XVYW
+T	T3-OK	T3	3		6107	5	ksD`g@u@mRgBsGaByB rEfYNH gAmPA? e@gALA
+P			6107	|B`X_@qCNaBMkC?iCWcBg@qA_AaEy@oAg@i@ rEfYNH gAmPA? e@gALA
+T	T3-OL	T3	1	2022-11-17	653	5	z{DsLoBa@
+P	2022	c	653	nB`@aBWMI
+T	T3-OM	T3	3		22	5	isCzh@BC
+P			22	CBBC
+T	T3-ON	T3	3		66	5	rkDt_@KC
+P			66	JBKC
+T	T3-OO	T3	3		2484	5	wvE{VzE_G^iB
+P			2484	{FhJjB}AbAuBj@k@^iB
+T	T3-OP	T3	1	2022-11-17	30	5	b{Dq_@AC
+P	2022	c	30	@BAC
+T	T3-OQ	T3	3		36	5	jVjmBBE
+P			36	CDBE
+T	T3-OR	T3	1	2022-11-17	2022	5	qe@uqB|CKfDgB
+P	2022		1563	eIrBNKlC?bAcATK
+P	2022	c	458	??x@YR@
+T	T3-OS	T3	1	2022-11-17	78	5	zBrKJC
+P	2022	c	78	KBJC
+T	T3-OT	T3	3		81	5	_yCx[II
+P			81	HHII
+T	T3-OU	T3	3		96	5	wUkDQ?
+P			96	P?Q?
+T	T3-OV	T3	1	2022-11-17	49	5	doD{c@EC
+P	2022	c	49	DBEC
+T	T3-OW	T3	1	2022-11-17	147	5	rBtGOS
+P	2022	c	147	NROS
+T	T3-OX	T3	3		22	5	ggDxUC?
+P			22	B?C?
+T	T3-OY	T3	3		2940	5	aVtI`AqATqGGwAq@a@
+P			2940	]|M`AqAB[Gu@X_EGwAYa@W?
+T	T3-OZ	T3	3		88	5	f@nQKI
+P			88	JHKI
+T	T3-PA	T3	1	2022-11-17	101	5	ryDk[JM
+P	2022		101	KLJM
+T	T3-PB	T3	1	2022-11-17	169	5	nDyFWS
+P	2022		169	VRWS
+T	T3-PC	T3	1	2022-11-17	369	5	_AeHy@]
+P	2022		369	x@\UEc@W
+T	T3-PD	T3	3		269	5	s~D`l@Hq@
+P			269	Ip@Hq@
+T	T3-PE	T3	1	2022-11-17	74	5	|vDud@IG
+P	2022		74	HFIG
+T	T3-PF	T3	3		129	5	q}CjXT?
+P			129	U?T?
+T	T3-PG	T3	3		37	5	`dEd|AD?
+P			37	E?D?
+T	T3-PH	T3	3		4181	5	kjBqjA{CqDkCcI\iD
+P			4181	hG~SkBmBo@cAkCcI\iD
+T	T3-PI	T3	3		19	5	vnBfoAAA
+P			19	@@AA
+T	T3-PJ	T3	1	2022-11-17	107	5	enAw_AFM GJ@? AA?B
+P	2022		107	??FM GJ@? AA?B
+T	T3-PK	T3	3		52	5	ckChA?G
+P			52	?F?G
+T	T3-PL	T3	3		26	5	xWoN@C
+P			26	AB@C
+T	T3-PM	T3	1	2022-11-17	147	5	jhDi[YE
+P	2022		147	XDYE
+T	T3-PN	T3	1	2022-11-17	94	5	lClFLG
+P	2022		94	MFLG
+T	T3-PO	T3	1	2022-11-17	47	5	aa@d@FC
+P	2022		47	GBFC
+T	T3-PP	T3	3		168	5	tq@p~@?_@
+P			168	?^?_@
+T	T3-PQ	T3	3		864	5	bKbcA_C{A
+P			864	~BzA_C{A
+T	T3-PR	T3	3		286	5	qkEqfBq@I
+P			286	p@Hq@I
+T	T3-PS	T3	3		209	5	tE{D\W
+P			209	]V\W
+T	T3-PT	T3	1	2022-11-17	230	5	zgDm]c@W
+P	2022		230	b@Vc@W
+T	T3-PU	T3	3		268	5	g_E~w@m@O
+P			268	l@Nm@O
+T	T3-PV	T3	3		167	5	~rBNUS
+P			167	TRUS
+T	T3-PW	T3	3	2022-11-17	22982	5	j`Akr@hGuEuAo@IuC [pJUs@ uBQl@Sl@v@ sIaApCuBnBlC tDa@EE pGAmBsBoAIg@kBXM gHbF@? xIItBG uTwAvDyDzBhC|BcA sMnAsC}A `LABC lGM@`@ iTiB\BQpA fCiBp@~@pAGb@d@ oM_CEqD|Et@e@tD aFaBl@J _AOPB gEOEcCeBC ~EfAAmAwBH vBh@@? gDe@?A vDKlBR b[dPk@W qOkAe@_@ _LuLPA
+P			14683	|ThS?A CUaB{BqCtB nEe@@? eFiBvDyDb@f@p@XHPKHf@j@f@a@ }Jl@_CgBSH `LABC yKuA\BQpA fCiBBPl@l@pAGb@d@ oM_CEqD|Et@e@tD aFaBl@J _AOPB gEOEcCeBC ~EfAAmAwBH vBh@@? gDe@?A vDKlBR dI`Me@_@ _LuLPA
+P	2022		8299	zTxVvB}AV_@xBwAuAo@[oAPeA [pJUs@ uBSl@Ql@v@ _B{@LP tDa@EE pGAmBsBoAIg@kBXM r@xEvAN\W yIiDd@a@n@? jAa@@`@ ~@rEYEQQ
+T	T3-PX	T3	1	2022-11-17	84	5	~EdKDO
+P	2022		84	ENDO
+T	T3-PY	T3	1	2022-11-17	108	5	oA_IOK
+P	2022		108	NJOK
+T	T3-PZ	T3	3		1365	5	kgE|t@hB_F
+P			1365	iB~EhB_F
+T	T3-QA	T3	1	2022-11-17	92	5	lfEgn@MI
+P	2022		92	LHMI
+T	T3-QB	T3	1	2022-11-17	48	5	yOjLDC
+P	2022		48	EBDC
+T	T3-QC	T3	3		65	5	fq@ncCIE
+P			65	HDIE
+T	T3-QD	T3	3		15	5	gmEwhBA?
+P			15	@?A?
+T	T3-QE	T3	3		92	5	jaBnTBQ
+P			92	CPBQ
+T	T3-QF	T3	3		154	5	qzBt@PU
+P			154	QTPU
+T	T3-QG	T3	3		803	5	jmBsJpByA
+P			803	qBxApByA
+T	T3-QH	T3	1	2022-11-17	210	5	ttAyq@d@A
+P	2022		210	e@@d@A
+T	T3-QI	T3	3		3054	5	umEpq@KaChCgE cFnCxAv@ E}Cn@p@
+P			3054	]lFKaCh@kBbAiAZQ cFnCxAv@ E}Cn@p@
+T	T3-QJ	T3	1	2022-11-17	83	5	~fDuWKG
+P	2022		83	JFKG
+T	T3-QK	T3	1	2022-11-17	33	5	|\mMBC
+P	2022		33	CBBC
+T	T3-QL	T3	1	2022-11-17	150	5	i^pNTQ
+P	2022		150	UPTQ
+T	T3-QM	T3	1	2022-11-17	106	5	te@sQR?
+P	2022		106	S?R?
+T	T3-QN	T3	3		91	5	iqD|]KK
+P			91	JJKK
+T	T3-QO	T3	3		672	5	k]tVByB
+P			672	CxBEWHaB
+T	T3-QP	T3	3		122	5	l{B`QCU
+P			122	BTCU
+T	T3-QQ	T3	1	2022-11-17	494	5	brAsdAqAa@
+P	2022		494	pA`@qAa@
+T	T3-QR	T3	1	2022-11-17	69	5	rALGG
+P	2022		69	FFGG
+T	T3-QS	T3	3		4954	5	bp@viDkDiFoE_Q fDnMA? gDoM@?
+P			4954	zJhXkDiFoE_Q fDnMA? gDoM@?
+T	T3-QT	T3	3		48	5	yqFw_BEE
+P			48	DDEE
+T	T3-QU	T3	3		52	5	hKkFEA
+P			52	D@EA
+T	T3-QV	T3	1	2022-11-17	447	5	rwDq^s@_A
+P	2022		447	r@~@s@_A
+T	T3-QW	T3	1	2022-11-17	18	5	[H@A
+P	2022		18	A@@A
+T	T3-QX	T3	3		3205	5	~p@dhCzCiH SQgDiC zDzCSQ
+P			3205	gCzHCI~C_H SQgDiC zDzCSQ
+T	T3-QY	T3	3		2032	5	mjFocBvDyB _@{B@nC
+P			2032	yCdBj@i@jCoA _@{BKn@@bAJZ
+T	T3-QZ	T3	3		57	5	zaFlpBFC
+P			57	GBFC
+T	T3-RA	T3	1	2022-11-17	190	5	yjA}eCXW
+P	2022		190	YVXW
+T	T3-RB	T3	1	2022-11-17	228	5	`e@gLg@?
+P	2022		228	f@?g@?
+T	T3-RC	T3	1	2022-11-17	18	5	wHvB@?
+P	2022		18	A?@?
+T	T3-RD	T3	3		103	5	ggE|n@AQ
+P			103	@PAQ
+T	T3-RE	T3	1	2022-11-17	100	5	xfEgo@@Q
+P	2022		100	AP@Q
+T	T3-RF	T3	3	2022-11-17	9621	5	qEi@_CgB |OjACs@vBX ?A?@ qFYcM{A |OrA^F wASYC Y?@E kO_AhCjA xPmC_Az@E|A yF{CbBx@m@z@ xDuBkCx@ lC~Aw@K aMKHu@
+P			8404	tBdD_CoB?F ~KVFWaAMiKu@ |OrAqAO xAFDsAp@y@LA yDfC@E kO_ANXfB`APO xFoCt@Bl@t@m@z@ xDuBaAh@aADGH kJfAHu@
+P	2022		1217	rOhCCs@vBX ?A?@ wCa@^F WO?H
+T	T3-RG	T3	1	2022-11-17	194	5	~DdD?c@
+P	2022		194	?b@?c@
+T	T3-RH	T3	3		30	5	{mAfeAE?
+P			30	D?E?
+T	T3-RI	T3	3		4258	5	_a@cKjEs@`NuG
+P			4258	mThIxBWpA[vEmBhGgD
+T	T3-RJ	T3	3		142	5	w{BlFA[
+P			142	@ZA[
+T	T3-RK	T3	1	2022-11-17	187	5	tgE_j@O]
+P	2022		187	N\O]
+T	T3-RL	T3	1	2022-11-17	52	5	dNeNHA
+P	2022		52	I@HA
+T	T3-RM	T3	3		130	5	}nE|q@JS
+P			130	KRJS
+T	T3-RN	T3	1	2022-11-17	153	5	x`E{^GY
+P	2022		153	FXGY
+T	T3-RO	T3	1	2022-11-17	70	5	_YoBJC
+P	2022		70	KBJC
+T	T3-RP	T3	1	2022-11-17	41	5	nY}F@G
+P	2022		41	AF@G
+T	T3-RQ	T3	1	2022-11-17	40	5	pNPFC
+P	2022		40	GBFC
+T	T3-RR	T3	3		121	5	o{Evs@UA
+P			121	T@UA
+T	T3-RS	T3	1	2022-11-17	426	5	x|Egs@ViA
+P	2022		424	WhAViA
+T	T3-RT	T3	1	2022-11-17	62	5	_CuEJ?
+P	2022		62	K?J?
+T	T3-RU	T3	3		151	5	}jE|r@VM
+P			151	WLVM
+T	T3-RV	T3	3		1511	5	nnBdf@wDkE
+P			1511	vDjEgCkCo@_A
+T	T3-RW	T3	3		26	5	rdBkiA?C
+P			26	?B?C
+T	T3-RX	T3	3		155	5	sI_ELY
+P			155	MXLY
+T	T3-RY	T3	3		104	5	oLnQPG
+P			104	QFPG
+T	T3-RZ	T3	3		33	5	CmBDA
+P			33	E@DA
+T	T3-SA	T3	3		37	5	~QgRGA
+P			37	F@GA
+T	T3-SB	T3	3		117	5	uCbFAU
+P			117	@TAU
+T	T3-SC	T3	3		904	5	nGx@DU gAoBfArB
+P			904	EPDU gAoBHXp@v@@ZHD
+T	T3-SD	T3	3		3797	5	b@hCfBgJ|@i@v@\fC{A qDbA?@
+P			3797	sDhKn@uBv@qF|@i@v@\dCcA@W qDbA?@
+T	T3-SE	T3	3		139	5	ep@|NTM
+P			139	ULTM
+T	T3-SF	T3	3		112	5	gtDds@PG
+P			112	QFPG
+T	T3-SG	T3	3		138	5	t~Eau@NQ
+P			138	OPNQ
+T	T3-SH	T3	3		48	5	iLiGBG
+P			48	CFBG
+T	T3-SI	T3	3		91	5	grAbm@BO
+P			91	CNBO
+T	T3-SJ	T3	3		48	5	leAg_@DC
+P			48	EBDC
+T	T3-SK	T3	3		2804	5	tRhBfD]l@qE sBrBlArA
+P			2804	oDf@zAYjAC`@i@C}@NiB sBrBBRhA~@
+T	T3-SL	T3	3		32	5	sCcTEA
+P			32	D@EA
+T	T3-SM	T3	3		57	5	yQfLDG
+P			57	EFDG
+T	T3-SN	T3	3		139	5	hHoDFW
+P			139	GVFW
+T	T3-SO	T3	3		280	5	{@Bh@[
+P			280	i@Zh@[
+T	T3-SP	T3	3		1917	5	bw@ppCqDmB bGpAeCC
+P			1917	r@^qDmB bGpAwBMMH
+T	T3-SQ	T3	3		186	5	md@seCP[
+P			186	QZP[
+T	T3-SR	T3	3		609	5	c}AfRfAqA _AbA@?
+P			609	ILfAqA _AbA@?
+T	T3-SS	T3	3		90	5	lzAkVN?
+P			90	O?N?
+T	T3-ST	T3	3		85	5	|`@nhCFM
+P			85	GLFM
+T	T3-SU	T3	3		50	5	_f@qlCCI
+P			50	BHCI
+T	T3-SV	T3	3		331	5	vElK`@q@
+P			331	a@p@`@q@
+T	T3-SW	T3	3		79	5	~]zzCLA
+P			79	M@LA
+T	T3-SX	T3	3		112	5	k|BgnCSA
+P			112	R@SA
+T	T3-SY	T3	3		1810	5	cC~Kr@mAXwDj@?
+P			1810	yBdG`@_@Pm@A}AZyAj@?
+T	T3-SZ	T3	3		1044	5	~cCfxB}A_D
+P			1044	|A~CaBkCBS
+T	T3-TA	T3	3		332	5	}x@anC?}@
+P			332	?|@?}@
+T	T3-TB	T3	3		50	5	~NsHCG
+P			50	BFCG
+T	T3-TC	T3	3		90	5	ss@|Y?O
+P			90	?N?O
+T	T3-TD	T3	3		138	5	_h@dhAMU
+P			138	LTMU
+T	T3-TE	T3	3		51	5	fmA{uAAG
+P			51	@FAG
+T	T3-TF	T3	3		77	5	bQiKKG
+P			77	JFKG
+T	T3-TG	T3	3		11675	5	va@rqEQ{F vJqDoBk@mFNcBkH`DiE f\~M_Ci@yGfA{E[i@l@ _JrDh@uD
+P			11675	WpLFWYcF vJqDWAwAi@}Ef@OWcBkH`DiE f\~M_Ci@uBHcD|@wA@cC]i@l@ _JrDd@uCGYJE
+T	T3-TH	T3	3		1859	5	opCsrBv@aI
+P			1859	w@`Ib@{@Fi@OkBVm@BaA
+T	T3-TI	T3	3		98	5	dvC|tAMG
+P			98	LFMG
+T	T3-TJ	T3	3		4653	5	ycCm|BtEw@hB}AxHoAN{Am@g@
+P			4653	{QhJtEw@hB}AxHoAN{Am@g@
+T	T3-TK	T3	3		3348	5	}QdJhA]tAcD~@j@ }C`C?A dCgDIN m@]eCaBq@H xBh@@? jAv@MI
+P			3348	qCjEp@CVYj@kA?Wh@_A~@j@ }C`C?A dCgDIN m@]eCaBq@H xBh@@? jAv@MI
+T	T3-TL	T3	3		179	5	|u@T_@E
+P			179	^D_@E
+T	T3-TM	T3	3		88	5	|}@bzBKG
+P			88	JFKG
+T	T3-TN	T3	3		22	5	olCwn@AC
+P			22	@BAC
+T	T3-TO	T3	3		123	5	gmBaPOM
+P			123	NLOM
+T	T3-TP	T3	3		172	5	xjE}jA_@?
+P			172	^?_@?
+T	T3-TQ	T3	3		25	5	mdAvVAA
+P			25	@@AA
+T	T3-TR	T3	3		35	5	sBq@DC
+P			35	EBDC
+T	T3-TS	T3	3		111	5	lpA_UNK
+P			111	OJNK
+T	T3-TT	T3	3		175	5	dCjT\G
+P			175	]F\G
+T	T3-TU	T3	3		78	5	owABFM
+P			78	GLFM
+T	T3-TV	T3	3		89	5	`_@tA@O
+P			89	AN@O
+T	T3-TW	T3	3		1152	5	zcBnzChEq@
+P			1152	iEp@hEq@
+T	T3-TX	T3	3		50	5	adC}zCI?
+P			50	H?I?
+T	T3-TY	T3	3		59	5	tv@gEEG
+P			59	DFEG
+T	T3-TZ	T3	3		134	5	_~@~DNS
+P			134	ORNS
+T	T3-UA	T3	3		104	5	x|@}KAS
+P			104	@RAS
+T	T3-UB	T3	3		119	5	`DwBSC
+P			119	RBSC
+T	T3-UC	T3	3		107	5	gxA|zARA
+P			107	S@RA
+T	T3-UD	T3	3		151	5	zrA}oAPQ
+P			151	QPPQ
+T	T3-UE	T3	3		2656	5	}}A|uAdBuAj@l@b@uAhCm@
+P			2656	_IjDAKfBiA^n@JA?g@b@m@|As@@Ph@K
+T	T3-UF	T3	3		30	5	`eCukAEA
+P			30	D@EA
+T	T3-UG	T3	3		75	5	fNjbDKG
+P			75	JFKG
+T	T3-UH	T3	3		255	5	eXmaEi@S
+P			255	h@Ri@S
+T	T3-UI	T3	3		33	5	gzAv_@@C
+P			33	AB@C
+T	T3-UJ	T3	3		83	5	v_C`cDGM
+P			83	FLGM
+T	T3-UK	T3	3		82	5	ekCebDLG
+P			82	MFLG
+T	T3-UL	T3	3		92	5	~KFJK
+P			92	KJJK
+T	T3-UM	T3	3		124	5	^~@SK
+P			124	RJSK
+T	T3-UN	T3	3		43	5	uN^EE
+P			43	DDEE
+T	T3-UO	T3	3		36	5	hJwBBE
+P			36	CDBE
+T	T3-UP	T3	3		104	5	deC`_DPE
+P			104	QDPE
+T	T3-UQ	T3	3		62	5	ycAqgDEG
+P			62	DFEG
+T	T3-UR	T3	3		129	5	glAxGRI
+P			129	SHRI
+T	T3-US	T3	3		2242	5	kHtFQ[ rBoA|CmC yFtEzAgA
+P			2242	aBjBDc@WF rBoAPi@jCcB yFtEbAUVq@
+T	T3-UT	T3	3		53	5	`jAgQEG
+P			53	DFEG
+T	T3-UU	T3	3		91	5	oFjGLE
+P			91	MDLE
+T	T3-UV	T3	3		957	5	yz@hPcAeC nArBKK
+P			957	?\?]_AiAC] nArBKK
+T	T3-UW	T3	3		165	5	d{@gR]C
+P			165	\B]C
+T	T3-UX	T3	3		129	5	qu@hGTE
+P			129	UDTE
+T	T3-UY	T3	3		16	5	iH~GAA
+P			16	@@AA
+T	T3-UZ	T3	3		1276	5	yUrgAcAmBuAv@
+P			1276	xCt@cAmBcAb@QR
+T	T3-VA	T3	3		15	5	zXedAAA
+P			15	@@AA
+T	T3-VB	T3	3		93	5	pEh@KI
+P			93	JHKI
+T	T3-VC	T3	3		106	5	vcCjbDCQ
+P			106	BPCQ
+T	T3-VD	T3	3		156	5	edCk`DD[
+P			156	EZD[
+T	T3-VE	T3	3		1106	5	mE]}@g@HwAd@E
+P			1106	LdCa@I[]HwAd@E
+T	T3-VF	T3	3		4326	5	|_CxBbDkBbC_FoCyDGkA
+P			4326	oCpQXQHQn@?`@m@l@YFe@zByDoCyDGkA
+T	T3-VG	T3	3		14	5	wcCnR@A
+P			14	A@@A
+T	T3-VH	T3	3		30	5	{@qEEA
+P			30	D@EA
+T	T3-VI	T3	3		523	5	`CrHs@kA
+P			523	r@jAGYk@q@
+T	T3-VJ	T3	3		14	5	iA}@@A
+P			14	A@@A
+T	T3-VK	T3	3		15332	5	haBqp@a@yBfCmB`JpDvDA sCOOR mv@]vIqOrBk@tE?tIdA rFjN?@ |EmA?@ gc@kLDB n]bL}BoBwDgH
+P			15332	nHbQ_@cAAu@lA}Ax@Ov@v@bEx@dB~@vDA sCOOR mv@]fDiHnDgFrBk@tE?fHhAVBTG rFjN?@ |EmA?@ gc@kLDB n]bL}BoBwDgH
+T	T3-VL	T3	3		140	5	yu@xq@KU
+P			140	JTKU
+T	T3-VM	T3	3		147	5	o\vUGY
+P			147	FXGY
+T	T3-VN	T3	3		2098	5	tbCrhDQwCwAI |E`@eCW
+P			2098	PvCWkBDk@{@K[@ |E`@eCW
+T	T3-VO	T3	3		137	5	ijCujDTG
+P			137	UFTG
+T	T3-VP	T3	3		35	5	pAtF?E
+P			35	?D?E
+T	T3-VQ	T3	3		98	5	aAaE@Q
+P			98	AP@Q
+T	T3-VR	T3	3		1976	5	vDtOgC}H A?@?
+P			1976	fC|Hc@iAWeBiAkAAaA A?@?
+T	T3-VS	T3	3		112	5	fkCxeDR?
+P			112	S?R?
+T	T3-VT	T3	3		162	5	whBewDPU
+P			162	QTPU
+T	T3-VU	T3	3		24	5	}b@zRD?
+P			24	E?D?
+T	T3-VV	T3	3		1227	5	hrBqy@fAsE
+P			1227	gArEbAmDBe@
+T	T3-VW	T3	3		169	5	~a@z}E\A
+P			169	]@\A
+T	T3-VX	T3	3		18	5	avC_zC@C
+P			18	AB@C
+T	T3-VY	T3	3		1838	5	paC{}@uGiD vE~BAD
+P			1838	~@b@uGiD vE~BAD
+T	T3-VZ	T3	3		6319	5	bFz_AViJvB{@tAuG`Cd@l@_E
+P			6319	uKtYZKQkBLqFvB{@X{Cz@yB`Cd@Hu@p@{BMM
+T	T3-WA	T3	3		148	5	yPpxDXA
+P			148	Y@XA
+T	T3-WB	T3	3		68	5	ggAyaEAK
+P			68	@JAK
+T	T3-WC	T3	3		124	5	pnAxkEFU
+P			124	GTFU
+T	T3-WD	T3	3		145	5	ejCgeDRO
+P			145	SNRO
+T	T3-WE	T3	3		6145	5	pkBpM`GqBjE~AfLmL
+P			6145	uZ~L`GqBjE~Ah@c@|JiK
+T	T3-WF	T3	3		1068	5	i\i`ADcE
+P			1068	EbEAqCFq@
+T	T3-WG	T3	3		133	5	sk@lg@CW
+P			133	BVCW
+T	T3-WH	T3	3		2893	5	wgAvVaAwBHgBhBiB~BM
+P			2893	qDvIMGs@oBHgBhBiBlASp@D
+T	T3-WI	T3	3		138	5	~}@qPUK
+P			138	TJUK
+T	T3-WJ	T3	3		99	5	ycAv[NI
+P			99	OHNI
+T	T3-WK	T3	3		67	5	xfAkWCK
+P			67	BJCK
+T	T3-WL	T3	3		39	5	zjAz`@DE
+P			39	EDDE
+T	T3-WM	T3	3		6987	5	qrCgd@_EmEoPjDiJP XA@? pJg@?@ zLwCBN
+P			6987	jG~D_EmEiBRWb@iK|Ac@TkBC}FT XA@? pJg@?@ zLwCBN
+T	T3-WN	T3	3		150	5	flAzF?Y
+P			150	?X?Y
+T	T3-WO	T3	3		58	5	v@jAH?
+P			58	I?H?
+T	T3-WP	T3	3		135	5	lu@_d@@Y
+P			135	AX@Y
+T	T3-WQ	T3	3		2498	5	qpBzuAn@mCs@aH TxJ?@
+P			2498	Qr@n@mCE_BSu@B}AWo@E@ TxJ?@
+T	T3-WR	T3	3		145	5	@kIKW
+P			145	JVKW
+T	T3-WS	T3	3	2025-04-08	15053	5	ed@vYlCgJoAcDgAI dFaJQuB pPsBwBmB uAdBeAiAx@cK uC`I~An@ sJsB`E~D~AuB xCeD]@ mOjZrEoI AiC`BwB lFJxAaB
+P			3360	cSne@^k@B{AhB_FoAcDa@Q
+P	2025		11694	e@FhBmBzBaFBuCEEOR mDnMSI rVyPwBmB uAdBeAiA~@yHEiA uC`IlAVPV sJsB`E~D~AuB xCeD]@ {HpK`BwB lFJxAaB
+T	T3-WT	T3	3		279	5	fcAkZHq@
+P			279	Ip@Hq@
+T	T3-WU	T3	0	2025-04-08	2163	5	ow@rf@_CkCmCcA bDd@U\
+P	2025		2163	~BjCk@MsA}BmCcA bDd@U\
+T	T3-WV	T3	3		17	5	jmBi_A?A
+P			17	?@?A
+T	T3-WW	T3	0	2025-04-08	16	5	eqBp}@@C
+P	2025		16	AB@C
+T	T3-WX	T3	0	2025-04-08	39	5	aA}@DC
+P	2025		39	EBDC
+T	T3-WY	T3	3		114	5	j_Ao^SA
+P			114	R@SA
+T	T3-WZ	T3	3		95	5	nw@s`@DO
+P			95	ENDO
+T	T3-XA	T3	3		128	5	~ShDJS
+P			128	KRJS
+T	T3-XB	T3	3		85	5	iiAda@FM
+P			85	GLFM
+T	T3-XC	T3	3		31	5	zwA~a@AE
+P			31	@DAE
+T	T3-XD	T3	3		5661	5	wrCqi@zD[bAo@pH{JT_CfBwA
+P			5661	oT~SzD[bAo@jEoG~@w@d@s@T_CfBwA
+T	T3-XE	T3	3		156	5	xpBsAWM
+P			156	VLWM
+T	T3-XF	T3	0	2025-04-08	95	5	ypCvw@KK
+P	2025		95	JJKK
+T	T3-XG	T3	3		1072	5	vmCigA}D[
+P			1072	|DZyACcBW
+T	T3-XH	T3	0	2025-04-08	79	5	kcCvrALA
+P	2025		79	M@LA
+T	T3-XI	T3	3		25	5	`kBqbAB?
+P			25	C?B?
+T	T3-XJ	T3	3		103	5	gsB|UBQ
+P			103	CPBQ
+T	T3-XK	T3	0	2025-04-08	78	5	hLfk@HK
+P	2025		78	IJHK
+T	T3-XL	T3	0	2025-04-08	141	5	iK_DQS
+P	2025		141	PRQS
+T	T3-XM	T3	3		28	5	`JkLAC
+P			28	@BAC
+T	T3-XN	T3	3		3	5	
+T	T3-XO	T3	3		230	5	`Hb`@g@M
+P			230	f@Lg@M
+T	T3-XP	T3	0	2025-04-08	125	5	mBmJSG
+P	2025		125	RFSG
+T	T3-XQ	T3	3		97	5	j{BgsAOC
+P			97	NBOC
+T	T3-XR	T3	3		2498	5	fa@ldB{CcL
+P			2498	zCbLFe@mAcDa@m@Cg@o@cC
+T	T3-XS	T3	3		4218	5	r@cwAeO[_EoC
+P			4218	dUjDeO[_EoC
+T	T3-XT	T3	3		142	5	edCvcAYA
+P			142	X@YA
+T	T3-XU	T3	0	2025-04-08	100	5	{M`IOC
+P	2025		100	NBOC
+T	T3-XV	T3	3		109	5	ftB{r@@Q
+P			109	AP@Q
+T	T3-XW	T3	3		14	5	~gAlsEC?
+P			14	B?C?
+T	T3-XX	T3	3		1322	5	wi@qbCsBuE d@hA@?
+P			1322	jAjCsBuE d@hA@?
+T	T3-XY	T3	0	2025-04-08	94	5	esC_XMG
+P	2025		94	LFMG
+T	T3-XZ	T3	3		59	5	hsClXFE
+P			59	GDFE
+T	T3-YA	T3	3		31	5	h\qJAC
+P			31	@BAC
+T	T3-YB	T3	0	2025-04-08	150	5	ckDiQX?
+P	2025		150	Y?X?
+T	T3-YC	T3	3		168	5	poChb@A]
+P			168	@\A]
+T	T3-YD	T3	3		3297	5	g_D_y@}F_P
+P			3297	|F~OqByDW}AsBgG
+T	T3-YE	T3	3		101	5	dlDii@NI
+P			101	OHNI
+T	T3-YF	T3	0	2025-04-08	125	5	kvCdmAAW
+P	2025		125	@VAW
+T	T3-YG	T3	3		2168	5	~iB_z@lJyB
+P			2168	mJxBlHeBTQh@A
+T	T3-YH	T3	3		55	5	v|@rvAGE
+P			55	FDGE
+T	T3-YI	T3	3		990	5	iUqfBoDO `DNAA
+P			990	N@oDO `DNAA
+T	T3-YJ	T3	0	2025-04-08	98	5	}fDraBBQ
+P	2025		98	CPBQ
+T	T3-YK	T3	3		464	5	|aDebBoAS
+P			464	nAR}@IQI
+T	T3-YL	T3	3		87	5	fB|@BO
+P			87	CNBO
+T	T3-YM	T3	3		81	5	`SnvBBM
+P			81	CLBM
+T	T3-YN	T3	0	2025-04-08	201	5	qyDa^_@S
+P	2025		201	^R_@S
+T	T3-YO	T3	3		101	5	~bDywAOG
+P			101	NFOG
+T	T3-YP	T3	0	2025-04-08	18454	5	mcDdgB`DM oj@EhCcC~RhBxGm@rDv@Cb@ su@uC~HcC|C`Bt@nC }MkLpAjG f\kHnCxFmAbD aa@_LF`@ |LiBeDlH
+P			144	lVkEMW
+P	2025		18310	|SrN`DM oj@EhCcChB^lBPhAMxCPbEr@^QhE_@n@BrDv@Cb@ su@uCfHmBVUl@d@nBz@t@nC }MkLpAjG t\sG`C`FmAbD aa@_LF`@ |LiBeDlH
+T	T3-YQ	T3	3		34	5	x`FeUDC
+P			34	EBDC
+T	T3-YR	T3	3		135	5	CAAY
+P			135	@XAY
+T	T3-YS	T3	3		301	5	sHwcABu@
+P			301	Ct@Bu@
+T	T3-YT	T3	3		2676	5	nHleAu@uHpAuC
+P			2676	[jMa@gCSmDDg@jAmB
+T	T3-YU	T3	3		158	5	eh@tx@ZG
+P			158	[FZG
+T	T3-YV	T3	3		12	5	l]opBA?
+P			12	@?A?
+T	T3-YW	T3	3		84	5	|ZbjBI?
+P			84	H?I?
+T	T3-YX	T3	3		14039	5	Kr|@lEiIjAgE\oK yDzU@? zCoHA[ hD}WP`B_D|E@r@ ~BsLj@wK{BgCuC_A_COi@|@ f@}@@? pJnTK}@
+P			14039	wLlj@Vs@pBaDbAsBjAgEDyKVO?X yDzU@? zCoHA[ hD}WP`B_D|E@r@ ~BsLC}@Je@b@sH{BgCmBWg@g@_COOf@YT f@}@@? pJnTK}@
+T	T3-YY	T3	3		48	5	oO}ZGA
+P			48	F@GA
+T	T3-YZ	T3	3		38	5	fCzI?C AB@?
+P			38	???C AB@?
+T	T3-ZA	T3	3		19	5	A@C?
+P			19	B?C?
+T	T3-ZB	T3	3		9763	5	gPgnBgB{D gGfC|BeBhCa@ vQj@?uAuJi@qEnB h[JaIqA eNP?@ XQ?A ~DOAK wEgAmA~C
+P			9763	bAhDgB{D gGfCAEr@MjAqAhCa@ vQj@?uAuJi@k@JcAp@aBp@ h[JiEk@o@UgAO eNP?@ XQ?A ~DOAK wEgAwAbCHZ
+T	T3-ZC	T3	3		141	5	sGnBX?
+P			141	Y?X?
+T	T3-ZD	T3	3		3377	5	hWddBo@kEaCMuAiB}ApA
+P			3377	dJpFo@kEcA[}@L}@{@Wm@gAp@U^
+T	T3-ZE	T3	3	2024-01-30	203	5	fMdTSQ RN@A AC?D
+P			60	?@?A ?E?D
+P	2024		144	@AUM
+T	T3-ZF	T3	3		90	5	z@uB@O
+P			90	AN@O
+T	T3-ZG	T3	0	2025-04-08	113	5	gjEaBRA
+P	2025		113	S@RA
+T	T3-ZH	T3	0	2024-01-30	536	5	jhEvF~@u@
+P	2024		536	_At@t@MHg@
+T	T3-ZI	T3	3		49	5	ma@{tBG?
+P			49	F?G?
+T	T3-ZJ	T3	3		3984	5	mrD`gAwJu@oFsE FRBA
+P		c	3984	zQvFIMsDa@yDEmBuAUo@_Am@_@MKQ FRBA
+T	T3-ZK	T3	3		69	5	deE}_AJA
+P			69	K@JA
+T	T3-ZL	T3	3		136	5	gtD|gAVC
+P			136	WBVC
+T	T3-ZM	T3	3		6499	5	r}@eXzCiCMkEw@}A`By@ m@tJA? pM{JuAiB_BtAaFh@ vHuCDX G[@@
+P			6499	yNrRzCiCMkEw@}AjBi@IO m@tJA? pM{JOGeAaB_BtAaFh@ vHuCDX G[@@
+T	T3-ZN	T3	3		136	5	fuBPBW
+P			136	CVBW
+T	T3-ZO	T3	3		179	5	sr@i@^A
+P			179	_@@^A
+T	T3-ZP	T3	3		850	5	lt@xD{A{B
+P			850	zAzB{A{B
+T	T3-ZQ	T3	3		32	5	dQdyAAC
+P			32	@BAC
+T	T3-ZR	T3	3		72	5	_Z{rBKG
+P			72	JFKG
+T	T3-ZS	T3	3		35	5	}wBzh@CC
+P			35	BBCC
+T	T3-ZT	T3	3		123	5	rdCgJMQ
+P			123	LPMQ
+T	T3-ZU	T3	3		105	5	cbEfUEQ
+P			105	DPEQ
+T	T3-ZV	T3	3		1948	5	lhAqGyIo@
+P			1948	xIn@yIo@
+T	T3-ZW	T3	3		99	5	yx@tnAHM
+P			99	ILHM
+T	T3-ZX	T3	3		57	5	vuDsxBHA
+P			57	I@HA
+T	T3-ZY	T3	3		2428	5	`YdfBm@gAK}C_DmB
+P			2428	xErIm@gAK}C}BaAa@k@
+T	T3-ZZ	T3	3		34	5	pFnI?E
+P			34	?D?E
+T	T3-AAA	T3	3		52	5	miBqiACG
+P			52	BFCG
+T	T3-AAB	T3	3		3891	5	UNuJuHsA}D IBJ@
+P			3891	fMlNuJuHo@{Bc@aA IBJ@
+T	T3-AAC	T3	3		24	5	|`ByL?C
+P			24	?B?C
+T	T3-AAD	T3	3		9649	5	i{EtlAfCh@nGqBs@kBnAu@ oVdCyGsFwC[sElA xIs@@A dRzI{HcB
+P		c	9649	zHbBfCh@~@OnEaBs@kBv@o@VE oVdCeAi@sEiEwC[sElA xIs@@A dRzI{HcB
+T	T3-AAE	T3	3		188	5	ffF}hAG_@
+P			188	F^G_@
+T	T3-AAF	T3	3		93	5	soEneABO
+P		c	93	CNBO
+T	T3-AAG	T3	3		71	5	hmFfs@LA
+P			71	M@LA
+T	T3-AAH	T3	3		128	5	a^mqBIS
+P			128	HRIS
+T	T3-AAI	T3	3		24	5	vDnxAAC
+P			24	@BAC
+T	T3-AAJ	T3	3		23	5	gBo`BCA
+P			23	B@CA
+T	T3-AAK	T3	3		107	5	_AcAHO
+P			107	INHO
+T	T3-AAL	T3	3		28	5	z\fnBEA
+P			28	D@EA
+T	T3-AAM	T3	3		193	5	Gd@Bc@
+P			193	Cb@Bc@
+T	T3-AAN	T3	3		59	5	Ch@?E
+P			59	?D?E
+T	T3-AAO	T3	3		968	5	{mC}}@gDU
+P			968	fDTcDMCG
+T	T3-AAP	T3	3		45	5	`uCh|@DE
+P			45	EDDE
+T	T3-AAQ	T3	3		79	5	mtC_|@MA
+P			79	L@MA
+T	T3-AAR	T3	3		1437	5	jlC~rAbCsA|AE {EdAB@
+P			1437	IPHQxBaA|AE {EdAB@
+T	T3-AAS	T3	3		705	5	rIc@}BI
+P			705	|BHaAM{@B
+T	T3-AAT	T3	3		73	5	kVi~BEK
+P			73	DJEK
+T	T3-AAU	T3	3		46	5	pSh~BBG
+P			46	CFBG
+T	T3-AAV	T3	3		17	5	oJw_@C?
+P			17	B?C?
+T	T3-AAW	T3	3		122	5	gnCy|@GI @@?B
+P			122	DBGI @@?B
+T	T3-AAX	T3	3		1578	5	q{Aja@j@~@xCkB
+P		c	1578	eEj@JCHv@TJbBuAt@U
+T	T3-AAY	T3	3		143	5	GSKU
+P		c	143	JTKU
+T	T3-AAZ	T3	3		168	5	xxF~~@]A
+P			168	\@]A
+T	T3-ABA	T3	3		4118	5	akCybAqAu@eB_Iw@u@`@mF
+P			4118	lExSqAu@}AkFGsAw@u@`@mF
+T	T3-ABB	T3	3		342	5	`mCl|Av@W
+P			342	w@Vv@W
+T	T3-ABC	T3	3		871	5	mEfChCiA
+P			871	iChAhCiA
+T	T3-ABD	T3	3		410	5	}D}Cq@S
+P			410	p@Ro@DAY
+T	T3-ABE	T3	3		168	5	^bAJ[
+P			168	KZJ[
+T	T3-ABF	T3	3		95	5	upEzIHM
+P			95	ILHM
+T	T3-ABG	T3	3		349	5	rvEeC|@K
+P			349	}@J|@K
+T	T3-ABH	T3	0	2025-04-08	98	5	mqFaYMK
+P	2025		98	LJMK
+T	T3-ABI	T3	3		35	5	hpFx[DA
+P			35	E@DA
+T	T3-ABJ	T3	3		863	5	mwBixAoBeA
+P			863	nBdAyBq@HS
+T	T3-ABK	T3	3		3659	5	leBbbBzJeGvCa@ cBv@Cg@
+P			3659	kLvGf@g@lCsAdEiCn@QfBO cBv@Cg@
+T	T3-ABL	T3	3		110	5	pACPI
+P			110	QHPI
+T	T3-ABM	T3	3		117	5	_ImcC?U
+P			117	?T?U
+T	T3-ABN	T3	3		2418	5	uzB|Oc@W PD?D hFmCy@nA}CbA dIcDkBP
+P			2418	yEvCc@W PD?D hFmCa@\Wp@eBZw@f@ dIcDkBP
+T	T3-ABO	T3	3		155	5	suBf~@D[
+P		c	155	EZD[
+T	T3-ABP	T3	3		111	5	xeBmp@QG
+P			111	PFQG
+T	T3-ABQ	T3	3		58	5	NDAI
+P			58	@HAI
+T	T3-ABR	T3	3		102	5	tjCtmBAS
+P			102	@RAS
+T	T3-ABS	T3	3		131	5	ibFyg@UI
+P			131	THUI
+T	T3-ABT	T3	3		66	5	bzAi_ABK
+P			66	CJBK
+T	T3-ABU	T3	3		58	5	NHGE
+P			58	FDGE
+T	T3-ABV	T3	3		11335	5	|cDblAIwL j@q@LcR|@cA|GeBbCsHfAs@ GaBKjB mQ~c@j@s@
+P			8241	Nq@H[i@uB^}DIcEF]|@cA|GeBbCsHfAs@ GaB@d@MdA
+P		c	3094	cQtq@P}E[yE j@q@Nq@ {@dBf@[BW
+T	T3-ABW	T3	3		77	5	_Y_zAMA
+P			77	L@MA
+T	T3-ABX	T3	0	2025-04-08	114	5	iwFplBLM
+P	2025		114	MLLM
+T	T3-ABY	T3	3		143	5	hwF~e@AY
+P			143	@XAY
+T	T3-ABZ	T3	3		121	5	y~F{iAJQ
+P		c	121	KPJQ
+T	T3-ACA	T3	3		72	5	bvGlg@KA
+P		c	72	J@KA
+T	T3-ACB	T3	3		12	5	~EeF?A
+P		c	12	?@?A
+T	T3-ACC	T3	3		2212	5	}kDanA~EyDn@aB
+P			2212	oGzG~EyDn@aB
+T	T3-ACD	T3	3		107	5	d}Cl`BMM
+P		c	107	LLMM
+T	T3-ACE	T3	3		119	5	i}Cq`BGS
+P			119	FRGS
+T	T3-ACF	T3	3		370	5	h_DddBaAA
+P		c	370	`A@aAA
+T	T3-ACG	T3	3		765	5	iCj@dCY
+P		c	765	eCXdCY
+T	T3-ACH	T3	3		83	5	kg@fXFK
+P			83	GJFK
+T	T3-ACI	T3	3		153	5	dj@gX[C
+P		c	153	ZB[C
+T	T3-ACJ	T3	3		121	5	eYbd@LQ
+P			121	MPLQ
+T	T3-ACK	T3	3		40	5	jVca@G?
+P		c	40	F?G?
+T	T3-ACL	T3	3		85	5	|@{YAO
+P		c	85	@NAO
+T	T3-ACM	T3	3		1115	5	qDnYsAqBq@X p@[?@
+P			583	\b@]e@q@Z p@[?@
+P		c	532	rApBu@mA
+T	T3-ACN	T3	3		589	5	d@xDNkB
+P			270	OjBFq@
+P		c	319	??Fy@
+T	T3-ACO	T3	3		77	5	KSLE
+P		c	77	MDLE
+T	T3-ACP	T3	3		367	5	xGwX{@_@
+P			119	z@^SI
+P		c	248	??g@U
+T	T3-ACQ	T3	3		161	5	iaH{XJ[
+P		c	161	KZJ[
+T	T3-ACR	T3	3		1937	5	|oHlq@QoCp@sCi@Y
+P			1799	H|HQoCd@qAJaAUK
+P		c	137	??SM
+T	T3-ACS	T3	3		84	5	X?LE
+P			84	MDLE
+T	T3-ACT	T3	3		62	5	grHqf@@I
+P		c	62	AH@I
+T	T3-ACU	T3	3		178	5	`{Gdy@I]
+P			178	H\I]
+T	T3-ACV	T3	3		138	5	kRnf@AY
+P			138	@XAY
+T	T3-ACW	T3	3		24	5	hPul@AC
+P			24	@BAC
+T	T3-ACX	T3	3		221	5	{zGsq@Nc@
+P		c	221	Ob@Nc@
+T	T3-ACY	T3	3		914	5	tcHd_AtCaA
+P			914	uC`AtCaA
+T	T3-ACZ	T3	3		206	5	_jHe|@Fc@
+P		c	206	Gb@Fc@
+T	T3-ADA	T3	3		227	5	W`@Bi@
+P		c	227	Ch@Bi@
+T	T3-ADB	T3	3		6446	5	reHpTjIYhA`@pK}CfBrA aI@?A qHgCl@nD
+P			6446	iIX~EBjB]hA`@pK}CfBrA aI@?A qHgCl@nD
+T	T3-ADC	T3	0	2025-04-08	75	5	o{GjGJI
+P	2025		75	KHJI
+T	T3-ADD	T3	0	2025-04-08	139	5	sO`MPO
+P	2025		139	QNPO
+T	T3-ADE	T3	3		199	5	faHjY`@I
+P			199	a@H`@I
+T	T3-ADF	T3	3		1683	5	KBwGwA
+P			1683	vGvACIuFm@]_@
+T	T3-ADG	T3	3		140	5	~[m^SO
+P			140	RNSO
+T	T3-ADH	T3	3		98	5	}Nt[NG
+P			98	OFNG
+T	T3-ADI	T3	3		91	5	eCyj@MG
+P			91	LFMG
+T	T3-ADJ	T3	3		20	5	zSbN@A
+P			20	A@@A
+T	T3-ADK	T3	3		69	5	eE`QFE
+P			69	GDFE
+T	T3-ADL	T3	3		38	5	Eb@?G
+P			38	?F?G
+T	T3-ADM	T3	3		6013	5	c\_a@gAAsF{CeAkD `UnHnCK _S_@?@ kEkAr@_@ fInD~HY
+P			6013	_IXs@FSIsF{CgAoB@{@ `UnHnCK _S_@?@ kEkAr@_@ fInD~HY
+T	T3-ADN	T3	3		570	5	`Bzu@dBC
+P			570	eBBdBC
+T	T3-ADO	T3	0	2025-04-08	2828	5	waHqf@eFeB{Fq@
+P	2025		2828	`NvCeFeB{Fq@
+T	T3-ADP	T3	3		4983	5	r@_WcFWoBf@IgA}Db@sGW rHT?A m@??@ kFY?A
+P		c	4983	tWp@cFWoBf@IgA}Db@}Ea@u@H rHT?A m@??@ kFY?A
+T	T3-ADQ	T3	3		704	5	ngI|Lg@I ^IRw@ a@fAFQ
+P			704	LTg@I ^IEAXu@ a@fAFQ
+T	T3-ADR	T3	3		3523	5	y`@f{ARC sHy@Ge@oFaA dOlDRE SDaFKi@y@
+P			3523	|G|@RC sHy@Ge@mCu@aBK dOlDRE SDaFK_@QIg@
+T	T3-ADS	T3	3		59	5	bj@ixAAI
+P			59	@HAI
+T	T3-ADT	T3	3		17	5	F?C?
+P			17	B?C?
+T	T3-ADU	T3	3		96	5	GSNC
+P			96	OBNC
+T	T3-ADV	T3	3		108	5	eA]PA
+P			108	Q@PA
+T	T3-ADW	T3	3		32	5	aoH{I@C
+P		c	32	AB@C
+T	T3-ADX	T3	3		352	5	`lHzN?_A
+P			352	?~@?_A
+T	T3-ADY	T3	3		256	5	@~u@l@A
+P			256	m@@l@A
+T	T3-ADZ	T3	3		373	5	aB{u@g@u@
+P			373	f@t@g@u@
+T	T3-AEA	T3	3		1536	5	tDaCq@?iBeC AnAv@I
+P			1536	dB~@q@?iBeC AnAv@I
+T	T3-AEB	T3	3		18255	5	xo@t~A}B_PnEuH _TjQ_CY}@kDv@Jz@cAhHw@nF^ iTfAZF rX{Ey@I ud@YeBw@ jRoJeOdL ~KxFkBWiDqI
+P			18255	|`@`Ya@iAIqDqAcHP?|DuH _TjQ_CY}@kDv@Jz@cAlCa@zCUnF^ iTfAZF rX{Ey@I ud@YeBw@ jRoJeOdL ~KxFkBWi@gB_CiF
+T	T3-AEC	T3	3		2127	5	{GegAgB_FeA? c@F|@M
+P			2127	rCdFCYcBeEeA? c@Fz@E@G
+T	T3-AED	T3	3		66	5	|HnNEI
+P			66	DHEI
+T	T3-AEE	T3	3		686	5	sBkC]yB
+P			686	\xB]yB
+T	T3-AEF	T3	3		153	5	gGPSS
+P			153	RRSS
+T	T3-AEG	T3	3		219	5	fGzkAc@M
+P			219	b@Lc@M
+T	T3-AEH	T3	3		42	5	TslAGA
+P			42	F@GA
+T	T3-AEI	T3	3		106	5	xDplAOI
+P			106	NHOI
+T	T3-AEJ	T3	3		128	5	wDLUI
+P			128	THUI
+T	T3-AEK	T3	3		90	5	~^gh@?Q
+P			90	?P?Q
+T	T3-AEL	T3	3		77	5	cNaTCK
+P			77	BJCK
+T	T3-AEM	T3	3		145	5	eNhaAUM
+P			145	TLUM
+T	T3-AEN	T3	3		320	5	gOkbAEy@
+P			320	Dx@Ey@
+T	T3-AEO	T3	3		187	5	dRsCGa@
+P			187	F`@Ga@
+T	T3-AEP	T3	3		29	5	kB|jACC
+P			29	BBCC
+T	T3-AEQ	T3	3		78	5	_Ar@GK
+P			78	FJGK
+T	T3-AER	T3	3		446	5	e|HcqAJoA
+P		c	446	KnAJoA
+T	T3-AES	T3	3		326	5	jjIRy@K
+P			326	x@Jy@K
+T	T3-AET	T3	3		44	5	_jII@E
+P		c	44	AD@E
+T	T3-AEU	T3	3		48	5	tjHbLBE
+P			48	CDBE
+T	T3-AEV	T3	3		100	5	rOuNPA
+P			100	Q@PA
+T	T3-AEW	T3	3		116	5	u@RPK
+P			116	QJPK
+T	T3-AEX	T3	3		72	5	jl@bi@CK
+P			72	BJCK
+T	T3-AEY	T3	3		3863	5	g@|PdFsGgDiH
+P			3863	}@|PrDyDp@yAuAiCqA_D
+T	T3-AEZ	T3	3		1260	5	eo@~o@gDyC
+P			1260	fDxCgDyC
+T	T3-AFA	T3	3		1432	5	m@`MlCsE
+P			1432	mCrENcA|BoC
+T	T3-AFB	T3	3		2448	5	gyHgnA]FsBkK rCbKA?
+P			1424	??]F_AwE ~AnEA?
+P		c	1024	}AoEs@sD
+T	T3-AFC	T3	3		65	5	C?BE ?AAB
+P		c	65	ABBE ?AAB
+T	T3-AFD	T3	3		1750	5	vtIqEsG_C
+P			1750	rG~Bu@]kE{@Qe@
+T	T3-AFE	T3	3		240	5	enIbJh@I
+P		c	240	i@Hh@I
+T	T3-AFF	T3	3		189	5	dvJbd@M]
+P			189	L\M]
+T	T3-AFG	T3	3		79	5	sw@rp@DM
+P			79	ELDM
+T	T3-AFH	T3	3		127	5	nW}{AIS
+P			127	HRIS
+T	T3-AFI	T3	3		167	5	ivIhHI[
+P		c	167	HZI[
+T	T3-AFJ	T3	3		6955	5	cYdGpI]vBiBrJ{B yPlF?A @cBV`B c@yBJV jDgBwDnA
+P			6240	yFrCpI]vBiB~Cq@ZOdAM gM`E?A @cBXh@Av@ c@yBJV jDgBoAZKPaBTDJ
+P		c	715	pMcAJUdBU
+T	T3-AFK	T3	3		125	5	||HnrAOO
+P			125	NNOO
+T	T3-AFL	T3	3		40	5	s}HqqACE
+P		c	40	BDCE
+T	T3-AFM	T3	3		97	5	~nHzC?Q
+P			97	?P?Q
+T	T3-AFN	T3	3		24	5	dhAbj@BA
+P			24	C@BA
+T	T3-AFO	T3	3		44	5	F\DE
+P			44	EDDE
+T	T3-AFP	T3	3		120	5	gZ~f@JQ
+P			120	KPJQ
+T	T3-AFQ	T3	3		186	5	dB_TXU
+P			186	YTXU
+T	T3-AFR	T3	3		22	5	eeJq_A?C
+P			22	?B?C
+T	T3-AFS	T3	3		2	5	
+T	T3-AFT	T3	3		74	5	``Ip_B@M
+P			74	AL@M
+T	T3-AFU	T3	3		186	5	tJOXS
+P			186	YRXS
+T	T3-AFV	T3	3		68	5	`UwDFI
+P			68	GHFI
+T	T3-AFW	T3	3		3076	5	bf@uh@qBuEGyD_AkB |DvNC@ qBsE@?
+P			3076	nBtESoA}AeCGyD_AkB |DvNC@ qBsE@?
+T	T3-AFX	T3	3		106	5	wr@ct@KM
+P			106	JLKM
+T	T3-AFY	T3	3		3	5	
+T	T3-AFZ	T3	3		156	5	rO|gBZG
+P			156	[FZG
+T	T3-AGA	T3	3		46	5	oiJqxAGA
+P			46	F@GA
+T	T3-AGB	T3	3		21	5	dPhGAC
+P			21	@BAC
+T	T3-AGC	T3	3		32	5	d{J~YCC
+P			32	BBCC
+T	T3-AGD	T3	3		126	5	u\xv@UC
+P			126	TBUC
+T	T3-AGE	T3	3		47	5	|Kyc@BE
+P			47	CDBE
+T	T3-AGF	T3	3		1418	5	~ZeToDwD
+P			1418	nDvDcD_DKW
+T	T3-AGG	T3	3		106	5	RGPE
+P			106	QDPE
+T	T3-AGH	T3	3		83	5	awKaVKK
+P			83	JJKK
+T	T3-AGI	T3	3		535	5	dnKtb@~AC
+P			535	_BB~AC
+T	T3-AGJ	T3	3		1780	5	lE_IdFcF
+P			1780	eFbFdFcF
+T	T3-AGK	T3	3		51	5	y_AhqADG
+P			51	EFDG
+T	T3-AGL	T3	3		29915	5	g_@|g@d@mBgAu@`@_Nz@Q tDxRkEqA {L`@sE}DlAgGrH_DjFX {UvL`CY dOoC|@H tL{AcCcFeFh@ dA`@Gm@ vd@IaAoMgFwC wUjQMF e[}AiDgCeAHqCsD |t@bDgLbF gXbDkByF zh@mChLwG
+P			29915	_c@be@d@mBo@SWa@`@_NBSv@@ tDxRkEqA {L`@sE}DlAgGrH_DjFX {UvL`CY dOoC|@H tL{AcCcFeFh@ dA`@Gm@ vd@ICaB[y@a@sHqEgCGOM? wUjQMF e[}AiDgCeAHqCsD |t@bDgLbF gXbDsAyEW_@ zh@mChLwG
+T	T3-AGM	T3	3		104	5	_dJ}dBMK
+P			104	LJMK
+T	T3-AGN	T3	3		129	5	~oKta@T?
+P			129	U?T?
+T	T3-AGO	T3	3		79	5	irKqa@@M
+P			79	AL@M
+T	T3-AGP	T3	3		62	5	r@{AFE
+P			62	GDFE
+T	T3-AGQ	T3	3		44	5	lvKri@FA
+P			44	G@FA
+T	T3-AGR	T3	3		177	5	gxKyi@\I
+P			177	]H\I
+T	T3-AGS	T3	3		39	5	rwKjl@AE
+P			39	@DAE
+T	T3-AGT	T3	3		532	5	BCzA]
+P			532	{A\zA]
+T	T3-AGU	T3	3		50	5	_Ufe@?I
+P			50	?H?I
+T	T3-AGV	T3	3		11213	5	vYoKbEeDd@v@ wBn@Oc@ vFeAlCuA sGz@xG{ClEv@ y@FDc@ aW{Cy@gI vJ~RqDoFiC}A lH|H\I rG}@u@gA
+P			11214	qLdI`BaB`BcAd@v@ wBn@Oc@ vFeAz@q@pAc@ sGz@hDsBnBg@tDZVZ y@FDc@ aW{CDsB_AsE vJ~RqDoFiC}A lH|H\I rG}@u@gA
+T	T3-AGW	T3	3		111	5	iuLuu@RA
+P			111	S@RA
+T	T3-AGX	T3	3		226	5	jbLnf@Z]
+P			226	[\Z]
+T	T3-AGY	T3	3		109	5	sPra@SC
+P			109	RBSC
+T	T3-AGZ	T3	3		132	5	}AgmAGW
+P			132	FVGW
+T	T3-AHA	T3	3		94	5	lTnw@@Q
+P			94	AP@Q
+T	T3-AHB	T3	3		2941	5	cP|PkG_D rFhA]r@ sH{AfBQ xAD[f@
+P			2941	bE`Ba@YwEaBQc@ rFhA]r@ sH{At@Cp@M xAD[f@
+T	T3-AHC	T3	3		85	5	fEzAHK
+P			85	IJHK
+T	T3-AHD	T3	3		46	5	kr@~i@?G
+P			46	?F?G
+T	T3-AHE	T3	3		111	5	xQzG?S
+P			111	?R?S
+T	T3-AHF	T3	3		85	5	v\mVAO
+P			85	@NAO
+T	T3-AHG	T3	3		291	5	k@ihBq@K
+P			291	p@Jq@K
+T	T3-AHH	T3	3		60	5	|_@beAGG
+P			60	FFGG
+T	T3-AHI	T3	3		98	5	h@jBKO
+P			98	JNKO
+T	T3-AHJ	T3	3		48	5	i{Afw@CG
+P			48	BFCG
+T	T3-AHK	T3	3		99	5	zwA}t@EQ
+P			99	DPEQ
+T	T3-AHL	T3	3		119	5	me@gnAU?
+P			119	T?U?
+T	T3-AHM	T3	3		122	5	`IuI@W
+P			122	AV@W
+T	T3-AHN	T3	3		106	5	~W`|ALM
+P			106	MLLM
+T	T3-AHO	T3	3		137	5	myA~v@CY
+P			137	BXCY
+T	T3-AHP	T3	3		147	5	hiBo}@OS
+P			147	NROS
+T	T3-AHQ	T3	3		34	5	wjBb}@EA
+P			34	D@EA
+T	T3-AHR	T3	3		48	5	hfBez@DE
+P			48	EDDE
+T	T3-AHS	T3	3		99	5	dHcB@Q
+P			99	AP@Q
+T	T3-AHT	T3	3		49	5	~@AEE
+P			49	DDEE
+T	T3-AHU	T3	3		16	5	}yBn}@?C
+P			16	?B?C
+T	T3-AHV	T3	3		119	5	~BhHUC
+P			119	TBUC
+T	T3-AHW	T3	3		1320	5	iCOsAcF
+P			1320	rAbFUmA}@uC
+T	T3-AHX	T3	3		6	5	
+T	T3-AHY	T3	3		24	5	aEhBCA
+P			24	B@CA
+T	T3-AHZ	T3	3		104	5	`OjPFQ
+P			104	GPFQ
+T	T3-AIA	T3	3		7833	5	RfVS_H|E{K?oA wExV?A |CcImBu@ hJmEaEcB fKIyEbB
+P			7833	wJdRYe@DyF|E{K?oA wExV?A |CcIQC{Aq@ hJmEaEcB fKIcB^uBbA
+T	T3-AIB	T3	3		115	5	gCwCQE
+P			115	PDQE
+T	T3-AIC	T3	3		98	5	wYaWLM
+P			98	MLLM
+T	T3-AID	T3	3		65	5	KnOKA
+P			65	J@KA
+T	T3-AIE	T3	3		128	5	hF`FOO
+P			128	NNOO
+T	T3-AIF	T3	3		6218	5	}Pm^bAuCsJmF[oGeAgD lOvRw@l@
+P			6218	cAtCbAuCsJmF[oGeAgD lOvRw@l@
+T	T3-AIG	T3	3		76	5	wA~BII
+P			76	HHII
+T	T3-AIH	T3	3		1914	5	`Vd~@tEwA~@}A
+P			1914	uGtDxB_@zAw@~@}A
+T	T3-AII	T3	3		134	5	}g@ocARM
+P			134	SLRM
+T	T3-AIJ	T3	3		12805	5	hgArDeG{IuEmDdCuCnDsArAiDoFoVPgD z@nn@A? fDwQC? kBoK@? m@yBA@ kC}D|@U
+P			10836	xHxr@MIgAkBoDeFuEmDdCuCnDsArAiDuAkIUk@@W{AkF b@re@A? fDwQC? kBoK@? m@yBA@
+P		c	1969	k@sBi@sBPgD gApE|@U
+O	-11.796055	-49.073794	2026-04-15	2026	1	2026-04-15	T1	19412	42079
+O	-11.744290	-48.730395	2025-04-08	2025	1	2025-04-08	T2-K	1244	6272
+O	-11.666372	-48.779433	2025-03-03	2025	1	2025-03-03	T3-CL	8762	45544
+O	-11.783575	-48.988722	2024-10-14	2024	1	2024-10-14	T1	4051	42079
+O	-11.871560	-48.990503	2024-10-01	2024	1	2024-10-01	T2-C	16258	20339
+O	-11.795291	-48.951837	2024-03-14	2024	1	2024-03-14	T1 / T2-B	15012	45544
+O	-12.027421	-48.722476	2024-01-30	2024	1	2024-01-30	T2-J	15551	20903
+O	-11.815383	-48.961471	2024-01-12	2024	1	2024-01-12	T3-CH	1749	6326
+O	-11.870885	-48.872553	2023-02-12	2023	1	2023-02-12	T1 / T2-E	15729	55616
+O	-11.919307	-48.754562	2022-12-30	2022	1	2022-12-30	T2-F	3063	23338
+O	-11.939850	-48.719212	2022-11-17	2022	1	2022-11-17	T2-F / T2-H	21106	39827
+O	-11.899674	-48.815738	2017-12-13	2017	1	2017-12-13	T2-F	3962	23338

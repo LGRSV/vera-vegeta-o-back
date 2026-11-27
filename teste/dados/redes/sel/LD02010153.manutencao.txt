@@ -1,0 +1,3 @@
+#{"v":1,"sit":["venc","pend","fora","exec"]}
+A	LD02010153
+M	`ogm@prvkH	1,0,0,0

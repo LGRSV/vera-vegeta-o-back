@@ -1,0 +1,3 @@
+#{"v":1,"sit":["venc","pend","fora","exec"]}
+A	AL01084002
+M	vrme@z}o`H	0,1,0,0

@@ -1,0 +1,119 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	AL03099059
+T	T1	T1	3		7418	3	hkhEryn\z@A XKAeB L`B_B? c@Yt@? ~@?Z? kBC@n@ t@{@^? CUPkG k@dGZ? [MX? MKC? P?M? Lw@E? RoDvAA@{@ oA|@@? jFMuBI `BF?C oAe@{@A n@AE^ rBk@x@GFgA }@lAGz@ fAgCB? C?A?
+P			7418	}KpNz@A XKAeB L`B_B? c@Yt@? ~@?Z? kBC@n@ t@{@^? CU?mDP}A k@dGZ? [MX? MKC? P?M? Lw@E? RoDvAA@{@ oA|@@? jFMuBO?D `BF?C oAe@{@A n@AE^ rBk@j@BLKFgA }@lAGz@ fAgCB? C?A?
+T	T2-A	T2	3		8893	4	_Wff@HO B@p@L`J}ORuD sJrTBE CBLH c@MME ~KwSIM JFA? ?GCuB ZpB]? ??@? HMk@? RSV? Iq@?A }B?A{A gAhAjEA eCg@R? SOv@? uItZDg@ QZCA
+P			8893	INHO B@HJf@@`J}ORs@?aC sJrTBE CBLH c@MME ~KwS@MK? JFA? ?GCuB ZpB]? ??@? HMk@? RSV? Iq@?A }B?A{A gAhAjEA eCg@R? SOv@? uItZESJS QZCA
+T	T2-B	T2	3		4790	4	cAkNhEuF _EjFAA yBO|BH jDaFH? Q?F? mAa@DG C@?@ NCr@h@ aAk@JL |BQs@n@ `Bs@A[ wAHCb@ Ug@xBC
+P			4790	kH`IzAmCn@u@|@q@ _EjFAA yBONARV|@QZD jDaFH? Q?F? mAa@DG C@?@ NCAJ`@ZR@ aAk@JL |BQo@LC`@ `Bs@A[ wAHCb@ Ug@XD~AI
+T	T3-A	T3	3		24	5	hEgE@C
+P			24	AB@C
+T	T3-B	T3	3		7	5	Ct@A?
+P			7	@?A?
+T	T3-C	T3	3		2082	5	f@~A?S h@P?o@ oAj@rA? b@U?i@ i@d@~@A mCIrAA `@MX?
+P			2082	iBz@?S h@P?o@ oAj@rA? b@U?i@ i@d@~@A mCIrAA `@MX?
+T	T3-D	T3	3		23	5	uCjA@A
+P			23	A@@A
+T	T3-E	T3	3		30	5	rAq@?A
+P			30	?@?A
+T	T3-F	T3	3		25	5	_Br@@A
+P			25	A@@A
+T	T3-G	T3	3		32	5	DtABA
+P			32	C@BA
+T	T3-H	T3	3		586	5	j@u@Ai@ Md@f@? Y[V?
+P			586	U^Ai@ Md@f@? Y[V?
+T	T3-I	T3	3		2036	5	x@oA?{@ A\X? aAI?S UNbAA i@Kc@[ dAZ`@? Wg@^? e@IHp@
+P			2036	Ix@?{@ A\X? aAI?S UNbAA i@Kg@?B[ dAZ`@? Wg@^? e@IF?@p@
+T	T3-J	T3	3		1226	5	AnH?G yB@rE?
+P			1226	yAD?G yB@rE?
+T	T3-K	T3	3		2	5	
+T	T3-L	T3	3		38	5	}GwA?E
+P			38	?D?E
+T	T3-M	T3	3		2045	5	cBm@?a@ oAD?o@ pAl@AeB uAdBF? CAvBA eAY`@? QcAP?
+P			2045	A~B?a@ oAD?o@ pAl@AeB uAdBF? CAvBA eAY`@? QcAP?
+T	T3-N	T3	3		6	5	r@rDA?
+P			6	@?A?
+T	T3-O	T3	3		75	5	jFcGII
+P			75	HHII
+T	T3-P	T3	3		186	5	}HnF?a@
+P			186	?`@?a@
+T	T3-Q	T3	3		2079	5	`@`Cj@ABiA Kt@I? y@E?g@ lA\D? mBKZ? r@A^? aCK~BA Oj@J?
+P			2079	o@Tj@ABiA Kt@I? y@E?g@ lA\D? mBKZ? r@A^? aCK~BA Oj@J?
+T	T3-R	T3	3		3	5	
+T	T3-S	T3	3		178	5	_C}B_@?
+P			178	^?_@?
+T	T3-T	T3	3		97	5	c@x@KK
+P			97	JJKK
+T	T3-U	T3	3		302	5	dDbA?M AHh@?
+P			302	g@B?M AHh@?
+T	T3-V	T3	3		15	5	INAA
+P			15	@@AA
+T	T3-W	T3	3		2	5	
+T	T3-X	T3	3		134	5	wDFIK HDG@
+P			134	FBIK HDG@
+T	T3-Y	T3	3		95	5	k@e@@O
+P			95	AN@O
+T	T3-Z	T3	3		1122	5	OL?G c@Dh@C g@u@F? KWF? Ey@HhC
+P			1122	XB?G c@Dh@C g@u@F? KWF? Ey@HhC
+T	T3-AA	T3	3		35	5	K@@?
+P			35	A?@?
+T	T3-AB	T3	3		130	5	Hy@VA
+P			130	W@VA
+T	T3-AC	T3	3		28	5	G?AC
+P			28	@BAC
+T	T3-AD	T3	0	2025-12-24	1282	5	o@`@Go@i@@ mAPvAE CBAW bA@YH
+P	2025		1282	Bh@Go@i@@ mAPvAE CBAW bA@YH
+T	T3-AE	T3	3		937	5	WlHYmA t@z@_@C Js@a@A
+P			937	XjACUU??w@ t@z@_@C Js@a@A
+T	T3-AF	T3	3		789	5	FmFCmA u@hA|@E s@@?@
+P			789	n@DCmA u@hA|@E s@@?@
+T	T3-AG	T3	3		106	5	j@zJAS
+P			106	@RAS
+T	T3-AH	T3	3		218	5	yAaJd@C
+P			218	e@Bd@C
+T	T3-AI	T3	3		23	5	t@cA@C
+P			23	AB@C
+T	T3-AJ	T3	3		6	5	cBdL?A
+P			6	?@?A
+T	T3-AK	T3	3		1724	5	GfK`C_Cq@e@ aB|BR^
+P			1724	AF\a@~@a@b@{@D]w@G aB|BR^
+T	T3-AL	T3	3		190	5	bAoB@G A@DU
+P			190	EZ@G A@DU
+T	T3-AM	T3	3		60	5	O^EK
+P			60	DJEK
+T	T3-AN	T3	3		34	5	xBbG@? ???A
+P			34	A@@? ???A
+T	T3-AO	T3	3		22	5	C?AC
+P			22	@BAC
+T	T3-AP	T3	3		1	5	
+T	T3-AQ	T3	3		2373	5	mIzB`DyF cEdFl@H g@aA~@T aAU@? zAq@FB
+P			2373	gAxBJIzAiDx@eA cEdFl@H g@aA~@T aAU@? zAq@FB
+T	T3-AR	T3	3		458	5	dAmBo@aA
+P			458	n@`AIEe@{@
+T	T3-AS	T3	3		100	5	p@FIM
+P			100	HLIM
+T	T3-AT	T3	3		1001	5	eApDeBO \A^P LUEB
+P			1001	^P_@QO`@u@_@ \A^P LUEB
+T	T3-AU	T3	3		312	5	DCNu@
+P			312	Ot@Nu@
+T	T3-AV	T3	3		49	5	??@G
+P			49	AF@G
+T	T3-AW	T3	3		847	5	uBxFf@LXu@ cAXl@R
+P			847	k@Ef@LXu@ cAXl@R
+T	T3-AX	T3	3		336	5	Pm@y@S
+P			336	x@Ry@S
+T	T3-AY	T3	3		29	5	\w@?E
+P			29	?D?E
+T	T3-AZ	T3	3		321	5	V~Au@Q
+P			321	t@Pu@Q
+T	T3-BA	T3	3		338	5	t@Ry@Q
+P			338	x@Py@Q
+T	T3-BB	T3	3		276	5	t@Xo@M
+P			276	n@Lo@M
+T	T3-BC	T3	3		82	5	T]MC
+P			82	LBMC
+T	T3-BD	T3	3		50	5	EREC
+P			50	DBEC
+T	T3-BE	T3	3		1654	5	lGmJx@y@H}D
+P			1654	cAvFZWBQP?FOb@aD?MYM
+O	-10.290696	-48.318976	2025-12-24	2025	1	2025-12-24	T3-AD	1282	1282

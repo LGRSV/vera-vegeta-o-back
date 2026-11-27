@@ -1,0 +1,3 @@
+#{"v":1,"sit":["venc","pend","fora","exec"]}
+A	LD03105019
+M	ziyo@rjn~Gwnv@fij@sXqn@dZjk@zvCe|Avgp@mte@	0,1,0,0 2,1,0,0 1,0,0,0 0,1,0,0 0,1,0,0 0,1,0,0

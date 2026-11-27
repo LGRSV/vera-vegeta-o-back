@@ -1,0 +1,12 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	LD06010004
+T	T1	T1	3	2025-08-30	10932	3	ztkCjpn\q@Z[wAK_Ap@E c@SGX eD{d@t@kB d@Ni@M dE`l@hB_BTgBeCuCqFy]
+P			534	xFvh@A? sA{Bl@E c@SM@DV iAsg@?C i@MBA
+P	2025		10397	lBfh@@j@TfAJb@J@jBwA`@e@TgBQG@WGQoA{@]g@[yAk@qEW{@mCsQCg@PC`@yAf@N
+T	T3-A	T3	3		95	5	hDxk@KI
+P			95	JHKI
+T	T3-B	T3	3		32	5	PJEA
+P			32	D@EA
+T	T3-C	T3	3		32	5	wA_DB? AA?@
+P			32	A?B? AA?@
+O	-7.198970	-48.277345	2025-08-30	2025	1	2025-08-30	T1	10397	10932

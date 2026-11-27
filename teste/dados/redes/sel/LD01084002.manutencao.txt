@@ -1,0 +1,3 @@
+#{"v":1,"sit":["venc","pend","fora","exec"]}
+A	LD01084002
+M	n|~e@rxwaHr_b@k}YvcBpvB{bh@fmDjlP{tBwtPtqFh_s@hrR~zA|rGama@gpc@	1,0,0,0 1,0,0,0 1,0,0,0 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0 0,1,0,0

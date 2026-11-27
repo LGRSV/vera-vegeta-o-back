@@ -1,0 +1,7 @@
+#{"v":1,"anos":[2026,2025]}
+A	LD01100001
+I	2025	58	dujEtjn\HA	T1
+I	2025	3478	pDaOaFGaBe@yBqB fDfC@A zFENq@ yH`@?@ q@a@BA WUNE UUIJ zJvBF]	T2
+I	2025	13606	qNtL`CQ xC[b@M uRSZ{ACcC vPfD\nA kCyDl@S EBBe@ _RFXELYJDZM a@PDC pP]JsAD? a@JZK aDkC{C_DWIKQaAXm@IcAJsAgC fEhCAC WC?A o@??@ `DkAQFOp@ nAsAm@X db@eO|BqA jJ}CHQ@{B_@gCV]Bu@ BxIA? fA_Cq@ESF mu@_TDqAiDQ xEXo@G cDIAM	T3
+I	2026	9000	lb@rzADcA_Co@kHmE fQvH{Cy@ zCv@?@ yFwA?C {C_B@A kC_B?@ }@k@eS{L xRxLBC _@Q?C s@]BA eB_A@C _CwA?A UO?@ sA{@?@ c@S@E c@WA@ OM?@ [UA@ aAg@DG AEi@S	T1
+I	2026	10164	g[dBvEcD|DcH qJjL@@ VW@B dCmBCF XOCC B@?@ ~DsGgTqMuAwBeExA v\hNA? DEA? cO_J?@ [S?@ qAy@?@ k@_@A@ yG[?A	T2

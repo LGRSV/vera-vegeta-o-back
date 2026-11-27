@@ -1,0 +1,96 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	AL07103004
+T	T1	T1	3	2026-06-25	23919	3	lblCp}l\?c@ gAb@`B? N]CmDbAuA mB~FlAA F]?g@ Qd@R? RA@a@ JLK? g@G?iA {AdAfCA m@_@`@? rAYIy@sFgD p@fD`AsA QjAv@cA b@~@NS aCNz@gA vAbAMP e@YNQ eEPMS FPzAqB y@lBG] VRCE tDOoDoC lCjCNQ EFQO sALJM xBFKN oCUNQ pAFV] mETz@aB `DzASX u@g@PW iBTHK rB?SX {B[HK ~@DYS PNFI \AOR Ii@OR o@]oBwA nCtAIJ cF[OC _@GRqB x@bBa@G c@CMA rC]{@K ?BFi@ Gb@YC [?Va@ D^OvA s@aBdD`@ cAg@A? a@Oh@C gA@W[ g@VCS XRGi@ Df@v@D mBIvB[p@cA qCvABO l@DAM l@H@E n@g@EC FSXE K_AHx@ SuB\c@sB}@ P]O\ qAcBZc@ rCfHC}@ kA}B_BiA
+P			23379	dJb^?c@ gAb@`B? N]CmDbAuA mB~FlAA F]?g@ Qd@R? RA@a@ JLK? g@G?iA {AdAfCA m@_@`@? rAYIy@]BuEkD p@fD`AsA QjAv@cA b@~@NS aCNz@gA vAbAMP e@YNQ eEPMS FPzAqB y@lBJOSM VRCE tDOmByA jAtANQ EFQO sALJM xBFKN oCUNQ pAFV] mET@Yx@gA `DzASX u@g@PW iBTHK rB?SX {B[HK ~@DYS PN@A b@IOR Oa@DG m@CQM XJDE _@@g@[u@w@QC }AdAOC _@GRqB x@bBa@G c@CMA rC]{@K ?BFi@ Gb@YC [?Dc@P@ D^OvA s@aBdD`@ cAg@A? a@Oh@B?G gA@QAEY g@VCS XRGi@ Df@v@D mBITI`BQN]\KBY qCvABO l@DAM l@H@E n@g@EC FSTKBD K_AHx@ SuBLCN_@sB}@ P]O\ qAcBZc@ rCfHC}@ kA}B_BiA
+P	2026		540	bKjRo@g@ b@b@DG AOIJ UYCD
+T	T2-A	T2	3		3486	4	oGdCAA D?lAy@VoC[E qBfEF[ uAXBW o@I`Dj@ pAgA?@ @OA? B]A? {@_@|@V H]YC ^W_@C ?A?@
+P			3486	iAzDAA D?lAy@VoC[E qBfEF[ uAXBW o@I`Dj@ pAgA?@ @OA? B]A? {@_@|@V H]YC ^W_@C ?A?@
+T	T3-A	T3	3		1352	5	|AkCTs@ Qr@sAc@ lA`@?A t@Se@I t@As@G
+P			1352	Oj@Ts@ Qr@sAc@ lA`@?A t@Se@I t@As@G
+T	T3-B	T3	3		23	5	Oj@AA
+P			23	@@AA
+T	T3-C	T3	3		622	5	\Nj@y@ e@v@]K t@UC? FCAC
+P			622	_@j@j@y@ e@v@]K t@UC? FCAC
+T	T3-D	T3	3		16	5	HCAA
+P			16	@@AA
+T	T3-E	T3	3		21	5	BGB?
+P			21	C?B?
+T	T3-F	T3	3		27	5	_DfB@C
+P			27	AB@C
+T	T3-G	T3	3		160	5	n@|A[E
+P			160	ZD[E
+T	T3-H	T3	3		13	5	O~AA?
+P			13	@?A?
+T	T3-I	T3	3		11	5	AL@?
+P			11	A?@?
+T	T3-J	T3	3		4	5	ERA?
+P			4	@?A?
+T	T3-K	T3	3		578	5	GbBg@aA \RCR
+P			578	LXg@aA \RDHIH
+T	T3-L	T3	3		218	5	jDaAV]
+P			218	W\V]
+T	T3-M	T3	3		11	5	yFjA?A
+P			11	?@?A
+T	T3-N	T3	3		45	5	bGuABG
+P			45	CFBG
+T	T3-O	T3	3		83	5	cGlBGM
+P			83	FLGM
+T	T3-P	T3	3		95	5	xE_@JM
+P			95	KLJM
+T	T3-Q	T3	0	2026-06-25	22	5	`B{CC?
+P	2026		22	B?C?
+T	T3-R	T3	0	2026-06-25	541	5	F]qAU @D@M
+P	2026		541	lA\qAU @D@M
+T	T3-S	T3	3		500	5	IrHv@eA
+P			500	w@dAv@eA
+T	T3-T	T3	3		1659	5	yKKRaA|@T eAVYG dC?EK _AFFU r@PDC {AA[G rAFRW C?N\
+P			1659	oBb@RaA|@T eAVYG dC?EK _AFFU r@PDC {AA[G rAFRW C?N\
+T	T3-U	T3	0	2026-06-25	118	5	~JyEHS
+P	2026		118	IRHS
+T	T3-V	T3	0	2026-06-25	8558	5	vFfHa@C c@YRL tFMkAy@{C~@ ~GSw@Q `@NAC iL_Bs@u@ NXAA MW?@ bM_DqAlG xKuJmB}CmDtBm@nC vFeFA@ [e@@B iNlQ_CsB
+P	2026		8558	dEpCc@WKDLL c@YRL tFM?_@kAY{C~@ ~GSw@Q `@NAC iL_B_@QSc@ NXAA MW?@ bM_DqAlG xKuJOc@}AyBmDtBm@nC vFeFA@ [e@@B iNlQmBkBQG
+T	T3-W	T3	0	2026-06-25	252	5	Mj@Lk@
+P	2026		252	Mj@Lk@
+T	T3-X	T3	3		24	5	mA`J@A
+P			24	A@@A
+T	T3-Y	T3	3		119	5	Vo@?G IDL?
+P			119	C@?G IDL?
+T	T3-Z	T3	3		15	5	G|@AA
+P			15	@@AA
+T	T3-AA	T3	3		194	5	Cn@?G W?XA
+P			194	AH?G W?XA
+T	T3-AB	T3	3		614	5	b@_A?s@ Kp@L? Q]?S GPX?
+P			614	A`@?s@ Kp@L? Q]?S GPX?
+T	T3-AC	T3	3		178	5	]E?_@
+P			178	?^?_@
+T	T3-AD	T3	0	2026-06-25	54	5	rDsCBG
+P	2026		54	CFBG
+T	T3-AE	T3	3		205	5	iD|H[O BD?E
+P			205	VN[O BD?E
+T	T3-AF	T3	0	2026-06-25	130	5	vG{FSK
+P	2026		130	RJSK
+T	T3-AG	T3	0	2026-06-25	111	5	bEI?S
+P	2026		111	?R?S
+T	T3-AH	T3	0	2026-06-25	151	5	DgIXA
+P	2026		151	Y@XA
+T	T3-AI	T3	0	2026-06-25	2929	5	zEcFkA_C\mH p@zJC? m@e@BC m@gBFE E}ADC `@wADC
+P	2026		2929	f@fK?q@kAmACoEr@gAQA?S p@zJC? m@e@BC m@gBFE E}ADC `@wADC
+T	T3-AJ	T3	0	2026-06-25	205	5	bApJW[
+P	2026		205	VZW[
+T	T3-AK	T3	0	2026-06-25	504	5	rBbGe@sA
+P	2026		504	d@rAe@sA
+T	T3-AL	T3	0	2026-06-25	63	5	qDcLHA
+P	2026		63	I@HA
+T	T3-AM	T3	0	2026-06-25	133	5	N{AV?
+P	2026		133	W?V?
+T	T3-AN	T3	0	2026-06-25	707	5	zBToBa@ ZL?B
+P	2026		707	rANy@OQDc@W ZL?B
+T	T3-AO	T3	0	2026-06-25	118	5	YY@U
+P	2026		118	AT@U
+T	T3-AP	T3	0	2026-06-25	99	5	KR@Q
+P	2026		99	AP@Q
+T	T3-AQ	T3	0	2026-06-25	181	5	`@h@D_@
+P	2026		181	E^D_@
+T	T3-AR	T3	0	2026-06-25	1584	5	aXb[v@sCn@t@ @?A? w@OEA t@y@e@X
+P	2026		1584	y@nC\q@XaBn@t@ @?A? w@OEA t@y@e@X
+O	-7.252828	-48.195024	2026-06-25	2026	1	2026-06-25	T1	540	23919

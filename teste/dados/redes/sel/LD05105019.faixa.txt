@@ -1,0 +1,9 @@
+#{"v":2,"hoje":"2026-11-24","sit":["dia","vence","vencida","sem"],"anos":[]}
+A	LD05105019
+T	T1	T1	3		27936	3	`gqCn}e\Gu@ A@f@O_@eC @@x@_BrFjCrF}@tDcDzJyCrOlCtNs@nJeEpEeGTaDy@oSnA_DxEeDCaI qeAn}@?A bD}@?A
+P			27936	sZtLMIDk@ A@T?POg@iATs@MG @@d@{ARCn@FZNNXl@R`@d@fA^dAQjAg@`@G~@B`@MrCuCzHuB~@c@l@EbBNnCnApFr@tNs@fA[hB}@LBj@e@bCiAhCuCv@iANe@VmBAs@s@qNE}CnA_DnCuAhAoAH{@MeG qeAn}@?A bD}@?A
+T	T3-A	T3	3		4652	5	l`Am{@NgL jHwEcFbBkAvB
+P			4652	KbLOmHLyAP_@ jHwEkAl@mB^i@TUR}@|AFD
+T	T3-B	T3	3		4277	5	nH{EnKwFtDgF
+P			4277	eQ~MnKwFz@_AxBgD
+T	T3-C	T3	3		0	5	
