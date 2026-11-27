@@ -219,7 +219,7 @@
         for (const x of ((c[0] === 'P' ? c[4] : c[3]) || '').split(' ')) if (x) le(x, !meu, a, m);
       } else if (c[0] === 'O' && !meu) {
         os.push({ x: ux(+c[2]), y: uy(+c[1]), ano: +c[4], datas: (c[6] || c[3] || '').split(','), tr: c[7] || '', al: ia });
-      } else if (c[0] === 'E' || c[0] === 'M') {
+      } else if ((c[0] === 'E' || c[0] === 'M') && esc === 1e5) {   // (no faixa.txt, M é a linha dos metros do município: sem pontos)
         const q = le(c[1] || '', false, 0, 0, true);
         if (meu) continue;
         const cs = (c[2] || '').split(' ');

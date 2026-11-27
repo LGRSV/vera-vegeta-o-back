@@ -6,8 +6,8 @@
 // (decisão ou insumo; "desde" = quando ficou aguardando). Item aberto tem "prazo" e "resp" (proj = dono do projeto,
 // dev = desenvolvimento). Datas em AAAA-MM-DD. Depois do "=" o conteúdo é JSON puro (o script lê com json.loads).
 window.ARGOS_ESCOPO = {
- "versao": "2.50",
- "atualizado": "2026-11-26",
+ "versao": "2.51",
+ "atualizado": "2026-11-27",
  "nota_prazos": "Os prazos dos itens abertos foram propostos em 09/11/2026 e 10/11/2026 e precisam da confirmação do dono do projeto.",
  "projeto": {
   "nome": "ARGOS · Manutenção",
@@ -193,6 +193,7 @@ window.ARGOS_ESCOPO = {
    {"t": "Selecionados com postes (17,5), equipamentos (16) e códigos (18,5) como o aberto; ✕ no aberto (vindo do satélite) tira tudo e volta ao satélite limpo", "st": "ok", "d": "2026-11-25"},
    {"t": "Modo manutenção (Ctrl+I; chave inglesa no celular; ?modo=manut): escolher trechos como no Ctrl+M, com o relatório de manutenção (período, números, Excel e PDF) no painel e as manutenções e ocorrências marcadas no mapa", "st": "ok", "d": "2026-11-26"},
    {"t": "Visão satélite (Ctrl+S): o alimentador aberto pelo satélite centra na rede inteira dele (abaixo dos controles, fora da legenda e dos botões), em vez de ficar na vista do estado com tudo sobreposto", "st": "ok", "d": "2026-11-26"},
+   {"t": "Mapa do alimentador: a Faixa dos outros alimentadores no lugar certo (saía deslocada ~13 km e parecia uma linha duplicada da rede)", "st": "ok", "d": "2026-11-27"},
    {"t": "Ctrl+M: faixas salvas (disquete no painel; lista de hoje e anteriores; no mapa de qualquer alimentador; abrir, apagar, exportar/importar) e rede de outro alimentador abre o Ctrl+M dele sem perder a faixa", "st": "ok", "d": "2026-11-26", "obs": "Ficam no navegador de quem salvou (sem servidor); Exportar/Importar leva para outro computador."},
    {"t": "Mapa do alimentador no PC: zoom pela roda mais leve (cerca de 1 nível por giro), rede nítida mais cedo depois do zoom, satélite do nível seguinte pré-carregado e etiquetas da Faixa sem piscar", "st": "ok", "d": "2026-11-26", "obs": "Medido no LD01059122 com CPU 4x: rede nítida 0,71 → 0,49 s depois do giro; satélite do nível seguinte 0,60 s → 0,02 s."},
    {"t": "Relatório de manutenção no Ctrl+M: do escolhido (trechos ou a parte entre o ponto inicial e o final), num período, as manutenções executadas e as ocorrências de todas as causas no caminho; dados em Excel e relatório em PDF (mapa, números, gráfico por mês, causas, serviços, ativos e listas)", "st": "ok", "d": "2026-11-25", "obs": "Ocorrências de todas as causas da Crítica de mai/2026 a nov/2026 (os meses de antes ainda não estão no site)."},
